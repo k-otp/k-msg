@@ -28,7 +28,7 @@ import {
 // Messaging core
 import {
   BulkMessageSender,
-  SingleMessageSender
+  KMsg
 } from './packages/messaging/src/index.js';
 
 // Analytics engine
@@ -98,8 +98,8 @@ describe.skip('K-Message E2E Integration Tests (DISABLED)', () => {
     expect(channel.name).toBe('Test Channel');
 
     // 4. 벌크 메시지 전송 설정
-    const singleSender = new SingleMessageSender([provider]);
-    const bulkSender = new BulkMessageSender(singleSender);
+    const kmsg = new KMsg(provider);
+    const bulkSender = new BulkMessageSender(kmsg);
 
     // 5. 분석 엔진 설정
     const analyticsConfig = {
@@ -308,8 +308,8 @@ describe.skip('K-Message E2E Integration Tests (DISABLED)', () => {
       baseUrl: 'https://invalid.api.com'
     });
 
-    const invalidSingleSender = new SingleMessageSender([invalidProvider]);
-    const invalidBulkSender = new BulkMessageSender(invalidSingleSender);
+    const invalidKMsg = new KMsg(invalidProvider);
+    const invalidBulkSender = new BulkMessageSender(invalidKMsg);
 
     await expect(invalidBulkSender.sendBulk({
       templateId: 'test',
