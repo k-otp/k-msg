@@ -53,21 +53,21 @@ import type {
   BaseProvider,
   DeliveryStatus,
   StandardRequest,
-  StandardResult
+  StandardResult,
 } from '@k-msg/core';
 
 // AlimTalk 전용 요청/응답 타입
-export interface AlimTalkRequest {
+export interface AlimTalkRequest extends StandardRequest {
   templateCode: string;
   phoneNumber: string;
-  variables: Record<string, unknown>;
+  variables: Record<string, any>;
   senderNumber?: string;
   options?: MessageOptions;
 }
 
-export interface AlimTalkResult {
+export interface AlimTalkResult extends StandardResult {
   messageId: string;
-  status: DeliveryStatus;
+  status: any; // Using any for compatibility with different status enums/types
   provider: string;
   timestamp: Date;
   templateCode: string;
@@ -306,9 +306,10 @@ export enum MessageStatus {
 }
 
 export interface ProviderError {
-  code: string;
+  code: any;
   message: string;
-  details?: Record<string, unknown>;
+  retryable: boolean;
+  details?: Record<string, any>;
 }
 
 // Analytics contract

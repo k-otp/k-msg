@@ -4,15 +4,16 @@
  */
 
 import {
+  KMsgErrorCode,
   BaseProviderAdapter,
+  ProviderConfig,
   StandardRequest,
   StandardResult,
   StandardError,
   StandardStatus,
   StandardErrorCode,
-  ProviderConfig,
+  ProviderMetadata,
   AdapterFactory,
-  ProviderMetadata
 } from '@k-msg/core';
 
 // IWINV 특화 타입들
@@ -87,6 +88,17 @@ export class IWINVAdapter extends BaseProviderAdapter {
   };
 
   constructor(config: IWINVConfig) {
+    if (!config.apiKey) {
+      throw new Error('API key is required');
+    }
+    if (!config.baseUrl) {
+      throw new Error('Base URL is required');
+    }
+    try {
+      new URL(config.baseUrl);
+    } catch {
+      throw new Error('Base URL must be a valid URL');
+    }
     super(config);
   }
 

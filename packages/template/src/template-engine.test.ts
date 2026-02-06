@@ -22,14 +22,14 @@ describe('VariableParser', () => {
   test('should extract variables from template content', () => {
     const content = '안녕하세요, #{name}님! 인증번호는 #{code}입니다.';
     const variables = VariableParser.extractVariables(content);
-    
+
     expect(variables).toEqual(['name', 'code']);
   });
 
   test('should replace variables in content', () => {
     const content = '안녕하세요, #{name}님! 인증번호는 #{code}입니다.';
     const variables = { name: '홍길동', code: '123456' };
-    
+
     const result = VariableParser.replaceVariables(content, variables);
     expect(result).toBe('안녕하세요, 홍길동님! 인증번호는 123456입니다.');
   });
@@ -60,7 +60,7 @@ describe('VariableParser', () => {
     ];
 
     const result = VariableParser.validateTemplateVariables(content, definitions);
-    
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain("Variable 'code' is used in template but not defined");
     expect(result.errors).toContain("Required variable 'unused' is defined but not used in template");
@@ -158,7 +158,7 @@ describe('TemplateValidator', () => {
   test('should reject template with missing required fields', () => {
     const invalidTemplate = { ...validTemplate, name: '' };
     const result = TemplateValidator.validate(invalidTemplate as AlimTalkTemplate);
-    
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Template name is required');
   });
@@ -167,7 +167,7 @@ describe('TemplateValidator', () => {
     const longContent = 'a'.repeat(1001);
     const invalidTemplate = { ...validTemplate, content: longContent };
     const result = TemplateValidator.validate(invalidTemplate);
-    
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Template content cannot exceed 1000 characters');
   });
@@ -178,7 +178,7 @@ describe('TemplateValidator', () => {
       category: TemplateCategory.AUTHENTICATION,
       variables: [{ name: 'message', type: 'string' as const, required: true }]
     };
-    
+
     const result = TemplateValidator.validate(authTemplate);
     expect(result.warnings).toContain('Authentication template should include an authentication code variable');
   });
@@ -317,11 +317,12 @@ describe('TemplateBuilders factory', () => {
 describe('TemplateService', () => {
   test('should create and retrieve template', async () => {
     const service = new TemplateService();
-    
+
     const templateData = {
       code: 'TEST_001',
       name: '테스트 템플릿',
       content: '안녕하세요, #{name}님!',
+      variables: [{ name: 'name', type: 'string', required: true }],
       category: TemplateCategory.NOTIFICATION,
       status: TemplateStatus.DRAFT,
       provider: 'test-provider'
@@ -337,7 +338,7 @@ describe('TemplateService', () => {
 
   test('should update template', async () => {
     const service = new TemplateService();
-    
+
     const created = await service.createTemplate({
       code: 'TEST_002',
       name: '원본 템플릿',
@@ -349,7 +350,7 @@ describe('TemplateService', () => {
 
     // Add a small delay to ensure different timestamps
     await new Promise(resolve => setTimeout(resolve, 1));
-    
+
     const updated = await service.updateTemplate(created.id, {
       name: '수정된 템플릿',
       content: '수정된 내용'
@@ -362,7 +363,7 @@ describe('TemplateService', () => {
 
   test('should delete template', async () => {
     const service = new TemplateService();
-    
+
     const created = await service.createTemplate({
       code: 'TEST_003',
       name: '삭제될 템플릿',
@@ -373,14 +374,14 @@ describe('TemplateService', () => {
     });
 
     await service.deleteTemplate(created.id);
-    
+
     const retrieved = await service.getTemplate(created.id);
     expect(retrieved).toBeNull();
   });
 
   test('should render template with variables', async () => {
     const service = new TemplateService();
-    
+
     const created = await service.createTemplate({
       code: 'TEST_004',
       name: '렌더링 템플릿',
@@ -402,7 +403,7 @@ describe('TemplateService', () => {
 describe('TemplateRegistry', () => {
   test('should register and retrieve templates', async () => {
     const registry = new TemplateRegistry();
-    
+
     const template: AlimTalkTemplate = {
       id: 'test-1',
       code: 'TEST_001',
@@ -420,7 +421,7 @@ describe('TemplateRegistry', () => {
     };
 
     await registry.register(template);
-    
+
     const retrieved = registry.get('test-1');
     expect(retrieved).toEqual(template);
 
@@ -430,7 +431,7 @@ describe('TemplateRegistry', () => {
 
   test('should search templates with filters', async () => {
     const registry = new TemplateRegistry();
-    
+
     const templates: AlimTalkTemplate[] = [
       {
         id: 'auth-1',
@@ -489,7 +490,7 @@ describe('TemplateRegistry', () => {
 
   test('should track template usage', async () => {
     const registry = new TemplateRegistry({ enableUsageTracking: true });
-    
+
     const template: AlimTalkTemplate = {
       id: 'usage-test',
       code: 'USAGE_001',
@@ -522,7 +523,7 @@ describe('TemplateRegistry', () => {
 
   test('should maintain version history', async () => {
     const registry = new TemplateRegistry({ enableVersioning: true });
-    
+
     const template: AlimTalkTemplate = {
       id: 'version-test',
       code: 'VER_001',
@@ -559,7 +560,7 @@ describe('TemplateRegistry', () => {
 
   test('should export and import templates', async () => {
     const registry = new TemplateRegistry();
-    
+
     const template: AlimTalkTemplate = {
       id: 'export-test',
       code: 'EXPORT_001',
@@ -596,7 +597,7 @@ describe('TemplateRegistry', () => {
 
   test('should get registry statistics', async () => {
     const registry = new TemplateRegistry();
-    
+
     const templates: AlimTalkTemplate[] = [
       {
         id: 'stat-1',
@@ -693,7 +694,7 @@ describe('Integration Tests', () => {
     const builder = new TemplateBuilder()
       .content(template.content)
       .variable('code', 'string', true, { example: '123456' });
-    
+
     const preview = builder.preview();
     expect(preview).toBe('[K-OTP] 인증번호는 123456입니다. 3분 내에 입력해주세요.');
 

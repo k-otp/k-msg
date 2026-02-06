@@ -6,8 +6,8 @@
 import { IWINVProvider } from './provider';
 import { IWINVSMSProvider } from './provider-sms';
 import type { IWINVConfig } from './types/iwinv';
-import type { StandardRequest, StandardResult } from '@k-msg/core';
-import { StandardStatus, StandardErrorCode } from '@k-msg/core';
+import { KMsgErrorCode } from '@k-msg/core';
+import { MessageStatus } from '../contracts/provider.contract';
 
 /**
  * AlimTalk과 SMS를 모두 지원하는 통합 IWINV 프로바이더
@@ -56,9 +56,9 @@ export class IWINVMultiProvider {
   /**
    * 채널 타입에 따른 자동 라우팅 전송
    */
-  async send(request: StandardRequest & {
+  async send(request: any & {
     channel?: 'alimtalk' | 'sms' | 'auto'
-  }): Promise<StandardResult> {
+  }): Promise<any> {
     const channel = request.channel || 'auto';
 
     switch (channel) {
@@ -88,17 +88,19 @@ export class IWINVMultiProvider {
   /**
    * AlimTalk 전송 (템플릿 기반)
    */
-  async sendAlimTalk(templateCode: string, phoneNumber: string, variables: Record<string, string>, options?: {
+  async sendAlimTalk(templateId: string, to: string, variables: Record<string, string>, options?: {
     scheduledAt?: Date;
     senderNumber?: string;
     priority?: 'high' | 'normal' | 'low';
-  }): Promise<StandardResult> {
+  }): Promise<any> {
     return this.alimtalkProvider.send({
-      templateCode,
-      phoneNumber,
+      type: 'ALIMTALK',
+      templateId,
+      to,
+      from: options?.senderNumber || this.config.senderNumber || '',
       variables,
-      options
-    });
+      ...options
+    } as any);
   }
 
   /**
@@ -108,7 +110,7 @@ export class IWINVMultiProvider {
     senderNumber?: string;
     scheduledAt?: Date;
     priority?: 'high' | 'normal' | 'low';
-  }): Promise<StandardResult> {
+  }): Promise<any> {
     return this.smsProvider.sendSMS(phoneNumber, message, options);
   }
 
@@ -119,7 +121,7 @@ export class IWINVMultiProvider {
     senderNumber?: string;
     scheduledAt?: Date;
     priority?: 'high' | 'normal' | 'low';
-  }): Promise<StandardResult> {
+  }): Promise<any> {
     return this.smsProvider.sendLMS(phoneNumber, subject, message, options);
   }
 
@@ -136,7 +138,7 @@ export class IWINVMultiProvider {
       senderNumber?: string;
       priority?: 'high' | 'normal' | 'low';
     };
-  }): Promise<StandardResult & { channel: 'alimtalk' | 'sms' }> {
+  }): Promise<any & { channel: 'alimtalk' | 'sms' }> {
     try {
       // 먼저 AlimTalk 시도
       const result = await this.sendAlimTalk(
@@ -167,15 +169,15 @@ export class IWINVMultiProvider {
   /**
    * 대량 전송 (채널 자동 선택)
    */
-  async sendBulk(requests: Array<StandardRequest & {
+  async sendBulk(requests: Array<any & {
     channel?: 'alimtalk' | 'sms' | 'auto'
   }>, options?: {
     batchSize?: number;
     concurrency?: number;
-  }): Promise<StandardResult[]> {
+  }): Promise<any[]> {
     const batchSize = options?.batchSize || 100;
     const concurrency = options?.concurrency || 5;
-    const results: StandardResult[] = [];
+    const results: any[] = [];
 
     for (let i = 0; i < requests.length; i += batchSize) {
       const batch = requests.slice(i, i + batchSize);
@@ -196,12 +198,12 @@ export class IWINVMultiProvider {
       results.push(...batchResults.map(result =>
         result.status === 'fulfilled' ? result.value : {
           messageId: `error_${Date.now()}`,
-          status: StandardStatus.FAILED,
+          status: MessageStatus.FAILED,
           provider: this.id,
           timestamp: new Date(),
           phoneNumber: '',
           error: {
-            code: StandardErrorCode.UNKNOWN_ERROR,
+            code: KMsgErrorCode.UNKNOWN_ERROR,
             message: result.status === 'rejected' ? result.reason?.message || 'Unknown error' : 'Unknown error',
             retryable: true
           }

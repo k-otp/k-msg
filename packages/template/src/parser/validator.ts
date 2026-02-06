@@ -25,7 +25,7 @@ export class TemplateValidator {
     // 변수 검증
     const variableValidation = VariableParser.validateTemplateVariables(
       template.content,
-      template.variables
+      template.variables || []
     );
     errors.push(...variableValidation.errors);
 
@@ -135,7 +135,7 @@ export class TemplateValidator {
     warnings: string[]
   ): void {
     // 인증 템플릿은 일반적으로 인증번호 변수를 포함해야 함
-    const hasAuthCode = template.variables.some(v => 
+    const hasAuthCode = (template.variables || []).some(v =>
       v.name.includes('인증') || v.name.includes('코드') || v.name.includes('번호')
     );
 
@@ -166,7 +166,7 @@ export class TemplateValidator {
     warnings: string[]
   ): void {
     // 결제 템플릿은 금액 관련 변수를 포함해야 함
-    const hasAmountVariable = template.variables.some(v => 
+    const hasAmountVariable = (template.variables || []).some(v =>
       v.name.includes('금액') || v.name.includes('가격') || v.name.includes('원')
     );
 

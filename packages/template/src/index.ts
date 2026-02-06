@@ -10,6 +10,7 @@ export { TemplateService } from './services/template.service';
 export { VariableParser } from './parser/variable.parser';
 export { ButtonParser } from './parser/button.parser';
 export { TemplateValidator, type ValidationResult } from './parser/validator';
+export { interpolate } from './interpolator';
 
 // Template Builder
 export { TemplateBuilder, TemplateBuilders } from './builder/template.builder';

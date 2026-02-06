@@ -394,8 +394,8 @@ export function toLegacyIWINVConfig(config: UnifiedProviderConfig): IWINVBaseCon
     debug: config.debug,
     logLevel: config.logLevel,
     timeout: config.timeout,
-    userId: config.channels?.alimtalk?.userId || config.channels?.sms?.userId,
-    senderNumber: config.channels?.alimtalk?.senderNumber || config.channels?.sms?.senderNumber
+    userId: (config.channels?.alimtalk?.userId as string | undefined) || (config.channels?.sms?.userId as string | undefined),
+    senderNumber: (config.channels?.alimtalk?.senderNumber as string | undefined) || (config.channels?.sms?.senderNumber as string | undefined)
   };
 }
 

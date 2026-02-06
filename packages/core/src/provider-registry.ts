@@ -6,12 +6,13 @@
 import {
   BaseProvider,
   BaseProviderAdapter,
-  AdapterFactory,
   ProviderConfig,
-  ProviderMetadata,
   StandardRequest,
-  StandardResult
-} from './index';
+  StandardResult,
+  ProviderMetadata,
+  AdapterFactory,
+  ProviderFactoryConfig
+} from './types';
 import { UniversalProvider } from './universal-provider';
 
 /**
@@ -22,6 +23,7 @@ export class ProviderRegistry {
   private factories = new Map<string, AdapterFactory>();
   private providers = new Map<string, BaseProvider<StandardRequest, StandardResult>>();
   private metadata = new Map<string, ProviderMetadata>();
+  private debug = false;
 
   /**
    * 어댑터 팩토리 등록
@@ -111,7 +113,7 @@ export class ProviderRegistry {
   unregisterProvider(providerId: string): boolean {
     const provider = this.providers.get(providerId);
     if (provider) {
-      provider.destroy();
+      provider.destroy?.();
       this.providers.delete(providerId);
       this.factories.delete(providerId);
       this.metadata.delete(providerId);
@@ -129,7 +131,7 @@ export class ProviderRegistry {
    */
   clear(): void {
     for (const provider of this.providers.values()) {
-      provider.destroy();
+      provider.destroy?.();
     }
     this.providers.clear();
     this.factories.clear();
@@ -171,8 +173,6 @@ export class ProviderRegistry {
 
     return results;
   }
-
-  private debug = false;
 
   /**
    * 디버그 모드 설정
@@ -224,15 +224,6 @@ export class ConfigBasedProviderFactory {
 
     return providers;
   }
-}
-
-/**
- * 프로바이더 팩토리 설정 인터페이스
- */
-export interface ProviderFactoryConfig {
-  providers: Record<string, ProviderConfig>;
-  defaultProvider?: string;
-  fallbackProviders?: string[];
 }
 
 /**
@@ -336,7 +327,6 @@ export class ProviderHealthMonitor {
     for (const [providerId, health] of Object.entries(results)) {
       if (!health.healthy) {
         console.warn(`Provider ${providerId} is unhealthy:`, health.issues);
-        // 추가적인 알림 로직 구현 가능
       }
     }
   }

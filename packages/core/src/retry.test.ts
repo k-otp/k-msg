@@ -12,7 +12,7 @@ import {
   GracefulDegradation,
   ErrorRecovery
 } from './retry';
-import { KMessageError, KMessageErrorCode } from './errors';
+import { KMsgError, KMsgErrorCode } from './errors';
 
 describe('RetryHandler', () => {
   test('should retry failed operations', async () => {
@@ -39,10 +39,9 @@ describe('RetryHandler', () => {
     let attempts = 0;
     const failingFunction = async () => {
       attempts++;
-      throw new KMessageError(
-        KMessageErrorCode.VALIDATION_ERROR,
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
         'Non-retryable error',
-        {},
         { retryable: false }
       );
     };

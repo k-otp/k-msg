@@ -41,7 +41,8 @@ export class IWINVMessagingContract implements MessagingContract {
           status: MessageStatus.FAILED,
           error: {
             code: ((result.code as string) as string) || 'SEND_FAILED',
-            message: ((result.message as string) as string) || 'Failed to send message'
+            message: ((result.message as string) as string) || 'Failed to send message',
+            retryable: response.status >= 500
           }
         };
       }
@@ -57,7 +58,8 @@ export class IWINVMessagingContract implements MessagingContract {
         status: MessageStatus.FAILED,
         error: {
           code: 'NETWORK_ERROR',
-          message: error instanceof Error ? error.message : 'Network error occurred'
+          message: error instanceof Error ? error.message : 'Network error occurred',
+          retryable: true
         }
       };
     }

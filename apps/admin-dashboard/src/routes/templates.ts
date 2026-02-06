@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { TemplateCategory, TemplateStatus } from '@k-msg/template';
+import { KMsgError } from '@k-msg/core';
 
 // Platform interface for templates
 interface KMessagePlatform {

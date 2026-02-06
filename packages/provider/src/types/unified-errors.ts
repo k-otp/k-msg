@@ -3,7 +3,18 @@
  * 통합 에러 처리 시스템
  */
 
-import { StandardError, StandardErrorCode } from '@k-msg/core';
+type StandardError = any;
+type StandardErrorCode = any;
+
+const StandardErrorCode = {
+  AUTHENTICATION_FAILED: 'AUTHENTICATION_FAILED',
+  INVALID_REQUEST: 'INVALID_REQUEST',
+  TEMPLATE_NOT_FOUND: 'TEMPLATE_NOT_FOUND',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  PROVIDER_ERROR: 'PROVIDER_ERROR',
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+} as any;
 
 // =============================================================================
 // 에러 분류 체계
