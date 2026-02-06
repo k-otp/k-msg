@@ -1,0 +1,165 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement for K-Message platform
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Target Package
+      description: Which package should this feature be added to?
+      options:
+        - "@k-msg/core"
+        - "@k-msg/provider"
+        - "@k-msg/messaging"
+        - "@k-msg/template"
+        - "@k-msg/analytics"
+        - "@k-msg/webhook"
+        - "@k-msg/channel"
+        - "k-msg (main package)"
+        - "New package"
+        - "Multiple packages"
+        - "Unsure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What problem does this feature solve? Is it related to a frustration or limitation?
+      placeholder: "I'm frustrated when... / It would be helpful if... / Currently there's no way to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see implemented
+      placeholder: "I would like to be able to... / A new method/class that... / Integration with..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-design
+    attributes:
+      label: API Design (if applicable)
+      description: If you have ideas about how this feature should be used, provide example code
+      render: typescript
+      placeholder: |
+        // Example of how the feature might be used
+        import { NewFeature } from 'k-msg';
+
+        const feature = new NewFeature({
+          // configuration
+        });
+
+        await feature.doSomething();
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: What other approaches have you considered?
+      placeholder: "I've considered... / Another way would be... / Currently I work around this by..."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - "Low - Nice to have"
+        - "Medium - Would be helpful"
+        - "High - Important for my use case"
+        - "Critical - Blocking my work"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - "Simple - Small addition or modification"
+        - "Medium - Moderate changes required"
+        - "Complex - Significant changes required"
+        - "Unknown - I'm not sure"
+
+  - type: checkboxes
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this? (Select all that apply)
+      options:
+        - label: "New API method or function"
+        - label: "New configuration option"
+        - label: "Performance improvement"
+        - label: "Developer experience improvement"
+        - label: "New provider integration"
+        - label: "Documentation improvement"
+        - label: "Testing improvement"
+        - label: "Build/tooling improvement"
+
+  - type: dropdown
+    id: breaking-change
+    attributes:
+      label: Breaking Change
+      description: Would this feature require breaking changes to existing APIs?
+      options:
+        - "No - Backward compatible"
+        - "Yes - Would require breaking changes"
+        - "Maybe - Depends on implementation"
+        - "Unknown"
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific scenarios where this feature would be useful
+      placeholder: |
+        1. When building a chat application...
+        2. For e-commerce notifications...
+        3. In enterprise environments...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or examples that might help
+      placeholder: "Links to similar implementations, relevant documentation, etc."
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to contribute to this feature?
+      options:
+        - label: "I would be willing to work on this feature myself"
+        - label: "I would be willing to test this feature once implemented"
+        - label: "I would be willing to help with documentation"
+        - label: "I would be willing to provide feedback during development"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: "I have searched existing issues to make sure this feature hasn't been requested before"
+          required: true
+        - label: "I have provided sufficient detail about the problem this feature would solve"
+          required: true
+        - label: "I understand this is a feature request and not a bug report"
+          required: true

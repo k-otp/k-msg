@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    // Environment
+    "lib": ["ESNext", "DOM"],
+    "target": "ES2020",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+
+    // Bundler
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
+    "allowImportingTsExtensions": false,
+
+    // Best Practices
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // Path Aliases for Editor - Point to src folder
+    "baseUrl": ".",
+    "paths": {
+      "@k-msg/*": [
+        "./packages/*/src"
+      ]
+    }
+  },
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+}
