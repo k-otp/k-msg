@@ -5,14 +5,14 @@ import {
   RecipientResult,
   MessageStatus 
 } from '../types/message.types';
-import { SingleMessageSender } from './single.sender';
+import { KMsg } from '../k-msg';
 
 export class BulkMessageSender {
-  private singleSender: SingleMessageSender;
+  private kmsg: KMsg;
   private activeBulkJobs: Map<string, BulkJob> = new Map();
 
-  constructor(singleSender: SingleMessageSender) {
-    this.singleSender = singleSender;
+  constructor(kmsg: KMsg) {
+    this.kmsg = kmsg;
   }
 
   async sendBulk(request: BulkMessageRequest): Promise<BulkMessageResult> {
@@ -174,23 +174,34 @@ export class BulkMessageSender {
     recipient: any
   ): Promise<RecipientResult> {
     try {
-      // Merge common variables with recipient-specific variables
       const variables = { ...request.commonVariables, ...recipient.variables };
 
-      // Create single message request
-      const messageRequest = {
+      const result = await this.kmsg.send({
+        type: 'ALIMTALK',
+        to: recipient.phoneNumber,
+        from: (request.options as any)?.senderNumber || '',
         templateId: request.templateId,
-        recipients: [{
-          phoneNumber: recipient.phoneNumber,
-          variables: {},
-          metadata: recipient.metadata
-        }],
-        variables,
-        options: request.options
-      };
+        variables: variables as Record<string, string>
+      });
 
-      const result = await this.singleSender.send(messageRequest);
-      return result.results[0];
+      if (result.isSuccess) {
+        return {
+          phoneNumber: recipient.phoneNumber,
+          messageId: result.value.messageId,
+          status: result.value.status === 'SENT' ? MessageStatus.SENT : MessageStatus.QUEUED,
+          metadata: recipient.metadata
+        };
+      } else {
+        return {
+          phoneNumber: recipient.phoneNumber,
+          status: MessageStatus.FAILED,
+          error: {
+            code: result.error.code,
+            message: result.error.message
+          },
+          metadata: recipient.metadata
+        };
+      }
 
     } catch (error) {
       return {
