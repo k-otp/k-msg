@@ -57,7 +57,9 @@ export type {
   ChannelContract,
   AnalyticsContract,
   AccountContract,
-  ScheduleResult
+  ScheduleResult,
+  ProviderMessageRequest,
+  ProviderMessageResult
 } from './contracts/provider.contract';
 
 // Abstract base provider (from provider-adapter)
@@ -68,6 +70,10 @@ export {
   IWINVAdapter,
   IWINVAdapterFactory
 } from './adapters/iwinv.adapter';
+
+export {
+  MockProvider
+} from './mock';
 
 // Provider manager service (from provider-adapter)
 export * from './services/provider.manager';
@@ -102,3 +108,65 @@ export type * from './iwinv/types/iwinv';
 
 // SMS Provider Contracts
 export type * from './contracts/sms.contract';
+
+// =============================================================================
+// NEW TYPE SAFETY SYSTEMS
+// =============================================================================
+
+// Unified Configuration System
+export {
+  UnifiedConfigBuilder,
+  UnifiedConfigFactory,
+  isValidUnifiedConfig,
+  isValidIWINVBaseConfig,
+  toLegacyIWINVConfig
+} from './types/unified-config';
+export type {
+  UnifiedProviderConfig,
+  IWINVBaseConfig,
+  AlimTalkConfig,
+  SMSConfig,
+  PerformanceConfig,
+  MonitoringConfig
+} from './types/unified-config';
+
+// Typed Template System
+export {
+  TypedProvider,
+  TemplateValidator,
+  TemplateTypeConverter,
+  TEMPLATE_REGISTRY
+} from './types/typed-templates';
+export type {
+  TemplateCode,
+  TypedRequest,
+  TypedResult,
+  TemplateVariables,
+  ValidationResult
+} from './types/typed-templates';
+
+// Unified Error System
+export {
+  ErrorFactory,
+  ErrorConverter,
+  ErrorAnalyzer,
+  UnifiedError,
+  ProviderError,
+  TemplateError,
+  NetworkError,
+  isUnifiedError,
+  isProviderError,
+  isTemplateError,
+  isNetworkError,
+  isRetryableError,
+  ErrorCategory,
+  ErrorSeverity
+} from './types/unified-errors';
+export type {
+  BaseErrorInfo,
+  ProviderErrorInfo,
+  TemplateErrorInfo,
+  NetworkErrorInfo,
+  UnifiedErrorInfo,
+  ErrorStats
+} from './types/unified-errors';
