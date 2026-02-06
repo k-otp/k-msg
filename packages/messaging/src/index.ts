@@ -37,3 +37,6 @@ export { DeliveryTracker } from './delivery/tracker';
 
 // Personalization
 export { VariableReplacer, defaultVariableReplacer, VariableUtils } from './personalization/variable.replacer';
+
+export { KMsg } from './k-msg';
+export * from './hooks';
