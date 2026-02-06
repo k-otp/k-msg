@@ -289,8 +289,17 @@ const kmsgService = new KMessageService(config);
 // Hono 앱 생성
 const app = new Hono();
 
-// 헬스 체크
+// 간단한 헬스체크
 app.get('/health', async (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date(),
+    uptime: process.uptime()
+  });
+});
+
+// 서비스 상태 체크
+app.get('/service/health', async (c) => {
   const health = await kmsgService.healthCheck();
   return c.json(health);
 });

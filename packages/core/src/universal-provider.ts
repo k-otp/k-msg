@@ -10,12 +10,11 @@ import {
   StandardResult,
   StandardError,
   StandardStatus,
-  StandardErrorCode,
   ProviderConfig,
   DeliveryStatus,
   ConfigurationSchema,
   ProviderHealthStatus
-} from './index';
+} from './types';
 
 /**
  * 어댑터 기반 범용 프로바이더
@@ -43,7 +42,7 @@ export class UniversalProvider implements BaseProvider<StandardRequest, Standard
     this.id = metadata.id;
     this.name = metadata.name;
     this.version = metadata.version;
-    this.config = adapter['config']; // 어댑터에서 설정 가져오기
+    this.config = (adapter as any).config; // 어댑터에서 설정 가져오기
     this.isConfigured = true;
   }
 
@@ -140,7 +139,7 @@ export class UniversalProvider implements BaseProvider<StandardRequest, Standard
       const standardError = this.adapter.mapError(error);
 
       const errorResult: StandardResult = {
-        messageId: this.adapter['generateMessageId']?.() || `error_${Date.now()}`,
+        messageId: (this.adapter as any).generateMessageId?.() || `error_${Date.now()}`,
         status: StandardStatus.FAILED,
         provider: this.id,
         timestamp: new Date(),

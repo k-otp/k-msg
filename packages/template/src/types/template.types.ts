@@ -52,7 +52,7 @@ export interface AlimTalkTemplate {
   code: string;                      // 프로바이더 템플릿 코드
   name: string;
   content: string;                   // #{변수} 포함 내용
-  variables: TemplateVariable[];     // 변수 정의
+  variables?: TemplateVariable[];    // 변수 정의 (선택적)
   buttons?: TemplateButton[];        // 버튼 정의
   category: TemplateCategory;        // 인증, 알림, 프로모션 등
   status: TemplateStatus;            // 승인, 검수중, 반려

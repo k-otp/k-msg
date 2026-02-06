@@ -6,7 +6,7 @@ import type {
   PlatformHealthStatus,
   MessageSendOptions,
   MessageSendResult
-} from './index';
+} from './types';
 
 /**
  * Core AlimTalk Platform implementation
@@ -99,11 +99,11 @@ export class AlimTalkPlatform implements KMsg {
             });
 
             // New BaseProvider returns result directly
-            const typedResult = result as any; // TODO: Proper typing needed
+            const typedResult = result as any; // Proper typing depends on TResult
             summary.sent++;
             results.push({
               messageId: typedResult.messageId,
-              status: typedResult.status?.status || 'sent',
+              status: typedResult.status || 'sent',
               phoneNumber: recipient.phoneNumber
             });
           } catch (error) {
@@ -140,7 +140,6 @@ export class AlimTalkPlatform implements KMsg {
 
     return {
       list: async (page: number = 1, size: number = 15, filters?: any) => {
-        // TODO: Update to use new provider contracts
         throw new Error('Template operations not yet migrated to new provider interface');
       },
 
@@ -166,7 +165,6 @@ export class AlimTalkPlatform implements KMsg {
 
     return {
       list: async (page: number = 1, size: number = 15, filters?: any) => {
-        // TODO: Update to use new provider contracts
         throw new Error('History operations not yet migrated to new provider interface');
       },
 

@@ -67,7 +67,7 @@ export class TemplateService {
     }
 
     // 변수 검증
-    const validation = VariableParser.validateVariables(template.variables, variables);
+    const validation = VariableParser.validateVariables(template.variables || [], variables);
     if (!validation.isValid) {
       throw new Error(`Variable validation failed: ${validation.errors.join(', ')}`);
     }

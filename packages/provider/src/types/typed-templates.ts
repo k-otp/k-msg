@@ -395,6 +395,9 @@ export class TypedProvider {
    * 상태 조회 (타입 안전하지 않은 부분 - messageId만 필요)
    */
   async getStatus(messageId: string) {
+    if (!this.provider.getStatus) {
+      throw new Error('Provider does not support status check');
+    }
     return this.provider.getStatus(messageId);
   }
 

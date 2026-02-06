@@ -1,8 +1,8 @@
 import { createApp } from 'honox/server';
-import { templatesRouter } from '../src/routes/templates';
-import { messagesRouter } from '../src/routes/messages';
-import { providersRouter } from '../src/routes/providers';
-import { KMessagePlatform } from '../src/index';
+import { templatesRouter } from './src/routes/templates';
+import { messagesRouter } from './src/routes/messages';
+import { providersRouter } from './src/routes/providers';
+import { KMessagePlatform } from './src/index';
 
 // Use real K-Message platform instead of mock
 const platform = new KMessagePlatform({

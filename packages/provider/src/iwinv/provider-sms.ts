@@ -24,16 +24,13 @@ export class IWINVSMSProvider extends IWINVProvider {
     priority?: 'high' | 'normal' | 'low';
   }) {
     return this.send({
-      templateCode: 'SMS_DIRECT', // SMS는 템플릿 없이 직접 전송
-      phoneNumber,
+      type: 'SMS',
+      templateId: 'SMS_DIRECT', // SMS는 템플릿 없이 직접 전송
+      to: phoneNumber,
+      from: options?.senderNumber || '',
       variables: { message },
-      options: {
-        senderNumber: options?.senderNumber,
-        scheduledAt: options?.scheduledAt,
-        priority: options?.priority || 'normal',
-        subject: message.length > 90 ? message.substring(0, 30) + '...' : undefined // LMS용 제목
-      }
-    });
+      ...options
+    } as any);
   }
 
   /**
@@ -45,16 +42,13 @@ export class IWINVSMSProvider extends IWINVProvider {
     priority?: 'high' | 'normal' | 'low';
   }) {
     return this.send({
-      templateCode: 'LMS_DIRECT',
-      phoneNumber,
+      type: 'LMS',
+      templateId: 'LMS_DIRECT',
+      to: phoneNumber,
+      from: options?.senderNumber || '',
       variables: { subject, message },
-      options: {
-        senderNumber: options?.senderNumber,
-        scheduledAt: options?.scheduledAt,
-        priority: options?.priority || 'normal',
-        subject
-      }
-    });
+      ...options
+    } as any);
   }
 
   /**

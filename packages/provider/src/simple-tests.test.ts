@@ -6,18 +6,13 @@
 
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
 import {
+  SendOptions,
+  SendResult,
+  KMsgErrorCode,
   globalProviderRegistry,
-  StandardRequest,
-  StandardResult,
-  StandardStatus,
-  StandardErrorCode
+  StandardRequest
 } from '@k-msg/core';
-import {
-  IWINVAdapterFactory,
-  isIWINVError,
-  isIWINVResponse,
-  IWINVError
-} from './adapters/iwinv.adapter';
+import { IWINVAdapter, IWINVAdapterFactory } from './adapters/iwinv.adapter';
 import {
   createIWINVProvider,
   createDefaultIWINVProvider,

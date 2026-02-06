@@ -147,7 +147,8 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         clickedAt: (result.clickedAt as string) ? new Date((result.clickedAt as string)) : undefined,
         error: (result.statusCode as string) !== 'OK' ? {
           code: (result.statusCode as string),
-          message: (result.statusCodeName as string)
+          message: (result.statusCodeName as string),
+          retryable: false
         } : undefined,
         attempts: [
           {
@@ -156,7 +157,8 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
             status: this.mapStatus((result.statusCode as string)),
             error: (result.statusCode as string) !== 'OK' ? {
               code: (result.statusCode as string),
-              message: (result.statusCodeName as string)
+              message: (result.statusCodeName as string),
+              retryable: false
             } : undefined
           }
         ]
@@ -169,7 +171,8 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         status: 'FAILED' as any,
         error: {
           code: 'API_ERROR',
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: error instanceof Error ? error.message : 'Unknown error',
+          retryable: false
         },
         attempts: []
       };

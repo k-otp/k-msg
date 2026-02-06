@@ -20,9 +20,10 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
 
     // Path Aliases for Editor - Point to src folder
-    "baseUrl": ".",
     "paths": {
       "@k-msg/*": [
         "./packages/*/src"

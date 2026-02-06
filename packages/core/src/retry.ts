@@ -2,14 +2,14 @@
  * Error recovery and retry patterns for K-Message Platform
  */
 
-import { KMessageError, KMessageErrorCode, ErrorUtils } from './errors';
+import { KMsgError, KMsgErrorCode, ErrorUtils } from './errors';
 
 export interface RetryOptions {
-  maxAttempts: number;
-  initialDelay: number;
-  maxDelay: number;
-  backoffMultiplier: number;
-  jitter: boolean;
+  maxAttempts?: number;
+  initialDelay?: number;
+  maxDelay?: number;
+  backoffMultiplier?: number;
+  jitter?: boolean;
   retryCondition?: (error: Error, attempt: number) => boolean;
   onRetry?: (error: Error, attempt: number) => void;
 }
@@ -47,7 +47,7 @@ export class RetryHandler {
     operation: () => Promise<T>,
     options: Partial<RetryOptions> = {}
   ): Promise<T> {
-    const opts = { ...this.defaultOptions, ...options };
+    const opts = { ...this.defaultOptions, ...options } as Required<RetryOptions>;
     let lastError: Error;
     let delay = opts.initialDelay;
 
@@ -108,8 +108,8 @@ export class CircuitBreaker {
     switch (this.state) {
       case 'OPEN':
         if (now < this.nextAttemptTime) {
-          throw new KMessageError(
-            KMessageErrorCode.NETWORK_SERVICE_UNAVAILABLE,
+          throw new KMsgError(
+            KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE,
             'Circuit breaker is OPEN',
             { state: this.state, nextAttemptTime: this.nextAttemptTime }
           );
@@ -132,8 +132,8 @@ export class CircuitBreaker {
         operation(),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(
-            new KMessageError(
-              KMessageErrorCode.NETWORK_TIMEOUT,
+            new KMsgError(
+              KMsgErrorCode.NETWORK_TIMEOUT,
               'Circuit breaker timeout',
               { timeout: this.options.timeout }
             )
@@ -237,8 +237,8 @@ export class BulkOperationHandler {
 
           // Fail fast if configured
           if (opts.failFast) {
-            throw new KMessageError(
-              KMessageErrorCode.MESSAGE_SEND_FAILED,
+            throw new KMsgError(
+              KMsgErrorCode.MESSAGE_SEND_FAILED,
               `Bulk operation failed fast after ${failed.length} failures`,
               { totalItems: items.length, failedCount: failed.length }
             );
@@ -426,8 +426,8 @@ export class GracefulDegradation {
         RetryHandler.execute(primaryOperation, options.retryOptions),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(
-            new KMessageError(
-              KMessageErrorCode.NETWORK_TIMEOUT,
+            new KMsgError(
+              KMsgErrorCode.NETWORK_TIMEOUT,
               `Operation ${operationName} timed out`,
               { operationName, timeout }
             )
@@ -444,15 +444,15 @@ export class GracefulDegradation {
         try {
           return await fallback();
         } catch (fallbackError) {
-          throw new KMessageError(
-            KMessageErrorCode.UNKNOWN_ERROR,
+          throw new KMsgError(
+            KMsgErrorCode.UNKNOWN_ERROR,
             `Both primary and fallback operations failed for ${operationName}`,
             { 
               operationName,
               primaryError: (error as Error).message,
-              fallbackError: (fallbackError as Error).message
-            },
-            { cause: error as Error }
+              fallbackError: (fallbackError as Error).message,
+              cause: error as Error
+            }
           );
         }
       }
@@ -506,8 +506,8 @@ export const ErrorRecovery = {
               func(...args),
               new Promise<never>((_, reject) =>
                 setTimeout(() => reject(
-                  new KMessageError(
-                    KMessageErrorCode.NETWORK_TIMEOUT,
+                  new KMsgError(
+                    KMsgErrorCode.NETWORK_TIMEOUT,
                     'Operation timed out',
                     { timeout: options.timeout }
                   )

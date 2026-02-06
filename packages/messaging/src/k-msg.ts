@@ -49,7 +49,7 @@ export class KMsg {
         }
       } else {
         if (this.hooks.onError) {
-          await this.hooks.onError(context, result.error);
+          await this.hooks.onError(context, (result as any).error);
         }
       }
 
