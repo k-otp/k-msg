@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // Platform interface for messages
 interface KMessagePlatform {
-  singleSender: any;
+  kmsg: any;
   bulkSender: any;
   provider: any;
 }
