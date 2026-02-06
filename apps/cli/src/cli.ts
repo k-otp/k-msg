@@ -4,7 +4,9 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { logger, ConfigLoader, KMsgError } from '@k-msg/core';
 import { KMsg } from '@k-msg/messaging';
-import { IWINVAdapter } from '@k-msg/provider';
+import { IWINVAdapter, IWINVProvider } from '@k-msg/provider';
+import { TemplateService } from '@k-msg/template';
+import { table } from 'table';
 // import { TemplateCommand } from './commands/template.js';
 // import { MessageCommand } from './commands/message.js';
 // import { ProviderCommand } from './commands/provider.js';
@@ -72,15 +74,20 @@ program
 // Initialize kmsg
 let kmsg: KMsg | null = null;
 let adapter: IWINVAdapter | null = null;
+let provider: IWINVProvider | null = null;
+let templateService: TemplateService | null = null;
 
 // Auto-initialize if API key is available
 if (process.env.IWINV_API_KEY) {
-  adapter = new IWINVAdapter({
+  const config = {
     apiKey: process.env.IWINV_API_KEY,
     baseUrl: process.env.IWINV_BASE_URL || 'https://alimtalk.bizservice.iwinv.kr',
     debug: true
-  });
-  kmsg = new KMsg(adapter);
+  };
+  provider = new IWINVProvider(config);
+  adapter = provider.getAdapter() as IWINVAdapter;
+  kmsg = new KMsg(provider as any);
+  templateService = new TemplateService(adapter);
 }
 
 // Register commands (임시로 주석처리)
@@ -197,15 +204,15 @@ program
     try {
       console.log(chalk.yellow('🔍 Checking provider health...'));
 
-      if (!adapter) {
+      if (!provider) {
         console.log(chalk.red('❌ IWINV provider not initialized. Check your IWINV_API_KEY.'));
         return;
       }
 
       // Simple health check for new architecture
       console.log(chalk.green('✅ Provider initialized'));
-      console.log(`  Name: ${adapter.name}`);
-      console.log(`  ID: ${adapter.id}`);
+      console.log(`  Name: ${provider.name}`);
+      console.log(`  ID: ${provider.id}`);
 
     } catch (error) {
       console.error(chalk.red('❌ Health check failed:'), error);
@@ -261,7 +268,7 @@ program
         console.log(chalk.green('✅ Message sent successfully!'));
         console.log(`Message ID: ${result.value.messageId}`);
         console.log(`Status: ${result.value.status}`);
-      } else {
+      } else if (result.isFailure) {
         console.log(chalk.red('❌ Message send failed:'));
         console.log(chalk.yellow(result.error.message));
       }
@@ -326,7 +333,7 @@ program
           phone: options.phone,
           template: options.template
         });
-      } else {
+      } else if (result.isFailure) {
         console.log(chalk.red('❌ Message send failed:'));
         console.log(chalk.yellow(result.error.message));
         logger.error('Message send failed', { error: result.error.message });
@@ -337,15 +344,47 @@ program
     }
   });
 
-// Test template creation
 program
-  .command('test-template')
-  .description('Test IWINV template creation')
-  .option('-n, --name <name>', 'Template name', 'test_template')
-  .option('-c, --content <content>', 'Template content', '[TEST] 테스트 메시지입니다.')
-  .option('--category <category>', 'Template category', 'NOTIFICATION')
+  .command('create-template')
+  .description('Create a new IWINV template')
+  .option('-c, --code <code>', 'Template code')
+  .option('-n, --name <name>', 'Template name')
+  .option('--content <content>', 'Template content')
+  .option('--category <category>', 'Template category (NOTIFICATION, etc)', 'NOTIFICATION')
   .action(async (options) => {
-    console.log(chalk.red('❌ Template management not yet migrated to new architecture in CLI.'));
+    try {
+      const missing = cliUtils.validateOptions(options, ['code', 'name', 'content']);
+      if (missing.length > 0) {
+        console.log(chalk.red('❌ Missing required options:'), missing.join(', '));
+        return;
+      }
+
+      if (!templateService) {
+        console.log(chalk.red('❌ Template service not initialized. Check your IWINV_API_KEY.'));
+        return;
+      }
+
+      const result = await cliUtils.withProgress('🏗️ Creating template', async () => {
+        return await templateService!.create({
+          code: options.code,
+          name: options.name,
+          content: options.content,
+          category: options.category
+        });
+      });
+
+      if (result.isSuccess) {
+        console.log(chalk.green('✅ Template created successfully!'));
+        console.log(`Code: ${chalk.cyan(result.value.code)}`);
+        console.log(`Name: ${chalk.cyan(result.value.name)}`);
+        console.log(`Status: ${chalk.yellow(result.value.status)}`);
+      } else if (result.isFailure) {
+        console.log(chalk.red('❌ Failed to create template:'));
+        console.log(chalk.yellow(result.error.message));
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Template creation failed:'), error);
+    }
   });
 
 // List templates command
@@ -354,11 +393,47 @@ program
   .description('List IWINV templates')
   .option('-p, --page <number>', 'Page number', '1')
   .option('-s, --size <number>', 'Page size', '15')
-  .option('-c, --code <code>', 'Filter by template code')
-  .option('-n, --name <name>', 'Filter by template name')
-  .option('--status <status>', 'Filter by status (Y/I/R)', '')
+  .option('--status <status>', 'Filter by status (APPROVED/PENDING/REJECTED)', '')
   .action(async (options) => {
-    console.log(chalk.red('❌ Template management not yet migrated to new architecture in CLI.'));
+    try {
+      if (!templateService) {
+        console.log(chalk.red('❌ Template service not initialized. Check your IWINV_API_KEY.'));
+        return;
+      }
+
+      const result = await cliUtils.withProgress('🔍 Fetching templates', async () => {
+        return await templateService!.list({
+          page: parseInt(options.page),
+          limit: parseInt(options.size),
+          status: options.status || undefined
+        });
+      });
+
+      if (result.isSuccess) {
+        if (result.value.length === 0) {
+          console.log(chalk.yellow('No templates found.'));
+          return;
+        }
+
+        const data = [
+          [chalk.bold('Code'), chalk.bold('Name'), chalk.bold('Status'), chalk.bold('Created At')],
+          ...result.value.map(t => [
+            t.code,
+            t.name,
+            t.status === 'APPROVED' ? chalk.green(t.status) : 
+            t.status === 'REJECTED' ? chalk.red(t.status) : chalk.yellow(t.status),
+            t.createdAt.toLocaleString()
+          ])
+        ];
+
+        console.log(table(data));
+      } else if (result.isFailure) {
+        console.log(chalk.red('❌ Failed to list templates:'));
+        console.log(chalk.yellow(result.error.message));
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ List templates failed:'), error);
+    }
   });
 
 // Delete template command
@@ -367,7 +442,30 @@ program
   .description('Delete IWINV template')
   .option('-c, --code <code>', 'Template code to delete')
   .action(async (options) => {
-    console.log(chalk.red('❌ Template management not yet migrated to new architecture in CLI.'));
+    try {
+      if (!options.code) {
+        console.log(chalk.red('❌ Missing required option: code'));
+        return;
+      }
+
+      if (!templateService) {
+        console.log(chalk.red('❌ Template service not initialized. Check your IWINV_API_KEY.'));
+        return;
+      }
+
+      const result = await cliUtils.withProgress(`🗑️ Deleting template ${options.code}`, async () => {
+        return await templateService!.delete(options.code);
+      });
+
+      if (result.isSuccess) {
+        console.log(chalk.green('✅ Template deleted successfully!'));
+      } else if (result.isFailure) {
+        console.log(chalk.red('❌ Failed to delete template:'));
+        console.log(chalk.yellow(result.error.message));
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Delete template failed:'), error);
+    }
   });
 
 // Modify template command
@@ -378,7 +476,33 @@ program
   .option('-n, --name <name>', 'New template name')
   .option('--content <content>', 'New template content')
   .action(async (options) => {
-    console.log(chalk.red('❌ Template management not yet migrated to new architecture in CLI.'));
+    try {
+      if (!options.code) {
+        console.log(chalk.red('❌ Missing required option: code'));
+        return;
+      }
+
+      if (!templateService) {
+        console.log(chalk.red('❌ Template service not initialized. Check your IWINV_API_KEY.'));
+        return;
+      }
+
+      const result = await cliUtils.withProgress(`📝 Modifying template ${options.code}`, async () => {
+        return await templateService!.update(options.code, {
+          name: options.name,
+          content: options.content
+        });
+      });
+
+      if (result.isSuccess) {
+        console.log(chalk.green('✅ Template modified successfully!'));
+      } else if (result.isFailure) {
+        console.log(chalk.red('❌ Failed to modify template:'));
+        console.log(chalk.yellow(result.error.message));
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Modify template failed:'), error);
+    }
   });
 
 // History command
@@ -437,19 +561,21 @@ program
 
     if (answers.provider === 'IWINV') {
       try {
-        adapter = new IWINVAdapter({
+        const config = {
           apiKey: answers.apiKey,
           baseUrl: answers.baseUrl,
           debug: program.opts().verbose
-        });
-
-        kmsg = new KMsg(adapter);
+        };
+        provider = new IWINVProvider(config);
+        adapter = provider.getAdapter() as IWINVAdapter;
+        kmsg = new KMsg(provider as any);
+        templateService = new TemplateService(adapter);
 
         console.log(chalk.green('✅ IWINV provider configured successfully!'));
 
         // Test connection
         console.log(chalk.yellow('🔍 Testing connection...'));
-        if (adapter) {
+        if (provider) {
           console.log(chalk.green('✅ Connection test successful (Provider initialized)!'));
         } else {
           console.log(chalk.red('❌ Connection test failed'));
