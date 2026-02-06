@@ -186,10 +186,10 @@ const template = await templateService.createTemplate({
 ### Handling Bulk Operations
 The messaging system provides sophisticated bulk processing:
 ```typescript
-import { BulkMessageSender, SingleMessageSender } from '@k-msg/messaging';
+import { BulkMessageSender, KMsg } from '@k-msg/messaging';
 
-const singleSender = new SingleMessageSender([provider]);
-const bulkSender = new BulkMessageSender(singleSender);
+const kmsg = new KMsg(provider);
+const bulkSender = new BulkMessageSender(kmsg);
 
 // Configure fail-fast or continue-on-failure behavior
 const result = await bulkSender.sendBulk({
@@ -197,8 +197,7 @@ const result = await bulkSender.sendBulk({
   recipients: [...],
   options: {
     batchSize: 10,
-    batchDelay: 1000,
-    failFast: false  // Continue processing on failures
+    batchDelay: 1000
   }
 });
 ```
