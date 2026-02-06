@@ -1,0 +1,50 @@
+# Bun configuration for K-Message platform
+[test]
+# Test patterns
+timeout = 5000
+
+# Coverage settings
+coverage = true
+coverageThreshold = 80
+coverageSkipNodeModules = true
+
+# Test environment
+env = ["NODE_ENV=test"]
+
+# Test filters
+root = "."
+testMatch = [
+  "**/*.test.{ts,tsx,js,jsx}",
+  "**/*.spec.{ts,tsx,js,jsx}"
+]
+
+# Ignore patterns
+testIgnore = [
+  "node_modules/**",
+  "dist/**",
+  "build/**",
+  ".next/**",
+  "coverage/**"
+]
+
+[install]
+# Faster installs
+frozen = true
+cache = true
+
+# Registry configuration
+registry = "https://registry.npmjs.org/"
+
+[run]
+# Development settings
+silent = false
+shell = "system"
+
+[build]
+# Build optimization
+splitting = true
+minify = true
+sourcemap = true
+
+# External dependencies
+external = ["bun:test", "node:*"]

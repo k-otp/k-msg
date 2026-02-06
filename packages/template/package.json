@@ -1,0 +1,59 @@
+{
+  "name": "@k-msg/template",
+  "version": "0.1.1",
+  "description": "AlimTalk template engine for parsing, building and managing templates",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test'",
+    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test'",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "clean": "rm -rf dist",
+    "pack": "bun pm pack",
+    "publish": "bun publish --access public"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:"
+  },
+  "keywords": [
+    "alimtalk",
+    "template",
+    "engine",
+    "parser",
+    "kakao"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k-otp/k-msg.git"
+  },
+  "homepage": "https://github.com/k-otp/k-msg",
+  "bugs": {
+    "url": "https://github.com/k-otp/k-msg/issues"
+  },
+  "author": "imjlk",
+  "license": "MIT"
+}

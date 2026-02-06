@@ -1,0 +1,77 @@
+{
+  "name": "k-msg",
+  "version": "0.1.1",
+  "description": "K-Message: Korean Multi-Channel Messaging Platform - Unified Package",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test' --external '@k-msg/*'",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
+    "dev": "bun --watch src/index.ts",
+    "test": "bun test",
+    "clean": "rm -rf dist",
+    "pack": "bun pm pack",
+    "publish": "bun publish --access public"
+  },
+  "dependencies": {
+    "@k-msg/core": "workspace:*",
+    "@k-msg/messaging": "workspace:*",
+    "@k-msg/template": "workspace:*",
+    "@k-msg/webhook": "workspace:*",
+    "@k-msg/analytics": "workspace:*",
+    "@k-msg/channel": "workspace:*",
+    "@k-msg/provider": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "typescript": "^5"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "korea",
+    "messaging",
+    "alimtalk",
+    "sms",
+    "lms",
+    "kakaotalk",
+    "friendtalk",
+    "multi-channel",
+    "notification",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k-otp/k-msg.git"
+  },
+  "homepage": "https://github.com/k-otp/k-msg",
+  "bugs": {
+    "url": "https://github.com/k-otp/k-msg/issues"
+  },
+  "license": "MIT",
+  "author": "imjlk"
+}

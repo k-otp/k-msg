@@ -1,0 +1,141 @@
+name: 🐛 Bug Report
+description: Report a bug or issue with K-Message platform
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill out the information below to help us resolve the issue.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Affected Package
+      description: Which package is affected by this bug?
+      options:
+        - "@k-msg/core"
+        - "@k-msg/provider"
+        - "@k-msg/messaging"
+        - "@k-msg/template"
+        - "@k-msg/analytics"
+        - "@k-msg/webhook"
+        - "@k-msg/channel"
+        - "k-msg (main package)"
+        - "Multiple packages"
+        - "Unknown"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version of K-Message are you using?
+      placeholder: "e.g., 0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Initialize the service with...
+        2. Call the method...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Sample
+      description: If applicable, add a minimal code sample that reproduces the issue
+      render: typescript
+      placeholder: |
+        import { MessageServiceFactory } from 'k-msg';
+
+        const service = MessageServiceFactory.createIWINVService({
+          apiKey: 'your-key'
+        });
+
+        // Code that causes the issue
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Message/Stack Trace
+      description: If there's an error message or stack trace, please include it here
+      render: text
+      placeholder: Paste the complete error message and stack trace
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you running in?
+      options:
+        - "Node.js"
+        - "Bun"
+        - "Browser"
+        - "Deno"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: runtime-version
+    attributes:
+      label: Runtime Version
+      description: Version of Node.js/Bun/etc.
+      placeholder: "e.g., Node.js 20.0.0, Bun 1.1.34"
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: "e.g., macOS 14.0, Ubuntu 22.04, Windows 11"
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider (if applicable)
+      description: Which messaging provider are you using?
+      options:
+        - "IWINV"
+        - "Not applicable"
+        - "Other"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+      placeholder: Add any other context about the problem here
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched the existing issues to make sure this bug hasn't been reported before
+          required: true
+        - label: I have provided all the required information above
+          required: true
+        - label: This bug is reproducible with the latest version of K-Message
+          required: false

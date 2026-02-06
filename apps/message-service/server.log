@@ -1,0 +1,10 @@
+✅ K-Message Service initialized with IWINVProvider
+🔄 Loading provider data...
+🚀 K-Message Service starting on port 3009
+📦 Using packages: core, provider, template, messaging, analytics
+Started development server: http://localhost:3009
+Channel list API returned 404, using default channel
+📋 Loaded 1 channels
+Template list raw response: {"code":200,"totalCount":3,"message":"정상적으로 호출하였습니다.","list":[{"templateCode":"TEMPLATE_CODE_2","templateName":"test_template","templateContent":"[TEST] 테스트 메시지입니다.","status":"Y","templateStatusMsg":"사용가능","templateStatusComments":"","buttons":[],"createDate":"2025-08-04 00:09:06"},{"templateCode":
+📋 Loaded 3 provider templates
+✅ Provider data loaded successfully

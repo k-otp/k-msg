@@ -1,0 +1,37 @@
+{
+  "name": "@k-msg/cli",
+  "version": "0.1.0",
+  "description": "AlimTalk Platform CLI tool",
+  "type": "module",
+  "bin": {
+    "alimtalk": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --outdir=dist --format=esm --target=node",
+    "dev": "bun --watch src/cli.ts",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@k-msg/core": "^0.1.1",
+    "@k-msg/provider": "^0.1.1",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "inquirer": "^10.0.0",
+    "table": "^6.8.1"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "@types/inquirer": "^9.0.0"
+  },
+  "keywords": [
+    "alimtalk",
+    "cli",
+    "messaging",
+    "kakao"
+  ],
+  "license": "MIT"
+}

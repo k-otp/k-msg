@@ -1,0 +1,89 @@
+{
+  "name": "@k-msg/provider",
+  "version": "0.1.1",
+  "type": "module",
+  "description": "Complete provider system with adapters and implementations for K-Message platform",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./interfaces": {
+      "types": "./dist/interfaces/index.d.ts",
+      "import": "./dist/interfaces/index.mjs",
+      "require": "./dist/interfaces/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.ts",
+      "import": "./dist/registry/index.mjs",
+      "require": "./dist/registry/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.mjs",
+      "require": "./dist/middleware/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test'",
+    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test'",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
+    "dev": "tsc --watch",
+    "test": "bun run test:unit",
+    "test:unit": "bun test --testPathPattern='.*\\.test\\.(ts|js)$' --testTimeout=5000",
+    "test:integration": "bun test --testPathPattern='.*\\.integration\\.(ts|js)$' --testTimeout=10000",
+    "test:e2e": "bun test --testPathPattern='.*\\.e2e\\.(ts|js)$' --testTimeout=30000",
+    "test:coverage": "bun test --coverage",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "pack": "bun pm pack",
+    "publish": "bun publish --access public"
+  },
+  "dependencies": {
+    "@k-msg/core": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "keywords": [
+    "provider",
+    "plugin",
+    "architecture",
+    "messaging",
+    "k-message",
+    "iwinv",
+    "alimtalk",
+    "adapter"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k-otp/k-msg.git"
+  },
+  "homepage": "https://github.com/k-otp/k-msg",
+  "bugs": {
+    "url": "https://github.com/k-otp/k-msg/issues"
+  },
+  "author": "imjlk",
+  "license": "MIT"
+}

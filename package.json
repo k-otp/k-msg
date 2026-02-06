@@ -1,0 +1,109 @@
+{
+  "name": "k-msg",
+  "version": "0.1.0",
+  "description": "K-Message: Korean Multi-Channel Messaging Platform",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun run build:all",
+    "build:all": "bun run --filter='./packages/*' build",
+    "build:core": "cd packages/core && bun run build",
+    "build:messaging": "cd packages/messaging && bun run build",
+    "build:template": "cd packages/template && bun run build",
+    "build:webhook": "cd packages/webhook && bun run build",
+    "build:analytics": "cd packages/analytics && bun run build",
+    "build:channel": "cd packages/channel && bun run build",
+    "build:provider": "cd packages/provider && bun run build",
+    "build:k-msg": "cd packages/k-msg && bun run build",
+    "dev": "bun run --filter='./packages/*' dev",
+    "test": "bun run test:unit",
+    "test:unit": "bun run --filter='./packages/*' test:unit",
+    "test:integration": "bun run --filter='./packages/*' test:integration",
+    "test:e2e": "bun run --filter='./packages/*' test:e2e",
+    "test:all": "bun run test:unit && bun run test:integration",
+    "test:coverage": "bun run --filter='./packages/*' test:coverage",
+    "test:watch": "bun run --filter='./packages/*' test:watch",
+    "typecheck": "bun run typecheck:all",
+    "typecheck:all": "bun run --filter='./packages/*' typecheck",
+    "lint:check": "echo 'Linting not configured yet'",
+    "format:check": "echo 'Format check not configured yet'",
+    "clean": "bun run --filter='./packages/*' clean",
+    "prepublishOnly": "bun run build",
+    "api": "bun --cwd apps/api --",
+    "admin": "bun --cwd apps/admin-dashboard --",
+    "cli": "bun --cwd apps/cli --",
+    "version:patch": "bun pm version patch",
+    "version:minor": "bun pm version minor",
+    "version:major": "bun pm version major",
+    "pack:all": "bun run --filter './packages/*' pack",
+    "pack:dry": "bun run --filter './packages/*' pack --dry-run",
+    "publish:all": "bun run --filter './packages/*' publish --access public",
+    "publish:beta": "bun run --filter './packages/*' publish --tag beta --access public",
+    "release": "./scripts/release.sh",
+    "release:patch": "bun run version:patch && bun run build:all && bun run publish:all",
+    "release:minor": "bun run version:minor && bun run build:all && bun run publish:all",
+    "release:major": "bun run version:major && bun run build:all && bun run publish:all"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "korea",
+    "messaging",
+    "alimtalk",
+    "sms",
+    "lms",
+    "kakaotalk",
+    "friendtalk",
+    "multi-channel",
+    "notification",
+    "typescript",
+    "monorepo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k-otp/k-msg.git"
+  },
+  "homepage": "https://github.com/k-otp/k-msg",
+  "bugs": {
+    "url": "https://github.com/k-otp/k-msg/issues"
+  },
+  "license": "MIT",
+  "author": "imjlk",
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "apps/*"
+    ],
+    "catalog": {
+      "typescript": "^5.7.2",
+      "@types/bun": "latest",
+      "@types/node": "^22.0.0",
+      "zod": "^4.0.14",
+      "hono": "^4.8.10",
+      "@hono/zod-validator": "^0.4.1",
+      "honox": "^0.1.43",
+      "vite": "^6.3.5",
+      "@cloudflare/workers-types": "^4.20250131.0",
+      "wrangler": "^4.4.0"
+    }
+  }
+}

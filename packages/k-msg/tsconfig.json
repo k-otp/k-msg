@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "references": [
+    { "path": "../provider" },
+    { "path": "../messaging" },
+    { "path": "../template" },
+    { "path": "../analytics" },
+    { "path": "../webhook" },
+    { "path": "../channel" }
+  ]
+}
