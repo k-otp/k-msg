@@ -29,7 +29,9 @@
   },
   "dependencies": {
     "zod": "catalog:",
-    "@k-msg/core": "workspace:*"
+    "@k-msg/core": "workspace:*",
+    "@k-msg/provider": "workspace:*",
+    "@k-msg/template": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",
