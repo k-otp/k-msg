@@ -1,6 +1,6 @@
 {
   "name": "k-msg",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "K-Message: Korean Multi-Channel Messaging Platform",
   "type": "module",
   "main": "./dist/index.js",
