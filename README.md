@@ -103,15 +103,15 @@ console.log('Message sent:', result.messageId);
 
 ```typescript
 import { TemplateValidator } from '@k-msg/template';
-import { SingleMessageSender } from '@k-msg/messaging';
+import { KMsg } from '@k-msg/messaging';
 import { IWINVProvider } from '@k-msg/provider';
 
 // Template validation
 const validation = TemplateValidator.validateTemplate(template);
 
 // Message sending
-const sender = new SingleMessageSender();
-const result = await sender.send(messageRequest);
+const kmsg = new KMsg(new IWINVProvider(config));
+const result = await kmsg.send(messageOptions);
 ```
 
 ## 🔌 Providers
@@ -165,13 +165,13 @@ const validation = TemplateValidator.validateTemplate(template);
 ### Message Sending
 
 ```typescript
-import { SingleMessageSender, BulkMessageSender } from '@k-msg/messaging';
+import { KMsg, BulkMessageSender } from '@k-msg/messaging';
 
-const sender = new SingleMessageSender();
-const bulkSender = new BulkMessageSender(sender);
+const kmsg = new KMsg(provider);
+const bulkSender = new BulkMessageSender(kmsg);
 
 // Single message
-const result = await sender.send(messageRequest);
+const result = await kmsg.send(messageOptions);
 
 // Bulk messages
 const bulkResult = await bulkSender.sendBulk(bulkRequest);

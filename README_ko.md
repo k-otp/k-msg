@@ -264,13 +264,13 @@ const validation = TemplateValidator.validateTemplate(template);
 메시지 발송을 위한 핵심 시스템
 
 ```typescript
-import { SingleMessageSender, BulkMessageSender } from '@k-msg/messaging';
+import { KMsg, BulkMessageSender } from '@k-msg/messaging';
 
-const sender = new SingleMessageSender();
-const bulkSender = new BulkMessageSender(sender);
+const kmsg = new KMsg(provider);
+const bulkSender = new BulkMessageSender(kmsg);
 
 // 단일 발송
-const result = await sender.send(messageRequest);
+const result = await kmsg.send(messageOptions);
 
 // 대량 발송
 const bulkResult = await bulkSender.sendBulk(bulkRequest);
