@@ -1,11 +1,12 @@
-import { 
-  BulkMessageRequest, 
-  BulkMessageResult, 
-  BulkBatchResult, 
-  RecipientResult,
-  MessageStatus 
-} from '../types/message.types';
-import { KMsg } from '../k-msg';
+import { KMsgError, KMsgErrorCode, RetryHandler } from "@k-msg/core";
+import type { KMsg } from "../k-msg";
+import {
+  type BulkBatchResult,
+  type BulkMessageRequest,
+  type BulkMessageResult,
+  MessageStatus,
+  type RecipientResult,
+} from "../types/message.types";
 
 export class BulkMessageSender {
   private kmsg: KMsg;
@@ -19,10 +20,10 @@ export class BulkMessageSender {
     const requestId = this.generateRequestId();
     const batchSize = request.options?.batchSize || 100;
     const batchDelay = request.options?.batchDelay || 1000;
-    
+
     // Split recipients into batches
     const batches = this.createBatches(request.recipients, batchSize);
-    
+
     const bulkResult: BulkMessageResult = {
       requestId,
       totalRecipients: request.recipients.length,
@@ -31,9 +32,9 @@ export class BulkMessageSender {
         queued: request.recipients.length,
         sent: 0,
         failed: 0,
-        processing: 0
+        processing: 0,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Create bulk job for tracking
@@ -41,8 +42,8 @@ export class BulkMessageSender {
       id: requestId,
       request,
       result: bulkResult,
-      status: 'processing',
-      createdAt: new Date()
+      status: "processing",
+      createdAt: new Date(),
     };
 
     this.activeBulkJobs.set(requestId, bulkJob);
@@ -56,7 +57,7 @@ export class BulkMessageSender {
   private async processBatchesAsync(
     bulkJob: BulkJob,
     batches: any[][],
-    batchDelay: number
+    batchDelay: number,
   ): Promise<void> {
     try {
       for (let i = 0; i < batches.length; i++) {
@@ -67,8 +68,8 @@ export class BulkMessageSender {
           batchId,
           batchNumber: i + 1,
           recipients: [],
-          status: 'processing',
-          createdAt: new Date()
+          status: "processing",
+          createdAt: new Date(),
         };
 
         bulkJob.result.batches.push(batchResult);
@@ -80,34 +81,40 @@ export class BulkMessageSender {
           const batchRecipients = await this.processBatch(
             bulkJob.request,
             batch,
-            batchId
+            batchId,
           );
 
           batchResult.recipients = batchRecipients;
-          batchResult.status = 'completed';
+          batchResult.status = "completed";
           batchResult.completedAt = new Date();
 
           // Update summary
-          const sent = batchRecipients.filter(r => r.status === MessageStatus.SENT).length;
-          const failed = batchRecipients.filter(r => r.status === MessageStatus.FAILED).length;
+          const sent = batchRecipients.filter(
+            (r) => r.status === MessageStatus.SENT,
+          ).length;
+          const failed = batchRecipients.filter(
+            (r) => r.status === MessageStatus.FAILED,
+          ).length;
 
           bulkJob.result.summary.sent += sent;
           bulkJob.result.summary.failed += failed;
           bulkJob.result.summary.processing -= batch.length;
-
         } catch (error) {
-          batchResult.status = 'failed';
+          batchResult.status = "failed";
           batchResult.completedAt = new Date();
-          
+
           // Mark all recipients in this batch as failed
-          batchResult.recipients = batch.map(recipient => ({
+          batchResult.recipients = batch.map((recipient) => ({
             phoneNumber: recipient.phoneNumber,
             status: MessageStatus.FAILED,
             error: {
-              code: 'BATCH_ERROR',
-              message: error instanceof Error ? error.message : 'Batch processing failed'
+              code: "BATCH_ERROR",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Batch processing failed",
             },
-            metadata: recipient.metadata
+            metadata: recipient.metadata,
           }));
 
           bulkJob.result.summary.failed += batch.length;
@@ -120,11 +127,10 @@ export class BulkMessageSender {
         }
       }
 
-      bulkJob.status = 'completed';
+      bulkJob.status = "completed";
       bulkJob.result.completedAt = new Date();
-
     } catch (error) {
-      bulkJob.status = 'failed';
+      bulkJob.status = "failed";
       bulkJob.result.completedAt = new Date();
     }
   }
@@ -132,35 +138,35 @@ export class BulkMessageSender {
   private async processBatch(
     request: BulkMessageRequest,
     batchRecipients: any[],
-    batchId: string
+    batchId: string,
   ): Promise<RecipientResult[]> {
     const results: RecipientResult[] = [];
     const maxConcurrency = request.options?.maxConcurrency || 10;
 
     // Process recipients in parallel with concurrency limit
     const promises: Promise<RecipientResult>[] = [];
-    
+
     for (let i = 0; i < batchRecipients.length; i += maxConcurrency) {
       const chunk = batchRecipients.slice(i, i + maxConcurrency);
-      
-      const chunkPromises = chunk.map(recipient => 
-        this.processRecipient(request, recipient)
+
+      const chunkPromises = chunk.map((recipient) =>
+        this.processRecipient(request, recipient),
       );
 
       const chunkResults = await Promise.allSettled(chunkPromises);
-      
+
       for (const result of chunkResults) {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           results.push(result.value);
         } else {
           // Handle promise rejection
           results.push({
-            phoneNumber: 'unknown',
+            phoneNumber: "unknown",
             status: MessageStatus.FAILED,
             error: {
-              code: 'PROCESSING_ERROR',
-              message: result.reason?.message || 'Unknown processing error'
-            }
+              code: "PROCESSING_ERROR",
+              message: result.reason?.message || "Unknown processing error",
+            },
           });
         }
       }
@@ -171,63 +177,66 @@ export class BulkMessageSender {
 
   private async processRecipient(
     request: BulkMessageRequest,
-    recipient: any
+    recipient: any,
   ): Promise<RecipientResult> {
+    const retryOptions = {
+      maxAttempts: 3,
+      initialDelay: 1000,
+      backoffMultiplier: 2,
+      ...request.options?.retryOptions,
+    };
+
     try {
       const variables = { ...request.commonVariables, ...recipient.variables };
 
-      const result = await this.kmsg.send({
-        type: 'ALIMTALK',
-        to: recipient.phoneNumber,
-        from: (request.options as any)?.senderNumber || '',
-        templateId: request.templateId,
-        variables: variables as Record<string, string>
-      });
+      return await RetryHandler.execute(async () => {
+        const result = await this.kmsg.send({
+          type: "ALIMTALK",
+          to: recipient.phoneNumber,
+          from: (request.options as any)?.senderNumber || "",
+          templateId: request.templateId,
+          variables: variables as Record<string, string>,
+        });
 
-      if (result.isSuccess) {
-        return {
-          phoneNumber: recipient.phoneNumber,
-          messageId: result.value.messageId,
-          status: result.value.status === 'SENT' ? MessageStatus.SENT : MessageStatus.QUEUED,
-          metadata: recipient.metadata
-        };
-      } else {
-        return {
-          phoneNumber: recipient.phoneNumber,
-          status: MessageStatus.FAILED,
-          error: {
-            code: result.error.code,
-            message: result.error.message
-          },
-          metadata: recipient.metadata
-        };
-      }
-
+        if (result.isSuccess) {
+          return {
+            phoneNumber: recipient.phoneNumber,
+            messageId: result.value.messageId,
+            status:
+              result.value.status === "SENT"
+                ? MessageStatus.SENT
+                : MessageStatus.QUEUED,
+            metadata: recipient.metadata,
+          };
+        } else {
+          throw result.error;
+        }
+      }, retryOptions);
     } catch (error) {
       return {
         phoneNumber: recipient.phoneNumber,
         status: MessageStatus.FAILED,
         error: {
-          code: 'RECIPIENT_ERROR',
-          message: error instanceof Error ? error.message : 'Unknown error'
+          code: error instanceof KMsgError ? error.code : "RECIPIENT_ERROR",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
-        metadata: recipient.metadata
+        metadata: recipient.metadata,
       };
     }
   }
 
   private createBatches<T>(items: T[], batchSize: number): T[][] {
     const batches: T[][] = [];
-    
+
     for (let i = 0; i < items.length; i += batchSize) {
       batches.push(items.slice(i, i + batchSize));
     }
-    
+
     return batches;
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generateRequestId(): string {
@@ -245,12 +254,12 @@ export class BulkMessageSender {
       return false;
     }
 
-    job.status = 'cancelled';
-    
+    job.status = "cancelled";
+
     // Cancel pending batches
     for (const batch of job.result.batches) {
-      if (batch.status === 'pending' || batch.status === 'processing') {
-        batch.status = 'failed';
+      if (batch.status === "pending" || batch.status === "processing") {
+        batch.status = "failed";
         batch.completedAt = new Date();
       }
     }
@@ -258,46 +267,48 @@ export class BulkMessageSender {
     return true;
   }
 
-  async retryFailedBatch(requestId: string, batchId: string): Promise<BulkBatchResult | null> {
+  async retryFailedBatch(
+    requestId: string,
+    batchId: string,
+  ): Promise<BulkBatchResult | null> {
     const job = this.activeBulkJobs.get(requestId);
     if (!job) {
       return null;
     }
 
-    const batch = job.result.batches.find(b => b.batchId === batchId);
-    if (!batch || batch.status !== 'failed') {
+    const batch = job.result.batches.find((b) => b.batchId === batchId);
+    if (!batch || batch.status !== "failed") {
       return null;
     }
 
     // Reset batch status
-    batch.status = 'processing';
+    batch.status = "processing";
     batch.createdAt = new Date();
     delete batch.completedAt;
 
     try {
       // Extract failed recipients for retry
       const failedRecipients = batch.recipients
-        .filter(r => r.status === MessageStatus.FAILED)
-        .map(r => ({
+        .filter((r) => r.status === MessageStatus.FAILED)
+        .map((r) => ({
           phoneNumber: r.phoneNumber,
           variables: {},
-          metadata: r.metadata
+          metadata: r.metadata,
         }));
 
       const retryResults = await this.processBatch(
         job.request,
         failedRecipients,
-        batchId
+        batchId,
       );
 
       batch.recipients = retryResults;
-      batch.status = 'completed';
+      batch.status = "completed";
       batch.completedAt = new Date();
 
       return batch;
-
     } catch (error) {
-      batch.status = 'failed';
+      batch.status = "failed";
       batch.completedAt = new Date();
       return batch;
     }
@@ -306,9 +317,9 @@ export class BulkMessageSender {
   cleanup(): void {
     // Remove completed jobs older than 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
+
     for (const [id, job] of this.activeBulkJobs) {
-      if (job.status === 'completed' && job.createdAt < oneDayAgo) {
+      if (job.status === "completed" && job.createdAt < oneDayAgo) {
         this.activeBulkJobs.delete(id);
       }
     }
@@ -319,6 +330,6 @@ interface BulkJob {
   id: string;
   request: BulkMessageRequest;
   result: BulkMessageResult;
-  status: 'processing' | 'completed' | 'failed' | 'cancelled';
+  status: "processing" | "completed" | "failed" | "cancelled";
   createdAt: Date;
 }
