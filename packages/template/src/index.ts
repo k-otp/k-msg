@@ -4,7 +4,8 @@
  */
 
 // 핵심 서비스
-export { TemplateService } from './services/template.service';
+export { TemplateService } from './service';
+export { TemplateService as MockTemplateService } from './services/template.service';
 
 // 파서 및 유틸리티
 export { VariableParser } from './parser/variable.parser';

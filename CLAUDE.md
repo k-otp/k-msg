@@ -42,12 +42,17 @@ k-msg-platform/
 
 ### Key Architectural Patterns
 
-**Contract-Based Provider System**: The provider system uses contracts to separate concerns:
-- `MessagingContract` - Message sending operations
-- `TemplateContract` - Template management
-- `ChannelContract` - Channel operations
-- `AnalyticsContract` - Metrics tracking
-- `AccountContract` - Account operations
+**Result Pattern**: Most operations return a `Result<T, E>` type:
+- `ok(value)` - Success result with data
+- `fail(error)` - Failure result with error detail
+
+**Unified Client (KMsg)**: The `KMsg` class provides a unified entry point for all messaging operations:
+- `send()` - Send AlimTalk, SMS, or LMS messages
+- Integration with template and analytics services
+
+**Adapter-Based Provider System**: The provider system uses adapters to normalize external APIs:
+- `IWINVAdapter` - Implementation for IWINV
+- Standardized request/result formats (`StandardRequest`, `StandardResult`)
 
 **Error Recovery Strategy**: Multi-layered error handling with:
 - Circuit breakers for external API calls
@@ -169,17 +174,17 @@ import { TestData, TestAssertions } from '@k-msg/core';
 ### Working with Templates
 Template system supports variable substitution with `#{variableName}` syntax:
 ```typescript
-import { TemplateService, TemplateValidator } from '@k-msg/template';
+import { TemplateService } from '@k-msg/template';
+import { IWINVAdapter } from '@k-msg/provider';
 
-const template = await templateService.createTemplate({
+const adapter = new IWINVAdapter(config);
+const templateService = new TemplateService(adapter);
+
+const result = await templateService.create({
   name: 'welcome_message',
   code: 'WELCOME_001',
-  provider: 'iwinv',
   content: 'Hello #{name}, welcome to #{service}!',
-  variables: [
-    { name: 'name', type: 'string', required: true },
-    { name: 'service', type: 'string', required: true }
-  ]
+  category: 'NOTIFICATION'
 });
 ```
 

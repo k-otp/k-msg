@@ -4,7 +4,7 @@
 
 import { test, expect, describe } from 'bun:test';
 import {
-  TemplateService,
+  MockTemplateService as TemplateService,
   VariableParser,
   ButtonParser,
   TemplateValidator,

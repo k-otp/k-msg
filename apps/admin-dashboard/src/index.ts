@@ -7,7 +7,8 @@ import { showRoutes } from 'hono/dev';
 // Import all k-msg packages
 import { IWINVProvider } from '@k-msg/provider';
 import { 
-  TemplateService
+  TemplateService,
+  MockTemplateService
 } from '@k-msg/template';
 import { 
   KMsg,
@@ -60,7 +61,7 @@ export class KMessagePlatform {
     });
 
     // Initialize Template Service
-    this.templateService = new TemplateService();
+    this.templateService = new MockTemplateService() as any;
 
     // Initialize Messaging Services
     this.kmsg = new KMsg(this.provider);

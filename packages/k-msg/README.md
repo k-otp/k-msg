@@ -47,59 +47,53 @@ yarn add k-msg
 
 ## 🚀 Quick Start
 
-### Method 1: Using MessageServiceFactory (Recommended)
+### Basic Usage with KMsg
 
 ```typescript
-import { MessageServiceFactory } from 'k-msg';
+import { KMsg, IWINVProvider, ok, fail } from 'k-msg';
 
-// Create service with auto-loading
-const kmsg = MessageServiceFactory.createIWINVService({
+// Initialize KMsg with IWINV provider
+const kmsg = new KMsg(new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,
-  baseUrl: process.env.IWINV_BASE_URL,
-  debug: true,
-  autoLoad: true // Automatically loads channels and templates
+  baseUrl: 'https://alimtalk.bizservice.iwinv.kr'
+}));
+
+// Send an SMS message
+const smsResult = await kmsg.send({
+  type: 'SMS',
+  to: '01012345678',
+  from: '01000000000',
+  text: 'Hello #{name}, this is a test SMS!',
+  variables: { name: '홍길동' }
 });
 
-// Wait a moment for auto-loading to complete
-await new Promise(resolve => setTimeout(resolve, 2000));
-
-// Send a message
-const result = await kmsg.sendMessage(
-  '01012345678',
-  'welcome_template',
-  {
-    customerName: '홍길동',
-    serviceName: 'K-Message',
-    verificationCode: '123456'
-  }
-);
-
-if (result.success) {
-  console.log('✅ Message sent successfully:', result.messageId);
+if (result.isSuccess) {
+  console.log('✅ Message sent successfully:', result.value.messageId);
 } else {
-  console.error('❌ Failed to send message:', result.error);
+  console.error('❌ Failed to send message:', result.error.message);
 }
 ```
 
-### Method 2: Manual Provider Setup
+### Manual Adapter Setup (Advanced)
 
 ```typescript
-import { IWINVProvider, MessageService } from 'k-msg';
+import { IWINVAdapter, KMsg } from 'k-msg';
 
-// Create provider instance
-const provider = new IWINVProvider({
+// Create adapter instance
+const adapter = new IWINVAdapter({
   apiKey: process.env.IWINV_API_KEY!,
   baseUrl: 'https://alimtalk.bizservice.iwinv.kr',
-  debug: true
+  senderNumber: '01012345678'
 });
 
-// Create message service
-const messageService = new MessageService([provider]);
+// Create KMsg client with custom adapter
+const kmsg = new KMsg(adapter);
 
 // Send message with full control
-const result = await messageService.send({
-  templateCode: 'AUTH_OTP',
-  phoneNumber: '01012345678',
+const result = await kmsg.send({
+  type: 'ALIMTALK',
+  templateId: 'AUTH_OTP',
+  to: '01012345678',
   variables: {
     name: '김철수',
     code: '987654'
@@ -107,115 +101,56 @@ const result = await messageService.send({
 });
 ```
 
-### Method 3: Web Server Integration
-
-```typescript
-import { Hono } from 'hono';
-import { MessageServiceFactory } from 'k-msg';
-
-const app = new Hono();
-const kmsg = MessageServiceFactory.createIWINVService({
-  apiKey: process.env.IWINV_API_KEY!,
-  autoLoad: true
-});
-
-// Health check endpoint
-app.get('/health', async (c) => {
-  const health = await kmsg.healthCheck();
-  return c.json(health);
-});
-
-// Send message endpoint
-app.post('/send', async (c) => {
-  const { phoneNumber, templateName, variables } = await c.req.json();
-  
-  const result = await kmsg.sendMessage(phoneNumber, templateName, variables);
-  return c.json(result);
-});
-
-// Start server
-export default { port: 3000, fetch: app.fetch };
-```
-
 ## 📚 Detailed Usage Guide
 
 ### Template Management
 
 ```typescript
+import { IWINVAdapter, TemplateService } from 'k-msg';
+
+const adapter = new IWINVAdapter(config);
+const templateService = new TemplateService(adapter);
+
 // Create a new template
-const template = await kmsg.createTemplate(
-  'order_confirmation',
-  '주문이 완료되었습니다. 주문번호: #{orderNumber}, 고객명: #{customerName}',
-  'TRANSACTION'
-);
+const template = await templateService.create({
+  code: 'order_confirmation',
+  name: 'order_confirmation',
+  content: '주문이 완료되었습니다. 주문번호: #{orderNumber}',
+  category: 'TRANSACTION'
+});
 
-if (template.success) {
-  console.log('Template created:', template.template.name);
+// List all templates
+const result = await templateService.list();
+if (result.isSuccess) {
+  console.log('Available templates:', result.value.length);
 }
-
-// List all templates (local + provider)
-const templates = kmsg.getTemplates('all');
-console.log('Available templates:', templates.templates.length);
-
-// Get templates from specific source
-const providerTemplates = kmsg.getTemplates('provider');
-const localTemplates = kmsg.getTemplates('local');
 ```
 
-### Channel Management
+### Error Handling with Result Pattern
 
 ```typescript
-// Get available channels
-const channels = kmsg.getChannels();
-console.log('Available channels:', channels.channels.length);
+import { KMsg, ok, fail } from 'k-msg';
 
-// Refresh provider data
-const refreshResult = await kmsg.refreshProviderData();
-console.log('Data refreshed:', refreshResult.success);
-```
+const result = await kmsg.send({
+  type: 'ALIMTALK',
+  to: '01012345678',
+  templateId: 'template_name',
+  variables: {}
+});
 
-### Analytics and Monitoring
-
-```typescript
-// Get analytics data
-const analytics = await kmsg.getAnalytics();
-console.log('Messages sent:', analytics.analytics.messagesSent);
-console.log('Success rate:', analytics.analytics.successRate + '%');
-
-// IWINV-specific features
-const balance = await kmsg.getIWINVBalance();
-console.log('Account balance:', balance);
-
-const history = await kmsg.getIWINVHistory(1, 10);
-console.log('Recent messages:', history);
-```
-
-### Error Handling
-
-```typescript
-import { KMessageError, KMessageErrorCode } from 'k-msg';
-
-try {
-  const result = await kmsg.sendMessage('01012345678', 'template_name', {});
+if (result.isFailure) {
+  // Handle failure
+  const error = result.error;
+  console.error('Send failed:', error.message);
   
-  if (!result.success) {
-    // Handle business logic errors
-    console.error('Send failed:', result.error);
-    
-    // Check specific error types
-    if (result.error.includes('template not found')) {
-      // Create template or use fallback
-    } else if (result.error.includes('insufficient balance')) {
-      // Handle billing issues
-    }
+  // You can check error codes or types
+  if (error.message.includes('template not found')) {
+    // Handle specific error
   }
-} catch (error) {
-  // Handle system errors
-  if (error instanceof KMessageError) {
-    console.error('System error:', error.code, error.message);
-  } else {
-    console.error('Unexpected error:', error);
-  }
+} else {
+  // Handle success
+  const { messageId, status } = result.value;
+  console.log(`Success: ${messageId} (${status})`);
 }
 ```
 
