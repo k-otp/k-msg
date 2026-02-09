@@ -2,33 +2,19 @@
  * Job processor for message queue system
  */
 
-import { EventEmitter } from 'events';
+import { CircuitBreaker, RateLimiter, RetryHandler } from "@k-msg/core";
+import { EventEmitter } from "events";
 import {
-  MessageRequest,
-  MessageResult,
-  MessageStatus,
+  type DeliveryReport,
+  type MessageEvent,
   MessageEventType,
-  MessageEvent,
-  RecipientResult,
-  DeliveryReport
-} from '../types/message.types';
-import { RetryHandler, CircuitBreaker, RateLimiter } from '@k-msg/core';
-
-export interface Job<T = any> {
-  id: string;
-  type: string;
-  data: T;
-  priority: number;
-  attempts: number;
-  maxAttempts: number;
-  delay: number;
-  createdAt: Date;
-  processAt: Date;
-  completedAt?: Date;
-  failedAt?: Date;
-  error?: string;
-  metadata: Record<string, any>;
-}
+  type MessageRequest,
+  type MessageResult,
+  MessageStatus,
+  type RecipientResult,
+} from "../types/message.types";
+import type { Job, JobQueue } from "./job-queue.interface";
+import { SQLiteJobQueue } from "./sqlite-job-queue";
 
 export interface JobProcessorOptions {
   concurrency: number;
@@ -47,9 +33,7 @@ export interface JobProcessorOptions {
   };
 }
 
-export interface JobHandler<T = any> {
-  (job: Job<T>): Promise<any>;
-}
+export type JobHandler<T = any> = (job: Job<T>) => Promise<any>;
 
 export interface JobProcessorMetrics {
   processed: number;
@@ -64,7 +48,7 @@ export interface JobProcessorMetrics {
 
 export class JobProcessor extends EventEmitter {
   private handlers = new Map<string, JobHandler>();
-  private queue: Job[] = [];
+  private queue: JobQueue<any>;
   private processing = new Set<string>();
   private isRunning = false;
   private pollTimer?: NodeJS.Timeout;
@@ -72,8 +56,12 @@ export class JobProcessor extends EventEmitter {
   private rateLimiter?: RateLimiter;
   private circuitBreaker?: CircuitBreaker;
 
-  constructor(private options: JobProcessorOptions) {
+  constructor(
+    private options: JobProcessorOptions,
+    jobQueue?: JobQueue<any>,
+  ) {
     super();
+    this.queue = jobQueue ?? new SQLiteJobQueue({ dbPath: ":memory:" });
 
     this.metrics = {
       processed: 0,
@@ -82,13 +70,13 @@ export class JobProcessor extends EventEmitter {
       retried: 0,
       activeJobs: 0,
       queueSize: 0,
-      averageProcessingTime: 0
+      averageProcessingTime: 0,
     };
 
     if (options.rateLimiter) {
       this.rateLimiter = new RateLimiter(
         options.rateLimiter.maxRequests,
-        options.rateLimiter.windowMs
+        options.rateLimiter.windowMs,
       );
     }
 
@@ -115,39 +103,19 @@ export class JobProcessor extends EventEmitter {
       delay?: number;
       maxAttempts?: number;
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<string> {
-    const jobId = `${jobType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const now = new Date();
-
-    const job: Job<T> = {
-      id: jobId,
-      type: jobType,
-      data,
+    const job = await this.queue.enqueue(jobType, data, {
       priority: options.priority || 5,
-      attempts: 0,
-      maxAttempts: options.maxAttempts || this.options.maxRetries,
       delay: options.delay || 0,
-      createdAt: now,
-      processAt: new Date(now.getTime() + (options.delay || 0)),
-      metadata: options.metadata || {}
-    };
-
-    // Insert job in priority order (higher priority first)
-    const insertIndex = this.queue.findIndex(
-      existingJob => existingJob.priority < job.priority
-    );
-
-    if (insertIndex === -1) {
-      this.queue.push(job);
-    } else {
-      this.queue.splice(insertIndex, 0, job);
-    }
+      maxAttempts: options.maxAttempts || this.options.maxRetries,
+      metadata: options.metadata,
+    });
 
     this.updateMetrics();
-    this.emit('job:added', job);
+    this.emit("job:added", job);
 
-    return jobId;
+    return job.id;
   }
 
   /**
@@ -160,7 +128,7 @@ export class JobProcessor extends EventEmitter {
 
     this.isRunning = true;
     this.scheduleNextPoll();
-    this.emit('processor:started');
+    this.emit("processor:started");
   }
 
   /**
@@ -176,10 +144,10 @@ export class JobProcessor extends EventEmitter {
 
     // Wait for active jobs to complete
     while (this.processing.size > 0) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    this.emit('processor:stopped');
+    this.emit("processor:stopped");
   }
 
   /**
@@ -192,57 +160,48 @@ export class JobProcessor extends EventEmitter {
   /**
    * Get queue status
    */
-  getQueueStatus(): {
+  async getQueueStatus(): Promise<{
     pending: number;
     processing: number;
     failed: number;
     totalProcessed: number;
-  } {
-    const failed = this.queue.filter(job => job.failedAt).length;
+  }> {
+    const queueSize = await this.queue.size();
 
     return {
-      pending: this.queue.length - failed,
+      pending: queueSize,
       processing: this.processing.size,
-      failed,
-      totalProcessed: this.metrics.processed
+      failed: this.metrics.failed,
+      totalProcessed: this.metrics.processed,
     };
   }
 
   /**
    * Remove completed jobs from queue
    */
-  cleanup(): number {
-    const initialLength = this.queue.length;
-
-    this.queue = this.queue.filter(job =>
-      !job.completedAt && !job.failedAt
-    );
-
-    const removed = initialLength - this.queue.length;
+  async cleanup(): Promise<number> {
+    const initialSize = await this.queue.size();
+    await this.queue.clear();
     this.updateMetrics();
 
-    return removed;
+    return initialSize;
   }
 
   /**
    * Get specific job by ID
    */
-  getJob(jobId: string): Job | undefined {
-    return this.queue.find(job => job.id === jobId);
+  async getJob(jobId: string): Promise<Job<any> | undefined> {
+    return await this.queue.getJob(jobId);
   }
 
   /**
    * Remove job from queue
    */
-  removeJob(jobId: string): boolean {
-    const index = this.queue.findIndex(job => job.id === jobId);
-    if (index !== -1) {
-      this.queue.splice(index, 1);
-      this.processing.delete(jobId);
-      this.updateMetrics();
-      return true;
-    }
-    return false;
+  async removeJob(jobId: string): Promise<boolean> {
+    const removed = await this.queue.remove(jobId);
+    this.processing.delete(jobId);
+    this.updateMetrics();
+    return removed;
   }
 
   private scheduleNextPoll(): void {
@@ -262,48 +221,42 @@ export class JobProcessor extends EventEmitter {
       return;
     }
 
-    const now = new Date();
-    const readyJobs = this.queue
-      .filter(job =>
-        !job.completedAt &&
-        !job.failedAt &&
-        !this.processing.has(job.id) &&
-        job.processAt <= now
-      )
-      .slice(0, availableSlots);
-
-    for (const job of readyJobs) {
+    for (let i = 0; i < availableSlots; i++) {
+      const job = await this.queue.dequeue();
+      if (!job) {
+        break;
+      }
+      this.processing.add(job.id);
       this.processJob(job);
     }
   }
 
-  private async processJob(job: Job): Promise<void> {
+  private async processJob(job: Job<any>): Promise<void> {
     const handler = this.handlers.get(job.type);
     if (!handler) {
-      this.failJob(job, `No handler registered for job type: ${job.type}`);
+      await this.failJob(
+        job.id,
+        `No handler registered for job type: ${job.type}`,
+        false,
+      );
       return;
     }
 
-    this.processing.add(job.id);
-    job.attempts++;
     this.metrics.activeJobs++;
 
     const startTime = Date.now();
 
     try {
-      // Apply rate limiting
       if (this.rateLimiter) {
         await this.rateLimiter.acquire();
       }
 
-      // Execute through circuit breaker if configured
       const executeJob = async () => handler(job);
       const result = this.circuitBreaker
         ? await this.circuitBreaker.execute(executeJob)
         : await executeJob();
 
-      // Job completed successfully
-      job.completedAt = new Date();
+      await this.queue.complete(job.id, result);
       this.processing.delete(job.id);
       this.metrics.activeJobs--;
       this.metrics.succeeded++;
@@ -312,8 +265,7 @@ export class JobProcessor extends EventEmitter {
       const processingTime = Date.now() - startTime;
       this.updateAverageProcessingTime(processingTime);
 
-      this.emit('job:completed', { job, result, processingTime });
-
+      this.emit("job:completed", { job, result, processingTime });
     } catch (error) {
       this.processing.delete(job.id);
       this.metrics.activeJobs--;
@@ -321,37 +273,53 @@ export class JobProcessor extends EventEmitter {
       const shouldRetry = job.attempts < job.maxAttempts;
 
       if (shouldRetry) {
-        // Schedule retry
         const retryDelay = this.getRetryDelay(job.attempts);
-        job.processAt = new Date(Date.now() + retryDelay);
-        job.error = error instanceof Error ? error.message : String(error);
+        await this.failJob(
+          job.id,
+          error instanceof Error ? error.message : String(error),
+          true,
+        );
 
         this.metrics.retried++;
-        this.emit('job:retry', { job, error, retryDelay });
+        this.emit("job:retry", { job, error, retryDelay });
       } else {
-        // Job failed permanently
-        this.failJob(job, error instanceof Error ? error.message : String(error));
+        await this.failJob(
+          job.id,
+          error instanceof Error ? error.message : String(error),
+          false,
+        );
       }
     }
 
     this.updateMetrics();
   }
 
-  private failJob(job: Job, error: string): void {
-    job.failedAt = new Date();
-    job.error = error;
-    this.metrics.failed++;
-    this.metrics.processed++;
-    this.emit('job:failed', { job, error });
+  private async failJob(
+    jobId: string,
+    error: string,
+    shouldRetry: boolean,
+  ): Promise<void> {
+    await this.queue.fail(jobId, error, shouldRetry);
+
+    if (!shouldRetry) {
+      this.metrics.failed++;
+      this.metrics.processed++;
+      this.emit("job:failed", { jobId, error });
+    }
   }
 
   private getRetryDelay(attempt: number): number {
-    const delayIndex = Math.min(attempt - 1, this.options.retryDelays.length - 1);
-    return this.options.retryDelays[delayIndex] || this.options.retryDelays[this.options.retryDelays.length - 1];
+    const delayIndex = Math.min(
+      attempt - 1,
+      this.options.retryDelays.length - 1,
+    );
+    return (
+      this.options.retryDelays[delayIndex] ||
+      this.options.retryDelays[this.options.retryDelays.length - 1]
+    );
   }
 
   private updateMetrics(): void {
-    this.metrics.queueSize = this.queue.length;
     this.metrics.lastProcessedAt = new Date();
   }
 
@@ -361,7 +329,8 @@ export class JobProcessor extends EventEmitter {
       this.metrics.averageProcessingTime = newTime;
     } else {
       this.metrics.averageProcessingTime =
-        (this.metrics.averageProcessingTime * (totalProcessed - 1) + newTime) / totalProcessed;
+        (this.metrics.averageProcessingTime * (totalProcessed - 1) + newTime) /
+        totalProcessed;
     }
   }
 }
@@ -370,59 +339,69 @@ export class JobProcessor extends EventEmitter {
  * Specific processor for message jobs
  */
 export class MessageJobProcessor extends JobProcessor {
-  constructor(options: Partial<JobProcessorOptions> = {}) {
-    super({
-      concurrency: 5,
-      retryDelays: [1000, 5000, 15000, 60000], // 1s, 5s, 15s, 1m
-      maxRetries: 3,
-      pollInterval: 1000,
-      enableMetrics: true,
-      ...options
-    });
+  constructor(
+    options: Partial<JobProcessorOptions> = {},
+    jobQueue?: JobQueue<any>,
+  ) {
+    super(
+      {
+        concurrency: 5,
+        retryDelays: [1000, 5000, 15000, 60000],
+        maxRetries: 3,
+        pollInterval: 1000,
+        enableMetrics: true,
+        ...options,
+      },
+      jobQueue,
+    );
 
     this.setupMessageHandlers();
   }
 
   private setupMessageHandlers(): void {
     // Handle single message sending
-    this.handle('send_message', async (job: Job<MessageRequest>) => {
+    this.handle("send_message", async (job: Job<MessageRequest>) => {
       return this.processSingleMessage(job);
     });
 
     // Handle bulk message sending
-    this.handle('send_bulk_messages', async (job: Job<MessageRequest[]>) => {
+    this.handle("send_bulk_messages", async (job: Job<MessageRequest[]>) => {
       return this.processBulkMessages(job);
     });
 
     // Handle delivery status updates
-    this.handle('update_delivery_status', async (job: Job<DeliveryReport>) => {
+    this.handle("update_delivery_status", async (job: Job<DeliveryReport>) => {
       return this.processDeliveryUpdate(job);
     });
 
     // Handle scheduled message sending
-    this.handle('send_scheduled_message', async (job: Job<MessageRequest>) => {
+    this.handle("send_scheduled_message", async (job: Job<MessageRequest>) => {
       return this.processScheduledMessage(job);
     });
   }
 
-  private async processSingleMessage(job: Job<MessageRequest>): Promise<MessageResult> {
+  private async processSingleMessage(
+    job: Job<MessageRequest>,
+  ): Promise<MessageResult> {
     const { data: messageRequest } = job;
 
     // Emit processing event
-    this.emit('message:processing', {
+    this.emit("message:processing", {
       type: MessageEventType.MESSAGE_QUEUED,
       timestamp: new Date(),
       data: { requestId: job.id, messageRequest },
-      metadata: job.metadata
+      metadata: job.metadata,
     } as MessageEvent);
 
     // Process message (this would integrate with actual provider)
-    const results: RecipientResult[] = messageRequest.recipients.map(recipient => ({
-      phoneNumber: recipient.phoneNumber,
-      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-      status: MessageStatus.QUEUED,
-      metadata: recipient.metadata
-    }));
+    const results: RecipientResult[] = messageRequest.recipients.map(
+      (recipient) => ({
+        phoneNumber: recipient.phoneNumber,
+        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        status: MessageStatus.QUEUED,
+        metadata: recipient.metadata,
+      }),
+    );
 
     const result: MessageResult = {
       requestId: job.id,
@@ -431,35 +410,48 @@ export class MessageJobProcessor extends JobProcessor {
         total: messageRequest.recipients.length,
         queued: messageRequest.recipients.length,
         sent: 0,
-        failed: 0
+        failed: 0,
       },
       metadata: {
         createdAt: new Date(),
-        provider: 'default',
-        templateId: messageRequest.templateId
-      }
+        provider: "default",
+        templateId: messageRequest.templateId,
+      },
     };
 
     // Emit completion event
-    this.emit('message:queued', {
+    this.emit("message:queued", {
       type: MessageEventType.MESSAGE_QUEUED,
       timestamp: new Date(),
       data: result,
-      metadata: job.metadata
+      metadata: job.metadata,
     } as MessageEvent);
 
     return result;
   }
 
-  private async processBulkMessages(job: Job<MessageRequest[]>): Promise<MessageResult[]> {
+  private async processBulkMessages(
+    job: Job<MessageRequest[]>,
+  ): Promise<MessageResult[]> {
     const { data: messageRequests } = job;
     const results: MessageResult[] = [];
 
     for (const messageRequest of messageRequests) {
       const singleJob: Job<MessageRequest> = {
-        ...job,
         id: `${job.id}_${results.length}`,
-        data: messageRequest
+        type: job.type,
+        data: messageRequest,
+        status: job.status,
+        priority: job.priority,
+        attempts: job.attempts,
+        maxAttempts: job.maxAttempts,
+        delay: job.delay,
+        createdAt: job.createdAt,
+        processAt: job.processAt,
+        completedAt: job.completedAt,
+        failedAt: job.failedAt,
+        error: job.error,
+        metadata: job.metadata,
       };
 
       const result = await this.processSingleMessage(singleJob);
@@ -473,22 +465,26 @@ export class MessageJobProcessor extends JobProcessor {
     const { data: deliveryReport } = job;
 
     // Update delivery status (this would update database)
-    this.emit('delivery:updated', {
+    this.emit("delivery:updated", {
       type: MessageEventType.MESSAGE_DELIVERED,
       timestamp: new Date(),
       data: deliveryReport,
-      metadata: job.metadata
+      metadata: job.metadata,
     } as MessageEvent);
   }
 
-  private async processScheduledMessage(job: Job<MessageRequest>): Promise<MessageResult> {
+  private async processScheduledMessage(
+    job: Job<MessageRequest>,
+  ): Promise<MessageResult> {
     const { data: messageRequest } = job;
 
     // Check if it's time to send
     const scheduledAt = messageRequest.scheduling?.scheduledAt;
     if (scheduledAt && scheduledAt > new Date()) {
       // Reschedule for later
-      throw new Error(`Message scheduled for ${scheduledAt.toISOString()}, rescheduling`);
+      throw new Error(
+        `Message scheduled for ${scheduledAt.toISOString()}, rescheduling`,
+      );
     }
 
     // Process as normal message
@@ -504,18 +500,22 @@ export class MessageJobProcessor extends JobProcessor {
       priority?: number;
       delay?: number;
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<string> {
-    const priority = options.priority ||
-      (messageRequest.options?.priority === 'high' ? 10 :
-        messageRequest.options?.priority === 'low' ? 1 : 5);
+    const priority =
+      options.priority ||
+      (messageRequest.options?.priority === "high"
+        ? 10
+        : messageRequest.options?.priority === "low"
+          ? 1
+          : 5);
 
     const delay = options.delay || 0;
 
-    return this.add('send_message', messageRequest, {
+    return this.add("send_message", messageRequest, {
       priority,
       delay,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
   }
 
@@ -528,12 +528,12 @@ export class MessageJobProcessor extends JobProcessor {
       priority?: number;
       delay?: number;
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<string> {
-    return this.add('send_bulk_messages', messageRequests, {
+    return this.add("send_bulk_messages", messageRequests, {
       priority: options.priority || 3,
       delay: options.delay || 0,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
   }
 
@@ -545,14 +545,14 @@ export class MessageJobProcessor extends JobProcessor {
     scheduledAt: Date,
     options: {
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<string> {
     const delay = Math.max(0, scheduledAt.getTime() - Date.now());
 
-    return this.add('send_scheduled_message', messageRequest, {
+    return this.add("send_scheduled_message", messageRequest, {
       priority: 5,
       delay,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
   }
 }
