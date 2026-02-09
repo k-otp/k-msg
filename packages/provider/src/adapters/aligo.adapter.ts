@@ -29,14 +29,17 @@ export class AligoAdapter
   readonly id = "aligo";
   readonly name = "Aligo Smart SMS";
 
-  private readonly SMS_HOST = "https://apis.aligo.in";
-  private readonly ALIMTALK_HOST = "https://kakaoapi.aligo.in";
+  private readonly SMS_HOST: string;
+  private readonly ALIMTALK_HOST: string;
 
   constructor(protected readonly aligoConfig: AligoConfig) {
     super({
-      baseUrl: "https://apis.aligo.in",
+      baseUrl: aligoConfig.smsBaseUrl || "https://apis.aligo.in",
       ...aligoConfig,
     });
+    this.SMS_HOST = aligoConfig.smsBaseUrl || "https://apis.aligo.in";
+    this.ALIMTALK_HOST =
+      aligoConfig.alimtalkBaseUrl || "https://kakaoapi.aligo.in";
   }
 
   async send(params: SendOptions): Promise<Result<SendResult, KMsgError>> {
@@ -57,9 +60,10 @@ export class AligoAdapter
       tpl_code: request.templateCode,
       receiver_1: request.phoneNumber,
       subject_1: request.options?.subject || "알림톡",
-      message_1: request.variables
-        ? this.interpolateMessage(request.variables)
-        : "",
+      message_1: this.interpolateMessage(
+        request.variables || {},
+        (request as any).templateContent,
+      ),
     };
   }
 
@@ -364,9 +368,7 @@ export class AligoAdapter
       sender: params.from || this.aligoConfig.sender || "",
       receiver_1: params.to,
       subject_1: "알림톡",
-      message_1: params.variables
-        ? this.interpolateMessage(params.variables)
-        : "",
+      message_1: this.interpolateMessage(params.variables || {}),
       testMode: this.aligoConfig.testMode ? "Y" : "N",
     };
 
@@ -419,8 +421,18 @@ export class AligoAdapter
     return new KMsgError(KMsgErrorCode.NETWORK_ERROR, String(error));
   }
 
-  private interpolateMessage(variables: Record<string, string>): string {
-    return Object.values(variables).join("\n");
+  private interpolateMessage(
+    variables: Record<string, any>,
+    templateContent?: string,
+  ): string {
+    if (variables._full_text) return String(variables._full_text);
+    if (!templateContent) return Object.values(variables).join("\n");
+
+    let result = templateContent;
+    for (const [key, value] of Object.entries(variables)) {
+      result = result.replace(new RegExp(`#{${key}}`, "g"), String(value));
+    }
+    return result;
   }
 
   private mapTemplateStatus(
