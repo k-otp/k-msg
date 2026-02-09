@@ -32,11 +32,11 @@ jobs:
         run: bun install --frozen-lockfile
       
       - name: Type check
-        run: bun run typecheck:all
+        run: bun x turbo typecheck
         continue-on-error: false
       
       - name: Lint code
-        run: bun run lint:check
+        run: bun x turbo lint
         continue-on-error: false
       
       - name: Check formatting
@@ -48,16 +48,12 @@ jobs:
     name: 🧪 Unit Tests
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        package: [core, provider, template, messaging, analytics, webhook, channel, k-msg]
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
       
@@ -65,11 +61,8 @@ jobs:
         run: bun install --frozen-lockfile
       
       - name: Run unit tests
-        run: |
-          cd packages/${{ matrix.package }}
-          bun run test:unit
+        run: bun x turbo test:unit
         env:
-          TEST_TYPE: unit
           NODE_ENV: test
       
       - name: Upload coverage
@@ -99,12 +92,11 @@ jobs:
         run: bun install --frozen-lockfile
       
       - name: Build packages
-        run: bun run build:all
+        run: bun x turbo build
       
       - name: Run integration tests
-        run: bun run test:integration
+        run: bun x turbo test:integration
         env:
-          TEST_TYPE: integration
           NODE_ENV: test
       
       - name: Upload integration test results

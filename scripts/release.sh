@@ -71,7 +71,8 @@ bun run pack:dry
 # 8. 배포 확인
 echo "🚀 Ready to publish packages:"
 echo "  - Version: $NEW_VERSION"
-echo "  - Packages: $(find packages -name package.json | wc -l | tr -d ' ') packages"
+NUM_PACKAGES=$(bun pm ls | grep "@workspace" | wc -l | tr -d ' ')
+echo "  - Packages: $NUM_PACKAGES packages"
 read -p "Continue with publish? (y/N): " confirm
 
 if [[ $confirm != "y" && $confirm != "Y" ]]; then
