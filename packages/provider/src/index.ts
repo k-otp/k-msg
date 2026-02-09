@@ -69,7 +69,7 @@ export type {
   TemplateContract,
 } from "./contracts/provider.contract";
 
-export { MockProvider } from "./mock";
+export * from "./providers/mock";
 
 // Provider manager service (from provider-adapter)
 export * from "./services/provider.manager";
