@@ -2,7 +2,13 @@
  * Job processor for message queue system
  */
 
-import { CircuitBreaker, RateLimiter, RetryHandler } from "@k-msg/core";
+import {
+  CircuitBreaker,
+  type Provider,
+  RateLimiter,
+  RetryHandler,
+  type SendOptions,
+} from "@k-msg/core";
 import { EventEmitter } from "events";
 import {
   type DeliveryReport,
@@ -340,6 +346,7 @@ export class JobProcessor extends EventEmitter {
  */
 export class MessageJobProcessor extends JobProcessor {
   constructor(
+    private provider: Provider,
     options: Partial<JobProcessorOptions> = {},
     jobQueue?: JobQueue<any>,
   ) {
@@ -393,31 +400,76 @@ export class MessageJobProcessor extends JobProcessor {
       metadata: job.metadata,
     } as MessageEvent);
 
-    // Process message (this would integrate with actual provider)
-    const results: RecipientResult[] = messageRequest.recipients.map(
-      (recipient) => ({
-        phoneNumber: recipient.phoneNumber,
-        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-        status: MessageStatus.QUEUED,
-        metadata: recipient.metadata,
+    const results: RecipientResult[] = await Promise.all(
+      messageRequest.recipients.map(async (recipient) => {
+        const sendOptions: SendOptions = {
+          type: "ALIMTALK",
+          to: recipient.phoneNumber,
+          from: (messageRequest.options as any)?.senderNumber || "",
+          templateId: messageRequest.templateId,
+          variables: {
+            ...messageRequest.variables,
+            ...recipient.variables,
+          } as Record<string, string>,
+        };
+
+        const response = await this.provider.send(sendOptions);
+
+        if (response.isSuccess) {
+          return {
+            phoneNumber: recipient.phoneNumber,
+            messageId: response.value.messageId,
+            status:
+              response.value.status === "SENT"
+                ? MessageStatus.SENT
+                : MessageStatus.QUEUED,
+            metadata: recipient.metadata,
+          };
+        } else {
+          return {
+            phoneNumber: recipient.phoneNumber,
+            status: MessageStatus.FAILED,
+            error: {
+              code: response.error.code,
+              message: response.error.message,
+            },
+            metadata: recipient.metadata,
+          };
+        }
       }),
     );
+
+    const sent = results.filter((r) => r.status === MessageStatus.SENT).length;
+    const failed = results.filter(
+      (r) => r.status === MessageStatus.FAILED,
+    ).length;
+    const queued = results.filter(
+      (r) => r.status === MessageStatus.QUEUED,
+    ).length;
 
     const result: MessageResult = {
       requestId: job.id,
       results,
       summary: {
         total: messageRequest.recipients.length,
-        queued: messageRequest.recipients.length,
-        sent: 0,
-        failed: 0,
+        queued,
+        sent,
+        failed,
       },
       metadata: {
         createdAt: new Date(),
-        provider: "default",
+        provider: this.provider.id,
         templateId: messageRequest.templateId,
       },
     };
+
+    if (failed > 0) {
+      const firstError = results.find((r) => r.error)?.error;
+      throw new Error(
+        firstError?.message ||
+          "Failed to send message to one or more recipients",
+      );
+    }
 
     // Emit completion event
     this.emit("message:queued", {
