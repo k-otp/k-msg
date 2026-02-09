@@ -54,7 +54,7 @@ export class AligoAdapter
   }
 
   adaptRequest(request: StandardRequest): any {
-    return {
+    const body: any = {
       apikey: this.aligoConfig.apiKey,
       userid: this.aligoConfig.userId,
       tpl_code: request.templateCode,
@@ -65,6 +65,15 @@ export class AligoAdapter
         (request as any).templateContent,
       ),
     };
+
+    if (request.options?.scheduledAt) {
+      const { date, time } = this.formatAligoDate(request.options.scheduledAt);
+      body.reserve = "Y";
+      body.reserve_date = date;
+      body.reserve_time = time;
+    }
+
+    return body;
   }
 
   adaptResponse(response: AligoResponse): StandardResult {
@@ -171,8 +180,37 @@ export class AligoAdapter
         return "/akv10/template/add/";
       case "templateDel":
         return "/akv10/template/del/";
+      case "getBalance":
+        return "/remain/";
       default:
         return "/";
+    }
+  }
+
+  /**
+   * Aligo 특화 기능: 잔액 조회
+   */
+  async getBalance(): Promise<number> {
+    try {
+      const body = {
+        key: this.aligoConfig.apiKey,
+        user_id: this.aligoConfig.userId,
+      };
+
+      const response = await this.request(
+        this.SMS_HOST,
+        this.getEndpoint("getBalance"),
+        body,
+      );
+
+      if (response.result_code !== "1") {
+        throw this.mapAligoError(response);
+      }
+
+      return Number(response.SMS_CNT) || 0;
+    } catch (error) {
+      this.log("Failed to get balance", error);
+      return 0;
     }
   }
 
@@ -322,6 +360,12 @@ export class AligoAdapter
       testmode_yn: this.aligoConfig.testMode ? "Y" : "N",
     };
 
+    if ((params as any).scheduledAt) {
+      const { date, time } = this.formatAligoDate((params as any).scheduledAt);
+      body.rdate = date;
+      body.rtime = time;
+    }
+
     const response = await this.request(
       this.SMS_HOST,
       this.getEndpoint("sendSMS"),
@@ -372,6 +416,13 @@ export class AligoAdapter
       testMode: this.aligoConfig.testMode ? "Y" : "N",
     };
 
+    if (params.type === "ALIMTALK" && (params as any).scheduledAt) {
+      const { date, time } = this.formatAligoDate((params as any).scheduledAt);
+      body.reserve = "Y";
+      body.reserve_date = date;
+      body.reserve_time = time;
+    }
+
     const response = await this.request(
       this.ALIMTALK_HOST,
       this.getEndpoint("sendAlimTalk"),
@@ -387,6 +438,19 @@ export class AligoAdapter
       status: "PENDING",
       provider: this.id,
     });
+  }
+
+  private formatAligoDate(date: Date): { date: string; time: string } {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return {
+      date: `${year}${month}${day}`,
+      time: `${hours}${minutes}`,
+    };
   }
 
   private async request(

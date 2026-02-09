@@ -67,3 +67,11 @@ export interface AligoTemplateDeleteRequest {
   senderkey: string;
   tpl_code: string;
 }
+
+export interface AligoRemainResponse {
+  result_code: string;
+  message: string;
+  SMS_CNT: number;
+  LMS_CNT: number;
+  MMS_CNT: number;
+}
