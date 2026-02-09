@@ -16,6 +16,10 @@ export class AligoProvider extends UniversalProvider {
   async send(params: SendOptions | any): Promise<any> {
     return super.send(params);
   }
+
+  async getBalance(): Promise<number> {
+    return (this.getAdapter() as AligoAdapter).getBalance();
+  }
 }
 
 export const createAligoProvider = (config: AligoConfig) =>
