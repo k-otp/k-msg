@@ -5,6 +5,8 @@ export interface AligoConfig {
   sender?: string;
   testMode?: boolean;
   debug?: boolean;
+  smsBaseUrl?: string;
+  alimtalkBaseUrl?: string;
 }
 
 export interface AligoSMSRequest {
