@@ -7,166 +7,164 @@
 // CORE PROVIDER SYSTEM
 // =============================================================================
 
-// Base types and interfaces - avoid conflicts with explicit exports
-export type {
-  MessageChannel,
-  MessageType,
-  SendOptions,
-  MediaAttachment,
-  HealthCheckResult,
-  SendResult,
-  TemplateResult,
-  BaseProvider,
-  MessageContent,
-  MessageButton,
-  TemplateCreateRequest,
-  TemplateUpdateRequest,
-  SenderNumber,
-  SenderVerificationResult,
-  ChannelInfo,
-  BaseProviderConfig,
-  TemplateFilters,
-  HistoryFilters
-} from './types/base';
-
 // Interfaces
 export type {
   NotificationRequest,
-  NotificationResponse
-} from './interfaces';
-
+  NotificationResponse,
+} from "./interfaces";
 // Plugin interfaces
-export * from './interfaces/plugin';
+export * from "./interfaces/plugin";
+export * from "./middleware";
 
 // Provider registry and plugin system
-export * from './registry';
-export * from './middleware';
-export * from './utils';
+export * from "./registry";
+// Base types and interfaces - avoid conflicts with explicit exports
+export type {
+  BaseProvider,
+  BaseProviderConfig,
+  ChannelInfo,
+  HealthCheckResult,
+  HistoryFilters,
+  MediaAttachment,
+  MessageButton,
+  MessageChannel,
+  MessageContent,
+  MessageType,
+  SenderNumber,
+  SenderVerificationResult,
+  SendOptions,
+  SendResult,
+  TemplateCreateRequest,
+  TemplateFilters,
+  TemplateResult,
+  TemplateUpdateRequest,
+} from "./types/base";
+export * from "./utils";
 
 // =============================================================================
 // PROVIDER CONTRACTS AND ADAPTERS
 // =============================================================================
 
-// Provider contracts (from provider-adapter)
-export type {
-  ProviderCapabilities,
-  ProviderConfiguration,
-  ConfigurationField,
-  MessagingContract,
-  TemplateContract,
-  ChannelContract,
-  AnalyticsContract,
-  AccountContract,
-  ScheduleResult,
-  ProviderMessageRequest,
-  ProviderMessageResult
-} from './contracts/provider.contract';
-
 // Abstract base provider (from provider-adapter)
-export { BaseAlimTalkProvider } from './abstract/provider.base';
+export { BaseAlimTalkProvider } from "./abstract/provider.base";
+export { AligoAdapter } from "./adapters/aligo.adapter";
 
 // ADAPTER PATTERN IMPLEMENTATION (using @k-msg/core)
 export {
   IWINVAdapter,
-  IWINVAdapterFactory
-} from './adapters/iwinv.adapter';
+  IWINVAdapterFactory,
+} from "./adapters/iwinv.adapter";
+// Provider contracts (from provider-adapter)
+export type {
+  AccountContract,
+  AnalyticsContract,
+  ChannelContract,
+  ConfigurationField,
+  MessagingContract,
+  ProviderCapabilities,
+  ProviderConfiguration,
+  ProviderMessageRequest,
+  ProviderMessageResult,
+  ScheduleResult,
+  TemplateContract,
+} from "./contracts/provider.contract";
 
-export {
-  MockProvider
-} from './mock';
+export { MockProvider } from "./mock";
 
 // Provider manager service (from provider-adapter)
-export * from './services/provider.manager';
-export * from './services/provider.service';
+export * from "./services/provider.manager";
+export * from "./services/provider.service";
 
 // =============================================================================
 // PROVIDER IMPLEMENTATIONS
 // =============================================================================
 
+export {
+  AligoProvider,
+  AligoProviderFactory,
+  createAligoProvider,
+  createDefaultAligoProvider,
+  initializeAligo,
+} from "./aligo/provider";
+// SMS Provider Contracts
+export type * from "./contracts/sms.contract";
 // IWINV Providers (New Adapter Pattern)
 export {
+  createDefaultIWINVProvider,
+  createIWINVProvider,
   IWINVProvider,
   IWINVProviderFactory,
-  createIWINVProvider,
-  createDefaultIWINVProvider,
-  initializeIWINV
-} from './iwinv/provider';
-
+  initializeIWINV,
+} from "./iwinv/provider";
 export {
-  IWINVSMSProvider,
-  createIWINVSMSProvider,
-  createDefaultIWINVSMSProvider
-} from './iwinv/provider-sms';
-
-export {
-  IWINVMultiProvider,
+  createDefaultIWINVMultiProvider,
   createIWINVMultiProvider,
-  createDefaultIWINVMultiProvider
-} from './iwinv/provider-multi';
-
-export type * from './iwinv/types/iwinv';
-
-// SMS Provider Contracts
-export type * from './contracts/sms.contract';
+  IWINVMultiProvider,
+} from "./iwinv/provider-multi";
+export {
+  createDefaultIWINVSMSProvider,
+  createIWINVSMSProvider,
+  IWINVSMSProvider,
+} from "./iwinv/provider-sms";
+export type * from "./iwinv/types/iwinv";
+export type * from "./types/aligo";
 
 // =============================================================================
 // NEW TYPE SAFETY SYSTEMS
 // =============================================================================
 
-// Unified Configuration System
-export {
-  UnifiedConfigBuilder,
-  UnifiedConfigFactory,
-  isValidUnifiedConfig,
-  isValidIWINVBaseConfig,
-  toLegacyIWINVConfig
-} from './types/unified-config';
-export type {
-  UnifiedProviderConfig,
-  IWINVBaseConfig,
-  AlimTalkConfig,
-  SMSConfig,
-  PerformanceConfig,
-  MonitoringConfig
-} from './types/unified-config';
-
-// Typed Template System
-export {
-  TypedProvider,
-  TemplateValidator,
-  TemplateTypeConverter,
-  TEMPLATE_REGISTRY
-} from './types/typed-templates';
 export type {
   TemplateCode,
+  TemplateVariables,
   TypedRequest,
   TypedResult,
-  TemplateVariables,
-  ValidationResult
-} from './types/typed-templates';
-
-// Unified Error System
+  ValidationResult,
+} from "./types/typed-templates";
+// Typed Template System
 export {
-  ErrorFactory,
-  ErrorConverter,
-  ErrorAnalyzer,
-  UnifiedError,
-  ProviderError,
-  TemplateError,
-  NetworkError,
-  isUnifiedError,
-  isProviderError,
-  isTemplateError,
-  isNetworkError,
-  isRetryableError,
-  ErrorCategory,
-  ErrorSeverity
-} from './types/unified-errors';
+  TEMPLATE_REGISTRY,
+  TemplateTypeConverter,
+  TemplateValidator,
+  TypedProvider,
+} from "./types/typed-templates";
+export type {
+  AlimTalkConfig,
+  IWINVBaseConfig,
+  MonitoringConfig,
+  PerformanceConfig,
+  SMSConfig,
+  UnifiedProviderConfig,
+} from "./types/unified-config";
+// Unified Configuration System
+export {
+  isValidIWINVBaseConfig,
+  isValidUnifiedConfig,
+  toLegacyIWINVConfig,
+  UnifiedConfigBuilder,
+  UnifiedConfigFactory,
+} from "./types/unified-config";
 export type {
   BaseErrorInfo,
+  ErrorStats,
+  NetworkErrorInfo,
   ProviderErrorInfo,
   TemplateErrorInfo,
-  NetworkErrorInfo,
   UnifiedErrorInfo,
-  ErrorStats
-} from './types/unified-errors';
+} from "./types/unified-errors";
+// Unified Error System
+export {
+  ErrorAnalyzer,
+  ErrorCategory,
+  ErrorConverter,
+  ErrorFactory,
+  ErrorSeverity,
+  isNetworkError,
+  isProviderError,
+  isRetryableError,
+  isTemplateError,
+  isUnifiedError,
+  NetworkError,
+  ProviderError,
+  TemplateError,
+  UnifiedError,
+} from "./types/unified-errors";

@@ -77,41 +77,51 @@ npm install k-msg
 ### 2. Basic Usage
 
 ```typescript
-import { IWINVProvider } from 'k-msg';
+import { KMsg, IWINVProvider, ok, fail } from 'k-msg';
 
-// Initialize IWINV provider
-const provider = new IWINVProvider({
+// Initialize KMsg with IWINV provider
+const kmsg = new KMsg(new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,
-  baseUrl: 'https://alimtalk.bizservice.iwinv.kr',
-  debug: false
-});
+  baseUrl: 'https://alimtalk.bizservice.iwinv.kr'
+}));
 
-// Send a message
-const result = await provider.sendMessage({
-  templateCode: 'welcome_template',
-  phoneNumber: '01012345678',
+// Send an AlimTalk message
+const result = await kmsg.send({
+  type: 'ALIMTALK',
+  to: '01012345678',
+  templateId: 'welcome_template',
   variables: {
     name: 'John Doe',
     service: 'MyApp'
   }
 });
 
-console.log('Message sent:', result.messageId);
+if (result.isSuccess) {
+  console.log('Message sent:', result.value.messageId);
+} else {
+  console.error('Failed to send:', result.error.message);
+}
 ```
 
-### 3. Advanced Usage with Multiple Packages
+### 3. Template Management
 
 ```typescript
-import { TemplateValidator } from '@k-msg/template';
-import { KMsg } from '@k-msg/messaging';
-import { IWINVProvider } from '@k-msg/provider';
+import { TemplateService } from '@k-msg/template';
+import { IWINVAdapter } from '@k-msg/provider';
 
-// Template validation
-const validation = TemplateValidator.validateTemplate(template);
+const adapter = new IWINVAdapter({
+  apiKey: process.env.IWINV_API_KEY!,
+  baseUrl: 'https://alimtalk.bizservice.iwinv.kr'
+});
+const templateService = new TemplateService(adapter);
 
-// Message sending
-const kmsg = new KMsg(new IWINVProvider(config));
-const result = await kmsg.send(messageOptions);
+// Create a new template
+const result = await templateService.create({
+  code: 'WELCOME_001',
+  name: 'welcome_message',
+  content: 'Hello #{name}, welcome!',
+  category: 'NOTIFICATION'
+});
 ```
 
 ## 🔌 Providers
@@ -147,34 +157,44 @@ const provider = new IWINVProvider({
 ### Template Management
 
 ```typescript
-import { TemplateService, TemplateValidator } from '@k-msg/template';
+import { TemplateService } from '@k-msg/template';
+import { IWINVAdapter } from '@k-msg/provider';
 
-const templateService = new TemplateService();
+const adapter = new IWINVAdapter(config);
+const templateService = new TemplateService(adapter);
 
-// Create template
-const template = await templateService.create({
-  name: 'welcome_message',
-  content: 'Hello #{name}, welcome to #{service}!',
-  variables: ['name', 'service']
-});
-
-// Validate template
-const validation = TemplateValidator.validateTemplate(template);
+// List templates
+const result = await templateService.list({ status: 'APPROVED' });
+if (result.isSuccess) {
+  console.log('Templates:', result.value);
+}
 ```
 
 ### Message Sending
 
 ```typescript
 import { KMsg, BulkMessageSender } from '@k-msg/messaging';
+import { IWINVProvider } from '@k-msg/provider';
 
-const kmsg = new KMsg(provider);
+const kmsg = new KMsg(new IWINVProvider(config));
 const bulkSender = new BulkMessageSender(kmsg);
 
-// Single message
-const result = await kmsg.send(messageOptions);
+// Single message (AlimTalk)
+const result = await kmsg.send({
+  type: 'ALIMTALK',
+  to: '01012345678',
+  templateId: 'TPL_001',
+  variables: { name: 'User' }
+});
 
 // Bulk messages
-const bulkResult = await bulkSender.sendBulk(bulkRequest);
+const bulkResult = await bulkSender.sendBulk({
+  templateId: 'TPL_001',
+  recipients: [
+    { to: '01011112222', variables: { name: 'User 1' } },
+    { to: '01033334444', variables: { name: 'User 2' } }
+  ]
+});
 ```
 
 ### Channel Management
@@ -190,6 +210,23 @@ const channel = await channelManager.createChannel(channelRequest);
 // Add sender number
 const senderNumber = await channelManager.addSenderNumber(channelId, number);
 ```
+
+## 🛠️ CLI Usage
+
+The platform comes with a powerful CLI tool for management:
+
+```bash
+# Send a message
+bun apps/cli/src/cli.ts send --template welcome_tpl --phone 01012345678
+
+# List templates
+bun apps/cli/src/cli.ts list-templates --status APPROVED
+
+# Check health
+bun apps/cli/src/cli.ts health
+```
+
+For more details, see [apps/cli/README.md](./apps/cli/README.md).
 
 ## 🛠️ Development
 

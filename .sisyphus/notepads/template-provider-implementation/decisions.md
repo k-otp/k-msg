@@ -1,0 +1,3 @@
+- Implemented `TemplateProvider` in `IWINVAdapter` to consolidate template management logic.
+- Defined IWINV-specific template types locally within the adapter file for better encapsulation and to avoid complex path imports in the adapter layer.
+- Used `getTemplate` as a helper within `updateTemplate` to ensure all required fields are sent to the IWINV API even if only partial updates are requested.

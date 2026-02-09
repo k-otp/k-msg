@@ -4,28 +4,27 @@
  */
 
 // Re-export core result types
-export { ok, fail, type Result } from '@k-msg/core';
-
-// Re-export the most essential classes for basic usage
-export { IWINVProvider } from '@k-msg/provider';
-
-// Re-export essential types 
-export type { 
-  ProviderMessageRequest,
-  ProviderMessageResult 
-} from '@k-msg/provider';
-
+export { fail, ok, type Result } from "@k-msg/core";
 // Re-export the main KMsg client
-export { KMsg } from '@k-msg/messaging';
+export { KMsg } from "@k-msg/messaging";
+
+// Re-export essential types
+export type {
+  AligoConfig,
+  ProviderMessageRequest,
+  ProviderMessageResult,
+} from "@k-msg/provider";
+// Re-export the most essential classes for basic usage
+export { AligoProvider, IWINVProvider } from "@k-msg/provider";
 
 // Re-export simple modules for CLI/scripts
-export { 
+export {
+  /** @deprecated Use KMsg instead */
+  createKMsgAnalytics,
   /** @deprecated Use KMsg instead */
   createKMsgSender,
   /** @deprecated Use KMsg instead */
   createKMsgTemplates,
-  /** @deprecated Use KMsg instead */
-  createKMsgAnalytics
-} from './modules';
+} from "./modules";
 
 // Remove admin exports for now as they are incomplete

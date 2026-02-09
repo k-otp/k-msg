@@ -1,0 +1,4 @@
+- Universal provider pattern is robust and allows for easy integration of new adapters.
+- Type definitions in a monorepo core package should be comprehensive to prevent downstream issues.
+- bun test is fast and helpful for catching regressions in a monorepo.
+- tsc --emitDeclarationOnly is essential for verifying type safety across packages.

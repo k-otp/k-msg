@@ -21,27 +21,23 @@ bun add @k-msg/template @k-msg/core
 ## Basic Usage
 
 ```typescript
-import { TemplateService, TemplateValidator } from '@k-msg/template';
+import { TemplateService } from '@k-msg/template';
+import { IWINVAdapter } from '@k-msg/provider';
 
-const templateService = new TemplateService();
+const adapter = new IWINVAdapter(config);
+const templateService = new TemplateService(adapter);
 
 // Create a new template
-const template = await templateService.create({
+const result = await templateService.create({
+  code: 'OTP_001',
   name: 'OTP Verification',
-  content: '[MyApp] Your verification code is #{code}. Valid for 10 minutes.',
-  category: 'AUTHENTICATION',
-  variables: ['code']
+  content: '[MyApp] Your verification code is #{code}.',
+  category: 'AUTHENTICATION'
 });
 
-// Validate template
-const validator = new TemplateValidator();
-const validation = validator.validate(template.content);
-
-if (validation.isValid) {
-  console.log('Template is valid');
-  console.log('Variables found:', validation.variables);
-} else {
-  console.log('Validation errors:', validation.errors);
+if (result.isSuccess) {
+  const template = result.value;
+  console.log('Template created:', template.id);
 }
 ```
 

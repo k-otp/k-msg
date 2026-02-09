@@ -14,6 +14,12 @@ import {
   StandardErrorCode,
   ProviderMetadata,
   AdapterFactory,
+  Template,
+  TemplateProvider,
+  Result,
+  KMsgError,
+  ok,
+  fail,
 } from '@k-msg/core';
 
 // IWINV 특화 타입들
@@ -54,6 +60,22 @@ export interface IWINVBalanceResponse {
   charge: number;
 }
 
+export interface IWINVTemplate {
+  templateCode: string;
+  templateName: string;
+  templateContent: string;
+  status: 'Y' | 'I' | 'R';
+  templateStatusMsg?: string;
+  templateStatusComments?: string;
+  createDate: string;
+  buttons: any[];
+}
+
+export interface IWINVTemplateListResponse extends IWINVResponse {
+  totalCount: number;
+  list: IWINVTemplate[];
+}
+
 // 타입 가드 함수들
 export function isIWINVError(error: unknown): error is IWINVError {
   return typeof error === 'object' && error !== null &&
@@ -78,7 +100,7 @@ export interface IWINVConfig extends ProviderConfig {
 /**
  * IWINV API 어댑터 구현
  */
-export class IWINVAdapter extends BaseProviderAdapter {
+export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvider {
   private readonly endpoints = {
     send: '/send/',
     template: '/template/',
@@ -255,6 +277,181 @@ export class IWINVAdapter extends BaseProviderAdapter {
       method: 'POST',
       headers: this.getAuthHeaders()
     };
+  }
+
+  async createTemplate(template: Omit<Template, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Result<Template, KMsgError>> {
+    try {
+      this.log('Creating template', template);
+      const url = `${this.getBaseUrl()}${this.getEndpoint('template')}create`;
+      const response = await fetch(url, {
+        ...this.getRequestConfig(),
+        body: JSON.stringify({
+          templateName: template.name,
+          templateContent: template.content,
+          buttons: template.buttons
+        })
+      });
+
+      const responseData = await response.json();
+      if (responseData.code !== 200) {
+        return fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, responseData.message || 'Failed to create template'));
+      }
+
+      return ok({
+        ...template,
+        id: template.code,
+        status: 'PENDING',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      this.log('Failed to create template', error);
+      return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  async updateTemplate(code: string, template: Partial<Omit<Template, 'id' | 'code' | 'status' | 'createdAt' | 'updatedAt'>>): Promise<Result<Template, KMsgError>> {
+    try {
+      this.log(`Updating template ${code}`, template);
+      const url = `${this.getBaseUrl()}${this.getEndpoint('template')}modify`;
+      
+      const existingResult = await this.getTemplate(code);
+      if (existingResult.isFailure) {
+        return existingResult;
+      }
+      const existing = existingResult.value;
+
+      const response = await fetch(url, {
+        ...this.getRequestConfig(),
+        body: JSON.stringify({
+          templateCode: code,
+          templateName: template.name || existing.name,
+          templateContent: template.content || existing.content,
+          buttons: template.buttons || existing.buttons
+        })
+      });
+
+      const responseData = await response.json();
+      if (responseData.code !== 200) {
+        return fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, responseData.message || 'Failed to update template'));
+      }
+
+      return ok({
+        ...existing,
+        ...template,
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      this.log(`Failed to update template ${code}`, error);
+      return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  async deleteTemplate(code: string): Promise<Result<void, KMsgError>> {
+    try {
+      this.log(`Deleting template ${code}`);
+      const url = `${this.getBaseUrl()}${this.getEndpoint('template')}delete`;
+      const response = await fetch(url, {
+        ...this.getRequestConfig(),
+        body: JSON.stringify({
+          templateCode: code
+        })
+      });
+
+      const responseData = await response.json();
+      if (responseData.code !== 200) {
+        return fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, responseData.message || 'Failed to delete template'));
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      this.log(`Failed to delete template ${code}`, error);
+      return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  async getTemplate(code: string): Promise<Result<Template, KMsgError>> {
+    try {
+      this.log(`Getting template ${code}`);
+      const url = `${this.getBaseUrl()}${this.getEndpoint('template')}list`;
+      const queryParams = new URLSearchParams();
+      queryParams.append('templateCode', code);
+
+      const response = await fetch(`${url}?${queryParams.toString()}`, this.getRequestConfig());
+      if (!response.ok) {
+        return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, `HTTP error! status: ${response.status}`));
+      }
+
+      const responseData = await response.json() as IWINVTemplateListResponse;
+      if (responseData.code !== 200) {
+        return fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, responseData.message || 'Failed to get template'));
+      }
+
+      const iwinvTemplate = responseData.list.find(t => t.templateCode === code);
+      if (!iwinvTemplate) {
+        return fail(new KMsgError(KMsgErrorCode.TEMPLATE_NOT_FOUND, `Template with code ${code} not found`));
+      }
+
+      return ok(this.mapIWINVTemplate(iwinvTemplate));
+    } catch (error) {
+      this.log(`Failed to get template ${code}`, error);
+      return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  async listTemplates(params?: { status?: string; page?: number; limit?: number }): Promise<Result<Template[], KMsgError>> {
+    try {
+      this.log('Listing templates', params);
+      const url = `${this.getBaseUrl()}${this.getEndpoint('template')}list`;
+      const queryParams = new URLSearchParams();
+      
+      if (params?.page) queryParams.append('pageNum', params.page.toString());
+      if (params?.limit) queryParams.append('pageSize', params.limit.toString());
+      if (params?.status) {
+        const iwinvStatus = params.status === 'APPROVED' ? 'Y' : 
+                           params.status === 'REJECTED' ? 'R' : 
+                           params.status === 'PENDING' ? 'I' : undefined;
+        if (iwinvStatus) queryParams.append('templateStatus', iwinvStatus);
+      }
+
+      const response = await fetch(`${url}?${queryParams.toString()}`, this.getRequestConfig());
+      if (!response.ok) {
+        return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, `HTTP error! status: ${response.status}`));
+      }
+
+      const responseData = await response.json() as IWINVTemplateListResponse;
+      if (responseData.code !== 200) {
+        return fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, responseData.message || 'Failed to list templates'));
+      }
+
+      const templates = responseData.list.map(t => this.mapIWINVTemplate(t));
+      return ok(templates);
+    } catch (error) {
+      this.log('Failed to list templates', error);
+      return fail(new KMsgError(KMsgErrorCode.NETWORK_ERROR, error instanceof Error ? error.message : String(error)));
+    }
+  }
+
+  private mapIWINVTemplate(iwinvTemplate: IWINVTemplate): Template {
+    return {
+      id: iwinvTemplate.templateCode,
+      code: iwinvTemplate.templateCode,
+      name: iwinvTemplate.templateName,
+      content: iwinvTemplate.templateContent,
+      status: this.mapIWINVTemplateStatus(iwinvTemplate.status),
+      buttons: iwinvTemplate.buttons,
+      createdAt: new Date(iwinvTemplate.createDate),
+      updatedAt: new Date(iwinvTemplate.createDate),
+    };
+  }
+
+  private mapIWINVTemplateStatus(status: 'Y' | 'I' | 'R'): 'APPROVED' | 'PENDING' | 'REJECTED' {
+    switch (status) {
+      case 'Y': return 'APPROVED';
+      case 'I': return 'PENDING';
+      case 'R': return 'REJECTED';
+      default: return 'PENDING';
+    }
   }
 
   isRetryableError(error: IWINVError | Error | unknown): boolean {
