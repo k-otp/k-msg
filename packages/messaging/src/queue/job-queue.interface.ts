@@ -10,6 +10,7 @@ export interface Job<T> {
   id: string;
   type: string;
   data: T;
+  status: JobStatus;
   priority: number;
   attempts: number;
   maxAttempts: number;
