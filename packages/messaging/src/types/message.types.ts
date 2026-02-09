@@ -1,17 +1,18 @@
-import { z } from 'zod';
+import type { RetryOptions } from "@k-msg/core";
+import { z } from "zod";
 
 export interface MessageRequest {
-  templateId: string;              // 템플릿 ID
-  recipients: Recipient[];         // 수신자 목록
-  variables: VariableMap;          // 공통 변수
-  scheduling?: SchedulingOptions;  // 예약 발송
-  options?: SendingOptions;        // 발송 옵션
+  templateId: string; // 템플릿 ID
+  recipients: Recipient[]; // 수신자 목록
+  variables: VariableMap; // 공통 변수
+  scheduling?: SchedulingOptions; // 예약 발송
+  options?: SendingOptions; // 발송 옵션
 }
 
 export interface Recipient {
   phoneNumber: string;
-  variables?: VariableMap;         // 개별 변수 (공통 변수 오버라이드)
-  metadata?: Record<string, any>;  // 추적용 메타데이터
+  variables?: VariableMap; // 개별 변수 (공통 변수 오버라이드)
+  metadata?: Record<string, any>; // 추적용 메타데이터
 }
 
 export interface VariableMap {
@@ -19,22 +20,22 @@ export interface VariableMap {
 }
 
 export interface SchedulingOptions {
-  scheduledAt: Date;               // 예약 발송 시간
-  timezone?: string;               // 타임존
-  retryCount?: number;             // 재시도 횟수
+  scheduledAt: Date; // 예약 발송 시간
+  timezone?: string; // 타임존
+  retryCount?: number; // 재시도 횟수
 }
 
 export interface SendingOptions {
-  priority?: 'high' | 'normal' | 'low';
-  ttl?: number;                   // Time to live (초)
+  priority?: "high" | "normal" | "low";
+  ttl?: number; // Time to live (초)
   failover?: {
     enabled: boolean;
-    fallbackChannel?: 'sms' | 'lms';
+    fallbackChannel?: "sms" | "lms";
     fallbackContent?: string;
   };
   deduplication?: {
     enabled: boolean;
-    window: number;               // 중복 제거 시간 (초)
+    window: number; // 중복 제거 시간 (초)
   };
   tracking?: {
     enabled: boolean;
@@ -67,13 +68,13 @@ export interface RecipientResult {
 }
 
 export enum MessageStatus {
-  QUEUED = 'QUEUED',               // 큐에 대기 중
-  SENDING = 'SENDING',             // 발송 중
-  SENT = 'SENT',                   // 발송 완료
-  DELIVERED = 'DELIVERED',         // 전달 완료
-  FAILED = 'FAILED',               // 발송 실패
-  CLICKED = 'CLICKED',             // 버튼 클릭됨
-  CANCELLED = 'CANCELLED'          // 취소됨
+  QUEUED = "QUEUED", // 큐에 대기 중
+  SENDING = "SENDING", // 발송 중
+  SENT = "SENT", // 발송 완료
+  DELIVERED = "DELIVERED", // 전달 완료
+  FAILED = "FAILED", // 발송 실패
+  CLICKED = "CLICKED", // 버튼 클릭됨
+  CANCELLED = "CANCELLED", // 취소됨
 }
 
 export interface MessageError {
@@ -118,9 +119,10 @@ export interface BulkRecipient {
 }
 
 export interface BulkSendingOptions extends SendingOptions {
-  batchSize?: number;              // 배치 크기
-  batchDelay?: number;             // 배치 간 지연 시간 (ms)
-  maxConcurrency?: number;         // 최대 동시 처리 수
+  batchSize?: number; // 배치 크기
+  batchDelay?: number; // 배치 간 지연 시간 (ms)
+  maxConcurrency?: number; // 최대 동시 처리 수
+  retryOptions?: Partial<RetryOptions>; // 재시도 옵션
 }
 
 export interface BulkMessageResult {
@@ -141,7 +143,7 @@ export interface BulkBatchResult {
   batchId: string;
   batchNumber: number;
   recipients: RecipientResult[];
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   createdAt: Date;
   completedAt?: Date;
 }
@@ -149,29 +151,29 @@ export interface BulkBatchResult {
 // Event types
 export enum MessageEventType {
   // 템플릿 이벤트
-  TEMPLATE_CREATED = 'template.created',
-  TEMPLATE_APPROVED = 'template.approved',
-  TEMPLATE_REJECTED = 'template.rejected',
-  TEMPLATE_UPDATED = 'template.updated',
-  TEMPLATE_DELETED = 'template.deleted',
-  
+  TEMPLATE_CREATED = "template.created",
+  TEMPLATE_APPROVED = "template.approved",
+  TEMPLATE_REJECTED = "template.rejected",
+  TEMPLATE_UPDATED = "template.updated",
+  TEMPLATE_DELETED = "template.deleted",
+
   // 메시지 이벤트
-  MESSAGE_QUEUED = 'message.queued',
-  MESSAGE_SENT = 'message.sent',
-  MESSAGE_DELIVERED = 'message.delivered',
-  MESSAGE_FAILED = 'message.failed',
-  MESSAGE_CLICKED = 'message.clicked',
-  MESSAGE_CANCELLED = 'message.cancelled',
-  
+  MESSAGE_QUEUED = "message.queued",
+  MESSAGE_SENT = "message.sent",
+  MESSAGE_DELIVERED = "message.delivered",
+  MESSAGE_FAILED = "message.failed",
+  MESSAGE_CLICKED = "message.clicked",
+  MESSAGE_CANCELLED = "message.cancelled",
+
   // 채널 이벤트
-  CHANNEL_CREATED = 'channel.created',
-  CHANNEL_VERIFIED = 'channel.verified',
-  SENDER_NUMBER_ADDED = 'sender_number.added',
-  
+  CHANNEL_CREATED = "channel.created",
+  CHANNEL_VERIFIED = "channel.verified",
+  SENDER_NUMBER_ADDED = "sender_number.added",
+
   // 시스템 이벤트
-  QUOTA_WARNING = 'system.quota_warning',
-  QUOTA_EXCEEDED = 'system.quota_exceeded',
-  PROVIDER_ERROR = 'system.provider_error'
+  QUOTA_WARNING = "system.quota_warning",
+  QUOTA_EXCEEDED = "system.quota_exceeded",
+  PROVIDER_ERROR = "system.provider_error",
 }
 
 export interface MessageEvent<T = any> {
@@ -188,7 +190,10 @@ export interface MessageEvent<T = any> {
 }
 
 // Zod schemas
-export const VariableMapSchema = z.record(z.string(), z.union([z.string(), z.number(), z.date()]));
+export const VariableMapSchema = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.date()]),
+);
 
 export const RecipientSchema = z.object({
   phoneNumber: z.string().regex(/^[0-9]{10,11}$/),
@@ -203,21 +208,27 @@ export const SchedulingOptionsSchema = z.object({
 });
 
 export const SendingOptionsSchema = z.object({
-  priority: z.enum(['high', 'normal', 'low']).optional().default('normal'),
+  priority: z.enum(["high", "normal", "low"]).optional().default("normal"),
   ttl: z.number().min(0).optional(),
-  failover: z.object({
-    enabled: z.boolean(),
-    fallbackChannel: z.enum(['sms', 'lms']).optional(),
-    fallbackContent: z.string().optional(),
-  }).optional(),
-  deduplication: z.object({
-    enabled: z.boolean(),
-    window: z.number().min(0).max(3600),
-  }).optional(),
-  tracking: z.object({
-    enabled: z.boolean(),
-    webhookUrl: z.string().url().optional(),
-  }).optional(),
+  failover: z
+    .object({
+      enabled: z.boolean(),
+      fallbackChannel: z.enum(["sms", "lms"]).optional(),
+      fallbackContent: z.string().optional(),
+    })
+    .optional(),
+  deduplication: z
+    .object({
+      enabled: z.boolean(),
+      window: z.number().min(0).max(3600),
+    })
+    .optional(),
+  tracking: z
+    .object({
+      enabled: z.boolean(),
+      webhookUrl: z.string().url().optional(),
+    })
+    .optional(),
 });
 
 export const MessageRequestSchema = z.object({
