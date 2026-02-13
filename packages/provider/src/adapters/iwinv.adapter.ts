@@ -101,6 +101,8 @@ export interface IWINVConfig extends ProviderConfig {
  * IWINV API 어댑터 구현
  */
 export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvider {
+  private static readonly directTemplates = new Set(['SMS_DIRECT', 'LMS_DIRECT', 'MMS_DIRECT']);
+
   private readonly endpoints = {
     send: '/send/',
     template: '/template/',
@@ -133,8 +135,28 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
       ? this.formatIWINVDate(request.options!.scheduledAt!)
       : undefined;
 
+    const channel = request.channel || request.options?.channel;
+    const isDirectMessageChannel =
+      channel === 'SMS' ||
+      channel === 'LMS' ||
+      channel === 'MMS' ||
+      channel === 'sms' ||
+      channel === 'mms' ||
+      IWINVAdapter.directTemplates.has(request.templateCode);
+
+    const messageContent =
+      request.text ??
+      (typeof request.variables?.message === 'string' ? request.variables.message : undefined) ??
+      (typeof request.variables?._full_text === 'string' ? request.variables._full_text : undefined);
+
     // 템플릿 변수를 IWINV 형식으로 변환
-    const templateParam = Object.values(request.variables).map(String);
+    const templateParam = isDirectMessageChannel
+      ? undefined
+      : Object.values(request.variables).map(String);
+
+    const resendTitle =
+      request.options?.subject ??
+      (typeof request.variables?.subject === 'string' ? request.variables.subject : undefined);
 
     const iwinvRequest: IWINVRequest = {
       templateCode: request.templateCode,
@@ -142,11 +164,12 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
       sendDate,
       reSend: 'Y', // 기본적으로 대체발송 활성화
       resendCallback: request.options?.senderNumber || (this.config as IWINVConfig).senderNumber,
-      resendType: 'Y', // 알림톡 내용으로 대체발송
-      resendTitle: request.options?.subject,
+      resendType: messageContent ? 'N' : 'Y', // N: 직접입력, Y: 알림톡내용
+      resendTitle,
+      resendContent: messageContent,
       list: [{
         phone: request.phoneNumber,
-        templateParam: templateParam.length > 0 ? templateParam : undefined
+        templateParam: templateParam && templateParam.length > 0 ? templateParam : undefined
       }]
     };
 

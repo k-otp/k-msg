@@ -10,6 +10,7 @@ import {
   type SendResult,
   type StandardError,
   StandardErrorCode,
+  type MessageType,
   type StandardRequest,
   type StandardResult,
   StandardStatus,
@@ -22,10 +23,19 @@ import type {
   AligoSMSRequest,
 } from "../types/aligo";
 
+type AligoStandardChannel = "ALIMTALK" | "FRIENDTALK" | "SMS" | "LMS" | "MMS";
+
 export class AligoAdapter
   extends BaseProviderAdapter
   implements Provider, TemplateProvider
 {
+  private static readonly directTemplates = new Set([
+    "SMS_DIRECT",
+    "LMS_DIRECT",
+    "MMS_DIRECT",
+    "FRIENDTALK_DIRECT",
+  ]);
+
   readonly id = "aligo";
   readonly name = "Aligo Smart SMS";
 
@@ -47,33 +57,84 @@ export class AligoAdapter
       if (params.type === "ALIMTALK") {
         return this.sendAlimTalk(params);
       }
+      if (params.type === "FRIENDTALK") {
+        return this.sendFriendTalk(params);
+      }
       return this.sendSMS(params);
     } catch (error) {
       return fail(this.handleError(error));
     }
   }
 
-  adaptRequest(request: StandardRequest): any {
-    const body: any = {
-      apikey: this.aligoConfig.apiKey,
-      userid: this.aligoConfig.userId,
-      tpl_code: request.templateCode,
-      receiver_1: request.phoneNumber,
-      subject_1: request.options?.subject || "알림톡",
-      message_1: this.interpolateMessage(
-        request.variables || {},
-        (request as any).templateContent,
-      ),
-    };
+  async sendStandard(request: StandardRequest): Promise<StandardResult> {
+    try {
+      const channel = this.resolveStandardChannel(request);
 
-    if (request.options?.scheduledAt) {
-      const { date, time } = this.formatAligoDate(request.options.scheduledAt);
-      body.reserve = "Y";
-      body.reserve_date = date;
-      body.reserve_time = time;
+      if (this.isKakaoChannel(channel) && !this.aligoConfig.senderKey) {
+        throw new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "Sender key required for KakaoTalk messages",
+        );
+      }
+
+      let response: AligoResponse;
+      if (channel === "ALIMTALK") {
+        response = (await this.request(
+          this.ALIMTALK_HOST,
+          this.getEndpoint("sendAlimTalk"),
+          this.buildAlimTalkBodyFromStandard(request),
+        )) as AligoResponse;
+      } else if (channel === "FRIENDTALK") {
+        response = (await this.request(
+          this.ALIMTALK_HOST,
+          this.getEndpoint("sendFriendTalk"),
+          this.buildFriendTalkBodyFromStandard(request),
+        )) as AligoResponse;
+      } else {
+        response = (await this.request(
+          this.SMS_HOST,
+          this.getEndpoint("sendSMS"),
+          this.buildSmsBodyFromStandard(request, channel),
+        )) as AligoResponse;
+      }
+
+      const expectedSuccessCode = this.isKakaoChannel(channel) ? "0" : "1";
+      const isSuccess = response.result_code === expectedSuccessCode;
+
+      return {
+        messageId: response.msg_id || this.generateMessageId(),
+        status: isSuccess ? StandardStatus.SENT : StandardStatus.FAILED,
+        provider: this.id,
+        timestamp: new Date(),
+        phoneNumber: request.phoneNumber,
+        error: !isSuccess ? this.mapError(response) : undefined,
+        metadata: {
+          channel: this.toProviderChannel(channel),
+          resultCode: response.result_code,
+          resultMessage: response.message,
+        },
+      };
+    } catch (error) {
+      return {
+        messageId: this.generateMessageId(),
+        status: StandardStatus.FAILED,
+        provider: this.id,
+        timestamp: new Date(),
+        phoneNumber: request.phoneNumber,
+        error: this.mapError(error),
+      };
     }
+  }
 
-    return body;
+  adaptRequest(request: StandardRequest): any {
+    const channel = this.resolveStandardChannel(request);
+    if (channel === "ALIMTALK") {
+      return this.buildAlimTalkBodyFromStandard(request);
+    }
+    if (channel === "FRIENDTALK") {
+      return this.buildFriendTalkBodyFromStandard(request);
+    }
+    return this.buildSmsBodyFromStandard(request, channel);
   }
 
   adaptResponse(response: AligoResponse): StandardResult {
@@ -170,10 +231,13 @@ export class AligoAdapter
 
   getEndpoint(operation: string): string {
     switch (operation) {
+      case "send":
       case "sendSMS":
         return "/send/";
       case "sendAlimTalk":
         return "/akv10/alimtalk/send/";
+      case "sendFriendTalk":
+        return this.aligoConfig.friendtalkEndpoint || "/akv10/friendtalk/send/";
       case "templateList":
         return "/akv10/template/list/";
       case "templateAdd":
@@ -440,6 +504,54 @@ export class AligoAdapter
     });
   }
 
+  private async sendFriendTalk(
+    params: SendOptions,
+  ): Promise<Result<SendResult, KMsgError>> {
+    if (params.type !== "FRIENDTALK") {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "Invalid type for FriendTalk",
+        ),
+      );
+    }
+
+    if (!this.aligoConfig.senderKey) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "Sender key required for FriendTalk",
+        ),
+      );
+    }
+
+    const body = this.buildFriendTalkBody({
+      to: params.to,
+      from: params.from,
+      text: params.text,
+      imageUrl: params.imageUrl,
+      buttons: params.buttons,
+      subject: (params as any).subject,
+      scheduledAt: (params as any).scheduledAt,
+    });
+
+    const response = await this.request(
+      this.ALIMTALK_HOST,
+      this.getEndpoint("sendFriendTalk"),
+      body,
+    );
+
+    if (response.result_code !== "0") {
+      return fail(this.mapAligoError(response));
+    }
+
+    return ok({
+      messageId: response.msg_id || "",
+      status: "PENDING",
+      provider: this.id,
+    });
+  }
+
   private formatAligoDate(date: Date): { date: string; time: string } {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -483,6 +595,196 @@ export class AligoAdapter
   private handleError(error: any): KMsgError {
     if (error instanceof KMsgError) return error;
     return new KMsgError(KMsgErrorCode.NETWORK_ERROR, String(error));
+  }
+
+  private toProviderChannel(channel: AligoStandardChannel): "alimtalk" | "friendtalk" | "sms" | "mms" {
+    if (channel === "ALIMTALK") return "alimtalk";
+    if (channel === "FRIENDTALK") return "friendtalk";
+    if (channel === "MMS") return "mms";
+    return "sms";
+  }
+
+  private normalizeChannelLike(value: unknown): string | undefined {
+    if (typeof value !== "string") return undefined;
+    return value.trim().toUpperCase();
+  }
+
+  private resolveStandardChannel(request: StandardRequest): AligoStandardChannel {
+    const normalizedChannel = this.normalizeChannelLike(request.channel);
+    const normalizedOptionChannel = this.normalizeChannelLike(request.options?.channel);
+    const normalizedTemplateCode = this.normalizeChannelLike(request.templateCode);
+
+    const channel = normalizedChannel || normalizedOptionChannel;
+
+    if (channel === "MMS") return "MMS";
+    if (channel === "LMS") return "LMS";
+    if (channel === "SMS") return "SMS";
+    if (channel === "FRIENDTALK") return "FRIENDTALK";
+    if (channel === "ALIMTALK") return "ALIMTALK";
+
+    if (normalizedTemplateCode === "MMS_DIRECT") return "MMS";
+    if (normalizedTemplateCode === "LMS_DIRECT") return "LMS";
+    if (normalizedTemplateCode === "SMS_DIRECT") return "SMS";
+    if (normalizedTemplateCode === "FRIENDTALK_DIRECT") return "FRIENDTALK";
+
+    if (
+      normalizedTemplateCode &&
+      AligoAdapter.directTemplates.has(normalizedTemplateCode)
+    ) {
+      return "SMS";
+    }
+
+    return "ALIMTALK";
+  }
+
+  private extractStandardMessage(request: StandardRequest): string {
+    const variables = request.variables || {};
+    if (typeof request.text === "string") {
+      return request.text;
+    }
+    if (typeof variables.message === "string") {
+      return variables.message;
+    }
+    return this.interpolateMessage(variables, (request as any).templateContent);
+  }
+
+  private buildSmsBodyFromStandard(
+    request: StandardRequest,
+    channel: "SMS" | "LMS" | "MMS",
+  ): AligoSMSRequest {
+    const body: AligoSMSRequest = {
+      key: this.aligoConfig.apiKey,
+      user_id: this.aligoConfig.userId,
+      sender: request.options?.senderNumber || this.aligoConfig.sender || "",
+      receiver: request.phoneNumber,
+      msg: this.extractStandardMessage(request),
+      msg_type: channel,
+      title:
+        request.options?.subject ||
+        (typeof request.variables?.subject === "string"
+          ? request.variables.subject
+          : undefined),
+      testmode_yn: this.aligoConfig.testMode ? "Y" : "N",
+    };
+
+    if (request.options?.scheduledAt) {
+      const { date, time } = this.formatAligoDate(request.options.scheduledAt);
+      body.rdate = date;
+      body.rtime = time;
+    }
+
+    if (channel === "MMS" && request.imageUrl) {
+      body.image = request.imageUrl;
+    }
+
+    return body;
+  }
+
+  private isKakaoChannel(channel: AligoStandardChannel): boolean {
+    return channel === "ALIMTALK" || channel === "FRIENDTALK";
+  }
+
+  private buildFriendTalkBody(params: {
+    to: string;
+    from?: string;
+    text: string;
+    imageUrl?: string;
+    buttons?: unknown;
+    subject?: string;
+    scheduledAt?: Date;
+    templateCode?: string;
+  }): Record<string, unknown> {
+    const body: Record<string, unknown> = {
+      apikey: this.aligoConfig.apiKey,
+      userid: this.aligoConfig.userId,
+      senderkey: this.aligoConfig.senderKey,
+      sender: params.from || this.aligoConfig.sender || "",
+      receiver_1: params.to,
+      subject_1: params.subject || "친구톡",
+      message_1: params.text,
+      testMode: this.aligoConfig.testMode ? "Y" : "N",
+    };
+
+    if (
+      params.templateCode &&
+      this.normalizeChannelLike(params.templateCode) !== "FRIENDTALK_DIRECT"
+    ) {
+      body.tpl_code = params.templateCode;
+    }
+
+    if (params.imageUrl) {
+      body.image_1 = params.imageUrl;
+    }
+
+    if (params.buttons) {
+      body.button_1 = JSON.stringify(params.buttons);
+    }
+
+    if (params.scheduledAt) {
+      const { date, time } = this.formatAligoDate(params.scheduledAt);
+      body.reserve = "Y";
+      body.reserve_date = date;
+      body.reserve_time = time;
+    }
+
+    return body;
+  }
+
+  private buildAlimTalkBodyFromStandard(request: StandardRequest): Record<string, unknown> {
+    const body: Record<string, unknown> = {
+      apikey: this.aligoConfig.apiKey,
+      userid: this.aligoConfig.userId,
+      senderkey: this.aligoConfig.senderKey,
+      tpl_code: request.templateCode,
+      sender: request.options?.senderNumber || this.aligoConfig.sender || "",
+      receiver_1: request.phoneNumber,
+      subject_1:
+        request.options?.subject ||
+        (typeof request.variables?.subject === "string"
+          ? request.variables.subject
+          : "알림톡"),
+      message_1: this.extractStandardMessage(request),
+      testMode: this.aligoConfig.testMode ? "Y" : "N",
+    };
+
+    if (request.options?.scheduledAt) {
+      const { date, time } = this.formatAligoDate(request.options.scheduledAt);
+      body.reserve = "Y";
+      body.reserve_date = date;
+      body.reserve_time = time;
+    }
+
+    return body;
+  }
+
+  private buildFriendTalkBodyFromStandard(request: StandardRequest): Record<string, unknown> {
+    const text = this.extractStandardMessage(request);
+    const subject =
+      request.options?.subject ||
+      (typeof request.variables?.subject === "string"
+        ? request.variables.subject
+        : undefined);
+    const buttons =
+      request.buttons ??
+      (Array.isArray(request.options?.buttons)
+        ? request.options?.buttons
+        : undefined);
+    const imageUrl =
+      request.imageUrl ||
+      (typeof request.options?.imageUrl === "string"
+        ? request.options.imageUrl
+        : undefined);
+
+    return this.buildFriendTalkBody({
+      to: request.phoneNumber,
+      from: request.options?.senderNumber,
+      text,
+      subject,
+      buttons,
+      imageUrl,
+      scheduledAt: request.options?.scheduledAt,
+      templateCode: request.templateCode,
+    });
   }
 
   private interpolateMessage(

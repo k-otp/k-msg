@@ -32,6 +32,16 @@ export class HealthChecker {
     this.services.set(name, checkFn);
   }
 
+  unregisterService(name: string): boolean {
+    this.lastCheck.delete(name);
+    return this.services.delete(name);
+  }
+
+  clearServices(): void {
+    this.services.clear();
+    this.lastCheck.clear();
+  }
+
   async checkHealth(): Promise<HealthStatus> {
     const start = Date.now();
     const services: Record<string, ServiceHealth> = {};

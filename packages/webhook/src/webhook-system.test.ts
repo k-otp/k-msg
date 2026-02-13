@@ -994,7 +994,8 @@ describe('Integration Tests', () => {
 
   test('should handle endpoint lifecycle management', async () => {
     const config = createTestConfig();
-    const webhookService = new WebhookService(config);
+    const mockHttpClient = new MockHttpClient();
+    const webhookService = new WebhookService(config, mockHttpClient);
 
     try {
       // 엔드포인트 생성

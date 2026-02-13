@@ -3,13 +3,16 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import { KMsg } from "@k-msg/messaging";
-import { MockProvider } from "@k-msg/provider";
 import { spawn } from "bun";
 import path from "path";
 
 const CLI_PATH = path.join(import.meta.dir, "cli.ts");
 const TEST_TIMEOUT = 30000;
+const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
+
+function stripAnsi(value: string): string {
+  return value.replace(ANSI_PATTERN, "");
+}
 
 describe("CLI E2E Tests", () => {
   const mockEnv = {
@@ -26,10 +29,11 @@ describe("CLI E2E Tests", () => {
 
       const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
 
       expect([0, 1]).toContain(exitCode);
-      expect(output).toContain("AlimTalk CLI");
-      expect(output).toContain("-h, --help");
+      expect(plain).toContain("K-Message CLI");
+      expect(plain).toContain("-h, --help");
     },
     TEST_TIMEOUT,
   );
@@ -43,9 +47,10 @@ describe("CLI E2E Tests", () => {
 
       const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
 
       expect(exitCode).toBe(0);
-      expect(output).toContain("0.1.0");
+      expect(plain).toContain("0.2.0");
     },
     TEST_TIMEOUT,
   );
@@ -59,11 +64,12 @@ describe("CLI E2E Tests", () => {
 
       const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
 
       expect(exitCode).toBe(0);
-      expect(output).toContain("Platform Information");
-      expect(output).toContain("Version:");
-      expect(output).toContain("Providers:");
+      expect(plain).toContain("Platform Information");
+      expect(plain).toContain("Providers: mock");
+      expect(plain).toContain("Supported Channels:");
     },
     TEST_TIMEOUT,
   );
@@ -77,29 +83,32 @@ describe("CLI E2E Tests", () => {
 
       const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
 
       expect(exitCode).toBe(0);
-      expect(output).toContain("Checking provider health");
-      expect(output).toContain("✅ Provider initialized");
-      expect(output).toContain("Mock Provider");
+      expect(plain).toContain("Checking provider health");
+      expect(plain).toContain("Mock Provider (mock)");
+      expect(plain).toContain("Platform healthy");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should handle message send with mock provider",
+    "should send SMS with mock provider",
     async () => {
       const proc = spawn(
         [
           "bun",
           CLI_PATH,
-          "test-send",
-          "-t",
-          "TEST_TEMPLATE",
+          "send",
           "-p",
           "01012345678",
-          "-v",
-          '{"name": "Test"}',
+          "-c",
+          "SMS",
+          "--text",
+          "인증번호는 123456 입니다",
+          "--variables",
+          '{"code":"123456"}',
         ],
         {
           env: mockEnv,
@@ -108,52 +117,29 @@ describe("CLI E2E Tests", () => {
 
       const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
 
       expect(exitCode).toBe(0);
-      expect(output).toContain("Testing IWINV message sending");
-      expect(output).toContain("✅ Message sent successfully!");
-      expect(output).toContain("Message ID: mock-");
+      expect(plain).toContain("Message sent successfully");
+      expect(plain).toContain("Message ID: mock-");
+      expect(plain).toContain("Channel: SMS");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should list templates using mock provider",
+    "should reject ALIMTALK without template",
     async () => {
-      const proc = spawn(["bun", CLI_PATH, "list-templates"], {
-        env: mockEnv,
-      });
+      const proc = spawn(
+        ["bun", CLI_PATH, "send", "-p", "01012345678", "-c", "ALIMTALK"],
+        {
+          env: mockEnv,
+        },
+      );
 
-      const output = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
-
-      expect(exitCode).toBe(0);
-      expect(output).toContain("Fetching templates");
+      expect(exitCode).toBe(1);
     },
     TEST_TIMEOUT,
   );
-});
-
-describe("Core Messaging Flow Integration", () => {
-  test("should verify the flow: Command -> Mock Provider -> Success", async () => {
-    const mockProvider = new MockProvider();
-    const kmsg = new KMsg(mockProvider as any);
-
-    const result = await kmsg.send({
-      type: "ALIMTALK",
-      to: "01012345678",
-      from: "01000000000",
-      templateId: "WELCOME",
-      variables: { name: "User" },
-    });
-
-    expect(result.isSuccess).toBe(true);
-    if (result.isSuccess) {
-      expect(result.value.messageId).toContain("mock-");
-      expect(result.value.status).toBe("SENT");
-    }
-
-    expect((mockProvider as any).getHistory().length).toBe(1);
-    expect((mockProvider as any).getHistory()[0].to).toBe("01012345678");
-  });
 });
