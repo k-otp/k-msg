@@ -23,3 +23,107 @@ export const fail = <E>(error: E): Fail<E> => ({
   isFailure: true,
   error,
 });
+
+/**
+ * Result utility functions for chaining and transformation
+ */
+export const Result = {
+  /**
+   * Transform the success value of a Result
+   */
+  map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
+    if (result.isSuccess) {
+      return ok(fn(result.value));
+    }
+    return result;
+  },
+
+  /**
+   * Chain Result-returning operations
+   */
+  flatMap<T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> {
+    if (result.isSuccess) {
+      return fn(result.value);
+    }
+    return result;
+  },
+
+  /**
+   * Transform the error of a Result
+   */
+  mapError<T, E, F>(result: Result<T, E>, fn: (error: E) => F): Result<T, F> {
+    if (result.isFailure) {
+      return fail(fn(result.error));
+    }
+    return result;
+  },
+
+  /**
+   * Extract the value or throw the error
+   */
+  unwrap<T, E>(result: Result<T, E>): T {
+    if (result.isSuccess) {
+      return result.value;
+    }
+    throw result.error;
+  },
+
+  /**
+   * Extract the value or return a default
+   */
+  unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
+    if (result.isSuccess) {
+      return result.value;
+    }
+    return defaultValue;
+  },
+
+  /**
+   * Extract the value or compute a default from the error
+   */
+  unwrapOrElse<T, E>(result: Result<T, E>, fn: (error: E) => T): T {
+    if (result.isSuccess) {
+      return result.value;
+    }
+    return fn(result.error);
+  },
+
+  /**
+   * Pattern match on a Result
+   */
+  match<T, E, U>(
+    result: Result<T, E>,
+    handlers: { ok: (value: T) => U; fail: (error: E) => U }
+  ): U {
+    if (result.isSuccess) {
+      return handlers.ok(result.value);
+    }
+    return handlers.fail(result.error);
+  },
+
+  /**
+   * Convert a Promise to a Result
+   */
+  async fromPromise<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>> {
+    try {
+      const value = await promise;
+      return ok(value);
+    } catch (error) {
+      return fail(error as E);
+    }
+  },
+
+  /**
+   * Check if a Result is Ok
+   */
+  isOk<T, E>(result: Result<T, E>): result is Ok<T> {
+    return result.isSuccess;
+  },
+
+  /**
+   * Check if a Result is Fail
+   */
+  isFail<T, E>(result: Result<T, E>): result is Fail<E> {
+    return result.isFailure;
+  },
+};

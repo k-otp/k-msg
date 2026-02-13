@@ -222,53 +222,38 @@ export class ConfigLoader {
   }
 }
 
+// Deep partial utility for environment-specific overrides
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
 // Environment-specific configurations
-export const developmentConfig: Partial<KMessageConfig> = {
+// Only include values that DIFFER from schema defaults
+export const developmentConfig: DeepPartial<KMessageConfig> = {
   logger: {
     level: LogLevel.DEBUG,
-    enableConsole: true,
-    enableFile: false,
-    maxFileSize: 10485760,
-    maxFiles: 5,
     enableColors: true,
     enableJson: false
   },
   server: {
-    port: 3000,
-    host: 'localhost',
-    cors: { origins: ['*'], credentials: false },
-    maxRequestSize: 10485760,
-    requestTimeout: 30000,
-    enableDocs: true,
-    enableMetrics: true
+    enableDocs: true
   }
 };
 
-export const productionConfig: Partial<KMessageConfig> = {
+export const productionConfig: DeepPartial<KMessageConfig> = {
   logger: {
     level: LogLevel.INFO,
-    enableConsole: true,
-    enableFile: false,
-    maxFileSize: 10485760,
-    maxFiles: 5,
     enableColors: false,
     enableJson: true
   },
   server: {
-    port: 3000,
-    host: 'localhost',
-    cors: { origins: ['*'], credentials: false },
-    maxRequestSize: 10485760,
-    requestTimeout: 30000,
-    enableDocs: false,
-    enableMetrics: true
+    enableDocs: false
   },
   security: {
     apiKeyRequired: true,
     rateLimitEnabled: true,
     maxRequestsPerMinute: 1000,
-    enableCors: true,
-    trustedProxies: []
+    enableCors: true
   }
 };
 

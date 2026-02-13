@@ -1,5 +1,5 @@
 import { Result } from './result';
-import { SendOptions, SendResult, BaseProviderAdapter, MessageType } from './types';
+import { SendOptions, SendResult } from './types/index';
 import { KMsgError } from './errors';
 
 export interface Template {
@@ -23,10 +23,14 @@ export interface TemplateProvider {
   listTemplates(params?: { status?: string; page?: number; limit?: number }): Promise<Result<Template[], KMsgError>>;
 }
 
+/**
+ * @deprecated Use `BaseProvider` from `@k-msg/core` instead.
+ * Legacy provider interface that uses the Result<T, E> pattern for send().
+ * New providers should implement `BaseProvider` which uses adapter-based patterns.
+ */
 export interface Provider {
   readonly id: string;
   readonly name: string;
   send(params: SendOptions): Promise<Result<SendResult, KMsgError>>;
 }
 
-export { BaseProviderAdapter };

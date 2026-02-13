@@ -1,18 +1,16 @@
 #!/usr/bin/env bun
 
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
+  BulkOperationHandler,
   logger,
   type BaseProvider,
   type MessageType,
   type StandardRequest,
   type StandardResult,
 } from "@k-msg/core";
-import {
-  AligoProvider,
-  IWINVProvider,
-  type AligoConfig,
-  type IWINVConfig,
-} from "@k-msg/provider";
 import chalk from "chalk";
 import { Command } from "commander";
 
@@ -56,67 +54,395 @@ class CliMockProvider implements BaseProvider<StandardRequest, StandardResult> {
       metadata: {
         channel: request.channel,
       },
-    } as R;
+    } as unknown as R;
   }
 }
 
 type Runtime = {
   providers: Map<string, BaseProvider<StandardRequest, StandardResult>>;
   defaultProviderId?: string;
+  source: "mock" | "plugin-manifest";
+  pluginManifestPath?: string;
 };
 
-function initializeRuntime(): Runtime {
+type ProviderConcreteDefinition = {
+  kind?: "provider";
+  id?: string;
+  module: string;
+  exportName?: string;
+  enabledWhenEnv?: string;
+  default?: boolean;
+  config?: Record<string, unknown>;
+  configFromEnv?: Record<string, string>;
+};
+
+type ProviderRouterDefinition = {
+  kind: "router";
+  id: string;
+  strategy: "round_robin";
+  providers: string[];
+  default?: boolean;
+};
+
+type ProviderDefinition = ProviderConcreteDefinition | ProviderRouterDefinition;
+
+type ProviderPluginManifest = {
+  defaultProviderId?: string;
+  providers: ProviderDefinition[];
+};
+
+type PluginManifestSource = {
+  manifest: ProviderPluginManifest;
+  baseDir: string;
+  pathLabel: string;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isProviderInstance(value: unknown): value is BaseProvider<StandardRequest, StandardResult> {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    typeof value.version === "string" &&
+    typeof value.type === "string" &&
+    typeof value.send === "function" &&
+    typeof value.healthCheck === "function"
+  );
+}
+
+function normalizePluginManifest(raw: unknown): ProviderPluginManifest {
+  if (Array.isArray(raw)) {
+    return { providers: raw as ProviderDefinition[] };
+  }
+  if (isRecord(raw) && Array.isArray(raw.providers)) {
+    return {
+      defaultProviderId:
+        typeof raw.defaultProviderId === "string" ? raw.defaultProviderId : undefined,
+      providers: raw.providers as ProviderDefinition[],
+    };
+  }
+  throw new Error(
+    "Invalid provider plugin manifest. Expected an array or { providers: [...] }.",
+  );
+}
+
+function readPluginManifestSource(): PluginManifestSource | null {
+  const inlineJson = process.env.K_MSG_PROVIDER_PLUGINS;
+  if (inlineJson && inlineJson.trim().length > 0) {
+    return {
+      manifest: normalizePluginManifest(JSON.parse(inlineJson)),
+      baseDir: process.cwd(),
+      pathLabel: "K_MSG_PROVIDER_PLUGINS",
+    };
+  }
+
+  const explicitPath = process.env.K_MSG_PROVIDER_PLUGIN_FILE;
+  const candidatePaths = explicitPath
+    ? [explicitPath]
+    : ["k-msg.providers.json", "apps/cli/k-msg.providers.json"];
+
+  for (const candidatePath of candidatePaths) {
+    const absolutePath = path.isAbsolute(candidatePath)
+      ? candidatePath
+      : path.resolve(process.cwd(), candidatePath);
+    if (!existsSync(absolutePath)) continue;
+
+    const fileContent = readFileSync(absolutePath, "utf8");
+    return {
+      manifest: normalizePluginManifest(JSON.parse(fileContent)),
+      baseDir: path.dirname(absolutePath),
+      pathLabel: absolutePath,
+    };
+  }
+
+  return null;
+}
+
+function resolvePluginModuleSpecifier(moduleName: string, baseDir: string): string {
+  if (moduleName.startsWith(".") || moduleName.startsWith("/")) {
+    const absolutePath = path.isAbsolute(moduleName)
+      ? moduleName
+      : path.resolve(baseDir, moduleName);
+    return pathToFileURL(absolutePath).href;
+  }
+  return moduleName;
+}
+
+function buildProviderConfig(definition: ProviderConcreteDefinition): Record<string, unknown> {
+  const config: Record<string, unknown> = {
+    ...(definition.config || {}),
+  };
+
+  for (const [field, envVar] of Object.entries(definition.configFromEnv || {})) {
+    const value = process.env[envVar];
+    if (value !== undefined) {
+      config[field] = value;
+    }
+  }
+
+  return config;
+}
+
+class SendFailedError extends Error {
+  readonly result: StandardResult;
+
+  constructor(result: StandardResult) {
+    super(result.error?.message || "Unknown provider error");
+    this.name = "SendFailedError";
+    this.result = result;
+  }
+}
+
+async function createProviderFromPlugin(
+  definition: ProviderConcreteDefinition,
+  baseDir: string,
+): Promise<BaseProvider<StandardRequest, StandardResult> | null> {
+  if (definition.enabledWhenEnv && !process.env[definition.enabledWhenEnv]) {
+    return null;
+  }
+
+  if (!definition.module || typeof definition.module !== "string") {
+    throw new Error("Plugin definition requires a non-empty `module` field.");
+  }
+
+  const moduleSpecifier = resolvePluginModuleSpecifier(definition.module, baseDir);
+  const loadedModule = await import(moduleSpecifier);
+  const candidateExport =
+    definition.exportName && definition.exportName.length > 0
+      ? loadedModule[definition.exportName]
+      : loadedModule.default ?? loadedModule;
+
+  const config = buildProviderConfig(definition);
+  let created: unknown;
+
+  if (candidateExport && typeof candidateExport.createProvider === "function") {
+    created = await candidateExport.createProvider(config);
+  } else if (typeof candidateExport === "function") {
+    try {
+      created = new candidateExport(config);
+    } catch {
+      created = await candidateExport(config);
+    }
+  } else {
+    throw new Error(
+      `Plugin export is not constructable/callable: ${definition.module}${definition.exportName ? `#${definition.exportName}` : ""}`,
+    );
+  }
+
+  if (!isProviderInstance(created)) {
+    throw new Error(
+      `Loaded plugin did not return a valid provider instance: ${definition.module}${definition.exportName ? `#${definition.exportName}` : ""}`,
+    );
+  }
+
+  return created;
+}
+
+class RoundRobinRouterProvider
+  implements BaseProvider<StandardRequest, StandardResult>
+{
+  readonly id: string;
+  readonly name: string;
+  readonly type = "messaging" as const;
+  readonly version = "1.0.0";
+
+  private readonly providers: BaseProvider<StandardRequest, StandardResult>[];
+  private idx = 0;
+
+  constructor(params: {
+    id: string;
+    name?: string;
+    providers: BaseProvider<StandardRequest, StandardResult>[];
+  }) {
+    this.id = params.id;
+    this.name = params.name || `RoundRobinRouter(${params.providers.map((p) => p.id).join(",")})`;
+    this.providers = params.providers;
+  }
+
+  async healthCheck() {
+    const results = await Promise.allSettled(
+      this.providers.map(async (provider) => ({
+        id: provider.id,
+        name: provider.name,
+        health: await provider.healthCheck(),
+      })),
+    );
+
+    const issues: string[] = [];
+    let anyHealthy = false;
+    const data: Record<string, unknown> = {};
+
+    for (const result of results) {
+      if (result.status === "rejected") {
+        issues.push(`Health check failed: ${String(result.reason)}`);
+        continue;
+      }
+
+      const entry = result.value;
+      data[entry.id] = entry.health;
+      if (!entry.health.healthy) {
+        issues.push(`${entry.id}: ${entry.health.issues.join(", ")}`);
+      } else {
+        anyHealthy = true;
+      }
+    }
+
+    return {
+      healthy: anyHealthy,
+      issues,
+      data,
+    };
+  }
+
+  async send<
+    T extends StandardRequest = StandardRequest,
+    R extends StandardResult = StandardResult,
+  >(request: T): Promise<R> {
+    if (this.providers.length === 0) {
+      throw new Error("Router provider has no upstream providers");
+    }
+
+    const provider = this.providers[this.idx % this.providers.length]!;
+    this.idx = (this.idx + 1) % this.providers.length;
+    return provider.send(request) as Promise<R>;
+  }
+}
+
+function createRouterProvider(
+  definition: ProviderRouterDefinition,
+  providers: Map<string, BaseProvider<StandardRequest, StandardResult>>,
+): BaseProvider<StandardRequest, StandardResult> | null {
+  if (!definition.id) {
+    throw new Error("Router definition requires `id`");
+  }
+  if (!Array.isArray(definition.providers) || definition.providers.length === 0) {
+    throw new Error("Router definition requires non-empty `providers`");
+  }
+
+  if (definition.strategy !== "round_robin") {
+    throw new Error(`Unsupported router strategy: ${definition.strategy}`);
+  }
+
+  const upstreamProviders = definition.providers
+    .map((providerId) => providers.get(providerId))
+    .filter((provider): provider is BaseProvider<StandardRequest, StandardResult> => Boolean(provider));
+
+  if (upstreamProviders.length === 0) {
+    const missing = definition.providers.join(", ");
+    if (definition.default) {
+      console.warn(
+        `[k-msg] Router provider (${definition.id}) disabled; no upstream providers found (${missing})`,
+      );
+    }
+    return null;
+  }
+
+  return new RoundRobinRouterProvider({
+    id: definition.id,
+    providers: upstreamProviders,
+  });
+}
+
+async function initializeRuntimeFromPluginManifest(): Promise<Runtime | null> {
+  const source = readPluginManifestSource();
+  if (!source) return null;
+
+  const providers = new Map<string, BaseProvider<StandardRequest, StandardResult>>();
+  const manifestDefaultCandidates: string[] = [];
+  const routerDefinitions: ProviderRouterDefinition[] = [];
+
+  for (const definition of source.manifest.providers) {
+    if (isRecord(definition) && definition.kind === "router") {
+      routerDefinitions.push(definition as ProviderRouterDefinition);
+      continue;
+    }
+
+    try {
+      const provider = await createProviderFromPlugin(
+        definition as ProviderConcreteDefinition,
+        source.baseDir,
+      );
+      if (!provider) continue;
+
+      const key = definition.id || provider.id;
+      providers.set(key, provider);
+      if (provider.id !== key && !providers.has(provider.id)) {
+        providers.set(provider.id, provider);
+      }
+
+      if (definition.default) {
+        manifestDefaultCandidates.push(key);
+      }
+    } catch (error) {
+      console.warn(
+        `[k-msg] Failed to load provider plugin (${definition.module}${definition.exportName ? `#${definition.exportName}` : ""}):`,
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  for (const routerDefinition of routerDefinitions) {
+    try {
+      const routerProvider = createRouterProvider(routerDefinition, providers);
+      if (!routerProvider) continue;
+      providers.set(routerProvider.id, routerProvider);
+      if (routerDefinition.default) {
+        manifestDefaultCandidates.push(routerProvider.id);
+      }
+    } catch (error) {
+      console.warn(
+        `[k-msg] Failed to create router provider (${routerDefinition.id}):`,
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  if (providers.size === 0) {
+    throw new Error(
+      `No providers were loaded from plugin manifest (${source.pathLabel}).`,
+    );
+  }
+
+  const requestedDefault = process.env.K_MSG_DEFAULT_PROVIDER;
+  const defaultProviderId =
+    (requestedDefault && providers.has(requestedDefault) && requestedDefault) ||
+    (source.manifest.defaultProviderId &&
+      providers.has(source.manifest.defaultProviderId) &&
+      source.manifest.defaultProviderId) ||
+    manifestDefaultCandidates.find((id) => providers.has(id)) ||
+    providers.keys().next().value;
+
+  return {
+    providers,
+    defaultProviderId,
+    source: "plugin-manifest",
+    pluginManifestPath: source.pathLabel,
+  };
+}
+
+async function initializeRuntime(): Promise<Runtime> {
   if (process.env.K_MSG_MOCK === "true") {
     const mock = new CliMockProvider();
     return {
       providers: new Map([[mock.id, mock]]),
       defaultProviderId: mock.id,
+      source: "mock",
     };
   }
 
-  const providers = new Map<string, BaseProvider<StandardRequest, StandardResult>>();
-
-  if (process.env.IWINV_API_KEY) {
-    const iwinvConfig: IWINVConfig = {
-      apiKey: process.env.IWINV_API_KEY,
-      baseUrl:
-        process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
-      debug: process.env.NODE_ENV !== "production",
-      senderNumber: process.env.IWINV_SENDER_NUMBER,
-    };
-    const provider = new IWINVProvider(iwinvConfig);
-    providers.set(provider.id, provider);
+  const pluginRuntime = await initializeRuntimeFromPluginManifest();
+  if (pluginRuntime) {
+  return pluginRuntime;
   }
-
-  if (process.env.ALIGO_API_KEY && process.env.ALIGO_USER_ID) {
-    const aligoConfig: AligoConfig = {
-      apiKey: process.env.ALIGO_API_KEY,
-      userId: process.env.ALIGO_USER_ID,
-      senderKey: process.env.ALIGO_SENDER_KEY,
-      sender: process.env.ALIGO_SENDER,
-      smsBaseUrl: process.env.ALIGO_SMS_BASE_URL,
-      alimtalkBaseUrl: process.env.ALIGO_ALIMTALK_BASE_URL,
-      friendtalkEndpoint: process.env.ALIGO_FRIENDTALK_ENDPOINT,
-      debug: process.env.NODE_ENV !== "production",
-      testMode: process.env.NODE_ENV !== "production",
-    };
-    const provider = new AligoProvider(aligoConfig);
-    providers.set(provider.id, provider);
-  }
-
-  const requestedDefault = process.env.K_MSG_DEFAULT_PROVIDER;
-  const defaultProviderId =
-    requestedDefault && providers.has(requestedDefault)
-      ? requestedDefault
-      : providers.keys().next().value;
-
-  return {
-    providers,
-    defaultProviderId,
-  };
+  throw new Error(
+    "No provider manifest found. Set K_MSG_PROVIDER_PLUGINS, K_MSG_PROVIDER_PLUGIN_FILE, or provide k-msg.providers.json.",
+  );
 }
 
-const runtime = initializeRuntime();
+const runtime = await initializeRuntime();
 
 function parseChannel(raw?: string): MessageType {
   const normalized = (raw || "ALIMTALK").toUpperCase() as MessageType;
@@ -126,6 +452,39 @@ function parseChannel(raw?: string): MessageType {
     );
   }
   return normalized;
+}
+
+function parsePhone(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return "";
+  if (trimmed.startsWith("+")) return trimmed;
+  return trimmed.replace(/[^0-9]/g, "");
+}
+
+function parsePhones(raw?: string): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map(parsePhone)
+    .filter((value) => value.length > 0);
+}
+
+function parsePhonesFile(filePath?: string): string[] {
+  if (!filePath) return [];
+  const absolutePath = path.isAbsolute(filePath)
+    ? filePath
+    : path.resolve(process.cwd(), filePath);
+  const content = readFileSync(absolutePath, "utf8");
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .map(parsePhone)
+    .filter((value) => value.length > 0);
+}
+
+function dedupePreserveOrder(values: string[]): string[] {
+  return Array.from(new Set(values));
 }
 
 function parseVariables(raw?: string): Record<string, any> {
@@ -143,7 +502,7 @@ function resolveProvider(
   const id = providerId || runtime.defaultProviderId;
   if (!id) {
     throw new Error(
-      "No provider initialized. Set K_MSG_MOCK=true or configure IWINV/ALIGO environment variables.",
+      "No provider initialized. Set K_MSG_MOCK=true or provide a provider manifest (K_MSG_PROVIDER_PLUGINS / K_MSG_PROVIDER_PLUGIN_FILE / k-msg.providers.json).",
     );
   }
 
@@ -269,12 +628,16 @@ program
     const providerIds = Array.from(runtime.providers.keys());
     console.log(`Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`);
     console.log(`Default Provider: ${runtime.defaultProviderId || "(none)"}`);
+    console.log(`Runtime Source: ${runtime.source}`);
+    if (runtime.pluginManifestPath) {
+      console.log(`Plugin Manifest: ${runtime.pluginManifestPath}`);
+    }
     console.log(`Supported Channels: ${SUPPORTED_CHANNELS.join(", ")}`);
 
     if (providerIds.length === 0) {
       console.log(
         chalk.yellow(
-          "Set K_MSG_MOCK=true, IWINV_API_KEY, or ALIGO_API_KEY + ALIGO_USER_ID.",
+          "Set K_MSG_MOCK=true or configure a provider manifest (K_MSG_PROVIDER_PLUGINS / K_MSG_PROVIDER_PLUGIN_FILE / k-msg.providers.json).",
         ),
       );
     }
@@ -290,7 +653,7 @@ program
       const providers = Array.from(runtime.providers.values());
       if (providers.length === 0) {
         throw new Error(
-          "No provider initialized. Set K_MSG_MOCK=true or provider environment variables.",
+          "No provider initialized. Set K_MSG_MOCK=true or configure a provider manifest (K_MSG_PROVIDER_PLUGINS / K_MSG_PROVIDER_PLUGIN_FILE / k-msg.providers.json).",
         );
       }
 
@@ -372,6 +735,145 @@ program
   });
 
 program
+  .command("bulk-send")
+  .description("Send the same message to multiple recipients")
+  .option("--phones <numbers>", "comma-separated recipient phone numbers")
+  .option("--phones-file <path>", "file with phone numbers (one per line)")
+  .option("-c, --channel <channel>", "ALIMTALK|FRIENDTALK|SMS|LMS|MMS", "SMS")
+  .option("-t, --template <code>", "template code")
+  .option("--text <text>", "message text")
+  .option("--variables <json>", "variables as JSON", "{}")
+  .option("--provider <providerId>", "provider id")
+  .option("--sender <number>", "sender number")
+  .option("--subject <subject>", "subject for LMS/MMS/FRIENDTALK")
+  .option("--image-url <url>", "image URL for MMS/FRIENDTALK")
+  .option("--concurrency <n>", "number of concurrent sends", "1")
+  .option("--fail-fast", "stop on first failure", false)
+  .option("--print-each", "print per-recipient results (auto-enabled for <= 25 recipients)", false)
+  .action(async (options) => {
+    try {
+      const phones = dedupePreserveOrder([
+        ...parsePhones(options.phones),
+        ...parsePhonesFile(options.phonesFile),
+      ]);
+      if (phones.length === 0) {
+        throw new Error("No recipient phones provided. Use --phones or --phones-file.");
+      }
+
+      const channel = parseChannel(options.channel);
+      const variables = parseVariables(options.variables);
+      const concurrencyRaw = Number(options.concurrency);
+      const concurrency =
+        Number.isFinite(concurrencyRaw) && concurrencyRaw > 0 ? Math.floor(concurrencyRaw) : 1;
+      const shouldPrintEach = Boolean(options.printEach) || phones.length <= 25;
+
+      console.log(chalk.yellow(`📨 Sending to ${phones.length} recipients...`));
+
+      let lastProgressAt = 0;
+
+      const { successful, failed, summary } = await BulkOperationHandler.execute(
+        phones,
+        async (phone) => {
+          const result = await sendMessage({
+            provider: options.provider,
+            channel,
+            phone,
+            template: options.template,
+            text: options.text,
+            variables,
+            sender: options.sender,
+            subject: options.subject,
+            imageUrl: options.imageUrl,
+          });
+
+          if (result.status === "FAILED") {
+            if (shouldPrintEach) {
+              console.log(
+                chalk.red(
+                  `❌ [${result.provider}] ${phone} -> FAILED: ${result.error?.message || "Unknown provider error"}`,
+                ),
+              );
+            }
+            throw new SendFailedError(result);
+          }
+
+          if (shouldPrintEach) {
+            console.log(chalk.green(`✅ [${result.provider}] ${phone} -> SENT (${result.messageId})`));
+          }
+
+          return result;
+        },
+        {
+          concurrency,
+          failFast: Boolean(options.failFast),
+          retryOptions: { maxAttempts: 1 },
+          onProgress: (completed, total, failedCount) => {
+            if (shouldPrintEach) return;
+            const now = Date.now();
+            if (now - lastProgressAt < 200) return;
+            lastProgressAt = now;
+            process.stdout.write(`\rProgress: ${completed}/${total} (failed: ${failedCount})`);
+          },
+        },
+      );
+
+      if (!shouldPrintEach) {
+        process.stdout.write("\n");
+      }
+
+      const providerCounts = new Map<string, number>();
+      for (const entry of successful) {
+        providerCounts.set(entry.result.provider, (providerCounts.get(entry.result.provider) || 0) + 1);
+      }
+      for (const entry of failed) {
+        const error = entry.error;
+        if (error instanceof SendFailedError) {
+          const providerId = error.result.provider;
+          providerCounts.set(providerId, (providerCounts.get(providerId) || 0) + 1);
+        }
+      }
+
+      console.log(chalk.cyan("📊 Bulk send summary:"));
+      console.log(`Total: ${summary.total}`);
+      console.log(`Successful: ${summary.successful}`);
+      console.log(`Failed: ${summary.failed}`);
+      console.log(`Duration: ${summary.duration}ms`);
+      if (providerCounts.size > 0) {
+        console.log(`Providers used: ${Array.from(providerCounts.entries()).map(([id, count]) => `${id}=${count}`).join(", ")}`);
+      }
+
+      if (failed.length > 0) {
+        if (!shouldPrintEach) {
+          const failuresToShow = failed.slice(0, 10);
+          for (const entry of failuresToShow) {
+            const providerId =
+              entry.error instanceof SendFailedError ? entry.error.result.provider : "unknown";
+            console.log(
+              chalk.red(
+                `❌ [${providerId}] ${entry.item} -> FAILED: ${entry.error.message || "Unknown error"}`,
+              ),
+            );
+          }
+          if (failed.length > failuresToShow.length) {
+            console.log(chalk.red(`...and ${failed.length - failuresToShow.length} more failures`));
+          }
+        }
+
+        process.exitCode = 1;
+        return;
+      }
+
+      console.log(chalk.green("✅ Bulk send completed"));
+    } catch (error) {
+      console.error(
+        chalk.red("❌ Bulk send failed:"),
+        error instanceof Error ? error.message : String(error),
+      );
+      process.exitCode = 1;
+    }
+  });
+
+program
   .command("test-send")
   .description("Quick send test")
   .option("-p, --phone <number>", "recipient phone number", "01012345678")
@@ -417,6 +919,10 @@ configCmd
     console.log(`Mock Mode: ${process.env.K_MSG_MOCK === "true" ? "enabled" : "disabled"}`);
     console.log(`Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`);
     console.log(`Default Provider: ${runtime.defaultProviderId || "(none)"}`);
+    console.log(`Runtime Source: ${runtime.source}`);
+    if (runtime.pluginManifestPath) {
+      console.log(`Plugin Manifest: ${runtime.pluginManifestPath}`);
+    }
     console.log(`Default Sender: ${process.env.K_MSG_SENDER_NUMBER || "(none)"}`);
   });
 

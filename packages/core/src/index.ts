@@ -1,11 +1,11 @@
 export * from './result';
-export * from './types';
+export * from './types/index';
 export * from './errors';
 export * from './provider';
 
 export * from './health';
 export * from './logger';
-export * from './retry';
+export * from './resilience/index';
 export * from './config';
 export * from './test-utils';
 export * from './provider-registry';

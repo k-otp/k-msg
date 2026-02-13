@@ -159,8 +159,31 @@ export interface BalanceResponse extends IWINVBaseResponse {
 export interface IWINVConfig {
   apiKey: string;
   baseUrl: string;
+  smsApiKey?: string;
+  smsAuthKey?: string;
+  smsBaseUrl?: string;
+  senderNumber?: string;
+  smsSenderNumber?: string;
+  sendEndpoint?: string;
+  ipRetryCount?: number;
+  ipRetryDelayMs?: number;
+  ipAlertWebhookUrl?: string;
+  onIpRestrictionAlert?: (payload: IWINVIPRestrictionAlert) => void | Promise<void>;
   debug?: boolean;
   [key: string]: unknown;
+}
+
+export interface IWINVIPRestrictionAlert {
+  provider: 'iwinv';
+  channel: string;
+  endpoint: string;
+  phoneNumber: string;
+  templateCode?: string;
+  code: string;
+  message: string;
+  attempt: number;
+  maxAttempts: number;
+  timestamp: string;
 }
 
 // =============================================================================

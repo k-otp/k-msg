@@ -7,6 +7,11 @@ import { spawn } from "bun";
 import path from "path";
 
 const CLI_PATH = path.join(import.meta.dir, "cli.ts");
+const FIXTURE_PLUGIN_PATH = path.join(
+  import.meta.dir,
+  "fixtures",
+  "mock-provider.plugin.ts",
+);
 const TEST_TIMEOUT = 30000;
 const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
 
@@ -139,6 +144,93 @@ describe("CLI E2E Tests", () => {
 
       const exitCode = await proc.exited;
       expect(exitCode).toBe(1);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "should load provider from plugin manifest env",
+    async () => {
+      const pluginEnv = {
+        ...process.env,
+        K_MSG_PROVIDER_PLUGINS: JSON.stringify([
+          {
+            id: "fixture-plugin",
+            module: FIXTURE_PLUGIN_PATH,
+            exportName: "FixtureProvider",
+            default: true,
+            config: {
+              id: "fixture-plugin",
+              name: "Fixture Plugin",
+            },
+          },
+        ]),
+      };
+
+      const proc = spawn(["bun", CLI_PATH, "info"], {
+        env: pluginEnv,
+      });
+
+      const output = await new Response(proc.stdout).text();
+      const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
+
+      expect(exitCode).toBe(0);
+      expect(plain).toContain("Providers: fixture-plugin");
+      expect(plain).toContain("Runtime Source: plugin-manifest");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "should round-robin providers during bulk send",
+    async () => {
+      const pluginEnv = {
+        ...process.env,
+        K_MSG_PROVIDER_PLUGINS: JSON.stringify({
+          defaultProviderId: "rr",
+          providers: [
+            {
+              id: "p1",
+              module: FIXTURE_PLUGIN_PATH,
+              exportName: "FixtureProvider",
+              config: { id: "p1", name: "P1" },
+            },
+            {
+              id: "p2",
+              module: FIXTURE_PLUGIN_PATH,
+              exportName: "FixtureProvider",
+              config: { id: "p2", name: "P2" },
+            },
+            {
+              kind: "router",
+              id: "rr",
+              strategy: "round_robin",
+              providers: ["p1", "p2"],
+              default: true,
+            },
+          ],
+        }),
+      };
+
+      const phones = "01000000001,01000000002,01000000003,01000000004";
+      const proc = spawn(
+        ["bun", CLI_PATH, "bulk-send", "--phones", phones, "-c", "SMS", "--text", "test"],
+        {
+          env: pluginEnv,
+        },
+      );
+
+      const output = await new Response(proc.stdout).text();
+      const exitCode = await proc.exited;
+      const plain = stripAnsi(output);
+
+      expect(exitCode).toBe(0);
+      expect(plain).toContain("[p1] 01000000001");
+      expect(plain).toContain("[p2] 01000000002");
+      expect(plain).toContain("[p1] 01000000003");
+      expect(plain).toContain("[p2] 01000000004");
+      expect(plain).toContain("Bulk send completed");
     },
     TEST_TIMEOUT,
   );
