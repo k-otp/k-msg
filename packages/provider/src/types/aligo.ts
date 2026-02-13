@@ -7,6 +7,7 @@ export interface AligoConfig {
   debug?: boolean;
   smsBaseUrl?: string;
   alimtalkBaseUrl?: string;
+  friendtalkEndpoint?: string;
 }
 
 export interface AligoSMSRequest {

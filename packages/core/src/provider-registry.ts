@@ -12,7 +12,7 @@ import {
   ProviderMetadata,
   AdapterFactory,
   ProviderFactoryConfig
-} from './types';
+} from './types/index';
 import { UniversalProvider } from './universal-provider';
 
 /**
@@ -194,7 +194,7 @@ export class ConfigBasedProviderFactory {
   constructor(
     private registry: ProviderRegistry,
     private config: ProviderFactoryConfig
-  ) {}
+  ) { }
 
   /**
    * 설정에서 프로바이더 생성
@@ -230,7 +230,7 @@ export class ConfigBasedProviderFactory {
  * 플러그인 기반 프로바이더 로더
  */
 export class ProviderPluginLoader {
-  constructor(private registry: ProviderRegistry) {}
+  constructor(private registry: ProviderRegistry) { }
 
   /**
    * 플러그인 모듈 동적 로딩
@@ -283,51 +283,94 @@ export class ProviderPluginLoader {
 
 /**
  * 프로바이더 헬스 모니터
+ * HealthChecker를 활용하여 프로바이더들의 헬스 상태를 모니터링
  */
 export class ProviderHealthMonitor {
-  private timers = new Map<string, NodeJS.Timeout>();
+  private checker: import('./health').HealthChecker;
+  private intervalId?: NodeJS.Timeout;
+  private registeredServices = new Set<string>();
 
   constructor(
     private registry: ProviderRegistry,
     private interval = 60000 // 1분
-  ) {}
+  ) {
+    // Lazily import to avoid circular dependency issue
+    const { HealthChecker } = require('./health');
+    this.checker = new HealthChecker({ timeout: 5000, includeMetrics: true });
+  }
 
   /**
    * 헬스 모니터링 시작
    */
   start(): void {
-    this.stop(); // 기존 모니터링 중지
+    this.stop();
+    this.syncProviders();
 
-    const timer = setInterval(async () => {
+    this.intervalId = setInterval(async () => {
       try {
-        const results = await this.registry.healthCheck();
-        this.processHealthResults(results);
+        this.syncProviders();
+        const result = await this.checker.checkHealth();
+        if (!result.healthy && result.services) {
+          for (const [name, health] of Object.entries(result.services)) {
+            if (!health.healthy) {
+              console.warn(`Provider ${name} is unhealthy:`, health.error);
+            }
+          }
+        }
       } catch (error) {
         console.error('Health monitoring failed:', error);
       }
     }, this.interval);
-
-    this.timers.set('main', timer);
   }
 
   /**
    * 헬스 모니터링 중지
    */
   stop(): void {
-    for (const timer of this.timers.values()) {
-      clearInterval(timer);
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
     }
-    this.timers.clear();
+    this.checker.clearServices();
+    this.registeredServices.clear();
   }
 
   /**
-   * 헬스체크 결과 처리
+   * 레지스트리의 프로바이더를 HealthChecker에 동기화
    */
-  private processHealthResults(results: Record<string, any>): void {
-    for (const [providerId, health] of Object.entries(results)) {
-      if (!health.healthy) {
-        console.warn(`Provider ${providerId} is unhealthy:`, health.issues);
+  private syncProviders(): void {
+    const activeServices = new Set<string>();
+    const providers = this.registry.getAvailableProviders();
+
+    for (const providerId of providers) {
+      const provider = this.registry.getProvider(providerId);
+      if (provider) {
+        activeServices.add(providerId);
+        this.checker.registerService(providerId, async () => {
+          const health = await provider.healthCheck();
+          return {
+            healthy: health.healthy,
+            ...(health.issues.length > 0 ? { error: health.issues.join(', ') } : {}),
+            latency: health.latency
+          };
+        });
+        this.registeredServices.add(providerId);
       }
     }
+
+    for (const providerId of Array.from(this.registeredServices)) {
+      if (!activeServices.has(providerId)) {
+        this.checker.unregisterService(providerId);
+        this.registeredServices.delete(providerId);
+      }
+    }
+  }
+
+  /**
+   * 현재 헬스 상태 조회
+   */
+  async checkNow() {
+    this.syncProviders();
+    return this.checker.checkHealth();
   }
 }
