@@ -49,4 +49,24 @@ describe('IWINVAdapter adaptRequest', () => {
     expect(payload.resendType).toBe('Y');
     expect(payload.list[0]?.templateParam).toEqual(['홍길동', 'k-msg']);
   });
+
+  test('maps AlimTalk validation code as non-retryable invalid request', () => {
+    const mapped = adapter.mapError({
+      code: 505,
+      message: '발신번호는 발신번호 관리에서 사전에 등록된 발신번호로만 발송이 가능합니다.',
+    });
+
+    expect(mapped.code).toBe('INVALID_REQUEST');
+    expect(mapped.retryable).toBe(false);
+  });
+
+  test('maps AlimTalk insufficient balance code correctly', () => {
+    const mapped = adapter.mapError({
+      code: 519,
+      message: '잔액이 부족합니다.',
+    });
+
+    expect(mapped.code).toBe('INSUFFICIENT_BALANCE');
+    expect(mapped.retryable).toBe(false);
+  });
 });

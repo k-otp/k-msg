@@ -11,7 +11,7 @@ import {
   HealthMonitor,
   GracefulDegradation,
   ErrorRecovery
-} from './retry';
+} from './resilience/index';
 import { KMsgError, KMsgErrorCode } from './errors';
 
 describe('RetryHandler', () => {
@@ -190,7 +190,7 @@ describe('CircuitBreaker', () => {
     // Make operation succeed
     shouldFail = false;
     const result = await circuitBreaker.execute(conditionalOperation);
-    
+
     expect(result).toBe('success');
     expect(circuitBreaker.getState()).toBe('CLOSED');
   });
@@ -267,8 +267,8 @@ describe('BulkOperationHandler', () => {
 
     const result = await BulkOperationHandler.execute(items, operation, {
       concurrency: 1,
-      retryOptions: { 
-        maxAttempts: 3, 
+      retryOptions: {
+        maxAttempts: 3,
         initialDelay: 10,
         retryCondition: () => true
       }
@@ -281,7 +281,7 @@ describe('BulkOperationHandler', () => {
 
   test('should call progress callback', async () => {
     const items = [1, 2, 3];
-    const progressUpdates: Array<{completed: number, total: number, failed: number}> = [];
+    const progressUpdates: Array<{ completed: number, total: number, failed: number }> = [];
 
     await BulkOperationHandler.execute(items, async (item) => item * 2, {
       concurrency: 1,
@@ -382,7 +382,7 @@ describe('HealthMonitor', () => {
 
     // Change service status
     service2Healthy = true;
-    
+
     // Wait for next check
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -418,7 +418,7 @@ describe('HealthMonitor', () => {
 describe('GracefulDegradation', () => {
   test('should use fallback on primary failure', async () => {
     const degradation = new GracefulDegradation();
-    
+
     degradation.registerFallback('test-operation', async () => 'fallback-result');
 
     const primaryOperation = async () => {
@@ -436,7 +436,7 @@ describe('GracefulDegradation', () => {
 
   test('should return primary result when successful', async () => {
     const degradation = new GracefulDegradation();
-    
+
     degradation.registerFallback('test-operation', async () => 'fallback-result');
 
     const primaryOperation = async () => 'primary-result';
@@ -451,7 +451,7 @@ describe('GracefulDegradation', () => {
 
   test('should timeout primary operation', async () => {
     const degradation = new GracefulDegradation();
-    
+
     degradation.registerFallback('slow-operation', async () => 'fallback-result');
 
     const slowOperation = async () => {
@@ -470,7 +470,7 @@ describe('GracefulDegradation', () => {
 
   test('should throw when both primary and fallback fail', async () => {
     const degradation = new GracefulDegradation();
-    
+
     degradation.registerFallback('failing-operation', async () => {
       throw new Error('Fallback also failed');
     });
@@ -499,8 +499,8 @@ describe('ErrorRecovery', () => {
     const resilientFunction = ErrorRecovery.createResilientFunction(
       unreliableFunction,
       {
-        retryOptions: { 
-          maxAttempts: 5, 
+        retryOptions: {
+          maxAttempts: 5,
           initialDelay: 10,
           retryCondition: () => true
         },

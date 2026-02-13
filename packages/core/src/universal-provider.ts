@@ -14,7 +14,7 @@ import {
   DeliveryStatus,
   ConfigurationSchema,
   ProviderHealthStatus
-} from './types';
+} from './types/index';
 
 /**
  * 어댑터 기반 범용 프로바이더
@@ -42,13 +42,14 @@ export class UniversalProvider implements BaseProvider<StandardRequest, Standard
     this.id = metadata.id;
     this.name = metadata.name;
     this.version = metadata.version;
-    this.config = (adapter as any).config; // 어댑터에서 설정 가져오기
+    this.config = adapter['config']; // access protected config via bracket notation
     this.isConfigured = true;
   }
 
   configure(config: Record<string, unknown>): void {
     this.config = config as ProviderConfig;
-    this.adapter = new (this.adapter.constructor as any)(config);
+    const AdapterClass = this.adapter.constructor as new (config: ProviderConfig) => BaseProviderAdapter;
+    this.adapter = new AdapterClass(config as ProviderConfig);
     this.isConfigured = true;
   }
 
@@ -139,7 +140,7 @@ export class UniversalProvider implements BaseProvider<StandardRequest, Standard
       const standardError = this.adapter.mapError(error);
 
       const errorResult: StandardResult = {
-        messageId: (this.adapter as any).generateMessageId?.() || `error_${Date.now()}`,
+        messageId: this.adapter['generateMessageId']?.() || `error_${Date.now()}`,
         status: StandardStatus.FAILED,
         provider: this.id,
         timestamp: new Date(),

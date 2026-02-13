@@ -1,93 +1,88 @@
-# K-msg CLI
+# K-Message CLI (`apps/cli`)
 
-Command-line interface for the K-Message platform. Manage templates, send test messages, and configure your providers directly from the terminal.
+Unified CLI for sending Korean messaging traffic (SMS/LMS/MMS, AlimTalk, FriendTalk) through pluggable providers.
 
-## Installation
-
-The CLI is included in the monorepo. To use it globally, you can link it:
+## Run
 
 ```bash
-cd apps/cli
-bun link
+bun --cwd apps/cli src/cli.ts --help
+bun --cwd apps/cli src/cli.ts info
 ```
 
-Or run it directly using bun:
+## Provider Loading (Plugin Manifest)
+
+This CLI runs in **plugin-manifest mode** by default. It loads providers from:
+
+- `K_MSG_PROVIDER_PLUGINS` (inline JSON), or
+- `K_MSG_PROVIDER_PLUGIN_FILE` (JSON file path), or
+- `k-msg.providers.json` in the current working directory, or
+- `apps/cli/k-msg.providers.json` (repo default).
+
+If you only want to run locally without providers, set:
 
 ```bash
-bun run apps/cli/src/cli.ts [command]
+export K_MSG_MOCK=true
 ```
 
-## Configuration
+### Default Manifest
 
-Before using the CLI, you need to configure your provider API keys. You can use environment variables or a configuration file.
+This repo includes a safe default manifest at `apps/cli/k-msg.providers.json` (no secrets). It loads providers using env vars.
 
-### Environment Variables
+## Environment Variables
+
+Put your secrets in `apps/cli/.env` (Bun loads it automatically when running from `apps/cli`).
+
+### IWINV (SMS v2 + AlimTalk)
+
+- `IWINV_API_KEY`: AlimTalk API key
+- `IWINV_SMS_API_KEY`: SMS v2 API key
+- `IWINV_SMS_AUTH_KEY`: SMS v2 auth key
+- `IWINV_SENDER_NUMBER`: sender phone number
+
+Optional (IP restriction alert/retry):
+
+- `IWINV_IP_RETRY_COUNT`
+- `IWINV_IP_RETRY_DELAY_MS`
+- `IWINV_IP_ALERT_WEBHOOK_URL`
+
+### ALIGO (optional)
+
+- `ALIGO_API_KEY`
+- `ALIGO_USER_ID`
+- `ALIGO_SENDER_KEY`
+- `ALIGO_SENDER`
+
+## Commands
+
+### Send (single)
 
 ```bash
-export IWINV_API_KEY="your-api-key"
-export IWINV_BASE_URL="https://alimtalk.bizservice.iwinv.kr"
-export IWINV_SENDER_NUMBER="01000000000"
+bun --cwd apps/cli src/cli.ts send -c SMS -p 01012345678 --text "hello" --sender 01000000000
 ```
 
-### Configuration Commands
+Notes:
 
-- `k-msg config init`: Interactive setup to create `k-msg.config.json`.
-- `k-msg config show`: Display current configuration.
-- `k-msg setup`: Interactive provider setup.
+- `ALIMTALK` requires `--template`.
+- `SMS/LMS/MMS/FRIENDTALK` require `--text` (or `--variables '{"message":"..."}'`).
 
-## Messaging Commands
-
-### Send Message
-
-Send an AlimTalk message using a template:
+### Bulk Send (multi)
 
 ```bash
-k-msg send --template welcome_tpl --phone 01012345678 --variables '{"name":"John"}'
+bun --cwd apps/cli src/cli.ts bulk-send -c SMS --phones 01011112222,01033334444 --text "hello" --sender 01000000000
 ```
 
-### Test Send
-
-Quick test with default values:
+From a file:
 
 ```bash
-k-msg test-send --template TEST_TPL --phone 01012345678
+bun --cwd apps/cli src/cli.ts bulk-send -c SMS --phones-file ./phones.txt --text "hello" --sender 01000000000
 ```
 
-## Template Management
+### Round-Robin Rotation (bulk)
 
-### List Templates
+The default manifest sets the default provider to `sms-rr`, a router that round-robins across `iwinv` and `aligo` (when both are enabled). If only one upstream provider is enabled, it behaves like that provider.
+
+Override explicitly:
 
 ```bash
-k-msg list-templates --status APPROVED --page 1 --size 10
+bun --cwd apps/cli src/cli.ts bulk-send -c SMS --provider iwinv --phones 01011112222,01033334444 --text "hello"
 ```
-
-### Create Template
-
-```bash
-k-msg create-template --code TPL_001 --name "Welcome" --content "Hello #{name}!" --category NOTIFICATION
-```
-
-### Modify Template
-
-```bash
-k-msg modify-template --code TPL_001 --name "New Name" --content "New Content"
-```
-
-### Delete Template
-
-```bash
-k-msg delete-template --code TPL_001
-```
-
-## System Commands
-
-- `k-msg health`: Check provider and platform connectivity.
-- `k-msg info`: Show platform information and architecture version.
-
-## Architecture
-
-This CLI uses the new **KMsg Architecture**, leveraging:
-- `KMsg` client from `@k-msg/messaging`
-- `IWINVProvider` and `IWINVAdapter` from `@k-msg/provider`
-- `Result` pattern for robust error handling
-- `TemplateService` from `@k-msg/template`

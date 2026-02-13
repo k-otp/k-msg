@@ -95,6 +95,7 @@ export function isIWINVBalanceResponse(response: unknown): response is IWINVBala
 export interface IWINVConfig extends ProviderConfig {
   userId?: string;
   senderNumber?: string;
+  sendEndpoint?: string;
 }
 
 /**
@@ -104,7 +105,7 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
   private static readonly directTemplates = new Set(['SMS_DIRECT', 'LMS_DIRECT', 'MMS_DIRECT']);
 
   private readonly endpoints = {
-    send: '/send/',
+    send: '/api/v2/send/',
     template: '/template/',
     history: '/history/',
     balance: '/balance/',
@@ -219,6 +220,10 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
           standardCode = StandardErrorCode.AUTHENTICATION_FAILED;
           retryable = false;
           break;
+        case 206:
+          standardCode = StandardErrorCode.AUTHENTICATION_FAILED;
+          retryable = false;
+          break;
         case 400:
           standardCode = StandardErrorCode.INVALID_REQUEST;
           retryable = false;
@@ -233,6 +238,35 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
           break;
         case 404:
           standardCode = StandardErrorCode.TEMPLATE_NOT_FOUND;
+          retryable = false;
+          break;
+        case 501:
+        case 502:
+        case 503:
+        case 504:
+        case 505:
+        case 506:
+        case 507:
+        case 508:
+        case 509:
+        case 510:
+        case 511:
+        case 512:
+        case 513:
+        case 514:
+        case 515:
+        case 516:
+        case 517:
+        case 540:
+          standardCode = StandardErrorCode.INVALID_REQUEST;
+          retryable = false;
+          break;
+        case 518:
+          standardCode = StandardErrorCode.PROVIDER_ERROR;
+          retryable = true;
+          break;
+        case 519:
+          standardCode = StandardErrorCode.INSUFFICIENT_BALANCE;
           retryable = false;
           break;
         case 429:
@@ -288,6 +322,15 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
   }
 
   getEndpoint(operation: string): string {
+    if (operation === 'send') {
+      const configuredSendEndpoint = (this.config as IWINVConfig).sendEndpoint;
+      if (configuredSendEndpoint && configuredSendEndpoint.length > 0) {
+        return configuredSendEndpoint.startsWith('/')
+          ? configuredSendEndpoint
+          : `/${configuredSendEndpoint}`;
+      }
+    }
+
     const endpoint = this.endpoints[operation as keyof typeof this.endpoints];
     if (!endpoint) {
       throw new Error(`Unsupported operation: ${operation}`);
@@ -507,11 +550,32 @@ export class IWINVAdapter extends BaseProviderAdapter implements TemplateProvide
       case 200:
         return StandardStatus.SENT;
       case 201:
+      case 206:
       case 400:
       case 401:
       case 403:
       case 404:
+      case 501:
+      case 502:
+      case 503:
+      case 504:
+      case 505:
+      case 506:
+      case 507:
+      case 508:
+      case 509:
+      case 510:
+      case 511:
+      case 512:
+      case 513:
+      case 514:
+      case 515:
+      case 516:
+      case 517:
+      case 519:
+      case 540:
         return StandardStatus.FAILED;
+      case 518:
       case 429:
       case 500:
       case 502:
@@ -612,7 +676,7 @@ export class IWINVAdapterFactory implements AdapterFactory {
         'balance_checking'
       ],
       capabilities: {
-        maxRecipientsPerRequest: 1000,
+        maxRecipientsPerRequest: 10000,
         maxRequestsPerSecond: 100,
         supportsBulk: true,
         supportsScheduling: true,
@@ -620,7 +684,7 @@ export class IWINVAdapterFactory implements AdapterFactory {
         supportsWebhooks: false
       },
       endpoints: {
-        send: '/send/',
+        send: '/api/v2/send/',
         template: '/template/',
         history: '/history/',
         balance: '/balance/',
