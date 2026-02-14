@@ -125,4 +125,79 @@ describe("IWINVProvider SMS/ALIMTALK behaviors", () => {
     expect(result.error?.details?.ipRetryAttempts).toBe(3);
     expect(result.metadata?.ipRetryAttempts).toBe(3);
   });
+
+  test("supports SMS charge and history queries (v2)", async () => {
+    const calls: Array<{
+      url: string;
+      secret: string;
+      body: Record<string, unknown>;
+    }> = [];
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const secret = new Headers(init?.headers).get("secret") || "";
+      const body = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+      calls.push({ url, secret, body });
+
+      if (url.endsWith("/api/charge/")) {
+        return new Response(
+          JSON.stringify({ code: 0, message: "ok", charge: 10000 }),
+          { status: 200 },
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "데이터가 조회되었습니다.",
+          totalCount: 1,
+          list: [
+            {
+              requestNo: 241640246571,
+              companyid: "koreav",
+              msgType: "SMS",
+              phone: "01000000000",
+              callback: "16884879",
+              sendStatus: "전송 성공",
+              sendDate: "2021-01-01 15:22:40",
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      smsCompanyId: "koreav",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const charge = await provider.getSmsCharge();
+    const history = await provider.getSmsHistory({
+      startDate: "2021-04-05",
+      endDate: "2021-06-23",
+      pageNum: 1,
+      pageSize: 15,
+      phone: "010-0000-0000",
+    });
+
+    expect(charge).toBe(10000);
+    expect(history.totalCount).toBe(1);
+    expect(history.list.length).toBe(1);
+
+    expect(calls[0]?.url).toBe("https://sms.bizservice.iwinv.kr/api/charge/");
+    expect(calls[1]?.url).toBe("https://sms.bizservice.iwinv.kr/api/history/");
+    expect(calls[0]?.secret).toBe(
+      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
+    );
+    expect(calls[1]?.body.companyid).toBe("koreav");
+  });
 });

@@ -775,6 +775,211 @@ export class IWINVAdapter
       return 0;
     }
   }
+
+  /**
+   * IWINV SMS v2: 잔액 조회
+   * - URL: POST https://sms.bizservice.iwinv.kr/api/charge/
+   * - Header: secret: base64(SMS_API_KEY&SMS_AUTH_KEY)
+   * - Body: { "version": "1.0" }
+   */
+  async getSmsCharge(): Promise<number> {
+    const response = await this.requestSmsApi("/api/charge/", { version: "1.0" });
+    const rawCode = (response.resultCode ?? response.code ?? -1) as unknown;
+    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
+    if (code !== 0) {
+      const message =
+        typeof response.message === "string" && response.message.length > 0
+          ? response.message
+          : "Failed to get SMS charge";
+      throw new Error(message);
+    }
+    return typeof response.charge === "number" ? response.charge : 0;
+  }
+
+  /**
+   * IWINV SMS v2: 전송 내역 조회
+   * - URL: POST https://sms.bizservice.iwinv.kr/api/history/
+   * - 기간은 90일 이내만 허용
+   */
+  async getSmsHistory(params: {
+    companyId?: string;
+    startDate: string | Date; // yyyy-MM-dd
+    endDate: string | Date; // yyyy-MM-dd
+    requestNo?: string;
+    pageNum?: number;
+    pageSize?: number; // max 1000
+    phone?: string;
+    version?: string; // default: "1.0"
+  }): Promise<{
+    totalCount: number;
+    list: unknown[];
+    message: string;
+  }> {
+    const version = params.version ?? "1.0";
+    const startDate = this.formatSmsHistoryDate(params.startDate);
+    const endDate = this.formatSmsHistoryDate(params.endDate);
+    const companyId = params.companyId ?? (this.config as IWINVConfig).smsCompanyId;
+    if (!companyId || companyId.length === 0) {
+      throw new Error(
+        "companyId is required for SMS history. Pass { companyId } or set smsCompanyId in config.",
+      );
+    }
+
+    this.assertSmsHistoryWindow(startDate, endDate);
+
+    const payload: Record<string, unknown> = {
+      version,
+      companyid: companyId,
+      startDate,
+      endDate,
+    };
+
+    if (typeof params.requestNo === "string" && params.requestNo.length > 0) {
+      payload.requestNo = params.requestNo;
+    }
+    if (typeof params.pageNum === "number") {
+      payload.pageNum = params.pageNum;
+    }
+    if (typeof params.pageSize === "number") {
+      payload.pageSize = Math.min(Math.max(params.pageSize, 1), 1000);
+    }
+    if (typeof params.phone === "string" && params.phone.length > 0) {
+      payload.phone = params.phone;
+    }
+
+    const response = await this.requestSmsApi("/api/history/", payload);
+    const rawCode = (response.resultCode ?? response.code ?? -1) as unknown;
+    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
+    const message =
+      typeof response.message === "string" && response.message.length > 0
+        ? response.message
+        : code === 0
+          ? "데이터가 조회되었습니다."
+          : "Failed to get SMS history";
+    if (code !== 0) {
+      throw new Error(message);
+    }
+    return {
+      totalCount: typeof response.totalCount === "number" ? response.totalCount : 0,
+      list: Array.isArray(response.list) ? response.list : [],
+      message,
+    };
+  }
+
+  private resolveSmsBaseUrl(): string {
+    const cfg = this.config as IWINVConfig;
+    if (typeof cfg.smsBaseUrl === "string" && cfg.smsBaseUrl.length > 0) {
+      return cfg.smsBaseUrl;
+    }
+    const baseUrl = this.getBaseUrl();
+    try {
+      const url = new URL(baseUrl);
+      if (url.hostname.includes("alimtalk.bizservice.iwinv.kr")) {
+        url.hostname = "sms.bizservice.iwinv.kr";
+      }
+      return url.origin;
+    } catch {
+      return "https://sms.bizservice.iwinv.kr";
+    }
+  }
+
+  private buildSmsSecretHeader(): string {
+    const cfg = this.config as IWINVConfig;
+    if (cfg.smsApiKey && cfg.smsAuthKey) {
+      return Buffer.from(`${cfg.smsApiKey}&${cfg.smsAuthKey}`, "utf8").toString(
+        "base64",
+      );
+    }
+    const legacyAuthKey = cfg.smsAuthKey || cfg.smsApiKey;
+    if (!legacyAuthKey) {
+      return "";
+    }
+    return Buffer.from(`${cfg.apiKey}&${legacyAuthKey}`, "utf8").toString(
+      "base64",
+    );
+  }
+
+  private formatSmsHistoryDate(value: string | Date): string {
+    if (typeof value === "string") {
+      return value.length >= 10 ? value.slice(0, 10) : value;
+    }
+    const pad = (v: number) => v.toString().padStart(2, "0");
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+  }
+
+  private assertSmsHistoryWindow(startDate: string, endDate: string) {
+    const start = new Date(`${startDate}T00:00:00+09:00`).getTime();
+    const end = new Date(`${endDate}T00:00:00+09:00`).getTime();
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      throw new Error("Invalid startDate/endDate (expected yyyy-MM-dd)");
+    }
+    if (end < start) {
+      throw new Error("endDate must be greater than or equal to startDate");
+    }
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    if (end - start > ninetyDaysMs) {
+      throw new Error("조회 기간은 90일 이내만 가능합니다.");
+    }
+  }
+
+  private async requestSmsApi(
+    path: string,
+    payload: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const url = `${this.resolveSmsBaseUrl()}${path}`;
+    const secretHeader = this.buildSmsSecretHeader();
+    if (!secretHeader) {
+      throw new Error(
+        "SMS 인증키가 없습니다. IWINV_SMS_AUTH_KEY 또는 IWINV_SMS_API_KEY를 설정하세요.",
+      );
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json;charset=UTF-8",
+      secret: secretHeader,
+    };
+
+    const xForwardedFor = (this.config as IWINVConfig).xForwardedFor;
+    if (typeof xForwardedFor === "string" && xForwardedFor.length > 0) {
+      headers["X-Forwarded-For"] = xForwardedFor;
+    }
+
+    const extraHeaders = (this.config as IWINVConfig).extraHeaders;
+    const mergedHeaders =
+      extraHeaders && typeof extraHeaders === "object"
+        ? { ...headers, ...extraHeaders }
+        : headers;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: mergedHeaders,
+      body: JSON.stringify(payload),
+    });
+
+    const responseText = await response.text();
+    let parsed: unknown;
+    try {
+      parsed = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      parsed = responseText;
+    }
+
+    if (!response.ok) {
+      const message =
+        parsed && typeof parsed === "object" && !Array.isArray(parsed)
+          ? typeof (parsed as Record<string, unknown>).message === "string"
+            ? String((parsed as Record<string, unknown>).message)
+            : `HTTP ${response.status}: ${response.statusText}`
+          : `HTTP ${response.status}: ${response.statusText}`;
+      throw new Error(message);
+    }
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+
+    return { resultCode: parsed };
+  }
 }
 
 /**

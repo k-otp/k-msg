@@ -1,4 +1,6 @@
 import type { Button, MessageType } from "./message";
+import type { BalanceQuery, BalanceResult } from "./balance";
+import type { HistoryQuery, HistoryResult } from "./history";
 import type { ProviderHealthStatus } from "./provider";
 
 export interface PlatformHealthStatus {
@@ -71,6 +73,19 @@ export interface KMsg {
   getProvider(providerId: string): any | null;
   listProviders(): string[];
   healthCheck(): Promise<PlatformHealthStatus>;
+  balance(providerId?: string): Promise<{
+    get(query?: BalanceQuery): Promise<BalanceResult>;
+  }>;
+  history(providerId?: string): Promise<{
+    list(query: HistoryQuery): Promise<HistoryResult>;
+    list(
+      page?: number,
+      pageSize?: number,
+      filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+        channel?: HistoryQuery["channel"];
+      },
+    ): Promise<HistoryResult>;
+  }>;
   messages: {
     send(options: MessageSendOptions): Promise<MessageSendResult>;
     getStatus(messageId: string): Promise<string>;

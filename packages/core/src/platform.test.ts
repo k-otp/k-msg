@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { AlimTalkPlatform } from "./platform";
 import type {
   BaseProvider,
+  HistoryResult,
   Config,
   StandardRequest,
   StandardResult,
@@ -69,6 +70,20 @@ class FailedResultProvider extends MockBaseProvider {
       isFailure: true,
       error: new Error("legacy result failure"),
     } as unknown as R;
+  }
+}
+
+class AdapterBackedProvider extends MockBaseProvider {
+  constructor(
+    id: string,
+    name: string,
+    private adapter: Record<string, unknown>,
+  ) {
+    super(id, name);
+  }
+
+  getAdapter() {
+    return this.adapter;
   }
 }
 
@@ -278,5 +293,83 @@ describe("AlimTalkPlatform unified send API", () => {
     expect(result.results[0]?.error?.message).toContain(
       "legacy result failure",
     );
+  });
+});
+
+describe("AlimTalkPlatform balance/history common APIs", () => {
+  test("exposes SMS charge via platform.balance().get()", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new AdapterBackedProvider("default-provider", "Default", {
+      getSmsCharge: async () => 10000,
+    });
+    platform.registerProvider(provider);
+
+    const balance = await (await platform.balance()).get({ channel: "SMS" });
+
+    expect(balance.providerId).toBe("default-provider");
+    expect(balance.channel).toBe("SMS");
+    expect(balance.amount).toBe(10000);
+    expect(balance.currency).toBe("KRW");
+  });
+
+  test("exposes SMS history via platform.history().list(query)", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new AdapterBackedProvider("default-provider", "Default", {
+      getSmsHistory: async () => ({
+        totalCount: 1,
+        list: [
+          {
+            requestNo: 241640246571,
+            msgType: "SMS",
+            phone: "01000000000",
+            callback: "16884879",
+            sendStatus: "전송 성공",
+            sendStatusCode: "06",
+            sendStatusMsg: "전송 성공",
+            sendDate: "2021-01-01 15:22:40",
+          },
+        ],
+        message: "ok",
+      }),
+    });
+    platform.registerProvider(provider);
+
+    const result = (await (await platform.history()).list({
+      channel: "SMS",
+      startDate: "2021-04-05",
+      endDate: "2021-06-23",
+      page: 1,
+      pageSize: 15,
+    })) as HistoryResult;
+
+    expect(result.providerId).toBe("default-provider");
+    expect(result.channel).toBe("SMS");
+    expect(result.totalCount).toBe(1);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.messageId).toBe("241640246571");
+    expect(result.items[0]?.to).toBe("01000000000");
+    expect(result.items[0]?.from).toBe("16884879");
+    expect(result.items[0]?.statusCode).toBe("06");
+  });
+
+  test("supports legacy platform.history().list(page, size, filters)", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new AdapterBackedProvider("default-provider", "Default", {
+      getSmsHistory: async (_params: Record<string, unknown>) => ({
+        totalCount: 0,
+        list: [],
+        message: "ok",
+      }),
+    });
+    platform.registerProvider(provider);
+
+    const result = await (await platform.history()).list(1, 15, {
+      channel: "SMS",
+      startDate: "2021-04-05",
+      endDate: "2021-06-23",
+    });
+
+    expect(result.channel).toBe("SMS");
+    expect(result.totalCount).toBe(0);
   });
 });

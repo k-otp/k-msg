@@ -52,6 +52,16 @@ Important:
 - In our runtime verification, lowercase header key `secret` worked for SMS v2.
 - If your service is IP-restricted, whitelist the real egress IP.
 
+### 3) SMS History / Charge (v2)
+
+- History URL: `POST https://sms.bizservice.iwinv.kr/api/history/`
+  - Header: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
+  - Body requires `version`, `companyid`, `startDate`, `endDate`
+  - Date window must be within 90 days
+- Charge URL: `POST https://sms.bizservice.iwinv.kr/api/charge/`
+  - Header: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
+  - Body: `{"version":"1.0"}`
+
 ## Environment Variables
 
 Minimum:
@@ -65,6 +75,7 @@ IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
 IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
+IWINV_SMS_COMPANY_ID=your_company_id   # required for history (optional if passed per-call)
 
 # Optional common sender
 IWINV_SENDER_NUMBER=01000000000
@@ -114,6 +125,19 @@ await provider.send({
   text: "hello",
   variables: { message: "hello" },
   options: { senderNumber: "01000000000" },
+});
+
+// SMS charge
+const charge = await provider.getSmsCharge();
+
+// SMS history (90-day window)
+const history = await provider.getSmsHistory({
+  // companyId can be omitted if you set IWINV_SMS_COMPANY_ID / smsCompanyId in config
+  startDate: "2021-04-05",
+  endDate: "2021-06-23",
+  pageNum: 1,
+  pageSize: 15,
+  phone: "010-0000-0000",
 });
 
 // AlimTalk

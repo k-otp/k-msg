@@ -52,6 +52,16 @@ bun add @k-msg/provider @k-msg/core
 - SMS v2는 실제 검증에서 소문자 `secret` 헤더로 정상 동작했습니다.
 - IP 화이트리스트가 걸려 있으면 실제 egress IP를 반드시 등록해야 합니다.
 
+### 3) SMS 전송내역/잔액 조회 (v2)
+
+- 전송내역 URL: `POST https://sms.bizservice.iwinv.kr/api/history/`
+  - 헤더: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
+  - BODY 필수: `version`, `companyid`, `startDate`, `endDate`
+  - 조회 기간은 90일 이내만 허용
+- 잔액 URL: `POST https://sms.bizservice.iwinv.kr/api/charge/`
+  - 헤더: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
+  - BODY: `{"version":"1.0"}`
+
 ## 환경변수
 
 최소 필수:
@@ -65,6 +75,7 @@ IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
 IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
+IWINV_SMS_COMPANY_ID=your_company_id   # 전송내역 조회에 필요(호출 시 파라미터로 넘기면 생략 가능)
 
 # 공통 발신번호(선택)
 IWINV_SENDER_NUMBER=01000000000
@@ -114,6 +125,19 @@ await provider.send({
   text: "hello",
   variables: { message: "hello" },
   options: { senderNumber: "01000000000" },
+});
+
+// SMS 잔액
+const charge = await provider.getSmsCharge();
+
+// SMS 전송내역(90일 이내)
+const history = await provider.getSmsHistory({
+  // companyId는 IWINV_SMS_COMPANY_ID / smsCompanyId 설정 시 생략 가능
+  startDate: "2021-04-05",
+  endDate: "2021-06-23",
+  pageNum: 1,
+  pageSize: 15,
+  phone: "010-0000-0000",
 });
 
 // 알림톡
