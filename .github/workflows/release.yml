@@ -36,7 +36,11 @@ jobs:
         if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: |
           set -euo pipefail
+          # Ensure Bun's publish step can authenticate. Some tools override the
+          # npm user config path, so we write to both the default location and
+          # the workspace and force the userconfig env when running Sampo.
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$GITHUB_WORKSPACE/.npmrc"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -65,6 +69,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
 
       - name: Update bun.lock in release PR branch
         if: steps.sampo.outputs.released == 'true'
