@@ -15,6 +15,7 @@ const FIXTURE_PLUGIN_PATH = path.join(
   "mock-provider.plugin.ts",
 );
 const TEST_TIMEOUT = 30000;
+// biome-ignore lint/complexity/useRegexLiterals: avoid embedding control characters in a regex literal
 const ANSI_PATTERN = new RegExp("\\u001b\\[[0-9;]*m", "g");
 
 function stripAnsi(value: string): string {
@@ -81,10 +82,7 @@ describe("CLI E2E Tests", () => {
   test(
     "should show version",
     async () => {
-      const { exitCode, stdout, stderr } = await runCli(
-        ["--version"],
-        mockEnv,
-      );
+      const { exitCode, stdout, stderr } = await runCli(["--version"], mockEnv);
       const plain = stripAnsi(stdout + stderr);
 
       expect(exitCode).toBe(0);
