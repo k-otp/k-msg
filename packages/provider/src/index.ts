@@ -48,12 +48,12 @@ export * from "./utils";
 // Abstract base provider (from provider-adapter)
 export { BaseAlimTalkProvider } from "./abstract/provider.base";
 export { AligoAdapter } from "./adapters/aligo.adapter";
-
 // ADAPTER PATTERN IMPLEMENTATION (using @k-msg/core)
 export {
   IWINVAdapter,
   IWINVAdapterFactory,
 } from "./adapters/iwinv.adapter";
+export { SolapiAdapter } from "./adapters/solapi.adapter";
 // Provider contracts (from provider-adapter)
 export type {
   AccountContract,
@@ -107,6 +107,14 @@ export {
   IWINVSMSProvider,
 } from "./iwinv/provider-sms";
 export type * from "./iwinv/types/iwinv";
+export {
+  createDefaultSolapiProvider,
+  createSolapiProvider,
+  initializeSolapi,
+  SolapiProvider,
+  SolapiProviderFactory,
+} from "./solapi/provider";
+export type { SolapiConfig } from "./solapi/types/solapi";
 export type * from "./types/aligo";
 
 // =============================================================================

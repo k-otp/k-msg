@@ -1,4 +1,15 @@
-export type MessageType = "ALIMTALK" | "FRIENDTALK" | "SMS" | "LMS" | "MMS";
+export type MessageType =
+  | "ALIMTALK"
+  | "FRIENDTALK"
+  | "SMS"
+  | "LMS"
+  | "MMS"
+  | "RCS_SMS"
+  | "RCS_LMS"
+  | "RCS_MMS"
+  | "RCS_TPL"
+  | "RCS_ITPL"
+  | "RCS_LTPL";
 
 export interface BaseOptions {
   to: string;

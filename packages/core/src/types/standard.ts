@@ -29,14 +29,14 @@ export interface StandardError {
   code: StandardErrorCode;
   message: string;
   retryable: boolean;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface StandardRequest {
   channel?: MessageType;
   templateCode: string;
   phoneNumber: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   text?: string;
   imageUrl?: string;
   buttons?: Button[];
@@ -44,6 +44,32 @@ export interface StandardRequest {
     scheduledAt?: Date;
     senderNumber?: string;
     subject?: string;
+    /**
+     * Provider-specific KakaoTalk options (e.g. SOLAPI kakaoOptions).
+     */
+    kakaoOptions?: {
+      pfId?: string;
+      templateId?: string;
+      variables?: Record<string, string>;
+      disableSms?: boolean;
+      adFlag?: boolean;
+      buttons?: unknown[];
+      imageId?: string;
+      [key: string]: unknown;
+    };
+    /**
+     * Provider-specific RCS options (e.g. SOLAPI rcsOptions).
+     */
+    rcsOptions?: {
+      brandId?: string;
+      templateId?: string;
+      variables?: Record<string, string>;
+      disableSms?: boolean;
+      buttons?: unknown[];
+      additionalBody?: unknown;
+      [key: string]: unknown;
+    };
+    // biome-ignore lint/suspicious/noExplicitAny: provider-specific options are intentionally untyped
     [key: string]: any;
   };
 }
@@ -55,7 +81,7 @@ export interface StandardResult {
   timestamp: Date;
   phoneNumber: string;
   error?: StandardError;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum TemplateCategory {
