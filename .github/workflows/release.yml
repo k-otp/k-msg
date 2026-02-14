@@ -77,7 +77,7 @@ jobs:
           NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
 
       - name: Update bun.lock in release PR branch
-        if: steps.sampo.outputs.released == 'true'
+        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: |
           set -euo pipefail
           BRANCH="sampo/release"
@@ -90,7 +90,15 @@ jobs:
           git fetch origin "$BRANCH:$BRANCH"
           git checkout "$BRANCH"
 
-          bun install
+          # Important: Bun rewrites `workspace:*` dependencies at pack/publish time
+          # using the workspace versions recorded in bun.lock. When Sampo bumps
+          # package versions, bun.lock can become stale, causing published
+          # packages to depend on the *previous* version.
+          #
+          # Bun currently doesn't update the workspace version metadata in-place,
+          # so we regenerate the lockfile.
+          rm -f bun.lock
+          bun install --save-text-lockfile
 
           if git diff --quiet -- bun.lock; then
             echo "bun.lock unchanged."
