@@ -193,8 +193,11 @@ export class BulkMessageSender {
         const result = await this.kmsg.send({
           type: "ALIMTALK",
           to: recipient.phoneNumber,
-          from: (request.options as any)?.senderNumber || "",
-          templateId: request.templateId,
+          from:
+            (request.options as any)?.from ||
+            (request.options as any)?.senderNumber ||
+            "",
+          templateCode: request.templateCode,
           variables: variables as Record<string, string>,
         });
 

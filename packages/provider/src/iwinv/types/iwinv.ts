@@ -3,7 +3,7 @@
  * IWINV 알림톡 REST API 규격서 기반
  */
 
-import type { ProviderConfig } from "@k-msg/core";
+// Standalone config interface (does not depend on core's removed StandardRequest system)
 
 // =============================================================================
 // 공통 응답 타입
@@ -202,7 +202,18 @@ export interface IWINVSmsHistoryResponse {
 // 설정 타입
 // =============================================================================
 
-export interface IWINVConfig extends ProviderConfig {
+export interface IWINVConfig {
+  /**
+   * IWINV AlimTalk API key (used for AUTH header).
+   */
+  apiKey: string;
+
+  /**
+   * IWINV AlimTalk base URL.
+   * Default: https://alimtalk.bizservice.iwinv.kr
+   */
+  baseUrl: string;
+
   smsApiKey?: string;
   smsAuthKey?: string;
   smsBaseUrl?: string;

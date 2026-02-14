@@ -52,7 +52,7 @@ export function providersRouter(platform: KMessagePlatform) {
         data: {
           id: platform.provider.id,
           name: platform.provider.name,
-          capabilities: platform.provider.capabilities,
+          supportedTypes: platform.provider.supportedTypes,
         },
       });
     } catch (error) {
@@ -102,14 +102,24 @@ export function providersRouter(platform: KMessagePlatform) {
         );
       }
 
-      const providerHealth = health.provider.healthy;
+      const providerHealth = health.providers?.[providerId];
+      if (!providerHealth) {
+        return c.json(
+          {
+            success: false,
+            error: `Provider '${providerId}' not found`,
+          },
+          404,
+        );
+      }
 
       return c.json({
         success: true,
         data: {
           provider: providerId,
-          healthy: providerHealth,
-          issues: health.provider.issues || [],
+          healthy: providerHealth.healthy,
+          issues: providerHealth.issues || [],
+          latencyMs: providerHealth.latencyMs,
         },
       });
     } catch (error) {

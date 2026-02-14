@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop]
+    branches-ignore: [main]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -51,11 +51,27 @@ jobs:
             BASE="${{ github.event.pull_request.base.sha }}"
           else
             BASE="${{ github.event.before }}"
+            if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+              # New branch push: GitHub sets `before` to all zeros.
+              # Compare against the default branch to keep incremental lint useful.
+              DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+              git fetch origin "$DEFAULT_BRANCH" --depth=1
+              BASE="origin/$DEFAULT_BRANCH"
+            fi
+          fi
+
+          CHANGED="$(git diff --name-only "$BASE" "${{ github.sha }}")"
+          # Only run Biome for file types it understands.
+          FILES="$(echo "$CHANGED" | grep -E '\\.(ts|tsx|js|jsx|json|jsonc)$' || true)"
+
+          if [[ -z "$FILES" ]]; then
+            echo "No Biome-checkable files changed; skipping."
+            exit 0
           fi
 
           # The repository currently has legacy lint debt; to keep CI useful and unblocked,
           # lint only files changed in this ref (incremental adoption).
-          bun x @biomejs/biome check --changed --since "$BASE" --files-ignore-unknown=true
+          bun x @biomejs/biome check --files-ignore-unknown=true $FILES
 
       - name: Typecheck
         run: bun run typecheck:all
