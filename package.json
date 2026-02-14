@@ -39,7 +39,7 @@
     "test:coverage": "bun run --filter='./packages/*' test:coverage",
     "test:watch": "bun run --filter='./packages/*' test:watch",
     "typecheck": "bun run typecheck:all",
-    "typecheck:all": "bun run --filter='./packages/*' typecheck",
+    "typecheck:all": "bun run --cwd packages/core build:types && bun run --filter='./packages/*' typecheck",
     "lint": "bun x @biomejs/biome lint .",
     "format": "bun x @biomejs/biome format --write .",
     "check": "bun x @biomejs/biome check .",
