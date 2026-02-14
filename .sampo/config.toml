@@ -6,7 +6,7 @@ default_branch = "main"
 short_tags = "k-msg"
 
 [github]
-repository = "k-otp/k-msg"
+repository = "imjlk/k-msg"
 
 [packages]
 # Ignore any package that can't be published (e.g. "private": true).
@@ -31,4 +31,3 @@ fixed = [[
   "npm/@k-msg/channel",
   "npm/@k-msg/webhook",
 ]]
-
