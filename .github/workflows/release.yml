@@ -31,7 +31,12 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
           cache: true
 
+      - name: Skip (missing NPM_TOKEN)
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: echo "::warning::NPM_TOKEN is not set; skipping Sampo release automation."
+
       - name: Run Sampo (auto)
+        if: ${{ secrets.NPM_TOKEN != '' }}
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
