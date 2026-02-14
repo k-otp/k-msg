@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import type { StandardRequest } from "@k-msg/core";
 import { IWINVAdapter } from "./iwinv.adapter";
 
+const originalFetch = globalThis.fetch;
+
 describe("IWINVAdapter adaptRequest", () => {
   const adapter = new IWINVAdapter({
     apiKey: "test-api-key",
@@ -103,5 +105,113 @@ describe("IWINVAdapter getAuthHeaders", () => {
     // extraHeaders should override the default XFF value.
     expect(headers["X-Forwarded-For"]).toBe("2.2.2.2");
     expect(headers["X-Custom"]).toBe("ok");
+  });
+});
+
+describe("IWINVAdapter SMS v2 utilities", () => {
+  test("calls SMS charge endpoint with Secret header", async () => {
+    let calledUrl = "";
+    let calledSecret = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledSecret = new Headers(init?.headers).get("secret") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+      return new Response(
+        JSON.stringify({ code: 0, message: "ok", charge: 12345 }),
+        { status: 200 },
+      );
+    };
+
+    const adapter = new IWINVAdapter({
+      apiKey: "alimtalk-api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+    });
+
+    const charge = await adapter.getSmsCharge();
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/charge/");
+    expect(calledSecret).toBe(
+      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
+    );
+    expect(calledBody.version).toBe("1.0");
+    expect(charge).toBe(12345);
+
+    globalThis.fetch = originalFetch;
+  });
+
+  test("calls SMS history endpoint and enforces 90-day window", async () => {
+    let calledUrl = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "데이터가 조회되었습니다.",
+          totalCount: 1,
+          list: [
+            {
+              requestNo: 241640246571,
+              companyid: "koreav",
+              msgType: "SMS",
+              phone: "01000000000",
+              callback: "16884879",
+              sendStatus: "전송 성공",
+              sendDate: "2021-01-01 15:22:40",
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    };
+
+    const adapter = new IWINVAdapter({
+      apiKey: "alimtalk-api-key",
+      smsAuthKey: "legacy-auth-key",
+      smsCompanyId: "koreav",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+    });
+
+    const result = await adapter.getSmsHistory({
+      startDate: "2021-04-05",
+      endDate: "2021-06-23",
+      pageNum: 1,
+      pageSize: 15,
+      phone: "010-0000-0000",
+    });
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/history/");
+    expect(calledBody.companyid).toBe("koreav");
+    expect(calledBody.startDate).toBe("2021-04-05");
+    expect(calledBody.endDate).toBe("2021-06-23");
+    expect(calledBody.pageNum).toBe(1);
+    expect(calledBody.pageSize).toBe(15);
+    expect(calledBody.phone).toBe("010-0000-0000");
+    expect(result.totalCount).toBe(1);
+    expect(result.list.length).toBe(1);
+
+    await expect(
+      adapter.getSmsHistory({
+        companyId: "koreav",
+        startDate: "2021-01-01",
+        endDate: "2021-04-15",
+      }),
+    ).rejects.toThrow("90일 이내");
+
+    globalThis.fetch = originalFetch;
   });
 });

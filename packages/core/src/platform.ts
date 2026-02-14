@@ -1,6 +1,10 @@
 import type {
+  BalanceQuery,
+  BalanceResult,
   BaseProvider,
   Config,
+  HistoryQuery,
+  HistoryResult,
   KMsg,
   LegacyMessageSendOptions,
   MessageSendOptions,
@@ -290,8 +294,6 @@ export class AlimTalkPlatform implements KMsg {
         return "friendtalk";
       case "MMS":
         return "mms";
-      case "SMS":
-      case "LMS":
       default:
         return "sms";
     }
@@ -367,7 +369,7 @@ export class AlimTalkPlatform implements KMsg {
       channelDefaults?.subject ??
       this.config.messageDefaults?.subject;
 
-    const requestOptions: Record<string, any> = {
+    const requestOptions: Record<string, unknown> = {
       ...options.options,
       channel: this.toProviderChannel(options.channel),
     };
@@ -477,7 +479,7 @@ export class AlimTalkPlatform implements KMsg {
         return this.sendUnifiedMessages(provider, options);
       },
 
-      getStatus: async (messageId: string): Promise<string> => {
+      getStatus: async (_messageId: string): Promise<string> => {
         const provider = this.getDefaultProvider();
         if (!provider) {
           throw new Error("No provider available");
@@ -485,6 +487,58 @@ export class AlimTalkPlatform implements KMsg {
 
         // Most providers don't have direct status check, return placeholder
         return "unknown";
+      },
+    };
+  }
+
+  async balance(providerId?: string) {
+    const provider = this.getProviderOrThrow(providerId);
+    const providerKey = provider.id;
+    const adapter = this.getProviderAdapter(provider);
+
+    return {
+      get: async (query: BalanceQuery = {}): Promise<BalanceResult> => {
+        const channel = query.channel;
+
+        // Prefer channel-specific balance when applicable.
+        if (this.isSmsChannel(channel)) {
+          const adapterFn = this.getFunction(adapter, "getSmsCharge");
+          const providerFn = this.getFunction(provider, "getSmsCharge");
+          const amount = adapterFn
+            ? await adapterFn.call(adapter)
+            : providerFn
+              ? await providerFn.call(provider)
+              : undefined;
+
+          if (amount !== undefined) {
+            return {
+              providerId: providerKey,
+              channel,
+              amount: typeof amount === "number" ? amount : Number(amount) || 0,
+              currency: "KRW",
+            };
+          }
+        }
+
+        const adapterFn = this.getFunction(adapter, "getBalance");
+        const providerFn = this.getFunction(provider, "getBalance");
+        const getBalanceTarget = adapterFn
+          ? adapter
+          : providerFn
+            ? provider
+            : null;
+        const getBalanceFn = adapterFn ?? providerFn;
+
+        if (!getBalanceFn || !getBalanceTarget) {
+          throw new Error(`Provider ${providerKey} does not support balance()`);
+        }
+
+        const amount = await getBalanceFn.call(getBalanceTarget);
+        return {
+          providerId: providerKey,
+          channel,
+          amount: typeof amount === "number" ? amount : Number(amount) || 0,
+        };
       },
     };
   }
@@ -503,7 +557,11 @@ export class AlimTalkPlatform implements KMsg {
 
     return {
       /** @deprecated Not yet implemented */
-      list: async (_page: number = 1, _size: number = 15, _filters?: any) => {
+      list: async (
+        _page: number = 1,
+        _size: number = 15,
+        _filters?: Record<string, unknown>,
+      ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
         );
@@ -513,8 +571,8 @@ export class AlimTalkPlatform implements KMsg {
         _name: string,
         _content: string,
         _category?: string,
-        _variables?: any[],
-        _buttons?: any[],
+        _variables?: unknown[],
+        _buttons?: unknown[],
       ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
@@ -525,7 +583,7 @@ export class AlimTalkPlatform implements KMsg {
         _templateCode: string,
         _name: string,
         _content: string,
-        _buttons?: any[],
+        _buttons?: unknown[],
       ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
@@ -541,29 +599,139 @@ export class AlimTalkPlatform implements KMsg {
   }
 
   /**
-   * @deprecated History operations are not yet migrated to the new provider interface.
-   * Use the provider's adapter directly for history queries.
+   * History operations (common API surface).
+   *
+   * Notes:
+   * - Not all providers implement history. This method will throw when unsupported.
+   * - For provider-specific, advanced fields, use provider adapter directly.
    */
   async history(providerId?: string) {
-    const provider = providerId
-      ? this.getProvider(providerId)
-      : this.getDefaultProvider();
-    if (!provider) {
-      throw new Error(`Provider ${providerId || "default"} not found`);
-    }
+    const provider = this.getProviderOrThrow(providerId);
+    const providerKey = provider.id;
+    const adapter = this.getProviderAdapter(provider);
 
     return {
-      /** @deprecated Not yet implemented */
-      list: async (_page: number = 1, _size: number = 15, _filters?: any) => {
-        throw new Error(
-          "History operations not yet migrated to new provider interface",
+      list: async (
+        queryOrPage: HistoryQuery | number = 1,
+        pageSize: number = 15,
+        filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+          channel?: HistoryQuery["channel"];
+        },
+      ): Promise<HistoryResult> => {
+        const query = this.normalizeHistoryQuery(
+          queryOrPage,
+          pageSize,
+          filters,
         );
+
+        const channel = query.channel;
+        if (this.isSmsChannel(channel)) {
+          const adapterFn = this.getFunction(adapter, "getSmsHistory");
+          const providerFn = this.getFunction(provider, "getSmsHistory");
+          const target = adapterFn ? adapter : providerFn ? provider : null;
+          const fn = adapterFn ?? providerFn;
+
+          if (!fn || !target) {
+            throw new Error(
+              `Provider ${providerKey} does not support SMS history()`,
+            );
+          }
+
+          const payload = await fn.call(target, {
+            companyId: query.companyId,
+            startDate: query.startDate,
+            endDate: query.endDate,
+            requestNo: query.requestNo,
+            pageNum: query.page ?? 1,
+            pageSize: query.pageSize ?? pageSize,
+            phone: query.phone,
+          });
+
+          const payloadRecord =
+            payload && typeof payload === "object" && !Array.isArray(payload)
+              ? (payload as Record<string, unknown>)
+              : {};
+          const rawList = Array.isArray(payloadRecord.list)
+            ? (payloadRecord.list as unknown[])
+            : [];
+
+          const items = rawList.map((raw) => {
+            const record =
+              raw && typeof raw === "object"
+                ? (raw as Record<string, unknown>)
+                : {};
+            const messageId =
+              typeof record.requestNo === "string" ||
+              typeof record.requestNo === "number"
+                ? String(record.requestNo)
+                : typeof record.seqNo === "string" ||
+                    typeof record.seqNo === "number"
+                  ? String(record.seqNo)
+                  : "unknown";
+
+            const sentAt =
+              typeof record.sendDate === "string" && record.sendDate.length > 0
+                ? new Date(record.sendDate)
+                : undefined;
+
+            return {
+              providerId: providerKey,
+              channel,
+              messageId,
+              to: typeof record.phone === "string" ? record.phone : undefined,
+              from:
+                typeof record.callback === "string"
+                  ? record.callback
+                  : undefined,
+              status:
+                typeof record.sendStatus === "string"
+                  ? record.sendStatus
+                  : undefined,
+              statusCode:
+                typeof record.sendStatusCode === "string"
+                  ? record.sendStatusCode
+                  : undefined,
+              statusMessage:
+                typeof record.sendStatusMsg === "string"
+                  ? record.sendStatusMsg
+                  : undefined,
+              sentAt,
+              raw,
+            };
+          });
+
+          return {
+            providerId: providerKey,
+            channel,
+            totalCount:
+              typeof payloadRecord.totalCount === "number"
+                ? payloadRecord.totalCount
+                : items.length,
+            items,
+            raw: payload,
+          };
+        }
+
+        const adapterFn = this.getFunction(adapter, "getHistory");
+        const providerFn = this.getFunction(provider, "getHistory");
+        const target = adapterFn ? adapter : providerFn ? provider : null;
+        const fn = adapterFn ?? providerFn;
+
+        if (!fn || !target) {
+          throw new Error(`Provider ${providerKey} does not support history()`);
+        }
+
+        const raw = await fn.call(target, query);
+        return {
+          providerId: providerKey,
+          channel,
+          totalCount: Array.isArray(raw) ? raw.length : 0,
+          items: [],
+          raw,
+        };
       },
-      /** @deprecated Not yet implemented */
       cancelReservation: async (_messageId: string) => {
-        throw new Error(
-          "History operations not yet migrated to new provider interface",
-        );
+        throw new Error("cancelReservation is not implemented yet");
       },
     };
   }
@@ -576,5 +744,67 @@ export class AlimTalkPlatform implements KMsg {
     }
 
     return await provider.healthCheck();
+  }
+
+  private getProviderAdapter(provider: BaseProvider): unknown | null {
+    const record = provider as unknown as Record<string, unknown>;
+    const fn = record.getAdapter;
+    if (typeof fn === "function") {
+      return (fn as () => unknown).call(provider);
+    }
+    return null;
+  }
+
+  private isSmsChannel(channel: MessageType | undefined): boolean {
+    return channel === "SMS" || channel === "LMS" || channel === "MMS";
+  }
+
+  private normalizeHistoryQuery(
+    queryOrPage: HistoryQuery | number,
+    pageSize: number,
+    filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+      channel?: HistoryQuery["channel"];
+    },
+  ): HistoryQuery {
+    if (typeof queryOrPage === "object" && queryOrPage !== null) {
+      return queryOrPage as HistoryQuery;
+    }
+
+    const channel = filters?.channel;
+    if (!channel) {
+      throw new Error("history.list requires filters.channel");
+    }
+
+    const startDate = filters.startDate;
+    const endDate = filters.endDate;
+    if (!startDate || !endDate) {
+      throw new Error(
+        "history.list requires filters.startDate and filters.endDate",
+      );
+    }
+
+    return {
+      channel,
+      startDate,
+      endDate,
+      page: queryOrPage,
+      pageSize,
+      phone: filters.phone,
+      requestNo: filters.requestNo,
+      companyId: filters.companyId,
+    };
+  }
+
+  private getFunction(
+    target: unknown,
+    key: string,
+  ): ((...args: unknown[]) => unknown) | null {
+    if (!target || typeof target !== "object") {
+      return null;
+    }
+    const value = (target as Record<string, unknown>)[key];
+    return typeof value === "function"
+      ? (value as (...args: unknown[]) => unknown)
+      : null;
   }
 }
