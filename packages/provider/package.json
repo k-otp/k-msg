@@ -12,26 +12,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./interfaces": {
-      "types": "./dist/interfaces/index.d.ts",
-      "import": "./dist/interfaces/index.mjs",
-      "require": "./dist/interfaces/index.js"
-    },
-    "./registry": {
-      "types": "./dist/registry/index.d.ts",
-      "import": "./dist/registry/index.mjs",
-      "require": "./dist/registry/index.js"
-    },
-    "./middleware": {
-      "types": "./dist/middleware/index.d.ts",
-      "import": "./dist/middleware/index.mjs",
-      "require": "./dist/middleware/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js"
     }
   },
   "publishConfig": {

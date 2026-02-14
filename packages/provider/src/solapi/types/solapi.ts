@@ -1,6 +1,9 @@
-import type { ProviderConfig } from "@k-msg/core";
+export interface SolapiConfig {
+  /**
+   * SOLAPI API Key
+   */
+  apiKey: string;
 
-export interface SolapiConfig extends ProviderConfig {
   /**
    * SOLAPI API Secret
    */
@@ -35,4 +38,11 @@ export interface SolapiConfig extends ProviderConfig {
    * Default country code (e.g. "82"). Optional.
    */
   defaultCountry?: string;
+
+  /**
+   * Base URL for SOLAPI API.
+   */
+  baseUrl?: string;
+
+  debug?: boolean;
 }

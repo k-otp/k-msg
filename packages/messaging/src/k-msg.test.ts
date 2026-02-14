@@ -5,43 +5,46 @@ import {
   KMsgErrorCode,
   ok,
   type Provider,
-  type SendOptions,
+  type SendInput,
 } from "@k-msg/core";
 import { KMsg } from "./k-msg";
 
 describe("KMsg", () => {
   test("should send a message and call hooks", async () => {
-    const sendMock = mock(async (options: SendOptions) => {
+    const sendMock = mock(async (options: any) => {
       return ok({
         messageId: options.messageId || "test-id",
         status: "SENT" as const,
-        provider: "mock",
+        providerId: "mock",
+        type: options.type,
+        to: options.to,
       });
     });
 
     const mockProvider: Provider = {
       id: "mock",
       name: "Mock Provider",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
       send: sendMock,
     };
 
     const beforeSend = mock(() => {});
     const success = mock(() => {});
 
-    const kmsg = new KMsg(mockProvider, {
-      onBeforeSend: beforeSend,
-      onSuccess: success,
+    const kmsg = new KMsg({
+      providers: [mockProvider],
+      hooks: {
+        onBeforeSend: beforeSend,
+        onSuccess: success,
+      },
     });
 
-    const options: SendOptions = {
-      type: "SMS",
+    const options: SendInput = {
       to: "01012345678",
       from: "021234567",
       text: "Hello #{name}!",
-    };
-
-    (options as unknown as Record<string, unknown>).variables = {
-      name: "World",
+      variables: { name: "World" },
     };
 
     const result = await kmsg.send(options);
@@ -67,14 +70,18 @@ describe("KMsg", () => {
     const failingProvider: Provider = {
       id: "fail",
       name: "Failing Provider",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
       send: mock(async () => fail(error)),
     };
 
     const onError = mock(() => {});
-    const kmsg = new KMsg(failingProvider, { onError });
+    const kmsg = new KMsg({
+      providers: [failingProvider],
+      hooks: { onError },
+    });
 
-    const options: SendOptions = {
-      type: "SMS",
+    const options: SendInput = {
       to: "01012345678",
       from: "021234567",
       text: "Hello",

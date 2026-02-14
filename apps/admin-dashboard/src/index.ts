@@ -5,7 +5,6 @@ import {
   MetricType,
 } from "@k-msg/analytics";
 import { ChannelService } from "@k-msg/channel";
-import { KMsgError } from "@k-msg/core";
 import { BulkMessageSender, KMsg } from "@k-msg/messaging";
 // Import all k-msg packages
 import { IWINVProvider } from "@k-msg/provider";
@@ -40,6 +39,7 @@ export class KMessagePlatform {
   constructor(config: {
     iwinvApiKey: string;
     iwinvBaseUrl?: string;
+    defaultFrom?: string;
     debug?: boolean;
   }) {
     // Initialize IWINV Provider
@@ -53,7 +53,12 @@ export class KMessagePlatform {
     this.templateService = new MockTemplateService() as any;
 
     // Initialize Messaging Services
-    this.kmsg = new KMsg(this.provider);
+    this.kmsg = new KMsg({
+      providers: [this.provider],
+      defaults: {
+        from: config.defaultFrom,
+      },
+    });
     this.bulkSender = new BulkMessageSender(this.kmsg);
 
     // Initialize Channel Service
@@ -115,11 +120,7 @@ export class KMessagePlatform {
       provider: {
         id: this.provider.id,
         name: this.provider.name,
-        capabilities: {
-          messaging: true,
-          templates: true,
-          analytics: true,
-        },
+        supportedTypes: this.provider.supportedTypes,
       },
       features: {
         templates: true,
@@ -141,32 +142,7 @@ export class KMessagePlatform {
 
   // Comprehensive health check
   async healthCheck() {
-    const results: any = {
-      healthy: true,
-      services: {},
-      provider: {},
-      issues: [],
-    };
-
-    try {
-      // Provider health check
-      results.provider = {
-        id: this.provider.id,
-        healthy: true,
-        issues: [],
-      };
-
-      // Service health checks
-      results.services.templateService = "healthy";
-      results.services.channelService = "healthy";
-      results.services.analyticsService = "healthy";
-      results.services.webhookService = "healthy";
-    } catch (error) {
-      results.healthy = false;
-      results.issues.push(`Platform health check failed: ${error}`);
-    }
-
-    return results;
+    return this.kmsg.healthCheck();
   }
 
   // Analytics dashboard data
