@@ -72,7 +72,7 @@ export interface IWINVTemplate {
   templateStatusMsg?: string;
   templateStatusComments?: string;
   createDate: string;
-  buttons: any[];
+  buttons: unknown[];
 }
 
 export interface IWINVTemplateListResponse extends IWINVResponse {
@@ -150,10 +150,12 @@ export class IWINVAdapter
     this.log("Adapting standard request to IWINV format", request);
 
     // 예약 발송 처리
-    const isScheduled = !!request.options?.scheduledAt;
-    const sendDate = isScheduled
-      ? this.formatIWINVDate(request.options!.scheduledAt!)
-      : undefined;
+    const scheduledAt = request.options?.scheduledAt;
+    const isScheduled = !!scheduledAt;
+    const sendDate =
+      isScheduled && scheduledAt
+        ? this.formatIWINVDate(scheduledAt)
+        : undefined;
 
     const channel = request.channel || request.options?.channel;
     const isDirectMessageChannel =
@@ -783,7 +785,9 @@ export class IWINVAdapter
    * - Body: { "version": "1.0" }
    */
   async getSmsCharge(): Promise<number> {
-    const response = await this.requestSmsApi("/api/charge/", { version: "1.0" });
+    const response = await this.requestSmsApi("/api/charge/", {
+      version: "1.0",
+    });
     const rawCode = (response.resultCode ?? response.code ?? -1) as unknown;
     const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
     if (code !== 0) {
@@ -818,7 +822,8 @@ export class IWINVAdapter
     const version = params.version ?? "1.0";
     const startDate = this.formatSmsHistoryDate(params.startDate);
     const endDate = this.formatSmsHistoryDate(params.endDate);
-    const companyId = params.companyId ?? (this.config as IWINVConfig).smsCompanyId;
+    const companyId =
+      params.companyId ?? (this.config as IWINVConfig).smsCompanyId;
     if (!companyId || companyId.length === 0) {
       throw new Error(
         "companyId is required for SMS history. Pass { companyId } or set smsCompanyId in config.",
@@ -860,7 +865,8 @@ export class IWINVAdapter
       throw new Error(message);
     }
     return {
-      totalCount: typeof response.totalCount === "number" ? response.totalCount : 0,
+      totalCount:
+        typeof response.totalCount === "number" ? response.totalCount : 0,
       list: Array.isArray(response.list) ? response.list : [],
       message,
     };

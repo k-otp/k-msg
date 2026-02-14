@@ -33,4 +33,3 @@ export interface HistoryResult {
   items: HistoryItem[];
   raw?: unknown;
 }
-

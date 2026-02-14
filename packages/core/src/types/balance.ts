@@ -13,4 +13,3 @@ export interface BalanceResult {
   currency?: string;
   raw?: unknown;
 }
-
