@@ -66,6 +66,9 @@ jobs:
           base-branch: main
           pr-branch: sampo/release
           pr-title: "chore(release): publish"
+          # Avoid running npm lifecycle scripts (notably `publish`) during
+          # `bun publish --dry-run`, which can otherwise recurse or prompt.
+          args: --ignore-scripts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
