@@ -27,9 +27,10 @@ export class FixtureProvider
     return { healthy: true, issues: [] };
   }
 
-  async send<T extends StandardRequest = StandardRequest, R extends StandardResult = StandardResult>(
-    request: T,
-  ): Promise<R> {
+  async send<
+    T extends StandardRequest = StandardRequest,
+    R extends StandardResult = StandardResult,
+  >(request: T): Promise<R> {
     return {
       messageId: `fixture-${Date.now()}`,
       status: "SENT",

@@ -1,40 +1,29 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { serveStatic } from 'hono/bun';
-import { showRoutes } from 'hono/dev';
-
-// Import all k-msg packages
-import { IWINVProvider } from '@k-msg/provider';
-import { 
-  TemplateService,
-  MockTemplateService
-} from '@k-msg/template';
-import { 
-  KMsg,
-  BulkMessageSender
-} from '@k-msg/messaging';
-import { 
-  ChannelService
-} from '@k-msg/channel';
-import { 
-  AnalyticsService, 
-  MetricsCollector,
+import {
+  AnalyticsService,
   DashboardGenerator,
-  MetricType 
-} from '@k-msg/analytics';
-import { 
-  WebhookService, 
+  MetricsCollector,
+  MetricType,
+} from "@k-msg/analytics";
+import { ChannelService } from "@k-msg/channel";
+import { KMsgError } from "@k-msg/core";
+import { BulkMessageSender, KMsg } from "@k-msg/messaging";
+// Import all k-msg packages
+import { IWINVProvider } from "@k-msg/provider";
+import { MockTemplateService, type TemplateService } from "@k-msg/template";
+import {
+  type WebhookConfig,
   WebhookEventType,
-  type WebhookConfig 
-} from '@k-msg/webhook';
-import { KMsgError } from '@k-msg/core';
-
+  WebhookService,
+} from "@k-msg/webhook";
+import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
+import { cors } from "hono/cors";
+import { showRoutes } from "hono/dev";
+import { logger } from "hono/logger";
+import { messagesRouter } from "./routes/messages.js";
+import { providersRouter } from "./routes/providers.js";
 // Import route handlers
-import { templatesRouter } from './routes/templates.js';
-import { messagesRouter } from './routes/messages.js';
-import { providersRouter } from './routes/providers.js';
-
+import { templatesRouter } from "./routes/templates.js";
 
 // K-Message Platform using all packages
 export class KMessagePlatform {
@@ -56,8 +45,8 @@ export class KMessagePlatform {
     // Initialize IWINV Provider
     this.provider = new IWINVProvider({
       apiKey: config.iwinvApiKey,
-      baseUrl: config.iwinvBaseUrl || 'https://alimtalk.bizservice.iwinv.kr',
-      debug: config.debug || false
+      baseUrl: config.iwinvBaseUrl || "https://alimtalk.bizservice.iwinv.kr",
+      debug: config.debug || false,
     });
 
     // Initialize Template Service
@@ -74,13 +63,17 @@ export class KMessagePlatform {
     const analyticsConfig = {
       enableRealTimeTracking: true,
       retentionDays: 30,
-      aggregationIntervals: ['minute', 'hour', 'day'] as ('minute' | 'hour' | 'day')[],
+      aggregationIntervals: ["minute", "hour", "day"] as (
+        | "minute"
+        | "hour"
+        | "day"
+      )[],
       enabledMetrics: [
         MetricType.MESSAGE_SENT,
         MetricType.MESSAGE_DELIVERED,
         MetricType.MESSAGE_FAILED,
-        MetricType.TEMPLATE_USAGE
-      ]
+        MetricType.TEMPLATE_USAGE,
+      ],
     };
     this.analyticsService = new AnalyticsService(analyticsConfig);
     this.metricsCollector = new MetricsCollector(analyticsConfig);
@@ -95,38 +88,38 @@ export class KMessagePlatform {
       jitter: true,
       timeoutMs: 30000,
       enableSecurity: true,
-      secretKey: process.env.WEBHOOK_SECRET || 'default-secret',
-      algorithm: 'sha256',
-      signatureHeader: 'X-Webhook-Signature',
-      signaturePrefix: 'sha256=',
+      secretKey: process.env.WEBHOOK_SECRET || "default-secret",
+      algorithm: "sha256",
+      signatureHeader: "X-Webhook-Signature",
+      signaturePrefix: "sha256=",
       enabledEvents: [
         WebhookEventType.MESSAGE_SENT,
         WebhookEventType.MESSAGE_DELIVERED,
         WebhookEventType.MESSAGE_FAILED,
         WebhookEventType.TEMPLATE_CREATED,
-        WebhookEventType.TEMPLATE_UPDATED
+        WebhookEventType.TEMPLATE_UPDATED,
       ],
       batchSize: 10,
-      batchTimeoutMs: 5000
+      batchTimeoutMs: 5000,
     };
     this.webhookService = new WebhookService(webhookConfig);
 
-    console.log('✅ K-Message Platform initialized with all packages');
+    console.log("✅ K-Message Platform initialized with all packages");
   }
 
   // Platform info
   getInfo() {
     return {
-      name: 'K-Message Platform',
-      version: '0.1.0',
+      name: "K-Message Platform",
+      version: "0.1.0",
       provider: {
         id: this.provider.id,
         name: this.provider.name,
         capabilities: {
           messaging: true,
           templates: true,
-          analytics: true
-        }
+          analytics: true,
+        },
       },
       features: {
         templates: true,
@@ -135,14 +128,14 @@ export class KMessagePlatform {
         channels: true,
         analytics: true,
         webhooks: true,
-        realTimeTracking: true
+        realTimeTracking: true,
       },
       services: {
-        templateService: 'active',
-        channelService: 'active',
-        analyticsService: 'active',
-        webhookService: 'active'
-      }
+        templateService: "active",
+        channelService: "active",
+        analyticsService: "active",
+        webhookService: "active",
+      },
     };
   }
 
@@ -152,7 +145,7 @@ export class KMessagePlatform {
       healthy: true,
       services: {},
       provider: {},
-      issues: []
+      issues: [],
     };
 
     try {
@@ -160,15 +153,14 @@ export class KMessagePlatform {
       results.provider = {
         id: this.provider.id,
         healthy: true,
-        issues: []
+        issues: [],
       };
-      
-      // Service health checks
-      results.services.templateService = 'healthy';
-      results.services.channelService = 'healthy';
-      results.services.analyticsService = 'healthy';
-      results.services.webhookService = 'healthy';
 
+      // Service health checks
+      results.services.templateService = "healthy";
+      results.services.channelService = "healthy";
+      results.services.analyticsService = "healthy";
+      results.services.webhookService = "healthy";
     } catch (error) {
       results.healthy = false;
       results.issues.push(`Platform health check failed: ${error}`);
@@ -177,22 +169,25 @@ export class KMessagePlatform {
     return results;
   }
 
-
   // Analytics dashboard data
   async getDashboardData(timeRange: { start: Date; end: Date }) {
     try {
       // Query analytics data
       const analyticsResult = await this.analyticsService.query({
-        metrics: [MetricType.MESSAGE_SENT, MetricType.MESSAGE_DELIVERED, MetricType.MESSAGE_FAILED],
+        metrics: [
+          MetricType.MESSAGE_SENT,
+          MetricType.MESSAGE_DELIVERED,
+          MetricType.MESSAGE_FAILED,
+        ],
         dateRange: timeRange,
-        interval: 'hour'
+        interval: "hour",
       });
 
       // Generate dashboard
       const dashboard = await this.dashboardGenerator.generateDashboard(
         timeRange,
-        { provider: 'iwinv' },
-        analyticsResult.data
+        { provider: "iwinv" },
+        analyticsResult.data,
       );
 
       return {
@@ -200,13 +195,13 @@ export class KMessagePlatform {
         data: {
           analytics: analyticsResult,
           dashboard,
-          summary: analyticsResult.summary
-        }
+          summary: analyticsResult.summary,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Analytics error'
+        error: error instanceof Error ? error.message : "Analytics error",
       };
     }
   }
@@ -215,9 +210,9 @@ export class KMessagePlatform {
   async shutdown() {
     try {
       await this.webhookService.shutdown();
-      console.log('✅ Platform shutdown completed');
+      console.log("✅ Platform shutdown completed");
     } catch (error) {
-      console.error('❌ Platform shutdown error:', error);
+      console.error("❌ Platform shutdown error:", error);
     }
   }
 }
@@ -232,34 +227,37 @@ if (process.env.IWINV_API_KEY) {
   platform = new KMessagePlatform({
     iwinvApiKey: process.env.IWINV_API_KEY,
     iwinvBaseUrl: process.env.IWINV_BASE_URL,
-    debug: process.env.NODE_ENV === 'development'
+    debug: process.env.NODE_ENV === "development",
   });
-  console.log('✅ K-Message Platform initialized successfully');
+  console.log("✅ K-Message Platform initialized successfully");
 } else {
-  console.log('⚠️  IWINV_API_KEY not found - platform running in demo mode');
+  console.log("⚠️  IWINV_API_KEY not found - platform running in demo mode");
 }
 
 // Middleware
-app.use('*', logger());
-app.use('*', cors());
+app.use("*", logger());
+app.use("*", cors());
 
 // Serve static files
-app.use('/static/*', serveStatic({ root: './public' }));
+app.use("/static/*", serveStatic({ root: "./public" }));
 
 // API Routes using k-msg services
 if (platform) {
-  app.route('/api/templates', templatesRouter(platform));
-  app.route('/api/messages', messagesRouter(platform));
-  app.route('/api/providers', providersRouter(platform));
+  app.route("/api/templates", templatesRouter(platform));
+  app.route("/api/messages", messagesRouter(platform));
+  app.route("/api/providers", providersRouter(platform));
 }
 
 // Platform info API
-app.get('/api/info', (c) => {
+app.get("/api/info", (c) => {
   if (!platform) {
-    return c.json({ 
-      success: false, 
-      error: 'Platform not initialized - missing IWINV_API_KEY' 
-    }, 503);
+    return c.json(
+      {
+        success: false,
+        error: "Platform not initialized - missing IWINV_API_KEY",
+      },
+      503,
+    );
   }
 
   const info = platform.getInfo();
@@ -267,133 +265,159 @@ app.get('/api/info', (c) => {
 });
 
 // Health check API
-app.get('/api/health', async (c) => {
+app.get("/api/health", async (c) => {
   if (!platform) {
-    return c.json({
-      healthy: false,
-      error: 'Platform not initialized - missing IWINV_API_KEY'
-    }, 503);
+    return c.json(
+      {
+        healthy: false,
+        error: "Platform not initialized - missing IWINV_API_KEY",
+      },
+      503,
+    );
   }
 
   try {
     const health = await platform.healthCheck();
     return c.json(health);
   } catch (error) {
-    return c.json({
-      healthy: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
+    return c.json(
+      {
+        healthy: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      500,
+    );
   }
 });
 
 // Analytics dashboard API
-app.get('/api/analytics/dashboard', async (c) => {
+app.get("/api/analytics/dashboard", async (c) => {
   if (!platform) {
-    return c.json({ 
-      success: false, 
-      error: 'Platform not initialized' 
-    }, 503);
+    return c.json(
+      {
+        success: false,
+        error: "Platform not initialized",
+      },
+      503,
+    );
   }
 
   try {
-    const hours = parseInt(c.req.query('hours') || '24');
+    const hours = parseInt(c.req.query("hours") || "24");
     const end = new Date();
     const start = new Date(end.getTime() - hours * 60 * 60 * 1000);
 
     const dashboardData = await platform.getDashboardData({ start, end });
     return c.json(dashboardData);
   } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Analytics error'
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Analytics error",
+      },
+      500,
+    );
   }
 });
 
 // Metrics collection API
-app.post('/api/analytics/metrics', async (c) => {
+app.post("/api/analytics/metrics", async (c) => {
   if (!platform) {
-    return c.json({ 
-      success: false, 
-      error: 'Platform not initialized' 
-    }, 503);
+    return c.json(
+      {
+        success: false,
+        error: "Platform not initialized",
+      },
+      503,
+    );
   }
 
   try {
     const { type, value, dimensions } = await c.req.json();
-    
+
     await platform.metricsCollector.collect({
       id: `metric_${Date.now()}`,
       type: type as MetricType,
       value,
       timestamp: new Date(),
-      dimensions: dimensions || {}
+      dimensions: dimensions || {},
     });
 
-    return c.json({ success: true, message: 'Metric collected' });
+    return c.json({ success: true, message: "Metric collected" });
   } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Metric collection error'
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Metric collection error",
+      },
+      500,
+    );
   }
 });
 
 // Webhook management APIs
-app.get('/api/webhooks/endpoints', async (c) => {
+app.get("/api/webhooks/endpoints", async (c) => {
   if (!platform) {
-    return c.json({ success: false, error: 'Platform not initialized' }, 503);
+    return c.json({ success: false, error: "Platform not initialized" }, 503);
   }
 
   try {
     // This would list registered webhook endpoints
-    return c.json({ 
-      success: true, 
-      data: { 
-        endpoints: [], 
-        message: 'Webhook endpoints feature available' 
-      } 
+    return c.json({
+      success: true,
+      data: {
+        endpoints: [],
+        message: "Webhook endpoints feature available",
+      },
     });
   } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Webhook error'
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Webhook error",
+      },
+      500,
+    );
   }
 });
 
-app.post('/api/webhooks/endpoints', async (c) => {
+app.post("/api/webhooks/endpoints", async (c) => {
   if (!platform) {
-    return c.json({ success: false, error: 'Platform not initialized' }, 503);
+    return c.json({ success: false, error: "Platform not initialized" }, 503);
   }
 
   try {
     const { url, name, events, headers } = await c.req.json();
-    
+
     const endpoint = await platform.webhookService.registerEndpoint({
       url,
-      name: name || 'Dashboard Webhook',
-      description: 'Webhook registered via admin dashboard',
+      name: name || "Dashboard Webhook",
+      description: "Webhook registered via admin dashboard",
       active: true,
       events: events || [WebhookEventType.MESSAGE_SENT],
-      headers: headers || {}
+      headers: headers || {},
     });
 
     return c.json({ success: true, data: endpoint });
   } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Webhook registration error'
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Webhook registration error",
+      },
+      500,
+    );
   }
 });
 
 // Redirect main route to app.ts implementation
-app.get('/', (c) => {
-  return c.redirect('/dashboard');
+app.get("/", (c) => {
+  return c.redirect("/dashboard");
 });
 
-app.get('/dashboard', (c) => {
+app.get("/dashboard", (c) => {
   return c.html(`
     <html>
       <head>
@@ -413,34 +437,40 @@ app.get('/dashboard', (c) => {
 
 // Error handling
 app.onError((error, c) => {
-  console.error('Application error:', error);
-  
+  console.error("Application error:", error);
+
   if (error instanceof KMsgError) {
-    return c.json({
-      success: false,
-      error: error.message,
-      code: error.code,
-      details: error.details
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error: error.message,
+        code: error.code,
+        details: error.details,
+      },
+      500,
+    );
   }
 
-  return c.json({
-    success: false,
-    error: 'Internal server error'
-  }, 500);
+  return c.json(
+    {
+      success: false,
+      error: "Internal server error",
+    },
+    500,
+  );
 });
 
 // Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\n🛑 Shutting down K-Message Admin Dashboard...');
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Shutting down K-Message Admin Dashboard...");
   if (platform) {
     await platform.shutdown();
   }
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('\n🛑 SIGTERM received, shutting down...');
+process.on("SIGTERM", async () => {
+  console.log("\n🛑 SIGTERM received, shutting down...");
   if (platform) {
     await platform.shutdown();
   }

@@ -1,12 +1,30 @@
-import type { BaseProvider, ProviderType, StandardRequest, StandardResult } from '@k-msg/core';
-import type { AlimTalkProvider, AlimTalkRequest, AlimTalkResult } from '../contracts/provider.contract';
-import type { SMSProvider, SMSRequest, SMSResult } from '../contracts/sms.contract';
+import type {
+  BaseProvider,
+  ProviderType,
+  StandardRequest,
+  StandardResult,
+} from "@k-msg/core";
+import type {
+  AlimTalkProvider,
+  AlimTalkRequest,
+  AlimTalkResult,
+} from "../contracts/provider.contract";
+import type {
+  SMSProvider,
+  SMSRequest,
+  SMSResult,
+} from "../contracts/sms.contract";
 
 export class ProviderManager {
-  private providers: Map<string, BaseProvider<StandardRequest, StandardResult>> = new Map();
+  private providers: Map<
+    string,
+    BaseProvider<StandardRequest, StandardResult>
+  > = new Map();
   private defaultProvider?: string;
 
-  registerProvider(provider: BaseProvider<StandardRequest, StandardResult>): void {
+  registerProvider(
+    provider: BaseProvider<StandardRequest, StandardResult>,
+  ): void {
     this.providers.set(provider.id, provider);
 
     // 첫 번째 프로바이더를 기본으로 설정
@@ -24,7 +42,9 @@ export class ProviderManager {
     }
   }
 
-  getProvider(providerId?: string): BaseProvider<StandardRequest, StandardResult> | null {
+  getProvider(
+    providerId?: string,
+  ): BaseProvider<StandardRequest, StandardResult> | null {
     const id = providerId || this.defaultProvider;
     return id ? this.providers.get(id) || null : null;
   }
@@ -40,7 +60,9 @@ export class ProviderManager {
   }
 
   listAlimTalkProviders(): AlimTalkProvider[] {
-    return Array.from(this.providers.values()).filter(this.isAlimTalkProvider) as AlimTalkProvider[];
+    return Array.from(this.providers.values()).filter(
+      this.isAlimTalkProvider,
+    ) as AlimTalkProvider[];
   }
 
   setDefaultProvider(providerId: string): void {
@@ -65,12 +87,14 @@ export class ProviderManager {
     return results;
   }
 
-  getProvidersForChannel(channel: string): BaseProvider<StandardRequest, StandardResult>[] {
-    return Array.from(this.providers.values()).filter(provider => {
+  getProvidersForChannel(
+    channel: string,
+  ): BaseProvider<StandardRequest, StandardResult>[] {
+    return Array.from(this.providers.values()).filter((provider) => {
       switch (channel) {
-        case 'alimtalk':
+        case "alimtalk":
           return this.isAlimTalkProvider(provider);
-        case 'sms':
+        case "sms":
           return this.isSMSProvider(provider);
         default:
           return false;
@@ -79,9 +103,11 @@ export class ProviderManager {
   }
 
   // Provider type별 조회
-  getProvidersByType(type: ProviderType): BaseProvider<StandardRequest, StandardResult>[] {
-    return Array.from(this.providers.values()).filter(provider =>
-      provider.type === type
+  getProvidersByType(
+    type: ProviderType,
+  ): BaseProvider<StandardRequest, StandardResult>[] {
+    return Array.from(this.providers.values()).filter(
+      (provider) => provider.type === type,
     );
   }
 
@@ -92,13 +118,15 @@ export class ProviderManager {
   }
 
   listSMSProviders(): SMSProvider[] {
-    return Array.from(this.providers.values()).filter(this.isSMSProvider) as SMSProvider[];
+    return Array.from(this.providers.values()).filter(
+      this.isSMSProvider,
+    ) as SMSProvider[];
   }
 
   // 제네릭 send 메서드 (타입 안전한 메시지 전송)
   async send<TRequest extends StandardRequest, TResult extends StandardResult>(
     providerId: string,
-    request: TRequest
+    request: TRequest,
   ): Promise<TResult> {
     const provider = this.getProvider(providerId);
     if (!provider) {
@@ -110,7 +138,7 @@ export class ProviderManager {
   // AlimTalk 전용 send 메서드
   async sendAlimTalk(
     providerId: string | undefined,
-    request: AlimTalkRequest
+    request: AlimTalkRequest,
   ): Promise<AlimTalkResult> {
     const provider = this.getAlimTalkProvider(providerId);
     if (!provider) {
@@ -122,7 +150,7 @@ export class ProviderManager {
   // SMS 전용 send 메서드
   async sendSMS(
     providerId: string | undefined,
-    request: SMSRequest
+    request: SMSRequest,
   ): Promise<SMSResult> {
     const provider = this.getSMSProvider(providerId);
     if (!provider) {
@@ -132,19 +160,23 @@ export class ProviderManager {
   }
 
   // Type guard to check if a provider is an AlimTalk provider
-  private isAlimTalkProvider(provider: BaseProvider): provider is AlimTalkProvider {
-    return provider.type === 'messaging' &&
-           'templates' in provider &&
-           'channels' in provider &&
-           'messaging' in provider &&
-           'analytics' in provider &&
-           'account' in provider;
+  private isAlimTalkProvider(
+    provider: BaseProvider,
+  ): provider is AlimTalkProvider {
+    return (
+      provider.type === "messaging" &&
+      "templates" in provider &&
+      "channels" in provider &&
+      "messaging" in provider &&
+      "analytics" in provider &&
+      "account" in provider
+    );
   }
 
   // Type guard to check if a provider is an SMS provider
   private isSMSProvider(provider: BaseProvider): provider is SMSProvider {
-    return provider.type === 'sms' &&
-           'sms' in provider &&
-           'account' in provider;
+    return (
+      provider.type === "sms" && "sms" in provider && "account" in provider
+    );
   }
 }

@@ -7,13 +7,13 @@ type StandardError = any;
 type StandardErrorCode = any;
 
 const StandardErrorCode = {
-  AUTHENTICATION_FAILED: 'AUTHENTICATION_FAILED',
-  INVALID_REQUEST: 'INVALID_REQUEST',
-  TEMPLATE_NOT_FOUND: 'TEMPLATE_NOT_FOUND',
-  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  PROVIDER_ERROR: 'PROVIDER_ERROR',
-  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+  AUTHENTICATION_FAILED: "AUTHENTICATION_FAILED",
+  INVALID_REQUEST: "INVALID_REQUEST",
+  TEMPLATE_NOT_FOUND: "TEMPLATE_NOT_FOUND",
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+  NETWORK_ERROR: "NETWORK_ERROR",
+  PROVIDER_ERROR: "PROVIDER_ERROR",
+  UNKNOWN_ERROR: "UNKNOWN_ERROR",
 } as any;
 
 // =============================================================================
@@ -25,33 +25,33 @@ const StandardErrorCode = {
  */
 export enum ErrorCategory {
   // 시스템 레벨 에러
-  SYSTEM = 'SYSTEM',
-  NETWORK = 'NETWORK',
-  CONFIGURATION = 'CONFIGURATION',
+  SYSTEM = "SYSTEM",
+  NETWORK = "NETWORK",
+  CONFIGURATION = "CONFIGURATION",
 
   // 비즈니스 레벨 에러
-  AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION = 'AUTHORIZATION',
-  VALIDATION = 'VALIDATION',
-  BUSINESS_LOGIC = 'BUSINESS_LOGIC',
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION = "AUTHORIZATION",
+  VALIDATION = "VALIDATION",
+  BUSINESS_LOGIC = "BUSINESS_LOGIC",
 
   // 외부 서비스 에러
-  PROVIDER = 'PROVIDER',
-  TEMPLATE = 'TEMPLATE',
-  RATE_LIMIT = 'RATE_LIMIT',
+  PROVIDER = "PROVIDER",
+  TEMPLATE = "TEMPLATE",
+  RATE_LIMIT = "RATE_LIMIT",
 
   // 알 수 없는 에러
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = "UNKNOWN",
 }
 
 /**
  * 에러 심각도
  */
 export enum ErrorSeverity {
-  LOW = 'LOW',        // 로깅만, 재시도 불필요
-  MEDIUM = 'MEDIUM',  // 경고, 재시도 가능
-  HIGH = 'HIGH',      // 에러, 재시도 필요
-  CRITICAL = 'CRITICAL' // 치명적, 즉시 조치 필요
+  LOW = "LOW", // 로깅만, 재시도 불필요
+  MEDIUM = "MEDIUM", // 경고, 재시도 가능
+  HIGH = "HIGH", // 에러, 재시도 필요
+  CRITICAL = "CRITICAL", // 치명적, 즉시 조치 필요
 }
 
 // =============================================================================
@@ -148,8 +148,8 @@ export class UnifiedError extends Error {
         category: this.category,
         severity: this.severity,
         timestamp: this.timestamp,
-        context: this.context
-      }
+        context: this.context,
+      },
     };
   }
 
@@ -262,7 +262,7 @@ export class ErrorFactory {
       provider: params.provider,
       originalCode: params.originalCode,
       originalMessage: params.originalMessage,
-      endpoint: params.endpoint
+      endpoint: params.endpoint,
     });
   }
 
@@ -277,7 +277,7 @@ export class ErrorFactory {
     retryable?: boolean;
   }): TemplateError {
     return new TemplateError({
-      code: 'TEMPLATE_ERROR',
+      code: "TEMPLATE_ERROR",
       message: params.message,
       category: ErrorCategory.TEMPLATE,
       severity: ErrorSeverity.MEDIUM,
@@ -285,7 +285,7 @@ export class ErrorFactory {
       timestamp: new Date(),
       templateCode: params.templateCode,
       validationErrors: params.validationErrors,
-      missingVariables: params.missingVariables
+      missingVariables: params.missingVariables,
     });
   }
 
@@ -300,66 +300,77 @@ export class ErrorFactory {
     timeout?: boolean;
     connectionRefused?: boolean;
   }): NetworkError {
-    const isRetryable = params.statusCode ?
-      params.statusCode >= 500 || params.statusCode === 429 :
-      true;
+    const isRetryable = params.statusCode
+      ? params.statusCode >= 500 || params.statusCode === 429
+      : true;
 
     return new NetworkError({
-      code: 'NETWORK_ERROR',
+      code: "NETWORK_ERROR",
       message: params.message,
       category: ErrorCategory.NETWORK,
-      severity: params.statusCode && params.statusCode >= 500 ? ErrorSeverity.HIGH : ErrorSeverity.MEDIUM,
+      severity:
+        params.statusCode && params.statusCode >= 500
+          ? ErrorSeverity.HIGH
+          : ErrorSeverity.MEDIUM,
       retryable: isRetryable,
       timestamp: new Date(),
       url: params.url,
       method: params.method,
       statusCode: params.statusCode,
       timeout: params.timeout,
-      connectionRefused: params.connectionRefused
+      connectionRefused: params.connectionRefused,
     });
   }
 
   /**
    * 인증 에러 생성
    */
-  static createAuthenticationError(message: string = 'Authentication failed'): UnifiedError {
+  static createAuthenticationError(
+    message: string = "Authentication failed",
+  ): UnifiedError {
     return new UnifiedError({
-      code: 'AUTHENTICATION_FAILED',
+      code: "AUTHENTICATION_FAILED",
       message,
       category: ErrorCategory.AUTHENTICATION,
       severity: ErrorSeverity.HIGH,
       retryable: false,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   /**
    * 검증 에러 생성
    */
-  static createValidationError(message: string, context?: Record<string, unknown>): UnifiedError {
+  static createValidationError(
+    message: string,
+    context?: Record<string, unknown>,
+  ): UnifiedError {
     return new UnifiedError({
-      code: 'VALIDATION_ERROR',
+      code: "VALIDATION_ERROR",
       message,
       category: ErrorCategory.VALIDATION,
       severity: ErrorSeverity.MEDIUM,
       retryable: false,
       timestamp: new Date(),
-      context
+      context,
     });
   }
 
   /**
    * 요율 제한 에러 생성
    */
-  static createRateLimitError(message: string = 'Rate limit exceeded', retryAfter?: number): UnifiedError {
+  static createRateLimitError(
+    message: string = "Rate limit exceeded",
+    retryAfter?: number,
+  ): UnifiedError {
     return new UnifiedError({
-      code: 'RATE_LIMIT_EXCEEDED',
+      code: "RATE_LIMIT_EXCEEDED",
       message,
       category: ErrorCategory.RATE_LIMIT,
       severity: ErrorSeverity.MEDIUM,
       retryable: true,
       timestamp: new Date(),
-      context: retryAfter ? { retryAfter } : undefined
+      context: retryAfter ? { retryAfter } : undefined,
     });
   }
 }
@@ -372,43 +383,50 @@ export class ErrorConverter {
   /**
    * 임의의 에러를 UnifiedError로 변환
    */
-  static toUnifiedError(error: unknown, context?: Record<string, unknown>): UnifiedError {
+  static toUnifiedError(
+    error: unknown,
+    context?: Record<string, unknown>,
+  ): UnifiedError {
     if (error instanceof UnifiedError) {
       return error;
     }
 
     if (error instanceof Error) {
       return new UnifiedError({
-        code: 'GENERIC_ERROR',
+        code: "GENERIC_ERROR",
         message: error.message,
         category: ErrorCategory.UNKNOWN,
         severity: ErrorSeverity.MEDIUM,
         retryable: false,
         timestamp: new Date(),
-        context: { ...context, originalName: error.name, originalStack: error.stack }
+        context: {
+          ...context,
+          originalName: error.name,
+          originalStack: error.stack,
+        },
       });
     }
 
-    if (typeof error === 'string') {
+    if (typeof error === "string") {
       return new UnifiedError({
-        code: 'STRING_ERROR',
+        code: "STRING_ERROR",
         message: error,
         category: ErrorCategory.UNKNOWN,
         severity: ErrorSeverity.LOW,
         retryable: false,
         timestamp: new Date(),
-        context
+        context,
       });
     }
 
     return new UnifiedError({
-      code: 'UNKNOWN_ERROR',
-      message: 'An unknown error occurred',
+      code: "UNKNOWN_ERROR",
+      message: "An unknown error occurred",
       category: ErrorCategory.UNKNOWN,
       severity: ErrorSeverity.MEDIUM,
       retryable: false,
       timestamp: new Date(),
-      context: { ...context, originalError: error }
+      context: { ...context, originalError: error },
     });
   }
 
@@ -422,7 +440,8 @@ export class ErrorConverter {
     data?: unknown;
   }): ProviderError {
     const retryable = error.code >= 500 || error.code === 429;
-    const severity = error.code >= 500 ? ErrorSeverity.HIGH : ErrorSeverity.MEDIUM;
+    const severity =
+      error.code >= 500 ? ErrorSeverity.HIGH : ErrorSeverity.MEDIUM;
 
     return new ProviderError({
       code: `IWINV_${error.code}`,
@@ -431,10 +450,10 @@ export class ErrorConverter {
       severity,
       retryable,
       timestamp: new Date(),
-      provider: 'iwinv',
+      provider: "iwinv",
       originalCode: error.code,
       originalMessage: error.message,
-      context: error.data ? { data: error.data } : undefined
+      context: error.data ? { data: error.data } : undefined,
     });
   }
 
@@ -453,7 +472,7 @@ export class ErrorConverter {
 
     return new NetworkError({
       code: `HTTP_${statusCode}`,
-      message: `HTTP ${statusCode}: ${statusText || 'Unknown error'}`,
+      message: `HTTP ${statusCode}: ${statusText || "Unknown error"}`,
       category: ErrorCategory.NETWORK,
       severity: statusCode >= 500 ? ErrorSeverity.HIGH : ErrorSeverity.MEDIUM,
       retryable,
@@ -461,7 +480,7 @@ export class ErrorConverter {
       url,
       method,
       statusCode,
-      context: responseBody ? { responseBody } : undefined
+      context: responseBody ? { responseBody } : undefined,
     });
   }
 }
@@ -491,10 +510,12 @@ export function isRetryableError(error: unknown): boolean {
     return error.retryable;
   }
   // 기본적으로 네트워크 에러는 재시도 가능
-  return error instanceof Error &&
-         (error.message.includes('network') ||
-          error.message.includes('timeout') ||
-          error.message.includes('ECONNREFUSED'));
+  return (
+    error instanceof Error &&
+    (error.message.includes("network") ||
+      error.message.includes("timeout") ||
+      error.message.includes("ECONNREFUSED"))
+  );
 }
 
 // =============================================================================
@@ -519,19 +540,19 @@ export class ErrorAnalyzer {
       byCategory: {} as Record<ErrorCategory, number>,
       bySeverity: {} as Record<ErrorSeverity, number>,
       retryable: 0,
-      nonRetryable: 0
+      nonRetryable: 0,
     };
 
     // 초기화
-    Object.values(ErrorCategory).forEach(category => {
+    Object.values(ErrorCategory).forEach((category) => {
       stats.byCategory[category] = 0;
     });
-    Object.values(ErrorSeverity).forEach(severity => {
+    Object.values(ErrorSeverity).forEach((severity) => {
       stats.bySeverity[severity] = 0;
     });
 
     // 집계
-    errors.forEach(error => {
+    errors.forEach((error) => {
       stats.byCategory[error.category]++;
       stats.bySeverity[error.severity]++;
       if (error.retryable) {
@@ -548,9 +569,10 @@ export class ErrorAnalyzer {
    * 중요 에러 필터링
    */
   static getCriticalErrors(errors: UnifiedError[]): UnifiedError[] {
-    return errors.filter(error =>
-      error.severity === ErrorSeverity.CRITICAL ||
-      error.severity === ErrorSeverity.HIGH
+    return errors.filter(
+      (error) =>
+        error.severity === ErrorSeverity.CRITICAL ||
+        error.severity === ErrorSeverity.HIGH,
     );
   }
 
@@ -558,6 +580,6 @@ export class ErrorAnalyzer {
    * 재시도 가능한 에러 필터링
    */
   static getRetryableErrors(errors: UnifiedError[]): UnifiedError[] {
-    return errors.filter(error => error.retryable);
+    return errors.filter((error) => error.retryable);
   }
 }

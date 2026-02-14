@@ -2,13 +2,13 @@
  * Template Registry - Manages templates across providers and categories
  */
 
-import { EventEmitter } from 'events';
-import {
+import { EventEmitter } from "events";
+import { TemplateValidator } from "../parser/validator";
+import type {
   AlimTalkTemplate,
   TemplateCategory,
-  TemplateStatus
-} from '../types/template.types';
-import { TemplateValidator } from '../parser/validator';
+  TemplateStatus,
+} from "../types/template.types";
 
 export interface TemplateSearchFilters {
   provider?: string;
@@ -25,8 +25,8 @@ export interface TemplateSearchFilters {
 export interface TemplateSearchOptions {
   page?: number;
   limit?: number;
-  sortBy?: 'name' | 'code' | 'createdAt' | 'updatedAt' | 'usage';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "code" | "createdAt" | "updatedAt" | "usage";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TemplateSearchResult {
@@ -91,7 +91,7 @@ export class TemplateRegistry extends EventEmitter {
     enableUsageTracking: true,
     enableAutoBackup: false,
     backupInterval: 3600000, // 1 hour
-    enableValidationOnRegister: true
+    enableValidationOnRegister: true,
   };
 
   constructor(private options: Partial<TemplateRegistryOptions> = {}) {
@@ -111,14 +111,18 @@ export class TemplateRegistry extends EventEmitter {
     if (this.options.enableValidationOnRegister) {
       const validation = TemplateValidator.validate(template);
       if (!validation.isValid) {
-        throw new Error(`Template validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Template validation failed: ${validation.errors.join(", ")}`,
+        );
       }
     }
 
     // Check for duplicate codes within the same provider
     const existingTemplate = this.getByCode(template.code, template.provider);
     if (existingTemplate && existingTemplate.id !== template.id) {
-      throw new Error(`Template with code '${template.code}' already exists for provider '${template.provider}'`);
+      throw new Error(
+        `Template with code '${template.code}' already exists for provider '${template.provider}'`,
+      );
     }
 
     // Store the template
@@ -138,13 +142,16 @@ export class TemplateRegistry extends EventEmitter {
       this.initializeUsageStats(template);
     }
 
-    this.emit('template:registered', { template });
+    this.emit("template:registered", { template });
   }
 
   /**
    * Update an existing template
    */
-  async update(templateId: string, updates: Partial<AlimTalkTemplate>): Promise<AlimTalkTemplate> {
+  async update(
+    templateId: string,
+    updates: Partial<AlimTalkTemplate>,
+  ): Promise<AlimTalkTemplate> {
     const existing = this.templates.get(templateId);
     if (!existing) {
       throw new Error(`Template ${templateId} not found`);
@@ -158,15 +165,17 @@ export class TemplateRegistry extends EventEmitter {
       metadata: {
         ...existing.metadata,
         ...updates.metadata,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     };
 
     // Validate if enabled
     if (this.options.enableValidationOnRegister) {
       const validation = TemplateValidator.validate(updatedTemplate);
       if (!validation.isValid) {
-        throw new Error(`Template validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Template validation failed: ${validation.errors.join(", ")}`,
+        );
       }
     }
 
@@ -177,12 +186,15 @@ export class TemplateRegistry extends EventEmitter {
 
     // Update storage and indexes
     this.templates.set(templateId, updatedTemplate);
-    this.templatesByCode.set(`${updatedTemplate.provider}:${updatedTemplate.code}`, updatedTemplate);
+    this.templatesByCode.set(
+      `${updatedTemplate.provider}:${updatedTemplate.code}`,
+      updatedTemplate,
+    );
     this.updateIndexes(updatedTemplate);
 
-    this.emit('template:updated', { 
-      oldTemplate: existing, 
-      newTemplate: updatedTemplate 
+    this.emit("template:updated", {
+      oldTemplate: existing,
+      newTemplate: updatedTemplate,
     });
 
     return updatedTemplate;
@@ -207,74 +219,87 @@ export class TemplateRegistry extends EventEmitter {
    */
   search(
     filters: TemplateSearchFilters = {},
-    options: TemplateSearchOptions = {}
+    options: TemplateSearchOptions = {},
   ): TemplateSearchResult {
     let templates = Array.from(this.templates.values());
 
     // Apply filters
     if (filters.provider) {
-      templates = templates.filter(t => t.provider === filters.provider);
+      templates = templates.filter((t) => t.provider === filters.provider);
     }
 
     if (filters.category) {
-      templates = templates.filter(t => t.category === filters.category);
+      templates = templates.filter((t) => t.category === filters.category);
     }
 
     if (filters.status) {
-      templates = templates.filter(t => t.status === filters.status);
+      templates = templates.filter((t) => t.status === filters.status);
     }
 
     if (filters.nameContains) {
       const searchTerm = filters.nameContains.toLowerCase();
-      templates = templates.filter(t => t.name.toLowerCase().includes(searchTerm));
+      templates = templates.filter((t) =>
+        t.name.toLowerCase().includes(searchTerm),
+      );
     }
 
     if (filters.codeContains) {
       const searchTerm = filters.codeContains.toLowerCase();
-      templates = templates.filter(t => t.code.toLowerCase().includes(searchTerm));
+      templates = templates.filter((t) =>
+        t.code.toLowerCase().includes(searchTerm),
+      );
     }
 
     if (filters.createdAfter) {
-      templates = templates.filter(t => t.metadata.createdAt >= filters.createdAfter!);
+      templates = templates.filter(
+        (t) => t.metadata.createdAt >= filters.createdAfter!,
+      );
     }
 
     if (filters.createdBefore) {
-      templates = templates.filter(t => t.metadata.createdAt <= filters.createdBefore!);
+      templates = templates.filter(
+        (t) => t.metadata.createdAt <= filters.createdBefore!,
+      );
     }
 
     if (filters.usageMin !== undefined) {
-      templates = templates.filter(t => t.metadata.usage.sent >= filters.usageMin!);
+      templates = templates.filter(
+        (t) => t.metadata.usage.sent >= filters.usageMin!,
+      );
     }
 
     if (filters.usageMax !== undefined) {
-      templates = templates.filter(t => t.metadata.usage.sent <= filters.usageMax!);
+      templates = templates.filter(
+        (t) => t.metadata.usage.sent <= filters.usageMax!,
+      );
     }
 
     // Apply sorting
-    const sortBy = options.sortBy || 'createdAt';
-    const sortOrder = options.sortOrder || 'desc';
+    const sortBy = options.sortBy || "createdAt";
+    const sortOrder = options.sortOrder || "desc";
 
     templates.sort((a, b) => {
-      let aValue, bValue;
+      let aValue: string | number = 0;
+      let bValue: string | number = 0;
 
       switch (sortBy) {
-        case 'name':
+        case "name":
           aValue = a.name;
           bValue = b.name;
           break;
-        case 'code':
+        case "code":
           aValue = a.code;
           bValue = b.code;
           break;
-        case 'createdAt':
+        case "createdAt":
           aValue = a.metadata.createdAt.getTime();
           bValue = b.metadata.createdAt.getTime();
           break;
-        case 'updatedAt':
+        case "updatedAt":
           aValue = a.metadata.updatedAt.getTime();
           bValue = b.metadata.updatedAt.getTime();
           break;
-        case 'usage':
+        case "usage":
           aValue = a.metadata.usage.sent;
           bValue = b.metadata.usage.sent;
           break;
@@ -283,7 +308,7 @@ export class TemplateRegistry extends EventEmitter {
           bValue = b.metadata.createdAt.getTime();
       }
 
-      if (sortOrder === 'asc') {
+      if (sortOrder === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
@@ -303,7 +328,7 @@ export class TemplateRegistry extends EventEmitter {
       total: templates.length,
       page,
       limit,
-      hasMore: end < templates.length
+      hasMore: end < templates.length,
     };
   }
 
@@ -313,8 +338,10 @@ export class TemplateRegistry extends EventEmitter {
   getByProvider(provider: string): AlimTalkTemplate[] {
     const templateIds = this.templatesByProvider.get(provider) || new Set();
     return Array.from(templateIds)
-      .map(id => this.templates.get(id))
-      .filter((template): template is AlimTalkTemplate => template !== undefined);
+      .map((id) => this.templates.get(id))
+      .filter(
+        (template): template is AlimTalkTemplate => template !== undefined,
+      );
   }
 
   /**
@@ -323,8 +350,10 @@ export class TemplateRegistry extends EventEmitter {
   getByCategory(category: TemplateCategory): AlimTalkTemplate[] {
     const templateIds = this.templatesByCategory.get(category) || new Set();
     return Array.from(templateIds)
-      .map(id => this.templates.get(id))
-      .filter((template): template is AlimTalkTemplate => template !== undefined);
+      .map((id) => this.templates.get(id))
+      .filter(
+        (template): template is AlimTalkTemplate => template !== undefined,
+      );
   }
 
   /**
@@ -360,7 +389,7 @@ export class TemplateRegistry extends EventEmitter {
     this.templateHistories.delete(templateId);
     this.usageStats.delete(templateId);
 
-    this.emit('template:deleted', { template });
+    this.emit("template:deleted", { template });
     return true;
   }
 
@@ -378,17 +407,22 @@ export class TemplateRegistry extends EventEmitter {
     const history = this.templateHistories.get(templateId);
     if (!history) return null;
 
-    const versionEntry = history.versions.find(v => v.version === version);
+    const versionEntry = history.versions.find((v) => v.version === version);
     return versionEntry ? versionEntry.template : null;
   }
 
   /**
    * Restore template to a specific version
    */
-  async restoreVersion(templateId: string, version: number): Promise<AlimTalkTemplate> {
+  async restoreVersion(
+    templateId: string,
+    version: number,
+  ): Promise<AlimTalkTemplate> {
     const versionTemplate = this.getVersion(templateId, version);
     if (!versionTemplate) {
-      throw new Error(`Version ${version} not found for template ${templateId}`);
+      throw new Error(
+        `Version ${version} not found for template ${templateId}`,
+      );
     }
 
     // Update to the version template (this will create a new version)
@@ -396,8 +430,8 @@ export class TemplateRegistry extends EventEmitter {
       ...versionTemplate,
       metadata: {
         ...versionTemplate.metadata,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     });
   }
 
@@ -417,7 +451,7 @@ export class TemplateRegistry extends EventEmitter {
       sent?: number;
       delivered?: number;
       failed?: number;
-    }
+    },
   ): void {
     const template = this.templates.get(templateId);
     if (!template) return;
@@ -435,22 +469,24 @@ export class TemplateRegistry extends EventEmitter {
         if (stats.delivered) usageStats.totalDelivered += stats.delivered;
         if (stats.failed) usageStats.totalFailed += stats.failed;
 
-        usageStats.deliveryRate = usageStats.totalSent > 0 
-          ? (usageStats.totalDelivered / usageStats.totalSent) * 100 
-          : 0;
-        usageStats.failureRate = usageStats.totalSent > 0 
-          ? (usageStats.totalFailed / usageStats.totalSent) * 100 
-          : 0;
+        usageStats.deliveryRate =
+          usageStats.totalSent > 0
+            ? (usageStats.totalDelivered / usageStats.totalSent) * 100
+            : 0;
+        usageStats.failureRate =
+          usageStats.totalSent > 0
+            ? (usageStats.totalFailed / usageStats.totalSent) * 100
+            : 0;
         usageStats.lastUsed = new Date();
 
         // Update daily stats
-        const today = new Date().toISOString().split('T')[0];
-        let todayStats = usageStats.usageByDay.find(d => d.date === today);
-        
+        const today = new Date().toISOString().split("T")[0];
+        let todayStats = usageStats.usageByDay.find((d) => d.date === today);
+
         if (!todayStats) {
           todayStats = { date: today, sent: 0, delivered: 0, failed: 0 };
           usageStats.usageByDay.push(todayStats);
-          
+
           // Keep only last 30 days
           usageStats.usageByDay = usageStats.usageByDay
             .sort((a, b) => b.date.localeCompare(a.date))
@@ -463,7 +499,7 @@ export class TemplateRegistry extends EventEmitter {
       }
     }
 
-    this.emit('usage:updated', { templateId, stats });
+    this.emit("usage:updated", { templateId, stats });
   }
 
   /**
@@ -491,7 +527,7 @@ export class TemplateRegistry extends EventEmitter {
       totalTemplates: templates.length,
       byProvider,
       byCategory,
-      byStatus
+      byStatus,
     };
   }
 
@@ -500,17 +536,24 @@ export class TemplateRegistry extends EventEmitter {
    */
   export(filters?: TemplateSearchFilters): string {
     const result = this.search(filters, { limit: 10000 });
-    return JSON.stringify({
-      templates: result.templates,
-      exportedAt: new Date().toISOString(),
-      total: result.total
-    }, null, 2);
+    return JSON.stringify(
+      {
+        templates: result.templates,
+        exportedAt: new Date().toISOString(),
+        total: result.total,
+      },
+      null,
+      2,
+    );
   }
 
   /**
    * Import templates from JSON
    */
-  async import(jsonData: string, options: { overwrite?: boolean } = {}): Promise<{
+  async import(
+    jsonData: string,
+    options: { overwrite?: boolean } = {},
+  ): Promise<{
     imported: number;
     skipped: number;
     errors: string[];
@@ -524,7 +567,7 @@ export class TemplateRegistry extends EventEmitter {
       for (const templateData of templates) {
         try {
           const existingTemplate = this.get(templateData.id);
-          
+
           if (existingTemplate && !options.overwrite) {
             result.skipped++;
             continue;
@@ -533,11 +576,15 @@ export class TemplateRegistry extends EventEmitter {
           await this.register(templateData);
           result.imported++;
         } catch (error) {
-          result.errors.push(`Template ${templateData.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          result.errors.push(
+            `Template ${templateData.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     } catch (error) {
-      result.errors.push(`Invalid JSON format: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      result.errors.push(
+        `Invalid JSON format: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
 
     return result;
@@ -553,8 +600,8 @@ export class TemplateRegistry extends EventEmitter {
     this.templatesByCategory.clear();
     this.templateHistories.clear();
     this.usageStats.clear();
-    
-    this.emit('registry:cleared');
+
+    this.emit("registry:cleared");
   }
 
   /**
@@ -565,9 +612,9 @@ export class TemplateRegistry extends EventEmitter {
       clearInterval(this.backupTimer);
       this.backupTimer = undefined;
     }
-    
+
     this.removeAllListeners();
-    this.emit('registry:destroyed');
+    this.emit("registry:destroyed");
   }
 
   private updateIndexes(template: AlimTalkTemplate): void {
@@ -587,33 +634,47 @@ export class TemplateRegistry extends EventEmitter {
   private initializeVersionHistory(template: AlimTalkTemplate): void {
     const history: TemplateHistory = {
       templateId: template.id,
-      versions: [{
-        version: 1,
-        template: JSON.parse(JSON.stringify(template)),
-        changes: ['Initial version'],
-        createdAt: new Date()
-      }],
-      currentVersion: 1
+      versions: [
+        {
+          version: 1,
+          template: JSON.parse(JSON.stringify(template)),
+          changes: ["Initial version"],
+          createdAt: new Date(),
+        },
+      ],
+      currentVersion: 1,
     };
 
     this.templateHistories.set(template.id, history);
   }
 
-  private addVersionToHistory(oldTemplate: AlimTalkTemplate, newTemplate: AlimTalkTemplate): void {
+  private addVersionToHistory(
+    oldTemplate: AlimTalkTemplate,
+    newTemplate: AlimTalkTemplate,
+  ): void {
     const history = this.templateHistories.get(newTemplate.id);
     if (!history) return;
 
     // Detect changes
     const changes: string[] = [];
-    if (oldTemplate.name !== newTemplate.name) changes.push('Name changed');
-    if (oldTemplate.content !== newTemplate.content) changes.push('Content changed');
-    if (oldTemplate.category !== newTemplate.category) changes.push('Category changed');
-    if (oldTemplate.status !== newTemplate.status) changes.push('Status changed');
-    if (JSON.stringify(oldTemplate.variables) !== JSON.stringify(newTemplate.variables)) {
-      changes.push('Variables changed');
+    if (oldTemplate.name !== newTemplate.name) changes.push("Name changed");
+    if (oldTemplate.content !== newTemplate.content)
+      changes.push("Content changed");
+    if (oldTemplate.category !== newTemplate.category)
+      changes.push("Category changed");
+    if (oldTemplate.status !== newTemplate.status)
+      changes.push("Status changed");
+    if (
+      JSON.stringify(oldTemplate.variables) !==
+      JSON.stringify(newTemplate.variables)
+    ) {
+      changes.push("Variables changed");
     }
-    if (JSON.stringify(oldTemplate.buttons) !== JSON.stringify(newTemplate.buttons)) {
-      changes.push('Buttons changed');
+    if (
+      JSON.stringify(oldTemplate.buttons) !==
+      JSON.stringify(newTemplate.buttons)
+    ) {
+      changes.push("Buttons changed");
     }
 
     if (changes.length === 0) return; // No changes detected
@@ -622,7 +683,7 @@ export class TemplateRegistry extends EventEmitter {
       version: history.currentVersion + 1,
       template: JSON.parse(JSON.stringify(newTemplate)),
       changes,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     history.versions.push(newVersion);
@@ -630,7 +691,9 @@ export class TemplateRegistry extends EventEmitter {
 
     // Keep only max versions
     if (history.versions.length > this.options.maxVersionsPerTemplate!) {
-      history.versions = history.versions.slice(-this.options.maxVersionsPerTemplate!);
+      history.versions = history.versions.slice(
+        -this.options.maxVersionsPerTemplate!,
+      );
     }
   }
 
@@ -642,7 +705,7 @@ export class TemplateRegistry extends EventEmitter {
       totalFailed: template.metadata.usage.failed,
       deliveryRate: 0,
       failureRate: 0,
-      usageByDay: []
+      usageByDay: [],
     };
 
     if (stats.totalSent > 0) {
@@ -655,9 +718,9 @@ export class TemplateRegistry extends EventEmitter {
 
   private startAutoBackup(): void {
     this.backupTimer = setInterval(() => {
-      this.emit('backup:requested', {
+      this.emit("backup:requested", {
         data: this.export(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }, this.options.backupInterval!);
   }

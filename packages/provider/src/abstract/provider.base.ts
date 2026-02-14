@@ -1,25 +1,25 @@
-import {
+import type { ConfigurationSchema, DeliveryStatus } from "@k-msg/core";
+import type {
+  AccountContract,
   AlimTalkProvider,
   AlimTalkRequest,
   AlimTalkResult,
-  ProviderCapabilities,
-  TemplateContract,
-  ChannelContract,
-  MessagingContract,
   AnalyticsContract,
-  AccountContract,
+  ChannelContract,
+  ConfigurationField,
+  MessagingContract,
+  ProviderCapabilities,
   ProviderConfiguration,
-  ConfigurationField
-} from '../contracts/provider.contract';
-import type { DeliveryStatus, ConfigurationSchema } from '@k-msg/core';
+  TemplateContract,
+} from "../contracts/provider.contract";
 
 export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   public abstract readonly id: string;
   public abstract readonly name: string;
-  public readonly type: 'messaging' = 'messaging';
+  public readonly type: "messaging" = "messaging";
   public abstract readonly version: string;
   public abstract readonly capabilities: ProviderCapabilities;
-  
+
   protected config: Record<string, unknown> = {};
   protected isConfigured: boolean = false;
 
@@ -47,7 +47,10 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   }
 
   // BaseProvider 필수 메서드들
-  public abstract send<T extends AlimTalkRequest = AlimTalkRequest, R extends AlimTalkResult = AlimTalkResult>(request: T): Promise<R>;
+  public abstract send<
+    T extends AlimTalkRequest = AlimTalkRequest,
+    R extends AlimTalkResult = AlimTalkResult,
+  >(request: T): Promise<R>;
   public abstract getStatus(requestId: string): Promise<DeliveryStatus>;
   public abstract cancel?(requestId: string): Promise<boolean>;
   public abstract getSupportedFeatures(): string[];
@@ -61,13 +64,15 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
    */
   protected validateConfiguration(config: Record<string, unknown>): void {
     const schema = this.getProviderConfiguration();
-    
+
     // Check required fields
     for (const field of schema.required) {
       if (!(field.key in config)) {
-        throw new Error(`Required configuration field '${field.key}' is missing`);
+        throw new Error(
+          `Required configuration field '${field.key}' is missing`,
+        );
       }
-      
+
       this.validateFieldValue(field, config[field.key]);
     }
 
@@ -82,22 +87,22 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   private validateFieldValue(field: ConfigurationField, value: unknown): void {
     // Type validation
     switch (field.type) {
-      case 'string':
-        if (typeof value !== 'string') {
+      case "string":
+        if (typeof value !== "string") {
           throw new Error(`Field '${field.key}' must be a string`);
         }
         break;
-      case 'number':
-        if (typeof value !== 'number') {
+      case "number":
+        if (typeof value !== "number") {
           throw new Error(`Field '${field.key}' must be a number`);
         }
         break;
-      case 'boolean':
-        if (typeof value !== 'boolean') {
+      case "boolean":
+        if (typeof value !== "boolean") {
           throw new Error(`Field '${field.key}' must be a boolean`);
         }
         break;
-      case 'url':
+      case "url":
         try {
           new URL(String(value));
         } catch {
@@ -111,16 +116,28 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
       if (field.validation.pattern) {
         const regex = new RegExp(field.validation.pattern);
         if (!regex.test(String(value))) {
-          throw new Error(`Field '${field.key}' does not match required pattern`);
+          throw new Error(
+            `Field '${field.key}' does not match required pattern`,
+          );
         }
       }
-      
-      if (field.validation.min !== undefined && Number(value) < field.validation.min) {
-        throw new Error(`Field '${field.key}' must be at least ${field.validation.min}`);
+
+      if (
+        field.validation.min !== undefined &&
+        Number(value) < field.validation.min
+      ) {
+        throw new Error(
+          `Field '${field.key}' must be at least ${field.validation.min}`,
+        );
       }
-      
-      if (field.validation.max !== undefined && Number(value) > field.validation.max) {
-        throw new Error(`Field '${field.key}' must be at most ${field.validation.max}`);
+
+      if (
+        field.validation.max !== undefined &&
+        Number(value) > field.validation.max
+      ) {
+        throw new Error(
+          `Field '${field.key}' must be at most ${field.validation.max}`,
+        );
       }
     }
   }
@@ -144,7 +161,7 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
    */
   protected getConfig<T = unknown>(key: string): T {
     if (!this.isConfigured) {
-      throw new Error('Provider is not configured');
+      throw new Error("Provider is not configured");
     }
     return this.config[key] as T;
   }
@@ -174,30 +191,31 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
 
     try {
       if (!this.isReady()) {
-        issues.push('Provider is not configured');
+        issues.push("Provider is not configured");
         return { healthy: false, issues };
       }
 
       // Test basic connectivity
       await this.testConnectivity();
-      
+
       // Test authentication
       await this.testAuthentication();
 
       const latency = Date.now() - startTime;
-      
+
       return {
         healthy: issues.length === 0,
         issues,
-        latency
+        latency,
       };
-
     } catch (error) {
-      issues.push(`Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      issues.push(
+        `Health check failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       return {
         healthy: false,
         issues,
-        latency: Date.now() - startTime
+        latency: Date.now() - startTime,
       };
     }
   }
@@ -227,7 +245,7 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
       name: this.name,
       version: this.getVersion(),
       capabilities: this.capabilities,
-      configured: this.isConfigured
+      configured: this.isConfigured,
     };
   }
 
@@ -255,8 +273,16 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   /**
    * Create standardized error
    */
-  protected createError(code: string, message: string, details?: Record<string, unknown>): Error {
-    const error = new Error(message) as Error & { code?: string; provider?: string; details?: Record<string, unknown> };
+  protected createError(
+    code: string,
+    message: string,
+    details?: Record<string, unknown>,
+  ): Error {
+    const error = new Error(message) as Error & {
+      code?: string;
+      provider?: string;
+      details?: Record<string, unknown>;
+    };
     error.code = code;
     error.provider = this.id;
     error.details = details;
@@ -266,12 +292,16 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   /**
    * Log provider activity
    */
-  protected log(level: 'info' | 'warn' | 'error', message: string, data?: unknown): void {
+  protected log(
+    level: "info" | "warn" | "error",
+    message: string,
+    data?: unknown,
+  ): void {
     const logData: Record<string, unknown> = {
       provider: this.id,
       level,
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     if (data) {
@@ -288,11 +318,11 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
   protected async handleRateLimit(operation: string): Promise<void> {
     // In a real implementation, this would check rate limits and implement backoff
     const rateLimit = this.capabilities.messaging.maxRequestsPerSecond;
-    
+
     // Simple implementation - can be enhanced with proper rate limiting
     if (rateLimit > 0) {
       const delay = 1000 / rateLimit;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -306,13 +336,13 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
       initialDelay?: number;
       maxDelay?: number;
       backoffFactor?: number;
-    } = {}
+    } = {},
   ): Promise<T> {
     const {
       maxRetries = 3,
       initialDelay = 1000,
       maxDelay = 10000,
-      backoffFactor = 2
+      backoffFactor = 2,
     } = options;
 
     let lastError: Error;
@@ -323,18 +353,18 @@ export abstract class BaseAlimTalkProvider implements AlimTalkProvider {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt === maxRetries) {
           break; // No more retries
         }
 
-        this.log('warn', `Operation failed, retrying in ${delay}ms`, {
+        this.log("warn", `Operation failed, retrying in ${delay}ms`, {
           attempt: attempt + 1,
           maxRetries,
-          error: lastError.message
+          error: lastError.message,
         });
 
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         delay = Math.min(delay * backoffFactor, maxDelay);
       }
     }

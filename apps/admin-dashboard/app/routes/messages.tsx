@@ -1,9 +1,9 @@
-import { createRoute } from 'honox/factory';
-import { Layout } from '../components/Layout';
-import { Header } from '../components/Header';
-import { Navigation } from '../components/Navigation';
-import { MessagesTab } from '../components/MessagesTab';
-import { NotificationToast } from '../components/NotificationToast';
+import { createRoute } from "honox/factory";
+import { Header } from "../components/Header";
+import { Layout } from "../components/Layout";
+import { MessagesTab } from "../components/MessagesTab";
+import { Navigation } from "../components/Navigation";
+import { NotificationToast } from "../components/NotificationToast";
 
 export default createRoute(async (c) => {
   return c.render(
@@ -11,7 +11,7 @@ export default createRoute(async (c) => {
       <div class="min-h-screen">
         <Header />
         <Navigation />
-        
+
         <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div class="px-4 py-6 sm:px-0">
             <MessagesTab />
@@ -20,6 +20,6 @@ export default createRoute(async (c) => {
 
         <NotificationToast />
       </div>
-    </Layout>
+    </Layout>,
   );
 });

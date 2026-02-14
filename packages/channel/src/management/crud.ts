@@ -3,25 +3,25 @@
  * 채널 생성, 조회, 수정, 삭제 통합 관리
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 import {
-  Channel,
-  SenderNumber,
-  ChannelCreateRequest,
-  SenderNumberCreateRequest,
-  ChannelFilters,
-  SenderNumberFilters,
+  type Channel,
+  type ChannelCreateRequest,
+  type ChannelFilters,
   ChannelStatus,
-  SenderNumberStatus,
   ChannelType,
-  VerificationStatus
-} from '../types/channel.types';
+  type SenderNumber,
+  type SenderNumberCreateRequest,
+  type SenderNumberFilters,
+  SenderNumberStatus,
+  VerificationStatus,
+} from "../types/channel.types";
 
 export interface PaginationOptions {
   page: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResult<T> {
@@ -46,9 +46,16 @@ export interface ChannelCRUDOptions {
 
 export interface AuditLogEntry {
   id: string;
-  entityType: 'channel' | 'senderNumber';
+  entityType: "channel" | "senderNumber";
   entityId: string;
-  action: 'create' | 'read' | 'update' | 'delete' | 'verify' | 'suspend' | 'activate';
+  action:
+    | "create"
+    | "read"
+    | "update"
+    | "delete"
+    | "verify"
+    | "suspend"
+    | "activate";
   userId?: string;
   timestamp: Date;
   changes?: {
@@ -71,7 +78,7 @@ export class ChannelCRUD extends EventEmitter {
     maxPageSize: 100,
     enableSoftDelete: true,
     autoCleanup: true,
-    cleanupInterval: 3600000 // 1 hour
+    cleanupInterval: 3600000, // 1 hour
   };
 
   constructor(private options: Partial<ChannelCRUDOptions> = {}) {
@@ -84,9 +91,12 @@ export class ChannelCRUD extends EventEmitter {
   }
 
   // Channel CRUD Operations
-  async createChannel(request: ChannelCreateRequest, userId?: string): Promise<Channel> {
+  async createChannel(
+    request: ChannelCreateRequest,
+    userId?: string,
+  ): Promise<Channel> {
     const channelId = this.generateChannelId();
-    
+
     const channel: Channel = {
       id: channelId,
       name: request.name,
@@ -99,45 +109,57 @@ export class ChannelCRUD extends EventEmitter {
         businessInfo: request.businessInfo,
         kakaoInfo: request.kakaoInfo,
         limits: this.getDefaultLimits(request.type),
-        features: this.getDefaultFeatures(request.type)
+        features: this.getDefaultFeatures(request.type),
       },
       verification: {
-        status: request.businessInfo ? VerificationStatus.PENDING : VerificationStatus.NOT_REQUIRED,
-        documents: []
+        status: request.businessInfo
+          ? VerificationStatus.PENDING
+          : VerificationStatus.NOT_REQUIRED,
+        documents: [],
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.channels.set(channelId, channel);
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('channel', channelId, 'create', userId, undefined, channel);
+      this.addAuditLog(
+        "channel",
+        channelId,
+        "create",
+        userId,
+        undefined,
+        channel,
+      );
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('channel:created', { channel, userId });
+      this.emit("channel:created", { channel, userId });
     }
 
     return channel;
   }
 
-  async getChannel(channelId: string, userId?: string): Promise<Channel | null> {
+  async getChannel(
+    channelId: string,
+    userId?: string,
+  ): Promise<Channel | null> {
     const channel = this.channels.get(channelId);
-    
+
     if (channel && this.options.enableAuditLog) {
-      this.addAuditLog('channel', channelId, 'read', userId);
+      this.addAuditLog("channel", channelId, "read", userId);
     }
 
     return channel || null;
   }
 
   async updateChannel(
-    channelId: string, 
-    updates: Partial<Omit<Channel, 'id' | 'createdAt' | 'updatedAt'>>,
-    userId?: string
+    channelId: string,
+    updates: Partial<Omit<Channel, "id" | "createdAt" | "updatedAt">>,
+    userId?: string,
   ): Promise<Channel> {
     const channel = this.channels.get(channelId);
     if (!channel) {
@@ -145,28 +167,35 @@ export class ChannelCRUD extends EventEmitter {
     }
 
     const before = this.options.enableAuditLog ? { ...channel } : undefined;
-    
+
     // Apply updates
     const updatedChannel = {
       ...channel,
       ...updates,
       id: channelId, // Ensure ID doesn't change
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.channels.set(channelId, updatedChannel);
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('channel', channelId, 'update', userId, before, updatedChannel);
+      this.addAuditLog(
+        "channel",
+        channelId,
+        "update",
+        userId,
+        before,
+        updatedChannel,
+      );
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('channel:updated', { 
-        channel: updatedChannel, 
+      this.emit("channel:updated", {
+        channel: updatedChannel,
         previousChannel: channel,
-        userId 
+        userId,
       });
     }
 
@@ -186,7 +215,7 @@ export class ChannelCRUD extends EventEmitter {
     } else {
       // Hard delete - remove from memory
       this.channels.delete(channelId);
-      
+
       // Also delete associated sender numbers
       for (const [id, senderNumber] of this.senderNumbers) {
         // In a real implementation, we'd have a channelId field in SenderNumber
@@ -196,66 +225,71 @@ export class ChannelCRUD extends EventEmitter {
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('channel', channelId, 'delete', userId, channel);
+      this.addAuditLog("channel", channelId, "delete", userId, channel);
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('channel:deleted', { channel, userId });
+      this.emit("channel:deleted", { channel, userId });
     }
 
     return true;
   }
 
   async listChannels(
-    filters: ChannelFilters = {}, 
-    pagination: PaginationOptions = { page: 1, limit: this.options.defaultPageSize! }
+    filters: ChannelFilters = {},
+    pagination: PaginationOptions = {
+      page: 1,
+      limit: this.options.defaultPageSize!,
+    },
   ): Promise<PaginatedResult<Channel>> {
     let channels = Array.from(this.channels.values());
 
     // Apply filters
     if (filters.provider) {
-      channels = channels.filter(c => c.provider === filters.provider);
+      channels = channels.filter((c) => c.provider === filters.provider);
     }
     if (filters.type) {
-      channels = channels.filter(c => c.type === filters.type);
+      channels = channels.filter((c) => c.type === filters.type);
     }
     if (filters.status) {
-      channels = channels.filter(c => c.status === filters.status);
+      channels = channels.filter((c) => c.status === filters.status);
     }
     if (filters.verified !== undefined) {
-      const targetStatus = filters.verified ? VerificationStatus.VERIFIED : VerificationStatus.PENDING;
-      channels = channels.filter(c => c.verification.status === targetStatus);
+      const targetStatus = filters.verified
+        ? VerificationStatus.VERIFIED
+        : VerificationStatus.PENDING;
+      channels = channels.filter((c) => c.verification.status === targetStatus);
     }
     if (filters.createdAfter) {
-      channels = channels.filter(c => c.createdAt >= filters.createdAfter!);
+      channels = channels.filter((c) => c.createdAt >= filters.createdAfter!);
     }
     if (filters.createdBefore) {
-      channels = channels.filter(c => c.createdAt <= filters.createdBefore!);
+      channels = channels.filter((c) => c.createdAt <= filters.createdBefore!);
     }
 
     // Exclude soft deleted channels unless specifically requested
     if (!filters.status || filters.status !== ChannelStatus.DELETED) {
-      channels = channels.filter(c => c.status !== ChannelStatus.DELETED);
+      channels = channels.filter((c) => c.status !== ChannelStatus.DELETED);
     }
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
-    
+    const sortBy = pagination.sortBy || "createdAt";
+    const sortOrder = pagination.sortOrder || "desc";
+
     channels.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortBy) {
-        case 'name':
+        case "name":
           aValue = a.name;
           bValue = b.name;
           break;
-        case 'createdAt':
+        case "createdAt":
           aValue = a.createdAt.getTime();
           bValue = b.createdAt.getTime();
           break;
-        case 'updatedAt':
+        case "updatedAt":
           aValue = a.updatedAt.getTime();
           bValue = b.updatedAt.getTime();
           break;
@@ -264,7 +298,7 @@ export class ChannelCRUD extends EventEmitter {
           bValue = b.createdAt.getTime();
       }
 
-      if (sortOrder === 'asc') {
+      if (sortOrder === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
@@ -285,7 +319,7 @@ export class ChannelCRUD extends EventEmitter {
       limit,
       totalPages: Math.ceil(total / limit),
       hasNext: offset + limit < total,
-      hasPrev: page > 1
+      hasPrev: page > 1,
     };
   }
 
@@ -293,7 +327,7 @@ export class ChannelCRUD extends EventEmitter {
   async createSenderNumber(
     channelId: string,
     request: SenderNumberCreateRequest,
-    userId?: string
+    userId?: string,
   ): Promise<SenderNumber> {
     const channel = this.channels.get(channelId);
     if (!channel) {
@@ -301,7 +335,7 @@ export class ChannelCRUD extends EventEmitter {
     }
 
     const senderNumberId = this.generateSenderNumberId();
-    
+
     const senderNumber: SenderNumber = {
       id: senderNumberId,
       phoneNumber: request.phoneNumber,
@@ -309,12 +343,13 @@ export class ChannelCRUD extends EventEmitter {
       category: request.category,
       metadata: {
         businessName: request.businessInfo?.businessName,
-        businessRegistrationNumber: request.businessInfo?.businessRegistrationNumber,
+        businessRegistrationNumber:
+          request.businessInfo?.businessRegistrationNumber,
         contactPerson: request.businessInfo?.contactPerson,
         contactEmail: request.businessInfo?.contactEmail,
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.senderNumbers.set(senderNumberId, senderNumber);
@@ -325,22 +360,32 @@ export class ChannelCRUD extends EventEmitter {
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('senderNumber', senderNumberId, 'create', userId, undefined, senderNumber);
+      this.addAuditLog(
+        "senderNumber",
+        senderNumberId,
+        "create",
+        userId,
+        undefined,
+        senderNumber,
+      );
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('senderNumber:created', { senderNumber, channelId, userId });
+      this.emit("senderNumber:created", { senderNumber, channelId, userId });
     }
 
     return senderNumber;
   }
 
-  async getSenderNumber(senderNumberId: string, userId?: string): Promise<SenderNumber | null> {
+  async getSenderNumber(
+    senderNumberId: string,
+    userId?: string,
+  ): Promise<SenderNumber | null> {
     const senderNumber = this.senderNumbers.get(senderNumberId);
-    
+
     if (senderNumber && this.options.enableAuditLog) {
-      this.addAuditLog('senderNumber', senderNumberId, 'read', userId);
+      this.addAuditLog("senderNumber", senderNumberId, "read", userId);
     }
 
     return senderNumber || null;
@@ -348,29 +393,35 @@ export class ChannelCRUD extends EventEmitter {
 
   async updateSenderNumber(
     senderNumberId: string,
-    updates: Partial<Omit<SenderNumber, 'id' | 'phoneNumber' | 'createdAt' | 'updatedAt'>>,
-    userId?: string
+    updates: Partial<
+      Omit<SenderNumber, "id" | "phoneNumber" | "createdAt" | "updatedAt">
+    >,
+    userId?: string,
   ): Promise<SenderNumber> {
     const senderNumber = this.senderNumbers.get(senderNumberId);
     if (!senderNumber) {
       throw new Error(`Sender number ${senderNumberId} not found`);
     }
 
-    const before = this.options.enableAuditLog ? { ...senderNumber } : undefined;
-    
+    const before = this.options.enableAuditLog
+      ? { ...senderNumber }
+      : undefined;
+
     // Apply updates
     const updatedSenderNumber = {
       ...senderNumber,
       ...updates,
       id: senderNumberId, // Ensure ID doesn't change
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.senderNumbers.set(senderNumberId, updatedSenderNumber);
 
     // Update in channel's sender numbers array
     for (const channel of this.channels.values()) {
-      const index = channel.senderNumbers.findIndex(sn => sn.id === senderNumberId);
+      const index = channel.senderNumbers.findIndex(
+        (sn) => sn.id === senderNumberId,
+      );
       if (index !== -1) {
         channel.senderNumbers[index] = updatedSenderNumber;
         channel.updatedAt = new Date();
@@ -380,22 +431,32 @@ export class ChannelCRUD extends EventEmitter {
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('senderNumber', senderNumberId, 'update', userId, before, updatedSenderNumber);
+      this.addAuditLog(
+        "senderNumber",
+        senderNumberId,
+        "update",
+        userId,
+        before,
+        updatedSenderNumber,
+      );
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('senderNumber:updated', { 
-        senderNumber: updatedSenderNumber, 
+      this.emit("senderNumber:updated", {
+        senderNumber: updatedSenderNumber,
         previousSenderNumber: senderNumber,
-        userId 
+        userId,
       });
     }
 
     return updatedSenderNumber;
   }
 
-  async deleteSenderNumber(senderNumberId: string, userId?: string): Promise<boolean> {
+  async deleteSenderNumber(
+    senderNumberId: string,
+    userId?: string,
+  ): Promise<boolean> {
     const senderNumber = this.senderNumbers.get(senderNumberId);
     if (!senderNumber) {
       return false;
@@ -406,7 +467,9 @@ export class ChannelCRUD extends EventEmitter {
 
     // Remove from channel's sender numbers array
     for (const channel of this.channels.values()) {
-      const index = channel.senderNumbers.findIndex(sn => sn.id === senderNumberId);
+      const index = channel.senderNumbers.findIndex(
+        (sn) => sn.id === senderNumberId,
+      );
       if (index !== -1) {
         channel.senderNumbers.splice(index, 1);
         channel.updatedAt = new Date();
@@ -416,12 +479,18 @@ export class ChannelCRUD extends EventEmitter {
 
     // Audit log
     if (this.options.enableAuditLog) {
-      this.addAuditLog('senderNumber', senderNumberId, 'delete', userId, senderNumber);
+      this.addAuditLog(
+        "senderNumber",
+        senderNumberId,
+        "delete",
+        userId,
+        senderNumber,
+      );
     }
 
     // Event emission
     if (this.options.enableEventEmission) {
-      this.emit('senderNumber:deleted', { senderNumber, userId });
+      this.emit("senderNumber:deleted", { senderNumber, userId });
     }
 
     return true;
@@ -429,7 +498,10 @@ export class ChannelCRUD extends EventEmitter {
 
   async listSenderNumbers(
     filters: SenderNumberFilters = {},
-    pagination: PaginationOptions = { page: 1, limit: this.options.defaultPageSize! }
+    pagination: PaginationOptions = {
+      page: 1,
+      limit: this.options.defaultPageSize!,
+    },
   ): Promise<PaginatedResult<SenderNumber>> {
     let senderNumbers = Array.from(this.senderNumbers.values());
 
@@ -443,36 +515,44 @@ export class ChannelCRUD extends EventEmitter {
       }
     }
     if (filters.status) {
-      senderNumbers = senderNumbers.filter(sn => sn.status === filters.status);
+      senderNumbers = senderNumbers.filter(
+        (sn) => sn.status === filters.status,
+      );
     }
     if (filters.category) {
-      senderNumbers = senderNumbers.filter(sn => sn.category === filters.category);
+      senderNumbers = senderNumbers.filter(
+        (sn) => sn.category === filters.category,
+      );
     }
     if (filters.verified !== undefined) {
       if (filters.verified) {
-        senderNumbers = senderNumbers.filter(sn => sn.status === SenderNumberStatus.VERIFIED);
+        senderNumbers = senderNumbers.filter(
+          (sn) => sn.status === SenderNumberStatus.VERIFIED,
+        );
       } else {
-        senderNumbers = senderNumbers.filter(sn => sn.status !== SenderNumberStatus.VERIFIED);
+        senderNumbers = senderNumbers.filter(
+          (sn) => sn.status !== SenderNumberStatus.VERIFIED,
+        );
       }
     }
 
     // Apply sorting
-    const sortBy = pagination.sortBy || 'createdAt';
-    const sortOrder = pagination.sortOrder || 'desc';
-    
+    const sortBy = pagination.sortBy || "createdAt";
+    const sortOrder = pagination.sortOrder || "desc";
+
     senderNumbers.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortBy) {
-        case 'phoneNumber':
+        case "phoneNumber":
           aValue = a.phoneNumber;
           bValue = b.phoneNumber;
           break;
-        case 'createdAt':
+        case "createdAt":
           aValue = a.createdAt.getTime();
           bValue = b.createdAt.getTime();
           break;
-        case 'updatedAt':
+        case "updatedAt":
           aValue = a.updatedAt.getTime();
           bValue = b.updatedAt.getTime();
           break;
@@ -481,7 +561,7 @@ export class ChannelCRUD extends EventEmitter {
           bValue = b.createdAt.getTime();
       }
 
-      if (sortOrder === 'asc') {
+      if (sortOrder === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
@@ -502,23 +582,23 @@ export class ChannelCRUD extends EventEmitter {
       limit,
       totalPages: Math.ceil(total / limit),
       hasNext: offset + limit < total,
-      hasPrev: page > 1
+      hasPrev: page > 1,
     };
   }
 
   // Audit and Analytics
   getAuditLogs(
-    entityType?: 'channel' | 'senderNumber',
+    entityType?: "channel" | "senderNumber",
     entityId?: string,
-    limit: number = 100
+    limit: number = 100,
   ): AuditLogEntry[] {
     let logs = [...this.auditLogs];
 
     if (entityType) {
-      logs = logs.filter(log => log.entityType === entityType);
+      logs = logs.filter((log) => log.entityType === entityType);
     }
     if (entityId) {
-      logs = logs.filter(log => log.entityId === entityId);
+      logs = logs.filter((log) => log.entityId === entityId);
     }
 
     return logs
@@ -546,18 +626,22 @@ export class ChannelCRUD extends EventEmitter {
     const channelsByType: Record<string, number> = {};
     const channelsByProvider: Record<string, number> = {};
 
-    channels.forEach(channel => {
-      channelsByStatus[channel.status] = (channelsByStatus[channel.status] || 0) + 1;
+    channels.forEach((channel) => {
+      channelsByStatus[channel.status] =
+        (channelsByStatus[channel.status] || 0) + 1;
       channelsByType[channel.type] = (channelsByType[channel.type] || 0) + 1;
-      channelsByProvider[channel.provider] = (channelsByProvider[channel.provider] || 0) + 1;
+      channelsByProvider[channel.provider] =
+        (channelsByProvider[channel.provider] || 0) + 1;
     });
 
     const senderNumbersByStatus: Record<string, number> = {};
     const senderNumbersByCategory: Record<string, number> = {};
 
-    senderNumbers.forEach(senderNumber => {
-      senderNumbersByStatus[senderNumber.status] = (senderNumbersByStatus[senderNumber.status] || 0) + 1;
-      senderNumbersByCategory[senderNumber.category] = (senderNumbersByCategory[senderNumber.category] || 0) + 1;
+    senderNumbers.forEach((senderNumber) => {
+      senderNumbersByStatus[senderNumber.status] =
+        (senderNumbersByStatus[senderNumber.status] || 0) + 1;
+      senderNumbersByCategory[senderNumber.category] =
+        (senderNumbersByCategory[senderNumber.category] || 0) + 1;
     });
 
     return {
@@ -565,13 +649,13 @@ export class ChannelCRUD extends EventEmitter {
         total: channels.length,
         byStatus: channelsByStatus,
         byType: channelsByType,
-        byProvider: channelsByProvider
+        byProvider: channelsByProvider,
       },
       senderNumbers: {
         total: senderNumbers.length,
         byStatus: senderNumbersByStatus,
-        byCategory: senderNumbersByCategory
-      }
+        byCategory: senderNumbersByCategory,
+      },
     };
   }
 
@@ -585,9 +669,12 @@ export class ChannelCRUD extends EventEmitter {
 
     // Clean up soft-deleted channels older than 30 days
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    
+
     for (const [id, channel] of this.channels) {
-      if (channel.status === ChannelStatus.DELETED && channel.updatedAt < thirtyDaysAgo) {
+      if (
+        channel.status === ChannelStatus.DELETED &&
+        channel.updatedAt < thirtyDaysAgo
+      ) {
         this.channels.delete(id);
         deletedChannels++;
       }
@@ -596,7 +683,9 @@ export class ChannelCRUD extends EventEmitter {
     // Clean up audit logs older than 90 days
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const originalLogCount = this.auditLogs.length;
-    this.auditLogs = this.auditLogs.filter(log => log.timestamp >= ninetyDaysAgo);
+    this.auditLogs = this.auditLogs.filter(
+      (log) => log.timestamp >= ninetyDaysAgo,
+    );
     expiredAuditLogs = originalLogCount - this.auditLogs.length;
 
     return { deletedChannels, expiredAuditLogs };
@@ -607,7 +696,7 @@ export class ChannelCRUD extends EventEmitter {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = undefined;
     }
-    
+
     this.removeAllListeners();
     this.channels.clear();
     this.senderNumbers.clear();
@@ -615,12 +704,12 @@ export class ChannelCRUD extends EventEmitter {
   }
 
   private addAuditLog(
-    entityType: 'channel' | 'senderNumber',
+    entityType: "channel" | "senderNumber",
     entityId: string,
-    action: AuditLogEntry['action'],
+    action: AuditLogEntry["action"],
     userId?: string,
     before?: any,
-    after?: any
+    after?: any,
   ): void {
     const auditLog: AuditLogEntry = {
       id: this.generateAuditLogId(),
@@ -629,7 +718,7 @@ export class ChannelCRUD extends EventEmitter {
       action,
       userId,
       timestamp: new Date(),
-      changes: before || after ? { before, after } : undefined
+      changes: before || after ? { before, after } : undefined,
     };
 
     this.auditLogs.push(auditLog);
@@ -646,13 +735,13 @@ export class ChannelCRUD extends EventEmitter {
         return {
           dailyMessageLimit: 10000,
           monthlyMessageLimit: 300000,
-          rateLimit: 10
+          rateLimit: 10,
         };
       case ChannelType.KAKAO_FRIENDTALK:
         return {
           dailyMessageLimit: 1000,
           monthlyMessageLimit: 30000,
-          rateLimit: 5
+          rateLimit: 5,
         };
       case ChannelType.SMS:
       case ChannelType.LMS:
@@ -660,13 +749,13 @@ export class ChannelCRUD extends EventEmitter {
         return {
           dailyMessageLimit: 1000,
           monthlyMessageLimit: 30000,
-          rateLimit: 3
+          rateLimit: 3,
         };
       default:
         return {
           dailyMessageLimit: 1000,
           monthlyMessageLimit: 30000,
-          rateLimit: 1
+          rateLimit: 1,
         };
     }
   }
@@ -678,21 +767,21 @@ export class ChannelCRUD extends EventEmitter {
           supportsBulkSending: true,
           supportsScheduling: true,
           supportsButtons: true,
-          maxButtonCount: 5
+          maxButtonCount: 5,
         };
       case ChannelType.KAKAO_FRIENDTALK:
         return {
           supportsBulkSending: true,
           supportsScheduling: true,
           supportsButtons: false,
-          maxButtonCount: 0
+          maxButtonCount: 0,
         };
       default:
         return {
           supportsBulkSending: false,
           supportsScheduling: false,
           supportsButtons: false,
-          maxButtonCount: 0
+          maxButtonCount: 0,
         };
     }
   }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export interface WebhookConfig {
   // 재시도 설정
@@ -7,20 +7,20 @@ export interface WebhookConfig {
   maxDelayMs?: number;
   backoffMultiplier?: number;
   jitter?: boolean;
-  
+
   // 네트워크 설정
   timeoutMs: number;
-  
+
   // 보안 설정
   enableSecurity: boolean;
   secretKey?: string;
-  algorithm?: 'sha256' | 'sha1';
+  algorithm?: "sha256" | "sha1";
   signatureHeader?: string;
   signaturePrefix?: string;
-  
+
   // 이벤트 설정
   enabledEvents: WebhookEventType[];
-  
+
   // 배치 처리 설정
   batchSize: number;
   batchTimeoutMs: number;
@@ -28,34 +28,34 @@ export interface WebhookConfig {
 
 export enum WebhookEventType {
   // 메시지 이벤트
-  MESSAGE_SENT = 'message.sent',
-  MESSAGE_DELIVERED = 'message.delivered',
-  MESSAGE_FAILED = 'message.failed',
-  MESSAGE_CLICKED = 'message.clicked',
-  MESSAGE_READ = 'message.read',
+  MESSAGE_SENT = "message.sent",
+  MESSAGE_DELIVERED = "message.delivered",
+  MESSAGE_FAILED = "message.failed",
+  MESSAGE_CLICKED = "message.clicked",
+  MESSAGE_READ = "message.read",
 
   // 템플릿 이벤트
-  TEMPLATE_CREATED = 'template.created',
-  TEMPLATE_APPROVED = 'template.approved',
-  TEMPLATE_REJECTED = 'template.rejected',
-  TEMPLATE_UPDATED = 'template.updated',
-  TEMPLATE_DELETED = 'template.deleted',
+  TEMPLATE_CREATED = "template.created",
+  TEMPLATE_APPROVED = "template.approved",
+  TEMPLATE_REJECTED = "template.rejected",
+  TEMPLATE_UPDATED = "template.updated",
+  TEMPLATE_DELETED = "template.deleted",
 
   // 채널 이벤트
-  CHANNEL_CREATED = 'channel.created',
-  CHANNEL_VERIFIED = 'channel.verified',
-  SENDER_NUMBER_ADDED = 'sender_number.added',
-  SENDER_NUMBER_VERIFIED = 'sender_number.verified',
+  CHANNEL_CREATED = "channel.created",
+  CHANNEL_VERIFIED = "channel.verified",
+  SENDER_NUMBER_ADDED = "sender_number.added",
+  SENDER_NUMBER_VERIFIED = "sender_number.verified",
 
   // 시스템 이벤트
-  QUOTA_WARNING = 'system.quota_warning',
-  QUOTA_EXCEEDED = 'system.quota_exceeded',
-  PROVIDER_ERROR = 'system.provider_error',
-  SYSTEM_MAINTENANCE = 'system.maintenance',
+  QUOTA_WARNING = "system.quota_warning",
+  QUOTA_EXCEEDED = "system.quota_exceeded",
+  PROVIDER_ERROR = "system.provider_error",
+  SYSTEM_MAINTENANCE = "system.maintenance",
 
   // 분석 이벤트
-  ANOMALY_DETECTED = 'analytics.anomaly_detected',
-  THRESHOLD_EXCEEDED = 'analytics.threshold_exceeded'
+  ANOMALY_DETECTED = "analytics.anomaly_detected",
+  THRESHOLD_EXCEEDED = "analytics.threshold_exceeded",
 }
 
 export interface WebhookEvent<T = any> {
@@ -98,7 +98,7 @@ export interface WebhookEndpoint {
   createdAt: Date;
   updatedAt: Date;
   lastTriggeredAt?: Date;
-  status: 'active' | 'inactive' | 'error' | 'suspended';
+  status: "active" | "inactive" | "error" | "suspended";
 }
 
 export interface WebhookDelivery {
@@ -106,11 +106,11 @@ export interface WebhookDelivery {
   endpointId: string;
   eventId: string;
   url: string;
-  httpMethod: 'POST' | 'PUT' | 'PATCH';
+  httpMethod: "POST" | "PUT" | "PATCH";
   headers: Record<string, string>;
   payload: string; // JSON stringified
   attempts: WebhookAttempt[];
-  status: 'pending' | 'success' | 'failed' | 'exhausted';
+  status: "pending" | "success" | "failed" | "exhausted";
   createdAt: Date;
   completedAt?: Date;
   nextRetryAt?: Date;
@@ -127,7 +127,7 @@ export interface WebhookAttempt {
 }
 
 export interface WebhookSecurity {
-  algorithm: 'sha256' | 'sha1';
+  algorithm: "sha256" | "sha1";
   header: string; // 예: 'X-Webhook-Signature'
   prefix?: string; // 예: 'sha256='
 }
@@ -138,7 +138,7 @@ export interface WebhookBatch {
   events: WebhookEvent[];
   createdAt: Date;
   scheduledAt: Date;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
 }
 
 export interface WebhookStats {
@@ -194,20 +194,24 @@ export const WebhookEndpointSchema = z.object({
   events: z.array(z.string()),
   headers: z.record(z.string(), z.string()).optional(),
   secret: z.string().optional(),
-  retryConfig: z.object({
-    maxRetries: z.number().min(0).max(10),
-    retryDelayMs: z.number().min(1000),
-    backoffMultiplier: z.number().min(1).max(5),
-  }).optional(),
-  filters: z.object({
-    providerId: z.array(z.string()).optional(),
-    channelId: z.array(z.string()).optional(),
-    templateId: z.array(z.string()).optional(),
-  }).optional(),
+  retryConfig: z
+    .object({
+      maxRetries: z.number().min(0).max(10),
+      retryDelayMs: z.number().min(1000),
+      backoffMultiplier: z.number().min(1).max(5),
+    })
+    .optional(),
+  filters: z
+    .object({
+      providerId: z.array(z.string()).optional(),
+      channelId: z.array(z.string()).optional(),
+      templateId: z.array(z.string()).optional(),
+    })
+    .optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   lastTriggeredAt: z.date().optional(),
-  status: z.enum(['active', 'inactive', 'error', 'suspended']),
+  status: z.enum(["active", "inactive", "error", "suspended"]),
 });
 
 export const WebhookDeliverySchema = z.object({
@@ -215,19 +219,21 @@ export const WebhookDeliverySchema = z.object({
   endpointId: z.string(),
   eventId: z.string(),
   url: z.string().url(),
-  httpMethod: z.enum(['POST', 'PUT', 'PATCH']),
+  httpMethod: z.enum(["POST", "PUT", "PATCH"]),
   headers: z.record(z.string(), z.string()),
   payload: z.string(),
-  attempts: z.array(z.object({
-    attemptNumber: z.number(),
-    timestamp: z.date(),
-    httpStatus: z.number().optional(),
-    responseBody: z.string().optional(),
-    responseHeaders: z.record(z.string(), z.string()).optional(),
-    error: z.string().optional(),
-    latencyMs: z.number(),
-  })),
-  status: z.enum(['pending', 'success', 'failed', 'exhausted']),
+  attempts: z.array(
+    z.object({
+      attemptNumber: z.number(),
+      timestamp: z.date(),
+      httpStatus: z.number().optional(),
+      responseBody: z.string().optional(),
+      responseHeaders: z.record(z.string(), z.string()).optional(),
+      error: z.string().optional(),
+      latencyMs: z.number(),
+    }),
+  ),
+  status: z.enum(["pending", "success", "failed", "exhausted"]),
   createdAt: z.date(),
   completedAt: z.date().optional(),
   nextRetryAt: z.date().optional(),

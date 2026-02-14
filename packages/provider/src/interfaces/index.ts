@@ -1,5 +1,5 @@
-export * from './plugin';
-export * from './services';
+export * from "./plugin";
+export * from "./services";
 
 export interface NotificationRequest {
   phoneNumber: string;

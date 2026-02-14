@@ -51,13 +51,13 @@ export class HealthChecker {
       try {
         const serviceHealth = await Promise.race([
           checkFn(),
-          this.timeoutPromise<ServiceHealth>(this.config.timeout || 5000)
+          this.timeoutPromise<ServiceHealth>(this.config.timeout || 5000),
         ]);
 
         services[name] = {
           ...serviceHealth,
           lastCheck: new Date(),
-          latency: Date.now() - start
+          latency: Date.now() - start,
         };
 
         this.lastCheck.set(name, services[name]);
@@ -68,9 +68,9 @@ export class HealthChecker {
       } catch (error) {
         const serviceHealth: ServiceHealth = {
           healthy: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
           lastCheck: new Date(),
-          latency: Date.now() - start
+          latency: Date.now() - start,
         };
 
         services[name] = serviceHealth;
@@ -87,10 +87,11 @@ export class HealthChecker {
       ...(this.config.includeMetrics && {
         metrics: {
           totalServices: this.services.size,
-          healthyServices: Object.values(services).filter(s => s.healthy).length,
-          averageLatency: this.calculateAverageLatency(services)
-        }
-      })
+          healthyServices: Object.values(services).filter((s) => s.healthy)
+            .length,
+          averageLatency: this.calculateAverageLatency(services),
+        },
+      }),
     };
   }
 
@@ -109,20 +110,25 @@ export class HealthChecker {
       healthy: overallHealthy,
       timestamp: new Date(),
       uptime: Date.now() - this.startTime,
-      services
+      services,
     };
   }
 
   private async timeoutPromise<T>(ms: number): Promise<T> {
     return new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`Health check timeout after ${ms}ms`)), ms);
+      setTimeout(
+        () => reject(new Error(`Health check timeout after ${ms}ms`)),
+        ms,
+      );
     });
   }
 
-  private calculateAverageLatency(services: Record<string, ServiceHealth>): number {
+  private calculateAverageLatency(
+    services: Record<string, ServiceHealth>,
+  ): number {
     const latencies = Object.values(services)
-      .map(s => s.latency)
-      .filter((l): l is number => typeof l === 'number');
+      .map((s) => s.latency)
+      .filter((l): l is number => typeof l === "number");
 
     return latencies.length > 0
       ? latencies.reduce((a, b) => a + b, 0) / latencies.length
@@ -142,19 +148,19 @@ export class SimpleHealthChecker {
       const start = Date.now();
       try {
         const response = await fetch(url, {
-          signal: AbortSignal.timeout(timeout)
+          signal: AbortSignal.timeout(timeout),
         });
 
         return {
           healthy: response.ok,
           latency: Date.now() - start,
-          ...(response.ok ? {} : { error: `HTTP ${response.status}` })
+          ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
         };
       } catch (error) {
         return {
           healthy: false,
           latency: Date.now() - start,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
     };
@@ -167,7 +173,11 @@ export class SimpleHealthChecker {
 
       return {
         healthy: usedMB < maxUsageMB,
-        ...(usedMB >= maxUsageMB ? { error: `Memory usage ${usedMB.toFixed(1)}MB exceeds limit ${maxUsageMB}MB` } : {})
+        ...(usedMB >= maxUsageMB
+          ? {
+              error: `Memory usage ${usedMB.toFixed(1)}MB exceeds limit ${maxUsageMB}MB`,
+            }
+          : {}),
       };
     };
   }

@@ -3,12 +3,16 @@
  * 시계열 데이터 집계 및 다운샘플링
  */
 
-import type { MetricData, AggregatedMetric, MetricType } from '../types/analytics.types';
+import type {
+  AggregatedMetric,
+  MetricData,
+  MetricType,
+} from "../types/analytics.types";
 
 export interface TimeWindow {
   start: Date;
   end: Date;
-  interval: 'minute' | 'hour' | 'day' | 'week' | 'month';
+  interval: "minute" | "hour" | "day" | "week" | "month";
 }
 
 export interface AggregationOptions {
@@ -20,7 +24,7 @@ export interface AggregationOptions {
 export class TimeSeriesAggregator {
   private timezone: string;
 
-  constructor(timezone = 'UTC') {
+  constructor(timezone = "UTC") {
     this.timezone = timezone;
   }
 
@@ -29,8 +33,8 @@ export class TimeSeriesAggregator {
    */
   async aggregate(
     metrics: MetricData[],
-    interval: 'minute' | 'hour' | 'day' | 'week' | 'month',
-    options: AggregationOptions = { fillGaps: false, fillValue: 0 }
+    interval: "minute" | "hour" | "day" | "week" | "month",
+    options: AggregationOptions = { fillGaps: false, fillValue: 0 },
   ): Promise<AggregatedMetric[]> {
     if (metrics.length === 0) {
       return [];
@@ -44,19 +48,24 @@ export class TimeSeriesAggregator {
       // 차원별로 그룹화
       const groupedByDimensions = this.groupByDimensions(typeMetrics);
 
-      for (const [dimensionKey, dimensionMetrics] of groupedByDimensions.entries()) {
+      for (const [
+        dimensionKey,
+        dimensionMetrics,
+      ] of groupedByDimensions.entries()) {
         const typeAggregated = await this.aggregateByInterval(
           dimensionMetrics,
           type,
           interval,
           JSON.parse(dimensionKey),
-          options
+          options,
         );
         aggregated.push(...typeAggregated);
       }
     }
 
-    return aggregated.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return aggregated.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
   }
 
   /**
@@ -65,16 +74,18 @@ export class TimeSeriesAggregator {
   async aggregateRolling(
     metrics: MetricData[],
     windowSize: number, // 분 단위
-    step: number = windowSize // 분 단위
+    step: number = windowSize, // 분 단위
   ): Promise<AggregatedMetric[]> {
     if (metrics.length === 0) {
       return [];
     }
 
-    const sortedMetrics = [...metrics].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const sortedMetrics = [...metrics].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
     const startTime = sortedMetrics[0].timestamp;
     const endTime = sortedMetrics[sortedMetrics.length - 1].timestamp;
-    
+
     const aggregated: AggregatedMetric[] = [];
     const windowMs = windowSize * 60 * 1000;
     const stepMs = step * 60 * 1000;
@@ -86,12 +97,15 @@ export class TimeSeriesAggregator {
       const windowStart = new Date(currentTime);
       const windowEnd = new Date(currentTime + windowMs);
 
-      const windowMetrics = sortedMetrics.filter(m => 
-        m.timestamp >= windowStart && m.timestamp < windowEnd
+      const windowMetrics = sortedMetrics.filter(
+        (m) => m.timestamp >= windowStart && m.timestamp < windowEnd,
       );
 
       if (windowMetrics.length > 0) {
-        const windowAggregated = await this.aggregateWindow(windowMetrics, windowStart);
+        const windowAggregated = await this.aggregateWindow(
+          windowMetrics,
+          windowStart,
+        );
         aggregated.push(...windowAggregated);
       }
 
@@ -106,7 +120,7 @@ export class TimeSeriesAggregator {
    */
   async decomposeSeasonality(
     metrics: AggregatedMetric[],
-    seasonLength: number = 24 // 시간 단위 (일별 패턴의 경우)
+    seasonLength: number = 24, // 시간 단위 (일별 패턴의 경우)
   ): Promise<{
     trend: AggregatedMetric[];
     seasonal: AggregatedMetric[];
@@ -116,14 +130,20 @@ export class TimeSeriesAggregator {
       return { trend: [], seasonal: [], residual: [] };
     }
 
-    const sortedMetrics = [...metrics].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-    
+    const sortedMetrics = [...metrics].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
+
     // 트렌드 계산 (이동평균)
     const trend = this.calculateMovingAverage(sortedMetrics, seasonLength);
-    
+
     // 계절성 계산
-    const seasonal = this.calculateSeasonalComponent(sortedMetrics, trend, seasonLength);
-    
+    const seasonal = this.calculateSeasonalComponent(
+      sortedMetrics,
+      trend,
+      seasonLength,
+    );
+
     // 잔차 계산
     const residual = this.calculateResidual(sortedMetrics, trend, seasonal);
 
@@ -135,66 +155,70 @@ export class TimeSeriesAggregator {
    */
   async downsample(
     metrics: AggregatedMetric[],
-    targetInterval: 'minute' | 'hour' | 'day' | 'week' | 'month'
+    targetInterval: "minute" | "hour" | "day" | "week" | "month",
   ): Promise<AggregatedMetric[]> {
     const groupedByTime = this.groupByTimeInterval(metrics, targetInterval);
     const downsampled: AggregatedMetric[] = [];
 
     for (const [timeKey, timeMetrics] of groupedByTime.entries()) {
       const timestamp = new Date(timeKey);
-      
+
       // 메트릭 타입과 차원별로 그룹화
       const grouped = new Map<string, Map<string, AggregatedMetric[]>>();
-      
+
       for (const metric of timeMetrics) {
         const typeKey = metric.type.toString();
         const dimensionKey = JSON.stringify(metric.dimensions);
-        
+
         if (!grouped.has(typeKey)) {
           grouped.set(typeKey, new Map());
         }
         if (!grouped.get(typeKey)!.has(dimensionKey)) {
           grouped.get(typeKey)!.set(dimensionKey, []);
         }
-        
+
         grouped.get(typeKey)!.get(dimensionKey)!.push(metric);
       }
 
       // 각 그룹별로 집계
       for (const [typeKey, typeGroups] of grouped.entries()) {
         for (const [dimensionKey, dimensionMetrics] of typeGroups.entries()) {
-          const aggregations = this.calculateAggregations(dimensionMetrics.map(m => m.aggregations.sum));
-          
+          const aggregations = this.calculateAggregations(
+            dimensionMetrics.map((m) => m.aggregations.sum),
+          );
+
           downsampled.push({
             type: dimensionMetrics[0].type,
             interval: targetInterval,
             timestamp,
             dimensions: JSON.parse(dimensionKey),
-            aggregations
+            aggregations,
           });
         }
       }
     }
 
-    return downsampled.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return downsampled.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
   }
 
   private groupByType(metrics: MetricData[]): Map<MetricType, MetricData[]> {
     const grouped = new Map<MetricType, MetricData[]>();
-    
+
     for (const metric of metrics) {
       if (!grouped.has(metric.type)) {
         grouped.set(metric.type, []);
       }
       grouped.get(metric.type)!.push(metric);
     }
-    
+
     return grouped;
   }
 
   private groupByDimensions(metrics: MetricData[]): Map<string, MetricData[]> {
     const grouped = new Map<string, MetricData[]>();
-    
+
     for (const metric of metrics) {
       const key = JSON.stringify(metric.dimensions);
       if (!grouped.has(key)) {
@@ -202,41 +226,49 @@ export class TimeSeriesAggregator {
       }
       grouped.get(key)!.push(metric);
     }
-    
+
     return grouped;
   }
 
   private async aggregateByInterval(
     metrics: MetricData[],
     type: MetricType,
-    interval: 'minute' | 'hour' | 'day' | 'week' | 'month',
+    interval: "minute" | "hour" | "day" | "week" | "month",
     dimensions: Record<string, string>,
-    options: AggregationOptions
+    options: AggregationOptions,
   ): Promise<AggregatedMetric[]> {
     const grouped = this.groupByTimeInterval(metrics, interval);
     const aggregated: AggregatedMetric[] = [];
 
     // 시간 간격 채우기 (옵션이 활성화된 경우)
     if (options.fillGaps && grouped.size > 0) {
-      const timeKeys = Array.from(grouped.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-      const filledGroups = this.fillTimeGaps(timeKeys, interval, options.fillValue);
-      
+      const timeKeys = Array.from(grouped.keys()).sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+      );
+      const filledGroups = this.fillTimeGaps(
+        timeKeys,
+        interval,
+        options.fillValue,
+      );
+
       for (const [timeKey, defaultValue] of filledGroups.entries()) {
         if (!grouped.has(timeKey)) {
-          grouped.set(timeKey, [{
-            id: `filled_${Date.now()}`,
-            type,
-            timestamp: new Date(timeKey),
-            value: defaultValue,
-            dimensions
-          }]);
+          grouped.set(timeKey, [
+            {
+              id: `filled_${Date.now()}`,
+              type,
+              timestamp: new Date(timeKey),
+              value: defaultValue,
+              dimensions,
+            },
+          ]);
         }
       }
     }
 
     for (const [timeKey, timeMetrics] of grouped.entries()) {
       const timestamp = new Date(timeKey);
-      const values = timeMetrics.map(m => m.value);
+      const values = timeMetrics.map((m) => m.value);
       const aggregations = this.calculateAggregations(values);
 
       aggregated.push({
@@ -244,7 +276,7 @@ export class TimeSeriesAggregator {
         interval,
         timestamp,
         dimensions,
-        aggregations
+        aggregations,
       });
     }
 
@@ -253,7 +285,7 @@ export class TimeSeriesAggregator {
 
   private groupByTimeInterval(
     metrics: (MetricData | AggregatedMetric)[],
-    interval: 'minute' | 'hour' | 'day' | 'week' | 'month'
+    interval: "minute" | "hour" | "day" | "week" | "month",
   ): Map<string, any[]> {
     const grouped = new Map<string, any[]>();
 
@@ -268,26 +300,30 @@ export class TimeSeriesAggregator {
     return grouped;
   }
 
-  private getTimeIntervalKey(timestamp: Date, interval: 'minute' | 'hour' | 'day' | 'week' | 'month'): string {
+  private getTimeIntervalKey(
+    timestamp: Date,
+    interval: "minute" | "hour" | "day" | "week" | "month",
+  ): string {
     const date = new Date(timestamp);
 
     switch (interval) {
-      case 'minute':
+      case "minute":
         date.setSeconds(0, 0);
         break;
-      case 'hour':
+      case "hour":
         date.setMinutes(0, 0, 0);
         break;
-      case 'day':
+      case "day":
         date.setHours(0, 0, 0, 0);
         break;
-      case 'week':
+      case "week": {
         const dayOfWeek = date.getDay();
         const diff = date.getDate() - dayOfWeek;
         date.setDate(diff);
         date.setHours(0, 0, 0, 0);
         break;
-      case 'month':
+      }
+      case "month":
         date.setDate(1);
         date.setHours(0, 0, 0, 0);
         break;
@@ -298,39 +334,39 @@ export class TimeSeriesAggregator {
 
   private fillTimeGaps(
     timeKeys: string[],
-    interval: 'minute' | 'hour' | 'day' | 'week' | 'month',
-    fillValue: number
+    interval: "minute" | "hour" | "day" | "week" | "month",
+    fillValue: number,
   ): Map<string, number> {
     const filled = new Map<string, number>();
-    
+
     if (timeKeys.length < 2) {
       return filled;
     }
 
     const start = new Date(timeKeys[0]);
     const end = new Date(timeKeys[timeKeys.length - 1]);
-    
-    let current = new Date(start);
-    
+
+    const current = new Date(start);
+
     while (current <= end) {
       const key = current.toISOString();
       filled.set(key, fillValue);
-      
+
       // 다음 간격으로 이동
       switch (interval) {
-        case 'minute':
+        case "minute":
           current.setMinutes(current.getMinutes() + 1);
           break;
-        case 'hour':
+        case "hour":
           current.setHours(current.getHours() + 1);
           break;
-        case 'day':
+        case "day":
           current.setDate(current.getDate() + 1);
           break;
-        case 'week':
+        case "week":
           current.setDate(current.getDate() + 7);
           break;
-        case 'month':
+        case "month":
           current.setMonth(current.getMonth() + 1);
           break;
       }
@@ -353,23 +389,29 @@ export class TimeSeriesAggregator {
     return { count, sum, avg, min, max };
   }
 
-  private async aggregateWindow(metrics: MetricData[], windowStart: Date): Promise<AggregatedMetric[]> {
+  private async aggregateWindow(
+    metrics: MetricData[],
+    windowStart: Date,
+  ): Promise<AggregatedMetric[]> {
     const grouped = this.groupByType(metrics);
     const aggregated: AggregatedMetric[] = [];
 
     for (const [type, typeMetrics] of grouped.entries()) {
       const dimensionGroups = this.groupByDimensions(typeMetrics);
-      
-      for (const [dimensionKey, dimensionMetrics] of dimensionGroups.entries()) {
-        const values = dimensionMetrics.map(m => m.value);
+
+      for (const [
+        dimensionKey,
+        dimensionMetrics,
+      ] of dimensionGroups.entries()) {
+        const values = dimensionMetrics.map((m) => m.value);
         const aggregations = this.calculateAggregations(values);
-        
+
         aggregated.push({
           type,
-          interval: 'minute', // 롤링 윈도우는 분 단위로 처리
+          interval: "minute", // 롤링 윈도우는 분 단위로 처리
           timestamp: windowStart,
           dimensions: JSON.parse(dimensionKey),
-          aggregations
+          aggregations,
         });
       }
     }
@@ -377,53 +419,67 @@ export class TimeSeriesAggregator {
     return aggregated;
   }
 
-  private calculateMovingAverage(metrics: AggregatedMetric[], windowSize: number): AggregatedMetric[] {
+  private calculateMovingAverage(
+    metrics: AggregatedMetric[],
+    windowSize: number,
+  ): AggregatedMetric[] {
     const trend: AggregatedMetric[] = [];
-    
-    for (let i = Math.floor(windowSize / 2); i < metrics.length - Math.floor(windowSize / 2); i++) {
-      const window = metrics.slice(i - Math.floor(windowSize / 2), i + Math.floor(windowSize / 2) + 1);
-      const avgValue = window.reduce((sum, m) => sum + m.aggregations.avg, 0) / window.length;
-      
+
+    for (
+      let i = Math.floor(windowSize / 2);
+      i < metrics.length - Math.floor(windowSize / 2);
+      i++
+    ) {
+      const window = metrics.slice(
+        i - Math.floor(windowSize / 2),
+        i + Math.floor(windowSize / 2) + 1,
+      );
+      const avgValue =
+        window.reduce((sum, m) => sum + m.aggregations.avg, 0) / window.length;
+
       trend.push({
         ...metrics[i],
         aggregations: {
           ...metrics[i].aggregations,
           avg: avgValue,
-          sum: avgValue * metrics[i].aggregations.count
-        }
+          sum: avgValue * metrics[i].aggregations.count,
+        },
       });
     }
-    
+
     return trend;
   }
 
   private calculateSeasonalComponent(
     metrics: AggregatedMetric[],
     trend: AggregatedMetric[],
-    seasonLength: number
+    seasonLength: number,
   ): AggregatedMetric[] {
     const seasonal: AggregatedMetric[] = [];
     const seasonalPattern = new Array(seasonLength).fill(0);
     const seasonalCounts = new Array(seasonLength).fill(0);
-    
+
     // 계절성 패턴 계산
     for (let i = 0; i < metrics.length; i++) {
       const seasonIndex = i % seasonLength;
-      const trendValue = trend.find(t => t.timestamp.getTime() === metrics[i].timestamp.getTime());
-      
+      const trendValue = trend.find(
+        (t) => t.timestamp.getTime() === metrics[i].timestamp.getTime(),
+      );
+
       if (trendValue) {
-        seasonalPattern[seasonIndex] += metrics[i].aggregations.avg - trendValue.aggregations.avg;
+        seasonalPattern[seasonIndex] +=
+          metrics[i].aggregations.avg - trendValue.aggregations.avg;
         seasonalCounts[seasonIndex]++;
       }
     }
-    
+
     // 평균 계산
     for (let i = 0; i < seasonLength; i++) {
       if (seasonalCounts[i] > 0) {
         seasonalPattern[i] /= seasonalCounts[i];
       }
     }
-    
+
     // 계절성 컴포넌트 생성
     for (let i = 0; i < metrics.length; i++) {
       const seasonIndex = i % seasonLength;
@@ -432,25 +488,27 @@ export class TimeSeriesAggregator {
         aggregations: {
           ...metrics[i].aggregations,
           avg: seasonalPattern[seasonIndex],
-          sum: seasonalPattern[seasonIndex] * metrics[i].aggregations.count
-        }
+          sum: seasonalPattern[seasonIndex] * metrics[i].aggregations.count,
+        },
       });
     }
-    
+
     return seasonal;
   }
 
   private calculateResidual(
     original: AggregatedMetric[],
     trend: AggregatedMetric[],
-    seasonal: AggregatedMetric[]
+    seasonal: AggregatedMetric[],
   ): AggregatedMetric[] {
     const residual: AggregatedMetric[] = [];
-    
+
     for (let i = 0; i < original.length; i++) {
-      const trendValue = trend.find(t => t.timestamp.getTime() === original[i].timestamp.getTime());
+      const trendValue = trend.find(
+        (t) => t.timestamp.getTime() === original[i].timestamp.getTime(),
+      );
       const seasonalValue = seasonal[i];
-      
+
       let residualValue = original[i].aggregations.avg;
       if (trendValue) {
         residualValue -= trendValue.aggregations.avg;
@@ -458,17 +516,17 @@ export class TimeSeriesAggregator {
       if (seasonalValue) {
         residualValue -= seasonalValue.aggregations.avg;
       }
-      
+
       residual.push({
         ...original[i],
         aggregations: {
           ...original[i].aggregations,
           avg: residualValue,
-          sum: residualValue * original[i].aggregations.count
-        }
+          sum: residualValue * original[i].aggregations.count,
+        },
       });
     }
-    
+
     return residual;
   }
 }

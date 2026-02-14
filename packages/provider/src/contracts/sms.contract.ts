@@ -1,4 +1,4 @@
-import type { BaseProvider, DeliveryStatus } from '@k-msg/core';
+import type { BaseProvider, DeliveryStatus } from "@k-msg/core";
 
 // SMS 전용 요청/응답 타입
 export interface SMSRequest {
@@ -9,11 +9,11 @@ export interface SMSRequest {
 }
 
 export interface SMSOptions {
-  priority?: 'high' | 'normal' | 'low';
-  encoding?: 'UTF-8' | 'EUC-KR';
+  priority?: "high" | "normal" | "low";
+  encoding?: "UTF-8" | "EUC-KR";
   scheduledAt?: Date;
   subject?: string; // LMS용
-  messageType?: 'SMS' | 'LMS'; // SMS(단문) vs LMS(장문)
+  messageType?: "SMS" | "LMS"; // SMS(단문) vs LMS(장문)
 }
 
 export interface SMSResult {
@@ -22,7 +22,7 @@ export interface SMSResult {
   provider: string;
   timestamp: Date;
   phoneNumber: string;
-  messageType: 'SMS' | 'LMS';
+  messageType: "SMS" | "LMS";
   deliveredAt?: Date;
   error?: SMSError;
 }
@@ -46,7 +46,7 @@ export interface SMSError {
 
 // SMS Provider 인터페이스
 export interface SMSProvider extends BaseProvider<SMSRequest, SMSResult> {
-  readonly type: 'sms';
+  readonly type: "sms";
 
   // SMS 전용 기능들
   sendBulkSMS?(requests: SMSRequest[]): Promise<BulkSMSResult>;
@@ -60,7 +60,10 @@ export interface SMSProvider extends BaseProvider<SMSRequest, SMSResult> {
 export interface SMSContract {
   send(request: SMSSendRequest): Promise<SMSResult>;
   sendBulk?(requests: SMSSendRequest[]): Promise<BulkSMSResult>;
-  schedule?(request: SMSSendRequest, scheduledAt: Date): Promise<ScheduleResult>;
+  schedule?(
+    request: SMSSendRequest,
+    scheduledAt: Date,
+  ): Promise<ScheduleResult>;
   cancel?(messageId: string): Promise<void>;
   getStatus(messageId: string): Promise<SMSStatus>;
 }
@@ -69,14 +72,14 @@ export interface SMSSendRequest {
   phoneNumber: string;
   text: string;
   senderNumber?: string;
-  messageType?: 'SMS' | 'LMS';
+  messageType?: "SMS" | "LMS";
   subject?: string; // LMS용
   options?: SMSSendOptions;
 }
 
 export interface SMSSendOptions {
-  priority?: 'high' | 'normal' | 'low';
-  encoding?: 'UTF-8' | 'EUC-KR';
+  priority?: "high" | "normal" | "low";
+  encoding?: "UTF-8" | "EUC-KR";
   webhookUrl?: string;
   tracking?: boolean;
   scheduledAt?: Date;
@@ -86,16 +89,16 @@ export interface ScheduleResult {
   scheduleId: string;
   messageId: string;
   scheduledAt: Date;
-  status: 'scheduled' | 'cancelled';
+  status: "scheduled" | "cancelled";
 }
 
 export enum SMSStatus {
-  QUEUED = 'QUEUED',
-  SENDING = 'SENDING',
-  SENT = 'SENT',
-  DELIVERED = 'DELIVERED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  QUEUED = "QUEUED",
+  SENDING = "SENDING",
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
 }
 
 // SMS 계정 관리 계약
@@ -104,12 +107,15 @@ export interface SMSAccountContract {
   getProfile(): Promise<SMSAccountProfile>;
   getSenderNumbers(): Promise<SMSSenderNumber[]>;
   addSenderNumber?(phoneNumber: string): Promise<SMSSenderNumber>;
-  verifySenderNumber?(phoneNumber: string, verificationCode: string): Promise<boolean>;
+  verifySenderNumber?(
+    phoneNumber: string,
+    verificationCode: string,
+  ): Promise<boolean>;
 }
 
 export interface SMSBalance {
-  sms: number;        // SMS 잔여 건수
-  lms: number;        // LMS 잔여 건수
+  sms: number; // SMS 잔여 건수
+  lms: number; // LMS 잔여 건수
   currency: string;
   lastUpdated: Date;
 }
@@ -117,8 +123,8 @@ export interface SMSBalance {
 export interface SMSAccountProfile {
   accountId: string;
   name: string;
-  status: 'active' | 'suspended' | 'blocked';
-  tier: 'basic' | 'standard' | 'premium';
+  status: "active" | "suspended" | "blocked";
+  tier: "basic" | "standard" | "premium";
   limits: {
     dailySMSLimit: number;
     dailyLMSLimit: number;
@@ -132,14 +138,14 @@ export interface SMSSenderNumber {
   phoneNumber: string;
   isVerified: boolean;
   verifiedAt?: Date;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   createdAt: Date;
 }
 
 // SMS Provider 기능
 export interface SMSCapabilities {
   sms: {
-    maxLength: number;           // SMS 최대 길이 (보통 90자)
+    maxLength: number; // SMS 최대 길이 (보통 90자)
     supportsBulk: boolean;
     maxRecipientsPerRequest: number;
     maxRequestsPerSecond: number;
@@ -147,7 +153,7 @@ export interface SMSCapabilities {
     maxScheduleDays: number;
   };
   lms: {
-    maxLength: number;           // LMS 최대 길이 (보통 2000자)
+    maxLength: number; // LMS 최대 길이 (보통 2000자)
     supportsSubject: boolean;
     maxSubjectLength: number;
     supportsBulk: boolean;

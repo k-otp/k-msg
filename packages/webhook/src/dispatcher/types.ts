@@ -2,7 +2,7 @@
  * Dispatcher Type Definitions
  */
 
-import type { WebhookEvent, WebhookEndpoint } from '../types/webhook.types';
+import type { WebhookEndpoint, WebhookEvent } from "../types/webhook.types";
 
 export interface DispatchConfig {
   maxConcurrentRequests: number;
@@ -29,7 +29,7 @@ export interface QueueConfig {
 }
 
 export interface LoadBalancerConfig {
-  strategy: 'round-robin' | 'least-connections' | 'weighted' | 'random';
+  strategy: "round-robin" | "least-connections" | "weighted" | "random";
   healthCheckInterval: number;
   healthCheckTimeoutMs: number;
   weights?: Record<string, number>;
@@ -49,7 +49,7 @@ export interface DispatchJob {
 
 export interface CircuitBreakerState {
   endpointId: string;
-  state: 'closed' | 'open' | 'half-open';
+  state: "closed" | "open" | "half-open";
   failureCount: number;
   lastFailureTime?: Date;
   nextRetryTime?: Date;

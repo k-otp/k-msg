@@ -1,8 +1,8 @@
 export enum LogLevel {
-  DEBUG = 'DEBUG',
-  INFO = 'INFO',
-  WARN = 'WARN',
-  ERROR = 'ERROR'
+  DEBUG = "DEBUG",
+  INFO = "INFO",
+  WARN = "WARN",
+  ERROR = "ERROR",
 }
 
 export interface LogContext {
@@ -39,22 +39,24 @@ export class Logger {
   private config: LoggerConfig;
   private context: LogContext;
 
-  constructor(
-    context: LogContext = {},
-    config: Partial<LoggerConfig> = {}
-  ) {
+  constructor(context: LogContext = {}, config: Partial<LoggerConfig> = {}) {
     this.context = context;
     this.config = {
       level: LogLevel.INFO,
       enableConsole: true,
       enableJson: false,
       enableColors: true,
-      ...config
+      ...config,
     };
   }
 
   private shouldLog(level: LogLevel): boolean {
-    const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
+    const levels = [
+      LogLevel.DEBUG,
+      LogLevel.INFO,
+      LogLevel.WARN,
+      LogLevel.ERROR,
+    ];
     return levels.indexOf(level) >= levels.indexOf(this.config.level);
   }
 
@@ -69,18 +71,23 @@ export class Logger {
           error: {
             name: entry.error.name,
             message: entry.error.message,
-            stack: entry.error.stack
-          }
+            stack: entry.error.stack,
+          },
         }),
-        ...(entry.duration && { duration: entry.duration })
+        ...(entry.duration && { duration: entry.duration }),
       });
     }
 
     const timestamp = entry.timestamp.toISOString();
-    const level = this.config.enableColors ? this.colorizeLevel(entry.level) : entry.level;
-    const contextStr = Object.keys(entry.context).length > 0
-      ? ` [${Object.entries(entry.context).map(([k, v]) => `${k}=${v}`).join(', ')}]`
-      : '';
+    const level = this.config.enableColors
+      ? this.colorizeLevel(entry.level)
+      : entry.level;
+    const contextStr =
+      Object.keys(entry.context).length > 0
+        ? ` [${Object.entries(entry.context)
+            .map(([k, v]) => `${k}=${v}`)
+            .join(", ")}]`
+        : "";
 
     let message = `${timestamp} ${level}${contextStr}: ${entry.message}`;
 
@@ -99,10 +106,10 @@ export class Logger {
     if (!this.config.enableColors) return level;
 
     const colors = {
-      [LogLevel.DEBUG]: '\x1b[36m', // cyan
-      [LogLevel.INFO]: '\x1b[32m',  // green
-      [LogLevel.WARN]: '\x1b[33m',  // yellow
-      [LogLevel.ERROR]: '\x1b[31m'  // red
+      [LogLevel.DEBUG]: "\x1b[36m", // cyan
+      [LogLevel.INFO]: "\x1b[32m", // green
+      [LogLevel.WARN]: "\x1b[33m", // yellow
+      [LogLevel.ERROR]: "\x1b[31m", // red
     };
 
     return `${colors[level]}${level}\x1b[0m`;
@@ -114,9 +121,12 @@ export class Logger {
     const message = this.formatMessage(entry);
 
     if (this.config.enableConsole) {
-      const logFn = entry.level === LogLevel.ERROR ? console.error :
-                   entry.level === LogLevel.WARN ? console.warn :
-                   console.log;
+      const logFn =
+        entry.level === LogLevel.ERROR
+          ? console.error
+          : entry.level === LogLevel.WARN
+            ? console.warn
+            : console.log;
       logFn(message);
     }
 
@@ -131,7 +141,7 @@ export class Logger {
       level: LogLevel.DEBUG,
       message,
       timestamp: new Date(),
-      context: { ...this.context, ...context }
+      context: { ...this.context, ...context },
     });
   }
 
@@ -140,7 +150,7 @@ export class Logger {
       level: LogLevel.INFO,
       message,
       timestamp: new Date(),
-      context: { ...this.context, ...context }
+      context: { ...this.context, ...context },
     });
   }
 
@@ -150,7 +160,7 @@ export class Logger {
       message,
       timestamp: new Date(),
       context: { ...this.context, ...context },
-      error
+      error,
     });
   }
 
@@ -160,15 +170,12 @@ export class Logger {
       message,
       timestamp: new Date(),
       context: { ...this.context, ...context },
-      error
+      error,
     });
   }
 
   child(context: LogContext): Logger {
-    return new Logger(
-      { ...this.context, ...context },
-      this.config
-    );
+    return new Logger({ ...this.context, ...context }, this.config);
   }
 
   time(label: string): () => void {
@@ -182,7 +189,7 @@ export class Logger {
   async measure<T>(
     operation: string,
     fn: () => Promise<T>,
-    context: LogContext = {}
+    context: LogContext = {},
   ): Promise<T> {
     const start = Date.now();
     const operationContext = { ...context, operation };
@@ -201,7 +208,7 @@ export class Logger {
       this.error(
         `Failed ${operation}`,
         { ...operationContext, duration },
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
       throw error;
     }
@@ -213,7 +220,7 @@ let globalLogger: Logger;
 
 export function createLogger(
   context?: LogContext,
-  config?: Partial<LoggerConfig>
+  config?: Partial<LoggerConfig>,
 ): Logger {
   return new Logger(context, config);
 }
@@ -231,14 +238,18 @@ export function setGlobalLogger(logger: Logger): void {
 
 // Convenience functions
 export const logger = {
-  debug: (message: string, context?: LogContext) => getLogger().debug(message, context),
-  info: (message: string, context?: LogContext) => getLogger().info(message, context),
-  warn: (message: string, context?: LogContext, error?: Error) => getLogger().warn(message, context, error),
-  error: (message: string, context?: LogContext, error?: Error) => getLogger().error(message, context, error),
+  debug: (message: string, context?: LogContext) =>
+    getLogger().debug(message, context),
+  info: (message: string, context?: LogContext) =>
+    getLogger().info(message, context),
+  warn: (message: string, context?: LogContext, error?: Error) =>
+    getLogger().warn(message, context, error),
+  error: (message: string, context?: LogContext, error?: Error) =>
+    getLogger().error(message, context, error),
   child: (context: LogContext) => getLogger().child(context),
   time: (label: string) => getLogger().time(label),
   measure: <T>(operation: string, fn: () => Promise<T>, context?: LogContext) =>
-    getLogger().measure(operation, fn, context)
+    getLogger().measure(operation, fn, context),
 };
 
 // Express-style middleware for Hono
@@ -253,26 +264,30 @@ export function loggerMiddleware(config?: Partial<LoggerConfig>) {
       requestId,
       method: c.req.method,
       path: c.req.path,
-      userAgent: c.req.header('user-agent') || 'unknown'
+      userAgent: c.req.header("user-agent") || "unknown",
     };
 
-    requestLogger.info('Request started', context);
+    requestLogger.info("Request started", context);
 
     try {
       await next();
 
       const duration = Date.now() - start;
-      requestLogger.info('Request completed', {
+      requestLogger.info("Request completed", {
         ...context,
         status: c.res.status,
-        duration
+        duration,
       });
     } catch (error) {
       const duration = Date.now() - start;
-      requestLogger.error('Request failed', {
-        ...context,
-        duration
-      }, error instanceof Error ? error : new Error(String(error)));
+      requestLogger.error(
+        "Request failed",
+        {
+          ...context,
+          duration,
+        },
+        error instanceof Error ? error : new Error(String(error)),
+      );
 
       throw error;
     }

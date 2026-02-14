@@ -1,15 +1,15 @@
 import type {
+  AggregatedMetric,
   AnalyticsConfig,
-  MetricData,
   AnalyticsQuery,
   AnalyticsResult,
-  AggregatedMetric,
   InsightData,
-  MetricType
-} from '../types/analytics.types';
-import { MetricsCollector } from './metrics.collector';
-import { ReportGenerator } from './report.generator';
-import { InsightEngine } from './insight.engine';
+  MetricData,
+  MetricType,
+} from "../types/analytics.types";
+import { InsightEngine } from "./insight.engine";
+import { MetricsCollector } from "./metrics.collector";
+import { ReportGenerator } from "./report.generator";
 
 export class AnalyticsService {
   private config: AnalyticsConfig;
@@ -84,7 +84,7 @@ export class AnalyticsService {
       for (const metric of metrics) {
         yield metric;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
@@ -94,7 +94,10 @@ export class AnalyticsService {
   async getDashboardData(timeRange: { start: Date; end: Date }) {
     const now = new Date();
     const previousPeriod = {
-      start: new Date(timeRange.start.getTime() - (timeRange.end.getTime() - timeRange.start.getTime())),
+      start: new Date(
+        timeRange.start.getTime() -
+          (timeRange.end.getTime() - timeRange.start.getTime()),
+      ),
       end: timeRange.start,
     };
 
@@ -103,7 +106,7 @@ export class AnalyticsService {
       metrics: this.config.enabledMetrics,
       dateRange: timeRange,
       interval: this.getOptimalInterval(timeRange),
-      groupBy: ['provider', 'channel'],
+      groupBy: ["provider", "channel"],
     });
 
     // 이전 기간 데이터 (비교용)
@@ -111,7 +114,7 @@ export class AnalyticsService {
       metrics: this.config.enabledMetrics,
       dateRange: previousPeriod,
       interval: this.getOptimalInterval(timeRange),
-      groupBy: ['provider', 'channel'],
+      groupBy: ["provider", "channel"],
     });
 
     // KPI 계산
@@ -129,14 +132,17 @@ export class AnalyticsService {
   /**
    * 이상 탐지
    */
-  async detectAnomalies(metricType: MetricType, timeRange: { start: Date; end: Date }): Promise<InsightData[]> {
+  async detectAnomalies(
+    metricType: MetricType,
+    timeRange: { start: Date; end: Date },
+  ): Promise<InsightData[]> {
     return this.insightEngine.detectAnomalies(metricType, timeRange);
   }
 
   private async processRealTimeMetric(metric: MetricData): Promise<void> {
     // 실시간 이상 탐지
     const anomalies = await this.insightEngine.detectRealTimeAnomalies(metric);
-    
+
     if (anomalies.length > 0) {
       // 이상 상황 알림 (웹훅 등)
       await this.notifyAnomalies(anomalies);
@@ -145,26 +151,31 @@ export class AnalyticsService {
 
   private validateQuery(query: AnalyticsQuery): void {
     if (query.dateRange.start >= query.dateRange.end) {
-      throw new Error('Invalid date range: start must be before end');
+      throw new Error("Invalid date range: start must be before end");
     }
 
     const maxRangeMs = 90 * 24 * 60 * 60 * 1000; // 90일
-    if (query.dateRange.end.getTime() - query.dateRange.start.getTime() > maxRangeMs) {
-      throw new Error('Date range too large: maximum 90 days');
+    if (
+      query.dateRange.end.getTime() - query.dateRange.start.getTime() >
+      maxRangeMs
+    ) {
+      throw new Error("Date range too large: maximum 90 days");
     }
 
     if (query.limit && query.limit > 10000) {
-      throw new Error('Limit too large: maximum 10000 records');
+      throw new Error("Limit too large: maximum 10000 records");
     }
   }
 
-  private async executeQuery(query: AnalyticsQuery): Promise<AggregatedMetric[]> {
+  private async executeQuery(
+    query: AnalyticsQuery,
+  ): Promise<AggregatedMetric[]> {
     // 실제 구현에서는 데이터베이스 쿼리를 실행
     // 여기서는 메모리 기반 구현 예시
-    
+
     const interval = query.interval || this.getOptimalInterval(query.dateRange);
     const cacheKey = this.generateCacheKey(query);
-    
+
     // 캐시된 데이터 확인
     if (this.aggregatedMetrics.has(cacheKey)) {
       return this.aggregatedMetrics.get(cacheKey)!;
@@ -172,56 +183,83 @@ export class AnalyticsService {
 
     // 집계 실행
     const aggregated = await this.performAggregation(query, interval);
-    
+
     // 캐시 저장 (TTL 설정 필요)
     this.aggregatedMetrics.set(cacheKey, aggregated);
-    
+
     return aggregated;
   }
 
-  private async performAggregation(query: AnalyticsQuery, interval: string): Promise<AggregatedMetric[]> {
+  private async performAggregation(
+    query: AnalyticsQuery,
+    interval: string,
+  ): Promise<AggregatedMetric[]> {
     // 집계 로직 구현
     // 실제로는 시계열 데이터베이스나 OLAP 엔진 사용
     return [];
   }
 
-  private async generateInsights(query: AnalyticsQuery, data: AggregatedMetric[]): Promise<InsightData[]> {
+  private async generateInsights(
+    query: AnalyticsQuery,
+    data: AggregatedMetric[],
+  ): Promise<InsightData[]> {
     return this.insightEngine.generateInsights(query, data);
   }
 
-  private getOptimalInterval(dateRange: { start: Date; end: Date }): 'minute' | 'hour' | 'day' | 'week' | 'month' {
+  private getOptimalInterval(dateRange: {
+    start: Date;
+    end: Date;
+  }): "minute" | "hour" | "day" | "week" | "month" {
     const durationMs = dateRange.end.getTime() - dateRange.start.getTime();
     const durationDays = durationMs / (24 * 60 * 60 * 1000);
 
-    if (durationDays <= 1) return 'minute';
-    if (durationDays <= 7) return 'hour';
-    if (durationDays <= 30) return 'day';
-    if (durationDays <= 90) return 'week';
-    return 'month';
+    if (durationDays <= 1) return "minute";
+    if (durationDays <= 7) return "hour";
+    if (durationDays <= 30) return "day";
+    if (durationDays <= 90) return "week";
+    return "month";
   }
 
-  private calculateKPIs(current: AggregatedMetric[], previous: AggregatedMetric[]) {
+  private calculateKPIs(
+    current: AggregatedMetric[],
+    previous: AggregatedMetric[],
+  ) {
     // KPI 계산 로직
     return {
-      totalMessages: this.sumMetrics(current, 'message_sent'),
-      deliveryRate: this.calculateRate(current, 'message_delivered', 'message_sent'),
-      errorRate: this.calculateRate(current, 'message_failed', 'message_sent'),
-      clickRate: this.calculateRate(current, 'message_clicked', 'message_delivered'),
+      totalMessages: this.sumMetrics(current, "message_sent"),
+      deliveryRate: this.calculateRate(
+        current,
+        "message_delivered",
+        "message_sent",
+      ),
+      errorRate: this.calculateRate(current, "message_failed", "message_sent"),
+      clickRate: this.calculateRate(
+        current,
+        "message_clicked",
+        "message_delivered",
+      ),
     };
   }
 
-  private calculateTrends(current: AggregatedMetric[], previous: AggregatedMetric[]) {
+  private calculateTrends(
+    current: AggregatedMetric[],
+    previous: AggregatedMetric[],
+  ) {
     // 트렌드 계산 로직
     return {};
   }
 
   private sumMetrics(metrics: AggregatedMetric[], type: string): number {
     return metrics
-      .filter(m => m.type.toString() === type)
+      .filter((m) => m.type.toString() === type)
       .reduce((sum, m) => sum + m.aggregations.sum, 0);
   }
 
-  private calculateRate(metrics: AggregatedMetric[], numerator: string, denominator: string): number {
+  private calculateRate(
+    metrics: AggregatedMetric[],
+    numerator: string,
+    denominator: string,
+  ): number {
     const num = this.sumMetrics(metrics, numerator);
     const den = this.sumMetrics(metrics, denominator);
     return den > 0 ? (num / den) * 100 : 0;
@@ -247,7 +285,7 @@ export class AnalyticsService {
   private scheduleAggregation(interval: string): void {
     // 집계 작업 스케줄링 로직
     const scheduleMs = this.getScheduleInterval(interval);
-    
+
     setInterval(async () => {
       try {
         await this.runAggregation(interval);
@@ -259,12 +297,18 @@ export class AnalyticsService {
 
   private getScheduleInterval(interval: string): number {
     switch (interval) {
-      case 'minute': return 60 * 1000;
-      case 'hour': return 60 * 60 * 1000;
-      case 'day': return 24 * 60 * 60 * 1000;
-      case 'week': return 7 * 24 * 60 * 60 * 1000;
-      case 'month': return 30 * 24 * 60 * 60 * 1000;
-      default: return 60 * 60 * 1000;
+      case "minute":
+        return 60 * 1000;
+      case "hour":
+        return 60 * 60 * 1000;
+      case "day":
+        return 24 * 60 * 60 * 1000;
+      case "week":
+        return 7 * 24 * 60 * 60 * 1000;
+      case "month":
+        return 30 * 24 * 60 * 60 * 1000;
+      default:
+        return 60 * 60 * 1000;
     }
   }
 
@@ -276,8 +320,8 @@ export class AnalyticsService {
   private async notifyAnomalies(anomalies: InsightData[]): Promise<void> {
     // 이상 상황 알림 로직 (웹훅, 이메일 등)
     for (const anomaly of anomalies) {
-      if (anomaly.severity === 'critical' || anomaly.severity === 'high') {
-        console.warn('Anomaly detected:', anomaly);
+      if (anomaly.severity === "critical" || anomaly.severity === "high") {
+        console.warn("Anomaly detected:", anomaly);
         // 실제 알림 전송
       }
     }

@@ -1,4 +1,4 @@
-import type { FC } from 'hono/jsx';
+import type { FC } from "hono/jsx";
 
 interface DashboardProps {
   platformInfo?: any;
@@ -6,10 +6,10 @@ interface DashboardProps {
   platformHealth?: boolean;
 }
 
-export const DashboardPage: FC<DashboardProps> = ({ 
-  platformInfo = {}, 
-  healthStatus = {}, 
-  platformHealth = false 
+export const DashboardPage: FC<DashboardProps> = ({
+  platformInfo = {},
+  healthStatus = {},
+  platformHealth = false,
 }) => {
   const providers = platformInfo.providers || [];
   const features = platformInfo.features || {};
@@ -30,22 +30,24 @@ export const DashboardPage: FC<DashboardProps> = ({
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                  <h1 class="text-xl font-semibold text-gray-900">K-Message Platform</h1>
+                  <h1 class="text-xl font-semibold text-gray-900">
+                    K-Message Platform
+                  </h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                  <span 
+                  <span
                     class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      platformHealth 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                      platformHealth
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
                     }`}
                   >
-                    <span 
+                    <span
                       class={`w-2 h-2 rounded-full mr-2 ${
-                        platformHealth ? 'bg-green-400' : 'bg-red-400'
+                        platformHealth ? "bg-green-400" : "bg-red-400"
                       }`}
                     ></span>
-                    {platformHealth ? 'Healthy' : 'Unhealthy'}
+                    {platformHealth ? "Healthy" : "Unhealthy"}
                   </span>
                 </div>
               </div>
@@ -56,7 +58,7 @@ export const DashboardPage: FC<DashboardProps> = ({
           <nav class="bg-gray-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="flex space-x-8">
-                <button 
+                <button
                   class="border-indigo-500 text-white border-b-2 py-4 px-1 text-sm font-medium"
                   hx-get="/dashboard/dashboard"
                   hx-target="#main-content"
@@ -64,7 +66,7 @@ export const DashboardPage: FC<DashboardProps> = ({
                 >
                   대시보드
                 </button>
-                <button 
+                <button
                   class="border-transparent text-gray-300 hover:text-white border-b-2 py-4 px-1 text-sm font-medium"
                   hx-get="/dashboard/templates"
                   hx-target="#main-content"
@@ -72,7 +74,7 @@ export const DashboardPage: FC<DashboardProps> = ({
                 >
                   템플릿 관리
                 </button>
-                <button 
+                <button
                   class="border-transparent text-gray-300 hover:text-white border-b-2 py-4 px-1 text-sm font-medium"
                   hx-get="/dashboard/messages"
                   hx-target="#main-content"
@@ -80,7 +82,7 @@ export const DashboardPage: FC<DashboardProps> = ({
                 >
                   메시지 발송
                 </button>
-                <button 
+                <button
                   class="border-transparent text-gray-300 hover:text-white border-b-2 py-4 px-1 text-sm font-medium"
                   hx-get="/dashboard/providers"
                   hx-target="#main-content"
@@ -104,14 +106,18 @@ export const DashboardPage: FC<DashboardProps> = ({
                       <div class="flex items-center">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
-                            <span class="text-white text-sm font-medium">🚀</span>
+                            <span class="text-white text-sm font-medium">
+                              🚀
+                            </span>
                           </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                           <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">플랫폼 상태</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                              플랫폼 상태
+                            </dt>
                             <dd class="text-lg font-medium text-gray-900">
-                              {platformInfo.version || 'v0.1.0'}
+                              {platformInfo.version || "v0.1.0"}
                             </dd>
                           </dl>
                         </div>
@@ -125,12 +131,16 @@ export const DashboardPage: FC<DashboardProps> = ({
                       <div class="flex items-center">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                            <span class="text-white text-sm font-medium">🔌</span>
+                            <span class="text-white text-sm font-medium">
+                              🔌
+                            </span>
                           </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                           <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">등록된 프로바이더</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                              등록된 프로바이더
+                            </dt>
                             <dd class="text-lg font-medium text-gray-900">
                               {providers.length || 1}
                             </dd>
@@ -146,12 +156,16 @@ export const DashboardPage: FC<DashboardProps> = ({
                       <div class="flex items-center">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                            <span class="text-white text-sm font-medium">⚡</span>
+                            <span class="text-white text-sm font-medium">
+                              ⚡
+                            </span>
                           </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                           <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">활성 기능</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                              활성 기능
+                            </dt>
                             <dd class="text-lg font-medium text-gray-900">
                               {Object.keys(features).length || 7}
                             </dd>
@@ -165,27 +179,39 @@ export const DashboardPage: FC<DashboardProps> = ({
                 {/* Health Status */}
                 <div class="bg-white shadow rounded-lg">
                   <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">시스템 상태</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                      시스템 상태
+                    </h3>
                     <div class="space-y-2">
-                      {healthStatus.services && Object.entries(healthStatus.services).map(([service, status]) => (
-                        <div key={service} class="flex items-center justify-between">
-                          <span class="text-sm font-medium text-gray-900">{service}</span>
-                          <span 
-                            class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              status === 'healthy' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            <span 
-                              class={`w-2 h-2 rounded-full mr-2 ${
-                                status === 'healthy' ? 'bg-green-400' : 'bg-red-400'
-                              }`}
-                            ></span>
-                            {status === 'healthy' ? 'Healthy' : 'Unhealthy'}
-                          </span>
-                        </div>
-                      ))}
+                      {healthStatus.services &&
+                        Object.entries(healthStatus.services).map(
+                          ([service, status]) => (
+                            <div
+                              key={service}
+                              class="flex items-center justify-between"
+                            >
+                              <span class="text-sm font-medium text-gray-900">
+                                {service}
+                              </span>
+                              <span
+                                class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  status === "healthy"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                <span
+                                  class={`w-2 h-2 rounded-full mr-2 ${
+                                    status === "healthy"
+                                      ? "bg-green-400"
+                                      : "bg-red-400"
+                                  }`}
+                                ></span>
+                                {status === "healthy" ? "Healthy" : "Unhealthy"}
+                              </span>
+                            </div>
+                          ),
+                        )}
                     </div>
                   </div>
                 </div>
@@ -197,8 +223,9 @@ export const DashboardPage: FC<DashboardProps> = ({
           <div id="notification"></div>
         </div>
 
-        <script dangerouslySetInnerHTML={{
-          __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
             // Global notification handler
             document.addEventListener('htmx:afterRequest', function(event) {
               const xhr = event.detail.xhr;
@@ -245,8 +272,9 @@ export const DashboardPage: FC<DashboardProps> = ({
                 }, 5000);
               }
             }
-          `
-        }} />
+          `,
+          }}
+        />
       </body>
     </html>
   );

@@ -1,12 +1,12 @@
-import type { 
-  ProviderPlugin, 
-  ProviderConfig, 
-  PluginContext, 
+import { EventEmitter } from "events";
+import type {
   Logger,
   MetricsCollector,
-  PluginStorage 
-} from '../interfaces';
-import { EventEmitter } from 'events';
+  PluginContext,
+  PluginStorage,
+  ProviderConfig,
+  ProviderPlugin,
+} from "../interfaces";
 
 export class PluginRegistry {
   private plugins = new Map<string, ProviderPlugin>();
@@ -14,31 +14,31 @@ export class PluginRegistry {
 
   register(plugin: ProviderPlugin): void {
     const id = plugin.metadata.name.toLowerCase();
-    
+
     if (this.plugins.has(id)) {
       throw new Error(`Plugin ${id} is already registered`);
     }
-    
+
     this.plugins.set(id, plugin);
   }
 
   async create(
-    pluginId: string, 
+    pluginId: string,
     config: ProviderConfig,
     options: {
       logger?: Logger;
       metrics?: MetricsCollector;
       storage?: PluginStorage;
-    } = {}
+    } = {},
   ): Promise<ProviderPlugin> {
     const plugin = this.plugins.get(pluginId.toLowerCase());
-    
+
     if (!plugin) {
       throw new Error(`Plugin ${pluginId} not found`);
     }
 
     // 새 인스턴스 생성
-    const PluginClass = plugin.constructor as new() => ProviderPlugin;
+    const PluginClass = plugin.constructor as new () => ProviderPlugin;
     const instance = new PluginClass();
 
     // 컨텍스트 생성
@@ -62,7 +62,7 @@ export class PluginRegistry {
   async loadAndCreate(
     pluginId: string,
     config: ProviderConfig,
-    options?: any
+    options?: any,
   ): Promise<ProviderPlugin> {
     // 동적 로딩 지원 (나중에 구현)
     return this.create(pluginId, config, options);
@@ -82,9 +82,9 @@ export class PluginRegistry {
 
   async destroyAll(): Promise<void> {
     const destroyPromises = Array.from(this.instances.values()).map(
-      instance => instance.destroy()
+      (instance) => instance.destroy(),
     );
-    
+
     await Promise.all(destroyPromises);
     this.instances.clear();
   }
@@ -95,15 +95,15 @@ class ConsoleLogger implements Logger {
   info(message: string, ...args: any[]): void {
     console.log(`[INFO] ${message}`, ...args);
   }
-  
+
   error(message: string, error?: any): void {
     console.error(`[ERROR] ${message}`, error);
   }
-  
+
   debug(message: string, ...args: any[]): void {
     console.debug(`[DEBUG] ${message}`, ...args);
   }
-  
+
   warn(message: string, ...args: any[]): void {
     console.warn(`[WARN] ${message}`, ...args);
   }
@@ -111,8 +111,16 @@ class ConsoleLogger implements Logger {
 
 class NoOpMetricsCollector implements MetricsCollector {
   increment(_metric: string, _labels?: Record<string, string>): void {}
-  histogram(_metric: string, _value: number, _labels?: Record<string, string>): void {}
-  gauge(_metric: string, _value: number, _labels?: Record<string, string>): void {}
+  histogram(
+    _metric: string,
+    _value: number,
+    _labels?: Record<string, string>,
+  ): void {}
+  gauge(
+    _metric: string,
+    _value: number,
+    _labels?: Record<string, string>,
+  ): void {}
 }
 
 class MemoryStorage implements PluginStorage {
@@ -120,19 +128,19 @@ class MemoryStorage implements PluginStorage {
 
   async get(key: string): Promise<any> {
     const item = this.store.get(key);
-    
+
     if (!item) return undefined;
-    
+
     if (item.expiry && Date.now() > item.expiry) {
       this.store.delete(key);
       return undefined;
     }
-    
+
     return item.value;
   }
 
   async set(key: string, value: any, ttl?: number): Promise<void> {
-    const expiry = ttl ? Date.now() + (ttl * 1000) : undefined;
+    const expiry = ttl ? Date.now() + ttl * 1000 : undefined;
     this.store.set(key, { value, expiry });
   }
 

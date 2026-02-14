@@ -1,4 +1,4 @@
-import { TemplateVariable } from '../types/template.types';
+import type { TemplateVariable } from "../types/template.types";
 
 export class VariableParser {
   private static readonly VARIABLE_PATTERN = /#{([^}]+)}/g;
@@ -8,15 +8,15 @@ export class VariableParser {
    */
   static extractVariables(content: string): string[] {
     const variables: string[] = [];
-    const matches = content.matchAll(this.VARIABLE_PATTERN);
-    
+    const matches = content.matchAll(VariableParser.VARIABLE_PATTERN);
+
     for (const match of matches) {
       const variableName = match[1].trim();
       if (variableName && !variables.includes(variableName)) {
         variables.push(variableName);
       }
     }
-    
+
     return variables;
   }
 
@@ -25,21 +25,24 @@ export class VariableParser {
    */
   static replaceVariables(
     content: string,
-    variables: Record<string, string | number | Date>
+    variables: Record<string, string | number | Date>,
   ): string {
-    return content.replace(this.VARIABLE_PATTERN, (match, variableName) => {
-      const value = variables[variableName.trim()];
-      
-      if (value === undefined || value === null) {
-        return match; // 값이 없으면 원래 변수 그대로 유지
-      }
-      
-      if (value instanceof Date) {
-        return value.toISOString();
-      }
-      
-      return String(value);
-    });
+    return content.replace(
+      VariableParser.VARIABLE_PATTERN,
+      (match, variableName) => {
+        const value = variables[variableName.trim()];
+
+        if (value === undefined || value === null) {
+          return match; // 값이 없으면 원래 변수 그대로 유지
+        }
+
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+
+        return String(value);
+      },
+    );
   }
 
   /**
@@ -47,7 +50,7 @@ export class VariableParser {
    */
   static validateVariables(
     variableDefinitions: TemplateVariable[],
-    providedVariables: Record<string, any>
+    providedVariables: Record<string, any>,
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -66,36 +69,48 @@ export class VariableParser {
       }
 
       // 타입 검증
-      if (!this.validateVariableType(value, definition.type)) {
-        errors.push(`Variable '${definition.name}' has invalid type. Expected: ${definition.type}`);
+      if (!VariableParser.validateVariableType(value, definition.type)) {
+        errors.push(
+          `Variable '${definition.name}' has invalid type. Expected: ${definition.type}`,
+        );
       }
 
       // 길이 검증
       if (definition.maxLength && String(value).length > definition.maxLength) {
-        errors.push(`Variable '${definition.name}' exceeds maximum length of ${definition.maxLength}`);
+        errors.push(
+          `Variable '${definition.name}' exceeds maximum length of ${definition.maxLength}`,
+        );
       }
 
       // 포맷 검증 (정규식)
-      if (definition.format && !new RegExp(definition.format).test(String(value))) {
-        errors.push(`Variable '${definition.name}' does not match required format: ${definition.format}`);
+      if (
+        definition.format &&
+        !new RegExp(definition.format).test(String(value))
+      ) {
+        errors.push(
+          `Variable '${definition.name}' does not match required format: ${definition.format}`,
+        );
       }
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
-  private static validateVariableType(value: any, expectedType: string): boolean {
+  private static validateVariableType(
+    value: any,
+    expectedType: string,
+  ): boolean {
     switch (expectedType) {
-      case 'string':
-        return typeof value === 'string';
-      case 'number':
-        return typeof value === 'number' && !isNaN(value);
-      case 'date':
+      case "string":
+        return typeof value === "string";
+      case "number":
+        return typeof value === "number" && !isNaN(value);
+      case "date":
         return value instanceof Date || !isNaN(Date.parse(value));
-      case 'custom':
+      case "custom":
         return true; // 커스텀 타입은 별도 검증 로직 필요
       default:
         return false;
@@ -107,29 +122,33 @@ export class VariableParser {
    */
   static validateTemplateVariables(
     content: string,
-    variableDefinitions: TemplateVariable[]
+    variableDefinitions: TemplateVariable[],
   ): { isValid: boolean; errors: string[] } {
-    const usedVariables = this.extractVariables(content);
-    const definedVariables = variableDefinitions.map(v => v.name);
+    const usedVariables = VariableParser.extractVariables(content);
+    const definedVariables = variableDefinitions.map((v) => v.name);
     const errors: string[] = [];
 
     // 사용된 변수가 정의되어 있는지 확인
     for (const usedVar of usedVariables) {
       if (!definedVariables.includes(usedVar)) {
-        errors.push(`Variable '${usedVar}' is used in template but not defined`);
+        errors.push(
+          `Variable '${usedVar}' is used in template but not defined`,
+        );
       }
     }
 
     // 정의된 필수 변수가 템플릿에서 사용되는지 확인
     for (const definition of variableDefinitions) {
       if (definition.required && !usedVariables.includes(definition.name)) {
-        errors.push(`Required variable '${definition.name}' is defined but not used in template`);
+        errors.push(
+          `Required variable '${definition.name}' is defined but not used in template`,
+        );
       }
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

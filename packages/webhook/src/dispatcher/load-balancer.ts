@@ -3,9 +3,9 @@
  * 웹훅 엔드포인트 간의 부하 분산 관리
  */
 
-import type { WebhookEndpoint } from '../types/webhook.types';
-import type { LoadBalancerConfig, CircuitBreakerState } from './types';
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
+import type { WebhookEndpoint } from "../types/webhook.types";
+import type { CircuitBreakerState, LoadBalancerConfig } from "./types";
 
 interface EndpointHealth {
   endpointId: string;
@@ -25,16 +25,16 @@ export class LoadBalancer extends EventEmitter {
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
   private defaultConfig: LoadBalancerConfig = {
-    strategy: 'round-robin',
+    strategy: "round-robin",
     healthCheckInterval: 30000, // 30초
     healthCheckTimeoutMs: 5000,
-    weights: {}
+    weights: {},
   };
 
   constructor(config: Partial<LoadBalancerConfig> = {}) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.startHealthChecks();
   }
 
@@ -48,16 +48,19 @@ export class LoadBalancer extends EventEmitter {
       consecutiveFailures: 0,
       lastHealthCheckAt: new Date(),
       averageResponseTime: 0,
-      activeConnections: 0
+      activeConnections: 0,
     };
 
     this.endpointHealth.set(endpoint.id, health);
     this.connectionCounts.set(endpoint.id, 0);
-    
+
     // 초기 건강 상태 확인
     await this.checkEndpointHealth(endpoint);
 
-    this.emit('endpointRegistered', { endpointId: endpoint.id, isHealthy: health.isHealthy });
+    this.emit("endpointRegistered", {
+      endpointId: endpoint.id,
+      isHealthy: health.isHealthy,
+    });
   }
 
   /**
@@ -68,20 +71,24 @@ export class LoadBalancer extends EventEmitter {
     this.circuitBreakers.delete(endpointId);
     this.connectionCounts.delete(endpointId);
 
-    this.emit('endpointUnregistered', { endpointId });
+    this.emit("endpointUnregistered", { endpointId });
   }
 
   /**
    * 로드 밸런싱을 통한 엔드포인트 선택
    */
-  async selectEndpoint(endpoints: WebhookEndpoint[]): Promise<WebhookEndpoint | null> {
-    const healthyEndpoints = endpoints.filter(endpoint => {
+  async selectEndpoint(
+    endpoints: WebhookEndpoint[],
+  ): Promise<WebhookEndpoint | null> {
+    const healthyEndpoints = endpoints.filter((endpoint) => {
       const health = this.endpointHealth.get(endpoint.id);
       const circuitBreaker = this.circuitBreakers.get(endpoint.id);
-      
-      return health?.isHealthy && 
-             endpoint.status === 'active' &&
-             circuitBreaker?.state !== 'open';
+
+      return (
+        health?.isHealthy &&
+        endpoint.status === "active" &&
+        circuitBreaker?.state !== "open"
+      );
     });
 
     if (healthyEndpoints.length === 0) {
@@ -90,30 +97,30 @@ export class LoadBalancer extends EventEmitter {
       if (halfOpenEndpoint) {
         return halfOpenEndpoint;
       }
-      
-      this.emit('noHealthyEndpoints', { totalEndpoints: endpoints.length });
+
+      this.emit("noHealthyEndpoints", { totalEndpoints: endpoints.length });
       return null;
     }
 
     let selectedEndpoint: WebhookEndpoint;
 
     switch (this.config.strategy) {
-      case 'round-robin':
+      case "round-robin":
         selectedEndpoint = this.selectRoundRobin(healthyEndpoints);
         break;
-      
-      case 'least-connections':
+
+      case "least-connections":
         selectedEndpoint = this.selectLeastConnections(healthyEndpoints);
         break;
-      
-      case 'weighted':
+
+      case "weighted":
         selectedEndpoint = this.selectWeighted(healthyEndpoints);
         break;
-      
-      case 'random':
+
+      case "random":
         selectedEndpoint = this.selectRandom(healthyEndpoints);
         break;
-      
+
       default:
         selectedEndpoint = healthyEndpoints[0];
     }
@@ -121,10 +128,10 @@ export class LoadBalancer extends EventEmitter {
     // 연결 수 증가
     this.incrementConnections(selectedEndpoint.id);
 
-    this.emit('endpointSelected', {
+    this.emit("endpointSelected", {
       endpointId: selectedEndpoint.id,
       strategy: this.config.strategy,
-      availableEndpoints: healthyEndpoints.length
+      availableEndpoints: healthyEndpoints.length,
     });
 
     return selectedEndpoint;
@@ -133,7 +140,11 @@ export class LoadBalancer extends EventEmitter {
   /**
    * 요청 완료 시 호출 (연결 수 감소 및 통계 업데이트)
    */
-  async onRequestComplete(endpointId: string, success: boolean, responseTime: number): Promise<void> {
+  async onRequestComplete(
+    endpointId: string,
+    success: boolean,
+    responseTime: number,
+  ): Promise<void> {
     // 연결 수 감소
     this.decrementConnections(endpointId);
 
@@ -144,29 +155,33 @@ export class LoadBalancer extends EventEmitter {
       if (health.averageResponseTime === 0) {
         health.averageResponseTime = responseTime;
       } else {
-        health.averageResponseTime = (health.averageResponseTime * 0.8) + (responseTime * 0.2);
+        health.averageResponseTime =
+          health.averageResponseTime * 0.8 + responseTime * 0.2;
       }
 
       if (success) {
         health.consecutiveFailures = 0;
         health.isHealthy = true;
-        
+
         // Circuit Breaker 복구
         const circuitBreaker = this.circuitBreakers.get(endpointId);
         if (circuitBreaker) {
-          if (circuitBreaker.state === 'half-open') {
-            circuitBreaker.state = 'closed';
+          if (circuitBreaker.state === "half-open") {
+            circuitBreaker.state = "closed";
             circuitBreaker.failureCount = 0;
-            this.emit('circuitBreakerClosed', { endpointId });
+            this.emit("circuitBreakerClosed", { endpointId });
           }
         }
       } else {
         health.consecutiveFailures++;
-        
+
         // 3번 연속 실패 시 비정상으로 마킹
         if (health.consecutiveFailures >= 3) {
           health.isHealthy = false;
-          this.emit('endpointUnhealthy', { endpointId, consecutiveFailures: health.consecutiveFailures });
+          this.emit("endpointUnhealthy", {
+            endpointId,
+            consecutiveFailures: health.consecutiveFailures,
+          });
         }
 
         // Circuit Breaker 업데이트
@@ -174,11 +189,11 @@ export class LoadBalancer extends EventEmitter {
       }
     }
 
-    this.emit('requestCompleted', {
+    this.emit("requestCompleted", {
       endpointId,
       success,
       responseTime,
-      averageResponseTime: health?.averageResponseTime
+      averageResponseTime: health?.averageResponseTime,
     });
   }
 
@@ -207,18 +222,25 @@ export class LoadBalancer extends EventEmitter {
     averageResponseTime: number;
   } {
     const healths = Array.from(this.endpointHealth.values());
-    const totalConnections = Array.from(this.connectionCounts.values()).reduce((sum, count) => sum + count, 0);
-    const circuitBreakersOpen = Array.from(this.circuitBreakers.values()).filter(cb => cb.state === 'open').length;
-    const avgResponseTime = healths.length > 0 
-      ? healths.reduce((sum, h) => sum + h.averageResponseTime, 0) / healths.length 
-      : 0;
+    const totalConnections = Array.from(this.connectionCounts.values()).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
+    const circuitBreakersOpen = Array.from(
+      this.circuitBreakers.values(),
+    ).filter((cb) => cb.state === "open").length;
+    const avgResponseTime =
+      healths.length > 0
+        ? healths.reduce((sum, h) => sum + h.averageResponseTime, 0) /
+          healths.length
+        : 0;
 
     return {
       totalEndpoints: healths.length,
-      healthyEndpoints: healths.filter(h => h.isHealthy).length,
+      healthyEndpoints: healths.filter((h) => h.isHealthy).length,
       activeConnections: totalConnections,
       circuitBreakersOpen,
-      averageResponseTime: avgResponseTime
+      averageResponseTime: avgResponseTime,
     };
   }
 
@@ -234,7 +256,9 @@ export class LoadBalancer extends EventEmitter {
   /**
    * Least Connections 전략
    */
-  private selectLeastConnections(endpoints: WebhookEndpoint[]): WebhookEndpoint {
+  private selectLeastConnections(
+    endpoints: WebhookEndpoint[],
+  ): WebhookEndpoint {
     return endpoints.reduce((least, current) => {
       const leastConnections = this.connectionCounts.get(least.id) || 0;
       const currentConnections = this.connectionCounts.get(current.id) || 0;
@@ -252,7 +276,7 @@ export class LoadBalancer extends EventEmitter {
     }, 0);
 
     let random = Math.random() * totalWeight;
-    
+
     for (const endpoint of endpoints) {
       const weight = weights[endpoint.id] || 1;
       random -= weight;
@@ -275,15 +299,21 @@ export class LoadBalancer extends EventEmitter {
   /**
    * Half-open Circuit Breaker 엔드포인트 시도
    */
-  private tryHalfOpenEndpoint(endpoints: WebhookEndpoint[]): WebhookEndpoint | null {
+  private tryHalfOpenEndpoint(
+    endpoints: WebhookEndpoint[],
+  ): WebhookEndpoint | null {
     const now = new Date();
-    
+
     for (const endpoint of endpoints) {
       const circuitBreaker = this.circuitBreakers.get(endpoint.id);
-      
-      if (circuitBreaker?.state === 'open' && circuitBreaker.nextRetryTime && now >= circuitBreaker.nextRetryTime) {
-        circuitBreaker.state = 'half-open';
-        this.emit('circuitBreakerHalfOpen', { endpointId: endpoint.id });
+
+      if (
+        circuitBreaker?.state === "open" &&
+        circuitBreaker.nextRetryTime &&
+        now >= circuitBreaker.nextRetryTime
+      ) {
+        circuitBreaker.state = "half-open";
+        this.emit("circuitBreakerHalfOpen", { endpointId: endpoint.id });
         return endpoint;
       }
     }
@@ -296,12 +326,12 @@ export class LoadBalancer extends EventEmitter {
    */
   private updateCircuitBreaker(endpointId: string, success: boolean): void {
     let circuitBreaker = this.circuitBreakers.get(endpointId);
-    
+
     if (!circuitBreaker) {
       circuitBreaker = {
         endpointId,
-        state: 'closed',
-        failureCount: 0
+        state: "closed",
+        failureCount: 0,
       };
       this.circuitBreakers.set(endpointId, circuitBreaker);
     }
@@ -311,14 +341,17 @@ export class LoadBalancer extends EventEmitter {
       circuitBreaker.lastFailureTime = new Date();
 
       // 5번 실패 시 Circuit Breaker 열기
-      if (circuitBreaker.failureCount >= 5 && circuitBreaker.state === 'closed') {
-        circuitBreaker.state = 'open';
+      if (
+        circuitBreaker.failureCount >= 5 &&
+        circuitBreaker.state === "closed"
+      ) {
+        circuitBreaker.state = "open";
         circuitBreaker.nextRetryTime = new Date(Date.now() + 60000); // 1분 후 재시도
-        
-        this.emit('circuitBreakerOpened', {
+
+        this.emit("circuitBreakerOpened", {
           endpointId,
           failureCount: circuitBreaker.failureCount,
-          nextRetryTime: circuitBreaker.nextRetryTime
+          nextRetryTime: circuitBreaker.nextRetryTime,
         });
       }
     }
@@ -330,7 +363,7 @@ export class LoadBalancer extends EventEmitter {
   private incrementConnections(endpointId: string): void {
     const currentCount = this.connectionCounts.get(endpointId) || 0;
     this.connectionCounts.set(endpointId, currentCount + 1);
-    
+
     const health = this.endpointHealth.get(endpointId);
     if (health) {
       health.activeConnections = currentCount + 1;
@@ -344,7 +377,7 @@ export class LoadBalancer extends EventEmitter {
     const currentCount = this.connectionCounts.get(endpointId) || 0;
     const newCount = Math.max(0, currentCount - 1);
     this.connectionCounts.set(endpointId, newCount);
-    
+
     const health = this.endpointHealth.get(endpointId);
     if (health) {
       health.activeConnections = newCount;
@@ -356,12 +389,12 @@ export class LoadBalancer extends EventEmitter {
    */
   private async checkEndpointHealth(endpoint: WebhookEndpoint): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // 간단한 HEAD 요청으로 건강 상태 확인
       const response = await fetch(endpoint.url, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(this.config.healthCheckTimeoutMs)
+        method: "HEAD",
+        signal: AbortSignal.timeout(this.config.healthCheckTimeoutMs),
       });
 
       const responseTime = Date.now() - startTime;
@@ -369,21 +402,20 @@ export class LoadBalancer extends EventEmitter {
 
       await this.onRequestComplete(endpoint.id, success, responseTime);
 
-      this.emit('healthCheckCompleted', {
+      this.emit("healthCheckCompleted", {
         endpointId: endpoint.id,
         success,
         responseTime,
-        httpStatus: response.status
+        httpStatus: response.status,
       });
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
       await this.onRequestComplete(endpoint.id, false, responseTime);
 
-      this.emit('healthCheckFailed', {
+      this.emit("healthCheckFailed", {
         endpointId: endpoint.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        responseTime
+        error: error instanceof Error ? error.message : "Unknown error",
+        responseTime,
       });
     }
   }
@@ -394,7 +426,7 @@ export class LoadBalancer extends EventEmitter {
   private startHealthChecks(): void {
     this.healthCheckInterval = setInterval(async () => {
       const endpoints = Array.from(this.endpointHealth.keys());
-      
+
       for (const endpointId of endpoints) {
         const health = this.endpointHealth.get(endpointId);
         if (health) {
@@ -407,9 +439,9 @@ export class LoadBalancer extends EventEmitter {
             events: [],
             createdAt: new Date(),
             updatedAt: new Date(),
-            status: 'active'
+            status: "active",
           };
-          
+
           await this.checkEndpointHealth(mockEndpoint);
         }
       }
@@ -425,9 +457,12 @@ export class LoadBalancer extends EventEmitter {
       this.healthCheckInterval = null;
     }
 
-    this.emit('shutdown', {
+    this.emit("shutdown", {
       totalEndpoints: this.endpointHealth.size,
-      activeConnections: Array.from(this.connectionCounts.values()).reduce((sum, count) => sum + count, 0)
+      activeConnections: Array.from(this.connectionCounts.values()).reduce(
+        (sum, count) => sum + count,
+        0,
+      ),
     });
   }
 }

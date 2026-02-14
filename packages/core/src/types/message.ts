@@ -1,4 +1,4 @@
-export type MessageType = 'ALIMTALK' | 'FRIENDTALK' | 'SMS' | 'LMS' | 'MMS';
+export type MessageType = "ALIMTALK" | "FRIENDTALK" | "SMS" | "LMS" | "MMS";
 
 export interface BaseOptions {
   to: string;
@@ -7,7 +7,7 @@ export interface BaseOptions {
 }
 
 export interface AlimTalkOptions extends BaseOptions {
-  type: 'ALIMTALK';
+  type: "ALIMTALK";
   templateId: string;
   variables: Record<string, string>;
 }
@@ -20,14 +20,14 @@ export interface Button {
 }
 
 export interface FriendTalkOptions extends BaseOptions {
-  type: 'FRIENDTALK';
+  type: "FRIENDTALK";
   text: string;
   imageUrl?: string;
   buttons?: Button[];
 }
 
 export interface SmsOptions extends BaseOptions {
-  type: 'SMS' | 'LMS' | 'MMS';
+  type: "SMS" | "LMS" | "MMS";
   text: string;
   subject?: string;
 }
@@ -36,6 +36,6 @@ export type SendOptions = AlimTalkOptions | FriendTalkOptions | SmsOptions;
 
 export interface SendResult {
   messageId: string;
-  status: 'PENDING' | 'SENT' | 'FAILED';
+  status: "PENDING" | "SENT" | "FAILED";
   provider: string;
 }

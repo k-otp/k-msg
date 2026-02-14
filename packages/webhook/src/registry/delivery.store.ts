@@ -3,11 +3,16 @@
  * 웹훅 전달 기록 저장 및 관리
  */
 
-import type { WebhookDelivery, WebhookEventType } from '../types/webhook.types';
-import type { DeliveryFilter, PaginationOptions, SearchResult, StorageConfig } from './types';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import type { WebhookDelivery, WebhookEventType } from "../types/webhook.types";
+import type {
+  DeliveryFilter,
+  PaginationOptions,
+  SearchResult,
+  StorageConfig,
+} from "./types";
 
 export class DeliveryStore extends EventEmitter {
   private config: StorageConfig;
@@ -18,22 +23,22 @@ export class DeliveryStore extends EventEmitter {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   private defaultConfig: StorageConfig = {
-    type: 'memory',
+    type: "memory",
     retentionDays: 30,
     enableCompression: false,
-    maxMemoryUsage: 100 * 1024 * 1024 // 100MB
+    maxMemoryUsage: 100 * 1024 * 1024, // 100MB
   };
 
   constructor(config: Partial<StorageConfig> = {}) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.initializeIndexes();
     this.startCleanupTask();
-    
-    if (this.config.type === 'file' && this.config.filePath) {
-      this.loadFromFile().catch(error => {
-        this.emit('loadError', error);
+
+    if (this.config.type === "file" && this.config.filePath) {
+      this.loadFromFile().catch((error) => {
+        this.emit("loadError", error);
       });
     }
   }
@@ -49,7 +54,7 @@ export class DeliveryStore extends EventEmitter {
     }
 
     // 메모리 사용량 확인
-    if (this.config.type === 'memory' && this.config.maxMemoryUsage) {
+    if (this.config.type === "memory" && this.config.maxMemoryUsage) {
       await this.checkMemoryUsage();
     }
 
@@ -58,14 +63,14 @@ export class DeliveryStore extends EventEmitter {
     this.addToIndexes(delivery);
 
     // 파일 저장
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.appendToFile(delivery);
     }
 
-    this.emit('deliverySaved', { 
-      deliveryId: delivery.id, 
+    this.emit("deliverySaved", {
+      deliveryId: delivery.id,
       endpointId: delivery.endpointId,
-      status: delivery.status 
+      status: delivery.status,
     });
   }
 
@@ -81,7 +86,7 @@ export class DeliveryStore extends EventEmitter {
    */
   async searchDeliveries(
     filter: DeliveryFilter = {},
-    pagination: PaginationOptions = { page: 1, limit: 100 }
+    pagination: PaginationOptions = { page: 1, limit: 100 },
   ): Promise<SearchResult<WebhookDelivery>> {
     let candidateIds: Set<string> | null = null;
 
@@ -95,7 +100,9 @@ export class DeliveryStore extends EventEmitter {
     if (filter.status) {
       const statusIds = this.indexByStatus.get(filter.status);
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => statusIds?.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => statusIds?.has(id)),
+        );
       } else {
         candidateIds = statusIds ? new Set(statusIds) : new Set();
       }
@@ -103,9 +110,14 @@ export class DeliveryStore extends EventEmitter {
 
     // 날짜 범위 필터 적용
     if (filter.createdAfter || filter.createdBefore) {
-      const dateIds = this.getDeliveryIdsByDateRange(filter.createdAfter, filter.createdBefore);
+      const dateIds = this.getDeliveryIdsByDateRange(
+        filter.createdAfter,
+        filter.createdBefore,
+      );
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => dateIds.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => dateIds.has(id)),
+        );
       } else {
         candidateIds = dateIds;
       }
@@ -118,24 +130,24 @@ export class DeliveryStore extends EventEmitter {
 
     // 추가 필터 적용
     const filteredDeliveries = Array.from(candidateIds)
-      .map(id => this.deliveries.get(id)!)
-      .filter(delivery => this.matchesFilter(delivery, filter));
+      .map((id) => this.deliveries.get(id)!)
+      .filter((delivery) => this.matchesFilter(delivery, filter));
 
     // 정렬 (기본: 최신순)
     filteredDeliveries.sort((a, b) => {
-      if (pagination.sortBy === 'createdAt' || !pagination.sortBy) {
+      if (pagination.sortBy === "createdAt" || !pagination.sortBy) {
         const comparison = b.createdAt.getTime() - a.createdAt.getTime();
-        return pagination.sortOrder === 'asc' ? -comparison : comparison;
+        return pagination.sortOrder === "asc" ? -comparison : comparison;
       }
-      
+
       const aValue = this.getFieldValue(a, pagination.sortBy);
       const bValue = this.getFieldValue(b, pagination.sortBy);
-      
+
       let comparison = 0;
       if (aValue < bValue) comparison = -1;
       else if (aValue > bValue) comparison = 1;
-      
-      return pagination.sortOrder === 'desc' ? -comparison : comparison;
+
+      return pagination.sortOrder === "desc" ? -comparison : comparison;
     });
 
     // 페이지네이션 적용
@@ -151,7 +163,7 @@ export class DeliveryStore extends EventEmitter {
       page: pagination.page,
       totalPages,
       hasNext: pagination.page < totalPages,
-      hasPrevious: pagination.page > 1
+      hasPrevious: pagination.page > 1,
     };
   }
 
@@ -160,7 +172,7 @@ export class DeliveryStore extends EventEmitter {
    */
   async getDeliveriesByEndpoint(
     endpointId: string,
-    limit = 100
+    limit = 100,
   ): Promise<WebhookDelivery[]> {
     const deliveryIds = this.indexByEndpoint.get(endpointId);
     if (!deliveryIds) {
@@ -168,7 +180,7 @@ export class DeliveryStore extends EventEmitter {
     }
 
     return Array.from(deliveryIds)
-      .map(id => this.deliveries.get(id)!)
+      .map((id) => this.deliveries.get(id)!)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
   }
@@ -178,13 +190,13 @@ export class DeliveryStore extends EventEmitter {
    */
   async getFailedDeliveries(
     endpointId?: string,
-    limit = 100
+    limit = 100,
   ): Promise<WebhookDelivery[]> {
-    const filter: DeliveryFilter = { 
-      status: 'failed',
-      endpointId 
+    const filter: DeliveryFilter = {
+      status: "failed",
+      endpointId,
     };
-    
+
     const result = await this.searchDeliveries(filter, { page: 1, limit });
     return result.items;
   }
@@ -194,7 +206,7 @@ export class DeliveryStore extends EventEmitter {
    */
   async getDeliveryStats(
     endpointId?: string,
-    timeRange?: { start: Date; end: Date }
+    timeRange?: { start: Date; end: Date },
   ): Promise<{
     totalDeliveries: number;
     successfulDeliveries: number;
@@ -208,31 +220,38 @@ export class DeliveryStore extends EventEmitter {
     const filter: DeliveryFilter = {
       endpointId,
       createdAfter: timeRange?.start,
-      createdBefore: timeRange?.end
+      createdBefore: timeRange?.end,
     };
 
-    const result = await this.searchDeliveries(filter, { page: 1, limit: 10000 });
+    const result = await this.searchDeliveries(filter, {
+      page: 1,
+      limit: 10000,
+    });
     const deliveries = result.items;
 
-    const successful = deliveries.filter(d => d.status === 'success');
-    const failed = deliveries.filter(d => d.status === 'failed');
-    const pending = deliveries.filter(d => d.status === 'pending');
-    const exhausted = deliveries.filter(d => d.status === 'exhausted');
+    const successful = deliveries.filter((d) => d.status === "success");
+    const failed = deliveries.filter((d) => d.status === "failed");
+    const pending = deliveries.filter((d) => d.status === "pending");
+    const exhausted = deliveries.filter((d) => d.status === "exhausted");
 
     // 평균 레이턴시 계산
-    const completedDeliveries = deliveries.filter(d => d.completedAt);
+    const completedDeliveries = deliveries.filter((d) => d.completedAt);
     const totalLatency = completedDeliveries.reduce((sum, delivery) => {
       const lastAttempt = delivery.attempts[delivery.attempts.length - 1];
       return sum + (lastAttempt?.latencyMs || 0);
     }, 0);
-    const averageLatency = completedDeliveries.length > 0 ? totalLatency / completedDeliveries.length : 0;
+    const averageLatency =
+      completedDeliveries.length > 0
+        ? totalLatency / completedDeliveries.length
+        : 0;
 
     // 에러 유형별 분석
     const errorBreakdown: Record<string, number> = {};
     for (const delivery of [...failed, ...exhausted]) {
       const lastAttempt = delivery.attempts[delivery.attempts.length - 1];
       if (lastAttempt?.error) {
-        errorBreakdown[lastAttempt.error] = (errorBreakdown[lastAttempt.error] || 0) + 1;
+        errorBreakdown[lastAttempt.error] =
+          (errorBreakdown[lastAttempt.error] || 0) + 1;
       } else if (lastAttempt?.httpStatus) {
         const errorKey = `HTTP ${lastAttempt.httpStatus}`;
         errorBreakdown[errorKey] = (errorBreakdown[errorKey] || 0) + 1;
@@ -246,8 +265,11 @@ export class DeliveryStore extends EventEmitter {
       pendingDeliveries: pending.length,
       exhaustedDeliveries: exhausted.length,
       averageLatency,
-      successRate: deliveries.length > 0 ? (successful.length / deliveries.length) * 100 : 0,
-      errorBreakdown
+      successRate:
+        deliveries.length > 0
+          ? (successful.length / deliveries.length) * 100
+          : 0,
+      errorBreakdown,
     };
   }
 
@@ -262,8 +284,8 @@ export class DeliveryStore extends EventEmitter {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
 
-    const oldDeliveries = Array.from(this.deliveries.values()).filter(delivery => 
-      delivery.createdAt < cutoffDate
+    const oldDeliveries = Array.from(this.deliveries.values()).filter(
+      (delivery) => delivery.createdAt < cutoffDate,
     );
 
     for (const delivery of oldDeliveries) {
@@ -272,13 +294,13 @@ export class DeliveryStore extends EventEmitter {
     }
 
     if (oldDeliveries.length > 0) {
-      this.emit('oldDeliveriesCleanup', { 
+      this.emit("oldDeliveriesCleanup", {
         removedCount: oldDeliveries.length,
-        cutoffDate 
+        cutoffDate,
       });
 
       // 파일 저장
-      if (this.config.type === 'file') {
+      if (this.config.type === "file") {
         await this.saveToFile();
       }
     }
@@ -299,15 +321,15 @@ export class DeliveryStore extends EventEmitter {
     };
   } {
     const memoryUsage = this.estimateMemoryUsage();
-    
+
     return {
       totalDeliveries: this.deliveries.size,
       memoryUsage,
       indexSizes: {
         byEndpoint: this.indexByEndpoint.size,
         byStatus: this.indexByStatus.size,
-        byDate: this.indexByDate.size
-      }
+        byDate: this.indexByDate.size,
+      },
     };
   }
 
@@ -315,7 +337,7 @@ export class DeliveryStore extends EventEmitter {
    * 인덱스 초기화
    */
   private initializeIndexes(): void {
-    const statuses = ['pending', 'success', 'failed', 'exhausted'];
+    const statuses = ["pending", "success", "failed", "exhausted"];
     for (const status of statuses) {
       this.indexByStatus.set(status, new Set());
     }
@@ -338,7 +360,7 @@ export class DeliveryStore extends EventEmitter {
     }
 
     // 날짜 인덱스
-    const dateKey = delivery.createdAt.toISOString().split('T')[0];
+    const dateKey = delivery.createdAt.toISOString().split("T")[0];
     if (!this.indexByDate.has(dateKey)) {
       this.indexByDate.set(dateKey, new Set());
     }
@@ -365,7 +387,7 @@ export class DeliveryStore extends EventEmitter {
     }
 
     // 날짜 인덱스
-    const dateKey = delivery.createdAt.toISOString().split('T')[0];
+    const dateKey = delivery.createdAt.toISOString().split("T")[0];
     const dateSet = this.indexByDate.get(dateKey);
     if (dateSet) {
       dateSet.delete(delivery.id);
@@ -378,25 +400,33 @@ export class DeliveryStore extends EventEmitter {
   /**
    * 날짜 범위로 전달 기록 ID 조회
    */
-  private getDeliveryIdsByDateRange(startDate?: Date, endDate?: Date): Set<string> {
+  private getDeliveryIdsByDateRange(
+    startDate?: Date,
+    endDate?: Date,
+  ): Set<string> {
     const ids = new Set<string>();
-    
+
     for (const [dateKey, deliveryIds] of this.indexByDate.entries()) {
       const date = new Date(dateKey);
-      
+
       if (startDate && date < startDate) continue;
       if (endDate && date > endDate) continue;
-      
-      deliveryIds.forEach(id => ids.add(id));
+
+      deliveryIds.forEach((id) => {
+        ids.add(id);
+      });
     }
-    
+
     return ids;
   }
 
   /**
    * 필터 조건 매칭 확인
    */
-  private matchesFilter(delivery: WebhookDelivery, filter: DeliveryFilter): boolean {
+  private matchesFilter(
+    delivery: WebhookDelivery,
+    filter: DeliveryFilter,
+  ): boolean {
     // 이벤트 ID 필터
     if (filter.eventId && delivery.eventId !== filter.eventId) {
       return false;
@@ -405,24 +435,33 @@ export class DeliveryStore extends EventEmitter {
     // HTTP 상태 코드 필터
     if (filter.httpStatusCode && filter.httpStatusCode.length > 0) {
       const lastAttempt = delivery.attempts[delivery.attempts.length - 1];
-      if (!lastAttempt?.httpStatus || !filter.httpStatusCode.includes(lastAttempt.httpStatus)) {
+      if (
+        !lastAttempt?.httpStatus ||
+        !filter.httpStatusCode.includes(lastAttempt.httpStatus)
+      ) {
         return false;
       }
     }
 
     // 에러 존재 여부 필터
     if (filter.hasError !== undefined) {
-      const hasError = delivery.attempts.some(attempt => attempt.error);
+      const hasError = delivery.attempts.some((attempt) => attempt.error);
       if (filter.hasError !== hasError) {
         return false;
       }
     }
 
     // 완료 날짜 필터
-    if (filter.completedAfter && (!delivery.completedAt || delivery.completedAt < filter.completedAfter)) {
+    if (
+      filter.completedAfter &&
+      (!delivery.completedAt || delivery.completedAt < filter.completedAfter)
+    ) {
       return false;
     }
-    if (filter.completedBefore && (!delivery.completedAt || delivery.completedAt > filter.completedBefore)) {
+    if (
+      filter.completedBefore &&
+      (!delivery.completedAt || delivery.completedAt > filter.completedBefore)
+    ) {
       return false;
     }
 
@@ -433,7 +472,7 @@ export class DeliveryStore extends EventEmitter {
    * 객체 필드 값 가져오기
    */
   private getFieldValue(obj: any, fieldPath: string): any {
-    return fieldPath.split('.').reduce((value, key) => value?.[key], obj);
+    return fieldPath.split(".").reduce((value, key) => value?.[key], obj);
   }
 
   /**
@@ -441,12 +480,12 @@ export class DeliveryStore extends EventEmitter {
    */
   private estimateMemoryUsage(): number {
     let totalSize = 0;
-    
+
     for (const delivery of this.deliveries.values()) {
       // 대략적인 객체 크기 계산
       totalSize += JSON.stringify(delivery).length * 2; // UTF-16 기준
     }
-    
+
     return totalSize;
   }
 
@@ -457,28 +496,29 @@ export class DeliveryStore extends EventEmitter {
     if (!this.config.maxMemoryUsage) return;
 
     const currentUsage = this.estimateMemoryUsage();
-    
+
     if (currentUsage > this.config.maxMemoryUsage) {
       // 오래된 전달 기록부터 제거
-      const deliveries = Array.from(this.deliveries.values())
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      
+      const deliveries = Array.from(this.deliveries.values()).sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      );
+
       let removedCount = 0;
       const targetUsage = this.config.maxMemoryUsage * 0.8; // 80%까지 줄이기
-      
+
       for (const delivery of deliveries) {
         if (this.estimateMemoryUsage() <= targetUsage) break;
-        
+
         this.removeFromIndexes(delivery);
         this.deliveries.delete(delivery.id);
         removedCount++;
       }
-      
+
       if (removedCount > 0) {
-        this.emit('memoryCleanup', { 
-          removedCount, 
+        this.emit("memoryCleanup", {
+          removedCount,
           previousUsage: currentUsage,
-          currentUsage: this.estimateMemoryUsage() 
+          currentUsage: this.estimateMemoryUsage(),
         });
       }
     }
@@ -489,14 +529,17 @@ export class DeliveryStore extends EventEmitter {
    */
   private startCleanupTask(): void {
     // 1시간마다 정리 작업 실행
-    this.cleanupInterval = setInterval(async () => {
-      try {
-        await this.cleanupOldDeliveries();
-        await this.checkMemoryUsage();
-      } catch (error) {
-        this.emit('cleanupError', error);
-      }
-    }, 60 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      async () => {
+        try {
+          await this.cleanupOldDeliveries();
+          await this.checkMemoryUsage();
+        } catch (error) {
+          this.emit("cleanupError", error);
+        }
+      },
+      60 * 60 * 1000,
+    );
   }
 
   /**
@@ -506,10 +549,10 @@ export class DeliveryStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const line = JSON.stringify(delivery) + '\n';
-      await fs.appendFile(this.config.filePath, line, 'utf8');
+      const line = JSON.stringify(delivery) + "\n";
+      await fs.appendFile(this.config.filePath, line, "utf8");
     } catch (error) {
-      this.emit('appendError', error);
+      this.emit("appendError", error);
     }
   }
 
@@ -520,38 +563,44 @@ export class DeliveryStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const data = await fs.readFile(this.config.filePath, 'utf8');
-      const lines = data.trim().split('\n').filter(line => line.trim());
-      
+      const data = await fs.readFile(this.config.filePath, "utf8");
+      const lines = data
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim());
+
       for (const line of lines) {
         try {
           const deliveryData = JSON.parse(line);
           const delivery: WebhookDelivery = {
             ...deliveryData,
             createdAt: new Date(deliveryData.createdAt),
-            completedAt: deliveryData.completedAt ? new Date(deliveryData.completedAt) : undefined,
-            nextRetryAt: deliveryData.nextRetryAt ? new Date(deliveryData.nextRetryAt) : undefined,
+            completedAt: deliveryData.completedAt
+              ? new Date(deliveryData.completedAt)
+              : undefined,
+            nextRetryAt: deliveryData.nextRetryAt
+              ? new Date(deliveryData.nextRetryAt)
+              : undefined,
             attempts: deliveryData.attempts.map((attempt: any) => ({
               ...attempt,
-              timestamp: new Date(attempt.timestamp)
-            }))
+              timestamp: new Date(attempt.timestamp),
+            })),
           };
-          
+
           this.deliveries.set(delivery.id, delivery);
           this.addToIndexes(delivery);
         } catch (parseError) {
-          this.emit('parseError', { line, error: parseError });
+          this.emit("parseError", { line, error: parseError });
         }
       }
 
-      this.emit('dataLoaded', { 
+      this.emit("dataLoaded", {
         filePath: this.config.filePath,
-        deliveryCount: this.deliveries.size 
+        deliveryCount: this.deliveries.size,
       });
-
     } catch (error) {
-      if ((error as any).code !== 'ENOENT') {
-        this.emit('loadError', error);
+      if ((error as any).code !== "ENOENT") {
+        this.emit("loadError", error);
       }
     }
   }
@@ -564,22 +613,21 @@ export class DeliveryStore extends EventEmitter {
 
     try {
       const lines = Array.from(this.deliveries.values())
-        .map(delivery => JSON.stringify(delivery))
-        .join('\n');
-      
+        .map((delivery) => JSON.stringify(delivery))
+        .join("\n");
+
       // 디렉토리 생성
       await fs.mkdir(path.dirname(this.config.filePath), { recursive: true });
-      
+
       // 파일 저장
-      await fs.writeFile(this.config.filePath, lines + '\n', 'utf8');
+      await fs.writeFile(this.config.filePath, lines + "\n", "utf8");
 
-      this.emit('dataSaved', { 
+      this.emit("dataSaved", {
         filePath: this.config.filePath,
-        deliveryCount: this.deliveries.size 
+        deliveryCount: this.deliveries.size,
       });
-
     } catch (error) {
-      this.emit('saveError', error);
+      this.emit("saveError", error);
       throw error;
     }
   }
@@ -594,12 +642,12 @@ export class DeliveryStore extends EventEmitter {
     }
 
     // 마지막 저장
-    if (this.config.type === 'file') {
-      await this.saveToFile().catch(error => {
-        this.emit('saveError', error);
+    if (this.config.type === "file") {
+      await this.saveToFile().catch((error) => {
+        this.emit("saveError", error);
       });
     }
 
-    this.emit('shutdown', { deliveryCount: this.deliveries.size });
+    this.emit("shutdown", { deliveryCount: this.deliveries.size });
   }
 }

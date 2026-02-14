@@ -3,12 +3,17 @@
  * 웹훅 이벤트 저장 및 관리
  */
 
-import type { WebhookEvent } from '../types/webhook.types';
-import { WebhookEventType } from '../types/webhook.types';
-import type { EventFilter, PaginationOptions, SearchResult, StorageConfig } from './types';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import type { WebhookEvent } from "../types/webhook.types";
+import { WebhookEventType } from "../types/webhook.types";
+import type {
+  EventFilter,
+  PaginationOptions,
+  SearchResult,
+  StorageConfig,
+} from "./types";
 
 export class EventStore extends EventEmitter {
   private config: StorageConfig;
@@ -20,22 +25,22 @@ export class EventStore extends EventEmitter {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   private defaultConfig: StorageConfig = {
-    type: 'memory',
+    type: "memory",
     retentionDays: 7,
     enableCompression: false,
-    maxMemoryUsage: 50 * 1024 * 1024 // 50MB
+    maxMemoryUsage: 50 * 1024 * 1024, // 50MB
   };
 
   constructor(config: Partial<StorageConfig> = {}) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.initializeIndexes();
     this.startCleanupTask();
-    
-    if (this.config.type === 'file' && this.config.filePath) {
-      this.loadFromFile().catch(error => {
-        this.emit('loadError', error);
+
+    if (this.config.type === "file" && this.config.filePath) {
+      this.loadFromFile().catch((error) => {
+        this.emit("loadError", error);
       });
     }
   }
@@ -46,12 +51,12 @@ export class EventStore extends EventEmitter {
   async saveEvent(event: WebhookEvent): Promise<void> {
     // 중복 이벤트 확인
     if (this.events.has(event.id)) {
-      this.emit('duplicateEvent', { eventId: event.id });
+      this.emit("duplicateEvent", { eventId: event.id });
       return;
     }
 
     // 메모리 사용량 확인
-    if (this.config.type === 'memory' && this.config.maxMemoryUsage) {
+    if (this.config.type === "memory" && this.config.maxMemoryUsage) {
       await this.checkMemoryUsage();
     }
 
@@ -60,14 +65,14 @@ export class EventStore extends EventEmitter {
     this.addToIndexes(event);
 
     // 파일 저장
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.appendToFile(event);
     }
 
-    this.emit('eventSaved', { 
-      eventId: event.id, 
+    this.emit("eventSaved", {
+      eventId: event.id,
       type: event.type,
-      providerId: event.metadata.providerId 
+      providerId: event.metadata.providerId,
     });
   }
 
@@ -83,7 +88,7 @@ export class EventStore extends EventEmitter {
    */
   async searchEvents(
     filter: EventFilter = {},
-    pagination: PaginationOptions = { page: 1, limit: 100 }
+    pagination: PaginationOptions = { page: 1, limit: 100 },
   ): Promise<SearchResult<WebhookEvent>> {
     let candidateIds: Set<string> | null = null;
 
@@ -93,7 +98,9 @@ export class EventStore extends EventEmitter {
       for (const eventType of filter.type) {
         const ids = this.indexByType.get(eventType);
         if (ids) {
-          ids.forEach(id => typeIds.add(id));
+          ids.forEach((id) => {
+            typeIds.add(id);
+          });
         }
       }
       candidateIds = typeIds;
@@ -105,12 +112,16 @@ export class EventStore extends EventEmitter {
       for (const providerId of filter.providerId) {
         const ids = this.indexByProvider.get(providerId);
         if (ids) {
-          ids.forEach(id => providerIds.add(id));
+          ids.forEach((id) => {
+            providerIds.add(id);
+          });
         }
       }
-      
+
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => providerIds.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => providerIds.has(id)),
+        );
       } else {
         candidateIds = providerIds;
       }
@@ -122,12 +133,16 @@ export class EventStore extends EventEmitter {
       for (const channelId of filter.channelId) {
         const ids = this.indexByChannel.get(channelId);
         if (ids) {
-          ids.forEach(id => channelIds.add(id));
+          ids.forEach((id) => {
+            channelIds.add(id);
+          });
         }
       }
-      
+
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => channelIds.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => channelIds.has(id)),
+        );
       } else {
         candidateIds = channelIds;
       }
@@ -135,9 +150,14 @@ export class EventStore extends EventEmitter {
 
     // 날짜 범위 필터 적용
     if (filter.createdAfter || filter.createdBefore) {
-      const dateIds = this.getEventIdsByDateRange(filter.createdAfter, filter.createdBefore);
+      const dateIds = this.getEventIdsByDateRange(
+        filter.createdAfter,
+        filter.createdBefore,
+      );
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => dateIds.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => dateIds.has(id)),
+        );
       } else {
         candidateIds = dateIds;
       }
@@ -150,24 +170,24 @@ export class EventStore extends EventEmitter {
 
     // 추가 필터 적용
     const filteredEvents = Array.from(candidateIds)
-      .map(id => this.events.get(id)!)
-      .filter(event => this.matchesFilter(event, filter));
+      .map((id) => this.events.get(id)!)
+      .filter((event) => this.matchesFilter(event, filter));
 
     // 정렬 (기본: 최신순)
     filteredEvents.sort((a, b) => {
-      if (pagination.sortBy === 'timestamp' || !pagination.sortBy) {
+      if (pagination.sortBy === "timestamp" || !pagination.sortBy) {
         const comparison = b.timestamp.getTime() - a.timestamp.getTime();
-        return pagination.sortOrder === 'asc' ? -comparison : comparison;
+        return pagination.sortOrder === "asc" ? -comparison : comparison;
       }
-      
+
       const aValue = this.getFieldValue(a, pagination.sortBy);
       const bValue = this.getFieldValue(b, pagination.sortBy);
-      
+
       let comparison = 0;
       if (aValue < bValue) comparison = -1;
       else if (aValue > bValue) comparison = 1;
-      
-      return pagination.sortOrder === 'desc' ? -comparison : comparison;
+
+      return pagination.sortOrder === "desc" ? -comparison : comparison;
     });
 
     // 페이지네이션 적용
@@ -183,7 +203,7 @@ export class EventStore extends EventEmitter {
       page: pagination.page,
       totalPages,
       hasNext: pagination.page < totalPages,
-      hasPrevious: pagination.page > 1
+      hasPrevious: pagination.page > 1,
     };
   }
 
@@ -192,7 +212,7 @@ export class EventStore extends EventEmitter {
    */
   async getEventsByType(
     eventType: WebhookEventType,
-    limit = 100
+    limit = 100,
   ): Promise<WebhookEvent[]> {
     const eventIds = this.indexByType.get(eventType);
     if (!eventIds) {
@@ -200,7 +220,7 @@ export class EventStore extends EventEmitter {
     }
 
     return Array.from(eventIds)
-      .map(id => this.events.get(id)!)
+      .map((id) => this.events.get(id)!)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }
@@ -208,9 +228,7 @@ export class EventStore extends EventEmitter {
   /**
    * 이벤트 통계 조회
    */
-  async getEventStats(
-    timeRange?: { start: Date; end: Date }
-  ): Promise<{
+  async getEventStats(timeRange?: { start: Date; end: Date }): Promise<{
     totalEvents: number;
     eventsByType: Record<WebhookEventType, number>;
     eventsByProvider: Record<string, number>;
@@ -219,7 +237,7 @@ export class EventStore extends EventEmitter {
   }> {
     const filter: EventFilter = {
       createdAfter: timeRange?.start,
-      createdBefore: timeRange?.end
+      createdBefore: timeRange?.end,
     };
 
     const result = await this.searchEvents(filter, { page: 1, limit: 10000 });
@@ -233,10 +251,10 @@ export class EventStore extends EventEmitter {
 
     // 프로바이더별 집계
     const eventsByProvider: Record<string, number> = {};
-    
+
     // 채널별 집계
     const eventsByChannel: Record<string, number> = {};
-    
+
     // 시간별 집계
     const eventsPerHour: Record<string, number> = {};
 
@@ -246,12 +264,14 @@ export class EventStore extends EventEmitter {
 
       // 프로바이더별
       if (event.metadata.providerId) {
-        eventsByProvider[event.metadata.providerId] = (eventsByProvider[event.metadata.providerId] || 0) + 1;
+        eventsByProvider[event.metadata.providerId] =
+          (eventsByProvider[event.metadata.providerId] || 0) + 1;
       }
 
       // 채널별
       if (event.metadata.channelId) {
-        eventsByChannel[event.metadata.channelId] = (eventsByChannel[event.metadata.channelId] || 0) + 1;
+        eventsByChannel[event.metadata.channelId] =
+          (eventsByChannel[event.metadata.channelId] || 0) + 1;
       }
 
       // 시간별 (YYYY-MM-DD HH 형식)
@@ -264,7 +284,7 @@ export class EventStore extends EventEmitter {
       eventsByType,
       eventsByProvider,
       eventsByChannel,
-      eventsPerHour
+      eventsPerHour,
     };
   }
 
@@ -279,8 +299,8 @@ export class EventStore extends EventEmitter {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
 
-    const oldEvents = Array.from(this.events.values()).filter(event => 
-      event.timestamp < cutoffDate
+    const oldEvents = Array.from(this.events.values()).filter(
+      (event) => event.timestamp < cutoffDate,
     );
 
     for (const event of oldEvents) {
@@ -289,13 +309,13 @@ export class EventStore extends EventEmitter {
     }
 
     if (oldEvents.length > 0) {
-      this.emit('oldEventsCleanup', { 
+      this.emit("oldEventsCleanup", {
         removedCount: oldEvents.length,
-        cutoffDate 
+        cutoffDate,
       });
 
       // 파일 저장
-      if (this.config.type === 'file') {
+      if (this.config.type === "file") {
         await this.saveToFile();
       }
     }
@@ -308,7 +328,7 @@ export class EventStore extends EventEmitter {
    */
   async cleanupDuplicateEvents(): Promise<number> {
     const eventsByContent = new Map<string, WebhookEvent[]>();
-    
+
     // 이벤트를 내용별로 그룹화
     for (const event of this.events.values()) {
       const contentKey = this.generateContentKey(event);
@@ -319,13 +339,15 @@ export class EventStore extends EventEmitter {
     }
 
     let removedCount = 0;
-    
+
     // 중복된 이벤트 제거 (가장 최신 것만 유지)
     for (const [contentKey, duplicateEvents] of eventsByContent.entries()) {
       if (duplicateEvents.length > 1) {
         // 타임스탬프 기준 정렬
-        duplicateEvents.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-        
+        duplicateEvents.sort(
+          (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+        );
+
         // 첫 번째(최신)를 제외한 나머지 제거
         for (let i = 1; i < duplicateEvents.length; i++) {
           const eventToRemove = duplicateEvents[i];
@@ -337,10 +359,10 @@ export class EventStore extends EventEmitter {
     }
 
     if (removedCount > 0) {
-      this.emit('duplicateEventsCleanup', { removedCount });
-      
+      this.emit("duplicateEventsCleanup", { removedCount });
+
       // 파일 저장
-      if (this.config.type === 'file') {
+      if (this.config.type === "file") {
         await this.saveToFile();
       }
     }
@@ -362,7 +384,7 @@ export class EventStore extends EventEmitter {
     };
   } {
     const memoryUsage = this.estimateMemoryUsage();
-    
+
     return {
       totalEvents: this.events.size,
       memoryUsage,
@@ -370,8 +392,8 @@ export class EventStore extends EventEmitter {
         byType: this.indexByType.size,
         byDate: this.indexByDate.size,
         byProvider: this.indexByProvider.size,
-        byChannel: this.indexByChannel.size
-      }
+        byChannel: this.indexByChannel.size,
+      },
     };
   }
 
@@ -397,7 +419,7 @@ export class EventStore extends EventEmitter {
     }
 
     // 날짜 인덱스
-    const dateKey = event.timestamp.toISOString().split('T')[0];
+    const dateKey = event.timestamp.toISOString().split("T")[0];
     if (!this.indexByDate.has(dateKey)) {
       this.indexByDate.set(dateKey, new Set());
     }
@@ -431,7 +453,7 @@ export class EventStore extends EventEmitter {
     }
 
     // 날짜 인덱스
-    const dateKey = event.timestamp.toISOString().split('T')[0];
+    const dateKey = event.timestamp.toISOString().split("T")[0];
     const dateSet = this.indexByDate.get(dateKey);
     if (dateSet) {
       dateSet.delete(event.id);
@@ -466,18 +488,23 @@ export class EventStore extends EventEmitter {
   /**
    * 날짜 범위로 이벤트 ID 조회
    */
-  private getEventIdsByDateRange(startDate?: Date, endDate?: Date): Set<string> {
+  private getEventIdsByDateRange(
+    startDate?: Date,
+    endDate?: Date,
+  ): Set<string> {
     const ids = new Set<string>();
-    
+
     for (const [dateKey, eventIds] of this.indexByDate.entries()) {
       const date = new Date(dateKey);
-      
+
       if (startDate && date < startDate) continue;
       if (endDate && date > endDate) continue;
-      
-      eventIds.forEach(id => ids.add(id));
+
+      eventIds.forEach((id) => {
+        ids.add(id);
+      });
     }
-    
+
     return ids;
   }
 
@@ -487,28 +514,40 @@ export class EventStore extends EventEmitter {
   private matchesFilter(event: WebhookEvent, filter: EventFilter): boolean {
     // 템플릿 ID 필터
     if (filter.templateId && filter.templateId.length > 0) {
-      if (!event.metadata.templateId || !filter.templateId.includes(event.metadata.templateId)) {
+      if (
+        !event.metadata.templateId ||
+        !filter.templateId.includes(event.metadata.templateId)
+      ) {
         return false;
       }
     }
 
     // 메시지 ID 필터
     if (filter.messageId && filter.messageId.length > 0) {
-      if (!event.metadata.messageId || !filter.messageId.includes(event.metadata.messageId)) {
+      if (
+        !event.metadata.messageId ||
+        !filter.messageId.includes(event.metadata.messageId)
+      ) {
         return false;
       }
     }
 
     // 사용자 ID 필터
     if (filter.userId && filter.userId.length > 0) {
-      if (!event.metadata.userId || !filter.userId.includes(event.metadata.userId)) {
+      if (
+        !event.metadata.userId ||
+        !filter.userId.includes(event.metadata.userId)
+      ) {
         return false;
       }
     }
 
     // 조직 ID 필터
     if (filter.organizationId && filter.organizationId.length > 0) {
-      if (!event.metadata.organizationId || !filter.organizationId.includes(event.metadata.organizationId)) {
+      if (
+        !event.metadata.organizationId ||
+        !filter.organizationId.includes(event.metadata.organizationId)
+      ) {
         return false;
       }
     }
@@ -520,7 +559,7 @@ export class EventStore extends EventEmitter {
    * 객체 필드 값 가져오기
    */
   private getFieldValue(obj: any, fieldPath: string): any {
-    return fieldPath.split('.').reduce((value, key) => value?.[key], obj);
+    return fieldPath.split(".").reduce((value, key) => value?.[key], obj);
   }
 
   /**
@@ -528,12 +567,12 @@ export class EventStore extends EventEmitter {
    */
   private estimateMemoryUsage(): number {
     let totalSize = 0;
-    
+
     for (const event of this.events.values()) {
       // 대략적인 객체 크기 계산
       totalSize += JSON.stringify(event).length * 2; // UTF-16 기준
     }
-    
+
     return totalSize;
   }
 
@@ -544,28 +583,29 @@ export class EventStore extends EventEmitter {
     if (!this.config.maxMemoryUsage) return;
 
     const currentUsage = this.estimateMemoryUsage();
-    
+
     if (currentUsage > this.config.maxMemoryUsage) {
       // 오래된 이벤트부터 제거
-      const events = Array.from(this.events.values())
-        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-      
+      const events = Array.from(this.events.values()).sort(
+        (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+      );
+
       let removedCount = 0;
       const targetUsage = this.config.maxMemoryUsage * 0.8; // 80%까지 줄이기
-      
+
       for (const event of events) {
         if (this.estimateMemoryUsage() <= targetUsage) break;
-        
+
         this.removeFromIndexes(event);
         this.events.delete(event.id);
         removedCount++;
       }
-      
+
       if (removedCount > 0) {
-        this.emit('memoryCleanup', { 
-          removedCount, 
+        this.emit("memoryCleanup", {
+          removedCount,
           previousUsage: currentUsage,
-          currentUsage: this.estimateMemoryUsage() 
+          currentUsage: this.estimateMemoryUsage(),
         });
       }
     }
@@ -575,7 +615,7 @@ export class EventStore extends EventEmitter {
    * 이벤트 내용 키 생성 (중복 검사용)
    */
   private generateContentKey(event: WebhookEvent): string {
-    return `${event.type}_${event.metadata.messageId || ''}_${event.metadata.templateId || ''}_${JSON.stringify(event.data)}`;
+    return `${event.type}_${event.metadata.messageId || ""}_${event.metadata.templateId || ""}_${JSON.stringify(event.data)}`;
   }
 
   /**
@@ -583,14 +623,17 @@ export class EventStore extends EventEmitter {
    */
   private startCleanupTask(): void {
     // 1시간마다 정리 작업 실행
-    this.cleanupInterval = setInterval(async () => {
-      try {
-        await this.cleanupOldEvents();
-        await this.cleanupDuplicateEvents();
-      } catch (error) {
-        this.emit('cleanupError', error);
-      }
-    }, 60 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      async () => {
+        try {
+          await this.cleanupOldEvents();
+          await this.cleanupDuplicateEvents();
+        } catch (error) {
+          this.emit("cleanupError", error);
+        }
+      },
+      60 * 60 * 1000,
+    );
   }
 
   /**
@@ -600,10 +643,10 @@ export class EventStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const line = JSON.stringify(event) + '\n';
-      await fs.appendFile(this.config.filePath, line, 'utf8');
+      const line = JSON.stringify(event) + "\n";
+      await fs.appendFile(this.config.filePath, line, "utf8");
     } catch (error) {
-      this.emit('appendError', error);
+      this.emit("appendError", error);
     }
   }
 
@@ -614,32 +657,34 @@ export class EventStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const data = await fs.readFile(this.config.filePath, 'utf8');
-      const lines = data.trim().split('\n').filter(line => line.trim());
-      
+      const data = await fs.readFile(this.config.filePath, "utf8");
+      const lines = data
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim());
+
       for (const line of lines) {
         try {
           const eventData = JSON.parse(line);
           const event: WebhookEvent = {
             ...eventData,
-            timestamp: new Date(eventData.timestamp)
+            timestamp: new Date(eventData.timestamp),
           };
-          
+
           this.events.set(event.id, event);
           this.addToIndexes(event);
         } catch (parseError) {
-          this.emit('parseError', { line, error: parseError });
+          this.emit("parseError", { line, error: parseError });
         }
       }
 
-      this.emit('dataLoaded', { 
+      this.emit("dataLoaded", {
         filePath: this.config.filePath,
-        eventCount: this.events.size 
+        eventCount: this.events.size,
       });
-
     } catch (error) {
-      if ((error as any).code !== 'ENOENT') {
-        this.emit('loadError', error);
+      if ((error as any).code !== "ENOENT") {
+        this.emit("loadError", error);
       }
     }
   }
@@ -652,22 +697,21 @@ export class EventStore extends EventEmitter {
 
     try {
       const lines = Array.from(this.events.values())
-        .map(event => JSON.stringify(event))
-        .join('\n');
-      
+        .map((event) => JSON.stringify(event))
+        .join("\n");
+
       // 디렉토리 생성
       await fs.mkdir(path.dirname(this.config.filePath), { recursive: true });
-      
+
       // 파일 저장
-      await fs.writeFile(this.config.filePath, lines + '\n', 'utf8');
+      await fs.writeFile(this.config.filePath, lines + "\n", "utf8");
 
-      this.emit('dataSaved', { 
+      this.emit("dataSaved", {
         filePath: this.config.filePath,
-        eventCount: this.events.size 
+        eventCount: this.events.size,
       });
-
     } catch (error) {
-      this.emit('saveError', error);
+      this.emit("saveError", error);
       throw error;
     }
   }
@@ -682,12 +726,12 @@ export class EventStore extends EventEmitter {
     }
 
     // 마지막 저장
-    if (this.config.type === 'file') {
-      await this.saveToFile().catch(error => {
-        this.emit('saveError', error);
+    if (this.config.type === "file") {
+      await this.saveToFile().catch((error) => {
+        this.emit("saveError", error);
       });
     }
 
-    this.emit('shutdown', { eventCount: this.events.size });
+    this.emit("shutdown", { eventCount: this.events.size });
   }
 }

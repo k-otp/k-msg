@@ -1,6 +1,7 @@
 {
   "name": "@k-msg/cli",
   "version": "0.1.1",
+  "private": true,
   "description": "AlimTalk Platform CLI tool",
   "type": "module",
   "bin": {

@@ -3,8 +3,12 @@
  * 발신번호 인증 및 검증 시스템
  */
 
-import { EventEmitter } from 'events';
-import { SenderNumber, SenderNumberStatus, SenderNumberCategory } from '../types/channel.types';
+import { EventEmitter } from "events";
+import {
+  SenderNumber,
+  SenderNumberCategory,
+  SenderNumberStatus,
+} from "../types/channel.types";
 
 export interface PhoneVerificationRequest {
   id: string;
@@ -30,30 +34,30 @@ export interface VerificationAttempt {
   attemptNumber: number;
   attemptedAt: Date;
   method: VerificationMethod;
-  status: 'sent' | 'delivered' | 'failed' | 'verified' | 'expired';
+  status: "sent" | "delivered" | "failed" | "verified" | "expired";
   failureReason?: string;
   responseTime?: number; // in milliseconds
 }
 
 export enum VerificationType {
-  SMS = 'sms',
-  VOICE_CALL = 'voice_call',
-  HYBRID = 'hybrid' // Try SMS first, fallback to voice
+  SMS = "sms",
+  VOICE_CALL = "voice_call",
+  HYBRID = "hybrid", // Try SMS first, fallback to voice
 }
 
 export enum VerificationMethod {
-  SMS = 'sms',
-  VOICE_CALL = 'voice_call',
-  MISSED_CALL = 'missed_call'
+  SMS = "sms",
+  VOICE_CALL = "voice_call",
+  MISSED_CALL = "missed_call",
 }
 
 export enum PhoneVerificationStatus {
-  PENDING = 'pending',
-  CODE_SENT = 'code_sent',
-  VERIFIED = 'verified',
-  FAILED = 'failed',
-  EXPIRED = 'expired',
-  BLOCKED = 'blocked'
+  PENDING = "pending",
+  CODE_SENT = "code_sent",
+  VERIFIED = "verified",
+  FAILED = "failed",
+  EXPIRED = "expired",
+  BLOCKED = "blocked",
 }
 
 export interface NumberVerifierOptions {
@@ -75,27 +79,38 @@ export interface NumberVerifierOptions {
 export interface SMSProvider {
   id: string;
   name: string;
-  sendSMS(phoneNumber: string, message: string, options?: any): Promise<SMSResult>;
+  sendSMS(
+    phoneNumber: string,
+    message: string,
+    options?: any,
+  ): Promise<SMSResult>;
   getDeliveryStatus?(messageId: string): Promise<DeliveryStatus>;
 }
 
 export interface VoiceProvider {
   id: string;
   name: string;
-  makeCall(phoneNumber: string, message: string, options?: any): Promise<VoiceResult>;
-  makeMissedCall?(phoneNumber: string, options?: any): Promise<MissedCallResult>;
+  makeCall(
+    phoneNumber: string,
+    message: string,
+    options?: any,
+  ): Promise<VoiceResult>;
+  makeMissedCall?(
+    phoneNumber: string,
+    options?: any,
+  ): Promise<MissedCallResult>;
 }
 
 export interface SMSResult {
   messageId: string;
-  status: 'sent' | 'failed';
+  status: "sent" | "failed";
   cost?: number;
   error?: string;
 }
 
 export interface VoiceResult {
   callId: string;
-  status: 'initiated' | 'answered' | 'failed' | 'busy' | 'no_answer';
+  status: "initiated" | "answered" | "failed" | "busy" | "no_answer";
   duration?: number;
   cost?: number;
   error?: string;
@@ -103,14 +118,14 @@ export interface VoiceResult {
 
 export interface MissedCallResult {
   callId: string;
-  status: 'initiated' | 'completed' | 'failed';
+  status: "initiated" | "completed" | "failed";
   missedCallNumber?: string;
   error?: string;
 }
 
 export interface DeliveryStatus {
   messageId: string;
-  status: 'pending' | 'delivered' | 'failed' | 'expired';
+  status: "pending" | "delivered" | "failed" | "expired";
   deliveredAt?: Date;
   failureReason?: string;
 }
@@ -120,7 +135,7 @@ export interface PhoneNumberInfo {
   countryCode: string;
   nationalNumber: string;
   carrier?: string;
-  lineType?: 'mobile' | 'landline' | 'voip' | 'unknown';
+  lineType?: "mobile" | "landline" | "voip" | "unknown";
   isValid: boolean;
   isPossible: boolean;
   region?: string;
@@ -130,7 +145,10 @@ export class NumberVerifier extends EventEmitter {
   private verificationRequests = new Map<string, PhoneVerificationRequest>();
   private phoneNumberCache = new Map<string, PhoneNumberInfo>();
   private rateLimitTracker = new Map<string, Date[]>();
-  private dailyAttemptTracker = new Map<string, { date: string; count: number }>();
+  private dailyAttemptTracker = new Map<
+    string,
+    { date: string; count: number }
+  >();
   private blockedNumbers = new Set<string>();
 
   private defaultOptions: NumberVerifierOptions = {
@@ -138,21 +156,21 @@ export class NumberVerifier extends EventEmitter {
     codeExpiryMinutes: 5,
     maxAttempts: 3,
     maxDailyAttempts: 10,
-    smsTemplate: '인증번호: {code}. {expiry}분 내에 입력해주세요.',
-    voiceTemplate: '인증번호는 {code}입니다. 다시 한 번, {code}입니다.',
+    smsTemplate: "인증번호: {code}. {expiry}분 내에 입력해주세요.",
+    voiceTemplate: "인증번호는 {code}입니다. 다시 한 번, {code}입니다.",
     rateLimitMinutes: 1,
     enableVoiceFallback: true,
     enableMissedCallVerification: false,
     blockedNumbers: [],
-    allowedCountries: ['KR']
+    allowedCountries: ["KR"],
   };
 
   constructor(private options: Partial<NumberVerifierOptions> = {}) {
     super();
     this.options = { ...this.defaultOptions, ...options };
-    
+
     // Initialize blocked numbers
-    this.options.blockedNumbers?.forEach(number => {
+    this.options.blockedNumbers?.forEach((number) => {
       this.blockedNumbers.add(number);
     });
   }
@@ -164,32 +182,34 @@ export class NumberVerifier extends EventEmitter {
     senderNumberId: string,
     phoneNumber: string,
     verificationType: VerificationType = VerificationType.SMS,
-    metadata: PhoneVerificationRequest['metadata'] = {}
+    metadata: PhoneVerificationRequest["metadata"] = {},
   ): Promise<PhoneVerificationRequest> {
     // Validate phone number
     const phoneInfo = await this.getPhoneNumberInfo(phoneNumber);
     if (!phoneInfo.isValid) {
-      throw new Error('Invalid phone number format');
+      throw new Error("Invalid phone number format");
     }
 
     // Check if number is blocked
     if (this.isNumberBlocked(phoneNumber)) {
-      throw new Error('Phone number is blocked');
+      throw new Error("Phone number is blocked");
     }
 
     // Check rate limiting
     if (this.isRateLimited(phoneNumber)) {
-      throw new Error('Rate limit exceeded. Please try again later.');
+      throw new Error("Rate limit exceeded. Please try again later.");
     }
 
     // Check daily attempt limit
     if (this.isDailyLimitExceeded(phoneNumber)) {
-      throw new Error('Daily verification attempt limit exceeded');
+      throw new Error("Daily verification attempt limit exceeded");
     }
 
     const requestId = this.generateRequestId();
     const verificationCode = this.generateVerificationCode();
-    const expiresAt = new Date(Date.now() + this.options.codeExpiryMinutes! * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + this.options.codeExpiryMinutes! * 60 * 1000,
+    );
 
     const verificationRequest: PhoneVerificationRequest = {
       id: requestId,
@@ -201,14 +221,14 @@ export class NumberVerifier extends EventEmitter {
       attempts: [],
       expiresAt,
       createdAt: new Date(),
-      metadata
+      metadata,
     };
 
     this.verificationRequests.set(requestId, verificationRequest);
     this.updateRateLimit(phoneNumber);
     this.updateDailyAttempts(phoneNumber);
 
-    this.emit('verification:started', { verificationRequest, phoneInfo });
+    this.emit("verification:started", { verificationRequest, phoneInfo });
 
     // Send verification code
     await this.sendVerificationCode(verificationRequest, phoneInfo);
@@ -219,7 +239,10 @@ export class NumberVerifier extends EventEmitter {
   /**
    * Verify the provided code
    */
-  async verifyCode(requestId: string, providedCode: string): Promise<{
+  async verifyCode(
+    requestId: string,
+    providedCode: string,
+  ): Promise<{
     success: boolean;
     status: PhoneVerificationStatus;
     message: string;
@@ -229,7 +252,7 @@ export class NumberVerifier extends EventEmitter {
       return {
         success: false,
         status: PhoneVerificationStatus.FAILED,
-        message: 'Verification request not found'
+        message: "Verification request not found",
       };
     }
 
@@ -238,19 +261,19 @@ export class NumberVerifier extends EventEmitter {
       return {
         success: true,
         status: PhoneVerificationStatus.VERIFIED,
-        message: 'Already verified'
+        message: "Already verified",
       };
     }
 
     // Check if expired
     if (new Date() > request.expiresAt) {
       request.status = PhoneVerificationStatus.EXPIRED;
-      this.emit('verification:expired', { verificationRequest: request });
-      
+      this.emit("verification:expired", { verificationRequest: request });
+
       return {
         success: false,
         status: PhoneVerificationStatus.EXPIRED,
-        message: 'Verification code has expired'
+        message: "Verification code has expired",
       };
     }
 
@@ -259,23 +282,26 @@ export class NumberVerifier extends EventEmitter {
       return {
         success: false,
         status: PhoneVerificationStatus.BLOCKED,
-        message: 'Verification blocked due to too many failed attempts'
+        message: "Verification blocked due to too many failed attempts",
       };
     }
 
     // Verify code
-    const isCodeValid = this.validateCode(request.verificationCode, providedCode);
-    
+    const isCodeValid = this.validateCode(
+      request.verificationCode,
+      providedCode,
+    );
+
     if (isCodeValid) {
       request.status = PhoneVerificationStatus.VERIFIED;
       request.completedAt = new Date();
 
-      this.emit('verification:success', { verificationRequest: request });
+      this.emit("verification:success", { verificationRequest: request });
 
       return {
         success: true,
         status: PhoneVerificationStatus.VERIFIED,
-        message: 'Phone number verified successfully'
+        message: "Phone number verified successfully",
       };
     } else {
       // Add failed verification attempt
@@ -283,33 +309,35 @@ export class NumberVerifier extends EventEmitter {
         attemptNumber: request.attempts.length + 1,
         attemptedAt: new Date(),
         method: VerificationMethod.SMS, // Assuming SMS for verification attempts
-        status: 'failed'
+        status: "failed",
       };
       request.attempts.push(failedAttempt);
 
       // Handle failed attempt
-      const failedAttempts = request.attempts.filter(a => a.status === 'failed').length;
-      
+      const failedAttempts = request.attempts.filter(
+        (a) => a.status === "failed",
+      ).length;
+
       if (failedAttempts >= this.options.maxAttempts!) {
         request.status = PhoneVerificationStatus.BLOCKED;
-        this.emit('verification:blocked', { verificationRequest: request });
-        
+        this.emit("verification:blocked", { verificationRequest: request });
+
         return {
           success: false,
           status: PhoneVerificationStatus.BLOCKED,
-          message: 'Too many failed attempts. Verification blocked.'
+          message: "Too many failed attempts. Verification blocked.",
         };
       } else {
         request.status = PhoneVerificationStatus.FAILED;
-        this.emit('verification:failed_attempt', { 
-          verificationRequest: request, 
-          attemptsRemaining: this.options.maxAttempts! - failedAttempts 
+        this.emit("verification:failed_attempt", {
+          verificationRequest: request,
+          attemptsRemaining: this.options.maxAttempts! - failedAttempts,
         });
 
         return {
           success: false,
           status: PhoneVerificationStatus.FAILED,
-          message: `Invalid code. ${this.options.maxAttempts! - failedAttempts} attempts remaining.`
+          message: `Invalid code. ${this.options.maxAttempts! - failedAttempts} attempts remaining.`,
         };
       }
     }
@@ -318,34 +346,41 @@ export class NumberVerifier extends EventEmitter {
   /**
    * Resend verification code
    */
-  async resendCode(requestId: string, method?: VerificationMethod): Promise<PhoneVerificationRequest> {
+  async resendCode(
+    requestId: string,
+    method?: VerificationMethod,
+  ): Promise<PhoneVerificationRequest> {
     const request = this.verificationRequests.get(requestId);
     if (!request) {
-      throw new Error('Verification request not found');
+      throw new Error("Verification request not found");
     }
 
     if (request.status === PhoneVerificationStatus.VERIFIED) {
-      throw new Error('Verification already completed');
+      throw new Error("Verification already completed");
     }
 
     if (request.status === PhoneVerificationStatus.BLOCKED) {
-      throw new Error('Verification is blocked');
+      throw new Error("Verification is blocked");
     }
 
     // Check rate limiting
     if (this.isRateLimited(request.phoneNumber)) {
-      throw new Error('Rate limit exceeded. Please wait before requesting a new code.');
+      throw new Error(
+        "Rate limit exceeded. Please wait before requesting a new code.",
+      );
     }
 
     // Generate new code and extend expiry
     request.verificationCode = this.generateVerificationCode();
-    request.expiresAt = new Date(Date.now() + this.options.codeExpiryMinutes! * 60 * 1000);
+    request.expiresAt = new Date(
+      Date.now() + this.options.codeExpiryMinutes! * 60 * 1000,
+    );
     request.status = PhoneVerificationStatus.PENDING;
 
     this.updateRateLimit(request.phoneNumber);
 
     const phoneInfo = await this.getPhoneNumberInfo(request.phoneNumber);
-    
+
     // Send using specified method or fallback logic
     if (method) {
       await this.sendVerificationByMethod(request, phoneInfo, method);
@@ -353,7 +388,7 @@ export class NumberVerifier extends EventEmitter {
       await this.sendVerificationCode(request, phoneInfo);
     }
 
-    this.emit('verification:resent', { verificationRequest: request });
+    this.emit("verification:resent", { verificationRequest: request });
 
     return request;
   }
@@ -379,7 +414,7 @@ export class NumberVerifier extends EventEmitter {
     }
 
     this.verificationRequests.delete(requestId);
-    this.emit('verification:cancelled', { verificationRequest: request });
+    this.emit("verification:cancelled", { verificationRequest: request });
 
     return true;
   }
@@ -389,16 +424,18 @@ export class NumberVerifier extends EventEmitter {
    */
   blockPhoneNumber(phoneNumber: string, reason?: string): void {
     this.blockedNumbers.add(phoneNumber);
-    
+
     // Cancel any pending verifications for this number
     for (const [requestId, request] of this.verificationRequests) {
-      if (request.phoneNumber === phoneNumber && 
-          request.status !== PhoneVerificationStatus.VERIFIED) {
+      if (
+        request.phoneNumber === phoneNumber &&
+        request.status !== PhoneVerificationStatus.VERIFIED
+      ) {
         request.status = PhoneVerificationStatus.BLOCKED;
       }
     }
 
-    this.emit('phone:blocked', { phoneNumber, reason });
+    this.emit("phone:blocked", { phoneNumber, reason });
   }
 
   /**
@@ -406,7 +443,7 @@ export class NumberVerifier extends EventEmitter {
    */
   unblockPhoneNumber(phoneNumber: string): void {
     this.blockedNumbers.delete(phoneNumber);
-    this.emit('phone:unblocked', { phoneNumber });
+    this.emit("phone:unblocked", { phoneNumber });
   }
 
   /**
@@ -420,13 +457,13 @@ export class NumberVerifier extends EventEmitter {
     averageCompletionTime: number;
   } {
     const requests = Array.from(this.verificationRequests.values());
-    
+
     const byStatus: Record<string, number> = {};
     const byMethod: Record<string, number> = {};
     let totalCompletionTime = 0;
     let completedCount = 0;
 
-    requests.forEach(request => {
+    requests.forEach((request) => {
       byStatus[request.status] = (byStatus[request.status] || 0) + 1;
 
       // Count by primary method used
@@ -437,21 +474,24 @@ export class NumberVerifier extends EventEmitter {
 
       // Calculate completion time for verified requests
       if (request.completedAt) {
-        const completionTime = request.completedAt.getTime() - request.createdAt.getTime();
+        const completionTime =
+          request.completedAt.getTime() - request.createdAt.getTime();
         totalCompletionTime += completionTime;
         completedCount++;
       }
     });
 
     const successCount = byStatus[PhoneVerificationStatus.VERIFIED] || 0;
-    const successRate = requests.length > 0 ? (successCount / requests.length) * 100 : 0;
+    const successRate =
+      requests.length > 0 ? (successCount / requests.length) * 100 : 0;
 
     return {
       total: requests.length,
       byStatus,
       byMethod,
       successRate,
-      averageCompletionTime: completedCount > 0 ? totalCompletionTime / completedCount : 0
+      averageCompletionTime:
+        completedCount > 0 ? totalCompletionTime / completedCount : 0,
     };
   }
 
@@ -463,7 +503,10 @@ export class NumberVerifier extends EventEmitter {
     let cleanedCount = 0;
 
     for (const [requestId, request] of this.verificationRequests) {
-      if (now > request.expiresAt && request.status !== PhoneVerificationStatus.VERIFIED) {
+      if (
+        now > request.expiresAt &&
+        request.status !== PhoneVerificationStatus.VERIFIED
+      ) {
         request.status = PhoneVerificationStatus.EXPIRED;
         this.verificationRequests.delete(requestId);
         cleanedCount++;
@@ -473,7 +516,9 @@ export class NumberVerifier extends EventEmitter {
     // Clean up old rate limit entries
     const rateWindow = this.options.rateLimitMinutes! * 60 * 1000;
     for (const [phoneNumber, timestamps] of this.rateLimitTracker) {
-      const validTimestamps = timestamps.filter(ts => now.getTime() - ts.getTime() < rateWindow);
+      const validTimestamps = timestamps.filter(
+        (ts) => now.getTime() - ts.getTime() < rateWindow,
+      );
       if (validTimestamps.length === 0) {
         this.rateLimitTracker.delete(phoneNumber);
       } else {
@@ -487,7 +532,7 @@ export class NumberVerifier extends EventEmitter {
   // Private Methods
   private async sendVerificationCode(
     request: PhoneVerificationRequest,
-    phoneInfo: PhoneNumberInfo
+    phoneInfo: PhoneNumberInfo,
   ): Promise<void> {
     let method: VerificationMethod;
 
@@ -500,7 +545,10 @@ export class NumberVerifier extends EventEmitter {
         break;
       case VerificationType.HYBRID:
         // Try SMS first for mobile, voice for landline
-        method = phoneInfo.lineType === 'landline' ? VerificationMethod.VOICE_CALL : VerificationMethod.SMS;
+        method =
+          phoneInfo.lineType === "landline"
+            ? VerificationMethod.VOICE_CALL
+            : VerificationMethod.SMS;
         break;
       default:
         method = VerificationMethod.SMS;
@@ -512,13 +560,13 @@ export class NumberVerifier extends EventEmitter {
   private async sendVerificationByMethod(
     request: PhoneVerificationRequest,
     phoneInfo: PhoneNumberInfo,
-    method: VerificationMethod
+    method: VerificationMethod,
   ): Promise<void> {
     const attempt: VerificationAttempt = {
       attemptNumber: request.attempts.length + 1,
       attemptedAt: new Date(),
       method,
-      status: 'sent'
+      status: "sent",
     };
 
     const startTime = Date.now();
@@ -536,25 +584,32 @@ export class NumberVerifier extends EventEmitter {
           break;
       }
 
-      attempt.status = 'delivered';
+      attempt.status = "delivered";
       attempt.responseTime = Date.now() - startTime;
       request.status = PhoneVerificationStatus.CODE_SENT;
-
     } catch (error) {
-      attempt.status = 'failed';
-      attempt.failureReason = error instanceof Error ? error.message : 'Unknown error';
+      attempt.status = "failed";
+      attempt.failureReason =
+        error instanceof Error ? error.message : "Unknown error";
       attempt.responseTime = Date.now() - startTime;
 
       // Try fallback method if enabled and this was SMS
-      if (method === VerificationMethod.SMS && 
-          this.options.enableVoiceFallback && 
-          request.attempts.filter(a => a.method === VerificationMethod.VOICE_CALL).length === 0) {
-        
-        attempt.status = 'failed';
+      if (
+        method === VerificationMethod.SMS &&
+        this.options.enableVoiceFallback &&
+        request.attempts.filter(
+          (a) => a.method === VerificationMethod.VOICE_CALL,
+        ).length === 0
+      ) {
+        attempt.status = "failed";
         request.attempts.push(attempt);
-        
+
         // Try voice call as fallback
-        await this.sendVerificationByMethod(request, phoneInfo, VerificationMethod.VOICE_CALL);
+        await this.sendVerificationByMethod(
+          request,
+          phoneInfo,
+          VerificationMethod.VOICE_CALL,
+        );
         return;
       }
 
@@ -565,56 +620,79 @@ export class NumberVerifier extends EventEmitter {
     request.attempts.push(attempt);
   }
 
-  private async sendSMS(request: PhoneVerificationRequest, phoneInfo: PhoneNumberInfo): Promise<void> {
+  private async sendSMS(
+    request: PhoneVerificationRequest,
+    phoneInfo: PhoneNumberInfo,
+  ): Promise<void> {
     if (!this.options.smsProvider) {
-      throw new Error('SMS provider not configured');
+      throw new Error("SMS provider not configured");
     }
 
-    const message = this.options.smsTemplate!
-      .replace('{code}', request.verificationCode)
-      .replace('{expiry}', this.options.codeExpiryMinutes!.toString());
+    const message = this.options
+      .smsTemplate!.replace("{code}", request.verificationCode)
+      .replace("{expiry}", this.options.codeExpiryMinutes!.toString());
 
-    const result = await this.options.smsProvider.sendSMS(request.phoneNumber, message);
-    
-    if (result.status === 'failed') {
-      throw new Error(result.error || 'SMS sending failed');
+    const result = await this.options.smsProvider.sendSMS(
+      request.phoneNumber,
+      message,
+    );
+
+    if (result.status === "failed") {
+      throw new Error(result.error || "SMS sending failed");
     }
   }
 
-  private async sendVoiceCall(request: PhoneVerificationRequest, phoneInfo: PhoneNumberInfo): Promise<void> {
+  private async sendVoiceCall(
+    request: PhoneVerificationRequest,
+    phoneInfo: PhoneNumberInfo,
+  ): Promise<void> {
     if (!this.options.voiceProvider) {
-      throw new Error('Voice provider not configured');
+      throw new Error("Voice provider not configured");
     }
 
-    const message = this.options.voiceTemplate!
-      .replace('{code}', request.verificationCode.split('').join(' '));
+    const message = this.options.voiceTemplate!.replace(
+      "{code}",
+      request.verificationCode.split("").join(" "),
+    );
 
-    const result = await this.options.voiceProvider.makeCall(request.phoneNumber, message);
-    
-    if (result.status === 'failed') {
-      throw new Error(result.error || 'Voice call failed');
+    const result = await this.options.voiceProvider.makeCall(
+      request.phoneNumber,
+      message,
+    );
+
+    if (result.status === "failed") {
+      throw new Error(result.error || "Voice call failed");
     }
   }
 
-  private async sendMissedCall(request: PhoneVerificationRequest, phoneInfo: PhoneNumberInfo): Promise<void> {
+  private async sendMissedCall(
+    request: PhoneVerificationRequest,
+    phoneInfo: PhoneNumberInfo,
+  ): Promise<void> {
     if (!this.options.voiceProvider?.makeMissedCall) {
-      throw new Error('Missed call verification not supported');
+      throw new Error("Missed call verification not supported");
     }
 
-    const result = await this.options.voiceProvider.makeMissedCall(request.phoneNumber);
-    
-    if (result.status === 'failed') {
-      throw new Error(result.error || 'Missed call failed');
+    const result = await this.options.voiceProvider.makeMissedCall(
+      request.phoneNumber,
+    );
+
+    if (result.status === "failed") {
+      throw new Error(result.error || "Missed call failed");
     }
 
     // For missed call verification, the code is typically the last 4-6 digits of the caller ID
     if (result.missedCallNumber) {
-      const codeFromNumber = result.missedCallNumber.slice(-this.options.codeLength!);
+      const codeFromNumber = result.missedCallNumber.slice(
+        -this.options.codeLength!,
+      );
       request.verificationCode = codeFromNumber;
     }
   }
 
-  private async getPhoneNumberInfo(phoneNumber: string): Promise<PhoneNumberInfo> {
+  private async getPhoneNumberInfo(
+    phoneNumber: string,
+  ): Promise<PhoneNumberInfo> {
     // Check cache first
     if (this.phoneNumberCache.has(phoneNumber)) {
       return this.phoneNumberCache.get(phoneNumber)!;
@@ -622,69 +700,70 @@ export class NumberVerifier extends EventEmitter {
 
     // Basic Korean phone number validation and parsing
     const phoneInfo = this.parseKoreanPhoneNumber(phoneNumber);
-    
+
     // Cache the result
     this.phoneNumberCache.set(phoneNumber, phoneInfo);
-    
+
     return phoneInfo;
   }
 
   private parseKoreanPhoneNumber(phoneNumber: string): PhoneNumberInfo {
     // Remove any non-digit characters
-    const cleaned = phoneNumber.replace(/\D/g, '');
-    
+    const cleaned = phoneNumber.replace(/\D/g, "");
+
     // Korean phone number patterns
     const mobilePattern = /^(010|011|016|017|018|019)(\d{7,8})$/;
-    const landlinePattern = /^(02|031|032|033|041|042|043|044|051|052|053|054|055|061|062|063|064)(\d{7,8})$/;
-    
+    const landlinePattern =
+      /^(02|031|032|033|041|042|043|044|051|052|053|054|055|061|062|063|064)(\d{7,8})$/;
+
     let isValid = false;
     let isPossible = false;
-    let lineType: PhoneNumberInfo['lineType'] = 'unknown';
+    let lineType: PhoneNumberInfo["lineType"] = "unknown";
     let carrier: string | undefined;
 
     if (mobilePattern.test(cleaned)) {
       isValid = true;
       isPossible = true;
-      lineType = 'mobile';
-      
+      lineType = "mobile";
+
       const prefix = cleaned.substring(0, 3);
       switch (prefix) {
-        case '010':
-          carrier = 'Multiple carriers';
+        case "010":
+          carrier = "Multiple carriers";
           break;
-        case '011':
-          carrier = 'SK Telecom';
+        case "011":
+          carrier = "SK Telecom";
           break;
-        case '016':
-          carrier = 'KT';
+        case "016":
+          carrier = "KT";
           break;
-        case '017':
-          carrier = 'LG U+';
+        case "017":
+          carrier = "LG U+";
           break;
-        case '018':
-          carrier = 'SK Telecom';
+        case "018":
+          carrier = "SK Telecom";
           break;
-        case '019':
-          carrier = 'LG U+';
+        case "019":
+          carrier = "LG U+";
           break;
       }
     } else if (landlinePattern.test(cleaned)) {
       isValid = true;
       isPossible = true;
-      lineType = 'landline';
+      lineType = "landline";
     } else if (cleaned.length >= 10 && cleaned.length <= 11) {
       isPossible = true;
     }
 
     return {
       phoneNumber: cleaned,
-      countryCode: '82',
+      countryCode: "82",
       nationalNumber: cleaned,
       carrier,
       lineType,
       isValid,
       isPossible,
-      region: 'KR'
+      region: "KR",
     };
   }
 
@@ -696,20 +775,22 @@ export class NumberVerifier extends EventEmitter {
     const timestamps = this.rateLimitTracker.get(phoneNumber) || [];
     const rateWindow = this.options.rateLimitMinutes! * 60 * 1000;
     const now = new Date();
-    
-    const recentAttempts = timestamps.filter(ts => now.getTime() - ts.getTime() < rateWindow);
-    
+
+    const recentAttempts = timestamps.filter(
+      (ts) => now.getTime() - ts.getTime() < rateWindow,
+    );
+
     return recentAttempts.length >= 1; // Allow only 1 attempt per rate limit window
   }
 
   private isDailyLimitExceeded(phoneNumber: string): boolean {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const dailyData = this.dailyAttemptTracker.get(phoneNumber);
-    
+
     if (!dailyData || dailyData.date !== today) {
       return false;
     }
-    
+
     return dailyData.count >= this.options.maxDailyAttempts!;
   }
 
@@ -720,9 +801,9 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private updateDailyAttempts(phoneNumber: string): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const dailyData = this.dailyAttemptTracker.get(phoneNumber);
-    
+
     if (!dailyData || dailyData.date !== today) {
       this.dailyAttemptTracker.set(phoneNumber, { date: today, count: 1 });
     } else {
@@ -731,17 +812,17 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private validateCode(expected: string, provided: string): boolean {
-    return expected === provided.replace(/\s/g, ''); // Remove spaces
+    return expected === provided.replace(/\s/g, ""); // Remove spaces
   }
 
   private generateVerificationCode(): string {
     const length = this.options.codeLength!;
-    let code = '';
-    
+    let code = "";
+
     for (let i = 0; i < length; i++) {
       code += Math.floor(Math.random() * 10).toString();
     }
-    
+
     return code;
   }
 

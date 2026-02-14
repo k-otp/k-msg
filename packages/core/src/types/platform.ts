@@ -1,98 +1,105 @@
-import type { MessageType, Button } from './message';
-import type { ProviderHealthStatus } from './provider';
+import type { Button, MessageType } from "./message";
+import type { ProviderHealthStatus } from "./provider";
 
 export interface PlatformHealthStatus {
-    healthy: boolean;
-    providers: Record<string, boolean>;
-    issues: string[];
+  healthy: boolean;
+  providers: Record<string, boolean>;
+  issues: string[];
 }
 
 export interface PlatformInfo {
-    version: string;
-    providers: string[];
-    features: string[];
+  version: string;
+  providers: string[];
+  features: string[];
 }
 
 export interface LegacyMessageSendOptions {
-    templateId: string;
-    recipients: {
-        phoneNumber: string;
-        variables?: Record<string, any>;
-    }[];
-    variables: Record<string, any>;
+  templateId: string;
+  recipients: {
+    phoneNumber: string;
+    variables?: Record<string, any>;
+  }[];
+  variables: Record<string, any>;
 }
 
 export interface UnifiedMessageRecipient {
-    phoneNumber: string;
-    variables?: Record<string, any>;
+  phoneNumber: string;
+  variables?: Record<string, any>;
 }
 
 export interface UnifiedMessageSendOptions {
-    channel: MessageType;
-    recipients: Array<string | UnifiedMessageRecipient>;
-    providerId?: string;
-    templateCode?: string;
-    variables?: Record<string, any>;
-    text?: string;
+  channel: MessageType;
+  recipients: Array<string | UnifiedMessageRecipient>;
+  providerId?: string;
+  templateCode?: string;
+  variables?: Record<string, any>;
+  text?: string;
+  subject?: string;
+  imageUrl?: string;
+  buttons?: Button[];
+  options?: {
+    scheduledAt?: Date;
+    senderNumber?: string;
     subject?: string;
-    imageUrl?: string;
-    buttons?: Button[];
-    options?: {
-        scheduledAt?: Date;
-        senderNumber?: string;
-        subject?: string;
-        [key: string]: any;
-    };
+    [key: string]: any;
+  };
 }
 
-export type MessageSendOptions = LegacyMessageSendOptions | UnifiedMessageSendOptions;
+export type MessageSendOptions =
+  | LegacyMessageSendOptions
+  | UnifiedMessageSendOptions;
 
 export interface MessageSendResult {
-    results: Array<{
-        messageId?: string;
-        status: string;
-        phoneNumber: string;
-        error?: {
-            message: string;
-        };
-    }>;
-    summary: {
-        total: number;
-        sent: number;
-        failed: number;
+  results: Array<{
+    messageId?: string;
+    status: string;
+    phoneNumber: string;
+    error?: {
+      message: string;
     };
+  }>;
+  summary: {
+    total: number;
+    sent: number;
+    failed: number;
+  };
 }
 
 export interface KMsg {
-    getInfo(): PlatformInfo;
-    registerProvider(provider: any): void;
-    getProvider(providerId: string): any | null;
-    listProviders(): string[];
-    healthCheck(): Promise<PlatformHealthStatus>;
-    messages: {
-        send(options: MessageSendOptions): Promise<MessageSendResult>;
-        getStatus(messageId: string): Promise<string>;
-    };
+  getInfo(): PlatformInfo;
+  registerProvider(provider: any): void;
+  getProvider(providerId: string): any | null;
+  listProviders(): string[];
+  healthCheck(): Promise<PlatformHealthStatus>;
+  messages: {
+    send(options: MessageSendOptions): Promise<MessageSendResult>;
+    getStatus(messageId: string): Promise<string>;
+  };
 }
 
 export interface Config {
-    defaultProvider?: string;
-    providers: string[];
-    features: {
-        enableBulkSending?: boolean;
-        enableScheduling?: boolean;
-        enableAnalytics?: boolean;
-    };
-    messageDefaults?: {
-        providerId?: string;
-        senderNumber?: string;
-        subject?: string;
-        templateCodes?: Partial<Record<MessageType, string>>;
-        channels?: Partial<Record<MessageType, {
-            providerId?: string;
-            senderNumber?: string;
-            subject?: string;
-            templateCode?: string;
-        }>>;
-    };
+  defaultProvider?: string;
+  providers: string[];
+  features: {
+    enableBulkSending?: boolean;
+    enableScheduling?: boolean;
+    enableAnalytics?: boolean;
+  };
+  messageDefaults?: {
+    providerId?: string;
+    senderNumber?: string;
+    subject?: string;
+    templateCodes?: Partial<Record<MessageType, string>>;
+    channels?: Partial<
+      Record<
+        MessageType,
+        {
+          providerId?: string;
+          senderNumber?: string;
+          subject?: string;
+          templateCode?: string;
+        }
+      >
+    >;
+  };
 }

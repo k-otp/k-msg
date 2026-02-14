@@ -1,18 +1,18 @@
-import { IWINVProvider } from '@k-msg/provider';
+import { IWINVProvider } from "@k-msg/provider";
 
 /**
  * Simple message sender for CLI/scripts
- * 
+ *
  * @example
  * ```typescript
  * import { createKMsgSender } from 'k-msg/modules';
- * 
+ *
  * const sender = createKMsgSender({
  *   iwinvApiKey: process.env.IWINV_API_KEY!
  * });
- * 
+ *
  * // User defines their own templates and variables
- * await sender.sendMessage('01012345678', 'USER_OTP_TEMPLATE', { 
+ * await sender.sendMessage('01012345678', 'USER_OTP_TEMPLATE', {
  *   code: '123456',
  *   serviceName: 'MyApp',
  *   expireMinutes: 3
@@ -25,8 +25,8 @@ export function createKMsgSender(config: {
 }) {
   const provider = new IWINVProvider({
     apiKey: config.iwinvApiKey,
-    baseUrl: config.iwinvBaseUrl || 'https://alimtalk.bizservice.iwinv.kr',
-    debug: false
+    baseUrl: config.iwinvBaseUrl || "https://alimtalk.bizservice.iwinv.kr",
+    debug: false,
   });
 
   return {
@@ -34,20 +34,27 @@ export function createKMsgSender(config: {
      * Send message with custom template and variables
      * User defines their own template structure
      */
-    async sendMessage(phoneNumber: string, templateCode: string, variables: Record<string, any>) {
+    async sendMessage(
+      phoneNumber: string,
+      templateCode: string,
+      variables: Record<string, any>,
+    ) {
       try {
         const result = (await provider.send({
           templateCode: templateCode as any,
           phoneNumber,
-          variables
+          variables,
         } as any)) as any;
 
         if (!result.isSuccess) {
           // Handle provider-level failure (e.g., invalid template, etc.)
           const error = result.error;
-          const errorMessage = error instanceof Error ? error.message :
-            typeof error === 'string' ? error :
-              'Provider reported a failure';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : typeof error === "string"
+                ? error
+                : "Provider reported a failure";
           throw new Error(errorMessage);
         }
 
@@ -55,22 +62,22 @@ export function createKMsgSender(config: {
 
         return {
           messageId: data.messageId,
-          status: 'SENT' as const,
+          status: "SENT" as const,
           templateCode,
           phoneNumber,
           variables,
           error: null,
-          sentAt: new Date().toISOString()
+          sentAt: new Date().toISOString(),
         };
       } catch (error) {
         return {
           messageId: null,
-          status: 'FAILED' as const,
+          status: "FAILED" as const,
           templateCode,
           phoneNumber,
           variables,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          sentAt: new Date().toISOString()
+          error: error instanceof Error ? error.message : "Unknown error",
+          sentAt: new Date().toISOString(),
         };
       }
     },
@@ -78,13 +85,17 @@ export function createKMsgSender(config: {
     /**
      * Send bulk messages with user-defined template
      */
-    async sendBulk(recipients: Array<{
-      phoneNumber: string;
-      variables: Record<string, any>;
-    }>, templateCode: string, options?: {
-      batchSize?: number;
-      batchDelay?: number;
-    }) {
+    async sendBulk(
+      recipients: Array<{
+        phoneNumber: string;
+        variables: Record<string, any>;
+      }>,
+      templateCode: string,
+      options?: {
+        batchSize?: number;
+        batchDelay?: number;
+      },
+    ) {
       const batchId = `batch_${Date.now()}`;
       const batchSize = options?.batchSize || 10;
       const batchDelay = options?.batchDelay || 1000;
@@ -103,7 +114,7 @@ export function createKMsgSender(config: {
             const result = (await provider.send({
               templateCode: templateCode as any,
               phoneNumber: recipient.phoneNumber,
-              variables: recipient.variables
+              variables: recipient.variables,
             } as any)) as any;
 
             if (result.isSuccess && result.value.messageId) {
@@ -111,18 +122,18 @@ export function createKMsgSender(config: {
               return {
                 messageId: result.value.messageId,
                 phoneNumber: recipient.phoneNumber,
-                status: 'SENT' as const,
+                status: "SENT" as const,
                 variables: recipient.variables,
-                error: null
+                error: null,
               };
             } else {
               failureCount++;
               return {
                 messageId: null,
                 phoneNumber: recipient.phoneNumber,
-                status: 'FAILED' as const,
+                status: "FAILED" as const,
                 variables: recipient.variables,
-                error: result.error?.message || 'Unknown error'
+                error: result.error?.message || "Unknown error",
               };
             }
           } catch (error) {
@@ -130,9 +141,9 @@ export function createKMsgSender(config: {
             return {
               messageId: null,
               phoneNumber: recipient.phoneNumber,
-              status: 'FAILED' as const,
+              status: "FAILED" as const,
               variables: recipient.variables,
-              error: error instanceof Error ? error.message : 'Unknown error'
+              error: error instanceof Error ? error.message : "Unknown error",
             };
           }
         });
@@ -142,7 +153,7 @@ export function createKMsgSender(config: {
 
         // Add delay between batches (except for the last batch)
         if (i + batchSize < recipients.length && batchDelay > 0) {
-          await new Promise(resolve => setTimeout(resolve, batchDelay));
+          await new Promise((resolve) => setTimeout(resolve, batchDelay));
         }
       }
 
@@ -153,7 +164,7 @@ export function createKMsgSender(config: {
         successCount,
         failureCount,
         processedAt: new Date().toISOString(),
-        results
+        results,
       };
     },
 
@@ -168,18 +179,20 @@ export function createKMsgSender(config: {
           messageId,
           status: status,
           checkedAt: new Date().toISOString(),
-          deliveredAt: status === 'DELIVERED' ? new Date().toISOString() : undefined,
-          failedAt: status === 'FAILED' ? new Date().toISOString() : undefined
+          deliveredAt:
+            status === "DELIVERED" ? new Date().toISOString() : undefined,
+          failedAt: status === "FAILED" ? new Date().toISOString() : undefined,
         };
       } catch (error) {
         return {
           messageId,
-          status: 'UNKNOWN',
-          error: error instanceof Error ? error.message : 'Failed to check status',
-          checkedAt: new Date().toISOString()
+          status: "UNKNOWN",
+          error:
+            error instanceof Error ? error.message : "Failed to check status",
+          checkedAt: new Date().toISOString(),
         };
       }
-    }
+    },
 
     /**
      * Get platform instance for advanced usage (when implemented)
@@ -190,7 +203,7 @@ export function createKMsgSender(config: {
 
 /**
  * Template manager for CLI/scripts
- * 
+ *
  * @example
  * ```typescript
  * const templates = createKMsgTemplates({ ... });
@@ -203,8 +216,8 @@ export function createKMsgTemplates(config: {
 }) {
   const provider = new IWINVProvider({
     apiKey: config.iwinvApiKey,
-    baseUrl: config.iwinvBaseUrl || 'https://alimtalk.bizservice.iwinv.kr',
-    debug: false
+    baseUrl: config.iwinvBaseUrl || "https://alimtalk.bizservice.iwinv.kr",
+    debug: false,
   });
 
   return {
@@ -219,8 +232,8 @@ export function createKMsgTemplates(config: {
         // TODO: Implement createTemplate when available
         const result = {
           templateId: templateCode,
-          status: 'pending',
-          message: 'Template creation not implemented yet'
+          status: "pending",
+          message: "Template creation not implemented yet",
         };
 
         return {
@@ -231,7 +244,7 @@ export function createKMsgTemplates(config: {
           variables,
           status: result.status,
           message: result.message,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
       } catch (error) {
         return {
@@ -240,9 +253,9 @@ export function createKMsgTemplates(config: {
           content,
           description,
           variables: this.parseVariables(content),
-          status: 'FAILED',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          createdAt: new Date().toISOString()
+          status: "FAILED",
+          error: error instanceof Error ? error.message : "Unknown error",
+          createdAt: new Date().toISOString(),
         };
       }
     },
@@ -255,7 +268,7 @@ export function createKMsgTemplates(config: {
         // TODO: Implement templates.list when available
         return [];
       } catch (error) {
-        console.warn('Failed to list templates:', error);
+        console.warn("Failed to list templates:", error);
         return [];
       }
     },
@@ -269,17 +282,17 @@ export function createKMsgTemplates(config: {
 
       // Basic validation
       if (content.length === 0) {
-        errors.push('Template content cannot be empty');
+        errors.push("Template content cannot be empty");
       }
 
       if (content.length > 1000) {
-        errors.push('Template content too long (max 1000 chars)');
+        errors.push("Template content too long (max 1000 chars)");
       }
 
       return {
         isValid: errors.length === 0,
         errors,
-        variables
+        variables,
       };
     },
 
@@ -289,12 +302,12 @@ export function createKMsgTemplates(config: {
     parseVariables(content: string) {
       const matches = content.match(/#{([^}]+)}/g) || [];
       // Use a Set to efficiently get unique variable names
-      const uniqueNames = new Set(matches.map(match => match.slice(2, -1)));
+      const uniqueNames = new Set(matches.map((match) => match.slice(2, -1)));
 
-      return Array.from(uniqueNames).map(name => ({
+      return Array.from(uniqueNames).map((name) => ({
         name,
-        type: 'string',
-        required: true
+        type: "string",
+        required: true,
       }));
     },
 
@@ -307,51 +320,55 @@ export function createKMsgTemplates(config: {
         const template = {
           code: templateCode,
           content: `Template ${templateCode}`,
-          variables: []
+          variables: [],
         };
 
         // Parse variables from template content
         const requiredVariables = this.parseVariables(template.content);
         const missingVariables = requiredVariables
-          .filter(v => v.required && !(v.name in sampleVariables))
-          .map(v => v.name);
+          .filter((v) => v.required && !(v.name in sampleVariables))
+          .map((v) => v.name);
 
         if (missingVariables.length > 0) {
           return {
             templateCode,
             renderedContent: null,
             isValid: false,
-            errors: [`Missing required variables: ${missingVariables.join(', ')}`]
+            errors: [
+              `Missing required variables: ${missingVariables.join(", ")}`,
+            ],
           };
         }
 
         // Render template with sample variables
         let renderedContent = template.content;
         for (const [key, value] of Object.entries(sampleVariables)) {
-          const regex = new RegExp(`#{${key}}`, 'g');
+          const regex = new RegExp(`#{${key}}`, "g");
           renderedContent = renderedContent.replace(regex, String(value));
         }
 
         // Check for unreplaced variables
         const unreplacedVars = renderedContent.match(/#{([^}]+)}/g);
-        const warnings = unreplacedVars ?
-          [`Unreplaced variables found: ${unreplacedVars.join(', ')}`] : [];
+        const warnings = unreplacedVars
+          ? [`Unreplaced variables found: ${unreplacedVars.join(", ")}`]
+          : [];
 
         return {
           templateCode,
           renderedContent,
           isValid: !unreplacedVars,
-          warnings
+          warnings,
         };
       } catch (error) {
         return {
           templateCode,
           renderedContent: null,
           isValid: false,
-          error: error instanceof Error ? error.message : 'Template test failed'
+          error:
+            error instanceof Error ? error.message : "Template test failed",
         };
       }
-    }
+    },
   };
 }
 
@@ -364,27 +381,27 @@ export function createKMsgAnalytics(config: {
 }) {
   const provider = new IWINVProvider({
     apiKey: config.iwinvApiKey,
-    baseUrl: config.iwinvBaseUrl || 'https://alimtalk.bizservice.iwinv.kr',
-    debug: false
+    baseUrl: config.iwinvBaseUrl || "https://alimtalk.bizservice.iwinv.kr",
+    debug: false,
   });
 
   return {
     /**
      * Get message statistics for specified period
      */
-    async getMessageStats(period: 'day' | 'week' | 'month' = 'day') {
+    async getMessageStats(period: "day" | "week" | "month" = "day") {
       try {
         const now = new Date();
         const periodStart = new Date();
 
         switch (period) {
-          case 'day':
+          case "day":
             periodStart.setDate(now.getDate() - 1);
             break;
-          case 'week':
+          case "week":
             periodStart.setDate(now.getDate() - 7);
             break;
-          case 'month':
+          case "month":
             periodStart.setMonth(now.getMonth() - 1);
             break;
         }
@@ -396,7 +413,7 @@ export function createKMsgAnalytics(config: {
           totalMessages: 0,
           deliveredMessages: 0,
           deliveryRate: 0,
-          breakdown: { byTemplate: {}, byDay: {}, byHour: {} }
+          breakdown: { byTemplate: {}, byDay: {}, byHour: {} },
         };
 
         return {
@@ -407,10 +424,10 @@ export function createKMsgAnalytics(config: {
           deliveryRate: usage.deliveryRate,
           periodStart: periodStart.toISOString(),
           periodEnd: now.toISOString(),
-          breakdown: usage.breakdown
+          breakdown: usage.breakdown,
         };
       } catch (error) {
-        console.warn('Failed to get message stats:', error);
+        console.warn("Failed to get message stats:", error);
         return {
           period,
           totalSent: 0,
@@ -419,7 +436,7 @@ export function createKMsgAnalytics(config: {
           deliveryRate: 0,
           periodStart: new Date().toISOString(),
           periodEnd: new Date().toISOString(),
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
     },
@@ -440,7 +457,7 @@ export function createKMsgAnalytics(config: {
             delivered: 0,
             failed: 0,
             deliveryRate: 0,
-            averageDeliveryTime: 0
+            averageDeliveryTime: 0,
           };
 
           return {
@@ -450,7 +467,7 @@ export function createKMsgAnalytics(config: {
             failureCount: stats.failed,
             successRate: stats.deliveryRate,
             lastUsed: new Date().toISOString(),
-            averageDeliveryTime: stats.averageDeliveryTime
+            averageDeliveryTime: stats.averageDeliveryTime,
           };
         }
 
@@ -458,53 +475,62 @@ export function createKMsgAnalytics(config: {
         // TODO: provider.analytics.getUsage
         const usage = {
           breakdown: { byTemplate: {} },
-          deliveryRate: 0
+          deliveryRate: 0,
         };
 
-        const templateUsage = Object.entries(usage.breakdown.byTemplate).map(([code, count]) => {
-          const countNum = Number(count) || 0;
-          const successCount = Math.round(countNum * (usage.deliveryRate / 100));
-          const failureCount = countNum - successCount;
+        const templateUsage = Object.entries(usage.breakdown.byTemplate).map(
+          ([code, count]) => {
+            const countNum = Number(count) || 0;
+            const successCount = Math.round(
+              countNum * (usage.deliveryRate / 100),
+            );
+            const failureCount = countNum - successCount;
 
-          return {
-            templateCode: code,
-            totalUsage: countNum,
-            successCount,
-            failureCount,
-            successRate: usage.deliveryRate
-          };
-        });
+            return {
+              templateCode: code,
+              totalUsage: countNum,
+              successCount,
+              failureCount,
+              successRate: usage.deliveryRate,
+            };
+          },
+        );
 
         return templateUsage.sort((a, b) => b.totalUsage - a.totalUsage);
       } catch (error) {
-        console.warn('Failed to get template usage:', error);
-        return templateCode ? {
-          templateCode,
-          totalUsage: 0,
-          successCount: 0,
-          failureCount: 0,
-          successRate: 0,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        } : [];
+        console.warn("Failed to get template usage:", error);
+        return templateCode
+          ? {
+              templateCode,
+              totalUsage: 0,
+              successCount: 0,
+              failureCount: 0,
+              successRate: 0,
+              error: error instanceof Error ? error.message : "Unknown error",
+            }
+          : [];
       }
     },
 
     /**
      * Generate usage reports
      */
-    async generateReport(type: 'daily' | 'weekly' | 'monthly', format: 'json' | 'csv' = 'json') {
+    async generateReport(
+      type: "daily" | "weekly" | "monthly",
+      format: "json" | "csv" = "json",
+    ) {
       try {
         const now = new Date();
         const periodStart = new Date();
 
         switch (type) {
-          case 'daily':
+          case "daily":
             periodStart.setDate(now.getDate() - 1);
             break;
-          case 'weekly':
+          case "weekly":
             periodStart.setDate(now.getDate() - 7);
             break;
-          case 'monthly':
+          case "monthly":
             periodStart.setMonth(now.getMonth() - 1);
             break;
         }
@@ -517,52 +543,53 @@ export function createKMsgAnalytics(config: {
           totalMessages: 0,
           deliveryRate: 0,
           failureRate: 0,
-          breakdown: { 
+          breakdown: {
             byTemplate: {} as Record<string, number>,
             byDay: {} as Record<string, number>,
-            byHour: {} as Record<string, number>
-          }
+            byHour: {} as Record<string, number>,
+          },
         };
 
         const templateUsage = await this.getTemplateUsage();
-        const topTemplates = Array.isArray(templateUsage) ?
-          templateUsage.slice(0, 3).map(t => t.templateCode) : [];
+        const topTemplates = Array.isArray(templateUsage)
+          ? templateUsage.slice(0, 3).map((t) => t.templateCode)
+          : [];
 
         const data = {
           reportType: type,
           generatedAt: new Date().toISOString(),
           period: {
             from: periodStart.toISOString(),
-            to: now.toISOString()
+            to: now.toISOString(),
           },
           summary: {
             totalMessages: usage.totalMessages,
             successRate: usage.deliveryRate,
             failureRate: usage.failureRate,
-            topTemplates
+            topTemplates,
           },
           breakdown: {
             byTemplate: usage.breakdown.byTemplate,
             byDay: usage.breakdown.byDay,
-            byHour: usage.breakdown.byHour
-          }
+            byHour: usage.breakdown.byHour,
+          },
         };
 
-        return format === 'csv' ? this.toCsv(data) : data;
+        return format === "csv" ? this.toCsv(data) : data;
       } catch (error) {
-        console.warn('Failed to generate report:', error);
+        console.warn("Failed to generate report:", error);
         const fallbackData = {
           reportType: type,
           generatedAt: new Date().toISOString(),
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
           summary: {
             totalMessages: 0,
             successRate: 0,
             failureRate: 0,
-            topTemplates: []
-          }
+            topTemplates: [],
+          },
         };
-        return format === 'csv' ? this.toCsv(fallbackData) : fallbackData;
+        return format === "csv" ? this.toCsv(fallbackData) : fallbackData;
       }
     },
 
@@ -583,17 +610,22 @@ export function createKMsgAnalytics(config: {
           totalMessages: 0,
           deliveryRate: 0,
           failureRate: 0,
-          breakdown: { 
-            byTemplate: {} as Record<string, number> 
-          }
+          breakdown: {
+            byTemplate: {} as Record<string, number>,
+          },
         };
 
-        let filtered = usage;
+        const filtered = usage;
         if (templateCode) {
           const templateCount = usage.breakdown.byTemplate[templateCode] || 0;
-          const templateDelivered = Math.round(templateCount * (usage.deliveryRate / 100));
-          const templateFailed = Math.round(templateCount * (usage.failureRate / 100));
-          const templatePending = templateCount - templateDelivered - templateFailed;
+          const templateDelivered = Math.round(
+            templateCount * (usage.deliveryRate / 100),
+          );
+          const templateFailed = Math.round(
+            templateCount * (usage.failureRate / 100),
+          );
+          const templatePending =
+            templateCount - templateDelivered - templateFailed;
 
           return {
             templateCode,
@@ -602,14 +634,22 @@ export function createKMsgAnalytics(config: {
             failed: templateFailed,
             total: templateCount,
             breakdown: {
-              'DELIVERED': templateCount > 0 ? (templateDelivered / templateCount) * 100 : 0,
-              'PENDING': templateCount > 0 ? (templatePending / templateCount) * 100 : 0,
-              'FAILED': templateCount > 0 ? (templateFailed / templateCount) * 100 : 0
-            }
+              DELIVERED:
+                templateCount > 0
+                  ? (templateDelivered / templateCount) * 100
+                  : 0,
+              PENDING:
+                templateCount > 0 ? (templatePending / templateCount) * 100 : 0,
+              FAILED:
+                templateCount > 0 ? (templateFailed / templateCount) * 100 : 0,
+            },
           };
         }
 
-        const pending = Math.max(0, usage.totalMessages - usage.deliveredMessages - usage.failedMessages);
+        const pending = Math.max(
+          0,
+          usage.totalMessages - usage.deliveredMessages - usage.failedMessages,
+        );
 
         return {
           templateCode: undefined,
@@ -618,13 +658,16 @@ export function createKMsgAnalytics(config: {
           failed: usage.failedMessages,
           total: usage.totalMessages,
           breakdown: {
-            'DELIVERED': usage.deliveryRate,
-            'PENDING': usage.totalMessages > 0 ? (pending / usage.totalMessages) * 100 : 0,
-            'FAILED': usage.failureRate
-          }
+            DELIVERED: usage.deliveryRate,
+            PENDING:
+              usage.totalMessages > 0
+                ? (pending / usage.totalMessages) * 100
+                : 0,
+            FAILED: usage.failureRate,
+          },
         };
       } catch (error) {
-        console.warn('Failed to get delivery stats:', error);
+        console.warn("Failed to get delivery stats:", error);
         return {
           templateCode,
           delivered: 0,
@@ -632,11 +675,11 @@ export function createKMsgAnalytics(config: {
           failed: 0,
           total: 0,
           breakdown: {
-            'DELIVERED': 0,
-            'PENDING': 0,
-            'FAILED': 0
+            DELIVERED: 0,
+            PENDING: 0,
+            FAILED: 0,
           },
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
     },
@@ -647,9 +690,9 @@ export function createKMsgAnalytics(config: {
     toCsv(data: any): string {
       // Simple CSV conversion
       return JSON.stringify(data, null, 2)
-        .replace(/[\{\}]/g, '')
-        .replace(/"/g, '')
-        .replace(/:/g, ',');
-    }
+        .replace(/[{}]/g, "")
+        .replace(/"/g, "")
+        .replace(/:/g, ",");
+    },
   };
 }

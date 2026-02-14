@@ -3,9 +3,9 @@
  * 실시간 이벤트 수집 및 메트릭 변환
  */
 
-import { EventEmitter } from 'events';
-import type { MetricData } from '../types/analytics.types';
-import { MetricType } from '../types/analytics.types';
+import { EventEmitter } from "events";
+import type { MetricData } from "../types/analytics.types";
+import { MetricType } from "../types/analytics.types";
 
 export interface EventData {
   id: string;
@@ -49,7 +49,7 @@ export class EventCollector extends EventEmitter {
     enableDeduplication: true,
     deduplicationWindow: 60000, // 1분
     enableSampling: false,
-    samplingRate: 1.0
+    samplingRate: 1.0,
   };
 
   constructor(config: Partial<EventCollectorConfig> = {}) {
@@ -65,7 +65,10 @@ export class EventCollector extends EventEmitter {
    */
   async collectEvent(event: EventData): Promise<void> {
     // 샘플링 확인
-    if (this.config.enableSampling && Math.random() > this.config.samplingRate) {
+    if (
+      this.config.enableSampling &&
+      Math.random() > this.config.samplingRate
+    ) {
       return;
     }
 
@@ -90,7 +93,7 @@ export class EventCollector extends EventEmitter {
       await this.flush();
     }
 
-    this.emit('event:collected', event);
+    this.emit("event:collected", event);
   }
 
   /**
@@ -107,7 +110,7 @@ export class EventCollector extends EventEmitter {
    */
   registerProcessor(name: string, processor: EventProcessor): void {
     this.processors.set(name, processor);
-    this.emit('processor:registered', { name, processor });
+    this.emit("processor:registered", { name, processor });
   }
 
   /**
@@ -116,7 +119,7 @@ export class EventCollector extends EventEmitter {
   unregisterProcessor(name: string): boolean {
     const removed = this.processors.delete(name);
     if (removed) {
-      this.emit('processor:unregistered', { name });
+      this.emit("processor:unregistered", { name });
     }
     return removed;
   }
@@ -129,7 +132,7 @@ export class EventCollector extends EventEmitter {
       return [...this.metrics];
     }
 
-    return this.metrics.filter(m => m.timestamp >= since);
+    return this.metrics.filter((m) => m.timestamp >= since);
   }
 
   /**
@@ -137,14 +140,16 @@ export class EventCollector extends EventEmitter {
    */
   async *streamMetrics(): AsyncGenerator<MetricData[]> {
     while (true) {
-      await new Promise(resolve => setTimeout(resolve, this.config.flushInterval));
-      
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.config.flushInterval),
+      );
+
       if (this.buffer.length > 0) {
         await this.flush();
       }
 
       const recentMetrics = this.getCollectedMetrics(
-        new Date(Date.now() - this.config.flushInterval)
+        new Date(Date.now() - this.config.flushInterval),
       );
 
       if (recentMetrics.length > 0) {
@@ -177,7 +182,7 @@ export class EventCollector extends EventEmitter {
       eventsByType,
       eventsBySource,
       bufferSize: this.buffer.length,
-      metricsGenerated: this.metrics.length
+      metricsGenerated: this.metrics.length,
     };
   }
 
@@ -207,15 +212,14 @@ export class EventCollector extends EventEmitter {
         this.metrics = this.metrics.slice(-50000); // 최근 50,000개만 유지
       }
 
-      this.emit('events:flushed', { 
-        eventCount: events.length, 
-        metricCount: allMetrics.length 
+      this.emit("events:flushed", {
+        eventCount: events.length,
+        metricCount: allMetrics.length,
       });
-
     } catch (error) {
       // 실패한 이벤트를 다시 버퍼에 추가
       this.buffer.unshift(...events);
-      this.emit('flush:error', error);
+      this.emit("flush:error", error);
       throw error;
     }
   }
@@ -230,7 +234,7 @@ export class EventCollector extends EventEmitter {
           metrics.push(...processorMetrics);
         }
       } catch (error) {
-        this.emit('processor:error', { processorName: name, event, error });
+        this.emit("processor:error", { processorName: name, event, error });
       }
     }
 
@@ -239,23 +243,23 @@ export class EventCollector extends EventEmitter {
 
   private validateEvent(event: EventData): void {
     if (!event.id) {
-      throw new Error('Event ID is required');
+      throw new Error("Event ID is required");
     }
 
     if (!event.type) {
-      throw new Error('Event type is required');
+      throw new Error("Event type is required");
     }
 
     if (!event.timestamp || !(event.timestamp instanceof Date)) {
-      throw new Error('Valid event timestamp is required');
+      throw new Error("Valid event timestamp is required");
     }
 
     if (!event.source) {
-      throw new Error('Event source is required');
+      throw new Error("Event source is required");
     }
 
-    if (!event.payload || typeof event.payload !== 'object') {
-      throw new Error('Event payload must be an object');
+    if (!event.payload || typeof event.payload !== "object") {
+      throw new Error("Event payload must be an object");
     }
   }
 
@@ -264,7 +268,7 @@ export class EventCollector extends EventEmitter {
     const eventKey = `${event.id}_${event.type}_${event.source}`;
     const lastSeen = this.recentEvents.get(eventKey);
 
-    if (lastSeen && (now - lastSeen) < this.config.deduplicationWindow) {
+    if (lastSeen && now - lastSeen < this.config.deduplicationWindow) {
       return true;
     }
 
@@ -275,10 +279,10 @@ export class EventCollector extends EventEmitter {
   private isHighPriorityEvent(event: EventData): boolean {
     // 높은 우선순위 이벤트 타입들
     const highPriorityTypes = [
-      'message.failed',
-      'system.error',
-      'security.alert',
-      'performance.degradation'
+      "message.failed",
+      "system.error",
+      "security.alert",
+      "performance.degradation",
     ];
 
     return highPriorityTypes.includes(event.type);
@@ -286,131 +290,145 @@ export class EventCollector extends EventEmitter {
 
   private initializeDefaultProcessors(): void {
     // 메시지 전송 프로세서
-    this.registerProcessor('message-sent', {
-      canProcess: (event) => event.type === 'message.sent',
+    this.registerProcessor("message-sent", {
+      canProcess: (event) => event.type === "message.sent",
       process: async (event) => {
-        return [{
-          id: `metric_${event.id}`,
-          type: MetricType.MESSAGE_SENT,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            provider: event.payload.provider || 'unknown',
-            channel: event.payload.channel || 'unknown',
-            template: event.payload.templateId || 'none'
+        return [
+          {
+            id: `metric_${event.id}`,
+            type: MetricType.MESSAGE_SENT,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              provider: event.payload.provider || "unknown",
+              channel: event.payload.channel || "unknown",
+              template: event.payload.templateId || "none",
+            },
+            metadata: {
+              messageId: event.payload.messageId,
+              recipientCount: event.payload.recipientCount || 1,
+            },
           },
-          metadata: {
-            messageId: event.payload.messageId,
-            recipientCount: event.payload.recipientCount || 1
-          }
-        }];
-      }
+        ];
+      },
     });
 
     // 메시지 전달 프로세서
-    this.registerProcessor('message-delivered', {
-      canProcess: (event) => event.type === 'message.delivered',
+    this.registerProcessor("message-delivered", {
+      canProcess: (event) => event.type === "message.delivered",
       process: async (event) => {
-        return [{
-          id: `metric_${event.id}`,
-          type: MetricType.MESSAGE_DELIVERED,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            provider: event.payload.provider || 'unknown',
-            channel: event.payload.channel || 'unknown'
+        return [
+          {
+            id: `metric_${event.id}`,
+            type: MetricType.MESSAGE_DELIVERED,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              provider: event.payload.provider || "unknown",
+              channel: event.payload.channel || "unknown",
+            },
+            metadata: {
+              messageId: event.payload.messageId,
+              deliveryTime: event.payload.deliveryTime,
+            },
           },
-          metadata: {
-            messageId: event.payload.messageId,
-            deliveryTime: event.payload.deliveryTime
-          }
-        }];
-      }
+        ];
+      },
     });
 
     // 메시지 실패 프로세서
-    this.registerProcessor('message-failed', {
-      canProcess: (event) => event.type === 'message.failed',
+    this.registerProcessor("message-failed", {
+      canProcess: (event) => event.type === "message.failed",
       process: async (event) => {
-        return [{
-          id: `metric_${event.id}`,
-          type: MetricType.MESSAGE_FAILED,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            provider: event.payload.provider || 'unknown',
-            channel: event.payload.channel || 'unknown',
-            errorCode: event.payload.errorCode || 'unknown'
+        return [
+          {
+            id: `metric_${event.id}`,
+            type: MetricType.MESSAGE_FAILED,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              provider: event.payload.provider || "unknown",
+              channel: event.payload.channel || "unknown",
+              errorCode: event.payload.errorCode || "unknown",
+            },
+            metadata: {
+              messageId: event.payload.messageId,
+              errorMessage: event.payload.errorMessage,
+              errorType: event.payload.errorType,
+            },
           },
-          metadata: {
-            messageId: event.payload.messageId,
-            errorMessage: event.payload.errorMessage,
-            errorType: event.payload.errorType
-          }
-        }];
-      }
+        ];
+      },
     });
 
     // 메시지 클릭 프로세서
-    this.registerProcessor('message-clicked', {
-      canProcess: (event) => event.type === 'message.clicked' || event.type === 'link.clicked',
+    this.registerProcessor("message-clicked", {
+      canProcess: (event) =>
+        event.type === "message.clicked" || event.type === "link.clicked",
       process: async (event) => {
-        return [{
-          id: `metric_${event.id}`,
-          type: MetricType.MESSAGE_CLICKED,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            provider: event.payload.provider || 'unknown',
-            channel: event.payload.channel || 'unknown',
-            linkType: event.payload.linkType || 'unknown'
+        return [
+          {
+            id: `metric_${event.id}`,
+            type: MetricType.MESSAGE_CLICKED,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              provider: event.payload.provider || "unknown",
+              channel: event.payload.channel || "unknown",
+              linkType: event.payload.linkType || "unknown",
+            },
+            metadata: {
+              messageId: event.payload.messageId,
+              linkUrl: event.payload.linkUrl,
+              userId: event.context?.userId,
+            },
           },
-          metadata: {
-            messageId: event.payload.messageId,
-            linkUrl: event.payload.linkUrl,
-            userId: event.context?.userId
-          }
-        }];
-      }
+        ];
+      },
     });
 
     // 템플릿 사용 프로세서
-    this.registerProcessor('template-used', {
-      canProcess: (event) => event.type === 'template.used',
+    this.registerProcessor("template-used", {
+      canProcess: (event) => event.type === "template.used",
       process: async (event) => {
-        return [{
-          id: `metric_${event.id}`,
-          type: MetricType.TEMPLATE_USAGE,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            templateId: event.payload.templateId || 'unknown',
-            provider: event.payload.provider || 'unknown',
-            channel: event.payload.channel || 'unknown'
+        return [
+          {
+            id: `metric_${event.id}`,
+            type: MetricType.TEMPLATE_USAGE,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              templateId: event.payload.templateId || "unknown",
+              provider: event.payload.provider || "unknown",
+              channel: event.payload.channel || "unknown",
+            },
+            metadata: {
+              templateName: event.payload.templateName,
+              version: event.payload.version,
+            },
           },
-          metadata: {
-            templateName: event.payload.templateName,
-            version: event.payload.version
-          }
-        }];
-      }
+        ];
+      },
     });
 
     // 채널 사용 프로세서
-    this.registerProcessor('channel-used', {
-      canProcess: (event) => ['message.sent', 'message.delivered'].includes(event.type),
+    this.registerProcessor("channel-used", {
+      canProcess: (event) =>
+        ["message.sent", "message.delivered"].includes(event.type),
       process: async (event) => {
-        return [{
-          id: `metric_channel_${event.id}`,
-          type: MetricType.CHANNEL_USAGE,
-          timestamp: event.timestamp,
-          value: 1,
-          dimensions: {
-            channel: event.payload.channel || 'unknown',
-            provider: event.payload.provider || 'unknown'
-          }
-        }];
-      }
+        return [
+          {
+            id: `metric_channel_${event.id}`,
+            type: MetricType.CHANNEL_USAGE,
+            timestamp: event.timestamp,
+            value: 1,
+            dimensions: {
+              channel: event.payload.channel || "unknown",
+              provider: event.payload.provider || "unknown",
+            },
+          },
+        ];
+      },
     });
   }
 
@@ -419,29 +437,35 @@ export class EventCollector extends EventEmitter {
       try {
         await this.flush();
       } catch (error) {
-        this.emit('flush:error', error);
+        this.emit("flush:error", error);
       }
     }, this.config.flushInterval);
   }
 
   private startCleanup(): void {
     // 중복 제거 캐시 정리 (매 10분)
-    setInterval(() => {
-      const cutoff = Date.now() - this.config.deduplicationWindow;
-      
-      for (const [key, timestamp] of this.recentEvents.entries()) {
-        if (timestamp < cutoff) {
-          this.recentEvents.delete(key);
+    setInterval(
+      () => {
+        const cutoff = Date.now() - this.config.deduplicationWindow;
+
+        for (const [key, timestamp] of this.recentEvents.entries()) {
+          if (timestamp < cutoff) {
+            this.recentEvents.delete(key);
+          }
         }
-      }
-    }, 10 * 60 * 1000);
+      },
+      10 * 60 * 1000,
+    );
 
     // 메트릭 정리 (매 시간)
-    setInterval(() => {
-      if (this.metrics.length > 100000) {
-        this.metrics = this.metrics.slice(-50000);
-        this.emit('metrics:cleaned', { remainingCount: this.metrics.length });
-      }
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        if (this.metrics.length > 100000) {
+          this.metrics = this.metrics.slice(-50000);
+          this.emit("metrics:cleaned", { remainingCount: this.metrics.length });
+        }
+      },
+      60 * 60 * 1000,
+    );
   }
 }

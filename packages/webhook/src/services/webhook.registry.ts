@@ -1,4 +1,8 @@
-import type { WebhookEndpoint, WebhookDelivery, WebhookEventType } from '../types/webhook.types';
+import type {
+  WebhookDelivery,
+  WebhookEndpoint,
+  WebhookEventType,
+} from "../types/webhook.types";
 
 export class WebhookRegistry {
   private endpoints: Map<string, WebhookEndpoint> = new Map();
@@ -8,7 +12,10 @@ export class WebhookRegistry {
     this.endpoints.set(endpoint.id, endpoint);
   }
 
-  async updateEndpoint(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
+  async updateEndpoint(
+    endpointId: string,
+    endpoint: WebhookEndpoint,
+  ): Promise<void> {
     if (!this.endpoints.has(endpointId)) {
       throw new Error(`Endpoint ${endpointId} not found`);
     }
@@ -36,22 +43,22 @@ export class WebhookRegistry {
     timeRange?: { start: Date; end: Date },
     eventType?: WebhookEventType,
     status?: string,
-    limit = 100
+    limit = 100,
   ): Promise<WebhookDelivery[]> {
     let deliveries = Array.from(this.deliveries.values());
 
     if (endpointId) {
-      deliveries = deliveries.filter(d => d.endpointId === endpointId);
+      deliveries = deliveries.filter((d) => d.endpointId === endpointId);
     }
 
     if (timeRange) {
-      deliveries = deliveries.filter(d => 
-        d.createdAt >= timeRange.start && d.createdAt <= timeRange.end
+      deliveries = deliveries.filter(
+        (d) => d.createdAt >= timeRange.start && d.createdAt <= timeRange.end,
       );
     }
 
     if (status) {
-      deliveries = deliveries.filter(d => d.status === status);
+      deliveries = deliveries.filter((d) => d.status === status);
     }
 
     return deliveries
@@ -59,7 +66,10 @@ export class WebhookRegistry {
       .slice(0, limit);
   }
 
-  async getFailedDeliveries(endpointId?: string, eventType?: WebhookEventType): Promise<WebhookDelivery[]> {
-    return this.getDeliveries(endpointId, undefined, eventType, 'failed');
+  async getFailedDeliveries(
+    endpointId?: string,
+    eventType?: WebhookEventType,
+  ): Promise<WebhookDelivery[]> {
+    return this.getDeliveries(endpointId, undefined, eventType, "failed");
   }
 }

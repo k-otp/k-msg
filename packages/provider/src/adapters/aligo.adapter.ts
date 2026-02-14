@@ -3,6 +3,7 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
+  type MessageType,
   ok,
   type Provider,
   type Result,
@@ -10,7 +11,6 @@ import {
   type SendResult,
   type StandardError,
   StandardErrorCode,
-  type MessageType,
   type StandardRequest,
   type StandardResult,
   StandardStatus,
@@ -597,7 +597,9 @@ export class AligoAdapter
     return new KMsgError(KMsgErrorCode.NETWORK_ERROR, String(error));
   }
 
-  private toProviderChannel(channel: AligoStandardChannel): "alimtalk" | "friendtalk" | "sms" | "mms" {
+  private toProviderChannel(
+    channel: AligoStandardChannel,
+  ): "alimtalk" | "friendtalk" | "sms" | "mms" {
     if (channel === "ALIMTALK") return "alimtalk";
     if (channel === "FRIENDTALK") return "friendtalk";
     if (channel === "MMS") return "mms";
@@ -609,10 +611,16 @@ export class AligoAdapter
     return value.trim().toUpperCase();
   }
 
-  private resolveStandardChannel(request: StandardRequest): AligoStandardChannel {
+  private resolveStandardChannel(
+    request: StandardRequest,
+  ): AligoStandardChannel {
     const normalizedChannel = this.normalizeChannelLike(request.channel);
-    const normalizedOptionChannel = this.normalizeChannelLike(request.options?.channel);
-    const normalizedTemplateCode = this.normalizeChannelLike(request.templateCode);
+    const normalizedOptionChannel = this.normalizeChannelLike(
+      request.options?.channel,
+    );
+    const normalizedTemplateCode = this.normalizeChannelLike(
+      request.templateCode,
+    );
 
     const channel = normalizedChannel || normalizedOptionChannel;
 
@@ -730,7 +738,9 @@ export class AligoAdapter
     return body;
   }
 
-  private buildAlimTalkBodyFromStandard(request: StandardRequest): Record<string, unknown> {
+  private buildAlimTalkBodyFromStandard(
+    request: StandardRequest,
+  ): Record<string, unknown> {
     const body: Record<string, unknown> = {
       apikey: this.aligoConfig.apiKey,
       userid: this.aligoConfig.userId,
@@ -757,7 +767,9 @@ export class AligoAdapter
     return body;
   }
 
-  private buildFriendTalkBodyFromStandard(request: StandardRequest): Record<string, unknown> {
+  private buildFriendTalkBodyFromStandard(
+    request: StandardRequest,
+  ): Record<string, unknown> {
     const text = this.extractStandardMessage(request);
     const subject =
       request.options?.subject ||

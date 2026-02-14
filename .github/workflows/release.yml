@@ -1,385 +1,72 @@
 name: Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      release-type:
-        description: 'Release type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-        - patch
-        - minor
-        - major
-        - prerelease
-      dry-run:
-        description: 'Dry run (do not actually publish)'
-        required: false
-        default: false
-        type: boolean
-      skip-tests:
-        description: 'Skip tests (use with caution)'
-        required: false
-        default: false
-        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
-  BUN_VERSION: '1.1.34'
+  BUN_VERSION: "1.3.8"
 
 jobs:
-  # Pre-release validation
-  pre-release-check:
-    name: 🔍 Pre-release Validation
+  release:
     runs-on: ubuntu-latest
-    
-    outputs:
-      current-version: ${{ steps.version.outputs.current }}
-      next-version: ${{ steps.version.outputs.next }}
-      
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Need full history for version calculation
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-      
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-      
-      - name: Get current version
-        id: version
-        run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $CURRENT_VERSION"
-          
-          # Calculate next version based on input
-          case "${{ github.event.inputs.release-type }}" in
-            "patch")
-              NEXT_VERSION=$(node -p "const v=require('./package.json').version.split('.'); v[2]=parseInt(v[2])+1; v.join('.')")
-              ;;
-            "minor") 
-              NEXT_VERSION=$(node -p "const v=require('./package.json').version.split('.'); v[1]=parseInt(v[1])+1; v[2]=0; v.join('.')")
-              ;;
-            "major")
-              NEXT_VERSION=$(node -p "const v=require('./package.json').version.split('.'); v[0]=parseInt(v[0])+1; v[1]=0; v[2]=0; v.join('.')")
-              ;;
-            "prerelease")
-              NEXT_VERSION=$(node -p "require('./package.json').version + '-beta.' + Date.now()")
-              ;;
-          esac
-          
-          echo "next=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "Next version: $NEXT_VERSION"
-      
-      - name: Check working directory clean
-        run: |
-          if [[ $(git status --porcelain) ]]; then
-            echo "❌ Working directory is not clean"
-            git status --porcelain
-            exit 1
-          else
-            echo "✅ Working directory is clean"
-          fi
-      
-      - name: Check if on main branch
-        run: |
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          if [ "$BRANCH" != "main" ]; then
-            echo "❌ Must be on main branch for release (current: $BRANCH)"
-            exit 1
-          else
-            echo "✅ On main branch"
-          fi
+          fetch-depth: 0
 
-  # Run tests before release
-  pre-release-test:
-    name: 🧪 Pre-release Tests
-    runs-on: ubuntu-latest
-    needs: pre-release-check
-    if: github.event.inputs.skip-tests != 'true'
-    
-    strategy:
-      matrix:
-        test-type: [unit, integration]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
-      
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-      
-      - name: Build packages
-        if: matrix.test-type == 'integration'
-        run: bun run build:all
-      
-      - name: Run tests
-        run: bun run test:${{ matrix.test-type }}
-        env:
-          TEST_TYPE: ${{ matrix.test-type }}
-          NODE_ENV: test
+          cache: true
 
-  # Build and prepare release
-  build-release:
-    name: 🏗️ Build Release
-    runs-on: ubuntu-latest
-    needs: [pre-release-check, pre-release-test]
-    if: always() && (needs.pre-release-test.result == 'success' || needs.pre-release-test.result == 'skipped')
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Run Sampo (auto)
+        id: sampo
+        uses: bruits/sampo/crates/sampo-github-action@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-      
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-      
-      - name: Build all packages
-        run: bun run build:all
-      
-      - name: Verify build outputs
-        run: |
-          echo "## 📦 Build Verification" >> $GITHUB_STEP_SUMMARY
-          FAILED_BUILDS=""
-          
-          for package_dir in packages/*; do
-            if [ -d "$package_dir" ]; then
-              package_name=$(basename "$package_dir")
-              dist_dir="$package_dir/dist"
-              
-              if [ -d "$dist_dir" ] && [ "$(ls -A $dist_dir 2>/dev/null)" ]; then
-                echo "✅ **$package_name**: $(ls $dist_dir | wc -l) files" >> $GITHUB_STEP_SUMMARY
-              else
-                echo "❌ **$package_name**: Build failed or empty" >> $GITHUB_STEP_SUMMARY
-                FAILED_BUILDS="$FAILED_BUILDS $package_name"
-              fi
-            fi
-          done
-          
-          if [ -n "$FAILED_BUILDS" ]; then
-            echo "Failed builds:$FAILED_BUILDS"
-            exit 1
-          fi
-      
-      - name: Pack packages
-        run: bun run pack:all
-      
-      - name: Upload release artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-artifacts-${{ needs.pre-release-check.outputs.next-version }}
-          path: |
-            packages/*/dist/
-            packages/*/*.tgz
-          retention-days: 30
-
-  # Create release
-  create-release:
-    name: 🚀 Create Release
-    runs-on: ubuntu-latest
-    needs: [pre-release-check, build-release]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-      
-      - name: Configure Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-      
-      - name: Download release artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: release-artifacts-${{ needs.pre-release-check.outputs.next-version }}
-          path: ./
-      
-      - name: Update version
-        run: |
-          echo "Updating version to ${{ needs.pre-release-check.outputs.next-version }}"
-          bun pm version ${{ github.event.inputs.release-type }}
-      
-      - name: Generate changelog
-        id: changelog
-        run: |
-          # Get commits since last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
-          if [ -n "$LAST_TAG" ]; then
-            COMMITS=$(git log --oneline "$LAST_TAG"..HEAD --pretty=format:"- %s (%an)")
-          else
-            COMMITS=$(git log --oneline --pretty=format:"- %s (%an)")
-          fi
-          
-          # Create changelog
-          CHANGELOG="## What's Changed\n\n$COMMITS\n\n**Full Changelog**: https://github.com/${{ github.repository }}/compare/$LAST_TAG...v${{ needs.pre-release-check.outputs.next-version }}"
-          
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      
-      - name: Create Git tag and push
-        if: github.event.inputs.dry-run != 'true'
-        run: |
-          git add -A
-          git commit -m "chore(release): v${{ needs.pre-release-check.outputs.next-version }}"
-          git tag -a "v${{ needs.pre-release-check.outputs.next-version }}" -m "Release v${{ needs.pre-release-check.outputs.next-version }}"
-          git push origin main --follow-tags
-      
-      - name: Create GitHub Release
-        if: github.event.inputs.dry-run != 'true'
-        uses: actions/create-release@v1
+          command: auto
+          create-github-release: false
+          base-branch: main
+          pr-branch: sampo/release
+          pr-title: "chore(release): publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.pre-release-check.outputs.next-version }}
-          release_name: Release v${{ needs.pre-release-check.outputs.next-version }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: ${{ github.event.inputs.release-type == 'prerelease' }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Publish to NPM
-  publish-npm:
-    name: 📦 Publish to NPM
-    runs-on: ubuntu-latest
-    needs: [pre-release-check, create-release]
-    if: github.event.inputs.dry-run != 'true'
-    
-    strategy:
-      matrix:
-        package: [core, provider, template, messaging, analytics, webhook, channel, k-msg]
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.pre-release-check.outputs.next-version }}
-      
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-      
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-      
-      - name: Download release artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: release-artifacts-${{ needs.pre-release-check.outputs.next-version }}
-          path: ./
-      
-      - name: Setup NPM authentication
+      - name: Update bun.lock in release PR branch
+        if: steps.sampo.outputs.released == 'true'
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-      
-      - name: Publish package
-        run: |
-          cd packages/${{ matrix.package }}
-          
-          # Check if package should be published
-          if [ -f "package.json" ]; then
-            PACKAGE_NAME=$(node -p "require('./package.json').name")
-            echo "Publishing $PACKAGE_NAME..."
-            
-            if [ "${{ github.event.inputs.release-type }}" == "prerelease" ]; then
-              npm publish --tag beta --access public
-            else
-              npm publish --access public
-            fi
-            
-            echo "✅ Published $PACKAGE_NAME@${{ needs.pre-release-check.outputs.next-version }}"
-          else
-            echo "⚠️ No package.json found in ${{ matrix.package }}"
+          set -euo pipefail
+          BRANCH="sampo/release"
+
+          if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "Release branch '$BRANCH' not found; skipping."
+            exit 0
           fi
 
-  # Post-release tasks
-  post-release:
-    name: 📋 Post-release Tasks
-    runs-on: ubuntu-latest
-    needs: [pre-release-check, create-release, publish-npm]
-    if: always() && github.event.inputs.dry-run != 'true'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.pre-release-check.outputs.next-version }}
-      
-      - name: Create release summary
-        run: |
-          echo "# 🎉 Release v${{ needs.pre-release-check.outputs.next-version }} Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📊 Release Information" >> $GITHUB_STEP_SUMMARY
-          echo "- **Release Type**: ${{ github.event.inputs.release-type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Previous Version**: ${{ needs.pre-release-check.outputs.current-version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **New Version**: ${{ needs.pre-release-check.outputs.next-version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tests**: ${{ needs.pre-release-test.result == 'skipped' && 'Skipped' || 'Passed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **NPM Publish**: ${{ needs.publish-npm.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📦 Published Packages" >> $GITHUB_STEP_SUMMARY
-          echo "All packages have been published to NPM with version ${{ needs.pre-release-check.outputs.next-version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🔗 Links" >> $GITHUB_STEP_SUMMARY
-          echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.pre-release-check.outputs.next-version }})" >> $GITHUB_STEP_SUMMARY
-          echo "- [NPM Package](https://www.npmjs.com/package/k-msg)" >> $GITHUB_STEP_SUMMARY
-      
-      - name: Notify success
-        if: needs.publish-npm.result == 'success'
-        run: |
-          echo "🎉 Release completed successfully!"
-          echo "Version ${{ needs.pre-release-check.outputs.next-version }} has been published to NPM"
-      
-      - name: Notify failure
-        if: needs.publish-npm.result != 'success'
-        run: |
-          echo "❌ Release partially failed - check NPM publishing"
-          exit 1
+          git fetch origin "$BRANCH:$BRANCH"
+          git checkout "$BRANCH"
 
-  # Dry run summary
-  dry-run-summary:
-    name: 🧪 Dry Run Summary
-    runs-on: ubuntu-latest
-    needs: [pre-release-check, build-release]
-    if: github.event.inputs.dry-run == 'true'
-    
-    steps:
-      - name: Create dry run summary
-        run: |
-          echo "# 🧪 Dry Run Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## What would happen:" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Version would be updated from ${{ needs.pre-release-check.outputs.current-version }} to ${{ needs.pre-release-check.outputs.next-version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Git tag \`v${{ needs.pre-release-check.outputs.next-version }}\` would be created" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GitHub release would be created" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ 8 packages would be published to NPM" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Build Status" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build**: ${{ needs.build-release.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note**: This was a dry run - no actual changes were made." >> $GITHUB_STEP_SUMMARY
+          bun install
+
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "chore(release): update bun.lock"
+          git push origin "HEAD:$BRANCH"

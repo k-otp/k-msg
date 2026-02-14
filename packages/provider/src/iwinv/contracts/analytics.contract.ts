@@ -3,15 +3,15 @@
  */
 
 import {
-  AnalyticsContract,
-  DateRange,
-  UsageStats,
-  TemplateStats,
-  DeliveryReport,
-  MessageStatus
-} from '../../contracts/provider.contract';
+  type AnalyticsContract,
+  type DateRange,
+  type DeliveryReport,
+  MessageStatus,
+  type TemplateStats,
+  type UsageStats,
+} from "../../contracts/provider.contract";
 
-import { IWINVConfig } from '../types/iwinv';
+import type { IWINVConfig } from "../types/iwinv";
 
 // Message types for analytics
 interface IWINVMessageRecord {
@@ -32,29 +32,35 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
   async getUsage(period: DateRange): Promise<UsageStats> {
     try {
       const response = await fetch(`${this.config.baseUrl}/history/list`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'AUTH': btoa(this.config.apiKey)
+          "Content-Type": "application/json",
+          AUTH: btoa(this.config.apiKey),
         },
         body: JSON.stringify({
           startDate: period.from.toISOString(),
           endDate: period.to.toISOString(),
           page: 1,
-          size: 1000
-        })
+          size: 1000,
+        }),
       });
 
-      const result = await response.json() as Record<string, unknown>;
+      const result = (await response.json()) as Record<string, unknown>;
 
       if (!response.ok) {
-        throw new Error(`Failed to get usage stats: ${(result.message as string)}`);
+        throw new Error(
+          `Failed to get usage stats: ${result.message as string}`,
+        );
       }
 
       const messages = (result.list as IWINVMessageRecord[]) || [];
       const totalMessages = messages.length;
-      const deliveredMessages = messages.filter((msg: IWINVMessageRecord) => msg.statusCode === 'OK').length;
-      const failedMessages = messages.filter((msg: IWINVMessageRecord) => msg.statusCode === 'FAILED').length;
+      const deliveredMessages = messages.filter(
+        (msg: IWINVMessageRecord) => msg.statusCode === "OK",
+      ).length;
+      const failedMessages = messages.filter(
+        (msg: IWINVMessageRecord) => msg.statusCode === "FAILED",
+      ).length;
       const sentMessages = totalMessages - failedMessages;
 
       return {
@@ -63,13 +69,15 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         sentMessages,
         deliveredMessages,
         failedMessages,
-        deliveryRate: totalMessages > 0 ? (deliveredMessages / totalMessages) * 100 : 0,
-        failureRate: totalMessages > 0 ? (failedMessages / totalMessages) * 100 : 0,
+        deliveryRate:
+          totalMessages > 0 ? (deliveredMessages / totalMessages) * 100 : 0,
+        failureRate:
+          totalMessages > 0 ? (failedMessages / totalMessages) * 100 : 0,
         breakdown: {
           byTemplate: this.groupByTemplate(messages),
           byDay: this.groupByDay(messages, period),
-          byHour: this.groupByHour(messages)
-        }
+          byHour: this.groupByHour(messages),
+        },
       };
     } catch (error) {
       // Return empty stats if API fails
@@ -84,13 +92,16 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         breakdown: {
           byTemplate: {},
           byDay: {},
-          byHour: {}
-        }
+          byHour: {},
+        },
       };
     }
   }
 
-  async getTemplateStats(templateId: string, period: DateRange): Promise<TemplateStats> {
+  async getTemplateStats(
+    templateId: string,
+    period: DateRange,
+  ): Promise<TemplateStats> {
     try {
       const usage = await this.getUsage(period);
       const templateMessages = usage.breakdown.byTemplate[templateId] || 0;
@@ -102,7 +113,7 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         delivered: Math.round(templateMessages * (usage.deliveryRate / 100)),
         failed: Math.round(templateMessages * (usage.failureRate / 100)),
         deliveryRate: usage.deliveryRate,
-        averageDeliveryTime: 30 // Mock average delivery time in seconds
+        averageDeliveryTime: 30, // Mock average delivery time in seconds
       };
     } catch (error) {
       return {
@@ -112,7 +123,7 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
         delivered: 0,
         failed: 0,
         deliveryRate: 0,
-        averageDeliveryTime: 0
+        averageDeliveryTime: 0,
       };
     }
   }
@@ -120,88 +131,110 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
   async getDeliveryReport(messageId: string): Promise<DeliveryReport> {
     try {
       const response = await fetch(`${this.config.baseUrl}/history/detail`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'AUTH': btoa(this.config.apiKey)
+          "Content-Type": "application/json",
+          AUTH: btoa(this.config.apiKey),
         },
         body: JSON.stringify({
-          messageId: parseInt(messageId) || 0
-        })
+          messageId: parseInt(messageId) || 0,
+        }),
       });
 
-      const result = await response.json() as Record<string, unknown>;
+      const result = (await response.json()) as Record<string, unknown>;
 
       if (!response.ok) {
-        throw new Error(`Failed to get delivery report: ${(result.message as string)}`);
+        throw new Error(
+          `Failed to get delivery report: ${result.message as string}`,
+        );
       }
 
       return {
         messageId,
-        phoneNumber: (result.phone as string) || 'unknown',
-        templateCode: (result.templateCode as string) || 'unknown',
-        status: this.mapStatus((result.statusCode as string)),
-        sentAt: (result.sendDate as string) ? new Date((result.sendDate as string)) : undefined,
-        deliveredAt: (result.receiveDate as string) ? new Date((result.receiveDate as string)) : undefined,
-        failedAt: (result.statusCode as string) === 'FAILED' ? new Date((result.sendDate as string)) : undefined,
-        clickedAt: (result.clickedAt as string) ? new Date((result.clickedAt as string)) : undefined,
-        error: (result.statusCode as string) !== 'OK' ? {
-          code: (result.statusCode as string),
-          message: (result.statusCodeName as string),
-          retryable: false
-        } : undefined,
+        phoneNumber: (result.phone as string) || "unknown",
+        templateCode: (result.templateCode as string) || "unknown",
+        status: this.mapStatus(result.statusCode as string),
+        sentAt: (result.sendDate as string)
+          ? new Date(result.sendDate as string)
+          : undefined,
+        deliveredAt: (result.receiveDate as string)
+          ? new Date(result.receiveDate as string)
+          : undefined,
+        failedAt:
+          (result.statusCode as string) === "FAILED"
+            ? new Date(result.sendDate as string)
+            : undefined,
+        clickedAt: (result.clickedAt as string)
+          ? new Date(result.clickedAt as string)
+          : undefined,
+        error:
+          (result.statusCode as string) !== "OK"
+            ? {
+                code: result.statusCode as string,
+                message: result.statusCodeName as string,
+                retryable: false,
+              }
+            : undefined,
         attempts: [
           {
             attemptNumber: 1,
-            attemptedAt: new Date((result.requestDate as string)),
-            status: this.mapStatus((result.statusCode as string)),
-            error: (result.statusCode as string) !== 'OK' ? {
-              code: (result.statusCode as string),
-              message: (result.statusCodeName as string),
-              retryable: false
-            } : undefined
-          }
-        ]
+            attemptedAt: new Date(result.requestDate as string),
+            status: this.mapStatus(result.statusCode as string),
+            error:
+              (result.statusCode as string) !== "OK"
+                ? {
+                    code: result.statusCode as string,
+                    message: result.statusCodeName as string,
+                    retryable: false,
+                  }
+                : undefined,
+          },
+        ],
       };
     } catch (error) {
       return {
         messageId,
-        phoneNumber: 'unknown',
-        templateCode: 'unknown', 
-        status: 'FAILED' as any,
+        phoneNumber: "unknown",
+        templateCode: "unknown",
+        status: "FAILED" as any,
         error: {
-          code: 'API_ERROR',
-          message: error instanceof Error ? error.message : 'Unknown error',
-          retryable: false
+          code: "API_ERROR",
+          message: error instanceof Error ? error.message : "Unknown error",
+          retryable: false,
         },
-        attempts: []
+        attempts: [],
       };
     }
   }
 
-  private groupByTemplate(messages: IWINVMessageRecord[]): Record<string, number> {
+  private groupByTemplate(
+    messages: IWINVMessageRecord[],
+  ): Record<string, number> {
     const groups: Record<string, number> = {};
-    messages.forEach(msg => {
-      const template = msg.templateCode || 'unknown';
+    messages.forEach((msg) => {
+      const template = msg.templateCode || "unknown";
       groups[template] = (groups[template] || 0) + 1;
     });
     return groups;
   }
 
-  private groupByDay(messages: IWINVMessageRecord[], period: DateRange): Record<string, number> {
+  private groupByDay(
+    messages: IWINVMessageRecord[],
+    period: DateRange,
+  ): Record<string, number> {
     const groups: Record<string, number> = {};
     const current = new Date(period.from);
-    
+
     while (current <= period.to) {
-      const dateKey = current.toISOString().split('T')[0];
+      const dateKey = current.toISOString().split("T")[0];
       groups[dateKey] = 0;
       current.setDate(current.getDate() + 1);
     }
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       if (msg.requestDate) {
-        const dateKey = new Date(msg.requestDate).toISOString().split('T')[0];
-        if (groups.hasOwnProperty(dateKey)) {
+        const dateKey = new Date(msg.requestDate).toISOString().split("T")[0];
+        if (Object.hasOwn(groups, dateKey)) {
           groups[dateKey]++;
         }
       }
@@ -216,7 +249,7 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
       groups[i.toString()] = 0;
     }
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       if (msg.requestDate) {
         const hour = new Date(msg.requestDate).getHours();
         groups[hour.toString()]++;
@@ -228,11 +261,11 @@ export class IWINVAnalyticsContract implements AnalyticsContract {
 
   private mapStatus(statusCode: string): MessageStatus {
     switch (statusCode) {
-      case 'OK':
+      case "OK":
         return MessageStatus.DELIVERED;
-      case 'PENDING':
+      case "PENDING":
         return MessageStatus.SENDING;
-      case 'FAILED':
+      case "FAILED":
         return MessageStatus.FAILED;
       default:
         return MessageStatus.SENT;
