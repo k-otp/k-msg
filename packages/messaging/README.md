@@ -1,67 +1,93 @@
 # @k-msg/messaging
 
-Messaging and delivery tracking system for the K-Message platform.
+High-level messaging facade for `k-msg`.
+
+This package provides `KMsg`, which normalizes user input, routes to a provider, and returns a `Result`.
 
 ## Installation
 
 ```bash
 npm install @k-msg/messaging @k-msg/core
-# or  
+# or
 bun add @k-msg/messaging @k-msg/core
 ```
 
-## Features
+## Quick Start
 
-- **DeliveryTracker**: Message delivery status tracking
-- **Message Events**: Comprehensive event management for sent, delivered, and failed messages
-- **Retry Logic**: Automatic retry for failed message deliveries
-- **Bulk Processing**: Efficient handling of bulk message operations
+```ts
+import { KMsg } from "@k-msg/messaging";
+import { SolapiProvider } from "@k-msg/provider";
 
-## Basic Usage
-
-```typescript
-import { DeliveryTracker, MessageEventType } from '@k-msg/messaging';
-
-const tracker = new DeliveryTracker({
-  retryAttempts: 3,
-  retryDelay: 1000
+const kmsg = new KMsg({
+  providers: [
+    new SolapiProvider({
+      apiKey: process.env.SOLAPI_API_KEY!,
+      apiSecret: process.env.SOLAPI_API_SECRET!,
+      defaultFrom: "01000000000",
+    }),
+  ],
+  defaults: {
+    from: "01000000000",
+    sms: { autoLmsBytes: 90 },
+  },
 });
 
-// Configure webhook URL
-tracker.setWebhookUrl('https://your-app.com/webhook');
+// Default SMS (type omitted). If the content is long, it can auto-upgrade to LMS.
+await kmsg.send({ to: "01012345678", text: "hello" });
 
-// Start tracking a message
-await tracker.trackMessage({
-  messageId: 'msg-123',
-  phone: '01012345678',
-  provider: 'iwinv',
-  templateCode: 'TPL001',
-  variables: { code: '123456' }
-});
-
-// Check message status
-const status = await tracker.getMessageStatus('msg-123');
-```
-
-## Event Handling
-
-```typescript
-import { MessageEvent, MessageEventType } from '@k-msg/messaging';
-
-// Register event listeners
-tracker.on(MessageEventType.MESSAGE_SENT, (event: MessageEvent) => {
-  console.log('Message sent:', event);
-});
-
-tracker.on(MessageEventType.MESSAGE_DELIVERED, (event: MessageEvent) => {
-  console.log('Message delivered:', event);
-});
-
-tracker.on(MessageEventType.MESSAGE_FAILED, (event: MessageEvent) => {
-  console.log('Message failed:', event);
+// Explicit typed send
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateCode: "AUTH_OTP",
+  variables: { code: "123456" },
 });
 ```
 
-## License
+## Routing
 
-MIT
+```ts
+import { KMsg } from "@k-msg/messaging";
+import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({
+  providers: [
+    new IWINVProvider({
+      apiKey: process.env.IWINV_API_KEY!,
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsApiKey: process.env.IWINV_SMS_API_KEY,
+      smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
+    }),
+    new SolapiProvider({
+      apiKey: process.env.SOLAPI_API_KEY!,
+      apiSecret: process.env.SOLAPI_API_SECRET!,
+      defaultFrom: "01000000000",
+      kakaoPfId: process.env.SOLAPI_KAKAO_PF_ID,
+      rcsBrandId: process.env.SOLAPI_RCS_BRAND_ID,
+    }),
+  ],
+  routing: {
+    defaultProviderId: "solapi",
+    byType: {
+      ALIMTALK: "iwinv",
+      SMS: ["solapi"],
+    },
+    strategy: "first",
+  },
+});
+```
+
+## Bulk Sending
+
+Use `sendMany()` for controlled concurrency.
+
+```ts
+const results = await kmsg.sendMany(
+  [
+    { to: "01011112222", text: "hello 1" },
+    { to: "01033334444", text: "hello 2" },
+  ],
+  { concurrency: 10 },
+);
+```
+

@@ -28,7 +28,7 @@ export interface RetryAttempt {
   attemptNumber: number;
   scheduledAt: Date;
   provider: string;
-  templateId: string;
+  templateCode: string;
   variables: Record<string, any>;
   metadata: Record<string, any>;
 }
@@ -271,7 +271,7 @@ export class MessageRetryHandler extends EventEmitter {
         scheduledAt: new Date(),
         provider:
           item.originalDeliveryReport.attempts[0]?.provider || "unknown",
-        templateId: item.originalDeliveryReport.metadata.templateId || "",
+        templateCode: item.originalDeliveryReport.metadata.templateCode || "",
         variables: item.originalDeliveryReport.metadata.variables || {},
         metadata: item.originalDeliveryReport.metadata,
       };

@@ -2,6 +2,7 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
+  type MessageType,
   ok,
   type Provider,
   type Result,
@@ -14,10 +15,30 @@ import {
 export class MockProvider implements Provider, TemplateProvider {
   readonly id = "mock";
   readonly name = "Mock Provider";
+  readonly supportedTypes: readonly MessageType[] = [
+    "ALIMTALK",
+    "FRIENDTALK",
+    "SMS",
+    "LMS",
+    "MMS",
+    "NSA",
+    "VOICE",
+    "FAX",
+    "RCS_SMS",
+    "RCS_LMS",
+    "RCS_MMS",
+    "RCS_TPL",
+    "RCS_ITPL",
+    "RCS_LTPL",
+  ];
 
   public calls: SendOptions[] = [];
   private failureCount = 0;
   private templates: Map<string, Template> = new Map();
+
+  async healthCheck() {
+    return { healthy: true, issues: [] };
+  }
 
   async send(params: SendOptions): Promise<Result<SendResult, KMsgError>> {
     this.calls.push(params);
@@ -34,9 +55,12 @@ export class MockProvider implements Provider, TemplateProvider {
     }
 
     const result: SendResult = {
-      messageId: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      messageId: params.messageId || crypto.randomUUID(),
       status: "SENT",
-      provider: this.id,
+      providerId: this.id,
+      providerMessageId: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      type: params.type,
+      to: params.to,
     };
 
     return ok(result);

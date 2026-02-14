@@ -36,7 +36,7 @@ export interface DeliveryWebhook {
 export interface TrackingRecord {
   messageId: string;
   phoneNumber: string;
-  templateId: string;
+  templateCode: string;
   provider: string;
   currentStatus: MessageStatus;
   statusHistory: StatusHistoryEntry[];
@@ -151,7 +151,7 @@ export class DeliveryTracker extends EventEmitter {
   async trackMessage(
     messageId: string,
     phoneNumber: string,
-    templateId: string,
+    templateCode: string,
     provider: string,
     options: {
       webhooks?: DeliveryWebhook[];
@@ -184,7 +184,7 @@ export class DeliveryTracker extends EventEmitter {
     const record: TrackingRecord = {
       messageId,
       phoneNumber,
-      templateId,
+      templateCode,
       provider,
       currentStatus: initialStatus,
       statusHistory: [

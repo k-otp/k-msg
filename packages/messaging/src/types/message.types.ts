@@ -2,7 +2,7 @@ import type { RetryOptions } from "@k-msg/core";
 import { z } from "zod";
 
 export interface MessageRequest {
-  templateId: string; // 템플릿 ID
+  templateCode: string; // 템플릿 코드
   recipients: Recipient[]; // 수신자 목록
   variables: VariableMap; // 공통 변수
   scheduling?: SchedulingOptions; // 예약 발송
@@ -55,7 +55,7 @@ export interface MessageResult {
   metadata: {
     createdAt: Date;
     provider: string;
-    templateId: string;
+    templateCode: string;
   };
 }
 
@@ -106,7 +106,7 @@ export interface DeliveryAttempt {
 
 // Bulk messaging types
 export interface BulkMessageRequest {
-  templateId: string;
+  templateCode: string;
   recipients: BulkRecipient[];
   commonVariables?: VariableMap;
   options?: BulkSendingOptions;
@@ -232,7 +232,7 @@ export const SendingOptionsSchema = z.object({
 });
 
 export const MessageRequestSchema = z.object({
-  templateId: z.string().min(1),
+  templateCode: z.string().min(1),
   recipients: z.array(RecipientSchema).min(1).max(10000),
   variables: VariableMapSchema,
   scheduling: SchedulingOptionsSchema.optional(),
@@ -265,7 +265,7 @@ export const MessageResultSchema = z.object({
   metadata: z.object({
     createdAt: z.date(),
     provider: z.string(),
-    templateId: z.string(),
+    templateCode: z.string(),
   }),
 });
 

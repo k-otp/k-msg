@@ -10,13 +10,14 @@ interface KMessagePlatform {
 }
 
 const sendMessageSchema = z.object({
-  templateId: z.string().min(1),
+  templateCode: z.string().min(1),
   phoneNumber: z.string().regex(/^[0-9]{10,11}$/),
   variables: z.record(z.union([z.string(), z.number(), z.date()])),
+  from: z.string().optional(),
 });
 
 const sendBulkSchema = z.object({
-  templateId: z.string().min(1),
+  templateCode: z.string().min(1),
   recipients: z.array(
     z.object({
       phoneNumber: z.string().regex(/^[0-9]{10,11}$/),
@@ -26,6 +27,7 @@ const sendBulkSchema = z.object({
     }),
   ),
   variables: z.record(z.union([z.string(), z.number(), z.date()])).optional(),
+  from: z.string().optional(),
 });
 
 export function messagesRouter(platform: KMessagePlatform) {
@@ -36,16 +38,27 @@ export function messagesRouter(platform: KMessagePlatform) {
     try {
       const data = c.req.valid("json");
 
-      const result = await platform.provider.sendMessage({
-        templateCode: data.templateId,
-        phoneNumber: data.phoneNumber,
+      const result = await platform.kmsg.send({
+        type: "ALIMTALK",
+        to: data.phoneNumber,
+        from: data.from,
+        templateCode: data.templateCode,
         variables: data.variables,
       });
 
-      return c.json({
-        success: true,
-        data: result,
-      });
+      if (result.isFailure) {
+        return c.json(
+          {
+            success: false,
+            error: result.error.message,
+            code: result.error.code,
+            details: result.error.details,
+          },
+          400,
+        );
+      }
+
+      return c.json({ success: true, data: result.value });
     } catch (error) {
       return c.json(
         {
@@ -63,15 +76,17 @@ export function messagesRouter(platform: KMessagePlatform) {
       const data = c.req.valid("json");
 
       const result = await platform.bulkSender.sendBulk({
-        templateId: data.templateId,
+        templateCode: data.templateCode,
         recipients: data.recipients.map((r) => ({
           phoneNumber: r.phoneNumber,
-          variables: { ...data.variables, ...r.variables },
+          variables: { ...(data.variables || {}), ...(r.variables || {}) },
         })),
+        commonVariables: {},
         options: {
           batchSize: 10,
           batchDelay: 1000,
-        },
+          from: data.from,
+        } as any,
       });
 
       return c.json({
