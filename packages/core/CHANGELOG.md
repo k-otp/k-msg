@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.1.6 — 2026-02-14
+
+### Patch changes
+
+- [19e8849](https://github.com/k-otp/k-msg/commit/19e8849e816686eb75cb499fd53f18b5a3c77f9c) fix(iwinv): stable AUTH header + support custom headers; feat(core): round-robin router provider — Thanks @imjlk!
+
 ## 0.1.5 — 2026-02-14
 
 ### Patch changes
