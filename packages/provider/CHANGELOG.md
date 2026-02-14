@@ -1,5 +1,15 @@
 # @k-msg/provider
 
+## 0.2.0 — 2026-02-14
+
+### Minor changes
+
+- [0c5bbd6](https://github.com/k-otp/k-msg/commit/0c5bbd697333ad3ab2022fbf21bb382029d38ee1) feat(iwinv): add SMS v2 charge and history queries (secret auth + 90-day guard) — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.2.0
+
 ## 0.1.6 — 2026-02-14
 
 ### Patch changes
