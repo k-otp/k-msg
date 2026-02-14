@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -15,55 +16,50 @@ concurrency:
 
 env:
   BUN_VERSION: "1.3.8"
+  NODE_VERSION: "24"
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Setup Node (for npm OIDC)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Authenticate to npm (OIDC)
+        uses: npm/oidc@v3
+        with:
+          # Keep the token file out of the repo workspace so it can't be
+          # accidentally committed into release PRs.
+          save-token-file: true
+          token-file: ".npmrc"
+          token-file-directory: ${{ runner.temp }}
+          registry-url: "https://registry.npmjs.org"
+
       - name: Configure npm auth (bun publish)
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: |
           set -euo pipefail
-          # Ensure Bun's publish step can authenticate.
-          #
-          # Important: Sampo may run `bun publish` without inheriting env vars
-          # like NPM_CONFIG_USERCONFIG / NPM_CONFIG_TOKEN. Writing auth into the
-          # user's home .npmrc makes Bun pick it up reliably, while still
-          # keeping secrets out of the repo workspace (so they can't be
-          # accidentally committed into release PRs).
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$RUNNER_TEMP/.npmrc"
-          chmod 0600 "$RUNNER_TEMP/.npmrc"
           cp "$RUNNER_TEMP/.npmrc" "$HOME/.npmrc"
           chmod 0600 "$HOME/.npmrc"
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install dependencies
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: bun install --frozen-lockfile
 
       - name: Build packages (for publish)
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: bun run build:all
 
-      - name: Skip (missing NPM_TOKEN)
-        if: ${{ env.HAS_NPM_TOKEN != 'true' }}
-        run: echo "::warning::NPM_TOKEN is not set; skipping Sampo release automation."
-
       - name: Run Sampo (auto)
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
@@ -77,13 +73,11 @@ jobs:
           args: --ignore-scripts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # bun publish supports token-based auth in CI via NPM_CONFIG_TOKEN.
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Prefer file-based auth for Bun, because Sampo may not forward env
+          # vars like NPM_CONFIG_USERCONFIG into the publish subprocess.
           NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/.npmrc
 
       - name: Update bun.lock in release PR branch
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: |
           set -euo pipefail
           BRANCH="sampo/release"
