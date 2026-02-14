@@ -12,7 +12,7 @@ export interface MessageRequest {
 export interface Recipient {
   phoneNumber: string;
   variables?: VariableMap; // 개별 변수 (공통 변수 오버라이드)
-  metadata?: Record<string, any>; // 추적용 메타데이터
+  metadata?: Record<string, unknown>; // 추적용 메타데이터
 }
 
 export interface VariableMap {
@@ -64,7 +64,7 @@ export interface RecipientResult {
   messageId?: string;
   status: MessageStatus;
   error?: MessageError;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum MessageStatus {
@@ -80,7 +80,7 @@ export enum MessageStatus {
 export interface MessageError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface DeliveryReport {
@@ -93,7 +93,7 @@ export interface DeliveryReport {
   failedAt?: Date;
   error?: MessageError;
   attempts: DeliveryAttempt[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface DeliveryAttempt {
@@ -105,7 +105,19 @@ export interface DeliveryAttempt {
 }
 
 // Bulk messaging types
+export type BulkMessageType =
+  | "ALIMTALK"
+  | "NSA"
+  | "RCS_TPL"
+  | "RCS_ITPL"
+  | "RCS_LTPL";
+
 export interface BulkMessageRequest {
+  /**
+   * BulkMessageSender currently targets template-based channels.
+   * Default: "ALIMTALK"
+   */
+  type?: BulkMessageType;
   templateCode: string;
   recipients: BulkRecipient[];
   commonVariables?: VariableMap;
@@ -115,10 +127,18 @@ export interface BulkMessageRequest {
 export interface BulkRecipient {
   phoneNumber: string;
   variables: VariableMap;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BulkSendingOptions extends SendingOptions {
+  /**
+   * Sender number / id for bulk sends (optional if KMsg defaults cover it).
+   */
+  from?: string;
+  /**
+   * Back-compat alias for legacy callers.
+   */
+  senderNumber?: string;
   batchSize?: number; // 배치 크기
   batchDelay?: number; // 배치 간 지연 시간 (ms)
   maxConcurrency?: number; // 최대 동시 처리 수
@@ -176,7 +196,7 @@ export enum MessageEventType {
   PROVIDER_ERROR = "system.provider_error",
 }
 
-export interface MessageEvent<T = any> {
+export interface MessageEvent<T = unknown> {
   id: string;
   type: MessageEventType;
   timestamp: Date;

@@ -2,9 +2,8 @@
  * Delivery tracking system for messages
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 import {
-  DeliveryAttempt,
   type DeliveryReport,
   type MessageEvent,
   MessageEventType,
@@ -45,14 +44,14 @@ export interface TrackingRecord {
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface StatusHistoryEntry {
   status: MessageStatus;
   timestamp: Date;
   provider: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   source: "provider" | "webhook" | "manual" | "system";
 }
 
@@ -155,7 +154,7 @@ export class DeliveryTracker extends EventEmitter {
     provider: string,
     options: {
       webhooks?: DeliveryWebhook[];
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       initialStatus?: MessageStatus;
     } = {},
   ): Promise<void> {
@@ -237,8 +236,12 @@ export class DeliveryTracker extends EventEmitter {
     status: MessageStatus,
     details: {
       provider?: string;
-      error?: { code: string; message: string; details?: any };
-      metadata?: Record<string, any>;
+      error?: {
+        code: string;
+        message: string;
+        details?: Record<string, unknown>;
+      };
+      metadata?: Record<string, unknown>;
       source?: "provider" | "webhook" | "manual" | "system";
       sentAt?: Date;
       deliveredAt?: Date;
@@ -306,7 +309,7 @@ export class DeliveryTracker extends EventEmitter {
     // Determine event type based on status
     const eventType = this.getEventTypeForStatus(status);
 
-    const event: MessageEvent = {
+    const event: MessageEvent<Record<string, unknown>> = {
       id: `evt_${messageId}_${Date.now()}`,
       type: eventType,
       timestamp: now,
@@ -581,7 +584,7 @@ export class DeliveryTracker extends EventEmitter {
 
       // Add signature if secret is provided
       if (webhook.secret) {
-        const payload = JSON.stringify(event);
+        const _payload = JSON.stringify(event);
         // This would normally use HMAC-SHA256
         headers["X-Signature"] = `sha256=${webhook.secret}`;
       }

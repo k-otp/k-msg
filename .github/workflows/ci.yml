@@ -61,17 +61,27 @@ jobs:
           fi
 
           CHANGED="$(git diff --name-only "$BASE" "${{ github.sha }}")"
-          # Only run Biome for file types it understands.
-          FILES="$(echo "$CHANGED" | grep -E '\\.(ts|tsx|js|jsx|json|jsonc)$' || true)"
+          files=()
+          while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            # Only run Biome for file types it understands, and skip deleted paths.
+            case "$f" in
+              *.ts|*.tsx|*.js|*.jsx|*.json|*.jsonc)
+                if [[ -f "$f" ]]; then
+                  files+=("$f")
+                fi
+                ;;
+            esac
+          done <<< "$CHANGED"
 
-          if [[ -z "$FILES" ]]; then
+          if (( ${#files[@]} == 0 )); then
             echo "No Biome-checkable files changed; skipping."
             exit 0
           fi
 
           # The repository currently has legacy lint debt; to keep CI useful and unblocked,
           # lint only files changed in this ref (incremental adoption).
-          bun x @biomejs/biome check --files-ignore-unknown=true $FILES
+          bun x @biomejs/biome check --files-ignore-unknown=true "${files[@]}"
 
       - name: Typecheck
         run: bun run typecheck:all

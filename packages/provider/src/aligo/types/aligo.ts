@@ -32,6 +32,7 @@ export interface AligoAlimTalkRequest {
   tpl_code: string;
   sender: string;
 
+  // biome-ignore lint/suspicious/noExplicitAny: provider API is loosely typed.
   [key: string]: any;
 
   testMode?: "Y" | "N";

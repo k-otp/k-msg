@@ -2,15 +2,18 @@
  * Retry handler for failed message deliveries
  */
 
-import { RetryHandler as CoreRetryHandler, ErrorUtils } from "@k-msg/core";
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
+import { RetryHandler as CoreRetryHandler } from "@k-msg/core";
 import {
-  DeliveryAttempt,
   type DeliveryReport,
   type MessageEvent,
   MessageEventType,
   MessageStatus,
 } from "../types/message.types";
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export interface RetryPolicy {
   maxAttempts: number;
@@ -29,8 +32,8 @@ export interface RetryAttempt {
   scheduledAt: Date;
   provider: string;
   templateCode: string;
-  variables: Record<string, any>;
-  metadata: Record<string, any>;
+  variables: Record<string, unknown>;
+  metadata: Record<string, unknown>;
 }
 
 export interface RetryQueueItem {
@@ -51,7 +54,7 @@ export interface RetryHandlerOptions {
   maxQueueSize: number;
   enablePersistence: boolean;
   onRetryExhausted?: (item: RetryQueueItem) => Promise<void>;
-  onRetrySuccess?: (item: RetryQueueItem, result: any) => Promise<void>;
+  onRetrySuccess?: (item: RetryQueueItem, result: unknown) => Promise<void>;
   onRetryFailed?: (item: RetryQueueItem, error: Error) => Promise<void>;
 }
 
@@ -263,6 +266,14 @@ export class MessageRetryHandler extends EventEmitter {
     item.updatedAt = new Date();
 
     try {
+      const originalMetadata = item.originalDeliveryReport.metadata;
+      const templateCode =
+        typeof originalMetadata.templateCode === "string"
+          ? originalMetadata.templateCode
+          : "";
+      const variablesRaw = originalMetadata.variables;
+      const variables = isObjectRecord(variablesRaw) ? variablesRaw : {};
+
       // Create retry attempt
       const attempt: RetryAttempt = {
         messageId: item.messageId,
@@ -271,9 +282,9 @@ export class MessageRetryHandler extends EventEmitter {
         scheduledAt: new Date(),
         provider:
           item.originalDeliveryReport.attempts[0]?.provider || "unknown",
-        templateCode: item.originalDeliveryReport.metadata.templateCode || "",
-        variables: item.originalDeliveryReport.metadata.variables || {},
-        metadata: item.originalDeliveryReport.metadata,
+        templateCode,
+        variables,
+        metadata: originalMetadata,
       };
 
       item.attempts.push(attempt);
@@ -346,7 +357,7 @@ export class MessageRetryHandler extends EventEmitter {
     }
   }
 
-  private async executeRetry(attempt: RetryAttempt): Promise<any> {
+  private async executeRetry(attempt: RetryAttempt): Promise<unknown> {
     // This would integrate with the actual message sender
     // For now, simulate the retry operation
     return CoreRetryHandler.execute(
