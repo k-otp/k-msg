@@ -1,5 +1,12 @@
 # k-msg
 
+## 0.1.4 — 2026-02-14
+
+### Patch changes
+
+- [82173bf](https://github.com/k-otp/k-msg/commit/82173bff8a4e71fe76ec2913d38a60c3d409ac4e) test(release): verify npm OIDC trusted publishing — Thanks @imjlk!
+- Updated dependencies: analytics@0.1.4, channel@0.1.4, core@0.1.4, messaging@0.1.4, provider@0.1.4, template@0.1.4, webhook@0.1.4
+
 ## 0.1.3 — 2026-02-14
 
 ### Patch changes
