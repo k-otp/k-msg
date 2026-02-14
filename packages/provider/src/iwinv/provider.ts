@@ -380,6 +380,7 @@ export class IWINVProvider implements Provider {
       case 518:
         return KMsgErrorCode.PROVIDER_ERROR;
       default:
+        if (code >= 500) return KMsgErrorCode.PROVIDER_ERROR;
         return KMsgErrorCode.INVALID_REQUEST;
     }
   }
