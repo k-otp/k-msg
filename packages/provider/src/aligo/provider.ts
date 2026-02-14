@@ -10,7 +10,7 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import type { AligoConfig, AligoResponse, AligoSMSRequest } from "../types/aligo";
+import type { AligoConfig, AligoResponse, AligoSMSRequest } from "./types/aligo";
 
 type AligoMessageType = "SMS" | "LMS" | "MMS" | "ALIMTALK" | "FRIENDTALK";
 
@@ -453,4 +453,3 @@ export class AligoProviderFactory {
 }
 
 export function initializeAligo(): void {}
-
