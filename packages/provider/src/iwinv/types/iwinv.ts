@@ -155,6 +155,50 @@ export interface BalanceResponse extends IWINVBaseResponse {
 }
 
 // =============================================================================
+// SMS(v2) 전송 내역/잔액 조회 타입
+// =============================================================================
+
+export interface IWINVSmsChargeRequest {
+  version: string; // "1.0"
+}
+
+export interface IWINVSmsChargeResponse {
+  code: number; // 0 on success
+  message: string;
+  charge: number; // remaining amount
+}
+
+export interface IWINVSmsHistoryRequest {
+  version: string; // "1.0"
+  companyid: string;
+  startDate: string; // yyyy-MM-dd
+  endDate: string; // yyyy-MM-dd
+  requestNo?: string;
+  pageNum?: number;
+  pageSize?: number;
+  phone?: string;
+}
+
+export interface IWINVSmsHistoryItem {
+  requestNo: string | number;
+  companyid: string;
+  msgType: string; // SMS, LMS, MMS
+  phone: string;
+  callback: string;
+  sendStatus?: string;
+  sendStatusCode?: string;
+  sendStatusMsg?: string;
+  sendDate: string; // yyyy-MM-dd HH:mm:ss
+}
+
+export interface IWINVSmsHistoryResponse {
+  resultCode: number; // 0 on success
+  message: string;
+  totalCount: number;
+  list: IWINVSmsHistoryItem[];
+}
+
+// =============================================================================
 // 설정 타입
 // =============================================================================
 
@@ -162,6 +206,11 @@ export interface IWINVConfig extends ProviderConfig {
   smsApiKey?: string;
   smsAuthKey?: string;
   smsBaseUrl?: string;
+  /**
+   * SMS v2 전송 내역 조회시 필요한 조직(업체) 발송 아이디.
+   * (API 문서의 `companyid`)
+   */
+  smsCompanyId?: string;
   senderNumber?: string;
   smsSenderNumber?: string;
   sendEndpoint?: string;

@@ -1,6 +1,10 @@
 import type {
   BaseProvider,
+  BalanceQuery,
+  BalanceResult,
   Config,
+  HistoryQuery,
+  HistoryResult,
   KMsg,
   LegacyMessageSendOptions,
   MessageSendOptions,
@@ -489,6 +493,56 @@ export class AlimTalkPlatform implements KMsg {
     };
   }
 
+  async balance(providerId?: string) {
+    const provider = this.getProviderOrThrow(providerId);
+    const providerKey = provider.id;
+    const adapter = this.getProviderAdapter(provider);
+
+    return {
+      get: async (query: BalanceQuery = {}): Promise<BalanceResult> => {
+        const channel = query.channel;
+
+        // Prefer channel-specific balance when applicable.
+        if (this.isSmsChannel(channel)) {
+          const getSmsCharge =
+            adapter && typeof (adapter as any).getSmsCharge === "function"
+              ? (adapter as any).getSmsCharge.bind(adapter)
+              : typeof (provider as any).getSmsCharge === "function"
+                ? (provider as any).getSmsCharge.bind(provider)
+                : undefined;
+
+          if (getSmsCharge) {
+            const amount = await getSmsCharge();
+            return {
+              providerId: providerKey,
+              channel,
+              amount: typeof amount === "number" ? amount : Number(amount) || 0,
+              currency: "KRW",
+            };
+          }
+        }
+
+        const getBalance =
+          adapter && typeof (adapter as any).getBalance === "function"
+            ? (adapter as any).getBalance.bind(adapter)
+            : typeof (provider as any).getBalance === "function"
+              ? (provider as any).getBalance.bind(provider)
+              : undefined;
+
+        if (!getBalance) {
+          throw new Error(`Provider ${providerKey} does not support balance()`);
+        }
+
+        const amount = await getBalance();
+        return {
+          providerId: providerKey,
+          channel,
+          amount: typeof amount === "number" ? amount : Number(amount) || 0,
+        };
+      },
+    };
+  }
+
   /**
    * @deprecated Template operations are not yet migrated to the new provider interface.
    * Use the provider's adapter directly for template management.
@@ -541,29 +595,139 @@ export class AlimTalkPlatform implements KMsg {
   }
 
   /**
-   * @deprecated History operations are not yet migrated to the new provider interface.
-   * Use the provider's adapter directly for history queries.
+   * History operations (common API surface).
+   *
+   * Notes:
+   * - Not all providers implement history. This method will throw when unsupported.
+   * - For provider-specific, advanced fields, use provider adapter directly.
    */
   async history(providerId?: string) {
-    const provider = providerId
-      ? this.getProvider(providerId)
-      : this.getDefaultProvider();
-    if (!provider) {
-      throw new Error(`Provider ${providerId || "default"} not found`);
-    }
+    const provider = this.getProviderOrThrow(providerId);
+    const providerKey = provider.id;
+    const adapter = this.getProviderAdapter(provider);
 
     return {
-      /** @deprecated Not yet implemented */
-      list: async (_page: number = 1, _size: number = 15, _filters?: any) => {
-        throw new Error(
-          "History operations not yet migrated to new provider interface",
+      list: async (
+        queryOrPage: HistoryQuery | number = 1,
+        pageSize: number = 15,
+        filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+          channel?: HistoryQuery["channel"];
+        },
+      ): Promise<HistoryResult> => {
+        const query = this.normalizeHistoryQuery(
+          queryOrPage,
+          pageSize,
+          filters,
         );
+
+        const channel = query.channel;
+        if (this.isSmsChannel(channel)) {
+          const getSmsHistory =
+            adapter && typeof (adapter as any).getSmsHistory === "function"
+              ? (adapter as any).getSmsHistory.bind(adapter)
+              : typeof (provider as any).getSmsHistory === "function"
+                ? (provider as any).getSmsHistory.bind(provider)
+                : undefined;
+
+          if (!getSmsHistory) {
+            throw new Error(
+              `Provider ${providerKey} does not support SMS history()`,
+            );
+          }
+
+          const payload = await getSmsHistory({
+            companyId: query.companyId,
+            startDate: query.startDate,
+            endDate: query.endDate,
+            requestNo: query.requestNo,
+            pageNum: query.page ?? 1,
+            pageSize: query.pageSize ?? pageSize,
+            phone: query.phone,
+          });
+
+          const rawList = Array.isArray((payload as any).list)
+            ? ((payload as any).list as unknown[])
+            : [];
+
+          const items = rawList.map((raw) => {
+            const record =
+              raw && typeof raw === "object"
+                ? (raw as Record<string, unknown>)
+                : {};
+            const messageId =
+              typeof record.requestNo === "string" ||
+              typeof record.requestNo === "number"
+                ? String(record.requestNo)
+                : typeof record.seqNo === "string" ||
+                    typeof record.seqNo === "number"
+                  ? String(record.seqNo)
+                  : "unknown";
+
+            const sentAt =
+              typeof record.sendDate === "string" && record.sendDate.length > 0
+                ? new Date(record.sendDate)
+                : undefined;
+
+            return {
+              providerId: providerKey,
+              channel,
+              messageId,
+              to: typeof record.phone === "string" ? record.phone : undefined,
+              from:
+                typeof record.callback === "string"
+                  ? record.callback
+                  : undefined,
+              status:
+                typeof record.sendStatus === "string"
+                  ? record.sendStatus
+                  : undefined,
+              statusCode:
+                typeof record.sendStatusCode === "string"
+                  ? record.sendStatusCode
+                  : undefined,
+              statusMessage:
+                typeof record.sendStatusMsg === "string"
+                  ? record.sendStatusMsg
+                  : undefined,
+              sentAt,
+              raw,
+            };
+          });
+
+          return {
+            providerId: providerKey,
+            channel,
+            totalCount:
+              typeof (payload as any).totalCount === "number"
+                ? (payload as any).totalCount
+                : items.length,
+            items,
+            raw: payload,
+          };
+        }
+
+        const getHistory =
+          adapter && typeof (adapter as any).getHistory === "function"
+            ? (adapter as any).getHistory.bind(adapter)
+            : typeof (provider as any).getHistory === "function"
+              ? (provider as any).getHistory.bind(provider)
+              : undefined;
+
+        if (!getHistory) {
+          throw new Error(`Provider ${providerKey} does not support history()`);
+        }
+
+        const raw = await getHistory(query);
+        return {
+          providerId: providerKey,
+          channel,
+          totalCount: Array.isArray(raw) ? raw.length : 0,
+          items: [],
+          raw,
+        };
       },
-      /** @deprecated Not yet implemented */
       cancelReservation: async (_messageId: string) => {
-        throw new Error(
-          "History operations not yet migrated to new provider interface",
-        );
+        throw new Error("cancelReservation is not implemented yet");
       },
     };
   }
@@ -576,5 +740,51 @@ export class AlimTalkPlatform implements KMsg {
     }
 
     return await provider.healthCheck();
+  }
+
+  private getProviderAdapter(provider: BaseProvider): unknown | null {
+    const anyProvider = provider as any;
+    if (anyProvider && typeof anyProvider.getAdapter === "function") {
+      return anyProvider.getAdapter();
+    }
+    return null;
+  }
+
+  private isSmsChannel(channel: MessageType | undefined): boolean {
+    return channel === "SMS" || channel === "LMS" || channel === "MMS";
+  }
+
+  private normalizeHistoryQuery(
+    queryOrPage: HistoryQuery | number,
+    pageSize: number,
+    filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+      channel?: HistoryQuery["channel"];
+    },
+  ): HistoryQuery {
+    if (typeof queryOrPage === "object" && queryOrPage !== null) {
+      return queryOrPage as HistoryQuery;
+    }
+
+    const channel = filters?.channel;
+    if (!channel) {
+      throw new Error("history.list requires filters.channel");
+    }
+
+    const startDate = filters.startDate;
+    const endDate = filters.endDate;
+    if (!startDate || !endDate) {
+      throw new Error("history.list requires filters.startDate and filters.endDate");
+    }
+
+    return {
+      channel,
+      startDate,
+      endDate,
+      page: queryOrPage,
+      pageSize,
+      phone: filters.phone,
+      requestNo: filters.requestNo,
+      companyId: filters.companyId,
+    };
   }
 }

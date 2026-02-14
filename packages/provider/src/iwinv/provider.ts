@@ -7,7 +7,13 @@ import {
   UniversalProvider,
 } from "@k-msg/core";
 import { IWINVAdapter } from "../adapters/iwinv.adapter";
-import type { IWINVConfig, IWINVIPRestrictionAlert } from "./types/iwinv";
+import type {
+  IWINVConfig,
+  IWINVIPRestrictionAlert,
+  IWINVSmsChargeResponse,
+  IWINVSmsHistoryItem,
+  IWINVSmsHistoryResponse,
+} from "./types/iwinv";
 
 const DEFAULT_IP_RETRY_COUNT = 2;
 const DEFAULT_IP_RETRY_DELAY_MS = 800;
@@ -20,6 +26,16 @@ type RequestRouteContext = {
 };
 
 type SmsV2MessageType = "SMS" | "LMS" | "MMS" | "GSMS";
+export type IWINVSmsHistoryParams = {
+  version?: string; // default: "1.0"
+  companyId?: string;
+  startDate: string | Date; // yyyy-MM-dd
+  endDate: string | Date; // yyyy-MM-dd
+  requestNo?: string;
+  pageNum?: number;
+  pageSize?: number; // max 1000
+  phone?: string;
+};
 
 export class IWINVProvider extends UniversalProvider {
   private static readonly directSmsTemplates = new Set([
@@ -80,6 +96,122 @@ export class IWINVProvider extends UniversalProvider {
       phoneNumber: params.phoneNumber,
       templateCode: params.templateCode,
     });
+  }
+
+  /**
+   * SMS v2: 잔액(충전금) 조회
+   * - URL: POST https://sms.bizservice.iwinv.kr/api/charge/
+   * - Header: secret: base64(SMS_API_KEY&SMS_AUTH_KEY)
+   * - Body: { "version": "1.0" }
+   */
+  async getSmsCharge(): Promise<number> {
+    const response = await this.requestSmsApi<IWINVSmsChargeResponse>(
+      "/api/charge/",
+      { version: "1.0" },
+    );
+
+    const rawCode =
+      (response as unknown as Record<string, unknown>).resultCode ??
+      (response as unknown as Record<string, unknown>).code ??
+      -1;
+    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
+    if (code !== 0) {
+      const message =
+        typeof (response as unknown as Record<string, unknown>).message ===
+          "string" &&
+        ((response as unknown as Record<string, unknown>).message as string)
+          .length > 0
+          ? ((response as unknown as Record<string, unknown>).message as string)
+          : "Failed to get SMS charge";
+      throw new Error(message);
+    }
+
+    return typeof (response as unknown as Record<string, unknown>).charge ===
+      "number"
+      ? ((response as unknown as Record<string, unknown>).charge as number)
+      : 0;
+  }
+
+  /**
+   * SMS v2: 전송 내역 조회
+   * - URL: POST https://sms.bizservice.iwinv.kr/api/history/
+   * - 기간은 90일 이내만 허용
+   */
+  async getSmsHistory(params: IWINVSmsHistoryParams): Promise<{
+    totalCount: number;
+    list: IWINVSmsHistoryItem[];
+    message: string;
+  }> {
+    const version = params.version ?? "1.0";
+    const startDate = this.formatSmsHistoryDate(params.startDate);
+    const endDate = this.formatSmsHistoryDate(params.endDate);
+    const companyId = params.companyId ?? this.iwinvConfig.smsCompanyId;
+    if (!companyId || companyId.length === 0) {
+      throw new Error(
+        "companyId is required for SMS history. Pass { companyId } or set smsCompanyId in config.",
+      );
+    }
+
+    this.assertSmsHistoryWindow(startDate, endDate);
+
+    const payload: Record<string, unknown> = {
+      version,
+      companyid: companyId,
+      startDate,
+      endDate,
+    };
+
+    if (typeof params.requestNo === "string" && params.requestNo.length > 0) {
+      payload.requestNo = params.requestNo;
+    }
+    if (typeof params.pageNum === "number") {
+      payload.pageNum = params.pageNum;
+    }
+    if (typeof params.pageSize === "number") {
+      payload.pageSize = Math.min(Math.max(params.pageSize, 1), 1000);
+    }
+    if (typeof params.phone === "string" && params.phone.length > 0) {
+      payload.phone = params.phone;
+    }
+
+    const response = await this.requestSmsApi<IWINVSmsHistoryResponse>(
+      "/api/history/",
+      payload,
+    );
+
+    const rawCode =
+      (response as unknown as Record<string, unknown>).resultCode ??
+      (response as unknown as Record<string, unknown>).code ??
+      -1;
+    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
+    const message =
+      typeof (response as unknown as Record<string, unknown>).message ===
+        "string" &&
+      ((response as unknown as Record<string, unknown>).message as string)
+        .length > 0
+        ? ((response as unknown as Record<string, unknown>).message as string)
+        : code === 0
+          ? "데이터가 조회되었습니다."
+          : "Failed to get SMS history";
+
+    if (code !== 0) {
+      throw new Error(message);
+    }
+
+    return {
+      totalCount:
+        typeof (response as unknown as Record<string, unknown>).totalCount ===
+          "number"
+          ? ((response as unknown as Record<string, unknown>).totalCount as number)
+          : 0,
+      list: Array.isArray(
+        (response as unknown as Record<string, unknown>).list,
+      )
+        ? (((response as unknown as Record<string, unknown>).list ??
+            []) as IWINVSmsHistoryItem[])
+        : [],
+      message,
+    };
   }
 
   private isStandardRequest(value: unknown): value is StandardRequest {
@@ -203,6 +335,90 @@ export class IWINVProvider extends UniversalProvider {
   private formatSmsReserveDate(date: Date): string {
     const pad = (value: number) => value.toString().padStart(2, "0");
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  private formatSmsHistoryDate(value: string | Date): string {
+    if (typeof value === "string") {
+      // The API expects yyyy-MM-dd. If caller provides longer strings, keep the first 10 chars.
+      return value.length >= 10 ? value.slice(0, 10) : value;
+    }
+    const pad = (v: number) => v.toString().padStart(2, "0");
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+  }
+
+  private assertSmsHistoryWindow(startDate: string, endDate: string) {
+    const start = new Date(`${startDate}T00:00:00+09:00`).getTime();
+    const end = new Date(`${endDate}T00:00:00+09:00`).getTime();
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      throw new Error("Invalid startDate/endDate (expected yyyy-MM-dd)");
+    }
+    if (end < start) {
+      throw new Error("endDate must be greater than or equal to startDate");
+    }
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    if (end - start > ninetyDaysMs) {
+      throw new Error("조회 기간은 90일 이내만 가능합니다.");
+    }
+  }
+
+  private async requestSmsApi<T>(
+    path: string,
+    payload: Record<string, unknown>,
+  ): Promise<T> {
+    const url = `${this.resolveSmsBaseUrl()}${path}`;
+    const secretHeader = this.buildSmsSecretHeader();
+    if (!secretHeader) {
+      throw new Error(
+        "SMS 인증키가 없습니다. IWINV_SMS_AUTH_KEY 또는 IWINV_SMS_API_KEY를 설정하세요.",
+      );
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json;charset=UTF-8",
+      secret: secretHeader,
+    };
+
+    if (
+      typeof this.iwinvConfig.xForwardedFor === "string" &&
+      this.iwinvConfig.xForwardedFor.length > 0
+    ) {
+      headers["X-Forwarded-For"] = this.iwinvConfig.xForwardedFor;
+    }
+
+    const extraHeaders = this.iwinvConfig.extraHeaders;
+    const mergedHeaders =
+      extraHeaders && typeof extraHeaders === "object"
+        ? { ...headers, ...extraHeaders }
+        : headers;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: mergedHeaders,
+      body: JSON.stringify(payload),
+    });
+
+    const responseText = await response.text();
+    let parsed: unknown;
+    try {
+      parsed = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      parsed = responseText;
+    }
+
+    if (!response.ok) {
+      const message =
+        typeof parsed === "object" && parsed !== null && "message" in parsed
+          ? String((parsed as Record<string, unknown>).message)
+          : `HTTP ${response.status}: ${response.statusText}`;
+      throw new Error(message);
+    }
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as T;
+    }
+
+    // Some endpoints may return scalar codes.
+    return { resultCode: parsed } as T;
   }
 
   private normalizePhoneNumber(value: string): string {
@@ -719,6 +935,7 @@ export const createDefaultIWINVProvider = () => {
     apiKey: process.env.IWINV_API_KEY || "",
     smsApiKey: process.env.IWINV_SMS_API_KEY,
     smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
+    smsCompanyId: process.env.IWINV_SMS_COMPANY_ID,
     baseUrl:
       process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
     smsBaseUrl: process.env.IWINV_SMS_BASE_URL,
