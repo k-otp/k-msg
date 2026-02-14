@@ -1,5 +1,11 @@
 # @k-msg/messaging
 
+## 0.6.0 — 2026-02-14
+
+### Patch changes
+
+- Updated dependencies: core@0.6.0, provider@0.6.0, template@0.6.0
+
 ## 0.5.0 — 2026-02-14
 
 ### Minor changes
