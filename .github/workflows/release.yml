@@ -31,7 +31,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
-          cache: true
 
       - name: Skip (missing NPM_TOKEN)
         if: ${{ env.HAS_NPM_TOKEN != 'true' }}
