@@ -265,9 +265,9 @@ for dir in "${PACKAGE_DIRS[@]}"; do
   validate_tarball "$TARBALL_PATH" "$NAME" "$VERSION" "$RELEASE_VERSION"
 
   if [[ "$NAME" == @* ]]; then
-    npm publish "$TARBALL_PATH" --access public
+    bunx npm publish "$TARBALL_PATH" --access public --provenance
   else
-    npm publish "$TARBALL_PATH"
+    bunx npm publish "$TARBALL_PATH" --provenance
   fi
 
   rm -f "$TARBALL_PATH"
