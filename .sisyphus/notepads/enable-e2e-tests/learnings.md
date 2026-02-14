@@ -1,6 +1,0 @@
-- Successfully enabled E2E tests for CLI by implementing a mock provider mode.
-- Used  environment variable to switch to  in the CLI.
-- Verified both subprocess (spawn) and in-process integration tests.
-- Successfully enabled E2E tests for CLI by implementing a mock provider mode.
-- Used K_MSG_MOCK=true environment variable to switch to MockProvider in the CLI.
-- Verified both subprocess (spawn) and in-process integration tests.
