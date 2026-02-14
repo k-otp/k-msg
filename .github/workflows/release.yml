@@ -55,6 +55,7 @@ jobs:
           pr-title: "chore(release): publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Sampo may update versions/changelogs in the working tree while preparing the release PR.
       # To ensure publishing uses the exact merged `main` commit, we re-checkout at `github.sha`
