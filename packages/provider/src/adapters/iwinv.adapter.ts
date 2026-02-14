@@ -3,6 +3,7 @@
  * IWINV API를 표준 인터페이스로 변환하는 어댑터
  */
 
+import { Buffer } from "node:buffer";
 import {
   type AdapterFactory,
   BaseProviderAdapter,
@@ -21,6 +22,9 @@ import {
   type Template,
   type TemplateProvider,
 } from "@k-msg/core";
+import type { IWINVConfig } from "../iwinv/types/iwinv";
+
+export type { IWINVConfig } from "../iwinv/types/iwinv";
 
 // IWINV 특화 타입들
 export interface IWINVError {
@@ -104,12 +108,6 @@ export function isIWINVBalanceResponse(
     "code" in response &&
     "charge" in response
   );
-}
-
-export interface IWINVConfig extends ProviderConfig {
-  userId?: string;
-  senderNumber?: string;
-  sendEndpoint?: string;
 }
 
 /**
@@ -342,9 +340,25 @@ export class IWINVAdapter
   }
 
   getAuthHeaders(): Record<string, string> {
+    // IWINV AlimTalk API expects AUTH: base64(API_KEY)
+    const auth = Buffer.from(this.config.apiKey, "utf8").toString("base64");
+    const base: Record<string, string> = {
+      AUTH: auth,
+      "Content-Type": "application/json;charset=UTF-8",
+    };
+
+    const xForwardedFor = (this.config as IWINVConfig).xForwardedFor;
+    if (typeof xForwardedFor === "string" && xForwardedFor.length > 0) {
+      base["X-Forwarded-For"] = xForwardedFor;
+    }
+
+    const extraHeaders = (this.config as IWINVConfig).extraHeaders;
+    if (extraHeaders && typeof extraHeaders === "object") {
+      return { ...base, ...extraHeaders };
+    }
+
     return {
-      AUTH: btoa(this.config.apiKey),
-      "Content-Type": "application/json",
+      ...base,
     };
   }
 
@@ -719,7 +733,7 @@ export class IWINVAdapter
       const url = `${this.getBaseUrl()}${this.getEndpoint("cancel")}`;
       const response = await fetch(url, {
         ...this.getRequestConfig(),
-        body: JSON.stringify({ seqNo: parseInt(messageId) }),
+        body: JSON.stringify({ seqNo: parseInt(messageId, 10) }),
       });
 
       if (!response.ok) {
