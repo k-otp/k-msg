@@ -4,6 +4,7 @@ import {
   KMsgErrorCode,
   ok,
   type MessageButton,
+  type MessageBinaryInput,
   type MessageType,
   type MessageVariables,
   type Provider,
@@ -266,12 +267,39 @@ export class SolapiProvider implements Provider {
     return out.length > 0 ? out : undefined;
   }
 
+  private resolveImageRef(options: { imageUrl?: string; media?: { image?: MessageBinaryInput } }) {
+    const imageUrl =
+      typeof options.imageUrl === "string" && options.imageUrl.trim().length > 0
+        ? options.imageUrl.trim()
+        : undefined;
+    if (imageUrl) return imageUrl;
+
+    const image = options.media?.image;
+    if (!image) return undefined;
+
+    if ("ref" in image) {
+      const ref = image.ref.trim();
+      return ref.length > 0 ? ref : undefined;
+    }
+
+    // SOLAPI SDK's `uploadFile()` accepts a file path / URL string.
+    // If a caller provides bytes/blob, they must pre-host the file (or provide a local path).
+    throw new KMsgError(
+      KMsgErrorCode.INVALID_REQUEST,
+      "SOLAPI image upload requires `options.imageUrl` or `options.media.image.ref` (url/path).",
+      { providerId: this.id },
+    );
+  }
+
   private toSolapiMessageType(options: SendOptions): SolapiMessageType {
     switch (options.type) {
       case "ALIMTALK":
         return "ATA";
       case "FRIENDTALK":
-        return options.imageUrl ? "CTI" : "CTA";
+        return (typeof options.imageUrl === "string" && options.imageUrl.trim().length > 0) ||
+          Boolean(options.media?.image)
+          ? "CTI"
+          : "CTA";
       default:
         return options.type as unknown as SolapiMessageType;
     }
@@ -340,6 +368,10 @@ export class SolapiProvider implements Provider {
     }
 
     if (type === "SMS" || type === "LMS" || type === "MMS") {
+      const smsOptions = options as Extract<
+        SendOptions,
+        { type: "SMS" | "LMS" | "MMS" }
+      >;
       const text = (options as any).text as string | undefined;
       if (!text || text.length === 0) {
         throw new KMsgError(
@@ -355,11 +387,26 @@ export class SolapiProvider implements Provider {
         base.subject = subject;
       }
 
-      if (type === "MMS" && typeof (options as any).imageUrl === "string") {
-        const upload = await this.client.uploadFile((options as any).imageUrl, "MMS");
+      if (type === "MMS") {
+        const imageRef = this.resolveImageRef(smsOptions);
+        if (!imageRef) {
+          throw new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            "image is required for MMS (options.imageUrl or options.media.image.ref)",
+            { providerId: this.id },
+          );
+        }
+
+        const upload = await this.client.uploadFile(imageRef, "MMS");
         const fileId = (upload as any)?.fileId;
         if (typeof fileId === "string" && fileId.length > 0) {
           base.imageId = fileId;
+        } else {
+          throw new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "Failed to upload MMS image",
+            { providerId: this.id },
+          );
         }
       }
 
@@ -440,11 +487,12 @@ export class SolapiProvider implements Provider {
 
       let imageId: string | undefined;
       if (type === "CTI") {
-        const imageUrl = (options as any).imageUrl as string | undefined;
-        if (!imageUrl) {
+        const friendTalkOptions = options as Extract<SendOptions, { type: "FRIENDTALK" }>;
+        const imageRef = this.resolveImageRef(friendTalkOptions);
+        if (!imageRef) {
           throw new KMsgError(
             KMsgErrorCode.INVALID_REQUEST,
-            "imageUrl is required for CTI (friendtalk image)",
+            "image is required for CTI (friendtalk image) (options.imageUrl or options.media.image.ref)",
             { providerId: this.id },
           );
         }
@@ -457,7 +505,7 @@ export class SolapiProvider implements Provider {
         }
 
         const upload = await this.client.uploadFile(
-          imageUrl,
+          imageRef,
           "KAKAO",
           undefined,
           imageLink,
@@ -689,11 +737,21 @@ export class SolapiProvider implements Provider {
       return normalized;
     };
 
-    if (type === "RCS_MMS" && typeof (options as any).imageUrl === "string") {
-      const upload = await this.client.uploadFile((options as any).imageUrl, "RCS");
-      const fileId = (upload as any)?.fileId;
-      if (typeof fileId === "string" && fileId.length > 0) {
-        rcsPayload.additionalBody = buildAdditionalBody(fileId);
+    if (type === "RCS_MMS") {
+      const rcsOptions = options as Extract<
+        SendOptions,
+        { type: "RCS_SMS" | "RCS_LMS" | "RCS_MMS" }
+      >;
+
+      const imageRef = this.resolveImageRef(rcsOptions);
+      if (imageRef) {
+        const upload = await this.client.uploadFile(imageRef, "RCS");
+        const fileId = (upload as any)?.fileId;
+        if (typeof fileId === "string" && fileId.length > 0) {
+          rcsPayload.additionalBody = buildAdditionalBody(fileId);
+        } else if (additionalBody) {
+          rcsPayload.additionalBody = buildAdditionalBody(undefined);
+        }
       } else if (additionalBody) {
         rcsPayload.additionalBody = buildAdditionalBody(undefined);
       }
