@@ -33,6 +33,7 @@ PACKAGE_DIRS=(
 
 PUBLISHED_ANY="false"
 RELEASE_VERSION=""
+BUILT="false"
 
 registry_has_version() {
   local name="$1"
@@ -75,6 +76,12 @@ for dir in "${PACKAGE_DIRS[@]}"; do
 
   echo "Publishing: ${NAME}@${VERSION}"
   PUBLISHED_ANY="true"
+
+  if [[ "$BUILT" != "true" ]]; then
+    echo "Building workspace packages (required before packing)..."
+    (cd "$ROOT_DIR" && bun run build:all)
+    BUILT="true"
+  fi
 
   TARBALL_PATH="$(
     cd "$PKG_DIR"
