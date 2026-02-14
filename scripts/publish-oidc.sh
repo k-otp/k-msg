@@ -78,6 +78,10 @@ for dir in "${PACKAGE_DIRS[@]}"; do
   PUBLISHED_ANY="true"
 
   if [[ "$BUILT" != "true" ]]; then
+    echo "Refreshing bun.lock (workspace version metadata for pack/publish)..."
+    rm -f "${ROOT_DIR}/bun.lock"
+    (cd "$ROOT_DIR" && bun install --save-text-lockfile)
+
     echo "Building workspace packages (required before packing)..."
     (cd "$ROOT_DIR" && bun run build:all)
     BUILT="true"
