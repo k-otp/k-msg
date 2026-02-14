@@ -1,5 +1,15 @@
 # @k-msg/channel
 
+## 0.5.0 — 2026-02-14
+
+### Minor changes
+
+- [e9e79d8](https://github.com/k-otp/k-msg/commit/e9e79d84c1cbeb34c60f6f395d8e1740d7c8ccaa) Unify the public API around `new KMsg({ providers })` + `send({ type, ... })`.
+  
+  - Remove legacy Platform/UniversalProvider/StandardRequest public APIs
+  - Rename `templateId` -> `templateCode`, and message discriminant to `type`
+  - Refactor built-in providers to the unified `SendOptions + Result` interface — Thanks @imjlk!
+
 ## 0.4.0 — 2026-02-14
 
 ### Minor changes
