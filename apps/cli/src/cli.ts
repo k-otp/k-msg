@@ -513,10 +513,11 @@ function dedupePreserveOrder(values: string[]): string[] {
   return Array.from(new Set(values));
 }
 
-function parseVariables(raw?: string): Record<string, any> {
+function parseVariables(raw?: string): Record<string, unknown> {
   if (!raw) return {};
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as unknown;
+    return isRecord(parsed) ? parsed : {};
   } catch {
     throw new Error("Invalid JSON format for variables");
   }
@@ -1017,9 +1018,21 @@ program.exitOverride();
 
 try {
   await program.parseAsync(process.argv);
-} catch (error: any) {
-  if (error.code !== "commander.help" && error.code !== "commander.version") {
-    console.error(chalk.red("❌ Command failed:"), error.message);
+} catch (error: unknown) {
+  const record = isRecord(error) ? error : null;
+  const code = record && typeof record.code === "string" ? record.code : "";
+  const message =
+    record && typeof record.message === "string"
+      ? record.message
+      : error instanceof Error
+        ? error.message
+        : String(error);
+
+  if (code !== "commander.help" && code !== "commander.version") {
+    console.error(chalk.red("❌ Command failed:"), message);
     process.exit(1);
   }
 }
+
+// Ensure the CLI exits even if a dependency accidentally keeps handles alive.
+process.exit(process.exitCode ?? 0);
