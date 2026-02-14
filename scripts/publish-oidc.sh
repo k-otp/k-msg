@@ -301,3 +301,19 @@ for dir in "${PACKAGE_DIRS[@]}"; do
 done
 
 git push origin --tags
+
+if [[ -n "$RELEASE_VERSION" ]]; then
+  if command -v gh >/dev/null 2>&1; then
+    # GH_TOKEN is preferred by gh; fall back to GITHUB_TOKEN if provided.
+    export GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+    if [[ -n "${GH_TOKEN:-}" ]]; then
+      if ! gh release view "v${RELEASE_VERSION}" >/dev/null 2>&1; then
+        gh release create "v${RELEASE_VERSION}" --generate-notes
+      fi
+    else
+      echo "GH_TOKEN/GITHUB_TOKEN not set; skipping GitHub Release creation." >&2
+    fi
+  else
+    echo "gh CLI not found; skipping GitHub Release creation." >&2
+  fi
+fi

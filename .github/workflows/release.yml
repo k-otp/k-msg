@@ -48,8 +48,8 @@ jobs:
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
-          command: release
-          create-github-release: true
+          command: auto
+          create-github-release: false
           base-branch: main
           pr-branch: sampo/release
           pr-title: "chore(release): publish"
