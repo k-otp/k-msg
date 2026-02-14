@@ -36,11 +36,17 @@ jobs:
         if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: |
           set -euo pipefail
-          # Ensure Bun's publish step can authenticate. Some tools override the
-          # npm user config path. Never write an auth token into the repo
-          # workspace, because Sampo can commit untracked files into release PRs.
+          # Ensure Bun's publish step can authenticate.
+          #
+          # Important: Sampo may run `bun publish` without inheriting env vars
+          # like NPM_CONFIG_USERCONFIG / NPM_CONFIG_TOKEN. Writing auth into the
+          # user's home .npmrc makes Bun pick it up reliably, while still
+          # keeping secrets out of the repo workspace (so they can't be
+          # accidentally committed into release PRs).
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$RUNNER_TEMP/.npmrc"
           chmod 0600 "$RUNNER_TEMP/.npmrc"
+          cp "$RUNNER_TEMP/.npmrc" "$HOME/.npmrc"
+          chmod 0600 "$HOME/.npmrc"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
