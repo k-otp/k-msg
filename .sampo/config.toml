@@ -6,7 +6,7 @@ default_branch = "main"
 short_tags = "k-msg"
 
 [github]
-repository = "imjlk/k-msg"
+repository = "k-otp/k-msg"
 
 [packages]
 # Ignore any package that can't be published (e.g. "private": true).
