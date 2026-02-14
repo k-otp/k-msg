@@ -1,5 +1,17 @@
 # k-msg
 
+## 0.6.0 — 2026-02-14
+
+### Minor changes
+
+- [9a977dd](https://github.com/k-otp/k-msg/commit/9a977ddcebd5cf5fb1d20aaddec9d4cfae03650e) Add extensible `media.image` binary inputs to core send options and implement MMS support:
+  - IWINV MMS v2 via multipart/form-data with `secret` header
+  - SOLAPI accepts `media.image.ref` as an alias for `imageUrl` (MMS/FriendTalk/RCS_MMS) — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: analytics@0.6.0, channel@0.6.0, core@0.6.0, messaging@0.6.0, provider@0.6.0, template@0.6.0, webhook@0.6.0
+
 ## 0.5.0 — 2026-02-14
 
 ### Minor changes
