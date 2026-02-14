@@ -1,5 +1,12 @@
 # @k-msg/analytics
 
+## 0.1.5 — 2026-02-14
+
+### Patch changes
+
+- [92fe876](https://github.com/k-otp/k-msg/commit/92fe8769bbb6cb73f392498b71c30a882574a5c5) fix(release): republish to correct workspace dependency versions — Thanks @imjlk!
+- Updated dependencies: messaging@0.1.5
+
 ## 0.1.4 — 2026-02-14
 
 ### Patch changes
