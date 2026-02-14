@@ -31,4 +31,3 @@ export interface SolapiConfig extends ProviderConfig {
    */
   defaultCountry?: string;
 }
-

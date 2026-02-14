@@ -1,5 +1,12 @@
-import { type StandardRequest, UniversalProvider } from "@k-msg/core";
-import { SolapiAdapter, type SolapiSdkClient } from "../adapters/solapi.adapter";
+import {
+  type StandardRequest,
+  type StandardResult,
+  UniversalProvider,
+} from "@k-msg/core";
+import {
+  SolapiAdapter,
+  type SolapiSdkClient,
+} from "../adapters/solapi.adapter";
 import type { SolapiConfig } from "./types/solapi";
 
 export class SolapiProvider extends UniversalProvider {
@@ -12,7 +19,9 @@ export class SolapiProvider extends UniversalProvider {
     });
   }
 
-  async send(params: StandardRequest | any): Promise<any> {
+  async send(params: StandardRequest): Promise<StandardResult>;
+  async send(params: unknown): Promise<unknown>;
+  async send(params: unknown): Promise<unknown> {
     const adapter = this.getAdapter() as SolapiAdapter;
 
     if (isStandardRequest(params)) {
@@ -67,6 +76,7 @@ export const createDefaultSolapiProvider = () => {
   return createSolapiProvider(config);
 };
 
+// biome-ignore lint/complexity/noStaticOnlyClass: kept for back-compat with existing imports
 export class SolapiProviderFactory {
   static create(config: SolapiConfig): SolapiProvider {
     return new SolapiProvider(config);
@@ -78,4 +88,3 @@ export class SolapiProviderFactory {
 }
 
 export function initializeSolapi(): void {}
-

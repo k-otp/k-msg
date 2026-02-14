@@ -1,19 +1,38 @@
 import { describe, expect, test } from "bun:test";
 import type { StandardRequest } from "@k-msg/core";
+import type {
+  FileType,
+  GetMessagesRequest,
+  RequestSendOneMessageSchema,
+} from "solapi";
 import { SolapiAdapter } from "../adapters/solapi.adapter";
 import { SolapiProvider } from "./provider";
 import type { SolapiConfig } from "./types/solapi";
 
 function createStubClient() {
-  const calls: any = {
+  type SendOneCall = { message: RequestSendOneMessageSchema; appId?: string };
+  type GetMessagesCall = Readonly<GetMessagesRequest> | undefined;
+  type UploadFileCall = {
+    filePath: string;
+    fileType: FileType;
+    name?: string;
+    link?: string;
+  };
+
+  const calls: {
+    sendOne: SendOneCall[];
+    getBalance: number;
+    getMessages: GetMessagesCall[];
+    uploadFile: UploadFileCall[];
+  } = {
     sendOne: [],
     getBalance: 0,
     getMessages: [],
     uploadFile: [],
   };
 
-  const client: any = {
-    sendOne: async (message: any, appId?: string) => {
+  const client = {
+    sendOne: async (message: RequestSendOneMessageSchema, appId?: string) => {
       calls.sendOne.push({ message, appId });
       return {
         groupId: "group_1",
@@ -21,7 +40,7 @@ function createStubClient() {
         from: message.from,
         type: message.type,
         statusMessage: "accepted",
-        country: message.country ?? "82",
+        country: "82",
         messageId: "msg_1",
         statusCode: "2000",
         accountId: "acc_1",
@@ -31,7 +50,7 @@ function createStubClient() {
       calls.getBalance += 1;
       return { balance: 1234, point: 0 };
     },
-    getMessages: async (query?: any) => {
+    getMessages: async (query?: Readonly<GetMessagesRequest>) => {
       calls.getMessages.push(query);
       return {
         startKey: query?.startKey ?? null,
@@ -41,7 +60,7 @@ function createStubClient() {
           a: {
             messageId: "m1",
             to: query?.to ?? "01012345678",
-            from: query?.from ?? "01000000000",
+            from: "01000000000",
             type: query?.type ?? "SMS",
             statusCode: "2000",
             statusMessage: "ok",
@@ -50,7 +69,12 @@ function createStubClient() {
         },
       };
     },
-    uploadFile: async (filePath: string, fileType: string, name?: string, link?: string) => {
+    uploadFile: async (
+      filePath: string,
+      fileType: FileType,
+      name?: string,
+      link?: string,
+    ) => {
       calls.uploadFile.push({ filePath, fileType, name, link });
       return { fileId: `${fileType}_file_1` };
     },
@@ -119,7 +143,9 @@ describe("SolapiProvider/Adapter (UniversalProvider-based)", () => {
     expect(calls.sendOne[0]?.message?.type).toBe("ATA");
     expect(calls.sendOne[0]?.message?.kakaoOptions?.pfId).toBe("pf_1");
     expect(calls.sendOne[0]?.message?.kakaoOptions?.templateId).toBe("TPL_1");
-    expect(calls.sendOne[0]?.message?.kakaoOptions?.variables?.code).toBe("1234");
+    expect(calls.sendOne[0]?.message?.kakaoOptions?.variables?.code).toBe(
+      "1234",
+    );
   });
 
   test("maps FRIENDTALK image to CTI and uploads KAKAO file with link", async () => {
@@ -142,9 +168,7 @@ describe("SolapiProvider/Adapter (UniversalProvider-based)", () => {
       variables: { message: "hi" },
       text: "hi",
       imageUrl: "https://example.com/a.png",
-      buttons: [
-        { name: "go", type: "WL", urlMobile: "https://m.example.com" },
-      ],
+      buttons: [{ name: "go", type: "WL", urlMobile: "https://m.example.com" }],
       options: { kakaoOptions: { pfId: "pf_1" } },
     };
 
@@ -155,7 +179,9 @@ describe("SolapiProvider/Adapter (UniversalProvider-based)", () => {
     expect(calls.uploadFile[0]?.fileType).toBe("KAKAO");
     expect(calls.uploadFile[0]?.link).toBe("https://m.example.com");
     expect(calls.sendOne[0]?.message?.type).toBe("CTI");
-    expect(calls.sendOne[0]?.message?.kakaoOptions?.imageId).toBe("KAKAO_file_1");
+    expect(calls.sendOne[0]?.message?.kakaoOptions?.imageId).toBe(
+      "KAKAO_file_1",
+    );
   });
 
   test("maps RCS_SMS to RCS with brandId", async () => {
@@ -234,4 +260,3 @@ describe("SolapiProvider/Adapter (UniversalProvider-based)", () => {
     expect(result.list).toHaveLength(1);
   });
 });
-

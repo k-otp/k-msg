@@ -1,11 +1,14 @@
+import type {
+  HistoryQuery,
+  StandardError,
+  StandardRequest,
+  StandardResult,
+} from "@k-msg/core";
 import {
   BaseProviderAdapter,
   StandardErrorCode,
-  type StandardRequest,
-  type StandardResult,
   StandardStatus,
 } from "@k-msg/core";
-import type { HistoryQuery, StandardError } from "@k-msg/core";
 import {
   ApiKeyError,
   BadRequestError,
@@ -22,19 +25,29 @@ export type SolapiSdkClient = Pick<
   "sendOne" | "getMessages" | "getBalance" | "uploadFile"
 >;
 
-type SolapiMessageType =
-  | "SMS"
-  | "LMS"
-  | "MMS"
-  | "ATA"
-  | "CTA"
-  | "CTI"
-  | "RCS_SMS"
-  | "RCS_LMS"
-  | "RCS_MMS"
-  | "RCS_TPL"
-  | "RCS_ITPL"
-  | "RCS_LTPL";
+type SolapiSendOneMessage = Parameters<SolapiSdkClient["sendOne"]>[0];
+type SolapiMessageType = Exclude<SolapiSendOneMessage["type"], undefined>;
+type SolapiGetMessagesRequest = Exclude<
+  Parameters<SolapiSdkClient["getMessages"]>[0],
+  undefined
+>;
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+type SolapiKakaoButton = {
+  buttonName: string;
+  buttonType: "WL";
+  linkMo: string;
+  linkPc?: string;
+};
+
+type SolapiRcsButton = {
+  buttonName: string;
+  buttonType: "WL";
+  link: string;
+};
 
 export class SolapiAdapter extends BaseProviderAdapter {
   private static readonly directTemplates = new Set([
@@ -66,7 +79,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
       client ?? new SolapiMessageService(config.apiKey, config.apiSecret);
   }
 
-  adaptRequest(request: StandardRequest): any {
+  adaptRequest(request: StandardRequest): Record<string, unknown> {
     // This adapter uses the official SOLAPI SDK in sendStandard().
     // Keep adaptRequest deterministic for debugging purposes.
     return {
@@ -81,19 +94,18 @@ export class SolapiAdapter extends BaseProviderAdapter {
     };
   }
 
-  adaptResponse(response: any): StandardResult {
+  adaptResponse(response: unknown): StandardResult {
+    const record = isObjectRecord(response) ? response : {};
     const messageId =
-      response && typeof response.messageId === "string"
-        ? response.messageId
+      typeof record.messageId === "string"
+        ? record.messageId
         : this.generateMessageId();
 
     const statusCode =
-      response && typeof response.statusCode === "string"
-        ? response.statusCode
-        : undefined;
+      typeof record.statusCode === "string" ? record.statusCode : undefined;
     const statusMessage =
-      response && typeof response.statusMessage === "string"
-        ? response.statusMessage
+      typeof record.statusMessage === "string"
+        ? record.statusMessage
         : undefined;
 
     return {
@@ -101,17 +113,13 @@ export class SolapiAdapter extends BaseProviderAdapter {
       status: StandardStatus.SENT,
       provider: "solapi",
       timestamp: new Date(),
-      phoneNumber: response && typeof response.to === "string" ? response.to : "",
+      phoneNumber: typeof record.to === "string" ? record.to : "",
       metadata: {
         groupId:
-          response && typeof response.groupId === "string"
-            ? response.groupId
-            : undefined,
+          typeof record.groupId === "string" ? record.groupId : undefined,
         accountId:
-          response && typeof response.accountId === "string"
-            ? response.accountId
-            : undefined,
-        type: response && typeof response.type === "string" ? response.type : undefined,
+          typeof record.accountId === "string" ? record.accountId : undefined,
+        type: typeof record.type === "string" ? record.type : undefined,
         statusCode,
         statusMessage,
       },
@@ -119,6 +127,8 @@ export class SolapiAdapter extends BaseProviderAdapter {
   }
 
   mapError(error: unknown): StandardError {
+    const record = isObjectRecord(error) ? error : {};
+
     if (error instanceof ApiKeyError) {
       return {
         code: StandardErrorCode.AUTHENTICATION_FAILED,
@@ -133,28 +143,32 @@ export class SolapiAdapter extends BaseProviderAdapter {
         message: error.message,
         retryable: false,
         details: {
-          validationErrors: (error as any).validationErrors,
+          validationErrors: record.validationErrors,
         },
       };
     }
 
     if (error instanceof NetworkError) {
+      const retryable =
+        typeof record.isRetryable === "boolean" ? record.isRetryable : true;
+      const url = typeof record.url === "string" ? record.url : undefined;
+      const method =
+        typeof record.method === "string" ? record.method : undefined;
+
       return {
         code: StandardErrorCode.NETWORK_ERROR,
         message: error.message,
-        retryable:
-          typeof (error as any).isRetryable === "boolean"
-            ? Boolean((error as any).isRetryable)
-            : true,
+        retryable,
         details: {
-          url: (error as any).url,
-          method: (error as any).method,
+          url,
+          method,
         },
       };
     }
 
     if (error instanceof ClientError) {
-      const httpStatus = typeof (error as any).httpStatus === "number" ? (error as any).httpStatus : undefined;
+      const httpStatus =
+        typeof record.httpStatus === "number" ? record.httpStatus : undefined;
       const asInvalidRequest =
         typeof httpStatus === "number" && httpStatus >= 400 && httpStatus < 500;
 
@@ -166,9 +180,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
         retryable: !asInvalidRequest,
         details: {
           httpStatus,
-          errorCode: (error as any).errorCode,
-          errorMessage: (error as any).errorMessage,
-          url: (error as any).url,
+          errorCode: record.errorCode,
+          errorMessage: record.errorMessage,
+          url: record.url,
         },
       };
     }
@@ -179,7 +193,10 @@ export class SolapiAdapter extends BaseProviderAdapter {
         message: error.message,
         retryable: true,
         details: {
-          httpStatus: (error as any).httpStatus,
+          httpStatus:
+            typeof record.httpStatus === "number"
+              ? record.httpStatus
+              : undefined,
         },
       };
     }
@@ -190,8 +207,8 @@ export class SolapiAdapter extends BaseProviderAdapter {
         message: error.message,
         retryable: false,
         details: {
-          errorCode: (error as any).errorCode,
-          errorMessage: (error as any).errorMessage,
+          errorCode: record.errorCode,
+          errorMessage: record.errorMessage,
         },
       };
     }
@@ -221,8 +238,11 @@ export class SolapiAdapter extends BaseProviderAdapter {
   async sendStandard(request: StandardRequest): Promise<StandardResult> {
     try {
       const message = await this.buildSolapiSendOneMessage(request);
-      const response = await this.client.sendOne(message as any, this.solapiConfig.appId);
-      const result = this.adaptResponse(response as any);
+      const response = await this.client.sendOne(
+        message,
+        this.solapiConfig.appId,
+      );
+      const result = this.adaptResponse(response);
       result.phoneNumber = request.phoneNumber;
       return result;
     } catch (error) {
@@ -240,8 +260,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
   async getSmsCharge(): Promise<number> {
     try {
       const response = await this.client.getBalance();
-      const balance = (response as any)?.balance;
-      return typeof balance === "number" ? balance : Number(balance) || 0;
+      return response.balance;
     } catch (error) {
       this.log("Failed to get SOLAPI balance", error);
       return 0;
@@ -288,14 +307,21 @@ export class SolapiAdapter extends BaseProviderAdapter {
       baseQuery.type = type;
     }
 
-    let startKey = typeof params.startKey === "string" ? params.startKey : undefined;
+    let startKey =
+      typeof params.startKey === "string" ? params.startKey : undefined;
 
-    const pageNum = typeof params.pageNum === "number" && params.pageNum > 0 ? Math.floor(params.pageNum) : 1;
+    const pageNum =
+      typeof params.pageNum === "number" && params.pageNum > 0
+        ? Math.floor(params.pageNum)
+        : 1;
     if (!startKey && pageNum > 1) {
       // Cursor pagination: walk forward to reach the requested page.
       for (let i = 1; i < pageNum; i++) {
-        const page = await this.client.getMessages({ ...baseQuery, startKey } as any);
-        const nextKey = (page as any)?.nextKey;
+        const page = await this.client.getMessages({
+          ...baseQuery,
+          startKey,
+        } as unknown as SolapiGetMessagesRequest);
+        const nextKey = page.nextKey;
         if (typeof nextKey !== "string" || nextKey.length === 0) {
           startKey = undefined;
           break;
@@ -304,20 +330,12 @@ export class SolapiAdapter extends BaseProviderAdapter {
       }
     }
 
-    const response = await this.client.getMessages({ ...baseQuery, startKey } as any);
-    const messageList =
-      response && typeof response === "object" && (response as any).messageList
-        ? (response as any).messageList
-        : {};
-
-    const list = messageList && typeof messageList === "object" && !Array.isArray(messageList)
-      ? Object.values(messageList as Record<string, unknown>)
-      : [];
-
-    const nextKey =
-      response && typeof response === "object" && "nextKey" in (response as any)
-        ? ((response as any).nextKey as string | null | undefined)
-        : undefined;
+    const response = await this.client.getMessages({
+      ...baseQuery,
+      startKey,
+    } as unknown as SolapiGetMessagesRequest);
+    const list = Object.values(response.messageList) as unknown[];
+    const nextKey = response.nextKey;
 
     return {
       totalCount: list.length,
@@ -349,20 +367,18 @@ export class SolapiAdapter extends BaseProviderAdapter {
 
     if (query.channel === "ALIMTALK") {
       baseQuery.type = "ATA";
-      return await this.client.getMessages(baseQuery as any);
+      return await this.client.getMessages(
+        baseQuery as unknown as SolapiGetMessagesRequest,
+      );
     }
 
     if (query.channel === "FRIENDTALK") {
-      const response = await this.client.getMessages(baseQuery as any);
-      const messageList = (response as any)?.messageList;
-      const list =
-        messageList && typeof messageList === "object" && !Array.isArray(messageList)
-          ? Object.values(messageList as Record<string, any>)
-          : [];
+      const response = await this.client.getMessages(
+        baseQuery as unknown as SolapiGetMessagesRequest,
+      );
+      const list = Object.values(response.messageList);
       const filtered = list.filter((item) => {
-        if (!item || typeof item !== "object") return false;
-        const type = (item as any).type;
-        return type === "CTA" || type === "CTI";
+        return item.type === "CTA" || item.type === "CTI";
       });
       return {
         ...response,
@@ -371,7 +387,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
     }
 
     // Fallback: return raw response without type filter.
-    return await this.client.getMessages(baseQuery as any);
+    return await this.client.getMessages(
+      baseQuery as unknown as SolapiGetMessagesRequest,
+    );
   }
 
   private clampLimit(pageSize: unknown): number {
@@ -410,7 +428,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
   }
 
   private stringifyVariables(
-    variables: Record<string, any> | undefined,
+    variables: Record<string, unknown> | undefined,
   ): Record<string, string> {
     const output: Record<string, string> = {};
     if (!variables) return output;
@@ -425,11 +443,11 @@ export class SolapiAdapter extends BaseProviderAdapter {
     if (typeof request.text === "string" && request.text.trim().length > 0) {
       return request.text;
     }
-    const message = request.variables?.message;
+    const message = request.variables.message;
     if (typeof message === "string" && message.trim().length > 0) {
       return message;
     }
-    const fullText = (request.variables as any)?._full_text;
+    const fullText = request.variables._full_text;
     if (typeof fullText === "string" && fullText.trim().length > 0) {
       return fullText;
     }
@@ -477,9 +495,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
     return "ALIMTALK";
   }
 
-  private toSolapiMessageType(
-    request: StandardRequest,
-  ): SolapiMessageType {
+  private toSolapiMessageType(request: StandardRequest): SolapiMessageType {
     const channel = this.resolveChannelLike(request);
     switch (channel) {
       case "SMS":
@@ -494,15 +510,14 @@ export class SolapiAdapter extends BaseProviderAdapter {
         return channel as SolapiMessageType;
       case "FRIENDTALK":
         return request.imageUrl ? "CTI" : "CTA";
-      case "ALIMTALK":
       default:
         return "ATA";
     }
   }
 
-  private toKakaoButtons(buttons: unknown): any[] | undefined {
+  private toKakaoButtons(buttons: unknown): SolapiKakaoButton[] | undefined {
     if (!Array.isArray(buttons) || buttons.length === 0) return undefined;
-    const out: any[] = [];
+    const out: SolapiKakaoButton[] = [];
 
     for (const raw of buttons) {
       if (!raw || typeof raw !== "object") continue;
@@ -513,8 +528,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
       const name = typeof record.name === "string" ? record.name : "";
       const urlMobile =
         typeof record.urlMobile === "string" ? record.urlMobile : undefined;
-      const urlPc =
-        typeof record.urlPc === "string" ? record.urlPc : undefined;
+      const urlPc = typeof record.urlPc === "string" ? record.urlPc : undefined;
 
       if (!name || !urlMobile) continue;
       out.push({
@@ -528,9 +542,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
     return out.length > 0 ? out : undefined;
   }
 
-  private toRcsButtons(buttons: unknown): any[] | undefined {
+  private toRcsButtons(buttons: unknown): SolapiRcsButton[] | undefined {
     if (!Array.isArray(buttons) || buttons.length === 0) return undefined;
-    const out: any[] = [];
+    const out: SolapiRcsButton[] = [];
 
     for (const raw of buttons) {
       if (!raw || typeof raw !== "object") continue;
@@ -541,8 +555,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
       const name = typeof record.name === "string" ? record.name : "";
       const urlMobile =
         typeof record.urlMobile === "string" ? record.urlMobile : undefined;
-      const urlPc =
-        typeof record.urlPc === "string" ? record.urlPc : undefined;
+      const urlPc = typeof record.urlPc === "string" ? record.urlPc : undefined;
 
       const link = urlMobile || urlPc;
       if (!name || !link) continue;
@@ -558,7 +571,7 @@ export class SolapiAdapter extends BaseProviderAdapter {
 
   private async buildSolapiSendOneMessage(
     request: StandardRequest,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<SolapiSendOneMessage> {
     const type = this.toSolapiMessageType(request);
     const messageText = this.extractText(request);
     const subject = this.extractSubject(request);
@@ -592,7 +605,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
 
     if (requiresFrom) {
       if (!senderNumber || senderNumber.length === 0) {
-        throw new Error("senderNumber is required (options.senderNumber or config.defaultFrom)");
+        throw new Error(
+          "senderNumber is required (options.senderNumber or config.defaultFrom)",
+        );
       }
       base.from = this.normalizePhoneNumber(senderNumber);
     } else if (senderNumber) {
@@ -609,45 +624,44 @@ export class SolapiAdapter extends BaseProviderAdapter {
       }
 
       if (type === "MMS" && typeof request.imageUrl === "string") {
-        const upload = await this.client.uploadFile(request.imageUrl, "MMS" as any);
-        const fileId = (upload as any)?.fileId;
+        const upload = await this.client.uploadFile(request.imageUrl, "MMS");
+        const fileId = upload.fileId;
         if (typeof fileId === "string" && fileId.length > 0) {
           base.imageId = fileId;
         }
       }
 
-      return base;
+      return base as unknown as SolapiSendOneMessage;
     }
 
     if (type === "ATA") {
-      const kakaoOptions =
-        request.options?.kakaoOptions && typeof request.options.kakaoOptions === "object"
-          ? (request.options.kakaoOptions as Record<string, unknown>)
-          : {};
+      const kakaoOptions = request.options?.kakaoOptions;
       const pfId =
-        typeof kakaoOptions.pfId === "string" && kakaoOptions.pfId.length > 0
+        typeof kakaoOptions?.pfId === "string" && kakaoOptions.pfId.length > 0
           ? kakaoOptions.pfId
           : this.solapiConfig.kakaoPfId;
 
       if (!pfId || pfId.length === 0) {
-        throw new Error("kakao pfId is required (options.kakaoOptions.pfId or config.kakaoPfId)");
+        throw new Error(
+          "kakao pfId is required (options.kakaoOptions.pfId or config.kakaoPfId)",
+        );
       }
 
-      const buttons = Array.isArray(kakaoOptions.buttons)
-        ? (kakaoOptions.buttons as any[])
+      const buttons = Array.isArray(kakaoOptions?.buttons)
+        ? kakaoOptions.buttons
         : this.toKakaoButtons(request.buttons);
 
       base.kakaoOptions = {
         pfId,
         templateId: request.templateCode,
         variables: this.stringifyVariables(request.variables),
-        disableSms: kakaoOptions.disableSms,
-        adFlag: kakaoOptions.adFlag,
+        disableSms: kakaoOptions?.disableSms,
+        adFlag: kakaoOptions?.adFlag,
         buttons,
-        imageId: kakaoOptions.imageId,
+        imageId: kakaoOptions?.imageId,
       };
 
-      return base;
+      return base as unknown as SolapiSendOneMessage;
     }
 
     if (type === "CTA" || type === "CTI") {
@@ -655,29 +669,36 @@ export class SolapiAdapter extends BaseProviderAdapter {
         throw new Error("text or variables.message is required");
       }
 
-      const kakaoOptions =
-        request.options?.kakaoOptions && typeof request.options.kakaoOptions === "object"
-          ? (request.options.kakaoOptions as Record<string, unknown>)
-          : {};
+      const kakaoOptions = request.options?.kakaoOptions;
       const pfId =
-        typeof kakaoOptions.pfId === "string" && kakaoOptions.pfId.length > 0
+        typeof kakaoOptions?.pfId === "string" && kakaoOptions.pfId.length > 0
           ? kakaoOptions.pfId
           : this.solapiConfig.kakaoPfId;
 
       if (!pfId || pfId.length === 0) {
-        throw new Error("kakao pfId is required (options.kakaoOptions.pfId or config.kakaoPfId)");
+        throw new Error(
+          "kakao pfId is required (options.kakaoOptions.pfId or config.kakaoPfId)",
+        );
       }
 
-      const buttons = Array.isArray(kakaoOptions.buttons)
-        ? (kakaoOptions.buttons as any[])
+      const buttons = Array.isArray(kakaoOptions?.buttons)
+        ? kakaoOptions.buttons
         : this.toKakaoButtons(request.buttons);
 
-      const imageLink =
-        typeof kakaoOptions.imageLink === "string" && kakaoOptions.imageLink.length > 0
-          ? kakaoOptions.imageLink
-          : buttons && buttons.length > 0
-            ? (buttons[0] as any).linkMo
-            : undefined;
+      const imageLinkRaw = kakaoOptions?.imageLink;
+      const imageLinkFromOptions =
+        typeof imageLinkRaw === "string" && imageLinkRaw.length > 0
+          ? imageLinkRaw
+          : undefined;
+
+      const firstButton =
+        Array.isArray(buttons) && buttons.length > 0 ? buttons[0] : undefined;
+      const imageLinkFromButton =
+        isObjectRecord(firstButton) && typeof firstButton.linkMo === "string"
+          ? firstButton.linkMo
+          : undefined;
+
+      const imageLink = imageLinkFromOptions ?? imageLinkFromButton;
 
       let imageId: string | undefined;
       if (type === "CTI") {
@@ -689,8 +710,13 @@ export class SolapiAdapter extends BaseProviderAdapter {
             "imageLink is required for friendtalk image upload (options.kakaoOptions.imageLink or WL button)",
           );
         }
-        const upload = await this.client.uploadFile(request.imageUrl, "KAKAO" as any, undefined, imageLink);
-        const fileId = (upload as any)?.fileId;
+        const upload = await this.client.uploadFile(
+          request.imageUrl,
+          "KAKAO",
+          undefined,
+          imageLink,
+        );
+        const fileId = upload.fileId;
         if (typeof fileId === "string" && fileId.length > 0) {
           imageId = fileId;
         } else {
@@ -702,54 +728,53 @@ export class SolapiAdapter extends BaseProviderAdapter {
       base.kakaoOptions = {
         pfId,
         variables: this.stringifyVariables(request.variables),
-        disableSms: kakaoOptions.disableSms,
-        adFlag: kakaoOptions.adFlag,
+        disableSms: kakaoOptions?.disableSms,
+        adFlag: kakaoOptions?.adFlag,
         buttons,
         imageId,
       };
 
-      return base;
+      return base as unknown as SolapiSendOneMessage;
     }
 
     // RCS
-    const rcsOptions =
-      request.options?.rcsOptions && typeof request.options.rcsOptions === "object"
-        ? (request.options.rcsOptions as Record<string, unknown>)
-        : {};
+    const rcsOptions = request.options?.rcsOptions;
 
     const brandId =
-      typeof rcsOptions.brandId === "string" && rcsOptions.brandId.length > 0
+      typeof rcsOptions?.brandId === "string" && rcsOptions.brandId.length > 0
         ? rcsOptions.brandId
         : this.solapiConfig.rcsBrandId;
 
     if (!brandId || brandId.length === 0) {
-      throw new Error("rcs brandId is required (options.rcsOptions.brandId or config.rcsBrandId)");
+      throw new Error(
+        "rcs brandId is required (options.rcsOptions.brandId or config.rcsBrandId)",
+      );
     }
 
-    const rcsButtons = Array.isArray(rcsOptions.buttons)
-      ? (rcsOptions.buttons as any[])
+    const rcsButtons = Array.isArray(rcsOptions?.buttons)
+      ? rcsOptions.buttons
       : this.toRcsButtons(request.buttons);
 
     const rcsPayload: Record<string, unknown> = {
       brandId,
       buttons: rcsButtons,
-      disableSms: rcsOptions.disableSms,
+      disableSms: rcsOptions?.disableSms,
       variables: this.stringifyVariables(request.variables),
     };
 
     // For template types, templateCode is used as templateId unless caller provided it explicitly.
-    if (
-      type === "RCS_TPL" ||
-      type === "RCS_ITPL" ||
-      type === "RCS_LTPL"
-    ) {
+    if (type === "RCS_TPL" || type === "RCS_ITPL" || type === "RCS_LTPL") {
       rcsPayload.templateId =
-        typeof rcsOptions.templateId === "string" && rcsOptions.templateId.length > 0
+        typeof rcsOptions?.templateId === "string" &&
+        rcsOptions.templateId.length > 0
           ? rcsOptions.templateId
           : request.templateCode;
     }
 
-    if (!messageText && (type === "RCS_SMS" || type === "RCS_LMS" || type === "RCS_MMS")) {
+    if (
+      !messageText &&
+      (type === "RCS_SMS" || type === "RCS_LMS" || type === "RCS_MMS")
+    ) {
       throw new Error("text or variables.message is required");
     }
     if (messageText) {
@@ -760,19 +785,21 @@ export class SolapiAdapter extends BaseProviderAdapter {
     }
 
     if (type === "RCS_MMS" && typeof request.imageUrl === "string") {
-      const upload = await this.client.uploadFile(request.imageUrl, "RCS" as any);
-      const fileId = (upload as any)?.fileId;
+      const upload = await this.client.uploadFile(request.imageUrl, "RCS");
+      const fileId = upload.fileId;
       if (typeof fileId === "string" && fileId.length > 0) {
-        const additionalBody =
-          rcsOptions.additionalBody && typeof rcsOptions.additionalBody === "object"
-            ? (rcsOptions.additionalBody as Record<string, unknown>)
-            : {};
+        const additionalBodyRaw = rcsOptions?.additionalBody;
+        const additionalBody = isObjectRecord(additionalBodyRaw)
+          ? additionalBodyRaw
+          : {};
         const title =
-          typeof additionalBody.title === "string" && additionalBody.title.length > 0
+          typeof additionalBody.title === "string" &&
+          additionalBody.title.length > 0
             ? additionalBody.title
             : subject || "RCS";
         const description =
-          typeof additionalBody.description === "string" && additionalBody.description.length > 0
+          typeof additionalBody.description === "string" &&
+          additionalBody.description.length > 0
             ? additionalBody.description
             : messageText || "";
 
@@ -783,11 +810,11 @@ export class SolapiAdapter extends BaseProviderAdapter {
           imaggeId: fileId,
         };
       }
-    } else if (rcsOptions.additionalBody !== undefined) {
+    } else if (rcsOptions?.additionalBody !== undefined) {
       rcsPayload.additionalBody = rcsOptions.additionalBody;
     }
 
     base.rcsOptions = rcsPayload;
-    return base;
+    return base as unknown as SolapiSendOneMessage;
   }
 }

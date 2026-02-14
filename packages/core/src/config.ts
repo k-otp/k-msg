@@ -195,13 +195,14 @@ export type QueueConfig = z.infer<typeof QueueConfigSchema>;
 export type KMessageConfig = z.infer<typeof KMessageConfigSchema>;
 
 // Configuration loader
+// biome-ignore lint/complexity/noStaticOnlyClass: kept as a static namespace for config helpers
 export class ConfigLoader {
   static loadFromEnv(): KMessageConfig {
     const config = {
       environment: process.env.NODE_ENV || "development",
 
       server: {
-        port: process.env.PORT ? parseInt(process.env.PORT) : undefined,
+        port: process.env.PORT ? parseInt(process.env.PORT, 10) : undefined,
         host: process.env.HOST,
         cors: {
           origins: process.env.CORS_ORIGINS
@@ -214,7 +215,7 @@ export class ConfigLoader {
         ? {
             host: process.env.DB_HOST,
             port: process.env.DB_PORT
-              ? parseInt(process.env.DB_PORT)
+              ? parseInt(process.env.DB_PORT, 10)
               : undefined,
             database: process.env.DB_NAME,
             username: process.env.DB_USER,
@@ -227,11 +228,11 @@ export class ConfigLoader {
         ? {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT
-              ? parseInt(process.env.REDIS_PORT)
+              ? parseInt(process.env.REDIS_PORT, 10)
               : undefined,
             password: process.env.REDIS_PASSWORD,
             db: process.env.REDIS_DB
-              ? parseInt(process.env.REDIS_DB)
+              ? parseInt(process.env.REDIS_DB, 10)
               : undefined,
           }
         : undefined,
@@ -257,9 +258,9 @@ export class ConfigLoader {
               provider: (process.env.SMS_PROVIDER === "coolsms"
                 ? "solapi"
                 : process.env.SMS_PROVIDER) as "iwinv" | "aligo" | "solapi",
-              apiKey: process.env.SMS_API_KEY!,
+              apiKey: process.env.SMS_API_KEY ?? "",
               apiSecret: process.env.SMS_API_SECRET,
-              senderId: process.env.SMS_SENDER_ID!,
+              senderId: process.env.SMS_SENDER_ID ?? "",
             }
           : undefined,
       },
@@ -268,7 +269,7 @@ export class ConfigLoader {
         apiKeyRequired: process.env.API_KEY_REQUIRED !== "false",
         rateLimitEnabled: process.env.RATE_LIMIT_ENABLED !== "false",
         maxRequestsPerMinute: process.env.MAX_REQUESTS_PER_MINUTE
-          ? parseInt(process.env.MAX_REQUESTS_PER_MINUTE)
+          ? parseInt(process.env.MAX_REQUESTS_PER_MINUTE, 10)
           : undefined,
       },
     };
@@ -285,13 +286,13 @@ export class ConfigLoader {
     }
   }
 
-  static validate(config: any): KMessageConfig {
+  static validate(config: unknown): KMessageConfig {
     try {
       return KMessageConfigSchema.parse(config);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors = error.issues.map(
-          (e: any) => `${e.path.join(".")}: ${e.message}`,
+          (e) => `${e.path.join(".")}: ${e.message}`,
         );
         throw new Error(
           `Configuration validation failed:\n${errors.join("\n")}`,
@@ -359,8 +360,8 @@ export function mergeConfigs(
 
 export function validateProviderConfig(
   provider: "iwinv" | "sms",
-  config: any,
-): any {
+  config: unknown,
+): IWINVConfig | SMSConfig {
   switch (provider) {
     case "iwinv":
       return IWINVConfigSchema.parse(config);
