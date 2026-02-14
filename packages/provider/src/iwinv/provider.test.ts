@@ -224,4 +224,141 @@ describe("IWINVProvider", () => {
     expect((calledBody as any).msgType).toBe("GSMS");
     expect(result.isFailure).toBe(true);
   });
+
+  test("MMS uses multipart/form-data with secret header and image", async () => {
+    let calledUrl = "";
+    let calledSecret = "";
+    let calledBody: any = null;
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledSecret = new Headers(init?.headers).get("secret") || "";
+      calledBody = init?.body;
+
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "전송 성공",
+          requestNo: "REQ_1",
+          msgType: "MMS",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      media: {
+        image: {
+          bytes: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]),
+          filename: "test.jpg",
+          contentType: "image/jpeg",
+        },
+      },
+    });
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/v2/send/");
+    expect(calledSecret).toBe(
+      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
+    );
+    expect(calledBody instanceof FormData).toBe(true);
+    if (calledBody instanceof FormData) {
+      expect(calledBody.get("version")).toBe("1.0");
+      expect(calledBody.get("from")).toBe("01000000000");
+      expect(calledBody.get("to")).toBe("01012345678");
+      expect(calledBody.get("title")).toBe("테스트");
+      expect(calledBody.get("text")).toBe("테스트");
+      const image = calledBody.get("image");
+      expect(image).toBeTruthy();
+      expect(image instanceof Blob).toBe(true);
+    }
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.status).toBe("SENT");
+      expect(result.value.providerMessageId).toBe("REQ_1");
+    }
+  });
+
+  test("MMS fails when image is missing", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+    }
+  });
+
+  test("MMS scheduledAt returns PENDING and includes date field", async () => {
+    let calledBody: any = null;
+
+    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+      calledBody = init?.body;
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "전송 성공",
+          requestNo: "REQ_2",
+          msgType: "MMS",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const scheduledAt = new Date("2030-01-01T00:00:00Z");
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      media: {
+        image: { bytes: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]) },
+      },
+      options: { scheduledAt },
+    });
+
+    expect(calledBody instanceof FormData).toBe(true);
+    if (calledBody instanceof FormData) {
+      expect(calledBody.get("date")).toBe("2030-01-01 00:00:00");
+    }
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.status).toBe("PENDING");
+    }
+  });
 });

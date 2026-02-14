@@ -1,9 +1,12 @@
 import { Buffer } from "node:buffer";
+import { readFile } from "node:fs/promises";
+import { basename, extname } from "node:path";
 import {
   fail,
   KMsgError,
   KMsgErrorCode,
   ok,
+  type MessageBinaryInput,
   type MessageType,
   type Provider,
   type ProviderHealthStatus,
@@ -126,6 +129,134 @@ export class IWINVProvider implements Provider {
 
   private toBase64(value: string): string {
     return Buffer.from(value, "utf8").toString("base64");
+  }
+
+  private isHttpUrl(value: string): boolean {
+    return /^https?:\/\//i.test(value);
+  }
+
+  private guessImageContentType(refOrFilename: string): string | undefined {
+    const ext = extname(refOrFilename).toLowerCase();
+    switch (ext) {
+      case ".jpg":
+      case ".jpeg":
+        return "image/jpeg";
+      case ".png":
+        return "image/png";
+      case ".gif":
+        return "image/gif";
+      case ".webp":
+        return "image/webp";
+      default:
+        return undefined;
+    }
+  }
+
+  private resolveImageInput(options: unknown): MessageBinaryInput | undefined {
+    const record = options as Record<string, unknown>;
+    const media = record.media as Record<string, unknown> | undefined;
+    const image = media?.image as Record<string, unknown> | undefined;
+
+    if (image && typeof image === "object") {
+      if (typeof image.ref === "string" && image.ref.trim().length > 0) {
+        return {
+          ref: image.ref.trim(),
+          filename: typeof image.filename === "string" ? image.filename : undefined,
+          contentType:
+            typeof image.contentType === "string" ? image.contentType : undefined,
+        };
+      }
+      if (image.bytes instanceof Uint8Array) {
+        return {
+          bytes: image.bytes,
+          filename: typeof image.filename === "string" ? image.filename : undefined,
+          contentType:
+            typeof image.contentType === "string" ? image.contentType : undefined,
+        };
+      }
+      if (image.blob instanceof Blob) {
+        return {
+          blob: image.blob,
+          filename: typeof image.filename === "string" ? image.filename : undefined,
+          contentType:
+            typeof image.contentType === "string" ? image.contentType : undefined,
+        };
+      }
+    }
+
+    const imageUrlRaw = record.imageUrl;
+    if (typeof imageUrlRaw === "string" && imageUrlRaw.trim().length > 0) {
+      return { ref: imageUrlRaw.trim() };
+    }
+
+    return undefined;
+  }
+
+  private async toImageBlob(
+    input: MessageBinaryInput,
+  ): Promise<{ blob: Blob; filename: string; contentType: string; size: number }> {
+    if ("blob" in input) {
+      const contentType =
+        input.contentType || input.blob.type || "application/octet-stream";
+      const filename = input.filename || "image";
+      const blob =
+        input.contentType && input.contentType !== input.blob.type
+          ? new Blob([await input.blob.arrayBuffer()], { type: contentType })
+          : input.blob;
+
+      return { blob, filename, contentType, size: blob.size };
+    }
+
+    if ("bytes" in input) {
+      const contentType = input.contentType || "application/octet-stream";
+      // TS 5.9 models typed arrays as `Uint8Array<ArrayBufferLike>` which doesn't satisfy
+      // DOM's `BlobPart` constraint. Copy into a fresh `Uint8Array<ArrayBuffer>` first.
+      const copied = new Uint8Array(input.bytes.byteLength);
+      copied.set(input.bytes);
+      const blob = new Blob([copied], { type: contentType });
+      const filename = input.filename || "image";
+      return { blob, filename, contentType, size: blob.size };
+    }
+
+    const ref = input.ref;
+    if (this.isHttpUrl(ref)) {
+      const response = await fetch(ref);
+      if (!response.ok) {
+        throw new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          `Failed to fetch image: ${response.status}`,
+          { providerId: this.id, url: ref },
+        );
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const header =
+        response.headers.get("content-type")?.split(";")[0]?.trim() || "";
+      const contentType =
+        input.contentType ||
+        (header.length > 0 ? header : undefined) ||
+        this.guessImageContentType(ref) ||
+        "application/octet-stream";
+      const filenameFromUrl = (() => {
+        try {
+          const u = new URL(ref);
+          const last = basename(u.pathname);
+          return last || undefined;
+        } catch {
+          return undefined;
+        }
+      })();
+      const filename = input.filename || filenameFromUrl || "image";
+      const blob = new Blob([arrayBuffer], { type: contentType });
+      return { blob, filename, contentType, size: blob.size };
+    }
+
+    const bytes = await readFile(ref);
+    const contentType =
+      input.contentType || this.guessImageContentType(ref) || "application/octet-stream";
+    const filename = input.filename || basename(ref) || "image";
+    const blob = new Blob([bytes], { type: contentType });
+    return { blob, filename, contentType, size: blob.size };
   }
 
   private getSendEndpoint(): string {
@@ -503,6 +634,186 @@ export class IWINVProvider implements Provider {
     return text.slice(0, 20);
   }
 
+  private async sendSmsV2Mms(params: {
+    // `SmsSendOptions` is modeled with `type: "SMS" | "LMS" | "MMS"`, so `Extract<..., {type:"MMS"}>`
+    // becomes `never`. We keep this signature wide and validate the type at runtime.
+    options: Extract<SendOptions, { type: SmsV2MessageType }>;
+    to: string;
+    from: string;
+    text: string;
+    scheduledAtValid: boolean;
+    scheduledAt?: Date;
+  }): Promise<Result<SendResult, KMsgError>> {
+    const { options, to, from, text, scheduledAtValid, scheduledAt } = params;
+
+    if (options.type !== "MMS") {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "IWINVProvider: MMS handler called with non-MMS options",
+          { providerId: this.id, type: options.type },
+        ),
+      );
+    }
+
+    const title = this.buildLmsTitle(text, (options as any).subject);
+
+    const imageInput = this.resolveImageInput(options);
+    if (!imageInput) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "image is required for MMS (options.media.image or options.imageUrl)",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    let image: { blob: Blob; filename: string; contentType: string; size: number };
+    try {
+      image = await this.toImageBlob(imageInput);
+    } catch (error) {
+      return fail(
+        error instanceof KMsgError
+          ? error
+          : new KMsgError(
+              KMsgErrorCode.NETWORK_ERROR,
+              error instanceof Error ? error.message : String(error),
+              { providerId: this.id },
+            ),
+      );
+    }
+
+    // Vendor docs mention 100KB JPG limit; enforce a conservative check early to avoid confusing failures.
+    if (image.size > 100 * 1024) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "MMS image must be <= 100KB",
+          { providerId: this.id, bytes: image.size },
+        ),
+      );
+    }
+
+    const form = new FormData();
+    form.append("version", "1.0");
+    form.append("from", from);
+    // Vendor docs are inconsistent about MMS `to` shape; use a single recipient string for now.
+    form.append("to", to);
+    form.append("title", title);
+    form.append("text", text);
+    if (scheduledAtValid && scheduledAt) {
+      form.append("date", this.formatSmsReserveDate(scheduledAt));
+    }
+
+    const filename = (() => {
+      const hasExt = extname(image.filename).length > 0;
+      if (hasExt) return image.filename;
+      const guessedExt =
+        this.guessImageContentType(image.filename) === "image/png"
+          ? ".png"
+          : this.guessImageContentType(image.filename) === "image/gif"
+            ? ".gif"
+            : this.guessImageContentType(image.filename) === "image/webp"
+              ? ".webp"
+              : image.contentType === "image/png"
+                ? ".png"
+                : image.contentType === "image/gif"
+                  ? ".gif"
+                  : image.contentType === "image/webp"
+                    ? ".webp"
+                    : ".jpg";
+      return `${image.filename}${guessedExt}`;
+    })();
+
+    form.append("image", image.blob, filename);
+
+    const secretHeader = this.buildSmsSecretHeader();
+    const headers: Record<string, string> = {
+      secret: secretHeader,
+    };
+
+    if (
+      typeof this.config.xForwardedFor === "string" &&
+      this.config.xForwardedFor.length > 0
+    ) {
+      headers["X-Forwarded-For"] = this.config.xForwardedFor;
+    }
+
+    const mergedHeaders: Record<string, string> = { ...headers };
+    if (this.config.extraHeaders && typeof this.config.extraHeaders === "object") {
+      for (const [key, value] of Object.entries(this.config.extraHeaders)) {
+        // Never override multipart boundary handling.
+        if (key.toLowerCase() === "content-type") continue;
+        mergedHeaders[key] = value;
+      }
+    }
+
+    const url = `${this.resolveSmsBaseUrl()}/api/v2/send/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: mergedHeaders,
+        body: form,
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data: SmsV2SendResponse = isObjectRecord(parsed)
+        ? (parsed as SmsV2SendResponse)
+        : ({ resultCode: parsed } as SmsV2SendResponse);
+
+      const rawCode = data.resultCode ?? data.code;
+      const code = this.normalizeCode(rawCode);
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : this.mapSmsResponseMessage(code, "MMS send failed");
+
+      const isSuccess = response.ok && code === "0";
+      if (!isSuccess) {
+        return fail(
+          new KMsgError(this.mapSmsErrorCode(code, response.ok), message, {
+            providerId: this.id,
+            originalCode: rawCode,
+          }),
+        );
+      }
+
+      const providerMessageId =
+        typeof data.requestNo === "string" && data.requestNo.length > 0
+          ? data.requestNo
+          : typeof data.msgid === "string" && data.msgid.length > 0
+            ? data.msgid
+            : undefined;
+
+      return ok({
+        messageId: options.messageId || crypto.randomUUID(),
+        providerId: this.id,
+        providerMessageId,
+        status: scheduledAtValid ? "PENDING" : "SENT",
+        type: options.type,
+        to: options.to,
+        raw: data,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
   private async sendSmsV2(
     options: Extract<SendOptions, { type: SmsV2MessageType }>,
   ): Promise<Result<SendResult, KMsgError>> {
@@ -551,6 +862,21 @@ export class IWINVProvider implements Provider {
       );
     }
 
+    const scheduledAt = options.options?.scheduledAt;
+    const scheduledAtValid =
+      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime());
+
+    if (options.type === "MMS") {
+      return await this.sendSmsV2Mms({
+        options,
+        to,
+        from,
+        text,
+        scheduledAtValid,
+        scheduledAt: scheduledAtValid ? (scheduledAt as Date) : undefined,
+      });
+    }
+
     const payload: Record<string, unknown> = {
       version: "1.0",
       from,
@@ -558,7 +884,7 @@ export class IWINVProvider implements Provider {
       text,
     };
 
-    if (options.type === "LMS" || options.type === "MMS") {
+    if (options.type === "LMS") {
       payload.title = this.buildLmsTitle(text, (options as any).subject);
     } else {
       const msgTypeOverride =
@@ -569,9 +895,6 @@ export class IWINVProvider implements Provider {
       payload.msgType = msgTypeOverride || options.type;
     }
 
-    const scheduledAt = options.options?.scheduledAt;
-    const scheduledAtValid =
-      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime());
     if (scheduledAtValid) {
       payload.date = this.formatSmsReserveDate(scheduledAt as Date);
     }
