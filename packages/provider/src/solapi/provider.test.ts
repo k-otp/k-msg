@@ -76,7 +76,7 @@ function createStubClient() {
       link?: string,
     ) => {
       calls.uploadFile.push({ filePath, fileType, name, link });
-      return { fileId: `${fileType}_file_1` };
+      return { fileId: `${fileType}_file_${calls.uploadFile.length}` };
     },
   };
 
@@ -212,6 +212,245 @@ describe("SolapiProvider/Adapter (UniversalProvider-based)", () => {
     expect(result.status).toBe("SENT");
     expect(calls.sendOne[0]?.message?.type).toBe("RCS_SMS");
     expect(calls.sendOne[0]?.message?.rcsOptions?.brandId).toBe("brand_1");
+  });
+
+  test("maps NSA to naverOptions with talkId/templateId/variables", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        naverTalkId: "talk_default",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "NSA",
+      templateCode: "NSA_TPL_1",
+      phoneNumber: "01012345678",
+      variables: { name: "tester", code: 1234 },
+      options: {
+        naverOptions: {
+          talkId: "talk_1",
+          disableSms: true,
+          variables: { code: "9999" },
+        },
+      },
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.sendOne[0]?.message?.type).toBe("NSA");
+    expect(calls.sendOne[0]?.message?.naverOptions?.talkId).toBe("talk_1");
+    expect(calls.sendOne[0]?.message?.naverOptions?.templateId).toBe(
+      "NSA_TPL_1",
+    );
+    expect(calls.sendOne[0]?.message?.naverOptions?.disableSms).toBe(true);
+    expect(calls.sendOne[0]?.message?.naverOptions?.variables?.name).toBe(
+      "tester",
+    );
+    expect(calls.sendOne[0]?.message?.naverOptions?.variables?.code).toBe(
+      "9999",
+    );
+  });
+
+  test("maps VOICE to voiceOptions with default voiceType", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "VOICE",
+      templateCode: "VOICE_DIRECT",
+      phoneNumber: "01012345678",
+      variables: { message: "voice hi" },
+      text: "voice hi",
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.sendOne[0]?.message?.type).toBe("VOICE");
+    expect(calls.sendOne[0]?.message?.text).toBe("voice hi");
+    expect(calls.sendOne[0]?.message?.voiceOptions?.voiceType).toBe("FEMALE");
+  });
+
+  test("maps VOICE to voiceOptions with overrides", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "VOICE",
+      templateCode: "VOICE_DIRECT",
+      phoneNumber: "01012345678",
+      variables: { message: "voice hi" },
+      text: "voice hi",
+      options: {
+        voiceOptions: {
+          voiceType: "MALE",
+          headerMessage: "head",
+        },
+      },
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.sendOne[0]?.message?.type).toBe("VOICE");
+    expect(calls.sendOne[0]?.message?.voiceOptions?.voiceType).toBe("MALE");
+    expect(calls.sendOne[0]?.message?.voiceOptions?.headerMessage).toBe("head");
+  });
+
+  test("maps FAX to faxOptions with fileIds (no upload)", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "FAX",
+      templateCode: "FAX_DIRECT",
+      phoneNumber: "01012345678",
+      variables: {},
+      options: { faxOptions: { fileIds: ["fax_file_1", "fax_file_2"] } },
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.uploadFile).toHaveLength(0);
+    expect(calls.sendOne[0]?.message?.type).toBe("FAX");
+    expect(calls.sendOne[0]?.message?.faxOptions?.fileIds).toEqual([
+      "fax_file_1",
+      "fax_file_2",
+    ]);
+  });
+
+  test("maps FAX to faxOptions by uploading fileUrls", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "FAX",
+      templateCode: "FAX_DIRECT",
+      phoneNumber: "01012345678",
+      variables: {},
+      options: {
+        faxOptions: {
+          fileUrls: ["https://example.com/a.pdf", "https://example.com/b.pdf"],
+        },
+      },
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.uploadFile).toHaveLength(2);
+    expect(calls.uploadFile[0]?.fileType).toBe("FAX");
+    expect(calls.uploadFile[0]?.filePath).toBe("https://example.com/a.pdf");
+    expect(calls.uploadFile[1]?.fileType).toBe("FAX");
+    expect(calls.uploadFile[1]?.filePath).toBe("https://example.com/b.pdf");
+    expect(calls.sendOne[0]?.message?.type).toBe("FAX");
+    expect(calls.sendOne[0]?.message?.faxOptions?.fileIds).toEqual([
+      "FAX_file_1",
+      "FAX_file_2",
+    ]);
+  });
+
+  test("maps RCS additionalBody imageId to imaggeId and passes RCS options", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        rcsBrandId: "brand_default",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const request: StandardRequest = {
+      channel: "RCS_MMS",
+      templateCode: "RCS_MMS_DIRECT",
+      phoneNumber: "01012345678",
+      variables: { message: "rcs hi", foo: "base" },
+      text: "rcs hi",
+      options: {
+        senderNumber: "01000000000",
+        rcsOptions: {
+          brandId: "brand_1",
+          copyAllowed: true,
+          mmsType: "M3",
+          commercialType: true,
+          variables: { foo: "override", bar: "1" },
+          additionalBody: {
+            title: "RCS Title",
+            description: "RCS Desc",
+            imageId: "rcs_image_1",
+          },
+        },
+      },
+    };
+
+    const result = await provider.send(request);
+
+    expect(result.status).toBe("SENT");
+    expect(calls.sendOne[0]?.message?.type).toBe("RCS_MMS");
+    expect(calls.sendOne[0]?.message?.rcsOptions?.brandId).toBe("brand_1");
+    expect(calls.sendOne[0]?.message?.rcsOptions?.copyAllowed).toBe(true);
+    expect(calls.sendOne[0]?.message?.rcsOptions?.mmsType).toBe("M3");
+    expect(calls.sendOne[0]?.message?.rcsOptions?.commercialType).toBe(true);
+    expect(calls.sendOne[0]?.message?.rcsOptions?.variables?.foo).toBe(
+      "override",
+    );
+    expect(
+      calls.sendOne[0]?.message?.rcsOptions?.additionalBody?.imaggeId,
+    ).toBe("rcs_image_1");
+    expect(calls.sendOne[0]?.message?.rcsOptions?.additionalBody?.title).toBe(
+      "RCS Title",
+    );
+    expect(
+      calls.sendOne[0]?.message?.rcsOptions?.additionalBody?.description,
+    ).toBe("RCS Desc");
   });
 
   test("exposes getSmsCharge via adapter", async () => {

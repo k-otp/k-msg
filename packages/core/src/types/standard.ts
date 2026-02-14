@@ -45,6 +45,14 @@ export interface StandardRequest {
     senderNumber?: string;
     subject?: string;
     /**
+     * Optional international country code for providers that support it (e.g. SOLAPI).
+     */
+    country?: string;
+    /**
+     * Provider-supported custom fields (string values only).
+     */
+    customFields?: Record<string, string>;
+    /**
      * Provider-specific KakaoTalk options (e.g. SOLAPI kakaoOptions).
      */
     kakaoOptions?: {
@@ -58,15 +66,54 @@ export interface StandardRequest {
       [key: string]: unknown;
     };
     /**
+     * Provider-specific Naver SmartAlert options (e.g. SOLAPI naverOptions).
+     */
+    naverOptions?: {
+      talkId?: string;
+      templateId?: string;
+      disableSms?: boolean;
+      variables?: Record<string, string>;
+      buttons?: unknown[];
+      [key: string]: unknown;
+    };
+    /**
+     * Provider-specific voice(TTS) options (e.g. SOLAPI voiceOptions).
+     */
+    voiceOptions?: {
+      voiceType: "FEMALE" | "MALE";
+      headerMessage?: string;
+      tailMessage?: string;
+      replyRange?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+      counselorNumber?: string;
+      [key: string]: unknown;
+    };
+    /**
+     * Provider-specific fax options (e.g. SOLAPI faxOptions).
+     */
+    faxOptions?: {
+      fileIds?: string[];
+      fileUrls?: string[];
+      [key: string]: unknown;
+    };
+    /**
      * Provider-specific RCS options (e.g. SOLAPI rcsOptions).
      */
     rcsOptions?: {
       brandId?: string;
       templateId?: string;
+      copyAllowed?: boolean;
       variables?: Record<string, string>;
+      mmsType?: "M3" | "S3" | "M4" | "S4" | "M5" | "S5" | "M6" | "S6";
+      commercialType?: boolean;
       disableSms?: boolean;
       buttons?: unknown[];
-      additionalBody?: unknown;
+      additionalBody?: {
+        title?: string;
+        description?: string;
+        imageId?: string;
+        buttons?: unknown[];
+        [key: string]: unknown;
+      };
       [key: string]: unknown;
     };
     // biome-ignore lint/suspicious/noExplicitAny: provider-specific options are intentionally untyped
