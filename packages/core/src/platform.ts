@@ -28,6 +28,9 @@ export class AlimTalkPlatform implements KMsg {
     LMS: "LMS_DIRECT",
     MMS: "MMS_DIRECT",
     FRIENDTALK: "FRIENDTALK_DIRECT",
+    RCS_SMS: "RCS_SMS_DIRECT",
+    RCS_LMS: "RCS_LMS_DIRECT",
+    RCS_MMS: "RCS_MMS_DIRECT",
   };
 
   private static readonly directTemplateCodes = new Set([
@@ -35,6 +38,9 @@ export class AlimTalkPlatform implements KMsg {
     "LMS_DIRECT",
     "MMS_DIRECT",
     "FRIENDTALK_DIRECT",
+    "RCS_SMS_DIRECT",
+    "RCS_LMS_DIRECT",
+    "RCS_MMS_DIRECT",
   ]);
 
   private providers = new Map<string, BaseProvider>();
@@ -274,6 +280,9 @@ export class AlimTalkPlatform implements KMsg {
       options.channel === "SMS" ||
       options.channel === "LMS" ||
       options.channel === "MMS" ||
+      options.channel === "RCS_SMS" ||
+      options.channel === "RCS_LMS" ||
+      options.channel === "RCS_MMS" ||
       options.channel === "FRIENDTALK" ||
       AlimTalkPlatform.directTemplateCodes.has(templateCode);
 
@@ -286,12 +295,19 @@ export class AlimTalkPlatform implements KMsg {
 
   private toProviderChannel(
     channel: MessageType,
-  ): "alimtalk" | "friendtalk" | "sms" | "mms" {
+  ): "alimtalk" | "friendtalk" | "sms" | "mms" | "rcs" {
     switch (channel) {
       case "ALIMTALK":
         return "alimtalk";
       case "FRIENDTALK":
         return "friendtalk";
+      case "RCS_SMS":
+      case "RCS_LMS":
+      case "RCS_MMS":
+      case "RCS_TPL":
+      case "RCS_ITPL":
+      case "RCS_LTPL":
+        return "rcs";
       case "MMS":
         return "mms";
       default:
@@ -638,6 +654,7 @@ export class AlimTalkPlatform implements KMsg {
           }
 
           const payload = await fn.call(target, {
+            channel,
             companyId: query.companyId,
             startDate: query.startDate,
             endDate: query.endDate,
@@ -645,6 +662,7 @@ export class AlimTalkPlatform implements KMsg {
             pageNum: query.page ?? 1,
             pageSize: query.pageSize ?? pageSize,
             phone: query.phone,
+            startKey: query.startKey,
           });
 
           const payloadRecord =
@@ -653,7 +671,13 @@ export class AlimTalkPlatform implements KMsg {
               : {};
           const rawList = Array.isArray(payloadRecord.list)
             ? (payloadRecord.list as unknown[])
-            : [];
+            : payloadRecord.messageList &&
+                typeof payloadRecord.messageList === "object" &&
+                !Array.isArray(payloadRecord.messageList)
+              ? Object.values(
+                  payloadRecord.messageList as Record<string, unknown>,
+                )
+              : [];
 
           const items = rawList.map((raw) => {
             const record =
@@ -661,44 +685,82 @@ export class AlimTalkPlatform implements KMsg {
                 ? (raw as Record<string, unknown>)
                 : {};
             const messageId =
-              typeof record.requestNo === "string" ||
-              typeof record.requestNo === "number"
-                ? String(record.requestNo)
-                : typeof record.seqNo === "string" ||
-                    typeof record.seqNo === "number"
-                  ? String(record.seqNo)
-                  : "unknown";
+              typeof record.messageId === "string" ||
+              typeof record.messageId === "number"
+                ? String(record.messageId)
+                : typeof record.requestNo === "string" ||
+                    typeof record.requestNo === "number"
+                  ? String(record.requestNo)
+                  : typeof record.seqNo === "string" ||
+                      typeof record.seqNo === "number"
+                    ? String(record.seqNo)
+                    : "unknown";
 
-            const sentAt =
-              typeof record.sendDate === "string" && record.sendDate.length > 0
-                ? new Date(record.sendDate)
-                : undefined;
+            const rawSentAt =
+              record.dateSent instanceof Date
+                ? record.dateSent
+                : typeof record.dateSent === "string" && record.dateSent.length
+                  ? new Date(record.dateSent)
+                  : record.dateCompleted instanceof Date
+                    ? record.dateCompleted
+                    : typeof record.dateCompleted === "string" &&
+                        record.dateCompleted.length
+                      ? new Date(record.dateCompleted)
+                      : typeof record.sendDate === "string" &&
+                          record.sendDate.length
+                        ? new Date(record.sendDate)
+                        : typeof record.dateCreated === "string" &&
+                            record.dateCreated.length
+                          ? new Date(record.dateCreated)
+                          : typeof record.dateUpdated === "string" &&
+                              record.dateUpdated.length
+                            ? new Date(record.dateUpdated)
+                            : undefined;
 
             return {
               providerId: providerKey,
               channel,
               messageId,
-              to: typeof record.phone === "string" ? record.phone : undefined,
+              to:
+                typeof record.to === "string"
+                  ? record.to
+                  : typeof record.phone === "string"
+                    ? record.phone
+                    : undefined,
               from:
-                typeof record.callback === "string"
-                  ? record.callback
-                  : undefined,
+                typeof record.from === "string"
+                  ? record.from
+                  : typeof record.callback === "string"
+                    ? record.callback
+                    : undefined,
               status:
-                typeof record.sendStatus === "string"
-                  ? record.sendStatus
-                  : undefined,
+                typeof record.status === "string"
+                  ? record.status
+                  : typeof record.sendStatus === "string"
+                    ? record.sendStatus
+                    : undefined,
               statusCode:
-                typeof record.sendStatusCode === "string"
-                  ? record.sendStatusCode
-                  : undefined,
+                typeof record.statusCode === "string"
+                  ? record.statusCode
+                  : typeof record.sendStatusCode === "string"
+                    ? record.sendStatusCode
+                    : undefined,
               statusMessage:
-                typeof record.sendStatusMsg === "string"
-                  ? record.sendStatusMsg
-                  : undefined,
-              sentAt,
+                typeof record.statusMessage === "string"
+                  ? record.statusMessage
+                  : typeof record.sendStatusMsg === "string"
+                    ? record.sendStatusMsg
+                    : undefined,
+              sentAt: rawSentAt,
               raw,
             };
           });
+
+          const nextKey =
+            typeof payloadRecord.nextKey === "string" ||
+            payloadRecord.nextKey === null
+              ? (payloadRecord.nextKey as string | null)
+              : undefined;
 
           return {
             providerId: providerKey,
@@ -707,6 +769,7 @@ export class AlimTalkPlatform implements KMsg {
               typeof payloadRecord.totalCount === "number"
                 ? payloadRecord.totalCount
                 : items.length,
+            nextKey,
             items,
             raw: payload,
           };
@@ -722,11 +785,116 @@ export class AlimTalkPlatform implements KMsg {
         }
 
         const raw = await fn.call(target, query);
+
+        const payloadRecord =
+          raw && typeof raw === "object" && !Array.isArray(raw)
+            ? (raw as Record<string, unknown>)
+            : {};
+
+        const rawList = Array.isArray(payloadRecord.list)
+          ? (payloadRecord.list as unknown[])
+          : payloadRecord.messageList &&
+              typeof payloadRecord.messageList === "object" &&
+              !Array.isArray(payloadRecord.messageList)
+            ? Object.values(
+                payloadRecord.messageList as Record<string, unknown>,
+              )
+            : [];
+
+        const items = rawList.map((rawItem) => {
+          const record =
+            rawItem && typeof rawItem === "object"
+              ? (rawItem as Record<string, unknown>)
+              : {};
+          const messageId =
+            typeof record.messageId === "string" ||
+            typeof record.messageId === "number"
+              ? String(record.messageId)
+              : typeof record.requestNo === "string" ||
+                  typeof record.requestNo === "number"
+                ? String(record.requestNo)
+                : typeof record.seqNo === "string" ||
+                    typeof record.seqNo === "number"
+                  ? String(record.seqNo)
+                  : "unknown";
+
+          const rawSentAt =
+            record.dateSent instanceof Date
+              ? record.dateSent
+              : typeof record.dateSent === "string" && record.dateSent.length
+                ? new Date(record.dateSent)
+                : record.dateCompleted instanceof Date
+                  ? record.dateCompleted
+                  : typeof record.dateCompleted === "string" &&
+                      record.dateCompleted.length
+                    ? new Date(record.dateCompleted)
+                    : typeof record.sendDate === "string" &&
+                        record.sendDate.length
+                      ? new Date(record.sendDate)
+                      : typeof record.dateCreated === "string" &&
+                          record.dateCreated.length
+                        ? new Date(record.dateCreated)
+                        : typeof record.dateUpdated === "string" &&
+                            record.dateUpdated.length
+                          ? new Date(record.dateUpdated)
+                          : undefined;
+
+          return {
+            providerId: providerKey,
+            channel,
+            messageId,
+            to:
+              typeof record.to === "string"
+                ? record.to
+                : typeof record.phone === "string"
+                  ? record.phone
+                  : undefined,
+            from:
+              typeof record.from === "string"
+                ? record.from
+                : typeof record.callback === "string"
+                  ? record.callback
+                  : undefined,
+            status:
+              typeof record.status === "string"
+                ? record.status
+                : typeof record.sendStatus === "string"
+                  ? record.sendStatus
+                  : undefined,
+            statusCode:
+              typeof record.statusCode === "string"
+                ? record.statusCode
+                : typeof record.sendStatusCode === "string"
+                  ? record.sendStatusCode
+                  : undefined,
+            statusMessage:
+              typeof record.statusMessage === "string"
+                ? record.statusMessage
+                : typeof record.sendStatusMsg === "string"
+                  ? record.sendStatusMsg
+                  : undefined,
+            sentAt: rawSentAt,
+            raw: rawItem,
+          };
+        });
+
+        const nextKey =
+          typeof payloadRecord.nextKey === "string" ||
+          payloadRecord.nextKey === null
+            ? (payloadRecord.nextKey as string | null)
+            : undefined;
+
         return {
           providerId: providerKey,
           channel,
-          totalCount: Array.isArray(raw) ? raw.length : 0,
-          items: [],
+          totalCount:
+            typeof payloadRecord.totalCount === "number"
+              ? payloadRecord.totalCount
+              : Array.isArray(raw)
+                ? raw.length
+                : items.length,
+          nextKey,
+          items,
           raw,
         };
       },
@@ -756,7 +924,12 @@ export class AlimTalkPlatform implements KMsg {
   }
 
   private isSmsChannel(channel: MessageType | undefined): boolean {
-    return channel === "SMS" || channel === "LMS" || channel === "MMS";
+    return (
+      channel === "SMS" ||
+      channel === "LMS" ||
+      channel === "MMS" ||
+      (typeof channel === "string" && channel.startsWith("RCS_"))
+    );
   }
 
   private normalizeHistoryQuery(
@@ -789,6 +962,7 @@ export class AlimTalkPlatform implements KMsg {
       endDate,
       page: queryOrPage,
       pageSize,
+      startKey: filters.startKey,
       phone: filters.phone,
       requestNo: filters.requestNo,
       companyId: filters.companyId,

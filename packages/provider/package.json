@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@k-msg/core": "workspace:*",
+    "solapi": "^5.5.4",
     "zod": "catalog:"
   },
   "devDependencies": {

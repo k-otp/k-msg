@@ -8,6 +8,11 @@ export interface HistoryQuery {
   endDate: string | Date;
   page?: number;
   pageSize?: number;
+  /**
+   * Cursor key for providers that use cursor-based pagination (e.g. SOLAPI).
+   * When provided, it takes precedence over `page`.
+   */
+  startKey?: string;
   phone?: string;
   requestNo?: string;
   companyId?: string;
@@ -30,6 +35,10 @@ export interface HistoryResult {
   providerId: string;
   channel: HistoryChannel;
   totalCount: number;
+  /**
+   * Cursor key for fetching the next page when provider supports cursor pagination.
+   */
+  nextKey?: string | null;
   items: HistoryItem[];
   raw?: unknown;
 }
