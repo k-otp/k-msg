@@ -94,6 +94,9 @@
     "packages/core": {
       "name": "@k-msg/core",
       "version": "0.1.2",
+      "dependencies": {
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@types/bun": "latest",
         "typescript": "^5.0.0",
