@@ -22,6 +22,11 @@ export interface SolapiConfig extends ProviderConfig {
   rcsBrandId?: string;
 
   /**
+   * Default Naver Talk ID (for NSA).
+   */
+  naverTalkId?: string;
+
+  /**
    * Optional appId for Solapi send APIs.
    */
   appId?: string;

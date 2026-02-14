@@ -62,6 +62,7 @@ export const createDefaultSolapiProvider = () => {
     defaultFrom: process.env.SOLAPI_DEFAULT_FROM,
     kakaoPfId: process.env.SOLAPI_KAKAO_PF_ID,
     rcsBrandId: process.env.SOLAPI_RCS_BRAND_ID,
+    naverTalkId: process.env.SOLAPI_NAVER_TALK_ID,
     appId: process.env.SOLAPI_APP_ID,
     defaultCountry: process.env.SOLAPI_DEFAULT_COUNTRY,
     debug: process.env.NODE_ENV === "development",
