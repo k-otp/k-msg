@@ -37,45 +37,28 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Authenticate to npm (OIDC)
-        uses: npm/oidc@v3
-        with:
-          # Keep the token file out of the repo workspace so it can't be
-          # accidentally committed into release PRs.
-          save-token-file: true
-          token-file: ".npmrc"
-          token-file-directory: ${{ runner.temp }}
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Configure npm auth (bun publish)
-        run: |
-          set -euo pipefail
-          cp "$RUNNER_TEMP/.npmrc" "$HOME/.npmrc"
-          chmod 0600 "$HOME/.npmrc"
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Build packages (for publish)
         run: bun run build:all
 
-      - name: Run Sampo (auto)
+      - name: Run Sampo (release PR only)
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
-          command: auto
+          command: release
           create-github-release: false
           base-branch: main
           pr-branch: sampo/release
           pr-title: "chore(release): publish"
-          # Avoid running npm lifecycle scripts (notably `publish`) during
-          # `bun publish --dry-run`, which can otherwise recurse or prompt.
-          args: --ignore-scripts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Prefer file-based auth for Bun, because Sampo may not forward env
-          # vars like NPM_CONFIG_USERCONFIG into the publish subprocess.
-          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/.npmrc
+
+      - name: Publish packages (npm OIDC)
+        run: |
+          chmod +x ./scripts/publish-oidc.sh
+          ./scripts/publish-oidc.sh
 
       - name: Update bun.lock in release PR branch
         run: |
