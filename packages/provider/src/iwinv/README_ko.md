@@ -14,6 +14,11 @@ npm install @k-msg/provider @k-msg/core
 bun add @k-msg/provider @k-msg/core
 ```
 
+## 공식 문서(IWINV) 링크
+
+- SMS API: https://docs.iwinv.kr/api/Message_api/
+- 알림톡(Kakao) API: https://docs.iwinv.kr/api/kakao_api/
+
 ## 채널별 엔드포인트 / 헤더
 
 ### 1) 알림톡 (v2)
@@ -62,6 +67,10 @@ bun add @k-msg/provider @k-msg/core
   - 헤더: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
   - BODY: `{"version":"1.0"}`
 
+참고:
+- `IWINVProvider`는 현재 알림톡 + SMS/LMS/MMS의 통합 `send()`에 집중합니다.
+- 전송내역/잔액 조회 엔드포인트는 참고용으로만 문서화되어 있으며, SDK 메서드로는 아직 제공되지 않습니다.
+
 ## 환경변수
 
 최소 필수:
@@ -75,7 +84,6 @@ IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
 IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
-IWINV_SMS_COMPANY_ID=your_company_id   # 전송내역 조회에 필요(호출 시 파라미터로 넘기면 생략 가능)
 
 # 공통 발신번호(선택)
 IWINV_SENDER_NUMBER=01000000000
@@ -109,6 +117,7 @@ const provider = new IWINVProvider({
   smsApiKey: process.env.IWINV_SMS_API_KEY,
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
   sendEndpoint: "/api/v2/send/",
   xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
   extraHeaders: {
@@ -118,35 +127,24 @@ const provider = new IWINVProvider({
 });
 
 // SMS
-await provider.send({
-  channel: "SMS",
-  templateCode: "SMS_DIRECT",
-  phoneNumber: "01012345678",
+const sms = await provider.send({
+  type: "SMS",
+  to: "01012345678",
+  from: "01000000000",
   text: "hello",
-  variables: { message: "hello" },
-  options: { senderNumber: "01000000000" },
 });
-
-// SMS 잔액
-const charge = await provider.getSmsCharge();
-
-// SMS 전송내역(90일 이내)
-const history = await provider.getSmsHistory({
-  // companyId는 IWINV_SMS_COMPANY_ID / smsCompanyId 설정 시 생략 가능
-  startDate: "2021-04-05",
-  endDate: "2021-06-23",
-  pageNum: 1,
-  pageSize: 15,
-  phone: "010-0000-0000",
-});
+if (sms.isFailure) throw sms.error;
 
 // 알림톡
-await provider.send({
-  channel: "ALIMTALK",
+const alimtalk = await provider.send({
+  type: "ALIMTALK",
+  to: "01012345678",
   templateCode: "YOUR_TEMPLATE_CODE",
-  phoneNumber: "01012345678",
   variables: { name: "Jane" },
+  // 선택: `from`을 주면 IWINV의 대체문자(reSend) 플로우가 활성화됩니다.
+  from: "01000000000",
 });
+if (alimtalk.isFailure) throw alimtalk.error;
 ```
 
 ## CLI 사용 예시
