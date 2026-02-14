@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.3.0 — 2026-02-14
+
+### Minor changes
+
+- [16c63cd](https://github.com/k-otp/k-msg/commit/16c63cddda0b5bc73d8206caaeaaa420db19b95e) feat(solapi): add SOLAPI provider (UniversalProvider + SDK) with RCS-aware history/balance — Thanks @imjlk!
+
 ## 0.2.0 — 2026-02-14
 
 ### Minor changes
