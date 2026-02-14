@@ -405,8 +405,11 @@ export class MessageJobProcessor extends JobProcessor {
         const sendOptions: SendOptions = {
           type: "ALIMTALK",
           to: recipient.phoneNumber,
-          from: (messageRequest.options as any)?.senderNumber || "",
-          templateId: messageRequest.templateId,
+          from:
+            (messageRequest.options as any)?.from ||
+            (messageRequest.options as any)?.senderNumber ||
+            "",
+          templateCode: messageRequest.templateCode,
           variables: {
             ...messageRequest.variables,
             ...recipient.variables,
@@ -459,7 +462,7 @@ export class MessageJobProcessor extends JobProcessor {
       metadata: {
         createdAt: new Date(),
         provider: this.provider.id,
-        templateId: messageRequest.templateId,
+        templateCode: messageRequest.templateCode,
       },
     };
 

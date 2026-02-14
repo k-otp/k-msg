@@ -3,6 +3,7 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
+  type MessageType,
   ok,
   type Provider,
   type Result,
@@ -13,10 +14,31 @@ import {
 export class MockProvider implements Provider {
   public readonly id: string;
   public readonly name: string;
+  public readonly supportedTypes: readonly MessageType[];
 
   constructor(id: string = "mock", name: string = "Mock Provider") {
     this.id = id;
     this.name = name;
+    this.supportedTypes = [
+      "ALIMTALK",
+      "FRIENDTALK",
+      "SMS",
+      "LMS",
+      "MMS",
+      "NSA",
+      "VOICE",
+      "FAX",
+      "RCS_SMS",
+      "RCS_LMS",
+      "RCS_MMS",
+      "RCS_TPL",
+      "RCS_ITPL",
+      "RCS_LTPL",
+    ];
+  }
+
+  async healthCheck() {
+    return { healthy: true, issues: [] };
   }
 
   async send(params: SendOptions): Promise<Result<SendResult, KMsgError>> {
@@ -27,9 +49,12 @@ export class MockProvider implements Provider {
     }
 
     return ok({
-      messageId: `mock_${Date.now()}`,
+      messageId: params.messageId || `mock_${Date.now()}`,
+      providerId: this.id,
+      providerMessageId: `mock_${Date.now()}`,
       status: "SENT",
-      provider: this.id,
+      type: params.type,
+      to: params.to,
     });
   }
 }

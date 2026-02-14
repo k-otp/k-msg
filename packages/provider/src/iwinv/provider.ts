@@ -1,322 +1,314 @@
+import { Buffer } from "node:buffer";
 import {
+  fail,
+  KMsgError,
+  KMsgErrorCode,
+  ok,
+  type MessageType,
+  type Provider,
+  type ProviderHealthStatus,
+  type Result,
   type SendOptions,
-  StandardErrorCode,
-  type StandardRequest,
-  type StandardResult,
-  StandardStatus,
-  UniversalProvider,
+  type SendResult,
 } from "@k-msg/core";
-import { IWINVAdapter } from "../adapters/iwinv.adapter";
-import type {
-  IWINVConfig,
-  IWINVIPRestrictionAlert,
-  IWINVSmsChargeResponse,
-  IWINVSmsHistoryItem,
-  IWINVSmsHistoryResponse,
-} from "./types/iwinv";
+import type { IWINVConfig } from "./types/iwinv";
 
-const DEFAULT_IP_RETRY_COUNT = 2;
-const DEFAULT_IP_RETRY_DELAY_MS = 800;
-
-type RequestRouteContext = {
-  channel: string;
-  endpoint: string;
-  phoneNumber: string;
-  templateCode?: string;
+type IWINVSendResponse = {
+  code: number;
+  message: string;
+  success?: number;
+  fail?: number;
+  seqNo?: number;
 };
 
-type SmsV2MessageType = "SMS" | "LMS" | "MMS" | "GSMS";
-export type IWINVSmsHistoryParams = {
-  version?: string; // default: "1.0"
-  companyId?: string;
-  startDate: string | Date; // yyyy-MM-dd
-  endDate: string | Date; // yyyy-MM-dd
+type SmsV2SendResponse = Record<string, unknown> & {
+  resultCode?: number | string;
+  code?: number | string;
+  message?: string;
   requestNo?: string;
-  pageNum?: number;
-  pageSize?: number; // max 1000
-  phone?: string;
+  msgid?: string;
+  msgType?: string;
 };
 
-export class IWINVProvider extends UniversalProvider {
-  private static readonly directSmsTemplates = new Set([
-    "SMS_DIRECT",
-    "LMS_DIRECT",
-    "MMS_DIRECT",
-  ]);
+type SmsV2MessageType = "SMS" | "LMS" | "MMS";
 
-  private readonly iwinvConfig: IWINVConfig;
+export class IWINVProvider implements Provider {
+  readonly id = "iwinv";
+  readonly name = "IWINV Messaging Provider";
+  readonly supportedTypes: readonly MessageType[];
+
+  private readonly config: IWINVConfig;
 
   constructor(config: IWINVConfig) {
-    const normalizedConfig: IWINVConfig = {
+    if (!config || typeof config !== "object") {
+      throw new Error("IWINVProvider requires a config object");
+    }
+    if (!config.apiKey || config.apiKey.length === 0) {
+      throw new Error("IWINVProvider requires `apiKey`");
+    }
+    if (!config.baseUrl || config.baseUrl.length === 0) {
+      throw new Error("IWINVProvider requires `baseUrl`");
+    }
+
+    this.config = {
       ...config,
-      senderNumber: config.senderNumber || config.smsSenderNumber,
+      baseUrl: config.baseUrl || "https://alimtalk.bizservice.iwinv.kr",
       sendEndpoint: config.sendEndpoint || "/api/v2/send/",
     };
-    const adapter = new IWINVAdapter(normalizedConfig);
-    super(adapter, {
-      id: "iwinv",
-      name: "IWINV AlimTalk Provider",
-      version: "1.0.0",
-    });
-    this.iwinvConfig = normalizedConfig;
+
+    const types: MessageType[] = ["ALIMTALK"];
+    if (this.canSendSmsV2()) {
+      types.push("SMS", "LMS", "MMS");
+    }
+    this.supportedTypes = types;
   }
 
-  // Unified send entrypoint: route SMS/LMS/MMS to SMS API, others to AlimTalk adapter.
-  async send(params: StandardRequest): Promise<StandardResult>;
-  async send(params: SendOptions): Promise<unknown>;
-  async send(params: unknown): Promise<unknown> {
-    if (!this.isStandardRequest(params)) {
-      return super.send(params as unknown as StandardRequest);
+  async healthCheck(): Promise<ProviderHealthStatus> {
+    const start = Date.now();
+    const issues: string[] = [];
+
+    try {
+      try {
+        new URL(this.config.baseUrl);
+      } catch {
+        issues.push("Invalid baseUrl");
+      }
+
+      if (this.canSendSmsV2()) {
+        try {
+          new URL(this.resolveSmsBaseUrl());
+        } catch {
+          issues.push("Invalid smsBaseUrl");
+        }
+      }
+
+      return {
+        healthy: issues.length === 0,
+        issues,
+        latencyMs: Date.now() - start,
+        data: {
+          provider: this.id,
+          baseUrl: this.config.baseUrl,
+          smsBaseUrl: this.resolveSmsBaseUrl(),
+        },
+      };
+    } catch (error) {
+      issues.push(error instanceof Error ? error.message : String(error));
+      return { healthy: false, issues, latencyMs: Date.now() - start };
+    }
+  }
+
+  async send(options: SendOptions): Promise<Result<SendResult, KMsgError>> {
+    const messageId = options.messageId || crypto.randomUUID();
+    const normalized = { ...options, messageId } as SendOptions;
+
+    switch (normalized.type) {
+      case "ALIMTALK":
+        return this.sendAlimTalk(normalized);
+      case "SMS":
+      case "LMS":
+      case "MMS":
+        return this.sendSmsV2(normalized);
+      default:
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            `IWINVProvider does not support type ${normalized.type}`,
+            { providerId: this.id, type: normalized.type },
+          ),
+        );
+    }
+  }
+
+  private normalizePhoneNumber(value: string): string {
+    return value.replace(/[^0-9]/g, "");
+  }
+
+  private toBase64(value: string): string {
+    return Buffer.from(value, "utf8").toString("base64");
+  }
+
+  private getSendEndpoint(): string {
+    const raw = this.config.sendEndpoint || "/api/v2/send/";
+    return raw.startsWith("/") ? raw : `/${raw}`;
+  }
+
+  private getAlimTalkHeaders(): Record<string, string> {
+    const auth = this.toBase64(this.config.apiKey);
+    const base: Record<string, string> = {
+      AUTH: auth,
+      "Content-Type": "application/json;charset=UTF-8",
+    };
+
+    if (
+      typeof this.config.xForwardedFor === "string" &&
+      this.config.xForwardedFor.length > 0
+    ) {
+      base["X-Forwarded-For"] = this.config.xForwardedFor;
     }
 
-    if (this.isSmsChannelRequest(params)) {
-      const messageText = this.extractMessageText(params);
-      const messageType = this.resolveSmsMessageType(params, messageText);
-      const routeContext: RequestRouteContext = {
-        channel: messageType,
-        endpoint: "/api/v2/send/",
-        phoneNumber: params.phoneNumber,
-        templateCode: params.templateCode,
-      };
+    if (this.config.extraHeaders && typeof this.config.extraHeaders === "object") {
+      return { ...base, ...this.config.extraHeaders };
+    }
 
-      return this.sendWithIpRetry(
-        () => this.sendSmsRequestOnce(params, messageText, messageType),
-        routeContext,
+    return base;
+  }
+
+  private formatIWINVDate(date: Date): string {
+    const pad = (v: number) => v.toString().padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  private async sendAlimTalk(
+    options: Extract<SendOptions, { type: "ALIMTALK" }>,
+  ): Promise<Result<SendResult, KMsgError>> {
+    if (!options.templateCode || options.templateCode.length === 0) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "templateCode is required for ALIMTALK",
+          { providerId: this.id },
+        ),
       );
     }
 
-    const channel =
-      typeof params.channel === "string"
-        ? params.channel.toUpperCase()
-        : typeof params.options?.channel === "string"
-          ? params.options.channel.toUpperCase()
-          : "ALIMTALK";
+    const scheduledAt = options.options?.scheduledAt;
+    const reserve = scheduledAt ? "Y" : "N";
+    const sendDate =
+      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime())
+        ? this.formatIWINVDate(scheduledAt)
+        : undefined;
 
-    return this.sendWithIpRetry(() => super.send(params), {
-      channel,
-      endpoint: this.iwinvConfig.sendEndpoint || "/api/v2/send/",
-      phoneNumber: params.phoneNumber,
-      templateCode: params.templateCode,
-    });
-  }
+    const to = this.normalizePhoneNumber(options.to);
+    if (!to) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "to is required", {
+          providerId: this.id,
+        }),
+      );
+    }
 
-  /**
-   * SMS v2: 잔액(충전금) 조회
-   * - URL: POST https://sms.bizservice.iwinv.kr/api/charge/
-   * - Header: secret: base64(SMS_API_KEY&SMS_AUTH_KEY)
-   * - Body: { "version": "1.0" }
-   */
-  async getSmsCharge(): Promise<number> {
-    const response = await this.requestSmsApi<IWINVSmsChargeResponse>(
-      "/api/charge/",
-      { version: "1.0" },
+    const templateParam = Object.values(options.variables || {}).map((v) =>
+      v === null || v === undefined ? "" : String(v),
     );
 
-    const rawCode =
-      (response as unknown as Record<string, unknown>).resultCode ??
-      (response as unknown as Record<string, unknown>).code ??
-      -1;
-    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
-    if (code !== 0) {
-      const message =
-        typeof (response as unknown as Record<string, unknown>).message ===
-          "string" &&
-        ((response as unknown as Record<string, unknown>).message as string)
-          .length > 0
-          ? ((response as unknown as Record<string, unknown>).message as string)
-          : "Failed to get SMS charge";
-      throw new Error(message);
-    }
-
-    return typeof (response as unknown as Record<string, unknown>).charge ===
-      "number"
-      ? ((response as unknown as Record<string, unknown>).charge as number)
-      : 0;
-  }
-
-  /**
-   * SMS v2: 전송 내역 조회
-   * - URL: POST https://sms.bizservice.iwinv.kr/api/history/
-   * - 기간은 90일 이내만 허용
-   */
-  async getSmsHistory(params: IWINVSmsHistoryParams): Promise<{
-    totalCount: number;
-    list: IWINVSmsHistoryItem[];
-    message: string;
-  }> {
-    const version = params.version ?? "1.0";
-    const startDate = this.formatSmsHistoryDate(params.startDate);
-    const endDate = this.formatSmsHistoryDate(params.endDate);
-    const companyId = params.companyId ?? this.iwinvConfig.smsCompanyId;
-    if (!companyId || companyId.length === 0) {
-      throw new Error(
-        "companyId is required for SMS history. Pass { companyId } or set smsCompanyId in config.",
-      );
-    }
-
-    this.assertSmsHistoryWindow(startDate, endDate);
+    // SMS fallback fields are optional. Enable only if we have a sender number.
+    const senderNumber =
+      (typeof options.from === "string" && options.from.length > 0
+        ? options.from
+        : this.config.senderNumber || this.config.smsSenderNumber) || "";
+    const normalizedSender = senderNumber
+      ? this.normalizePhoneNumber(senderNumber)
+      : "";
 
     const payload: Record<string, unknown> = {
-      version,
-      companyid: companyId,
-      startDate,
-      endDate,
+      templateCode: options.templateCode,
+      reserve,
+      ...(sendDate ? { sendDate } : {}),
+      list: [
+        {
+          phone: to,
+          templateParam: templateParam.length > 0 ? templateParam : undefined,
+        },
+      ],
+      reSend: normalizedSender ? "Y" : "N",
+      ...(normalizedSender ? { resendCallback: normalizedSender } : {}),
     };
 
-    if (typeof params.requestNo === "string" && params.requestNo.length > 0) {
-      payload.requestNo = params.requestNo;
-    }
-    if (typeof params.pageNum === "number") {
-      payload.pageNum = params.pageNum;
-    }
-    if (typeof params.pageSize === "number") {
-      payload.pageSize = Math.min(Math.max(params.pageSize, 1), 1000);
-    }
-    if (typeof params.phone === "string" && params.phone.length > 0) {
-      payload.phone = params.phone;
-    }
+    const url = `${this.config.baseUrl}${this.getSendEndpoint()}`;
 
-    const response = await this.requestSmsApi<IWINVSmsHistoryResponse>(
-      "/api/history/",
-      payload,
-    );
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
 
-    const rawCode =
-      (response as unknown as Record<string, unknown>).resultCode ??
-      (response as unknown as Record<string, unknown>).code ??
-      -1;
-    const code = typeof rawCode === "number" ? rawCode : Number(rawCode);
-    const message =
-      typeof (response as unknown as Record<string, unknown>).message ===
-        "string" &&
-      ((response as unknown as Record<string, unknown>).message as string)
-        .length > 0
-        ? ((response as unknown as Record<string, unknown>).message as string)
-        : code === 0
-          ? "데이터가 조회되었습니다."
-          : "Failed to get SMS history";
+      const responseText = await response.text();
+      const parsed: unknown = responseText ? JSON.parse(responseText) : {};
+      const data: IWINVSendResponse = isObjectRecord(parsed)
+        ? (parsed as IWINVSendResponse)
+        : ({ code: response.status, message: responseText } as IWINVSendResponse);
 
-    if (code !== 0) {
-      throw new Error(message);
+      if (!response.ok || data.code !== 200) {
+        return fail(
+          new KMsgError(
+            this.mapIwinvCodeToKMsgErrorCode(data.code),
+            data.message || "IWINV send failed",
+            { providerId: this.id, originalCode: data.code },
+          ),
+        );
+      }
+
+      return ok({
+        messageId: options.messageId || crypto.randomUUID(),
+        providerId: this.id,
+        providerMessageId:
+          typeof data.seqNo === "number" ? String(data.seqNo) : undefined,
+        status: "SENT",
+        type: options.type,
+        to: options.to,
+        raw: data,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
     }
-
-    return {
-      totalCount:
-        typeof (response as unknown as Record<string, unknown>).totalCount ===
-        "number"
-          ? ((response as unknown as Record<string, unknown>)
-              .totalCount as number)
-          : 0,
-      list: Array.isArray((response as unknown as Record<string, unknown>).list)
-        ? (((response as unknown as Record<string, unknown>).list ??
-            []) as IWINVSmsHistoryItem[])
-        : [],
-      message,
-    };
   }
 
-  private isStandardRequest(value: unknown): value is StandardRequest {
-    if (!value || typeof value !== "object") {
-      return false;
+  private mapIwinvCodeToKMsgErrorCode(code: number): KMsgErrorCode {
+    switch (code) {
+      case 201:
+      case 206:
+      case 401:
+        return KMsgErrorCode.AUTHENTICATION_FAILED;
+      case 403:
+      case 519:
+        return KMsgErrorCode.INSUFFICIENT_BALANCE;
+      case 404:
+        return KMsgErrorCode.TEMPLATE_NOT_FOUND;
+      case 429:
+        return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
+      default:
+        if (code >= 500) return KMsgErrorCode.PROVIDER_ERROR;
+        return KMsgErrorCode.INVALID_REQUEST;
     }
-    const request = value as Record<string, unknown>;
-    return (
-      typeof request.templateCode === "string" &&
-      typeof request.phoneNumber === "string" &&
-      typeof request.variables === "object" &&
-      request.variables !== null
-    );
-  }
-
-  private isSmsChannelRequest(request: StandardRequest): boolean {
-    const channel = (request.channel || "").toUpperCase();
-    if (channel === "SMS" || channel === "LMS" || channel === "MMS") {
-      return true;
-    }
-
-    const optionChannel =
-      typeof request.options?.channel === "string"
-        ? request.options.channel.toUpperCase()
-        : "";
-    if (
-      optionChannel === "SMS" ||
-      optionChannel === "LMS" ||
-      optionChannel === "MMS"
-    ) {
-      return true;
-    }
-
-    return IWINVProvider.directSmsTemplates.has(request.templateCode);
   }
 
   private resolveSmsBaseUrl(): string {
-    const explicitSmsBaseUrl =
-      typeof this.iwinvConfig.smsBaseUrl === "string" &&
-      this.iwinvConfig.smsBaseUrl.length > 0
-        ? this.iwinvConfig.smsBaseUrl
-        : this.iwinvConfig.baseUrl;
-
-    let baseUrl = explicitSmsBaseUrl || "https://sms.bizservice.iwinv.kr";
-    baseUrl = baseUrl.replace(
-      "alimtalk.bizservice.iwinv.kr",
-      "sms.bizservice.iwinv.kr",
+    return (
+      this.config.smsBaseUrl ||
+      process.env.IWINV_SMS_BASE_URL ||
+      "https://sms.bizservice.iwinv.kr"
     );
-    baseUrl = baseUrl.replace(/\/api\/?$/, "");
-    return baseUrl.replace(/\/+$/, "");
   }
 
-  private resolveSmsMessageType(
-    request: StandardRequest,
-    message: string,
-  ): SmsV2MessageType {
-    const optionType =
-      typeof request.options?.msgType === "string"
-        ? request.options.msgType.toUpperCase()
-        : "";
-    if (optionType === "GSMS") {
-      return "GSMS";
-    }
-    if (optionType === "MMS") {
-      return "MMS";
-    }
-    if (optionType === "LMS") {
-      return "LMS";
-    }
-    if (optionType === "SMS") {
-      return "SMS";
-    }
-
-    const channel = (request.channel || "").toUpperCase();
-    if (channel === "MMS" || request.templateCode === "MMS_DIRECT") {
-      return "MMS";
-    }
-    if (channel === "LMS" || request.templateCode === "LMS_DIRECT") {
-      return "LMS";
-    }
-    if (channel === "SMS" || request.templateCode === "SMS_DIRECT") {
-      return "SMS";
-    }
-
-    return message.length > 90 ? "LMS" : "SMS";
+  private canSendSmsV2(): boolean {
+    const secret = this.buildSmsSecretHeader();
+    return secret.length > 0;
   }
 
-  private extractMessageText(request: StandardRequest): string {
-    if (typeof request.text === "string" && request.text.trim().length > 0) {
-      return request.text;
+  private buildSmsSecretHeader(): string {
+    // Preferred mode: SMS API key + SMS auth key
+    if (this.config.smsApiKey && this.config.smsAuthKey) {
+      return Buffer.from(
+        `${this.config.smsApiKey}&${this.config.smsAuthKey}`,
+        "utf8",
+      ).toString("base64");
     }
-    if (
-      typeof request.variables.message === "string" &&
-      request.variables.message.trim().length > 0
-    ) {
-      return request.variables.message;
-    }
-    if (
-      typeof request.variables._full_text === "string" &&
-      request.variables._full_text.trim().length > 0
-    ) {
-      return request.variables._full_text;
-    }
-    return "";
+
+    // Legacy-compatible mode: existing IWINV apiKey + one extra SMS key.
+    const legacyAuthKey = this.config.smsAuthKey || this.config.smsApiKey;
+    if (!legacyAuthKey) return "";
+
+    return Buffer.from(`${this.config.apiKey}&${legacyAuthKey}`, "utf8").toString(
+      "base64",
+    );
   }
 
   private formatSmsReserveDate(date: Date): string {
@@ -324,125 +316,14 @@ export class IWINVProvider extends UniversalProvider {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 
-  private formatSmsHistoryDate(value: string | Date): string {
+  private normalizeCode(value: unknown): string {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value.toString();
+    }
     if (typeof value === "string") {
-      // The API expects yyyy-MM-dd. If caller provides longer strings, keep the first 10 chars.
-      return value.length >= 10 ? value.slice(0, 10) : value;
+      return value.trim();
     }
-    const pad = (v: number) => v.toString().padStart(2, "0");
-    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
-  }
-
-  private assertSmsHistoryWindow(startDate: string, endDate: string) {
-    const start = new Date(`${startDate}T00:00:00+09:00`).getTime();
-    const end = new Date(`${endDate}T00:00:00+09:00`).getTime();
-    if (Number.isNaN(start) || Number.isNaN(end)) {
-      throw new Error("Invalid startDate/endDate (expected yyyy-MM-dd)");
-    }
-    if (end < start) {
-      throw new Error("endDate must be greater than or equal to startDate");
-    }
-    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
-    if (end - start > ninetyDaysMs) {
-      throw new Error("조회 기간은 90일 이내만 가능합니다.");
-    }
-  }
-
-  private async requestSmsApi<T>(
-    path: string,
-    payload: Record<string, unknown>,
-  ): Promise<T> {
-    const url = `${this.resolveSmsBaseUrl()}${path}`;
-    const secretHeader = this.buildSmsSecretHeader();
-    if (!secretHeader) {
-      throw new Error(
-        "SMS 인증키가 없습니다. IWINV_SMS_AUTH_KEY 또는 IWINV_SMS_API_KEY를 설정하세요.",
-      );
-    }
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json;charset=UTF-8",
-      secret: secretHeader,
-    };
-
-    if (
-      typeof this.iwinvConfig.xForwardedFor === "string" &&
-      this.iwinvConfig.xForwardedFor.length > 0
-    ) {
-      headers["X-Forwarded-For"] = this.iwinvConfig.xForwardedFor;
-    }
-
-    const extraHeaders = this.iwinvConfig.extraHeaders;
-    const mergedHeaders =
-      extraHeaders && typeof extraHeaders === "object"
-        ? { ...headers, ...extraHeaders }
-        : headers;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: mergedHeaders,
-      body: JSON.stringify(payload),
-    });
-
-    const responseText = await response.text();
-    let parsed: unknown;
-    try {
-      parsed = responseText ? JSON.parse(responseText) : {};
-    } catch {
-      parsed = responseText;
-    }
-
-    if (!response.ok) {
-      const message =
-        typeof parsed === "object" && parsed !== null && "message" in parsed
-          ? String((parsed as Record<string, unknown>).message)
-          : `HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(message);
-    }
-
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed as T;
-    }
-
-    // Some endpoints may return scalar codes.
-    return { resultCode: parsed } as T;
-  }
-
-  private normalizePhoneNumber(value: string): string {
-    return value.replace(/[^0-9]/g, "");
-  }
-
-  private buildSmsSecretHeader(): string {
-    // Preferred v2 mode: SMS API key + SMS auth key
-    if (this.iwinvConfig.smsApiKey && this.iwinvConfig.smsAuthKey) {
-      return Buffer.from(
-        `${this.iwinvConfig.smsApiKey}&${this.iwinvConfig.smsAuthKey}`,
-        "utf8",
-      ).toString("base64");
-    }
-
-    // Legacy-compatible mode: existing IWINV_API_KEY + one extra SMS key.
-    const legacyAuthKey =
-      this.iwinvConfig.smsAuthKey || this.iwinvConfig.smsApiKey;
-    if (!legacyAuthKey) {
-      return "";
-    }
-    const secretBase = `${this.iwinvConfig.apiKey}&${legacyAuthKey}`;
-    return Buffer.from(secretBase, "utf8").toString("base64");
-  }
-
-  private buildLmsTitle(request: StandardRequest, messageText: string): string {
-    const subject =
-      request.options?.subject ||
-      (typeof request.variables.subject === "string"
-        ? request.variables.subject
-        : undefined);
-    if (subject && subject.trim().length > 0) {
-      return subject.trim();
-    }
-
-    // Fallback title to satisfy LMS required title without forcing caller changes.
-    return messageText.slice(0, 20);
+    return "";
   }
 
   private mapSmsResponseMessage(code: string, fallback: string): string {
@@ -471,15 +352,12 @@ export class IWINVProvider extends UniversalProvider {
     return knownMessages[code] || fallback;
   }
 
-  private mapSmsErrorCode(
-    code: string,
-    responseOk: boolean,
-  ): StandardErrorCode {
+  private mapSmsErrorCode(code: string, responseOk: boolean): KMsgErrorCode {
     if (code === "14" || code === "15" || code === "202" || code === "206") {
-      return StandardErrorCode.AUTHENTICATION_FAILED;
+      return KMsgErrorCode.AUTHENTICATION_FAILED;
     }
     if (code === "50") {
-      return StandardErrorCode.INSUFFICIENT_BALANCE;
+      return KMsgErrorCode.INSUFFICIENT_BALANCE;
     }
     if (
       code === "13" ||
@@ -494,344 +372,106 @@ export class IWINVProvider extends UniversalProvider {
       code === "43" ||
       code === "44"
     ) {
-      return StandardErrorCode.INVALID_REQUEST;
-    }
-    if (code === "12") {
-      return StandardErrorCode.PROVIDER_ERROR;
+      return KMsgErrorCode.INVALID_REQUEST;
     }
     if (!responseOk) {
-      return StandardErrorCode.NETWORK_ERROR;
+      return KMsgErrorCode.NETWORK_ERROR;
     }
-    return StandardErrorCode.PROVIDER_ERROR;
+    return KMsgErrorCode.PROVIDER_ERROR;
   }
 
-  private isSmsRetryableCode(code: string, responseOk: boolean): boolean {
-    if (!responseOk) {
-      return true;
-    }
-    return code === "12" || code === "429" || code.startsWith("5");
+  private buildLmsTitle(text: string, subject?: string): string {
+    if (subject && subject.trim().length > 0) return subject.trim();
+    return text.slice(0, 20);
   }
 
-  private normalizeCode(value: unknown): string {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value.toString();
-    }
-    if (typeof value === "string") {
-      return value.trim();
-    }
-    return "";
-  }
-
-  private extractProviderCode(result: StandardResult): string {
-    const metadataCode = this.normalizeCode(result.metadata?.originalCode);
-    if (metadataCode) {
-      return metadataCode;
+  private async sendSmsV2(
+    options: Extract<SendOptions, { type: SmsV2MessageType }>,
+  ): Promise<Result<SendResult, KMsgError>> {
+    if (!this.canSendSmsV2()) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "SMS v2 configuration missing (smsApiKey/smsAuthKey)",
+          { providerId: this.id },
+        ),
+      );
     }
 
-    const detailCode = this.normalizeCode(result.error?.details?.originalCode);
-    if (detailCode) {
-      return detailCode;
+    const to = this.normalizePhoneNumber(options.to);
+    if (!to) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "to is required", {
+          providerId: this.id,
+        }),
+      );
     }
 
-    const nestedCode = this.normalizeCode(
-      (
-        result.error?.details?.originalError as
-          | Record<string, unknown>
-          | undefined
-      )?.code,
-    );
-    if (nestedCode) {
-      return nestedCode;
-    }
-
-    return "";
-  }
-
-  private isIpRestrictionResult(result: StandardResult): boolean {
-    const code = this.extractProviderCode(result);
-    if (code === "15" || code === "206") {
-      return true;
-    }
-
-    const message = result.error?.message || "";
-    return (
-      message.includes("등록하지 않은 IP") ||
-      message.toLowerCase().includes("unregistered ip")
-    );
-  }
-
-  private getIpRetryCount(): number {
-    const raw = Number(this.iwinvConfig.ipRetryCount ?? DEFAULT_IP_RETRY_COUNT);
-    if (!Number.isFinite(raw) || raw < 0) {
-      return DEFAULT_IP_RETRY_COUNT;
-    }
-    return Math.floor(raw);
-  }
-
-  private getIpRetryDelayMs(attempt: number): number {
-    const raw = Number(
-      this.iwinvConfig.ipRetryDelayMs ?? DEFAULT_IP_RETRY_DELAY_MS,
-    );
-    if (!Number.isFinite(raw) || raw <= 0) {
-      return DEFAULT_IP_RETRY_DELAY_MS;
-    }
-    // Simple linear backoff to avoid hammering a blocked route.
-    return Math.floor(raw * attempt);
-  }
-
-  private async wait(ms: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private async emitIpRestrictionAlert(
-    context: RequestRouteContext,
-    result: StandardResult,
-    attempt: number,
-    maxAttempts: number,
-  ): Promise<void> {
-    const code = this.extractProviderCode(result) || "206";
-    const message =
-      result.error?.message || "등록하지 않은 IP에서는 발송되지 않습니다.";
-    const alertPayload: IWINVIPRestrictionAlert = {
-      provider: "iwinv",
-      channel: context.channel,
-      endpoint: context.endpoint,
-      phoneNumber: context.phoneNumber,
-      templateCode: context.templateCode,
-      code,
-      message,
-      attempt,
-      maxAttempts,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.warn(
-      `[iwinv] Unregistered IP response detected (${context.channel}, attempt ${attempt}/${maxAttempts}, code=${code}, endpoint=${context.endpoint})`,
-    );
-
-    if (typeof this.iwinvConfig.onIpRestrictionAlert === "function") {
-      try {
-        await Promise.resolve(
-          this.iwinvConfig.onIpRestrictionAlert(alertPayload),
-        );
-      } catch (error) {
-        console.warn("[iwinv] onIpRestrictionAlert callback failed:", error);
-      }
-    }
-
-    if (
-      typeof this.iwinvConfig.ipAlertWebhookUrl === "string" &&
-      this.iwinvConfig.ipAlertWebhookUrl.length > 0
-    ) {
-      try {
-        await fetch(this.iwinvConfig.ipAlertWebhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(alertPayload),
-        });
-      } catch (error) {
-        console.warn("[iwinv] IP alert webhook delivery failed:", error);
-      }
-    }
-  }
-
-  private addIpRetryMetadata(
-    result: StandardResult,
-    maxAttempts: number,
-  ): StandardResult {
-    if (!result.error) {
-      return result;
-    }
-
-    const currentMessage =
-      result.error.message || "등록하지 않은 IP에서는 발송되지 않습니다.";
-    const message = currentMessage.includes("재시도")
-      ? currentMessage
-      : `${currentMessage} (미등록 IP로 ${maxAttempts}회 재시도 후 중단)`;
-
-    return {
-      ...result,
-      error: {
-        ...result.error,
-        message,
-        details: {
-          ...(result.error.details || {}),
-          ipRestriction: true,
-          ipRetryAttempts: maxAttempts,
-        },
-      },
-      metadata: {
-        ...(result.metadata || {}),
-        ipRestriction: true,
-        ipRetryAttempts: maxAttempts,
-      },
-    };
-  }
-
-  private async sendWithIpRetry(
-    sendOnce: () => Promise<StandardResult>,
-    context: RequestRouteContext,
-  ): Promise<StandardResult> {
-    const retryCount = this.getIpRetryCount();
-    const maxAttempts = retryCount + 1;
-    let lastResult: StandardResult | null = null;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const result = await sendOnce();
-      lastResult = result;
-
-      if (!this.isIpRestrictionResult(result)) {
-        return result;
-      }
-
-      await this.emitIpRestrictionAlert(context, result, attempt, maxAttempts);
-
-      if (attempt < maxAttempts) {
-        await this.wait(this.getIpRetryDelayMs(attempt));
-      }
-    }
-
-    if (!lastResult) {
-      return {
-        messageId: `ip_retry_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: context.phoneNumber,
-        error: {
-          code: StandardErrorCode.NETWORK_ERROR,
-          message: "Unknown send failure after retry",
-          retryable: false,
-        },
-      };
-    }
-
-    return this.addIpRetryMetadata(lastResult, maxAttempts);
-  }
-
-  private async sendSmsRequestOnce(
-    request: StandardRequest,
-    messageText: string,
-    messageType: SmsV2MessageType,
-  ): Promise<StandardResult> {
-    if (!messageText) {
-      return {
-        messageId: `sms_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: {
-          code: StandardErrorCode.INVALID_REQUEST,
-          message: "SMS/LMS message text is required",
-          retryable: false,
-        },
-      };
+    const text = (options as any).text as string | undefined;
+    if (!text || text.trim().length === 0) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "text is required for SMS/LMS/MMS",
+          { providerId: this.id },
+        ),
+      );
     }
 
     const senderNumber =
-      request.options?.senderNumber ||
-      this.iwinvConfig.senderNumber ||
-      this.iwinvConfig.smsSenderNumber;
-    const normalizedSender = senderNumber
-      ? this.normalizePhoneNumber(senderNumber)
-      : "";
-    if (!normalizedSender) {
-      return {
-        messageId: `sms_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: {
-          code: StandardErrorCode.INVALID_REQUEST,
-          message: "SMS sender number is required",
-          retryable: false,
-        },
-      };
+      (typeof options.from === "string" && options.from.length > 0
+        ? options.from
+        : this.config.smsSenderNumber || this.config.senderNumber) || "";
+    const from = senderNumber ? this.normalizePhoneNumber(senderNumber) : "";
+    if (!from) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "from is required for SMS/LMS/MMS (options.from or config.smsSenderNumber)",
+          { providerId: this.id },
+        ),
+      );
     }
 
     const payload: Record<string, unknown> = {
       version: "1.0",
-      from: normalizedSender,
-      to: [this.normalizePhoneNumber(request.phoneNumber)],
-      text: messageText,
+      from,
+      to: [to],
+      text,
     };
-    const recipients = payload.to as string[];
-    if (!recipients[0]) {
-      return {
-        messageId: `sms_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: {
-          code: StandardErrorCode.INVALID_REQUEST,
-          message: "SMS recipient number is required",
-          retryable: false,
-        },
-      };
+
+    if (options.type === "LMS" || options.type === "MMS") {
+      payload.title = this.buildLmsTitle(text, (options as any).subject);
+    } else {
+      payload.msgType = options.type;
     }
 
-    if (messageType === "LMS" || messageType === "MMS") {
-      payload.title = this.buildLmsTitle(request, messageText);
-    }
-    if (messageType !== "LMS" && messageType !== "MMS") {
-      payload.msgType = messageType;
-    }
-    if (
-      request.options?.scheduledAt instanceof Date &&
-      !Number.isNaN(request.options.scheduledAt.getTime())
-    ) {
-      payload.date = this.formatSmsReserveDate(request.options.scheduledAt);
+    const scheduledAt = options.options?.scheduledAt;
+    if (scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime())) {
+      payload.date = this.formatSmsReserveDate(scheduledAt);
     }
 
-    const endpoint = "/api/v2/send/";
-    const url = `${this.resolveSmsBaseUrl()}${endpoint}`;
     const secretHeader = this.buildSmsSecretHeader();
-    if (!secretHeader) {
-      return {
-        messageId: `sms_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: {
-          code: StandardErrorCode.AUTHENTICATION_FAILED,
-          message:
-            "SMS 인증키가 없습니다. IWINV_SMS_AUTH_KEY 또는 IWINV_SMS_API_KEY를 설정하세요.",
-          retryable: false,
-        },
-      };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json;charset=UTF-8",
+      secret: secretHeader,
+    };
+
+    if (
+      typeof this.config.xForwardedFor === "string" &&
+      this.config.xForwardedFor.length > 0
+    ) {
+      headers["X-Forwarded-For"] = this.config.xForwardedFor;
     }
 
-    if (this.iwinvConfig.debug) {
-      console.log(`[${this.id}] Making request to:`, url);
-      console.log(
-        `[${this.id}] Request data:`,
-        JSON.stringify(payload).substring(0, 200),
-      );
-    }
+    const mergedHeaders =
+      this.config.extraHeaders && typeof this.config.extraHeaders === "object"
+        ? { ...headers, ...this.config.extraHeaders }
+        : headers;
+
+    const url = `${this.resolveSmsBaseUrl()}/api/v2/send/`;
 
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json;charset=UTF-8",
-        secret: secretHeader,
-      };
-
-      if (
-        typeof this.iwinvConfig.xForwardedFor === "string" &&
-        this.iwinvConfig.xForwardedFor.length > 0
-      ) {
-        headers["X-Forwarded-For"] = this.iwinvConfig.xForwardedFor;
-      }
-
-      const extraHeaders = this.iwinvConfig.extraHeaders;
-      const mergedHeaders =
-        extraHeaders && typeof extraHeaders === "object"
-          ? { ...headers, ...extraHeaders }
-          : headers;
-
       const response = await fetch(url, {
         method: "POST",
         headers: mergedHeaders,
@@ -839,15 +479,6 @@ export class IWINVProvider extends UniversalProvider {
       });
 
       const responseText = await response.text();
-
-      if (this.iwinvConfig.debug) {
-        console.log(`[${this.id}] Response status:`, response.status);
-        console.log(
-          `[${this.id}] Response body:`,
-          responseText.substring(0, 500),
-        );
-      }
-
       let parsed: unknown;
       try {
         parsed = responseText ? JSON.parse(responseText) : {};
@@ -855,88 +486,75 @@ export class IWINVProvider extends UniversalProvider {
         parsed = responseText;
       }
 
-      const responseData =
-        parsed && typeof parsed === "object" && !Array.isArray(parsed)
-          ? (parsed as Record<string, unknown>)
-          : ({ resultCode: parsed } as Record<string, unknown>);
+      const data: SmsV2SendResponse = isObjectRecord(parsed)
+        ? (parsed as SmsV2SendResponse)
+        : ({ resultCode: parsed } as SmsV2SendResponse);
 
-      const rawCode = responseData.resultCode ?? responseData.code;
+      const rawCode = data.resultCode ?? data.code;
       const code = this.normalizeCode(rawCode);
       const message =
-        typeof responseData.message === "string" &&
-        responseData.message.length > 0
-          ? responseData.message
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
           : this.mapSmsResponseMessage(code, "SMS send failed");
+
       const isSuccess = response.ok && code === "0";
 
-      return {
-        messageId:
-          typeof responseData.requestNo === "string" &&
-          responseData.requestNo.length > 0
-            ? responseData.requestNo
-            : typeof responseData.msgid === "string" &&
-                responseData.msgid.length > 0
-              ? responseData.msgid
-              : `sms_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
-        status: isSuccess ? StandardStatus.SENT : StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: isSuccess
-          ? undefined
-          : {
-              code: this.mapSmsErrorCode(code, response.ok),
-              message,
-              retryable: this.isSmsRetryableCode(code, response.ok),
-              details: { originalCode: rawCode },
-            },
-        metadata: {
-          channel: messageType,
-          msgType: responseData.msgType,
-          originalCode: rawCode,
-        },
-      };
+      if (!isSuccess) {
+        return fail(
+          new KMsgError(this.mapSmsErrorCode(code, response.ok), message, {
+            providerId: this.id,
+            originalCode: rawCode,
+          }),
+        );
+      }
+
+      const providerMessageId =
+        typeof data.requestNo === "string" && data.requestNo.length > 0
+          ? data.requestNo
+          : typeof data.msgid === "string" && data.msgid.length > 0
+            ? data.msgid
+            : undefined;
+
+      return ok({
+        messageId: options.messageId || crypto.randomUUID(),
+        providerId: this.id,
+        providerMessageId,
+        status: "SENT",
+        type: options.type,
+        to: options.to,
+        raw: data,
+      });
     } catch (error) {
-      return {
-        messageId: `sms_error_${Date.now()}`,
-        status: StandardStatus.FAILED,
-        provider: this.id,
-        timestamp: new Date(),
-        phoneNumber: request.phoneNumber,
-        error: {
-          code: StandardErrorCode.NETWORK_ERROR,
-          message:
-            error instanceof Error ? error.message : "Unknown network error",
-          retryable: true,
-        },
-      };
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
     }
   }
 }
 
-export const createIWINVProvider = (config: IWINVConfig) =>
-  new IWINVProvider(config);
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export const createIWINVProvider = (config: IWINVConfig) => new IWINVProvider(config);
 
 export const createDefaultIWINVProvider = () => {
   const config: IWINVConfig = {
     apiKey: process.env.IWINV_API_KEY || "",
+    baseUrl: process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
     smsApiKey: process.env.IWINV_SMS_API_KEY,
     smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
     smsCompanyId: process.env.IWINV_SMS_COMPANY_ID,
-    baseUrl:
-      process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
     smsBaseUrl: process.env.IWINV_SMS_BASE_URL,
     senderNumber:
       process.env.IWINV_SENDER_NUMBER || process.env.IWINV_SMS_SENDER_NUMBER,
+    smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
     sendEndpoint: process.env.IWINV_SEND_ENDPOINT || "/api/v2/send/",
     xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
-    ipRetryCount: process.env.IWINV_IP_RETRY_COUNT
-      ? Number(process.env.IWINV_IP_RETRY_COUNT)
-      : undefined,
-    ipRetryDelayMs: process.env.IWINV_IP_RETRY_DELAY_MS
-      ? Number(process.env.IWINV_IP_RETRY_DELAY_MS)
-      : undefined,
-    ipAlertWebhookUrl: process.env.IWINV_IP_ALERT_WEBHOOK_URL,
     debug: process.env.NODE_ENV === "development",
   };
 
@@ -944,10 +562,10 @@ export const createDefaultIWINVProvider = () => {
     throw new Error("IWINV_API_KEY environment variable is required");
   }
 
-  return createIWINVProvider(config);
+  return new IWINVProvider(config);
 };
 
-// biome-ignore lint/complexity/noStaticOnlyClass: kept for back-compat with existing imports
+// biome-ignore lint/complexity/noStaticOnlyClass: kept as a factory for convenience
 export class IWINVProviderFactory {
   static create(config: IWINVConfig): IWINVProvider {
     return new IWINVProvider(config);
@@ -956,13 +574,7 @@ export class IWINVProviderFactory {
   static createDefault(): IWINVProvider {
     return createDefaultIWINVProvider();
   }
-
-  static getInstance() {
-    return {
-      createProvider: (config: IWINVConfig) => new IWINVProvider(config),
-      initialize: () => {},
-    };
-  }
 }
 
 export function initializeIWINV(): void {}
+

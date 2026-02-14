@@ -1,6 +1,6 @@
 import type { KMsgError } from "./errors";
 import type { Result } from "./result";
-import type { SendOptions, SendResult } from "./types/index";
+import type { MessageType, SendOptions, SendResult } from "./types/index";
 
 export interface Template {
   id: string;
@@ -34,13 +34,18 @@ export interface TemplateProvider {
   }): Promise<Result<Template[], KMsgError>>;
 }
 
-/**
- * @deprecated Use `BaseProvider` from `@k-msg/core` instead.
- * Legacy provider interface that uses the Result<T, E> pattern for send().
- * New providers should implement `BaseProvider` which uses adapter-based patterns.
- */
+export interface ProviderHealthStatus {
+  healthy: boolean;
+  issues: string[];
+  latencyMs?: number;
+  data?: Record<string, unknown>;
+}
+
 export interface Provider {
   readonly id: string;
   readonly name: string;
+  readonly supportedTypes: readonly MessageType[];
+
+  healthCheck(): Promise<ProviderHealthStatus>;
   send(params: SendOptions): Promise<Result<SendResult, KMsgError>>;
 }
