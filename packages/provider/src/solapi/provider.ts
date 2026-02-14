@@ -2,11 +2,11 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  ok,
-  type MessageButton,
   type MessageBinaryInput,
+  type MessageButton,
   type MessageType,
   type MessageVariables,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -85,7 +85,8 @@ export class SolapiProvider implements Provider {
           : "https://api.solapi.com",
     };
     this.client =
-      client ?? new SolapiMessageService(this.config.apiKey, this.config.apiSecret);
+      client ??
+      new SolapiMessageService(this.config.apiKey, this.config.apiSecret);
   }
 
   async healthCheck(): Promise<ProviderHealthStatus> {
@@ -248,7 +249,9 @@ export class SolapiProvider implements Provider {
     return output;
   }
 
-  private toKakaoButtons(buttons: MessageButton[] | undefined): SolapiKakaoButton[] | undefined {
+  private toKakaoButtons(
+    buttons: MessageButton[] | undefined,
+  ): SolapiKakaoButton[] | undefined {
     if (!Array.isArray(buttons) || buttons.length === 0) return undefined;
     const out: SolapiKakaoButton[] = [];
 
@@ -267,7 +270,10 @@ export class SolapiProvider implements Provider {
     return out.length > 0 ? out : undefined;
   }
 
-  private resolveImageRef(options: { imageUrl?: string; media?: { image?: MessageBinaryInput } }) {
+  private resolveImageRef(options: {
+    imageUrl?: string;
+    media?: { image?: MessageBinaryInput };
+  }) {
     const imageUrl =
       typeof options.imageUrl === "string" && options.imageUrl.trim().length > 0
         ? options.imageUrl.trim()
@@ -291,12 +297,19 @@ export class SolapiProvider implements Provider {
     );
   }
 
+  private extractFileId(upload: unknown): string | undefined {
+    return isObjectRecord(upload) && typeof upload.fileId === "string"
+      ? upload.fileId
+      : undefined;
+  }
+
   private toSolapiMessageType(options: SendOptions): SolapiMessageType {
     switch (options.type) {
       case "ALIMTALK":
         return "ATA";
       case "FRIENDTALK":
-        return (typeof options.imageUrl === "string" && options.imageUrl.trim().length > 0) ||
+        return (typeof options.imageUrl === "string" &&
+          options.imageUrl.trim().length > 0) ||
           Boolean(options.media?.image)
           ? "CTI"
           : "CTA";
@@ -321,7 +334,8 @@ export class SolapiProvider implements Provider {
     };
 
     const country =
-      typeof options.options?.country === "string" && options.options.country.length > 0
+      typeof options.options?.country === "string" &&
+      options.options.country.length > 0
         ? options.options.country
         : typeof this.config.defaultCountry === "string"
           ? this.config.defaultCountry
@@ -372,8 +386,8 @@ export class SolapiProvider implements Provider {
         SendOptions,
         { type: "SMS" | "LMS" | "MMS" }
       >;
-      const text = (options as any).text as string | undefined;
-      if (!text || text.length === 0) {
+      const text = smsOptions.text;
+      if (text.length === 0) {
         throw new KMsgError(
           KMsgErrorCode.INVALID_REQUEST,
           "text is required for SMS/LMS/MMS",
@@ -382,7 +396,7 @@ export class SolapiProvider implements Provider {
       }
 
       base.text = text;
-      const subject = (options as any).subject as string | undefined;
+      const subject = smsOptions.subject;
       if (subject) {
         base.subject = subject;
       }
@@ -398,7 +412,7 @@ export class SolapiProvider implements Provider {
         }
 
         const upload = await this.client.uploadFile(imageRef, "MMS");
-        const fileId = (upload as any)?.fileId;
+        const fileId = this.extractFileId(upload);
         if (typeof fileId === "string" && fileId.length > 0) {
           base.imageId = fileId;
         } else {
@@ -414,10 +428,14 @@ export class SolapiProvider implements Provider {
     }
 
     if (type === "ATA") {
+      const alimtalkOptions = options as Extract<
+        SendOptions,
+        { type: "ALIMTALK" }
+      >;
       const pfId =
-        typeof (options as any).kakao?.profileId === "string" &&
-        (options as any).kakao.profileId.length > 0
-          ? (options as any).kakao.profileId
+        typeof alimtalkOptions.kakao?.profileId === "string" &&
+        alimtalkOptions.kakao.profileId.length > 0
+          ? alimtalkOptions.kakao.profileId
           : this.config.kakaoPfId;
 
       if (!pfId || pfId.length === 0) {
@@ -430,22 +448,26 @@ export class SolapiProvider implements Provider {
 
       base.kakaoOptions = {
         pfId,
-        templateId: (options as any).templateCode,
-        variables: this.stringifyVariables((options as any).variables),
-        disableSms: (options as any).kakao?.disableSms,
-        adFlag: (options as any).kakao?.adFlag,
-        buttons: Array.isArray((options as any).kakao?.buttons)
-          ? (options as any).kakao.buttons
+        templateId: alimtalkOptions.templateCode,
+        variables: this.stringifyVariables(alimtalkOptions.variables),
+        disableSms: alimtalkOptions.kakao?.disableSms,
+        adFlag: alimtalkOptions.kakao?.adFlag,
+        buttons: Array.isArray(alimtalkOptions.kakao?.buttons)
+          ? alimtalkOptions.kakao.buttons
           : undefined,
-        imageId: (options as any).kakao?.imageId,
+        imageId: alimtalkOptions.kakao?.imageId,
       };
 
       return base as unknown as SolapiSendOneMessage;
     }
 
     if (type === "CTA" || type === "CTI") {
-      const text = (options as any).text as string | undefined;
-      if (!text || text.length === 0) {
+      const friendTalkOptions = options as Extract<
+        SendOptions,
+        { type: "FRIENDTALK" }
+      >;
+      const text = friendTalkOptions.text;
+      if (text.length === 0) {
         throw new KMsgError(
           KMsgErrorCode.INVALID_REQUEST,
           "text is required for FRIENDTALK",
@@ -454,9 +476,9 @@ export class SolapiProvider implements Provider {
       }
 
       const pfId =
-        typeof (options as any).kakao?.profileId === "string" &&
-        (options as any).kakao.profileId.length > 0
-          ? (options as any).kakao.profileId
+        typeof friendTalkOptions.kakao?.profileId === "string" &&
+        friendTalkOptions.kakao.profileId.length > 0
+          ? friendTalkOptions.kakao.profileId
           : this.config.kakaoPfId;
 
       if (!pfId || pfId.length === 0) {
@@ -467,15 +489,15 @@ export class SolapiProvider implements Provider {
         );
       }
 
-      const kakaoButtons = this.toKakaoButtons((options as any).buttons);
-      const buttons = Array.isArray((options as any).kakao?.buttons)
-        ? (options as any).kakao.buttons
+      const kakaoButtons = this.toKakaoButtons(friendTalkOptions.buttons);
+      const buttons = Array.isArray(friendTalkOptions.kakao?.buttons)
+        ? friendTalkOptions.kakao.buttons
         : kakaoButtons;
 
       const imageLinkFromOptions =
-        typeof (options as any).kakao?.imageLink === "string" &&
-        (options as any).kakao.imageLink.length > 0
-          ? (options as any).kakao.imageLink
+        typeof friendTalkOptions.kakao?.imageLink === "string" &&
+        friendTalkOptions.kakao.imageLink.length > 0
+          ? friendTalkOptions.kakao.imageLink
           : undefined;
       const firstButton =
         Array.isArray(buttons) && buttons.length > 0 ? buttons[0] : undefined;
@@ -487,7 +509,6 @@ export class SolapiProvider implements Provider {
 
       let imageId: string | undefined;
       if (type === "CTI") {
-        const friendTalkOptions = options as Extract<SendOptions, { type: "FRIENDTALK" }>;
         const imageRef = this.resolveImageRef(friendTalkOptions);
         if (!imageRef) {
           throw new KMsgError(
@@ -510,7 +531,7 @@ export class SolapiProvider implements Provider {
           undefined,
           imageLink,
         );
-        const fileId = (upload as any)?.fileId;
+        const fileId = this.extractFileId(upload);
         if (typeof fileId === "string" && fileId.length > 0) {
           imageId = fileId;
         } else {
@@ -525,9 +546,9 @@ export class SolapiProvider implements Provider {
       base.text = text;
       base.kakaoOptions = {
         pfId,
-        variables: this.stringifyVariables((options as any).variables),
-        disableSms: (options as any).kakao?.disableSms,
-        adFlag: (options as any).kakao?.adFlag,
+        variables: this.stringifyVariables(friendTalkOptions.variables),
+        disableSms: friendTalkOptions.kakao?.disableSms,
+        adFlag: friendTalkOptions.kakao?.adFlag,
         buttons,
         imageId,
       };
@@ -536,10 +557,11 @@ export class SolapiProvider implements Provider {
     }
 
     if (type === "NSA") {
+      const nsaOptions = options as Extract<SendOptions, { type: "NSA" }>;
       const talkId =
-        typeof (options as any).naver?.talkId === "string" &&
-        (options as any).naver.talkId.length > 0
-          ? (options as any).naver.talkId
+        typeof nsaOptions.naver?.talkId === "string" &&
+        nsaOptions.naver.talkId.length > 0
+          ? nsaOptions.naver.talkId
           : this.config.naverTalkId;
 
       if (!talkId || talkId.length === 0) {
@@ -551,23 +573,23 @@ export class SolapiProvider implements Provider {
       }
 
       const templateId =
-        typeof (options as any).naver?.templateCode === "string" &&
-        (options as any).naver.templateCode.length > 0
-          ? (options as any).naver.templateCode
-          : (options as any).templateCode;
+        typeof nsaOptions.naver?.templateCode === "string" &&
+        nsaOptions.naver.templateCode.length > 0
+          ? nsaOptions.naver.templateCode
+          : nsaOptions.templateCode;
 
       const variables = {
-        ...this.stringifyVariables((options as any).variables),
-        ...this.stringifyVariables((options as any).naver?.variables),
+        ...this.stringifyVariables(nsaOptions.variables),
+        ...this.stringifyVariables(nsaOptions.naver?.variables),
       };
 
       base.naverOptions = {
         talkId,
         templateId,
         variables,
-        disableSms: (options as any).naver?.disableSms,
-        buttons: Array.isArray((options as any).naver?.buttons)
-          ? (options as any).naver.buttons
+        disableSms: nsaOptions.naver?.disableSms,
+        buttons: Array.isArray(nsaOptions.naver?.buttons)
+          ? nsaOptions.naver.buttons
           : undefined,
       };
 
@@ -575,8 +597,12 @@ export class SolapiProvider implements Provider {
     }
 
     if (type === "VOICE") {
-      const text = (options as any).text as string | undefined;
-      if (!text || text.length === 0) {
+      const voiceMessageOptions = options as Extract<
+        SendOptions,
+        { type: "VOICE" }
+      >;
+      const text = voiceMessageOptions.text;
+      if (text.length === 0) {
         throw new KMsgError(
           KMsgErrorCode.INVALID_REQUEST,
           "text is required for VOICE",
@@ -584,22 +610,23 @@ export class SolapiProvider implements Provider {
         );
       }
 
-      const voiceTypeRaw = (options as any).voice?.voiceType;
+      const voiceTypeRaw = voiceMessageOptions.voice?.voiceType;
       const voiceType =
         voiceTypeRaw === "FEMALE" || voiceTypeRaw === "MALE"
           ? voiceTypeRaw
           : "FEMALE";
 
       base.text = text;
-      base.voiceOptions = isObjectRecord((options as any).voice)
-        ? { ...(options as any).voice, voiceType }
+      base.voiceOptions = voiceMessageOptions.voice
+        ? { ...voiceMessageOptions.voice, voiceType }
         : { voiceType };
 
       return base as unknown as SolapiSendOneMessage;
     }
 
     if (type === "FAX") {
-      const fax = (options as any).fax;
+      const faxOptions = options as Extract<SendOptions, { type: "FAX" }>;
+      const fax = faxOptions.fax;
       const fileIdsFromOptions = Array.isArray(fax?.fileIds)
         ? fax.fileIds.filter((value: unknown): value is string => {
             return typeof value === "string" && value.length > 0;
@@ -626,7 +653,7 @@ export class SolapiProvider implements Provider {
         fileIds = [];
         for (const url of fileUrls) {
           const upload = await this.client.uploadFile(url, "FAX");
-          const fileId = (upload as any)?.fileId;
+          const fileId = this.extractFileId(upload);
           if (typeof fileId === "string" && fileId.length > 0) {
             fileIds.push(fileId);
           }
@@ -646,10 +673,23 @@ export class SolapiProvider implements Provider {
     }
 
     // RCS
+    const rcsOptions = options as Extract<
+      SendOptions,
+      {
+        type:
+          | "RCS_SMS"
+          | "RCS_LMS"
+          | "RCS_MMS"
+          | "RCS_TPL"
+          | "RCS_ITPL"
+          | "RCS_LTPL";
+      }
+    >;
+    const rcs = rcsOptions.rcs;
+
     const brandId =
-      typeof (options as any).rcs?.brandId === "string" &&
-      (options as any).rcs.brandId.length > 0
-        ? (options as any).rcs.brandId
+      typeof rcs?.brandId === "string" && rcs.brandId.length > 0
+        ? rcs.brandId
         : this.config.rcsBrandId;
 
     if (!brandId || brandId.length === 0) {
@@ -662,41 +702,51 @@ export class SolapiProvider implements Provider {
 
     const rcsPayload: Record<string, unknown> = {
       brandId,
-      buttons: Array.isArray((options as any).rcs?.buttons)
-        ? (options as any).rcs.buttons
-        : undefined,
-      copyAllowed: (options as any).rcs?.copyAllowed,
-      mmsType: (options as any).rcs?.mmsType,
-      commercialType: (options as any).rcs?.commercialType,
-      disableSms: (options as any).rcs?.disableSms,
+      buttons: Array.isArray(rcs?.buttons) ? rcs.buttons : undefined,
+      copyAllowed: rcs?.copyAllowed,
+      mmsType: rcs?.mmsType,
+      commercialType: rcs?.commercialType,
+      disableSms: rcs?.disableSms,
       variables: {
-        ...this.stringifyVariables((options as any).variables),
-        ...this.stringifyVariables((options as any).rcs?.variables),
+        ...this.stringifyVariables(rcsOptions.variables),
+        ...this.stringifyVariables(rcs?.variables),
       },
     };
 
     if (type === "RCS_TPL" || type === "RCS_ITPL" || type === "RCS_LTPL") {
+      const templateOptions = options as Extract<
+        SendOptions,
+        { type: "RCS_TPL" | "RCS_ITPL" | "RCS_LTPL" }
+      >;
       rcsPayload.templateId =
-        typeof (options as any).rcs?.templateCode === "string" &&
-        (options as any).rcs.templateCode.length > 0
-          ? (options as any).rcs.templateCode
-          : (options as any).templateCode;
+        typeof templateOptions.rcs?.templateCode === "string" &&
+        templateOptions.rcs.templateCode.length > 0
+          ? templateOptions.rcs.templateCode
+          : templateOptions.templateCode;
     }
 
-    const text = (options as any).text as string | undefined;
-    const subject = (options as any).subject as string | undefined;
+    let text: string | undefined;
+    let subject: string | undefined;
+    if (type === "RCS_SMS" || type === "RCS_LMS" || type === "RCS_MMS") {
+      const textOptions = options as Extract<
+        SendOptions,
+        { type: "RCS_SMS" | "RCS_LMS" | "RCS_MMS" }
+      >;
+      text = textOptions.text;
+      subject = textOptions.subject;
 
-    if (!text && (type === "RCS_SMS" || type === "RCS_LMS" || type === "RCS_MMS")) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        "text is required for RCS text types",
-        { providerId: this.id },
-      );
+      if (!text || text.length === 0) {
+        throw new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "text is required for RCS text types",
+          { providerId: this.id },
+        );
+      }
+      base.text = text;
+      if (subject) base.subject = subject;
     }
-    if (text) base.text = text;
-    if (subject) base.subject = subject;
 
-    const additionalBodyRaw = (options as any).rcs?.additionalBody;
+    const additionalBodyRaw = rcs?.additionalBody;
     const additionalBody = isObjectRecord(additionalBodyRaw)
       ? additionalBodyRaw
       : undefined;
@@ -706,9 +756,9 @@ export class SolapiProvider implements Provider {
       additionalBody.imageId.length > 0
         ? additionalBody.imageId
         : additionalBody &&
-            typeof (additionalBody as any).imaggeId === "string" &&
-            (additionalBody as any).imaggeId.length > 0
-          ? (additionalBody as any).imaggeId
+            typeof additionalBody.imaggeId === "string" &&
+            additionalBody.imaggeId.length > 0
+          ? additionalBody.imaggeId
           : undefined;
 
     const buildAdditionalBody = (uploadedImageId?: string) => {
@@ -738,15 +788,15 @@ export class SolapiProvider implements Provider {
     };
 
     if (type === "RCS_MMS") {
-      const rcsOptions = options as Extract<
+      const rcsTextOptions = options as Extract<
         SendOptions,
         { type: "RCS_SMS" | "RCS_LMS" | "RCS_MMS" }
       >;
 
-      const imageRef = this.resolveImageRef(rcsOptions);
+      const imageRef = this.resolveImageRef(rcsTextOptions);
       if (imageRef) {
         const upload = await this.client.uploadFile(imageRef, "RCS");
-        const fileId = (upload as any)?.fileId;
+        const fileId = this.extractFileId(upload);
         if (typeof fileId === "string" && fileId.length > 0) {
           rcsPayload.additionalBody = buildAdditionalBody(fileId);
         } else if (additionalBody) {

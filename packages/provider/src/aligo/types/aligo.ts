@@ -77,4 +77,3 @@ export interface AligoRemainResponse {
   LMS_CNT: number;
   MMS_CNT: number;
 }
-
