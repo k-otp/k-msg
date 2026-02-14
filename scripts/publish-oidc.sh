@@ -42,7 +42,13 @@ registry_has_version() {
   local encoded="${name//@/%40}"
   encoded="${encoded//\//%2F}"
 
-  curl -fsSL "https://registry.npmjs.org/${encoded}" | node -e '
+  # If the package doesn't exist yet, treat it as "version not found".
+  local json
+  if ! json="$(curl -fsSL "https://registry.npmjs.org/${encoded}" 2>/dev/null)"; then
+    return 1
+  fi
+
+  printf '%s' "$json" | node -e '
     const fs = require("node:fs");
     const version = process.argv[1];
     const data = JSON.parse(fs.readFileSync(0, "utf8"));
@@ -117,4 +123,3 @@ for dir in "${PACKAGE_DIRS[@]}"; do
 done
 
 git push origin --tags
-
