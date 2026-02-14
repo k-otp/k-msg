@@ -172,7 +172,7 @@ validate_tarball() {
     EXPECTED_NAME="$expected_name" \
     EXPECTED_VERSION="$expected_version" \
     EXPECTED_RELEASE_VERSION="$expected_release_version" \
-    node - <<'NODE'
+    node - "$pkg_json" <<'NODE'
 const fs = require("node:fs");
 
 const expectedName = process.env.EXPECTED_NAME;
@@ -213,7 +213,6 @@ for (const field of fields) {
   }
 }
 NODE
-  "$pkg_json"
 }
 
 for dir in "${PACKAGE_DIRS[@]}"; do
