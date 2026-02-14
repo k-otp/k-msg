@@ -173,11 +173,12 @@ export class IWINVProvider implements Provider {
     }
 
     const scheduledAt = options.options?.scheduledAt;
-    const reserve = scheduledAt ? "Y" : "N";
-    const sendDate =
-      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime())
-        ? this.formatIWINVDate(scheduledAt)
-        : undefined;
+    const scheduledAtValid =
+      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime());
+    const reserve: "Y" | "N" = scheduledAtValid ? "Y" : "N";
+    const sendDate = scheduledAtValid
+      ? this.formatIWINVDate(scheduledAt as Date)
+      : undefined;
 
     const to = this.normalizePhoneNumber(options.to);
     if (!to) {
@@ -188,9 +189,14 @@ export class IWINVProvider implements Provider {
       );
     }
 
-    const templateParam = Object.values(options.variables || {}).map((v) =>
-      v === null || v === undefined ? "" : String(v),
-    );
+    const templateParamOverride = options.providerOptions?.templateParam;
+    const templateParam = Array.isArray(templateParamOverride)
+      ? templateParamOverride.map((v) =>
+          v === null || v === undefined ? "" : String(v),
+        )
+      : Object.values(options.variables || {}).map((v) =>
+          v === null || v === undefined ? "" : String(v),
+        );
 
     // SMS fallback fields are optional. Enable only if we have a sender number.
     const senderNumber =
@@ -200,6 +206,65 @@ export class IWINVProvider implements Provider {
     const normalizedSender = senderNumber
       ? this.normalizePhoneNumber(senderNumber)
       : "";
+
+    const reSendOverrideRaw =
+      typeof options.providerOptions?.reSend === "string"
+        ? options.providerOptions.reSend.trim().toUpperCase()
+        : "";
+    const reSendOverride =
+      reSendOverrideRaw === "Y" || reSendOverrideRaw === "N"
+        ? (reSendOverrideRaw as "Y" | "N")
+        : undefined;
+    const reSend = reSendOverride ?? (normalizedSender ? "Y" : "N");
+
+    const resendCallbackOverride =
+      typeof options.providerOptions?.resendCallback === "string"
+        ? this.normalizePhoneNumber(options.providerOptions.resendCallback)
+        : "";
+    const resendCallback = resendCallbackOverride || normalizedSender;
+
+    if (reSend === "Y" && !resendCallback) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "resendCallback is required when reSend is 'Y' (options.from or providerOptions.resendCallback)",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const resendTypeRaw =
+      typeof options.providerOptions?.resendType === "string"
+        ? options.providerOptions.resendType.trim().toUpperCase()
+        : "";
+    const resendType =
+      resendTypeRaw === "Y" || resendTypeRaw === "N"
+        ? (resendTypeRaw as "Y" | "N")
+        : undefined;
+    if (
+      typeof options.providerOptions?.resendType === "string" &&
+      options.providerOptions.resendType.length > 0 &&
+      !resendType
+    ) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "resendType must be 'Y' or 'N'",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const resendTitle =
+      typeof options.providerOptions?.resendTitle === "string" &&
+      options.providerOptions.resendTitle.trim().length > 0
+        ? options.providerOptions.resendTitle.trim()
+        : undefined;
+    const resendContent =
+      typeof options.providerOptions?.resendContent === "string" &&
+      options.providerOptions.resendContent.trim().length > 0
+        ? options.providerOptions.resendContent.trim()
+        : undefined;
 
     const payload: Record<string, unknown> = {
       templateCode: options.templateCode,
@@ -211,8 +276,11 @@ export class IWINVProvider implements Provider {
           templateParam: templateParam.length > 0 ? templateParam : undefined,
         },
       ],
-      reSend: normalizedSender ? "Y" : "N",
-      ...(normalizedSender ? { resendCallback: normalizedSender } : {}),
+      reSend,
+      ...(resendCallback ? { resendCallback } : {}),
+      ...(resendType ? { resendType } : {}),
+      ...(resendTitle ? { resendTitle } : {}),
+      ...(resendContent ? { resendContent } : {}),
     };
 
     const url = `${this.config.baseUrl}${this.getSendEndpoint()}`;
@@ -225,10 +293,19 @@ export class IWINVProvider implements Provider {
       });
 
       const responseText = await response.text();
-      const parsed: unknown = responseText ? JSON.parse(responseText) : {};
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
       const data: IWINVSendResponse = isObjectRecord(parsed)
         ? (parsed as IWINVSendResponse)
-        : ({ code: response.status, message: responseText } as IWINVSendResponse);
+        : ({
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          } as IWINVSendResponse);
 
       if (!response.ok || data.code !== 200) {
         return fail(
@@ -245,7 +322,7 @@ export class IWINVProvider implements Provider {
         providerId: this.id,
         providerMessageId:
           typeof data.seqNo === "number" ? String(data.seqNo) : undefined,
-        status: "SENT",
+        status: scheduledAtValid ? "PENDING" : "SENT",
         type: options.type,
         to: options.to,
         raw: data,
@@ -262,22 +339,62 @@ export class IWINVProvider implements Provider {
   }
 
   private mapIwinvCodeToKMsgErrorCode(code: number): KMsgErrorCode {
+    // IWINV AlimTalk returns application codes in the response body (not HTTP status codes).
+    // Keep this mapping aligned with the vendor docs under `src/iwinv/_docs/*`.
     switch (code) {
+      // Auth / IP restriction
       case 201:
       case 206:
       case 401:
-        return KMsgErrorCode.AUTHENTICATION_FAILED;
       case 403:
-      case 519:
-        return KMsgErrorCode.INSUFFICIENT_BALANCE;
-      case 404:
-        return KMsgErrorCode.TEMPLATE_NOT_FOUND;
+        return KMsgErrorCode.AUTHENTICATION_FAILED;
       case 429:
         return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
+      // Balance
+      case 519:
+        return KMsgErrorCode.INSUFFICIENT_BALANCE;
+      // Template
+      case 404:
+      case 501:
+        return KMsgErrorCode.TEMPLATE_NOT_FOUND;
+      // Invalid request (documented codes)
+      case 502:
+      case 503:
+      case 504:
+      case 505:
+      case 506:
+      case 507:
+      case 508:
+      case 509:
+      case 510:
+      case 511:
+      case 512:
+      case 513:
+      case 514:
+      case 515:
+      case 516:
+      case 517:
+      case 540:
+        return KMsgErrorCode.INVALID_REQUEST;
+      // Provider-side issues
+      case 518:
+        return KMsgErrorCode.PROVIDER_ERROR;
       default:
-        if (code >= 500) return KMsgErrorCode.PROVIDER_ERROR;
         return KMsgErrorCode.INVALID_REQUEST;
     }
+  }
+
+  private normalizeIwinvCode(value: unknown): number | undefined {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) return undefined;
+      const num = Number(trimmed);
+      if (Number.isFinite(num)) return num;
+    }
+    return undefined;
   }
 
   private resolveSmsBaseUrl(): string {
@@ -443,12 +560,19 @@ export class IWINVProvider implements Provider {
     if (options.type === "LMS" || options.type === "MMS") {
       payload.title = this.buildLmsTitle(text, (options as any).subject);
     } else {
-      payload.msgType = options.type;
+      const msgTypeOverride =
+        typeof options.providerOptions?.msgType === "string" &&
+        options.providerOptions.msgType.trim().length > 0
+          ? options.providerOptions.msgType.trim()
+          : undefined;
+      payload.msgType = msgTypeOverride || options.type;
     }
 
     const scheduledAt = options.options?.scheduledAt;
-    if (scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime())) {
-      payload.date = this.formatSmsReserveDate(scheduledAt);
+    const scheduledAtValid =
+      scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime());
+    if (scheduledAtValid) {
+      payload.date = this.formatSmsReserveDate(scheduledAt as Date);
     }
 
     const secretHeader = this.buildSmsSecretHeader();
@@ -519,7 +643,7 @@ export class IWINVProvider implements Provider {
         messageId: options.messageId || crypto.randomUUID(),
         providerId: this.id,
         providerMessageId,
-        status: "SENT",
+        status: scheduledAtValid ? "PENDING" : "SENT",
         type: options.type,
         to: options.to,
         raw: data,
@@ -577,4 +701,3 @@ export class IWINVProviderFactory {
 }
 
 export function initializeIWINV(): void {}
-
