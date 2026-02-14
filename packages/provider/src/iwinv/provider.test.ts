@@ -129,4 +129,99 @@ describe("IWINVProvider", () => {
       expect(result.value.providerMessageId).toBe("123");
     }
   });
+
+  test("ALIMTALK maps numeric-only response code 501 to TEMPLATE_NOT_FOUND", async () => {
+    globalThis.fetch = async () => new Response("501", { status: 200 });
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      from: "01000000000",
+      templateCode: "TPL_1",
+      variables: { code: 1234 },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("TEMPLATE_NOT_FOUND");
+    }
+  });
+
+  test("ALIMTALK uses providerOptions.templateParam when provided", async () => {
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(JSON.stringify({ code: 200, message: "ok", seqNo: 1 }), {
+        status: 200,
+      });
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      from: "01000000000",
+      templateCode: "TPL_1",
+      variables: { code: 1234 },
+      providerOptions: { templateParam: ["A", "B", "C"] },
+    });
+
+    expect(Array.isArray((calledBody as any).list)).toBe(true);
+    expect((calledBody as any).list[0].templateParam).toEqual(["A", "B", "C"]);
+    expect(result.isSuccess).toBe(true);
+  });
+
+  test("SMS supports providerOptions.msgType override (e.g. GSMS)", async () => {
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+      return new Response(
+        JSON.stringify({
+          resultCode: 14,
+          message: "인증 요청이 올바르지 않습니다.",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      providerOptions: { msgType: "GSMS" },
+    });
+
+    expect((calledBody as any).msgType).toBe("GSMS");
+    expect(result.isFailure).toBe(true);
+  });
 });
