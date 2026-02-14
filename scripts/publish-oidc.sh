@@ -180,7 +180,9 @@ const expectedVersion = process.env.EXPECTED_VERSION;
 const expectedReleaseVersion = process.env.EXPECTED_RELEASE_VERSION;
 const internalNames = new Set((process.env.INTERNAL_NAMES_CSV ?? "").split(",").filter(Boolean));
 
-const pkgPath = process.argv[1];
+// When executing `node -` the script path is "-" (argv[1]),
+// so custom args start at argv[2].
+const pkgPath = process.argv[2];
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
 
 if (pkg.name !== expectedName) {
