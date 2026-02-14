@@ -796,7 +796,9 @@ export class AlimTalkPlatform implements KMsg {
           : payloadRecord.messageList &&
               typeof payloadRecord.messageList === "object" &&
               !Array.isArray(payloadRecord.messageList)
-            ? Object.values(payloadRecord.messageList as Record<string, unknown>)
+            ? Object.values(
+                payloadRecord.messageList as Record<string, unknown>,
+              )
             : [];
 
         const items = rawList.map((rawItem) => {

@@ -341,7 +341,9 @@ describe("AlimTalkPlatform balance/history common APIs", () => {
     });
     platform.registerProvider(provider);
 
-    const balance = await (await platform.balance()).get({ channel: "RCS_SMS" });
+    const balance = await (await platform.balance()).get({
+      channel: "RCS_SMS",
+    });
 
     expect(balance.providerId).toBe("default-provider");
     expect(balance.channel).toBe("RCS_SMS");
