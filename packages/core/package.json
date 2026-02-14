@@ -34,7 +34,9 @@
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.0.0"
