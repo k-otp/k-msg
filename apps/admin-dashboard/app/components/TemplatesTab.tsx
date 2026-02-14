@@ -1,5 +1,5 @@
-import TemplateForm from '../islands/TemplateForm';
-import TemplateList from '../islands/TemplateList';
+import TemplateForm from "../islands/TemplateForm";
+import TemplateList from "../islands/TemplateList";
 
 export const TemplatesTab = () => {
   return (

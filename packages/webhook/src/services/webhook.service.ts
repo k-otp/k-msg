@@ -1,16 +1,16 @@
+import { RetryManager } from "../retry/retry.manager";
+import { SecurityManager } from "../security/security.manager";
 import type {
   WebhookConfig,
-  WebhookEvent,
-  WebhookEndpoint,
   WebhookDelivery,
+  WebhookEndpoint,
+  WebhookEvent,
   WebhookStats,
-  WebhookTestResult
-} from '../types/webhook.types';
-import { WebhookEventType } from '../types/webhook.types';
-import { WebhookDispatcher, type HttpClient } from './webhook.dispatcher';
-import { WebhookRegistry } from './webhook.registry';
-import { SecurityManager } from '../security/security.manager';
-import { RetryManager } from '../retry/retry.manager';
+  WebhookTestResult,
+} from "../types/webhook.types";
+import { WebhookEventType } from "../types/webhook.types";
+import { type HttpClient, WebhookDispatcher } from "./webhook.dispatcher";
+import { WebhookRegistry } from "./webhook.registry";
 
 export class WebhookService {
   private config: WebhookConfig;
@@ -34,7 +34,12 @@ export class WebhookService {
   /**
    * 웹훅 엔드포인트 등록
    */
-  async registerEndpoint(endpoint: Omit<WebhookEndpoint, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<WebhookEndpoint> {
+  async registerEndpoint(
+    endpoint: Omit<
+      WebhookEndpoint,
+      "id" | "createdAt" | "updatedAt" | "status"
+    >,
+  ): Promise<WebhookEndpoint> {
     // URL 유효성 검사
     await this.validateEndpointUrl(endpoint.url);
 
@@ -43,11 +48,11 @@ export class WebhookService {
       id: this.generateEndpointId(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      status: 'active',
+      status: "active",
     };
 
     await this.registry.addEndpoint(newEndpoint);
-    
+
     // 테스트 웹훅 전송
     await this.testEndpoint(newEndpoint.id);
 
@@ -57,7 +62,10 @@ export class WebhookService {
   /**
    * 웹훅 엔드포인트 수정
    */
-  async updateEndpoint(endpointId: string, updates: Partial<WebhookEndpoint>): Promise<WebhookEndpoint> {
+  async updateEndpoint(
+    endpointId: string,
+    updates: Partial<WebhookEndpoint>,
+  ): Promise<WebhookEndpoint> {
     const endpoint = await this.registry.getEndpoint(endpointId);
     if (!endpoint) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
@@ -152,16 +160,16 @@ export class WebhookService {
       timestamp: new Date(),
       data: {
         test: true,
-        message: 'This is a test webhook',
+        message: "This is a test webhook",
       },
       metadata: {
         correlationId: `test_${endpointId}`,
       },
-      version: '1.0',
+      version: "1.0",
     };
 
     const startTime = Date.now();
-    
+
     try {
       const delivery = await this.dispatcher.dispatch(testEvent, endpoint);
       const endTime = Date.now();
@@ -169,20 +177,20 @@ export class WebhookService {
       return {
         endpointId,
         url: endpoint.url,
-        success: delivery.status === 'success',
+        success: delivery.status === "success",
         httpStatus: delivery.attempts[0]?.httpStatus,
         responseTime: endTime - startTime,
         testedAt: new Date(),
       };
     } catch (error) {
       const endTime = Date.now();
-      
+
       return {
         endpointId,
         url: endpoint.url,
         success: false,
         responseTime: endTime - startTime,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         testedAt: new Date(),
       };
     }
@@ -191,12 +199,17 @@ export class WebhookService {
   /**
    * 웹훅 통계 조회
    */
-  async getStats(endpointId: string, timeRange: { start: Date; end: Date }): Promise<WebhookStats> {
+  async getStats(
+    endpointId: string,
+    timeRange: { start: Date; end: Date },
+  ): Promise<WebhookStats> {
     const deliveries = await this.registry.getDeliveries(endpointId, timeRange);
-    
-    const successful = deliveries.filter(d => d.status === 'success');
-    const failed = deliveries.filter(d => d.status === 'failed' || d.status === 'exhausted');
-    
+
+    const successful = deliveries.filter((d) => d.status === "success");
+    const failed = deliveries.filter(
+      (d) => d.status === "failed" || d.status === "exhausted",
+    );
+
     const totalLatency = deliveries.reduce((sum, d) => {
       const lastAttempt = d.attempts[d.attempts.length - 1];
       return sum + (lastAttempt?.latencyMs || 0);
@@ -207,11 +220,12 @@ export class WebhookService {
 
     for (const delivery of deliveries) {
       // 이벤트 유형별 집계는 실제 구현에서 이벤트 정보를 조회해야 함
-      
+
       // 에러 유형별 집계
-      if (delivery.status === 'failed' || delivery.status === 'exhausted') {
+      if (delivery.status === "failed" || delivery.status === "exhausted") {
         const lastAttempt = delivery.attempts[delivery.attempts.length - 1];
-        const errorKey = lastAttempt?.error || `HTTP ${lastAttempt?.httpStatus || 'Unknown'}`;
+        const errorKey =
+          lastAttempt?.error || `HTTP ${lastAttempt?.httpStatus || "Unknown"}`;
         errorBreakdown[errorKey] = (errorBreakdown[errorKey] || 0) + 1;
       }
     }
@@ -222,8 +236,12 @@ export class WebhookService {
       totalDeliveries: deliveries.length,
       successfulDeliveries: successful.length,
       failedDeliveries: failed.length,
-      averageLatencyMs: deliveries.length > 0 ? totalLatency / deliveries.length : 0,
-      successRate: deliveries.length > 0 ? (successful.length / deliveries.length) * 100 : 0,
+      averageLatencyMs:
+        deliveries.length > 0 ? totalLatency / deliveries.length : 0,
+      successRate:
+        deliveries.length > 0
+          ? (successful.length / deliveries.length) * 100
+          : 0,
       eventBreakdown,
       errorBreakdown,
     };
@@ -232,8 +250,14 @@ export class WebhookService {
   /**
    * 실패한 웹훅 재시도
    */
-  async retryFailed(endpointId?: string, eventType?: WebhookEventType): Promise<number> {
-    const failedDeliveries = await this.registry.getFailedDeliveries(endpointId, eventType);
+  async retryFailed(
+    endpointId?: string,
+    eventType?: WebhookEventType,
+  ): Promise<number> {
+    const failedDeliveries = await this.registry.getFailedDeliveries(
+      endpointId,
+      eventType,
+    );
     let retriedCount = 0;
 
     for (const delivery of failedDeliveries) {
@@ -244,8 +268,8 @@ export class WebhookService {
           const endpoint = await this.registry.getEndpoint(delivery.endpointId);
           if (endpoint) {
             await this.dispatcher.dispatch(
-              JSON.parse(delivery.payload), 
-              endpoint
+              JSON.parse(delivery.payload),
+              endpoint,
             );
           }
         }, this.retryManager.getBackoffDelay(attemptCount));
@@ -260,14 +284,14 @@ export class WebhookService {
    * 웹훅 일시 중단
    */
   async pauseEndpoint(endpointId: string): Promise<void> {
-    await this.updateEndpoint(endpointId, { status: 'suspended' });
+    await this.updateEndpoint(endpointId, { status: "suspended" });
   }
 
   /**
    * 웹훅 재개
    */
   async resumeEndpoint(endpointId: string): Promise<void> {
-    await this.updateEndpoint(endpointId, { status: 'active' });
+    await this.updateEndpoint(endpointId, { status: "active" });
   }
 
   /**
@@ -277,9 +301,15 @@ export class WebhookService {
     endpointId?: string,
     eventType?: WebhookEventType,
     status?: string,
-    limit = 100
+    limit = 100,
   ): Promise<WebhookDelivery[]> {
-    return this.registry.getDeliveries(endpointId, undefined, eventType, status, limit);
+    return this.registry.getDeliveries(
+      endpointId,
+      undefined,
+      eventType,
+      status,
+      limit,
+    );
   }
 
   private async processBatch(): Promise<void> {
@@ -288,31 +318,36 @@ export class WebhookService {
     }
 
     const batch = this.eventQueue.splice(0, this.config.batchSize);
-    
+
     try {
       for (const event of batch) {
         const endpoints = await this.getMatchingEndpoints(event);
-        
+
         for (const endpoint of endpoints) {
           // 비동기로 전달 (에러가 발생해도 다른 엔드포인트에 영향 없음)
-          this.dispatcher.dispatch(event, endpoint).catch(error => {
-            console.error(`Failed to dispatch webhook to ${endpoint.url}:`, error);
+          this.dispatcher.dispatch(event, endpoint).catch((error) => {
+            console.error(
+              `Failed to dispatch webhook to ${endpoint.url}:`,
+              error,
+            );
           });
         }
       }
     } catch (error) {
-      console.error('Batch processing failed:', error);
+      console.error("Batch processing failed:", error);
       // 실패한 이벤트를 다시 큐에 추가 (재시도)
       this.eventQueue.unshift(...batch);
     }
   }
 
-  private async getMatchingEndpoints(event: WebhookEvent): Promise<WebhookEndpoint[]> {
+  private async getMatchingEndpoints(
+    event: WebhookEvent,
+  ): Promise<WebhookEndpoint[]> {
     const allEndpoints = await this.registry.listEndpoints();
-    
-    return allEndpoints.filter(endpoint => {
+
+    return allEndpoints.filter((endpoint) => {
       // 비활성 엔드포인트 제외
-      if (endpoint.status !== 'active') {
+      if (endpoint.status !== "active") {
         return false;
       }
 
@@ -324,7 +359,9 @@ export class WebhookService {
       // 추가 필터 적용
       if (endpoint.filters) {
         if (endpoint.filters.providerId && event.metadata.providerId) {
-          if (!endpoint.filters.providerId.includes(event.metadata.providerId)) {
+          if (
+            !endpoint.filters.providerId.includes(event.metadata.providerId)
+          ) {
             return false;
           }
         }
@@ -336,7 +373,9 @@ export class WebhookService {
         }
 
         if (endpoint.filters.templateId && event.metadata.templateId) {
-          if (!endpoint.filters.templateId.includes(event.metadata.templateId)) {
+          if (
+            !endpoint.filters.templateId.includes(event.metadata.templateId)
+          ) {
             return false;
           }
         }
@@ -348,44 +387,52 @@ export class WebhookService {
 
   private validateEvent(event: WebhookEvent): void {
     if (!event.id) {
-      throw new Error('Event ID is required');
+      throw new Error("Event ID is required");
     }
 
     if (!event.type) {
-      throw new Error('Event type is required');
+      throw new Error("Event type is required");
     }
 
     if (!event.timestamp) {
-      throw new Error('Event timestamp is required');
+      throw new Error("Event timestamp is required");
     }
 
     if (!event.version) {
-      throw new Error('Event version is required');
+      throw new Error("Event version is required");
     }
   }
 
   private async validateEndpointUrl(url: string): Promise<void> {
     try {
       const parsedUrl = new URL(url);
-      
+
       // HTTPS 필수 (개발 환경 제외)
-      if (parsedUrl.protocol !== 'https:' && !url.includes('localhost') && !url.includes('127.0.0.1')) {
-        throw new Error('Webhook URL must use HTTPS');
+      if (
+        parsedUrl.protocol !== "https:" &&
+        !url.includes("localhost") &&
+        !url.includes("127.0.0.1")
+      ) {
+        throw new Error("Webhook URL must use HTTPS");
       }
 
       // 로컬호스트 및 프라이빗 IP 차단 (프로덕션에서)
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === "production") {
         const hostname = parsedUrl.hostname;
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
-          throw new Error('Private IP addresses are not allowed in production');
+        if (
+          hostname === "localhost" ||
+          hostname === "127.0.0.1" ||
+          hostname.startsWith("192.168.") ||
+          hostname.startsWith("10.")
+        ) {
+          throw new Error("Private IP addresses are not allowed in production");
         }
       }
-
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Invalid webhook URL');
+      throw new Error("Invalid webhook URL");
     }
   }
 
@@ -398,7 +445,7 @@ export class WebhookService {
       try {
         await this.processBatch();
       } catch (error) {
-        console.error('Batch processor error:', error);
+        console.error("Batch processor error:", error);
       }
     }, this.config.batchTimeoutMs);
   }

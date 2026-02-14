@@ -3,10 +3,10 @@
  * 웹훅 작업 큐 관리 시스템
  */
 
-import type { QueueConfig, DispatchJob } from './types';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import type { DispatchJob, QueueConfig } from "./types";
 
 export class QueueManager extends EventEmitter {
   private config: QueueConfig;
@@ -21,21 +21,21 @@ export class QueueManager extends EventEmitter {
     maxQueueSize: 10000,
     persistToDisk: false,
     compressionEnabled: false,
-    ttlMs: 24 * 60 * 60 * 1000 // 24시간
+    ttlMs: 24 * 60 * 60 * 1000, // 24시간
   };
 
   constructor(config: Partial<QueueConfig> = {}) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     // 우선순위 큐 초기화
-    this.queues.set('high', this.highPriorityQueue);
-    this.queues.set('medium', this.mediumPriorityQueue);
-    this.queues.set('low', this.lowPriorityQueue);
+    this.queues.set("high", this.highPriorityQueue);
+    this.queues.set("medium", this.mediumPriorityQueue);
+    this.queues.set("low", this.lowPriorityQueue);
 
     if (this.config.persistToDisk && this.config.diskPath) {
-      this.loadFromDisk().catch(error => {
-        this.emit('diskLoadError', error);
+      this.loadFromDisk().catch((error) => {
+        this.emit("diskLoadError", error);
       });
     }
 
@@ -49,7 +49,10 @@ export class QueueManager extends EventEmitter {
   async enqueue(job: DispatchJob): Promise<boolean> {
     // 큐 크기 제한 확인
     if (this.totalJobs >= this.config.maxQueueSize) {
-      this.emit('queueFull', { totalJobs: this.totalJobs, maxSize: this.config.maxQueueSize });
+      this.emit("queueFull", {
+        totalJobs: this.totalJobs,
+        maxSize: this.config.maxQueueSize,
+      });
       return false;
     }
 
@@ -62,7 +65,7 @@ export class QueueManager extends EventEmitter {
     // 우선순위에 따른 큐 선택
     const queueName = this.getQueueName(job.priority);
     const queue = this.queues.get(queueName);
-    
+
     if (!queue) {
       throw new Error(`Invalid queue name: ${queueName}`);
     }
@@ -71,17 +74,17 @@ export class QueueManager extends EventEmitter {
     queue.push(job);
     this.totalJobs++;
 
-    this.emit('jobEnqueued', {
+    this.emit("jobEnqueued", {
       jobId: job.id,
       priority: job.priority,
       queueName,
-      totalJobs: this.totalJobs
+      totalJobs: this.totalJobs,
     });
 
     // 디스크 영속화
     if (this.config.persistToDisk) {
-      await this.saveToDisk().catch(error => {
-        this.emit('diskSaveError', error);
+      await this.saveToDisk().catch((error) => {
+        this.emit("diskSaveError", error);
       });
     }
 
@@ -98,16 +101,16 @@ export class QueueManager extends EventEmitter {
         const job = queue.shift()!;
         this.totalJobs--;
 
-        this.emit('jobDequeued', {
+        this.emit("jobDequeued", {
           jobId: job.id,
           queueName,
-          totalJobs: this.totalJobs
+          totalJobs: this.totalJobs,
         });
 
         // 디스크 영속화
         if (this.config.persistToDisk) {
-          await this.saveToDisk().catch(error => {
-            this.emit('diskSaveError', error);
+          await this.saveToDisk().catch((error) => {
+            this.emit("diskSaveError", error);
           });
         }
 
@@ -124,7 +127,7 @@ export class QueueManager extends EventEmitter {
   async dequeueFromPriority(priority: number): Promise<DispatchJob | null> {
     const queueName = this.getQueueName(priority);
     const queue = this.queues.get(queueName);
-    
+
     if (!queue || queue.length === 0) {
       return null;
     }
@@ -132,10 +135,10 @@ export class QueueManager extends EventEmitter {
     const job = queue.shift()!;
     this.totalJobs--;
 
-    this.emit('jobDequeued', {
+    this.emit("jobDequeued", {
       jobId: job.id,
       queueName,
-      totalJobs: this.totalJobs
+      totalJobs: this.totalJobs,
     });
 
     return job;
@@ -158,21 +161,21 @@ export class QueueManager extends EventEmitter {
    */
   async removeJob(jobId: string): Promise<boolean> {
     for (const [queueName, queue] of this.queues.entries()) {
-      const index = queue.findIndex(job => job.id === jobId);
+      const index = queue.findIndex((job) => job.id === jobId);
       if (index !== -1) {
         queue.splice(index, 1);
         this.totalJobs--;
 
-        this.emit('jobRemoved', {
+        this.emit("jobRemoved", {
           jobId,
           queueName,
-          totalJobs: this.totalJobs
+          totalJobs: this.totalJobs,
         });
 
         // 디스크 영속화
         if (this.config.persistToDisk) {
-          await this.saveToDisk().catch(error => {
-            this.emit('diskSaveError', error);
+          await this.saveToDisk().catch((error) => {
+            this.emit("diskSaveError", error);
           });
         }
 
@@ -185,7 +188,7 @@ export class QueueManager extends EventEmitter {
     if (delayedTimeout) {
       clearTimeout(delayedTimeout);
       this.delayedJobs.delete(jobId);
-      this.emit('delayedJobCanceled', { jobId });
+      this.emit("delayedJobCanceled", { jobId });
       return true;
     }
 
@@ -209,7 +212,7 @@ export class QueueManager extends EventEmitter {
       mediumPriorityJobs: this.mediumPriorityQueue.length,
       lowPriorityJobs: this.lowPriorityQueue.length,
       delayedJobs: this.delayedJobs.size,
-      queueUtilization: (this.totalJobs / this.config.maxQueueSize) * 100
+      queueUtilization: (this.totalJobs / this.config.maxQueueSize) * 100,
     };
   }
 
@@ -220,21 +223,21 @@ export class QueueManager extends EventEmitter {
     for (const queue of this.queues.values()) {
       queue.length = 0;
     }
-    
+
     // 지연된 작업들 취소
     for (const timeout of this.delayedJobs.values()) {
       clearTimeout(timeout);
     }
     this.delayedJobs.clear();
-    
+
     this.totalJobs = 0;
 
-    this.emit('queueCleared');
+    this.emit("queueCleared");
 
     // 디스크에서도 삭제
     if (this.config.persistToDisk) {
-      await this.saveToDisk().catch(error => {
-        this.emit('diskSaveError', error);
+      await this.saveToDisk().catch((error) => {
+        this.emit("diskSaveError", error);
       });
     }
   }
@@ -248,33 +251,36 @@ export class QueueManager extends EventEmitter {
 
     for (const [queueName, queue] of this.queues.entries()) {
       const initialLength = queue.length;
-      
+
       // TTL 확인하여 만료된 작업 제거
       for (let i = queue.length - 1; i >= 0; i--) {
         const job = queue[i];
         const age = now.getTime() - job.createdAt.getTime();
-        
+
         if (age > this.config.ttlMs) {
           queue.splice(i, 1);
           this.totalJobs--;
           removedCount++;
-          
-          this.emit('jobExpired', {
+
+          this.emit("jobExpired", {
             jobId: job.id,
             queueName,
-            age
+            age,
           });
         }
       }
     }
 
     if (removedCount > 0) {
-      this.emit('expiredJobsCleanup', { removedCount, totalJobs: this.totalJobs });
-      
+      this.emit("expiredJobsCleanup", {
+        removedCount,
+        totalJobs: this.totalJobs,
+      });
+
       // 디스크 영속화
       if (this.config.persistToDisk) {
-        await this.saveToDisk().catch(error => {
-          this.emit('diskSaveError', error);
+        await this.saveToDisk().catch((error) => {
+          this.emit("diskSaveError", error);
         });
       }
     }
@@ -286,9 +292,9 @@ export class QueueManager extends EventEmitter {
    * 우선순위 숫자를 큐 이름으로 변환
    */
   private getQueueName(priority: number): string {
-    if (priority >= 8) return 'high';
-    if (priority >= 5) return 'medium';
-    return 'low';
+    if (priority >= 8) return "high";
+    if (priority >= 5) return "medium";
+    return "low";
   }
 
   /**
@@ -296,27 +302,27 @@ export class QueueManager extends EventEmitter {
    */
   private async scheduleDelayedJob(job: DispatchJob): Promise<void> {
     const delay = job.scheduledAt.getTime() - Date.now();
-    
+
     const timeout = setTimeout(async () => {
       this.delayedJobs.delete(job.id);
-      
+
       // 정시가 되면 큐에 추가
       const success = await this.enqueue({
         ...job,
-        scheduledAt: new Date() // 즉시 처리 가능하도록 변경
+        scheduledAt: new Date(), // 즉시 처리 가능하도록 변경
       });
-      
+
       if (success) {
-        this.emit('delayedJobActivated', { jobId: job.id });
+        this.emit("delayedJobActivated", { jobId: job.id });
       }
     }, delay);
 
     this.delayedJobs.set(job.id, timeout);
-    
-    this.emit('jobScheduled', {
+
+    this.emit("jobScheduled", {
       jobId: job.id,
       scheduledAt: job.scheduledAt,
-      delay
+      delay,
     });
   }
 
@@ -325,13 +331,16 @@ export class QueueManager extends EventEmitter {
    */
   private startTTLCleanup(): void {
     // 5분마다 만료된 작업 정리
-    setInterval(async () => {
-      try {
-        await this.cleanupExpiredJobs();
-      } catch (error) {
-        this.emit('cleanupError', error);
-      }
-    }, 5 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.cleanupExpiredJobs();
+        } catch (error) {
+          this.emit("cleanupError", error);
+        }
+      },
+      5 * 60 * 1000,
+    );
   }
 
   /**
@@ -345,25 +354,24 @@ export class QueueManager extends EventEmitter {
         queues: {
           high: this.highPriorityQueue,
           medium: this.mediumPriorityQueue,
-          low: this.lowPriorityQueue
+          low: this.lowPriorityQueue,
         },
         totalJobs: this.totalJobs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       const json = JSON.stringify(data, null, 2);
-      const filePath = path.join(this.config.diskPath, 'webhook-queue.json');
-      
+      const filePath = path.join(this.config.diskPath, "webhook-queue.json");
+
       // 디렉토리 생성
       await fs.mkdir(path.dirname(filePath), { recursive: true });
-      
+
       // 파일 저장
-      await fs.writeFile(filePath, json, 'utf8');
-      
-      this.emit('diskSaved', { filePath, totalJobs: this.totalJobs });
-      
+      await fs.writeFile(filePath, json, "utf8");
+
+      this.emit("diskSaved", { filePath, totalJobs: this.totalJobs });
     } catch (error) {
-      this.emit('diskSaveError', error);
+      this.emit("diskSaveError", error);
       throw error;
     }
   }
@@ -375,8 +383,8 @@ export class QueueManager extends EventEmitter {
     if (!this.config.diskPath) return;
 
     try {
-      const filePath = path.join(this.config.diskPath, 'webhook-queue.json');
-      const json = await fs.readFile(filePath, 'utf8');
+      const filePath = path.join(this.config.diskPath, "webhook-queue.json");
+      const json = await fs.readFile(filePath, "utf8");
       const data = JSON.parse(json);
 
       // 큐 복원
@@ -390,15 +398,14 @@ export class QueueManager extends EventEmitter {
 
       this.totalJobs = data.totalJobs || 0;
 
-      this.emit('diskLoaded', { 
-        filePath, 
+      this.emit("diskLoaded", {
+        filePath,
         totalJobs: this.totalJobs,
-        timestamp: data.timestamp 
+        timestamp: data.timestamp,
       });
-
     } catch (error) {
-      if ((error as any).code !== 'ENOENT') {
-        this.emit('diskLoadError', error);
+      if ((error as any).code !== "ENOENT") {
+        this.emit("diskLoadError", error);
       }
       // 파일이 없는 경우는 정상 (처음 시작)
     }
@@ -416,11 +423,11 @@ export class QueueManager extends EventEmitter {
 
     // 마지막 디스크 저장
     if (this.config.persistToDisk) {
-      await this.saveToDisk().catch(error => {
-        this.emit('diskSaveError', error);
+      await this.saveToDisk().catch((error) => {
+        this.emit("diskSaveError", error);
       });
     }
 
-    this.emit('shutdown', { totalJobs: this.totalJobs });
+    this.emit("shutdown", { totalJobs: this.totalJobs });
   }
 }

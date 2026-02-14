@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import {
   AligoProvider,
-  IWINVProvider,
-  KMsg,
   createKMsgAnalytics,
   createKMsgSender,
   createKMsgTemplates,
   fail,
+  IWINVProvider,
+  KMsg,
   ok,
 } from "./index";
 

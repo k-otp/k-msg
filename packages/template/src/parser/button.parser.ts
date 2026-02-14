@@ -1,14 +1,17 @@
-import { TemplateButton } from '../types/template.types';
+import type { TemplateButton } from "../types/template.types";
 
 export class ButtonParser {
   /**
    * 버튼 설정의 유효성을 검증합니다
    */
-  static validateButtons(buttons: TemplateButton[]): { isValid: boolean; errors: string[] } {
+  static validateButtons(buttons: TemplateButton[]): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (buttons.length > 5) {
-      errors.push('Maximum 5 buttons are allowed');
+      errors.push("Maximum 5 buttons are allowed");
     }
 
     for (let i = 0; i < buttons.length; i++) {
@@ -23,55 +26,59 @@ export class ButtonParser {
       }
 
       // 버튼 타입별 검증
-      this.validateButtonByType(button, buttonIndex, errors);
+      ButtonParser.validateButtonByType(button, buttonIndex, errors);
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   private static validateButtonByType(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
     switch (button.type) {
-      case 'WL': // 웹링크
-        this.validateWebLinkButton(button, buttonIndex, errors);
+      case "WL": // 웹링크
+        ButtonParser.validateWebLinkButton(button, buttonIndex, errors);
         break;
-      case 'AL': // 앱링크
-        this.validateAppLinkButton(button, buttonIndex, errors);
+      case "AL": // 앱링크
+        ButtonParser.validateAppLinkButton(button, buttonIndex, errors);
         break;
-      case 'DS': // 배송조회
-        this.validateDeliveryButton(button, buttonIndex, errors);
+      case "DS": // 배송조회
+        ButtonParser.validateDeliveryButton(button, buttonIndex, errors);
         break;
-      case 'BK': // 봇키워드
-        this.validateBotKeywordButton(button, buttonIndex, errors);
+      case "BK": // 봇키워드
+        ButtonParser.validateBotKeywordButton(button, buttonIndex, errors);
         break;
-      case 'MD': // 메시지전달
-        this.validateMessageDeliveryButton(button, buttonIndex, errors);
+      case "MD": // 메시지전달
+        ButtonParser.validateMessageDeliveryButton(button, buttonIndex, errors);
         break;
       default:
-        errors.push(`Button ${buttonIndex}: invalid button type '${button.type}'`);
+        errors.push(
+          `Button ${buttonIndex}: invalid button type '${button.type}'`,
+        );
     }
   }
 
   private static validateWebLinkButton(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
     if (!button.linkMobile && !button.linkPc) {
-      errors.push(`Button ${buttonIndex}: web link button must have at least mobile or PC link`);
+      errors.push(
+        `Button ${buttonIndex}: web link button must have at least mobile or PC link`,
+      );
     }
 
-    if (button.linkMobile && !this.isValidUrl(button.linkMobile)) {
+    if (button.linkMobile && !ButtonParser.isValidUrl(button.linkMobile)) {
       errors.push(`Button ${buttonIndex}: invalid mobile link URL`);
     }
 
-    if (button.linkPc && !this.isValidUrl(button.linkPc)) {
+    if (button.linkPc && !ButtonParser.isValidUrl(button.linkPc)) {
       errors.push(`Button ${buttonIndex}: invalid PC link URL`);
     }
   }
@@ -79,20 +86,25 @@ export class ButtonParser {
   private static validateAppLinkButton(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
-    const hasAnyLink = button.linkIos || button.linkAndroid || 
-                       button.schemeIos || button.schemeAndroid;
+    const hasAnyLink =
+      button.linkIos ||
+      button.linkAndroid ||
+      button.schemeIos ||
+      button.schemeAndroid;
 
     if (!hasAnyLink) {
-      errors.push(`Button ${buttonIndex}: app link button must have at least one app link or scheme`);
+      errors.push(
+        `Button ${buttonIndex}: app link button must have at least one app link or scheme`,
+      );
     }
 
-    if (button.linkIos && !this.isValidUrl(button.linkIos)) {
+    if (button.linkIos && !ButtonParser.isValidUrl(button.linkIos)) {
       errors.push(`Button ${buttonIndex}: invalid iOS link URL`);
     }
 
-    if (button.linkAndroid && !this.isValidUrl(button.linkAndroid)) {
+    if (button.linkAndroid && !ButtonParser.isValidUrl(button.linkAndroid)) {
       errors.push(`Button ${buttonIndex}: invalid Android link URL`);
     }
   }
@@ -100,7 +112,7 @@ export class ButtonParser {
   private static validateDeliveryButton(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
     // 배송조회 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
@@ -109,7 +121,7 @@ export class ButtonParser {
   private static validateBotKeywordButton(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
     // 봇키워드 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
@@ -118,7 +130,7 @@ export class ButtonParser {
   private static validateMessageDeliveryButton(
     button: TemplateButton,
     buttonIndex: number,
-    errors: string[]
+    errors: string[],
   ): void {
     // 메시지전달 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
@@ -137,7 +149,7 @@ export class ButtonParser {
    * 버튼을 JSON 문자열로 직렬화합니다 (카카오 API 형식)
    */
   static serializeButtons(buttons: TemplateButton[]): string {
-    const serializedButtons = buttons.map(button => ({
+    const serializedButtons = buttons.map((button) => ({
       name: button.name,
       type: button.type,
       url_mobile: button.linkMobile,
@@ -155,7 +167,7 @@ export class ButtonParser {
   static deserializeButtons(buttonsJson: string): TemplateButton[] {
     try {
       const parsed = JSON.parse(buttonsJson);
-      
+
       return parsed.map((button: any) => ({
         name: button.name,
         type: button.type,

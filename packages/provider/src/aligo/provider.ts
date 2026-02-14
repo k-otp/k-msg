@@ -52,10 +52,7 @@ function isStandardRequest(value: unknown): value is StandardRequest {
 
 function isLegacySendOptions(value: unknown): value is SendOptions {
   if (!isObjectRecord(value)) return false;
-  return (
-    typeof value.type === "string" &&
-    typeof value.to === "string"
-  );
+  return typeof value.type === "string" && typeof value.to === "string";
 }
 
 export const createAligoProvider = (config: AligoConfig) =>

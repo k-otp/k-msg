@@ -3,12 +3,17 @@
  * 웹훅 엔드포인트 관리를 위한 고급 기능 제공
  */
 
-import type { WebhookEndpoint } from '../types/webhook.types';
-import { WebhookEventType } from '../types/webhook.types';
-import type { EndpointFilter, PaginationOptions, SearchResult, StorageConfig } from './types';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import type { WebhookEndpoint } from "../types/webhook.types";
+import { WebhookEventType } from "../types/webhook.types";
+import type {
+  EndpointFilter,
+  PaginationOptions,
+  SearchResult,
+  StorageConfig,
+} from "./types";
 
 export class EndpointManager extends EventEmitter {
   private config: StorageConfig;
@@ -18,20 +23,20 @@ export class EndpointManager extends EventEmitter {
   private indexByStatus: Map<string, Set<string>> = new Map(); // status -> endpoint ids
 
   private defaultConfig: StorageConfig = {
-    type: 'memory',
+    type: "memory",
     retentionDays: 90,
-    enableEncryption: false
+    enableEncryption: false,
   };
 
   constructor(config: Partial<StorageConfig> = {}) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.initializeIndexes();
-    
-    if (this.config.type === 'file' && this.config.filePath) {
-      this.loadFromFile().catch(error => {
-        this.emit('loadError', error);
+
+    if (this.config.type === "file" && this.config.filePath) {
+      this.loadFromFile().catch((error) => {
+        this.emit("loadError", error);
       });
     }
   }
@@ -44,7 +49,9 @@ export class EndpointManager extends EventEmitter {
     if (this.indexByUrl.has(endpoint.url)) {
       const existingId = this.indexByUrl.get(endpoint.url);
       if (existingId !== endpoint.id) {
-        throw new Error(`Endpoint with URL ${endpoint.url} already exists with different ID`);
+        throw new Error(
+          `Endpoint with URL ${endpoint.url} already exists with different ID`,
+        );
       }
     }
 
@@ -59,17 +66,20 @@ export class EndpointManager extends EventEmitter {
     this.addToIndexes(endpoint);
 
     // 파일 저장
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.saveToFile();
     }
 
-    this.emit('endpointAdded', { endpointId: endpoint.id, url: endpoint.url });
+    this.emit("endpointAdded", { endpointId: endpoint.id, url: endpoint.url });
   }
 
   /**
    * 엔드포인트 업데이트
    */
-  async updateEndpoint(endpointId: string, updates: Partial<WebhookEndpoint>): Promise<WebhookEndpoint> {
+  async updateEndpoint(
+    endpointId: string,
+    updates: Partial<WebhookEndpoint>,
+  ): Promise<WebhookEndpoint> {
     const existingEndpoint = this.endpoints.get(endpointId);
     if (!existingEndpoint) {
       throw new Error(`Endpoint ${endpointId} not found`);
@@ -92,22 +102,22 @@ export class EndpointManager extends EventEmitter {
     const updatedEndpoint: WebhookEndpoint = {
       ...existingEndpoint,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.endpoints.set(endpointId, updatedEndpoint);
     this.addToIndexes(updatedEndpoint);
 
     // 파일 저장
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.saveToFile();
     }
 
-    this.emit('endpointUpdated', { 
-      endpointId, 
+    this.emit("endpointUpdated", {
+      endpointId,
       changes: Object.keys(updates),
       oldUrl: existingEndpoint.url,
-      newUrl: updatedEndpoint.url
+      newUrl: updatedEndpoint.url,
     });
 
     return updatedEndpoint;
@@ -127,11 +137,11 @@ export class EndpointManager extends EventEmitter {
     this.endpoints.delete(endpointId);
 
     // 파일 저장
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.saveToFile();
     }
 
-    this.emit('endpointRemoved', { endpointId, url: endpoint.url });
+    this.emit("endpointRemoved", { endpointId, url: endpoint.url });
     return true;
   }
 
@@ -155,7 +165,7 @@ export class EndpointManager extends EventEmitter {
    */
   async searchEndpoints(
     filter: EndpointFilter = {},
-    pagination: PaginationOptions = { page: 1, limit: 100 }
+    pagination: PaginationOptions = { page: 1, limit: 100 },
   ): Promise<SearchResult<WebhookEndpoint>> {
     let candidateIds: Set<string> | null = null;
 
@@ -171,12 +181,16 @@ export class EndpointManager extends EventEmitter {
       for (const eventType of filter.events) {
         const ids = this.indexByEvent.get(eventType);
         if (ids) {
-          ids.forEach(id => eventIds.add(id));
+          ids.forEach((id) => {
+            eventIds.add(id);
+          });
         }
       }
-      
+
       if (candidateIds) {
-        candidateIds = new Set(Array.from(candidateIds).filter(id => eventIds.has(id)));
+        candidateIds = new Set(
+          Array.from(candidateIds).filter((id) => eventIds.has(id)),
+        );
       } else {
         candidateIds = eventIds;
       }
@@ -189,20 +203,20 @@ export class EndpointManager extends EventEmitter {
 
     // 추가 필터 적용
     const filteredEndpoints = Array.from(candidateIds)
-      .map(id => this.endpoints.get(id)!)
-      .filter(endpoint => this.matchesFilter(endpoint, filter));
+      .map((id) => this.endpoints.get(id)!)
+      .filter((endpoint) => this.matchesFilter(endpoint, filter));
 
     // 정렬
     if (pagination.sortBy) {
       filteredEndpoints.sort((a, b) => {
         const aValue = this.getFieldValue(a, pagination.sortBy!);
         const bValue = this.getFieldValue(b, pagination.sortBy!);
-        
+
         let comparison = 0;
         if (aValue < bValue) comparison = -1;
         else if (aValue > bValue) comparison = 1;
-        
-        return pagination.sortOrder === 'desc' ? -comparison : comparison;
+
+        return pagination.sortOrder === "desc" ? -comparison : comparison;
       });
     }
 
@@ -219,22 +233,24 @@ export class EndpointManager extends EventEmitter {
       page: pagination.page,
       totalPages,
       hasNext: pagination.page < totalPages,
-      hasPrevious: pagination.page > 1
+      hasPrevious: pagination.page > 1,
     };
   }
 
   /**
    * 특정 이벤트 타입을 구독하는 활성 엔드포인트 조회
    */
-  async getActiveEndpointsForEvent(eventType: WebhookEventType): Promise<WebhookEndpoint[]> {
+  async getActiveEndpointsForEvent(
+    eventType: WebhookEventType,
+  ): Promise<WebhookEndpoint[]> {
     const endpointIds = this.indexByEvent.get(eventType);
     if (!endpointIds) {
       return [];
     }
 
     return Array.from(endpointIds)
-      .map(id => this.endpoints.get(id)!)
-      .filter(endpoint => endpoint.status === 'active');
+      .map((id) => this.endpoints.get(id)!)
+      .filter((endpoint) => endpoint.status === "active");
   }
 
   /**
@@ -249,10 +265,10 @@ export class EndpointManager extends EventEmitter {
     eventSubscriptions: Record<WebhookEventType, number>;
   } {
     const total = this.endpoints.size;
-    const active = this.indexByStatus.get('active')?.size || 0;
-    const inactive = this.indexByStatus.get('inactive')?.size || 0;
-    const error = this.indexByStatus.get('error')?.size || 0;
-    const suspended = this.indexByStatus.get('suspended')?.size || 0;
+    const active = this.indexByStatus.get("active")?.size || 0;
+    const inactive = this.indexByStatus.get("inactive")?.size || 0;
+    const error = this.indexByStatus.get("error")?.size || 0;
+    const suspended = this.indexByStatus.get("suspended")?.size || 0;
 
     const eventSubscriptions: Record<WebhookEventType, number> = {} as any;
     for (const [eventType, endpointIds] of this.indexByEvent.entries()) {
@@ -265,7 +281,7 @@ export class EndpointManager extends EventEmitter {
       inactiveEndpoints: inactive,
       errorEndpoints: error,
       suspendedEndpoints: suspended,
-      eventSubscriptions
+      eventSubscriptions,
     };
   }
 
@@ -280,19 +296,23 @@ export class EndpointManager extends EventEmitter {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
 
-    const expiredEndpoints = Array.from(this.endpoints.values()).filter(endpoint => {
-      return endpoint.status === 'inactive' && 
-             (!endpoint.lastTriggeredAt || endpoint.lastTriggeredAt < cutoffDate);
-    });
+    const expiredEndpoints = Array.from(this.endpoints.values()).filter(
+      (endpoint) => {
+        return (
+          endpoint.status === "inactive" &&
+          (!endpoint.lastTriggeredAt || endpoint.lastTriggeredAt < cutoffDate)
+        );
+      },
+    );
 
     for (const endpoint of expiredEndpoints) {
       await this.removeEndpoint(endpoint.id);
     }
 
     if (expiredEndpoints.length > 0) {
-      this.emit('expiredEndpointsCleanup', { 
+      this.emit("expiredEndpointsCleanup", {
         removedCount: expiredEndpoints.length,
-        cutoffDate 
+        cutoffDate,
       });
     }
 
@@ -310,7 +330,7 @@ export class EndpointManager extends EventEmitter {
     }
 
     // 상태별 인덱스 초기화
-    const statuses = ['active', 'inactive', 'error', 'suspended'];
+    const statuses = ["active", "inactive", "error", "suspended"];
     for (const status of statuses) {
       this.indexByStatus.set(status, new Set());
     }
@@ -363,19 +383,22 @@ export class EndpointManager extends EventEmitter {
   /**
    * 필터 조건 매칭 확인
    */
-  private matchesFilter(endpoint: WebhookEndpoint, filter: EndpointFilter): boolean {
+  private matchesFilter(
+    endpoint: WebhookEndpoint,
+    filter: EndpointFilter,
+  ): boolean {
     // 프로바이더 ID 필터
     if (filter.providerId && filter.providerId.length > 0) {
-      const hasMatchingProvider = filter.providerId.some(providerId => 
-        endpoint.filters?.providerId?.includes(providerId)
+      const hasMatchingProvider = filter.providerId.some((providerId) =>
+        endpoint.filters?.providerId?.includes(providerId),
       );
       if (!hasMatchingProvider) return false;
     }
 
     // 채널 ID 필터
     if (filter.channelId && filter.channelId.length > 0) {
-      const hasMatchingChannel = filter.channelId.some(channelId => 
-        endpoint.filters?.channelId?.includes(channelId)
+      const hasMatchingChannel = filter.channelId.some((channelId) =>
+        endpoint.filters?.channelId?.includes(channelId),
       );
       if (!hasMatchingChannel) return false;
     }
@@ -389,10 +412,18 @@ export class EndpointManager extends EventEmitter {
     }
 
     // 마지막 트리거 날짜 필터
-    if (filter.lastTriggeredAfter && (!endpoint.lastTriggeredAt || endpoint.lastTriggeredAt < filter.lastTriggeredAfter)) {
+    if (
+      filter.lastTriggeredAfter &&
+      (!endpoint.lastTriggeredAt ||
+        endpoint.lastTriggeredAt < filter.lastTriggeredAfter)
+    ) {
       return false;
     }
-    if (filter.lastTriggeredBefore && (!endpoint.lastTriggeredAt || endpoint.lastTriggeredAt > filter.lastTriggeredBefore)) {
+    if (
+      filter.lastTriggeredBefore &&
+      (!endpoint.lastTriggeredAt ||
+        endpoint.lastTriggeredAt > filter.lastTriggeredBefore)
+    ) {
       return false;
     }
 
@@ -403,7 +434,7 @@ export class EndpointManager extends EventEmitter {
    * 객체 필드 값 가져오기 (정렬용)
    */
   private getFieldValue(obj: any, fieldPath: string): any {
-    return fieldPath.split('.').reduce((value, key) => value?.[key], obj);
+    return fieldPath.split(".").reduce((value, key) => value?.[key], obj);
   }
 
   /**
@@ -413,30 +444,31 @@ export class EndpointManager extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const data = await fs.readFile(this.config.filePath, 'utf8');
+      const data = await fs.readFile(this.config.filePath, "utf8");
       const parsed = JSON.parse(data);
-      
+
       // 엔드포인트 복원
       for (const endpointData of parsed.endpoints || []) {
         const endpoint: WebhookEndpoint = {
           ...endpointData,
           createdAt: new Date(endpointData.createdAt),
           updatedAt: new Date(endpointData.updatedAt),
-          lastTriggeredAt: endpointData.lastTriggeredAt ? new Date(endpointData.lastTriggeredAt) : undefined
+          lastTriggeredAt: endpointData.lastTriggeredAt
+            ? new Date(endpointData.lastTriggeredAt)
+            : undefined,
         };
-        
+
         this.endpoints.set(endpoint.id, endpoint);
         this.addToIndexes(endpoint);
       }
 
-      this.emit('dataLoaded', { 
+      this.emit("dataLoaded", {
         filePath: this.config.filePath,
-        endpointCount: this.endpoints.size 
+        endpointCount: this.endpoints.size,
       });
-
     } catch (error) {
-      if ((error as any).code !== 'ENOENT') {
-        this.emit('loadError', error);
+      if ((error as any).code !== "ENOENT") {
+        this.emit("loadError", error);
       }
     }
   }
@@ -450,24 +482,23 @@ export class EndpointManager extends EventEmitter {
     try {
       const data = {
         endpoints: Array.from(this.endpoints.values()),
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       const json = JSON.stringify(data, null, 2);
-      
+
       // 디렉토리 생성
       await fs.mkdir(path.dirname(this.config.filePath), { recursive: true });
-      
+
       // 파일 저장
-      await fs.writeFile(this.config.filePath, json, 'utf8');
+      await fs.writeFile(this.config.filePath, json, "utf8");
 
-      this.emit('dataSaved', { 
+      this.emit("dataSaved", {
         filePath: this.config.filePath,
-        endpointCount: this.endpoints.size 
+        endpointCount: this.endpoints.size,
       });
-
     } catch (error) {
-      this.emit('saveError', error);
+      this.emit("saveError", error);
       throw error;
     }
   }
@@ -477,12 +508,12 @@ export class EndpointManager extends EventEmitter {
    */
   async shutdown(): Promise<void> {
     // 마지막 저장
-    if (this.config.type === 'file') {
-      await this.saveToFile().catch(error => {
-        this.emit('saveError', error);
+    if (this.config.type === "file") {
+      await this.saveToFile().catch((error) => {
+        this.emit("saveError", error);
       });
     }
 
-    this.emit('shutdown', { endpointCount: this.endpoints.size });
+    this.emit("shutdown", { endpointCount: this.endpoints.size });
   }
 }

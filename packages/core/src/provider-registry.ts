@@ -4,16 +4,16 @@
  */
 
 import {
-  BaseProvider,
+  type AdapterFactory,
+  type BaseProvider,
   BaseProviderAdapter,
-  ProviderConfig,
-  StandardRequest,
-  StandardResult,
-  ProviderMetadata,
-  AdapterFactory,
-  ProviderFactoryConfig
-} from './types/index';
-import { UniversalProvider } from './universal-provider';
+  type ProviderConfig,
+  type ProviderFactoryConfig,
+  type ProviderMetadata,
+  type StandardRequest,
+  type StandardResult,
+} from "./types/index";
+import { UniversalProvider } from "./universal-provider";
 
 /**
  * 프로바이더 레지스트리
@@ -21,7 +21,10 @@ import { UniversalProvider } from './universal-provider';
  */
 export class ProviderRegistry {
   private factories = new Map<string, AdapterFactory>();
-  private providers = new Map<string, BaseProvider<StandardRequest, StandardResult>>();
+  private providers = new Map<
+    string,
+    BaseProvider<StandardRequest, StandardResult>
+  >();
   private metadata = new Map<string, ProviderMetadata>();
   private debug = false;
 
@@ -41,7 +44,10 @@ export class ProviderRegistry {
   /**
    * 프로바이더 인스턴스 생성
    */
-  createProvider(providerId: string, config: ProviderConfig): BaseProvider<StandardRequest, StandardResult> {
+  createProvider(
+    providerId: string,
+    config: ProviderConfig,
+  ): BaseProvider<StandardRequest, StandardResult> {
     const factory = this.factories.get(providerId);
     if (!factory) {
       throw new Error(`Provider factory not found: ${providerId}`);
@@ -57,7 +63,7 @@ export class ProviderRegistry {
     const provider = new UniversalProvider(adapter, {
       id: metadata.id,
       name: metadata.name,
-      version: metadata.version
+      version: metadata.version,
     });
 
     // 생성된 프로바이더를 캐시
@@ -73,7 +79,9 @@ export class ProviderRegistry {
   /**
    * 등록된 프로바이더 인스턴스 반환
    */
-  getProvider(providerId: string): BaseProvider<StandardRequest, StandardResult> | null {
+  getProvider(
+    providerId: string,
+  ): BaseProvider<StandardRequest, StandardResult> | null {
     return this.providers.get(providerId) || null;
   }
 
@@ -102,8 +110,8 @@ export class ProviderRegistry {
    * 특정 기능을 지원하는 프로바이더 검색
    */
   findProvidersByFeature(feature: string): ProviderMetadata[] {
-    return Array.from(this.metadata.values()).filter(
-      metadata => metadata.supportedFeatures.includes(feature)
+    return Array.from(this.metadata.values()).filter((metadata) =>
+      metadata.supportedFeatures.includes(feature),
     );
   }
 
@@ -138,7 +146,7 @@ export class ProviderRegistry {
     this.metadata.clear();
 
     if (this.debug) {
-      console.log('[ProviderRegistry] Cleared all providers');
+      console.log("[ProviderRegistry] Cleared all providers");
     }
   }
 
@@ -150,7 +158,7 @@ export class ProviderRegistry {
       registeredFactories: this.factories.size,
       activeProviders: this.providers.size,
       availableProviders: this.getAvailableProviders(),
-      metadata: this.getAllMetadata()
+      metadata: this.getAllMetadata(),
     };
   }
 
@@ -166,7 +174,9 @@ export class ProviderRegistry {
       } catch (error) {
         results[providerId] = {
           healthy: false,
-          issues: [`Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
+          issues: [
+            `Health check failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          ],
         };
       }
     }
@@ -193,13 +203,15 @@ export const globalProviderRegistry = new ProviderRegistry();
 export class ConfigBasedProviderFactory {
   constructor(
     private registry: ProviderRegistry,
-    private config: ProviderFactoryConfig
-  ) { }
+    private config: ProviderFactoryConfig,
+  ) {}
 
   /**
    * 설정에서 프로바이더 생성
    */
-  createFromConfig(providerId: string): BaseProvider<StandardRequest, StandardResult> {
+  createFromConfig(
+    providerId: string,
+  ): BaseProvider<StandardRequest, StandardResult> {
     const providerConfig = this.config.providers[providerId];
     if (!providerConfig) {
       throw new Error(`Provider configuration not found: ${providerId}`);
@@ -211,12 +223,21 @@ export class ConfigBasedProviderFactory {
   /**
    * 모든 설정된 프로바이더 생성
    */
-  createAllFromConfig(): Record<string, BaseProvider<StandardRequest, StandardResult>> {
-    const providers: Record<string, BaseProvider<StandardRequest, StandardResult>> = {};
+  createAllFromConfig(): Record<
+    string,
+    BaseProvider<StandardRequest, StandardResult>
+  > {
+    const providers: Record<
+      string,
+      BaseProvider<StandardRequest, StandardResult>
+    > = {};
 
     for (const [providerId, config] of Object.entries(this.config.providers)) {
       try {
-        providers[providerId] = this.registry.createProvider(providerId, config);
+        providers[providerId] = this.registry.createProvider(
+          providerId,
+          config,
+        );
       } catch (error) {
         console.error(`Failed to create provider ${providerId}:`, error);
       }
@@ -230,7 +251,7 @@ export class ConfigBasedProviderFactory {
  * 플러그인 기반 프로바이더 로더
  */
 export class ProviderPluginLoader {
-  constructor(private registry: ProviderRegistry) { }
+  constructor(private registry: ProviderRegistry) {}
 
   /**
    * 플러그인 모듈 동적 로딩
@@ -241,12 +262,16 @@ export class ProviderPluginLoader {
       const factory = module.default || module;
 
       if (!this.isValidFactory(factory)) {
-        throw new Error('Invalid factory: must implement AdapterFactory interface');
+        throw new Error(
+          "Invalid factory: must implement AdapterFactory interface",
+        );
       }
 
       this.registry.registerFactory(factory);
     } catch (error) {
-      throw new Error(`Failed to load plugin ${pluginPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to load plugin ${pluginPath}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -255,16 +280,19 @@ export class ProviderPluginLoader {
    */
   async loadPlugins(pluginPaths: string[]): Promise<void> {
     const results = await Promise.allSettled(
-      pluginPaths.map(path => this.loadPlugin(path))
+      pluginPaths.map((path) => this.loadPlugin(path)),
     );
 
     const failures = results
       .map((result, index) => ({ result, path: pluginPaths[index] }))
-      .filter(({ result }) => result.status === 'rejected')
-      .map(({ result, path }) => ({ path, error: (result as PromiseRejectedResult).reason }));
+      .filter(({ result }) => result.status === "rejected")
+      .map(({ result, path }) => ({
+        path,
+        error: (result as PromiseRejectedResult).reason,
+      }));
 
     if (failures.length > 0) {
-      console.warn('Some plugins failed to load:', failures);
+      console.warn("Some plugins failed to load:", failures);
     }
   }
 
@@ -274,9 +302,9 @@ export class ProviderPluginLoader {
   private isValidFactory(factory: any): factory is AdapterFactory {
     return (
       factory &&
-      typeof factory.create === 'function' &&
-      typeof factory.supports === 'function' &&
-      typeof factory.getMetadata === 'function'
+      typeof factory.create === "function" &&
+      typeof factory.supports === "function" &&
+      typeof factory.getMetadata === "function"
     );
   }
 }
@@ -286,16 +314,16 @@ export class ProviderPluginLoader {
  * HealthChecker를 활용하여 프로바이더들의 헬스 상태를 모니터링
  */
 export class ProviderHealthMonitor {
-  private checker: import('./health').HealthChecker;
+  private checker: import("./health").HealthChecker;
   private intervalId?: NodeJS.Timeout;
   private registeredServices = new Set<string>();
 
   constructor(
     private registry: ProviderRegistry,
-    private interval = 60000 // 1분
+    private interval = 60000, // 1분
   ) {
     // Lazily import to avoid circular dependency issue
-    const { HealthChecker } = require('./health');
+    const { HealthChecker } = require("./health");
     this.checker = new HealthChecker({ timeout: 5000, includeMetrics: true });
   }
 
@@ -318,7 +346,7 @@ export class ProviderHealthMonitor {
           }
         }
       } catch (error) {
-        console.error('Health monitoring failed:', error);
+        console.error("Health monitoring failed:", error);
       }
     }, this.interval);
   }
@@ -350,8 +378,10 @@ export class ProviderHealthMonitor {
           const health = await provider.healthCheck();
           return {
             healthy: health.healthy,
-            ...(health.issues.length > 0 ? { error: health.issues.join(', ') } : {}),
-            latency: health.latency
+            ...(health.issues.length > 0
+              ? { error: health.issues.join(", ") }
+              : {}),
+            latency: health.latency,
           };
         });
         this.registeredServices.add(providerId);

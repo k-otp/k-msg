@@ -1,5 +1,9 @@
-import type { ChannelConfig, ChannelVerificationResult, SenderNumber } from '../types/channel.types';
-import { SenderNumberStatus } from '../types/channel.types';
+import type {
+  ChannelConfig,
+  ChannelVerificationResult,
+  SenderNumber,
+} from "../types/channel.types";
+import { SenderNumberStatus } from "../types/channel.types";
 
 // Define a service-specific SenderNumber interface that extends the types from channel.types
 export interface ServiceSenderNumber {
@@ -14,7 +18,9 @@ export class ChannelService {
   private channels: Map<string, ChannelConfig> = new Map();
   private senderNumbers: Map<string, ServiceSenderNumber> = new Map();
 
-  async createChannel(channel: Omit<ChannelConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<ChannelConfig> {
+  async createChannel(
+    channel: Omit<ChannelConfig, "id" | "createdAt" | "updatedAt">,
+  ): Promise<ChannelConfig> {
     const newChannel: ChannelConfig = {
       ...channel,
       id: this.generateChannelId(),
@@ -32,15 +38,18 @@ export class ChannelService {
 
   async listChannels(providerId?: string): Promise<ChannelConfig[]> {
     const channels = Array.from(this.channels.values());
-    
+
     if (providerId) {
-      return channels.filter(c => c.providerId === providerId);
+      return channels.filter((c) => c.providerId === providerId);
     }
-    
+
     return channels;
   }
 
-  async updateChannel(channelId: string, updates: Partial<ChannelConfig>): Promise<ChannelConfig> {
+  async updateChannel(
+    channelId: string,
+    updates: Partial<ChannelConfig>,
+  ): Promise<ChannelConfig> {
     const channel = this.channels.get(channelId);
     if (!channel) {
       throw new Error(`Channel ${channelId} not found`);
@@ -58,7 +67,7 @@ export class ChannelService {
 
   async deleteChannel(channelId: string): Promise<void> {
     this.channels.delete(channelId);
-    
+
     // 관련 발신번호도 삭제
     for (const [key, senderNumber] of this.senderNumbers.entries()) {
       if (senderNumber.channelId === channelId) {
@@ -67,7 +76,11 @@ export class ChannelService {
     }
   }
 
-  async addSenderNumber(channelId: string, phoneNumber: string, name?: string): Promise<ServiceSenderNumber> {
+  async addSenderNumber(
+    channelId: string,
+    phoneNumber: string,
+    name?: string,
+  ): Promise<ServiceSenderNumber> {
     const channel = this.channels.get(channelId);
     if (!channel) {
       throw new Error(`Channel ${channelId} not found`);
@@ -84,13 +97,15 @@ export class ChannelService {
     return senderNumber;
   }
 
-  async verifySenderNumber(phoneNumber: string): Promise<ChannelVerificationResult> {
+  async verifySenderNumber(
+    phoneNumber: string,
+  ): Promise<ChannelVerificationResult> {
     const senderNumber = this.senderNumbers.get(phoneNumber);
     if (!senderNumber) {
       return {
         success: false,
-        status: 'not_found',
-        error: 'Sender number not found',
+        status: "not_found",
+        error: "Sender number not found",
       };
     }
 
@@ -104,18 +119,18 @@ export class ChannelService {
 
     return {
       success: true,
-      status: 'verified',
+      status: "verified",
       verificationCode: verificationCode.toString(),
     };
   }
 
   async getSenderNumbers(channelId?: string): Promise<ServiceSenderNumber[]> {
     const senderNumbers = Array.from(this.senderNumbers.values());
-    
+
     if (channelId) {
-      return senderNumbers.filter(s => s.channelId === channelId);
+      return senderNumbers.filter((s) => s.channelId === channelId);
     }
-    
+
     return senderNumbers;
   }
 

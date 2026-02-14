@@ -18,11 +18,11 @@ export interface IWINVBaseResponse {
 
 export interface SendMessageRequest {
   templateCode: string;
-  reserve?: 'Y' | 'N'; // 기본값: N
+  reserve?: "Y" | "N"; // 기본값: N
   sendDate?: string; // yyyy-MM-dd HH:mm:ss (예약발송시 필수)
-  reSend?: 'Y' | 'N'; // 기본값: N
+  reSend?: "Y" | "N"; // 기본값: N
   resendCallback?: string; // 발신번호
-  resendType?: 'Y' | 'N'; // 기본값: Y (Y:알림톡내용, N:직접입력)
+  resendType?: "Y" | "N"; // 기본값: Y (Y:알림톡내용, N:직접입력)
   resendTitle?: string; // LMS 대체문자 제목
   resendContent?: string; // 대체문자 내용
   list: SendRecipient[];
@@ -49,7 +49,7 @@ export interface CreateTemplateRequest {
 }
 
 export interface CreateTemplateButton {
-  type: 'WL' | 'AL' | 'DB' | 'BK' | 'MD';
+  type: "WL" | "AL" | "DB" | "BK" | "MD";
   name: string; // 최대 15자
   linkMo?: string; // WL타입 필수, 최대 200자
   linkPc?: string; // WL타입 필수, 최대 200자
@@ -61,7 +61,7 @@ export interface Template {
   templateCode: string;
   templateName: string;
   templateContent: string;
-  status: 'Y' | 'I' | 'R'; // Y:사용가능, I:검수중, R:부결
+  status: "Y" | "I" | "R"; // Y:사용가능, I:검수중, R:부결
   templateStatusMsg?: string;
   templateStatusComments?: string;
   createDate: string;
@@ -73,7 +73,7 @@ export interface TemplateListRequest {
   pageSize?: string; // 기본값: "15", 최대: "1000"
   templateCode?: string;
   templateName?: string;
-  templateStatus?: 'Y' | 'I' | 'R'; // Y:사용가능, I:검수중, R:부결
+  templateStatus?: "Y" | "I" | "R"; // Y:사용가능, I:검수중, R:부결
 }
 
 export interface TemplateListResponse extends IWINVBaseResponse {
@@ -103,7 +103,7 @@ export type DeleteTemplateResponse = IWINVBaseResponse;
 export interface HistoryRequest {
   pageNum?: number; // 기본값: 1
   pageSize?: number; // 기본값: 15, 최대: 1000
-  reserve?: 'Y' | 'N'; // 예약발송 여부
+  reserve?: "Y" | "N"; // 예약발송 여부
   startDate?: string; // yyyy-MM-dd HH:mm:ss
   endDate?: string; // yyyy-MM-dd HH:mm:ss
   seqNo?: number; // 메시지 ID
@@ -116,7 +116,7 @@ export interface MessageHistory {
   callback: string; // 발신번호
   templateCode: string;
   sendMessage: string; // 전송한 메시지
-  reserve: 'Y' | 'N'; // 예약발송 여부
+  reserve: "Y" | "N"; // 예약발송 여부
   requestDate: string; // 요청일
   sendDate: string; // 전송일
   receiveDate: string; // 수신일
@@ -168,13 +168,15 @@ export interface IWINVConfig {
   ipRetryCount?: number;
   ipRetryDelayMs?: number;
   ipAlertWebhookUrl?: string;
-  onIpRestrictionAlert?: (payload: IWINVIPRestrictionAlert) => void | Promise<void>;
+  onIpRestrictionAlert?: (
+    payload: IWINVIPRestrictionAlert,
+  ) => void | Promise<void>;
   debug?: boolean;
   [key: string]: unknown;
 }
 
 export interface IWINVIPRestrictionAlert {
-  provider: 'iwinv';
+  provider: "iwinv";
   channel: string;
   endpoint: string;
   phoneNumber: string;
@@ -198,5 +200,5 @@ export const IWINV_STATUS_CODES = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   TOO_MANY_REQUESTS: 429,
-  INTERNAL_SERVER_ERROR: 500
+  INTERNAL_SERVER_ERROR: 500,
 } as const;

@@ -1,23 +1,23 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export interface AnalyticsConfig {
   enableRealTimeTracking: boolean;
   retentionDays: number;
-  aggregationIntervals: ('minute' | 'hour' | 'day' | 'week' | 'month')[];
+  aggregationIntervals: ("minute" | "hour" | "day" | "week" | "month")[];
   enabledMetrics: MetricType[];
 }
 
 export enum MetricType {
-  MESSAGE_SENT = 'message_sent',
-  MESSAGE_DELIVERED = 'message_delivered',
-  MESSAGE_FAILED = 'message_failed',
-  MESSAGE_CLICKED = 'message_clicked',
-  TEMPLATE_USAGE = 'template_usage',
-  PROVIDER_PERFORMANCE = 'provider_performance',
-  CHANNEL_USAGE = 'channel_usage',
-  ERROR_RATE = 'error_rate',
-  DELIVERY_RATE = 'delivery_rate',
-  CLICK_RATE = 'click_rate'
+  MESSAGE_SENT = "message_sent",
+  MESSAGE_DELIVERED = "message_delivered",
+  MESSAGE_FAILED = "message_failed",
+  MESSAGE_CLICKED = "message_clicked",
+  TEMPLATE_USAGE = "template_usage",
+  PROVIDER_PERFORMANCE = "provider_performance",
+  CHANNEL_USAGE = "channel_usage",
+  ERROR_RATE = "error_rate",
+  DELIVERY_RATE = "delivery_rate",
+  CLICK_RATE = "click_rate",
 }
 
 export interface MetricData {
@@ -31,7 +31,7 @@ export interface MetricData {
 
 export interface AggregatedMetric {
   type: MetricType;
-  interval: 'minute' | 'hour' | 'day' | 'week' | 'month';
+  interval: "minute" | "hour" | "day" | "week" | "month";
   timestamp: Date;
   dimensions: Record<string, string>;
   aggregations: {
@@ -54,23 +54,23 @@ export interface AnalyticsReport {
   filters: Record<string, any>;
   metrics: ReportMetric[];
   generatedAt: Date;
-  format: 'json' | 'csv' | 'pdf';
+  format: "json" | "csv" | "pdf";
 }
 
 export interface ReportMetric {
   type: MetricType;
   value: number;
   change?: number; // 이전 기간 대비 변화율
-  trend?: 'up' | 'down' | 'stable';
+  trend?: "up" | "down" | "stable";
   breakdown?: Record<string, number>; // 세부 분석
 }
 
 export interface InsightData {
   id: string;
-  type: 'anomaly' | 'trend' | 'recommendation';
+  type: "anomaly" | "trend" | "recommendation";
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   metric: MetricType;
   dimensions: Record<string, string>;
   value: number;
@@ -87,10 +87,10 @@ export interface AnalyticsQuery {
     start: Date;
     end: Date;
   };
-  interval?: 'minute' | 'hour' | 'day' | 'week' | 'month';
+  interval?: "minute" | "hour" | "day" | "week" | "month";
   filters?: Record<string, any>;
   groupBy?: string[];
-  orderBy?: { field: string; direction: 'asc' | 'desc' }[];
+  orderBy?: { field: string; direction: "asc" | "desc" }[];
   limit?: number;
   offset?: number;
 }
@@ -122,23 +122,27 @@ export const AnalyticsQuerySchema = z.object({
     start: z.date(),
     end: z.date(),
   }),
-  interval: z.enum(['minute', 'hour', 'day', 'week', 'month']).optional(),
+  interval: z.enum(["minute", "hour", "day", "week", "month"]).optional(),
   filters: z.record(z.string(), z.any()).optional(),
   groupBy: z.array(z.string()).optional(),
-  orderBy: z.array(z.object({
-    field: z.string(),
-    direction: z.enum(['asc', 'desc']),
-  })).optional(),
+  orderBy: z
+    .array(
+      z.object({
+        field: z.string(),
+        direction: z.enum(["asc", "desc"]),
+      }),
+    )
+    .optional(),
   limit: z.number().min(1).max(10000).optional(),
   offset: z.number().min(0).optional(),
 });
 
 export const InsightDataSchema = z.object({
   id: z.string(),
-  type: z.enum(['anomaly', 'trend', 'recommendation']),
+  type: z.enum(["anomaly", "trend", "recommendation"]),
   title: z.string(),
   description: z.string(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  severity: z.enum(["low", "medium", "high", "critical"]),
   metric: z.nativeEnum(MetricType),
   dimensions: z.record(z.string(), z.string()),
   value: z.number(),

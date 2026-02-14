@@ -41,7 +41,10 @@ export const Result = {
   /**
    * Chain Result-returning operations
    */
-  flatMap<T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> {
+  flatMap<T, U, E>(
+    result: Result<T, E>,
+    fn: (value: T) => Result<U, E>,
+  ): Result<U, E> {
     if (result.isSuccess) {
       return fn(result.value);
     }
@@ -93,7 +96,7 @@ export const Result = {
    */
   match<T, E, U>(
     result: Result<T, E>,
-    handlers: { ok: (value: T) => U; fail: (error: E) => U }
+    handlers: { ok: (value: T) => U; fail: (error: E) => U },
   ): U {
     if (result.isSuccess) {
       return handlers.ok(result.value);

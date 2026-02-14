@@ -26,7 +26,10 @@ export interface AnalyticsService {
 
 export interface WebhookService {
   registerWebhook(params: WebhookParams): Promise<WebhookRegistration>;
-  updateWebhook(webhookId: string, params: WebhookParams): Promise<WebhookRegistration>;
+  updateWebhook(
+    webhookId: string,
+    params: WebhookParams,
+  ): Promise<WebhookRegistration>;
   deleteWebhook(webhookId: string): Promise<void>;
   listWebhooks(): Promise<WebhookRegistration[]>;
 }
@@ -67,7 +70,7 @@ export interface ResendConfig {
 
 export interface SendMessageResult {
   messageId: string;
-  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  status: "SUCCESS" | "FAILED" | "PENDING";
   statusCode?: string;
   remainingBalance?: number;
   creditsUsed?: number;
@@ -78,7 +81,7 @@ export interface BulkMessageResult {
   successCount: number;
   failureCount: number;
   results: Array<{
-    status: 'SUCCESS' | 'FAILED';
+    status: "SUCCESS" | "FAILED";
     statusCode?: string;
     messageId?: string;
   }>;
@@ -135,7 +138,7 @@ export interface Template {
   id: string;
   name: string;
   content: string;
-  status: 'ACTIVE' | 'PENDING' | 'REJECTED';
+  status: "ACTIVE" | "PENDING" | "REJECTED";
   variables: string[];
   buttons?: TemplateButton[];
   createdAt: Date;
@@ -164,7 +167,7 @@ export interface ValidationResult {
 
 export interface DeliveryStatus {
   messageId: string;
-  status: 'PENDING' | 'SENT' | 'DELIVERED' | 'FAILED' | 'EXPIRED';
+  status: "PENDING" | "SENT" | "DELIVERED" | "FAILED" | "EXPIRED";
   sentAt?: Date;
   deliveredAt?: Date;
   failureReason?: string;

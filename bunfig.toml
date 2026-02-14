@@ -29,7 +29,7 @@ testIgnore = [
 
 [install]
 # Faster installs
-frozen = true
+frozen = false
 cache = true
 
 # Registry configuration

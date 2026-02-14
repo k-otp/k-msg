@@ -1,12 +1,12 @@
-import type { EventEmitter } from 'events';
+import type { EventEmitter } from "events";
 
 export interface ProviderPlugin {
   readonly metadata: ProviderMetadata;
   readonly capabilities: ProviderCapabilities;
-  
+
   initialize(context: PluginContext): Promise<void>;
   destroy(): Promise<void>;
-  
+
   middleware?: ProviderMiddleware[];
   getImplementation(): ProviderImplementation;
 }
@@ -29,7 +29,7 @@ export interface ProviderCapabilities {
     variableSupport?: boolean;
     maxVariables?: number;
   };
-  
+
   scheduling?: {
     supported: boolean;
     maxAdvanceDays?: number;
@@ -37,7 +37,7 @@ export interface ProviderCapabilities {
     modifiable?: boolean;
     cancellable?: boolean;
   };
-  
+
   templating?: {
     supported: boolean;
     crud: boolean;
@@ -47,18 +47,18 @@ export interface ProviderCapabilities {
     reviewRequired?: boolean;
     reviewTime?: string;
   };
-  
+
   resending?: {
     supported: boolean;
     fallbackTypes?: string[];
     customContent?: boolean;
   };
-  
+
   webhooks?: {
     delivery: boolean;
     status: boolean;
   };
-  
+
   rateLimit?: {
     messagesPerSecond?: number;
     messagesPerMinute?: number;
@@ -105,7 +105,11 @@ export interface Logger {
 
 export interface MetricsCollector {
   increment(metric: string, labels?: Record<string, string>): void;
-  histogram(metric: string, value: number, labels?: Record<string, string>): void;
+  histogram(
+    metric: string,
+    value: number,
+    labels?: Record<string, string>,
+  ): void;
   gauge(metric: string, value: number, labels?: Record<string, string>): void;
 }
 
@@ -115,15 +119,15 @@ export interface PluginStorage {
   delete(key: string): Promise<void>;
 }
 
-import {
+import type {
+  AnalyticsService,
+  BalanceService,
+  HistoryService,
   MessagingService,
   SchedulingService,
   TemplatingService,
-  AnalyticsService,
   WebhookService,
-  BalanceService,
-  HistoryService
-} from './services';
+} from "./services";
 
 export interface ProviderImplementation {
   messaging: MessagingService;

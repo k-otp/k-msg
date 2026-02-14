@@ -2,16 +2,16 @@
  * Insights - 인사이트 생성 컴포넌트들
  */
 
-export { 
-  AnomalyDetector, 
-  type AnomalyDetectionConfig, 
-  type AnomalyAlgorithm, 
-  type Anomaly 
-} from './anomaly.detector';
+export {
+  type Anomaly,
+  type AnomalyAlgorithm,
+  type AnomalyDetectionConfig,
+  AnomalyDetector,
+} from "./anomaly.detector";
 
-export { 
-  RecommendationEngine, 
-  type RecommendationConfig, 
-  type Recommendation, 
-  type RecommendationRule 
-} from './recommendation.engine';
+export {
+  type Recommendation,
+  type RecommendationConfig,
+  RecommendationEngine,
+  type RecommendationRule,
+} from "./recommendation.engine";

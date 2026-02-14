@@ -35,7 +35,7 @@ export interface Channel {
   id: string;
   name: string;
   profileKey: string;
-  status: 'active' | 'inactive' | 'pending' | 'blocked';
+  status: "active" | "inactive" | "pending" | "blocked";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,7 +54,7 @@ import type {
   DeliveryStatus,
   StandardRequest,
   StandardResult,
-} from '@k-msg/core';
+} from "@k-msg/core";
 
 // AlimTalk 전용 요청/응답 타입
 export interface AlimTalkRequest extends StandardRequest {
@@ -77,8 +77,9 @@ export interface AlimTalkResult extends StandardResult {
 }
 
 // Core provider interface - extends the new generic base provider from core
-export interface AlimTalkProvider extends BaseProvider<AlimTalkRequest, AlimTalkResult> {
-  readonly type: 'messaging';
+export interface AlimTalkProvider
+  extends BaseProvider<AlimTalkRequest, AlimTalkResult> {
+  readonly type: "messaging";
 
   // Enhanced capabilities (required for AlimTalk providers)
   readonly capabilities: ProviderCapabilities;
@@ -107,7 +108,7 @@ export interface ProviderCapabilities {
     maxButtons: number;
     supportedButtonTypes: string[];
     requiresApproval: boolean;
-    approvalTime: string;          // "instant" | "1-2 days" | "2-3 days"
+    approvalTime: string; // "instant" | "1-2 days" | "2-3 days"
   };
   messaging: {
     maxRecipientsPerRequest: number;
@@ -127,11 +128,14 @@ export interface ProviderCapabilities {
 // Template management contract
 export interface TemplateContract {
   create(template: TemplateCreateRequest): Promise<TemplateCreateResult>;
-  update(templateId: string, template: TemplateUpdateRequest): Promise<TemplateUpdateResult>;
+  update(
+    templateId: string,
+    template: TemplateUpdateRequest,
+  ): Promise<TemplateUpdateResult>;
   delete(templateId: string): Promise<void>;
   get(templateId: string): Promise<ProviderTemplate>;
   list(filters?: TemplateFilters): Promise<ProviderTemplate[]>;
-  sync(): Promise<SyncResult>;  // Sync with provider
+  sync(): Promise<SyncResult>; // Sync with provider
 }
 
 export interface TemplateCreateRequest {
@@ -176,11 +180,11 @@ export interface ProviderTemplate {
 }
 
 export enum TemplateStatus {
-  DRAFT = 'DRAFT',
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  DISABLED = 'DISABLED'
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  DISABLED = "DISABLED",
 }
 
 export interface TemplateVariableDefinition {
@@ -229,7 +233,10 @@ export interface ChannelContract {
   register(channel: ChannelRequest): Promise<Channel>;
   list(): Promise<Channel[]>;
   addSenderNumber(channelId: string, number: string): Promise<SenderNumber>;
-  verifySenderNumber(number: string, verificationCode: string): Promise<boolean>;
+  verifySenderNumber(
+    number: string,
+    verificationCode: string,
+  ): Promise<boolean>;
 }
 
 export interface ChannelRequest {
@@ -251,7 +258,10 @@ export interface BusinessInfo {
 export interface MessagingContract {
   send(message: ProviderMessageRequest): Promise<ProviderMessageResult>;
   sendBulk(messages: ProviderMessageRequest[]): Promise<ProviderBulkResult>;
-  schedule(message: ProviderMessageRequest, scheduledAt: Date): Promise<ScheduleResult>;
+  schedule(
+    message: ProviderMessageRequest,
+    scheduledAt: Date,
+  ): Promise<ScheduleResult>;
   cancel(messageId: string): Promise<void>;
   getStatus(messageId: string): Promise<MessageStatus>;
 }
@@ -265,7 +275,7 @@ export interface ProviderMessageRequest {
 }
 
 export interface MessageOptions {
-  priority?: 'high' | 'normal' | 'low';
+  priority?: "high" | "normal" | "low";
   ttl?: number;
   tracking?: boolean;
   webhookUrl?: string;
@@ -293,16 +303,16 @@ export interface ScheduleResult {
   scheduleId: string;
   messageId: string;
   scheduledAt: Date;
-  status: 'scheduled' | 'cancelled';
+  status: "scheduled" | "cancelled";
 }
 
 export enum MessageStatus {
-  QUEUED = 'QUEUED',
-  SENDING = 'SENDING',
-  SENT = 'SENT',
-  DELIVERED = 'DELIVERED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  QUEUED = "QUEUED",
+  SENDING = "SENDING",
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
 }
 
 export interface ProviderError {
@@ -315,7 +325,10 @@ export interface ProviderError {
 // Analytics contract
 export interface AnalyticsContract {
   getUsage(period: DateRange): Promise<UsageStats>;
-  getTemplateStats(templateId: string, period: DateRange): Promise<TemplateStats>;
+  getTemplateStats(
+    templateId: string,
+    period: DateRange,
+  ): Promise<TemplateStats>;
   getDeliveryReport(messageId: string): Promise<DeliveryReport>;
 }
 
@@ -388,8 +401,8 @@ export interface AccountProfile {
   name: string;
   email: string;
   phone: string;
-  status: 'active' | 'suspended' | 'blocked';
-  tier: 'basic' | 'standard' | 'premium' | 'enterprise';
+  status: "active" | "suspended" | "blocked";
+  tier: "basic" | "standard" | "premium" | "enterprise";
   features: string[];
   limits: {
     dailyMessageLimit: number;
@@ -416,7 +429,7 @@ export interface ProviderConfiguration {
 export interface ConfigurationField {
   key: string;
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'password' | 'url';
+  type: "string" | "number" | "boolean" | "password" | "url";
   description: string;
   required: boolean;
   default?: unknown;

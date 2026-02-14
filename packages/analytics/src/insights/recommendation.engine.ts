@@ -3,8 +3,8 @@
  * 데이터 기반 추천 시스템
  */
 
-import type { AggregatedMetric, InsightData } from '../types/analytics.types';
-import { MetricType } from '../types/analytics.types';
+import type { AggregatedMetric, InsightData } from "../types/analytics.types";
+import { MetricType } from "../types/analytics.types";
 
 export interface RecommendationConfig {
   rules: RecommendationRule[];
@@ -26,18 +26,23 @@ export interface RecommendationRule {
 
 export interface RuleCondition {
   metric: MetricType;
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between' | 'trend';
+  operator: "gt" | "lt" | "eq" | "gte" | "lte" | "between" | "trend";
   value: number | [number, number];
   timeWindow?: string; // '1h', '1d', '1w'
   dimensions?: Record<string, string>;
 }
 
 export interface RecommendationAction {
-  type: 'optimization' | 'cost-saving' | 'performance' | 'reliability' | 'security';
+  type:
+    | "optimization"
+    | "cost-saving"
+    | "performance"
+    | "reliability"
+    | "security";
   title: string;
   description: string;
-  impact: 'low' | 'medium' | 'high';
-  effort: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
+  effort: "low" | "medium" | "high";
   steps: string[];
   estimatedBenefit?: {
     metric: MetricType;
@@ -55,8 +60,8 @@ export interface Recommendation {
   rationale: string;
   actions: RecommendationAction[];
   confidence: number;
-  impact: 'low' | 'medium' | 'high';
-  effort: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
+  effort: "low" | "medium" | "high";
   createdAt: Date;
   validUntil?: Date;
   metadata: {
@@ -87,11 +92,31 @@ export class RecommendationEngine {
     confidenceThreshold: 0.7,
     maxRecommendations: 10,
     categories: [
-      { id: 'cost', name: 'Cost Optimization', description: 'Reduce operational costs', weight: 0.8 },
-      { id: 'performance', name: 'Performance', description: 'Improve system performance', weight: 0.9 },
-      { id: 'reliability', name: 'Reliability', description: 'Enhance system reliability', weight: 1.0 },
-      { id: 'security', name: 'Security', description: 'Strengthen security posture', weight: 0.95 }
-    ]
+      {
+        id: "cost",
+        name: "Cost Optimization",
+        description: "Reduce operational costs",
+        weight: 0.8,
+      },
+      {
+        id: "performance",
+        name: "Performance",
+        description: "Improve system performance",
+        weight: 0.9,
+      },
+      {
+        id: "reliability",
+        name: "Reliability",
+        description: "Enhance system reliability",
+        weight: 1.0,
+      },
+      {
+        id: "security",
+        name: "Security",
+        description: "Strengthen security posture",
+        weight: 0.95,
+      },
+    ],
   };
 
   constructor(config: Partial<RecommendationConfig> = {}) {
@@ -102,29 +127,36 @@ export class RecommendationEngine {
   /**
    * 메트릭 기반 추천 생성
    */
-  async generateRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  async generateRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // 규칙 기반 추천
-    const ruleBasedRecommendations = await this.generateRuleBasedRecommendations(metrics);
+    const ruleBasedRecommendations =
+      await this.generateRuleBasedRecommendations(metrics);
     recommendations.push(...ruleBasedRecommendations);
 
     // 패턴 기반 추천
-    const patternBasedRecommendations = await this.generatePatternBasedRecommendations(metrics);
+    const patternBasedRecommendations =
+      await this.generatePatternBasedRecommendations(metrics);
     recommendations.push(...patternBasedRecommendations);
 
     // 비교 기반 추천
-    const comparisonBasedRecommendations = await this.generateComparisonBasedRecommendations(metrics);
+    const comparisonBasedRecommendations =
+      await this.generateComparisonBasedRecommendations(metrics);
     recommendations.push(...comparisonBasedRecommendations);
 
     // ML 기반 추천 (활성화된 경우)
     if (this.config.enableMachineLearning) {
-      const mlRecommendations = await this.generateMLBasedRecommendations(metrics);
+      const mlRecommendations =
+        await this.generateMLBasedRecommendations(metrics);
       recommendations.push(...mlRecommendations);
     }
 
     // 중복 제거 및 우선순위 정렬
-    const filteredRecommendations = this.deduplicateAndPrioritize(recommendations);
+    const filteredRecommendations =
+      this.deduplicateAndPrioritize(recommendations);
 
     // 저장
     for (const recommendation of filteredRecommendations) {
@@ -139,7 +171,7 @@ export class RecommendationEngine {
    */
   getRecommendationsByCategory(category: string): Recommendation[] {
     return Array.from(this.recommendations.values())
-      .filter(r => r.category === category)
+      .filter((r) => r.category === category)
       .sort((a, b) => b.priority - a.priority);
   }
 
@@ -184,8 +216,9 @@ export class RecommendationEngine {
     for (const rec of recommendations) {
       byCategory[rec.category] = (byCategory[rec.category] || 0) + 1;
       byImpact[rec.impact] = (byImpact[rec.impact] || 0) + 1;
-      
-      const priorityLevel = rec.priority >= 8 ? 'high' : rec.priority >= 5 ? 'medium' : 'low';
+
+      const priorityLevel =
+        rec.priority >= 8 ? "high" : rec.priority >= 5 ? "medium" : "low";
       byPriority[priorityLevel] = (byPriority[priorityLevel] || 0) + 1;
     }
 
@@ -193,11 +226,13 @@ export class RecommendationEngine {
       total: recommendations.length,
       byCategory,
       byImpact,
-      byPriority
+      byPriority,
     };
   }
 
-  private async generateRuleBasedRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  private async generateRuleBasedRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     for (const rule of this.config.rules) {
@@ -205,10 +240,16 @@ export class RecommendationEngine {
 
       try {
         const matchingMetrics = this.evaluateRuleConditions(rule, metrics);
-        
+
         if (matchingMetrics.length > 0) {
-          const recommendation = await this.createRecommendationFromRule(rule, matchingMetrics);
-          if (recommendation && recommendation.confidence >= this.config.confidenceThreshold) {
+          const recommendation = await this.createRecommendationFromRule(
+            rule,
+            matchingMetrics,
+          );
+          if (
+            recommendation &&
+            recommendation.confidence >= this.config.confidenceThreshold
+          ) {
             recommendations.push(recommendation);
             this.recordRuleExecution(rule.id);
           }
@@ -221,56 +262,76 @@ export class RecommendationEngine {
     return recommendations;
   }
 
-  private async generatePatternBasedRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  private async generatePatternBasedRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // 시간 패턴 분석
     const timePatterns = this.analyzeTimePatterns(metrics);
-    recommendations.push(...this.generateTimeBasedRecommendations(timePatterns));
+    recommendations.push(
+      ...this.generateTimeBasedRecommendations(timePatterns),
+    );
 
     // 채널 사용 패턴 분석
     const channelPatterns = this.analyzeChannelPatterns(metrics);
-    recommendations.push(...this.generateChannelBasedRecommendations(channelPatterns));
+    recommendations.push(
+      ...this.generateChannelBasedRecommendations(channelPatterns),
+    );
 
     // 오류 패턴 분석
     const errorPatterns = this.analyzeErrorPatterns(metrics);
-    recommendations.push(...this.generateErrorBasedRecommendations(errorPatterns));
+    recommendations.push(
+      ...this.generateErrorBasedRecommendations(errorPatterns),
+    );
 
     return recommendations;
   }
 
-  private async generateComparisonBasedRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  private async generateComparisonBasedRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // 프로바이더 성능 비교
     const providerComparison = this.compareProviderPerformance(metrics);
-    recommendations.push(...this.generateProviderRecommendations(providerComparison));
+    recommendations.push(
+      ...this.generateProviderRecommendations(providerComparison),
+    );
 
     // 채널 효율성 비교
     const channelComparison = this.compareChannelEfficiency(metrics);
-    recommendations.push(...this.generateChannelEfficiencyRecommendations(channelComparison));
+    recommendations.push(
+      ...this.generateChannelEfficiencyRecommendations(channelComparison),
+    );
 
     return recommendations;
   }
 
-  private async generateMLBasedRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  private async generateMLBasedRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     // ML 기반 추천 로직 (향후 구현)
     // 현재는 간단한 통계 기반 접근법 사용
-    
+
     const recommendations: Recommendation[] = [];
-    
+
     // 예측 모델을 통한 용량 계획
-    const capacityRecommendations = await this.generateCapacityRecommendations(metrics);
+    const capacityRecommendations =
+      await this.generateCapacityRecommendations(metrics);
     recommendations.push(...capacityRecommendations);
 
     return recommendations;
   }
 
-  private evaluateRuleConditions(rule: RecommendationRule, metrics: AggregatedMetric[]): AggregatedMetric[] {
+  private evaluateRuleConditions(
+    rule: RecommendationRule,
+    metrics: AggregatedMetric[],
+  ): AggregatedMetric[] {
     const matchingMetrics: AggregatedMetric[] = [];
 
     for (const condition of rule.conditions) {
-      const relevantMetrics = metrics.filter(m => {
+      const relevantMetrics = metrics.filter((m) => {
         // 메트릭 타입 확인
         if (m.type !== condition.metric) return false;
 
@@ -295,19 +356,28 @@ export class RecommendationEngine {
     return matchingMetrics;
   }
 
-  private evaluateCondition(metric: AggregatedMetric, condition: RuleCondition): boolean {
+  private evaluateCondition(
+    metric: AggregatedMetric,
+    condition: RuleCondition,
+  ): boolean {
     const value = metric.aggregations.avg;
 
     switch (condition.operator) {
-      case 'gt': return value > (condition.value as number);
-      case 'lt': return value < (condition.value as number);
-      case 'gte': return value >= (condition.value as number);
-      case 'lte': return value <= (condition.value as number);
-      case 'eq': return value === (condition.value as number);
-      case 'between': 
+      case "gt":
+        return value > (condition.value as number);
+      case "lt":
+        return value < (condition.value as number);
+      case "gte":
+        return value >= (condition.value as number);
+      case "lte":
+        return value <= (condition.value as number);
+      case "eq":
+        return value === (condition.value as number);
+      case "between": {
         const [min, max] = condition.value as [number, number];
         return value >= min && value <= max;
-      case 'trend':
+      }
+      case "trend":
         // 트렌드 조건은 더 복잡한 로직 필요
         return false;
       default:
@@ -317,7 +387,7 @@ export class RecommendationEngine {
 
   private async createRecommendationFromRule(
     rule: RecommendationRule,
-    matchingMetrics: AggregatedMetric[]
+    matchingMetrics: AggregatedMetric[],
   ): Promise<Recommendation | null> {
     if (rule.actions.length === 0) return null;
 
@@ -341,14 +411,16 @@ export class RecommendationEngine {
       metadata: {
         ruleIds: [rule.id],
         triggeredBy: {
-          metrics: matchingMetrics.map(m => ({
+          metrics: matchingMetrics.map((m) => ({
             type: m.type,
             value: m.aggregations.avg,
-            timestamp: m.timestamp
+            timestamp: m.timestamp,
           })),
-          conditions: rule.conditions.map(c => `${c.metric} ${c.operator} ${c.value}`)
-        }
-      }
+          conditions: rule.conditions.map(
+            (c) => `${c.metric} ${c.operator} ${c.value}`,
+          ),
+        },
+      },
     };
   }
 
@@ -361,53 +433,71 @@ export class RecommendationEngine {
       const hour = metric.timestamp.getHours();
       const dayOfWeek = metric.timestamp.getDay();
 
-      hourlyUsage.set(hour, (hourlyUsage.get(hour) || 0) + metric.aggregations.sum);
-      dailyUsage.set(dayOfWeek, (dailyUsage.get(dayOfWeek) || 0) + metric.aggregations.sum);
+      hourlyUsage.set(
+        hour,
+        (hourlyUsage.get(hour) || 0) + metric.aggregations.sum,
+      );
+      dailyUsage.set(
+        dayOfWeek,
+        (dailyUsage.get(dayOfWeek) || 0) + metric.aggregations.sum,
+      );
     }
 
     return { hourlyUsage, dailyUsage };
   }
 
-  private generateTimeBasedRecommendations(timePatterns: any): Recommendation[] {
+  private generateTimeBasedRecommendations(
+    timePatterns: any,
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const { hourlyUsage, dailyUsage } = timePatterns;
 
     // 피크 시간 분석
-    const peakHour = Array.from(hourlyUsage.entries() as Iterable<[number, number]>).reduce((max: [number, number], curr: [number, number]) => 
-      curr[1] > max[1] ? curr : max, [0, 0] as [number, number]
+    const peakHour = Array.from(
+      hourlyUsage.entries() as Iterable<[number, number]>,
+    ).reduce(
+      (max: [number, number], curr: [number, number]) =>
+        curr[1] > max[1] ? curr : max,
+      [0, 0] as [number, number],
     );
 
     if (peakHour[1] > 0) {
       recommendations.push({
         id: `time_peak_${Date.now()}`,
-        category: 'performance',
+        category: "performance",
         priority: 7,
-        title: 'Optimize for Peak Hours',
+        title: "Optimize for Peak Hours",
         description: `Peak usage occurs at ${peakHour[0]}:00. Consider load balancing optimizations.`,
-        rationale: 'High traffic concentration during peak hours may impact performance',
-        actions: [{
-          type: 'performance',
-          title: 'Implement Load Balancing',
-          description: 'Configure load balancing to distribute traffic during peak hours',
-          impact: 'medium',
-          effort: 'medium',
-          steps: [
-            'Set up multiple provider connections',
-            'Implement round-robin distribution',
-            'Monitor performance during peak hours'
-          ]
-        }],
+        rationale:
+          "High traffic concentration during peak hours may impact performance",
+        actions: [
+          {
+            type: "performance",
+            title: "Implement Load Balancing",
+            description:
+              "Configure load balancing to distribute traffic during peak hours",
+            impact: "medium",
+            effort: "medium",
+            steps: [
+              "Set up multiple provider connections",
+              "Implement round-robin distribution",
+              "Monitor performance during peak hours",
+            ],
+          },
+        ],
         confidence: 0.8,
-        impact: 'medium',
-        effort: 'medium',
+        impact: "medium",
+        effort: "medium",
         createdAt: new Date(),
         metadata: {
           ruleIds: [],
           triggeredBy: {
             metrics: [],
-            conditions: [`Peak hour usage: ${peakHour[1]} at ${peakHour[0]}:00`]
-          }
-        }
+            conditions: [
+              `Peak hour usage: ${peakHour[1]} at ${peakHour[0]}:00`,
+            ],
+          },
+        },
       });
     }
 
@@ -415,11 +505,18 @@ export class RecommendationEngine {
   }
 
   private analyzeChannelPatterns(metrics: AggregatedMetric[]): any {
-    const channelUsage = new Map<string, { sent: number; delivered: number; failed: number }>();
+    const channelUsage = new Map<
+      string,
+      { sent: number; delivered: number; failed: number }
+    >();
 
     for (const metric of metrics) {
-      const channel = metric.dimensions.channel || 'unknown';
-      const stats = channelUsage.get(channel) || { sent: 0, delivered: 0, failed: 0 };
+      const channel = metric.dimensions.channel || "unknown";
+      const stats = channelUsage.get(channel) || {
+        sent: 0,
+        delivered: 0,
+        failed: 0,
+      };
 
       if (metric.type === MetricType.MESSAGE_SENT) {
         stats.sent += metric.aggregations.sum;
@@ -435,46 +532,55 @@ export class RecommendationEngine {
     return { channelUsage };
   }
 
-  private generateChannelBasedRecommendations(channelPatterns: any): Recommendation[] {
+  private generateChannelBasedRecommendations(
+    channelPatterns: any,
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const { channelUsage } = channelPatterns;
 
     for (const [channel, stats] of channelUsage.entries()) {
-      const deliveryRate = stats.sent > 0 ? (stats.delivered / stats.sent) * 100 : 0;
-      const failureRate = stats.sent > 0 ? (stats.failed / stats.sent) * 100 : 0;
+      const deliveryRate =
+        stats.sent > 0 ? (stats.delivered / stats.sent) * 100 : 0;
+      const failureRate =
+        stats.sent > 0 ? (stats.failed / stats.sent) * 100 : 0;
 
       if (deliveryRate < 90 && stats.sent > 100) {
         recommendations.push({
           id: `channel_delivery_${channel}_${Date.now()}`,
-          category: 'reliability',
+          category: "reliability",
           priority: 8,
           title: `Improve ${channel} Channel Reliability`,
           description: `${channel} channel has ${deliveryRate.toFixed(1)}% delivery rate`,
-          rationale: 'Low delivery rate impacts customer experience and wastes resources',
-          actions: [{
-            type: 'reliability',
-            title: 'Investigate Channel Issues',
-            description: `Analyze and fix delivery issues for ${channel} channel`,
-            impact: 'high',
-            effort: 'medium',
-            steps: [
-              `Review ${channel} provider configuration`,
-              'Check template approval status',
-              'Analyze failure patterns',
-              'Implement fallback mechanisms'
-            ]
-          }],
+          rationale:
+            "Low delivery rate impacts customer experience and wastes resources",
+          actions: [
+            {
+              type: "reliability",
+              title: "Investigate Channel Issues",
+              description: `Analyze and fix delivery issues for ${channel} channel`,
+              impact: "high",
+              effort: "medium",
+              steps: [
+                `Review ${channel} provider configuration`,
+                "Check template approval status",
+                "Analyze failure patterns",
+                "Implement fallback mechanisms",
+              ],
+            },
+          ],
           confidence: 0.9,
-          impact: 'high',
-          effort: 'medium',
+          impact: "high",
+          effort: "medium",
           createdAt: new Date(),
           metadata: {
             ruleIds: [],
             triggeredBy: {
               metrics: [],
-              conditions: [`${channel} delivery rate: ${deliveryRate.toFixed(1)}%`]
-            }
-          }
+              conditions: [
+                `${channel} delivery rate: ${deliveryRate.toFixed(1)}%`,
+              ],
+            },
+          },
         });
       }
     }
@@ -488,59 +594,72 @@ export class RecommendationEngine {
 
     for (const metric of metrics) {
       if (metric.type === MetricType.MESSAGE_FAILED) {
-        const errorCode = metric.dimensions.errorCode || 'unknown';
-        const provider = metric.dimensions.provider || 'unknown';
+        const errorCode = metric.dimensions.errorCode || "unknown";
+        const provider = metric.dimensions.provider || "unknown";
 
-        errorsByCode.set(errorCode, (errorsByCode.get(errorCode) || 0) + metric.aggregations.sum);
-        errorsByProvider.set(provider, (errorsByProvider.get(provider) || 0) + metric.aggregations.sum);
+        errorsByCode.set(
+          errorCode,
+          (errorsByCode.get(errorCode) || 0) + metric.aggregations.sum,
+        );
+        errorsByProvider.set(
+          provider,
+          (errorsByProvider.get(provider) || 0) + metric.aggregations.sum,
+        );
       }
     }
 
     return { errorsByCode, errorsByProvider };
   }
 
-  private generateErrorBasedRecommendations(errorPatterns: any): Recommendation[] {
+  private generateErrorBasedRecommendations(
+    errorPatterns: any,
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const { errorsByCode, errorsByProvider } = errorPatterns;
 
     // 가장 빈번한 오류 코드 분석
     if (errorsByCode.size > 0) {
-      const topError = Array.from(errorsByCode.entries() as Iterable<[string, number]>).reduce((max: [string, number], curr: [string, number]) => 
-        curr[1] > max[1] ? curr : max
+      const topError = Array.from(
+        errorsByCode.entries() as Iterable<[string, number]>,
+      ).reduce((max: [string, number], curr: [string, number]) =>
+        curr[1] > max[1] ? curr : max,
       );
 
       if (topError[1] > 10) {
         recommendations.push({
           id: `error_${topError[0]}_${Date.now()}`,
-          category: 'reliability',
+          category: "reliability",
           priority: 9,
           title: `Address Frequent Error: ${topError[0]}`,
           description: `Error code ${topError[0]} occurred ${topError[1]} times`,
-          rationale: 'Frequent errors indicate systematic issues that need attention',
-          actions: [{
-            type: 'reliability',
-            title: 'Fix Recurring Error',
-            description: `Investigate and resolve error code ${topError[0]}`,
-            impact: 'high',
-            effort: 'high',
-            steps: [
-              'Analyze error logs and patterns',
-              'Identify root cause',
-              'Implement fix or workaround',
-              'Add monitoring for this error type'
-            ]
-          }],
+          rationale:
+            "Frequent errors indicate systematic issues that need attention",
+          actions: [
+            {
+              type: "reliability",
+              title: "Fix Recurring Error",
+              description: `Investigate and resolve error code ${topError[0]}`,
+              impact: "high",
+              effort: "high",
+              steps: [
+                "Analyze error logs and patterns",
+                "Identify root cause",
+                "Implement fix or workaround",
+                "Add monitoring for this error type",
+              ],
+            },
+          ],
           confidence: 0.95,
-          impact: 'high',
-          effort: 'high',
+          impact: "high",
+          effort: "high",
           createdAt: new Date(),
           metadata: {
             ruleIds: [],
             triggeredBy: {
               metrics: [],
-              conditions: [`Error ${topError[0]}: ${topError[1]} occurrences`]
-            }
-          }
+              conditions: [`Error ${topError[0]}: ${topError[1]} occurrences`],
+            },
+          },
         });
       }
     }
@@ -549,13 +668,20 @@ export class RecommendationEngine {
   }
 
   private compareProviderPerformance(metrics: AggregatedMetric[]): any {
-    const providerStats = new Map<string, { sent: number; delivered: number; avgResponseTime: number }>();
+    const providerStats = new Map<
+      string,
+      { sent: number; delivered: number; avgResponseTime: number }
+    >();
 
     for (const metric of metrics) {
       const provider = metric.dimensions.provider;
       if (!provider) continue;
 
-      const stats = providerStats.get(provider) || { sent: 0, delivered: 0, avgResponseTime: 0 };
+      const stats = providerStats.get(provider) || {
+        sent: 0,
+        delivered: 0,
+        avgResponseTime: 0,
+      };
 
       if (metric.type === MetricType.MESSAGE_SENT) {
         stats.sent += metric.aggregations.sum;
@@ -569,49 +695,64 @@ export class RecommendationEngine {
     return { providerStats };
   }
 
-  private generateProviderRecommendations(providerComparison: any): Recommendation[] {
+  private generateProviderRecommendations(
+    providerComparison: any,
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const { providerStats } = providerComparison;
 
-    const providers = Array.from(providerStats.entries() as Iterable<[string, { sent: number; delivered: number; avgResponseTime: number }]>).map(([provider, stats]) => ({
+    const providers = Array.from(
+      providerStats.entries() as Iterable<
+        [string, { sent: number; delivered: number; avgResponseTime: number }]
+      >,
+    ).map(([provider, stats]) => ({
       provider,
       deliveryRate: stats.sent > 0 ? (stats.delivered / stats.sent) * 100 : 0,
-      volume: stats.sent
+      volume: stats.sent,
     }));
 
     if (providers.length > 1) {
-      const bestProvider = providers.reduce((best: { provider: string; deliveryRate: number; volume: number }, curr: { provider: string; deliveryRate: number; volume: number }) => 
-        curr.deliveryRate > best.deliveryRate ? curr : best
+      const bestProvider = providers.reduce(
+        (
+          best: { provider: string; deliveryRate: number; volume: number },
+          curr: { provider: string; deliveryRate: number; volume: number },
+        ) => (curr.deliveryRate > best.deliveryRate ? curr : best),
       );
 
-      const worstProvider = providers.reduce((worst: { provider: string; deliveryRate: number; volume: number }, curr: { provider: string; deliveryRate: number; volume: number }) => 
-        curr.deliveryRate < worst.deliveryRate ? curr : worst
+      const worstProvider = providers.reduce(
+        (
+          worst: { provider: string; deliveryRate: number; volume: number },
+          curr: { provider: string; deliveryRate: number; volume: number },
+        ) => (curr.deliveryRate < worst.deliveryRate ? curr : worst),
       );
 
       if (bestProvider.deliveryRate - worstProvider.deliveryRate > 10) {
         recommendations.push({
           id: `provider_optimization_${Date.now()}`,
-          category: 'cost',
+          category: "cost",
           priority: 6,
-          title: 'Optimize Provider Usage',
+          title: "Optimize Provider Usage",
           description: `${bestProvider.provider} has ${bestProvider.deliveryRate.toFixed(1)}% delivery rate vs ${worstProvider.provider} at ${worstProvider.deliveryRate.toFixed(1)}%`,
-          rationale: 'Shifting traffic to better-performing providers can improve delivery rates and reduce costs',
-          actions: [{
-            type: 'optimization',
-            title: 'Rebalance Provider Traffic',
-            description: 'Increase traffic to high-performing providers',
-            impact: 'medium',
-            effort: 'low',
-            steps: [
-              `Reduce traffic allocation to ${worstProvider.provider}`,
-              `Increase traffic allocation to ${bestProvider.provider}`,
-              'Monitor performance changes',
-              'Adjust allocation based on results'
-            ]
-          }],
+          rationale:
+            "Shifting traffic to better-performing providers can improve delivery rates and reduce costs",
+          actions: [
+            {
+              type: "optimization",
+              title: "Rebalance Provider Traffic",
+              description: "Increase traffic to high-performing providers",
+              impact: "medium",
+              effort: "low",
+              steps: [
+                `Reduce traffic allocation to ${worstProvider.provider}`,
+                `Increase traffic allocation to ${bestProvider.provider}`,
+                "Monitor performance changes",
+                "Adjust allocation based on results",
+              ],
+            },
+          ],
           confidence: 0.85,
-          impact: 'medium',
-          effort: 'low',
+          impact: "medium",
+          effort: "low",
           createdAt: new Date(),
           metadata: {
             ruleIds: [],
@@ -619,10 +760,10 @@ export class RecommendationEngine {
               metrics: [],
               conditions: [
                 `${bestProvider.provider}: ${bestProvider.deliveryRate.toFixed(1)}%`,
-                `${worstProvider.provider}: ${worstProvider.deliveryRate.toFixed(1)}%`
-              ]
-            }
-          }
+                `${worstProvider.provider}: ${worstProvider.deliveryRate.toFixed(1)}%`,
+              ],
+            },
+          },
         });
       }
     }
@@ -635,56 +776,68 @@ export class RecommendationEngine {
     return {};
   }
 
-  private generateChannelEfficiencyRecommendations(channelComparison: any): Recommendation[] {
+  private generateChannelEfficiencyRecommendations(
+    channelComparison: any,
+  ): Recommendation[] {
     return [];
   }
 
-  private async generateCapacityRecommendations(metrics: AggregatedMetric[]): Promise<Recommendation[]> {
+  private async generateCapacityRecommendations(
+    metrics: AggregatedMetric[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // 간단한 용량 예측 (실제로는 더 정교한 ML 모델 사용)
-    const messageSentMetrics = metrics.filter(m => m.type === MetricType.MESSAGE_SENT);
-    
+    const messageSentMetrics = metrics.filter(
+      (m) => m.type === MetricType.MESSAGE_SENT,
+    );
+
     if (messageSentMetrics.length > 0) {
       const recentVolume = messageSentMetrics
-        .filter(m => m.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000))
+        .filter((m) => m.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000))
         .reduce((sum, m) => sum + m.aggregations.sum, 0);
 
-      const historicalAverage = messageSentMetrics
-        .reduce((sum, m) => sum + m.aggregations.sum, 0) / messageSentMetrics.length;
+      const historicalAverage =
+        messageSentMetrics.reduce((sum, m) => sum + m.aggregations.sum, 0) /
+        messageSentMetrics.length;
 
       if (recentVolume > historicalAverage * 1.5) {
         recommendations.push({
           id: `capacity_scale_${Date.now()}`,
-          category: 'performance',
+          category: "performance",
           priority: 7,
-          title: 'Consider Capacity Scaling',
+          title: "Consider Capacity Scaling",
           description: `Recent volume (${recentVolume}) is 50% above historical average (${historicalAverage.toFixed(0)})`,
-          rationale: 'Sustained high volume may require additional capacity',
-          actions: [{
-            type: 'performance',
-            title: 'Scale Infrastructure',
-            description: 'Prepare for increased load by scaling infrastructure',
-            impact: 'high',
-            effort: 'high',
-            steps: [
-              'Monitor system resource utilization',
-              'Prepare additional provider connections',
-              'Review rate limiting configurations',
-              'Plan for peak capacity scenarios'
-            ]
-          }],
+          rationale: "Sustained high volume may require additional capacity",
+          actions: [
+            {
+              type: "performance",
+              title: "Scale Infrastructure",
+              description:
+                "Prepare for increased load by scaling infrastructure",
+              impact: "high",
+              effort: "high",
+              steps: [
+                "Monitor system resource utilization",
+                "Prepare additional provider connections",
+                "Review rate limiting configurations",
+                "Plan for peak capacity scenarios",
+              ],
+            },
+          ],
           confidence: 0.75,
-          impact: 'high',
-          effort: 'high',
+          impact: "high",
+          effort: "high",
           createdAt: new Date(),
           metadata: {
             ruleIds: [],
             triggeredBy: {
               metrics: [],
-              conditions: [`Recent volume: ${recentVolume}, Historical average: ${historicalAverage.toFixed(0)}`]
-            }
-          }
+              conditions: [
+                `Recent volume: ${recentVolume}, Historical average: ${historicalAverage.toFixed(0)}`,
+              ],
+            },
+          },
         });
       }
     }
@@ -692,150 +845,180 @@ export class RecommendationEngine {
     return recommendations;
   }
 
-  private calculateRuleConfidence(rule: RecommendationRule, matchingMetrics: AggregatedMetric[]): number {
+  private calculateRuleConfidence(
+    rule: RecommendationRule,
+    matchingMetrics: AggregatedMetric[],
+  ): number {
     // 조건 만족도와 데이터 품질을 기반으로 신뢰도 계산
     const baseConfidence = 0.5;
     const dataQualityBonus = Math.min(0.3, matchingMetrics.length / 10);
-    const priorityBonus = rule.priority / 10 * 0.2;
+    const priorityBonus = (rule.priority / 10) * 0.2;
 
     return Math.min(0.99, baseConfidence + dataQualityBonus + priorityBonus);
   }
 
-  private calculateAggregateImpact(actions: RecommendationAction[]): 'low' | 'medium' | 'high' {
+  private calculateAggregateImpact(
+    actions: RecommendationAction[],
+  ): "low" | "medium" | "high" {
     const impactScores = { low: 1, medium: 2, high: 3 };
-    const avgScore = actions.reduce((sum, action) => sum + impactScores[action.impact], 0) / actions.length;
-    
-    if (avgScore >= 2.5) return 'high';
-    if (avgScore >= 1.5) return 'medium';
-    return 'low';
+    const avgScore =
+      actions.reduce((sum, action) => sum + impactScores[action.impact], 0) /
+      actions.length;
+
+    if (avgScore >= 2.5) return "high";
+    if (avgScore >= 1.5) return "medium";
+    return "low";
   }
 
-  private calculateAggregateEffort(actions: RecommendationAction[]): 'low' | 'medium' | 'high' {
+  private calculateAggregateEffort(
+    actions: RecommendationAction[],
+  ): "low" | "medium" | "high" {
     const effortScores = { low: 1, medium: 2, high: 3 };
-    const avgScore = actions.reduce((sum, action) => sum + effortScores[action.effort], 0) / actions.length;
-    
-    if (avgScore >= 2.5) return 'high';
-    if (avgScore >= 1.5) return 'medium';
-    return 'low';
+    const avgScore =
+      actions.reduce((sum, action) => sum + effortScores[action.effort], 0) /
+      actions.length;
+
+    if (avgScore >= 2.5) return "high";
+    if (avgScore >= 1.5) return "medium";
+    return "low";
   }
 
-  private generateRationale(rule: RecommendationRule, matchingMetrics: AggregatedMetric[]): string {
-    const metricSummary = matchingMetrics.length > 0 
-      ? `Based on ${matchingMetrics.length} metrics showing concerning patterns`
-      : 'Based on rule evaluation';
-    
+  private generateRationale(
+    rule: RecommendationRule,
+    matchingMetrics: AggregatedMetric[],
+  ): string {
+    const metricSummary =
+      matchingMetrics.length > 0
+        ? `Based on ${matchingMetrics.length} metrics showing concerning patterns`
+        : "Based on rule evaluation";
+
     return `${metricSummary}. ${rule.name} conditions have been met, indicating potential optimization opportunities.`;
   }
 
   private recordRuleExecution(ruleId: string): void {
     const history = this.ruleExecutionHistory.get(ruleId) || [];
     history.push(new Date());
-    
+
     // 최근 100개 실행 기록만 유지
     if (history.length > 100) {
       history.splice(0, history.length - 100);
     }
-    
+
     this.ruleExecutionHistory.set(ruleId, history);
   }
 
-  private deduplicateAndPrioritize(recommendations: Recommendation[]): Recommendation[] {
+  private deduplicateAndPrioritize(
+    recommendations: Recommendation[],
+  ): Recommendation[] {
     // 유사한 추천 제거
     const uniqueRecommendations = new Map<string, Recommendation>();
-    
+
     for (const rec of recommendations) {
       const key = `${rec.category}_${rec.title}`;
-      
-      if (!uniqueRecommendations.has(key) || 
-          uniqueRecommendations.get(key)!.confidence < rec.confidence) {
+
+      if (
+        !uniqueRecommendations.has(key) ||
+        uniqueRecommendations.get(key)!.confidence < rec.confidence
+      ) {
         uniqueRecommendations.set(key, rec);
       }
     }
 
     // 우선순위 및 신뢰도 기준 정렬
-    return Array.from(uniqueRecommendations.values())
-      .sort((a, b) => {
-        if (a.priority !== b.priority) return b.priority - a.priority;
-        return b.confidence - a.confidence;
-      });
+    return Array.from(uniqueRecommendations.values()).sort((a, b) => {
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return b.confidence - a.confidence;
+    });
   }
 
   private initializeDefaultRules(): void {
     this.config.rules.push(
       {
-        id: 'low-delivery-rate',
-        name: 'Low Delivery Rate Alert',
-        category: 'reliability',
+        id: "low-delivery-rate",
+        name: "Low Delivery Rate Alert",
+        category: "reliability",
         priority: 9,
         conditions: [
-          { metric: MetricType.DELIVERY_RATE, operator: 'lt', value: 90 }
+          { metric: MetricType.DELIVERY_RATE, operator: "lt", value: 90 },
         ],
-        actions: [{
-          type: 'reliability',
-          title: 'Improve Delivery Rate',
-          description: 'Investigate and fix delivery rate issues',
-          impact: 'high',
-          effort: 'medium',
-          steps: [
-            'Check provider API status',
-            'Review template approval status',
-            'Validate recipient phone numbers',
-            'Consider switching providers'
-          ]
-        }],
-        enabled: true
+        actions: [
+          {
+            type: "reliability",
+            title: "Improve Delivery Rate",
+            description: "Investigate and fix delivery rate issues",
+            impact: "high",
+            effort: "medium",
+            steps: [
+              "Check provider API status",
+              "Review template approval status",
+              "Validate recipient phone numbers",
+              "Consider switching providers",
+            ],
+          },
+        ],
+        enabled: true,
       },
       {
-        id: 'high-error-rate',
-        name: 'High Error Rate Warning',
-        category: 'reliability',
+        id: "high-error-rate",
+        name: "High Error Rate Warning",
+        category: "reliability",
         priority: 8,
         conditions: [
-          { metric: MetricType.ERROR_RATE, operator: 'gt', value: 10 }
+          { metric: MetricType.ERROR_RATE, operator: "gt", value: 10 },
         ],
-        actions: [{
-          type: 'reliability',
-          title: 'Reduce Error Rate',
-          description: 'Address high error rates',
-          impact: 'high',
-          effort: 'high',
-          steps: [
-            'Analyze error patterns',
-            'Fix common error causes',
-            'Implement better error handling',
-            'Add monitoring and alerts'
-          ]
-        }],
-        enabled: true
+        actions: [
+          {
+            type: "reliability",
+            title: "Reduce Error Rate",
+            description: "Address high error rates",
+            impact: "high",
+            effort: "high",
+            steps: [
+              "Analyze error patterns",
+              "Fix common error causes",
+              "Implement better error handling",
+              "Add monitoring and alerts",
+            ],
+          },
+        ],
+        enabled: true,
       },
       {
-        id: 'cost-optimization-sms',
-        name: 'SMS to AlimTalk Migration',
-        category: 'cost',
+        id: "cost-optimization-sms",
+        name: "SMS to AlimTalk Migration",
+        category: "cost",
         priority: 6,
         conditions: [
-          { metric: MetricType.CHANNEL_USAGE, operator: 'gt', value: 1000, dimensions: { channel: 'sms' } }
+          {
+            metric: MetricType.CHANNEL_USAGE,
+            operator: "gt",
+            value: 1000,
+            dimensions: { channel: "sms" },
+          },
         ],
-        actions: [{
-          type: 'cost-saving',
-          title: 'Migrate to AlimTalk',
-          description: 'Switch eligible SMS messages to AlimTalk for cost savings',
-          impact: 'medium',
-          effort: 'medium',
-          steps: [
-            'Identify AlimTalk-eligible messages',
-            'Create AlimTalk templates',
-            'Implement fallback logic',
-            'Monitor cost savings'
-          ],
-          estimatedBenefit: {
-            metric: MetricType.MESSAGE_SENT,
-            improvement: 30,
-            unit: 'percent cost reduction'
-          }
-        }],
-        enabled: true
-      }
+        actions: [
+          {
+            type: "cost-saving",
+            title: "Migrate to AlimTalk",
+            description:
+              "Switch eligible SMS messages to AlimTalk for cost savings",
+            impact: "medium",
+            effort: "medium",
+            steps: [
+              "Identify AlimTalk-eligible messages",
+              "Create AlimTalk templates",
+              "Implement fallback logic",
+              "Monitor cost savings",
+            ],
+            estimatedBenefit: {
+              metric: MetricType.MESSAGE_SENT,
+              improvement: 30,
+              unit: "percent cost reduction",
+            },
+          },
+        ],
+        enabled: true,
+      },
     );
   }
 }

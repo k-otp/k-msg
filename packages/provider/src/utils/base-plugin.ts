@@ -1,11 +1,11 @@
 import type {
-  ProviderPlugin,
-  ProviderMetadata,
-  ProviderCapabilities,
   PluginContext,
+  ProviderCapabilities,
+  ProviderImplementation,
+  ProviderMetadata,
   ProviderMiddleware,
-  ProviderImplementation
-} from '../interfaces';
+  ProviderPlugin,
+} from "../interfaces";
 
 export abstract class BasePlugin implements ProviderPlugin {
   abstract readonly metadata: ProviderMetadata;
@@ -27,17 +27,17 @@ export abstract class BasePlugin implements ProviderPlugin {
   abstract getImplementation(): ProviderImplementation;
 
   protected async executeMiddleware(
-    phase: 'pre' | 'post' | 'error',
+    phase: "pre" | "post" | "error",
     context: any,
-    error?: Error
+    error?: Error,
   ): Promise<void> {
     for (const middleware of this.middleware) {
       try {
-        if (phase === 'pre' && middleware.pre) {
+        if (phase === "pre" && middleware.pre) {
           await middleware.pre(context);
-        } else if (phase === 'post' && middleware.post) {
+        } else if (phase === "post" && middleware.post) {
           await middleware.post(context);
-        } else if (phase === 'error' && middleware.error && error) {
+        } else if (phase === "error" && middleware.error && error) {
           await middleware.error(error, context);
         }
       } catch (err) {
@@ -47,23 +47,28 @@ export abstract class BasePlugin implements ProviderPlugin {
     }
   }
 
-  protected createMiddlewareContext(request: any, metadata: Record<string, any> = {}) {
+  protected createMiddlewareContext(
+    request: any,
+    metadata: Record<string, any> = {},
+  ) {
     return {
       request,
       response: undefined as any,
       metadata: {
         ...metadata,
         pluginName: this.metadata.name,
-        pluginVersion: this.metadata.version
+        pluginVersion: this.metadata.version,
       },
-      startTime: Date.now()
+      startTime: Date.now(),
     };
   }
 
   protected validateConfig(config: any, required: string[]): void {
     for (const field of required) {
       if (!config[field]) {
-        throw new Error(`${this.metadata.name}: Missing required config field: ${field}`);
+        throw new Error(
+          `${this.metadata.name}: Missing required config field: ${field}`,
+        );
       }
     }
   }
@@ -71,29 +76,29 @@ export abstract class BasePlugin implements ProviderPlugin {
   protected async makeRequest(
     url: string,
     options: RequestInit,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): Promise<Response> {
     const context = this.createMiddlewareContext({ url, options }, metadata);
 
     try {
-      await this.executeMiddleware('pre', context);
+      await this.executeMiddleware("pre", context);
 
       const response = await fetch(url, {
         ...options,
         headers: {
-          'User-Agent': `K-OTP-${this.metadata.name}/${this.metadata.version}`,
+          "User-Agent": `K-OTP-${this.metadata.name}/${this.metadata.version}`,
           ...this.context.config.headers,
           ...options.headers,
         },
-        signal: AbortSignal.timeout(this.context.config.timeout || 30000)
+        signal: AbortSignal.timeout(this.context.config.timeout || 30000),
       });
 
       context.response = response;
-      await this.executeMiddleware('post', context);
+      await this.executeMiddleware("post", context);
 
       return response;
     } catch (error) {
-      await this.executeMiddleware('error', context, error as Error);
+      await this.executeMiddleware("error", context, error as Error);
       throw error;
     }
   }
@@ -105,21 +110,23 @@ export abstract class BasePlugin implements ProviderPlugin {
   protected async makeJSONRequest<T = any>(
     url: string,
     options: RequestInit,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): Promise<T> {
     const response = await this.makeRequest(url, options, metadata);
 
     if (!response.ok) {
-      const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const error = new Error(
+        `HTTP ${response.status}: ${response.statusText}`,
+      );
       (error as any).response = response;
       (error as any).status = response.status;
       throw error;
     }
 
     try {
-      return await response.json() as T;
+      return (await response.json()) as T;
     } catch (parseError) {
-      const error = new Error('Failed to parse JSON response');
+      const error = new Error("Failed to parse JSON response");
       (error as any).response = response;
       (error as any).parseError = parseError;
       throw error;
@@ -137,6 +144,9 @@ export abstract class BasePlugin implements ProviderPlugin {
    * Helper method for logging provider-specific errors
    */
   protected logError(operation: string, error: any, data?: any): void {
-    this.context.logger.error(`${this.metadata.name}: ${operation} failed`, { error, data });
+    this.context.logger.error(`${this.metadata.name}: ${operation} failed`, {
+      error,
+      data,
+    });
   }
 }

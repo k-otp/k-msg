@@ -2,10 +2,10 @@
  * Registry Type Definitions
  */
 
-import type { WebhookEventType } from '../types/webhook.types';
+import type { WebhookEventType } from "../types/webhook.types";
 
 export interface EndpointFilter {
-  status?: 'active' | 'inactive' | 'error' | 'suspended';
+  status?: "active" | "inactive" | "error" | "suspended";
   events?: WebhookEventType[];
   providerId?: string[];
   channelId?: string[];
@@ -18,7 +18,7 @@ export interface EndpointFilter {
 export interface DeliveryFilter {
   endpointId?: string;
   eventId?: string;
-  status?: 'pending' | 'success' | 'failed' | 'exhausted';
+  status?: "pending" | "success" | "failed" | "exhausted";
   createdAfter?: Date;
   createdBefore?: Date;
   completedAfter?: Date;
@@ -40,20 +40,20 @@ export interface EventFilter {
 }
 
 export interface StorageConfig {
-  type: 'memory' | 'file' | 'database';
-  
+  type: "memory" | "file" | "database";
+
   // File storage options
   filePath?: string;
   enableCompression?: boolean;
   maxFileSize?: number;
-  
+
   // Database options
   connectionString?: string;
   tableName?: string;
-  
+
   // Memory options
   maxMemoryUsage?: number;
-  
+
   // Common options
   retentionDays?: number;
   enableEncryption?: boolean;
@@ -64,7 +64,7 @@ export interface PaginationOptions {
   page: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface SearchResult<T> {

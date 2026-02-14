@@ -4,9 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import {
+  type BaseProvider,
   BulkOperationHandler,
   logger,
-  type BaseProvider,
   type MessageType,
   type StandardRequest,
   type StandardResult,
@@ -41,9 +41,10 @@ class CliMockProvider implements BaseProvider<StandardRequest, StandardResult> {
     return { healthy: true, issues: [] };
   }
 
-  async send<T extends StandardRequest = StandardRequest, R extends StandardResult = StandardResult>(
-    request: T,
-  ): Promise<R> {
+  async send<
+    T extends StandardRequest = StandardRequest,
+    R extends StandardResult = StandardResult,
+  >(request: T): Promise<R> {
     this.history.push(request);
     return {
       messageId: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
@@ -101,7 +102,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isProviderInstance(value: unknown): value is BaseProvider<StandardRequest, StandardResult> {
+function isProviderInstance(
+  value: unknown,
+): value is BaseProvider<StandardRequest, StandardResult> {
   if (!isRecord(value)) return false;
   return (
     typeof value.id === "string" &&
@@ -120,7 +123,9 @@ function normalizePluginManifest(raw: unknown): ProviderPluginManifest {
   if (isRecord(raw) && Array.isArray(raw.providers)) {
     return {
       defaultProviderId:
-        typeof raw.defaultProviderId === "string" ? raw.defaultProviderId : undefined,
+        typeof raw.defaultProviderId === "string"
+          ? raw.defaultProviderId
+          : undefined,
       providers: raw.providers as ProviderDefinition[],
     };
   }
@@ -161,7 +166,10 @@ function readPluginManifestSource(): PluginManifestSource | null {
   return null;
 }
 
-function resolvePluginModuleSpecifier(moduleName: string, baseDir: string): string {
+function resolvePluginModuleSpecifier(
+  moduleName: string,
+  baseDir: string,
+): string {
   if (moduleName.startsWith(".") || moduleName.startsWith("/")) {
     const absolutePath = path.isAbsolute(moduleName)
       ? moduleName
@@ -171,12 +179,16 @@ function resolvePluginModuleSpecifier(moduleName: string, baseDir: string): stri
   return moduleName;
 }
 
-function buildProviderConfig(definition: ProviderConcreteDefinition): Record<string, unknown> {
+function buildProviderConfig(
+  definition: ProviderConcreteDefinition,
+): Record<string, unknown> {
   const config: Record<string, unknown> = {
     ...(definition.config || {}),
   };
 
-  for (const [field, envVar] of Object.entries(definition.configFromEnv || {})) {
+  for (const [field, envVar] of Object.entries(
+    definition.configFromEnv || {},
+  )) {
     const value = process.env[envVar];
     if (value !== undefined) {
       config[field] = value;
@@ -208,12 +220,15 @@ async function createProviderFromPlugin(
     throw new Error("Plugin definition requires a non-empty `module` field.");
   }
 
-  const moduleSpecifier = resolvePluginModuleSpecifier(definition.module, baseDir);
+  const moduleSpecifier = resolvePluginModuleSpecifier(
+    definition.module,
+    baseDir,
+  );
   const loadedModule = await import(moduleSpecifier);
   const candidateExport =
     definition.exportName && definition.exportName.length > 0
       ? loadedModule[definition.exportName]
-      : loadedModule.default ?? loadedModule;
+      : (loadedModule.default ?? loadedModule);
 
   const config = buildProviderConfig(definition);
   let created: unknown;
@@ -258,7 +273,9 @@ class RoundRobinRouterProvider
     providers: BaseProvider<StandardRequest, StandardResult>[];
   }) {
     this.id = params.id;
-    this.name = params.name || `RoundRobinRouter(${params.providers.map((p) => p.id).join(",")})`;
+    this.name =
+      params.name ||
+      `RoundRobinRouter(${params.providers.map((p) => p.id).join(",")})`;
     this.providers = params.providers;
   }
 
@@ -318,7 +335,10 @@ function createRouterProvider(
   if (!definition.id) {
     throw new Error("Router definition requires `id`");
   }
-  if (!Array.isArray(definition.providers) || definition.providers.length === 0) {
+  if (
+    !Array.isArray(definition.providers) ||
+    definition.providers.length === 0
+  ) {
     throw new Error("Router definition requires non-empty `providers`");
   }
 
@@ -328,7 +348,10 @@ function createRouterProvider(
 
   const upstreamProviders = definition.providers
     .map((providerId) => providers.get(providerId))
-    .filter((provider): provider is BaseProvider<StandardRequest, StandardResult> => Boolean(provider));
+    .filter(
+      (provider): provider is BaseProvider<StandardRequest, StandardResult> =>
+        Boolean(provider),
+    );
 
   if (upstreamProviders.length === 0) {
     const missing = definition.providers.join(", ");
@@ -350,7 +373,10 @@ async function initializeRuntimeFromPluginManifest(): Promise<Runtime | null> {
   const source = readPluginManifestSource();
   if (!source) return null;
 
-  const providers = new Map<string, BaseProvider<StandardRequest, StandardResult>>();
+  const providers = new Map<
+    string,
+    BaseProvider<StandardRequest, StandardResult>
+  >();
   const manifestDefaultCandidates: string[] = [];
   const routerDefinitions: ProviderRouterDefinition[] = [];
 
@@ -435,7 +461,7 @@ async function initializeRuntime(): Promise<Runtime> {
 
   const pluginRuntime = await initializeRuntimeFromPluginManifest();
   if (pluginRuntime) {
-  return pluginRuntime;
+    return pluginRuntime;
   }
   throw new Error(
     "No provider manifest found. Set K_MSG_PROVIDER_PLUGINS, K_MSG_PROVIDER_PLUGIN_FILE, or provide k-msg.providers.json.",
@@ -514,14 +540,19 @@ function resolveProvider(
   return provider;
 }
 
-function toProviderChannel(channel: MessageType): "alimtalk" | "friendtalk" | "sms" | "mms" {
+function toProviderChannel(
+  channel: MessageType,
+): "alimtalk" | "friendtalk" | "sms" | "mms" {
   if (channel === "ALIMTALK") return "alimtalk";
   if (channel === "FRIENDTALK") return "friendtalk";
   if (channel === "MMS") return "mms";
   return "sms";
 }
 
-function resolveTemplateCode(channel: MessageType, templateCode?: string): string {
+function resolveTemplateCode(
+  channel: MessageType,
+  templateCode?: string,
+): string {
   if (templateCode && templateCode.trim().length > 0) {
     return templateCode;
   }
@@ -538,11 +569,16 @@ function resolveTemplateCode(channel: MessageType, templateCode?: string): strin
   return fallback;
 }
 
-function hasMessageContent(text: string | undefined, variables: Record<string, any>): boolean {
+function hasMessageContent(
+  text: string | undefined,
+  variables: Record<string, any>,
+): boolean {
   if (typeof text === "string" && text.trim().length > 0) {
     return true;
   }
-  return typeof variables.message === "string" && variables.message.trim().length > 0;
+  return (
+    typeof variables.message === "string" && variables.message.trim().length > 0
+  );
 }
 
 async function sendMessage(options: {
@@ -566,7 +602,9 @@ async function sendMessage(options: {
       options.channel === "MMS") &&
     !hasMessageContent(options.text, options.variables)
   ) {
-    throw new Error(`text or variables.message is required for ${options.channel} channel`);
+    throw new Error(
+      `text or variables.message is required for ${options.channel} channel`,
+    );
   }
 
   const request: StandardRequest = {
@@ -626,7 +664,9 @@ program
     console.log("Version: 0.2.0");
 
     const providerIds = Array.from(runtime.providers.keys());
-    console.log(`Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`);
+    console.log(
+      `Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`,
+    );
     console.log(`Default Provider: ${runtime.defaultProviderId || "(none)"}`);
     console.log(`Runtime Source: ${runtime.source}`);
     if (runtime.pluginManifestPath) {
@@ -689,7 +729,11 @@ program
   .command("send")
   .description("Send message with unified API")
   .requiredOption("-p, --phone <number>", "recipient phone number")
-  .option("-c, --channel <channel>", "ALIMTALK|FRIENDTALK|SMS|LMS|MMS", "ALIMTALK")
+  .option(
+    "-c, --channel <channel>",
+    "ALIMTALK|FRIENDTALK|SMS|LMS|MMS",
+    "ALIMTALK",
+  )
   .option("-t, --template <code>", "template code")
   .option("--text <text>", "message text")
   .option("--variables <json>", "variables as JSON", "{}")
@@ -749,7 +793,11 @@ program
   .option("--image-url <url>", "image URL for MMS/FRIENDTALK")
   .option("--concurrency <n>", "number of concurrent sends", "1")
   .option("--fail-fast", "stop on first failure", false)
-  .option("--print-each", "print per-recipient results (auto-enabled for <= 25 recipients)", false)
+  .option(
+    "--print-each",
+    "print per-recipient results (auto-enabled for <= 25 recipients)",
+    false,
+  )
   .action(async (options) => {
     try {
       const phones = dedupePreserveOrder([
@@ -757,65 +805,76 @@ program
         ...parsePhonesFile(options.phonesFile),
       ]);
       if (phones.length === 0) {
-        throw new Error("No recipient phones provided. Use --phones or --phones-file.");
+        throw new Error(
+          "No recipient phones provided. Use --phones or --phones-file.",
+        );
       }
 
       const channel = parseChannel(options.channel);
       const variables = parseVariables(options.variables);
       const concurrencyRaw = Number(options.concurrency);
       const concurrency =
-        Number.isFinite(concurrencyRaw) && concurrencyRaw > 0 ? Math.floor(concurrencyRaw) : 1;
+        Number.isFinite(concurrencyRaw) && concurrencyRaw > 0
+          ? Math.floor(concurrencyRaw)
+          : 1;
       const shouldPrintEach = Boolean(options.printEach) || phones.length <= 25;
 
       console.log(chalk.yellow(`📨 Sending to ${phones.length} recipients...`));
 
       let lastProgressAt = 0;
 
-      const { successful, failed, summary } = await BulkOperationHandler.execute(
-        phones,
-        async (phone) => {
-          const result = await sendMessage({
-            provider: options.provider,
-            channel,
-            phone,
-            template: options.template,
-            text: options.text,
-            variables,
-            sender: options.sender,
-            subject: options.subject,
-            imageUrl: options.imageUrl,
-          });
+      const { successful, failed, summary } =
+        await BulkOperationHandler.execute(
+          phones,
+          async (phone) => {
+            const result = await sendMessage({
+              provider: options.provider,
+              channel,
+              phone,
+              template: options.template,
+              text: options.text,
+              variables,
+              sender: options.sender,
+              subject: options.subject,
+              imageUrl: options.imageUrl,
+            });
 
-          if (result.status === "FAILED") {
+            if (result.status === "FAILED") {
+              if (shouldPrintEach) {
+                console.log(
+                  chalk.red(
+                    `❌ [${result.provider}] ${phone} -> FAILED: ${result.error?.message || "Unknown provider error"}`,
+                  ),
+                );
+              }
+              throw new SendFailedError(result);
+            }
+
             if (shouldPrintEach) {
               console.log(
-                chalk.red(
-                  `❌ [${result.provider}] ${phone} -> FAILED: ${result.error?.message || "Unknown provider error"}`,
+                chalk.green(
+                  `✅ [${result.provider}] ${phone} -> SENT (${result.messageId})`,
                 ),
               );
             }
-            throw new SendFailedError(result);
-          }
 
-          if (shouldPrintEach) {
-            console.log(chalk.green(`✅ [${result.provider}] ${phone} -> SENT (${result.messageId})`));
-          }
-
-          return result;
-        },
-        {
-          concurrency,
-          failFast: Boolean(options.failFast),
-          retryOptions: { maxAttempts: 1 },
-          onProgress: (completed, total, failedCount) => {
-            if (shouldPrintEach) return;
-            const now = Date.now();
-            if (now - lastProgressAt < 200) return;
-            lastProgressAt = now;
-            process.stdout.write(`\rProgress: ${completed}/${total} (failed: ${failedCount})`);
+            return result;
           },
-        },
-      );
+          {
+            concurrency,
+            failFast: Boolean(options.failFast),
+            retryOptions: { maxAttempts: 1 },
+            onProgress: (completed, total, failedCount) => {
+              if (shouldPrintEach) return;
+              const now = Date.now();
+              if (now - lastProgressAt < 200) return;
+              lastProgressAt = now;
+              process.stdout.write(
+                `\rProgress: ${completed}/${total} (failed: ${failedCount})`,
+              );
+            },
+          },
+        );
 
       if (!shouldPrintEach) {
         process.stdout.write("\n");
@@ -823,13 +882,19 @@ program
 
       const providerCounts = new Map<string, number>();
       for (const entry of successful) {
-        providerCounts.set(entry.result.provider, (providerCounts.get(entry.result.provider) || 0) + 1);
+        providerCounts.set(
+          entry.result.provider,
+          (providerCounts.get(entry.result.provider) || 0) + 1,
+        );
       }
       for (const entry of failed) {
         const error = entry.error;
         if (error instanceof SendFailedError) {
           const providerId = error.result.provider;
-          providerCounts.set(providerId, (providerCounts.get(providerId) || 0) + 1);
+          providerCounts.set(
+            providerId,
+            (providerCounts.get(providerId) || 0) + 1,
+          );
         }
       }
 
@@ -839,7 +904,11 @@ program
       console.log(`Failed: ${summary.failed}`);
       console.log(`Duration: ${summary.duration}ms`);
       if (providerCounts.size > 0) {
-        console.log(`Providers used: ${Array.from(providerCounts.entries()).map(([id, count]) => `${id}=${count}`).join(", ")}`);
+        console.log(
+          `Providers used: ${Array.from(providerCounts.entries())
+            .map(([id, count]) => `${id}=${count}`)
+            .join(", ")}`,
+        );
       }
 
       if (failed.length > 0) {
@@ -847,7 +916,9 @@ program
           const failuresToShow = failed.slice(0, 10);
           for (const entry of failuresToShow) {
             const providerId =
-              entry.error instanceof SendFailedError ? entry.error.result.provider : "unknown";
+              entry.error instanceof SendFailedError
+                ? entry.error.result.provider
+                : "unknown";
             console.log(
               chalk.red(
                 `❌ [${providerId}] ${entry.item} -> FAILED: ${entry.error.message || "Unknown error"}`,
@@ -855,7 +926,11 @@ program
             );
           }
           if (failed.length > failuresToShow.length) {
-            console.log(chalk.red(`...and ${failed.length - failuresToShow.length} more failures`));
+            console.log(
+              chalk.red(
+                `...and ${failed.length - failuresToShow.length} more failures`,
+              ),
+            );
           }
         }
 
@@ -908,7 +983,9 @@ program
     }
   });
 
-const configCmd = program.command("config").description("Configuration helpers");
+const configCmd = program
+  .command("config")
+  .description("Configuration helpers");
 
 configCmd
   .command("show")
@@ -916,14 +993,20 @@ configCmd
   .action(() => {
     const providerIds = Array.from(runtime.providers.keys());
     console.log(chalk.cyan("📋 Runtime Configuration:"));
-    console.log(`Mock Mode: ${process.env.K_MSG_MOCK === "true" ? "enabled" : "disabled"}`);
-    console.log(`Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`);
+    console.log(
+      `Mock Mode: ${process.env.K_MSG_MOCK === "true" ? "enabled" : "disabled"}`,
+    );
+    console.log(
+      `Providers: ${providerIds.length > 0 ? providerIds.join(", ") : "(none)"}`,
+    );
     console.log(`Default Provider: ${runtime.defaultProviderId || "(none)"}`);
     console.log(`Runtime Source: ${runtime.source}`);
     if (runtime.pluginManifestPath) {
       console.log(`Plugin Manifest: ${runtime.pluginManifestPath}`);
     }
-    console.log(`Default Sender: ${process.env.K_MSG_SENDER_NUMBER || "(none)"}`);
+    console.log(
+      `Default Sender: ${process.env.K_MSG_SENDER_NUMBER || "(none)"}`,
+    );
   });
 
 program.configureOutput({

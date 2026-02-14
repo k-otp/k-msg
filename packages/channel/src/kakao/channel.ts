@@ -1,10 +1,10 @@
-import { 
-  Channel, 
-  ChannelCreateRequest, 
-  ChannelStatus, 
+import {
+  type Channel,
+  type ChannelCreateRequest,
+  ChannelStatus,
   ChannelType,
-  VerificationStatus 
-} from '../types/channel.types';
+  VerificationStatus,
+} from "../types/channel.types";
 
 export class KakaoChannelManager {
   private channels: Map<string, Channel> = new Map();
@@ -14,7 +14,7 @@ export class KakaoChannelManager {
     this.validateKakaoChannelRequest(request);
 
     const channelId = this.generateChannelId();
-    
+
     const channel: Channel = {
       id: channelId,
       name: request.name,
@@ -29,21 +29,23 @@ export class KakaoChannelManager {
         limits: {
           dailyMessageLimit: 10000,
           monthlyMessageLimit: 300000,
-          rateLimit: 10 // 10 messages per second
+          rateLimit: 10, // 10 messages per second
         },
         features: {
           supportsBulkSending: true,
           supportsScheduling: true,
           supportsButtons: true,
-          maxButtonCount: 5
-        }
+          maxButtonCount: 5,
+        },
       },
       verification: {
-        status: request.businessInfo ? VerificationStatus.PENDING : VerificationStatus.NOT_REQUIRED,
-        documents: []
+        status: request.businessInfo
+          ? VerificationStatus.PENDING
+          : VerificationStatus.NOT_REQUIRED,
+        documents: [],
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.channels.set(channelId, channel);
@@ -57,21 +59,24 @@ export class KakaoChannelManager {
   }
 
   private validateKakaoChannelRequest(request: ChannelCreateRequest): void {
-    if (request.type !== ChannelType.KAKAO_ALIMTALK && request.type !== ChannelType.KAKAO_FRIENDTALK) {
-      throw new Error('Invalid channel type for Kakao channel');
+    if (
+      request.type !== ChannelType.KAKAO_ALIMTALK &&
+      request.type !== ChannelType.KAKAO_FRIENDTALK
+    ) {
+      throw new Error("Invalid channel type for Kakao channel");
     }
 
     if (!request.kakaoInfo?.plusFriendId) {
-      throw new Error('Plus Friend ID is required for Kakao channels');
+      throw new Error("Plus Friend ID is required for Kakao channels");
     }
 
     if (!request.kakaoInfo?.brandName) {
-      throw new Error('Brand name is required for Kakao channels');
+      throw new Error("Brand name is required for Kakao channels");
     }
 
     // Validate Plus Friend ID format
     if (!this.isValidPlusFriendId(request.kakaoInfo.plusFriendId)) {
-      throw new Error('Invalid Plus Friend ID format');
+      throw new Error("Invalid Plus Friend ID format");
     }
   }
 
@@ -84,7 +89,7 @@ export class KakaoChannelManager {
   private async initiateBusinessVerification(channel: Channel): Promise<void> {
     // In a real implementation, this would integrate with Kakao's verification API
     // For now, we'll simulate the process
-    
+
     channel.verification.status = VerificationStatus.UNDER_REVIEW;
     channel.status = ChannelStatus.VERIFYING;
     channel.updatedAt = new Date();
@@ -95,10 +100,14 @@ export class KakaoChannelManager {
     }, 5000); // 5 seconds for demo
   }
 
-  async completeVerification(channelId: string, approved: boolean, rejectionReason?: string): Promise<void> {
+  async completeVerification(
+    channelId: string,
+    approved: boolean,
+    rejectionReason?: string,
+  ): Promise<void> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     if (approved) {
@@ -108,7 +117,8 @@ export class KakaoChannelManager {
     } else {
       channel.verification.status = VerificationStatus.REJECTED;
       channel.verification.rejectedAt = new Date();
-      channel.verification.rejectionReason = rejectionReason || 'Verification failed';
+      channel.verification.rejectionReason =
+        rejectionReason || "Verification failed";
       channel.status = ChannelStatus.SUSPENDED;
     }
 
@@ -119,15 +129,21 @@ export class KakaoChannelManager {
     return this.channels.get(channelId) || null;
   }
 
-  async updateChannel(channelId: string, updates: Partial<Channel>): Promise<Channel> {
+  async updateChannel(
+    channelId: string,
+    updates: Partial<Channel>,
+  ): Promise<Channel> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     // Validate updates
-    if (updates.metadata?.kakaoInfo?.plusFriendId && !this.isValidPlusFriendId(updates.metadata.kakaoInfo.plusFriendId)) {
-      throw new Error('Invalid Plus Friend ID format');
+    if (
+      updates.metadata?.kakaoInfo?.plusFriendId &&
+      !this.isValidPlusFriendId(updates.metadata.kakaoInfo.plusFriendId)
+    ) {
+      throw new Error("Invalid Plus Friend ID format");
     }
 
     // Apply updates
@@ -158,30 +174,34 @@ export class KakaoChannelManager {
 
     if (filters) {
       if (filters.status) {
-        channels = channels.filter(c => c.status === filters.status);
+        channels = channels.filter((c) => c.status === filters.status);
       }
       if (filters.type) {
-        channels = channels.filter(c => c.type === filters.type);
+        channels = channels.filter((c) => c.type === filters.type);
       }
       if (filters.verified !== undefined) {
-        const verifiedStatus = filters.verified ? VerificationStatus.VERIFIED : VerificationStatus.PENDING;
-        channels = channels.filter(c => c.verification.status === verifiedStatus);
+        const verifiedStatus = filters.verified
+          ? VerificationStatus.VERIFIED
+          : VerificationStatus.PENDING;
+        channels = channels.filter(
+          (c) => c.verification.status === verifiedStatus,
+        );
       }
     }
 
     // Exclude deleted channels unless specifically requested
-    return channels.filter(c => c.status !== ChannelStatus.DELETED);
+    return channels.filter((c) => c.status !== ChannelStatus.DELETED);
   }
 
   async suspendChannel(channelId: string, reason: string): Promise<void> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     channel.status = ChannelStatus.SUSPENDED;
     channel.updatedAt = new Date();
-    
+
     // Log suspension reason (in real implementation, save to audit log)
     console.log(`Channel ${channelId} suspended: ${reason}`);
   }
@@ -189,11 +209,11 @@ export class KakaoChannelManager {
   async reactivateChannel(channelId: string): Promise<void> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     if (channel.verification.status !== VerificationStatus.VERIFIED) {
-      throw new Error('Channel must be verified before reactivation');
+      throw new Error("Channel must be verified before reactivation");
     }
 
     channel.status = ChannelStatus.ACTIVE;
@@ -207,7 +227,7 @@ export class KakaoChannelManager {
   }> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     const issues: string[] = [];
@@ -219,25 +239,29 @@ export class KakaoChannelManager {
     }
 
     // Check verification status
-    if (channel.verification.status !== VerificationStatus.VERIFIED && 
-        channel.verification.status !== VerificationStatus.NOT_REQUIRED) {
+    if (
+      channel.verification.status !== VerificationStatus.VERIFIED &&
+      channel.verification.status !== VerificationStatus.NOT_REQUIRED
+    ) {
       issues.push(`Channel verification is ${channel.verification.status}`);
     }
 
     // Check if channel has sender numbers
     if (channel.senderNumbers.length === 0) {
-      recommendations.push('Add at least one verified sender number');
+      recommendations.push("Add at least one verified sender number");
     }
 
     // Check business info completeness
     if (!channel.metadata.businessInfo) {
-      recommendations.push('Complete business information for better deliverability');
+      recommendations.push(
+        "Complete business information for better deliverability",
+      );
     }
 
     return {
       isHealthy: issues.length === 0,
       issues,
-      recommendations
+      recommendations,
     };
   }
 

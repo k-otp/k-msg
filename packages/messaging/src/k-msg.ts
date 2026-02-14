@@ -1,19 +1,19 @@
-import { 
-  Result, 
-  fail, 
-  KMsgError, 
-  KMsgErrorCode, 
-  SendOptions, 
-  SendResult, 
-  Provider 
-} from '@k-msg/core';
-import { interpolate } from '@k-msg/template';
-import { KMsgHooks, HookContext } from './hooks';
+import {
+  fail,
+  KMsgError,
+  KMsgErrorCode,
+  type Provider,
+  type Result,
+  type SendOptions,
+  type SendResult,
+} from "@k-msg/core";
+import { interpolate } from "@k-msg/template";
+import type { HookContext, KMsgHooks } from "./hooks";
 
 export class KMsg {
   constructor(
     private readonly provider: Provider,
-    private readonly hooks: KMsgHooks = {}
+    private readonly hooks: KMsgHooks = {},
   ) {}
 
   async send(options: SendOptions): Promise<Result<SendResult, KMsgError>> {
@@ -31,12 +31,24 @@ export class KMsg {
 
       let finalOptions: SendOptions = { ...options, messageId };
 
-      if (finalOptions.type === 'SMS' || finalOptions.type === 'LMS' || finalOptions.type === 'MMS') {
-        const potentialVars = (options as unknown as Record<string, unknown>).variables;
-        if (potentialVars && typeof potentialVars === 'object' && finalOptions.text) {
+      if (
+        finalOptions.type === "SMS" ||
+        finalOptions.type === "LMS" ||
+        finalOptions.type === "MMS"
+      ) {
+        const potentialVars = (options as unknown as Record<string, unknown>)
+          .variables;
+        if (
+          potentialVars &&
+          typeof potentialVars === "object" &&
+          finalOptions.text
+        ) {
           finalOptions = {
             ...finalOptions,
-            text: interpolate(finalOptions.text, potentialVars as Record<string, string>),
+            text: interpolate(
+              finalOptions.text,
+              potentialVars as Record<string, string>,
+            ),
           };
         }
       }
@@ -55,12 +67,13 @@ export class KMsg {
 
       return result;
     } catch (error) {
-      const kMsgError = error instanceof KMsgError
-        ? error
-        : new KMsgError(
-            KMsgErrorCode.UNKNOWN_ERROR,
-            error instanceof Error ? error.message : String(error)
-          );
+      const kMsgError =
+        error instanceof KMsgError
+          ? error
+          : new KMsgError(
+              KMsgErrorCode.UNKNOWN_ERROR,
+              error instanceof Error ? error.message : String(error),
+            );
 
       if (this.hooks.onError) {
         await this.hooks.onError(context, kMsgError);

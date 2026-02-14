@@ -14,7 +14,7 @@ export interface ProviderConfigBase {
 
 // AlimTalk 전용 설정
 export interface AlimTalkConfig extends ProviderConfigBase {
-  type: 'alimtalk';
+  type: "alimtalk";
   senderKey?: string;
   fallbackSettings?: {
     enableSMSFallback: boolean;
@@ -28,9 +28,9 @@ export interface AlimTalkConfig extends ProviderConfigBase {
 
 // SMS 전용 설정
 export interface SMSConfig extends ProviderConfigBase {
-  type: 'sms';
+  type: "sms";
   senderNumber: string;
-  defaultMsgType: 'SMS' | 'LMS' | 'MMS';
+  defaultMsgType: "SMS" | "LMS" | "MMS";
   autoDetectMessageType?: boolean;
   lengthLimits?: {
     sms: number;
@@ -40,7 +40,7 @@ export interface SMSConfig extends ProviderConfigBase {
 
 // MMS 전용 설정
 export interface MMSConfig extends ProviderConfigBase {
-  type: 'mms';
+  type: "mms";
   senderNumber: string;
   mediaSettings?: {
     maxFileSize: number;
@@ -62,7 +62,7 @@ export interface CacheConfig {
   enabled: boolean;
   ttl: number;
   maxSize: number;
-  strategy: 'LRU' | 'FIFO' | 'TTL';
+  strategy: "LRU" | "FIFO" | "TTL";
 }
 
 // 서킷 브레이커 설정
@@ -78,12 +78,12 @@ export interface CircuitBreakerConfig {
 export interface RateLimitConfig {
   requestsPerSecond: number;
   burstSize: number;
-  strategy: 'token_bucket' | 'sliding_window';
+  strategy: "token_bucket" | "sliding_window";
 }
 
 // 환경별 설정
 export interface EnvironmentConfig {
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   rateLimits: RateLimitConfig;
   monitoring: {
     enableMetrics: boolean;
@@ -92,7 +92,7 @@ export interface EnvironmentConfig {
     metricsInterval: number;
   };
   logging: {
-    level: 'debug' | 'info' | 'warn' | 'error';
+    level: "debug" | "info" | "warn" | "error";
     structured: boolean;
     sensitiveDataMasking: boolean;
   };
@@ -150,27 +150,29 @@ export class IWINVConfigBuilder {
     return this;
   }
 
-  shared(config: IWINVConfigV2['shared']): this {
+  shared(config: IWINVConfigV2["shared"]): this {
     this.config.shared = config;
     return this;
   }
 
-  security(config: IWINVConfigV2['security']): this {
+  security(config: IWINVConfigV2["security"]): this {
     this.config.security = config;
     return this;
   }
 
   build(): IWINVConfigV2 {
     if (!this.config.environment) {
-      throw new Error('Environment configuration is required');
+      throw new Error("Environment configuration is required");
     }
 
     if (!this.config.shared) {
-      throw new Error('Shared configuration is required');
+      throw new Error("Shared configuration is required");
     }
 
     if (!this.config.alimtalk && !this.config.sms && !this.config.mms) {
-      throw new Error('At least one channel configuration (alimtalk, sms, or mms) is required');
+      throw new Error(
+        "At least one channel configuration (alimtalk, sms, or mms) is required",
+      );
     }
 
     return this.config as IWINVConfigV2;
@@ -182,44 +184,44 @@ export class ConfigFactory {
   static development(): IWINVConfigV2 {
     return IWINVConfigBuilder.create()
       .environment({
-        environment: 'development',
+        environment: "development",
         rateLimits: {
           requestsPerSecond: 10,
           burstSize: 20,
-          strategy: 'token_bucket'
+          strategy: "token_bucket",
         },
         monitoring: {
           enableMetrics: true,
           enableTracing: true,
           enableHealthChecks: true,
-          metricsInterval: 5000
+          metricsInterval: 5000,
         },
         logging: {
-          level: 'debug',
+          level: "debug",
           structured: true,
-          sensitiveDataMasking: true
-        }
+          sensitiveDataMasking: true,
+        },
       })
       .shared({
         connectionPool: {
           maxConnections: 10,
           idleTimeout: 30000,
           connectionTimeout: 5000,
-          keepAlive: true
+          keepAlive: true,
         },
         cache: {
           enabled: true,
           ttl: 300000, // 5분
           maxSize: 1000,
-          strategy: 'LRU'
+          strategy: "LRU",
         },
         circuitBreaker: {
           enabled: true,
           failureThreshold: 5,
           timeoutMs: 30000,
           retryDelayMs: 10000,
-          maxRetries: 3
-        }
+          maxRetries: 3,
+        },
       })
       .build();
   }
@@ -227,55 +229,57 @@ export class ConfigFactory {
   static production(): IWINVConfigV2 {
     return IWINVConfigBuilder.create()
       .environment({
-        environment: 'production',
+        environment: "production",
         rateLimits: {
           requestsPerSecond: 100,
           burstSize: 200,
-          strategy: 'sliding_window'
+          strategy: "sliding_window",
         },
         monitoring: {
           enableMetrics: true,
           enableTracing: false, // 성능상 비활성화
           enableHealthChecks: true,
-          metricsInterval: 10000
+          metricsInterval: 10000,
         },
         logging: {
-          level: 'info',
+          level: "info",
           structured: true,
-          sensitiveDataMasking: true
-        }
+          sensitiveDataMasking: true,
+        },
       })
       .shared({
         connectionPool: {
           maxConnections: 50,
           idleTimeout: 60000,
           connectionTimeout: 10000,
-          keepAlive: true
+          keepAlive: true,
         },
         cache: {
           enabled: true,
           ttl: 600000, // 10분
           maxSize: 10000,
-          strategy: 'LRU'
+          strategy: "LRU",
         },
         circuitBreaker: {
           enabled: true,
           failureThreshold: 10,
           timeoutMs: 60000,
           retryDelayMs: 30000,
-          maxRetries: 5
-        }
+          maxRetries: 5,
+        },
       })
       .build();
   }
 
   static fromEnvironment(): IWINVConfigV2 {
-    const env = process.env.NODE_ENV as 'development' | 'staging' | 'production' || 'development';
+    const env =
+      (process.env.NODE_ENV as "development" | "staging" | "production") ||
+      "development";
 
     const builder = IWINVConfigBuilder.create();
 
     // 환경 설정
-    if (env === 'production') {
+    if (env === "production") {
       builder.environment(ConfigFactory.production().environment);
       builder.shared(ConfigFactory.production().shared);
     } else {
@@ -286,30 +290,36 @@ export class ConfigFactory {
     // AlimTalk 설정 (환경변수 기반)
     if (process.env.IWINV_API_KEY) {
       builder.alimtalk({
-        type: 'alimtalk',
+        type: "alimtalk",
         apiKey: process.env.IWINV_API_KEY,
-        baseUrl: process.env.IWINV_BASE_URL || 'https://alimtalk.bizservice.iwinv.kr',
+        baseUrl:
+          process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
         senderKey: process.env.IWINV_SENDER_KEY,
-        timeout: parseInt(process.env.IWINV_TIMEOUT || '10000'),
-        retries: parseInt(process.env.IWINV_RETRIES || '3'),
-        debug: process.env.IWINV_DEBUG === 'true',
+        timeout: parseInt(process.env.IWINV_TIMEOUT || "10000"),
+        retries: parseInt(process.env.IWINV_RETRIES || "3"),
+        debug: process.env.IWINV_DEBUG === "true",
         fallbackSettings: {
-          enableSMSFallback: process.env.IWINV_ENABLE_SMS_FALLBACK === 'true'
-        }
+          enableSMSFallback: process.env.IWINV_ENABLE_SMS_FALLBACK === "true",
+        },
       });
     }
 
     // SMS 설정 (환경변수 기반)
     if (process.env.IWINV_SMS_SENDER_NUMBER) {
       builder.sms({
-        type: 'sms',
-        apiKey: process.env.IWINV_API_KEY || '',
-        baseUrl: process.env.IWINV_SMS_BASE_URL || process.env.IWINV_BASE_URL || 'https://alimtalk.bizservice.iwinv.kr',
+        type: "sms",
+        apiKey: process.env.IWINV_API_KEY || "",
+        baseUrl:
+          process.env.IWINV_SMS_BASE_URL ||
+          process.env.IWINV_BASE_URL ||
+          "https://alimtalk.bizservice.iwinv.kr",
         senderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
-        defaultMsgType: (process.env.IWINV_SMS_DEFAULT_TYPE as 'SMS' | 'LMS' | 'MMS') || 'SMS',
-        autoDetectMessageType: process.env.IWINV_SMS_AUTO_DETECT === 'true',
-        timeout: parseInt(process.env.IWINV_SMS_TIMEOUT || '10000'),
-        retries: parseInt(process.env.IWINV_SMS_RETRIES || '3')
+        defaultMsgType:
+          (process.env.IWINV_SMS_DEFAULT_TYPE as "SMS" | "LMS" | "MMS") ||
+          "SMS",
+        autoDetectMessageType: process.env.IWINV_SMS_AUTO_DETECT === "true",
+        timeout: parseInt(process.env.IWINV_SMS_TIMEOUT || "10000"),
+        retries: parseInt(process.env.IWINV_SMS_RETRIES || "3"),
       });
     }
 
@@ -325,49 +335,58 @@ export class ConfigValidator {
 
     // 필수 필드 검증
     if (!config.environment) {
-      errors.push('Environment configuration is required');
+      errors.push("Environment configuration is required");
     }
 
     if (!config.shared) {
-      errors.push('Shared configuration is required');
+      errors.push("Shared configuration is required");
     }
 
     // API 키 검증
     if (config.alimtalk && !config.alimtalk.apiKey) {
-      errors.push('AlimTalk API key is required');
+      errors.push("AlimTalk API key is required");
     }
 
     if (config.sms && !config.sms.apiKey) {
-      errors.push('SMS API key is required');
+      errors.push("SMS API key is required");
     }
 
     // URL 검증
-    [config.alimtalk, config.sms, config.mms].forEach((channelConfig, index) => {
-      if (channelConfig && !this.isValidUrl(channelConfig.baseUrl)) {
-        errors.push(`Invalid base URL for ${['alimtalk', 'sms', 'mms'][index]}`);
-      }
-    });
+    [config.alimtalk, config.sms, config.mms].forEach(
+      (channelConfig, index) => {
+        if (
+          channelConfig &&
+          !ConfigValidator.isValidUrl(channelConfig.baseUrl)
+        ) {
+          errors.push(
+            `Invalid base URL for ${["alimtalk", "sms", "mms"][index]}`,
+          );
+        }
+      },
+    );
 
     // 성능 설정 검증
     if (config.shared?.connectionPool?.maxConnections < 1) {
-      errors.push('Connection pool max connections must be greater than 0');
+      errors.push("Connection pool max connections must be greater than 0");
     }
 
     // 권장사항 경고
-    if (config.environment.environment === 'production') {
-      if (config.environment.logging.level === 'debug') {
-        warnings.push('Debug logging is not recommended for production');
+    if (config.environment.environment === "production") {
+      if (config.environment.logging.level === "debug") {
+        warnings.push("Debug logging is not recommended for production");
       }
 
       if (config.shared.cache?.ttl < 60000) {
-        warnings.push('Cache TTL less than 1 minute may impact performance in production');
+        warnings.push(
+          "Cache TTL less than 1 minute may impact performance in production",
+        );
       }
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 

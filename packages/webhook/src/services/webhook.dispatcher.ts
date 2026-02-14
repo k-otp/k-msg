@@ -1,4 +1,10 @@
-import type { WebhookConfig, WebhookEvent, WebhookEndpoint, WebhookDelivery, WebhookAttempt } from '../types/webhook.types';
+import type {
+  WebhookAttempt,
+  WebhookConfig,
+  WebhookDelivery,
+  WebhookEndpoint,
+  WebhookEvent,
+} from "../types/webhook.types";
 
 export interface HttpClient {
   fetch(url: string, options: RequestInit): Promise<Response>;
@@ -19,9 +25,11 @@ export class MockHttpClient implements HttpClient {
 
   async fetch(url: string, options: RequestInit): Promise<Response> {
     // For test URLs, return mock responses
-    if (url.includes('webhook.example.com') || url.includes('test-')) {
+    if (url.includes("webhook.example.com") || url.includes("test-")) {
       // Add small delay to simulate network latency
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 5));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.random() * 10 + 5),
+      );
 
       const mockResponse = this.responses.get(url);
       if (mockResponse) {
@@ -29,10 +37,10 @@ export class MockHttpClient implements HttpClient {
       }
 
       // Default success response for test URLs
-      return new Response(JSON.stringify({ status: 'ok' }), {
+      return new Response(JSON.stringify({ status: "ok" }), {
         status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' }
+        statusText: "OK",
+        headers: { "content-type": "application/json" },
       });
     }
 
@@ -50,17 +58,20 @@ export class WebhookDispatcher {
     this.httpClient = httpClient || new DefaultHttpClient();
   }
 
-  async dispatch(event: WebhookEvent, endpoint: WebhookEndpoint): Promise<WebhookDelivery> {
+  async dispatch(
+    event: WebhookEvent,
+    endpoint: WebhookEndpoint,
+  ): Promise<WebhookDelivery> {
     const delivery: WebhookDelivery = {
       id: this.generateDeliveryId(),
       endpointId: endpoint.id,
       eventId: event.id,
       url: endpoint.url,
-      httpMethod: 'POST',
+      httpMethod: "POST",
       headers: this.buildHeaders(endpoint, event),
       payload: JSON.stringify(event),
       attempts: [],
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
     };
 
@@ -68,15 +79,27 @@ export class WebhookDispatcher {
     return delivery;
   }
 
-  private async executeDelivery(delivery: WebhookDelivery, endpoint: WebhookEndpoint): Promise<void> {
-    const maxRetries = endpoint.retryConfig?.maxRetries || this.config.maxRetries;
-    
+  private async executeDelivery(
+    delivery: WebhookDelivery,
+    endpoint: WebhookEndpoint,
+  ): Promise<void> {
+    const maxRetries =
+      endpoint.retryConfig?.maxRetries || this.config.maxRetries;
+
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
-      const attemptResult = await this.makeHttpRequest(delivery, endpoint, attempt);
+      const attemptResult = await this.makeHttpRequest(
+        delivery,
+        endpoint,
+        attempt,
+      );
       delivery.attempts.push(attemptResult);
 
-      if (attemptResult.httpStatus && attemptResult.httpStatus >= 200 && attemptResult.httpStatus < 300) {
-        delivery.status = 'success';
+      if (
+        attemptResult.httpStatus &&
+        attemptResult.httpStatus >= 200 &&
+        attemptResult.httpStatus < 300
+      ) {
+        delivery.status = "success";
         delivery.completedAt = new Date();
         return;
       }
@@ -87,11 +110,15 @@ export class WebhookDispatcher {
       }
     }
 
-    delivery.status = 'exhausted';
+    delivery.status = "exhausted";
     delivery.completedAt = new Date();
   }
 
-  private async makeHttpRequest(delivery: WebhookDelivery, endpoint: WebhookEndpoint, attemptNumber: number): Promise<WebhookAttempt> {
+  private async makeHttpRequest(
+    delivery: WebhookDelivery,
+    endpoint: WebhookEndpoint,
+    attemptNumber: number,
+  ): Promise<WebhookAttempt> {
     const startTime = Date.now();
     const attempt: WebhookAttempt = {
       attemptNumber,
@@ -120,22 +147,24 @@ export class WebhookDispatcher {
       if (!response.ok) {
         attempt.error = `HTTP ${response.status}: ${response.statusText}`;
       }
-
     } catch (error) {
       attempt.latencyMs = Date.now() - startTime;
-      attempt.error = error instanceof Error ? error.message : 'Unknown error';
+      attempt.error = error instanceof Error ? error.message : "Unknown error";
     }
 
     return attempt;
   }
 
-  private buildHeaders(endpoint: WebhookEndpoint, event: WebhookEvent): Record<string, string> {
+  private buildHeaders(
+    endpoint: WebhookEndpoint,
+    event: WebhookEvent,
+  ): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-Webhook-ID': event.id,
-      'X-Webhook-Event': event.type,
-      'X-Webhook-Timestamp': event.timestamp.toISOString(),
-      'User-Agent': 'K-Message-Webhook/1.0',
+      "Content-Type": "application/json",
+      "X-Webhook-ID": event.id,
+      "X-Webhook-Event": event.type,
+      "X-Webhook-Timestamp": event.timestamp.toISOString(),
+      "User-Agent": "K-Message-Webhook/1.0",
     };
 
     // 엔드포인트별 커스텀 헤더
@@ -145,8 +174,11 @@ export class WebhookDispatcher {
 
     // 보안 서명
     if (endpoint.secret) {
-      const signature = this.generateSignature(JSON.stringify(event), endpoint.secret);
-      headers['X-Webhook-Signature'] = signature;
+      const signature = this.generateSignature(
+        JSON.stringify(event),
+        endpoint.secret,
+      );
+      headers["X-Webhook-Signature"] = signature;
     }
 
     return headers;
@@ -154,17 +186,21 @@ export class WebhookDispatcher {
 
   private generateSignature(payload: string, secret: string): string {
     // 실제 구현에서는 crypto 모듈 사용
-    return `sha256=${Buffer.from(payload + secret).toString('base64')}`;
+    return `sha256=${Buffer.from(payload + secret).toString("base64")}`;
   }
 
-  private calculateRetryDelay(attempt: number, endpoint: WebhookEndpoint): number {
-    const baseDelay = endpoint.retryConfig?.retryDelayMs || this.config.retryDelayMs;
+  private calculateRetryDelay(
+    attempt: number,
+    endpoint: WebhookEndpoint,
+  ): number {
+    const baseDelay =
+      endpoint.retryConfig?.retryDelayMs || this.config.retryDelayMs;
     const multiplier = endpoint.retryConfig?.backoffMultiplier || 2;
-    return baseDelay * Math.pow(multiplier, attempt - 1);
+    return baseDelay * multiplier ** (attempt - 1);
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generateDeliveryId(): string {

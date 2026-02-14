@@ -3,7 +3,7 @@
  * 채널 및 발신번호 액세스 권한 관리
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface User {
   id: string;
@@ -34,38 +34,44 @@ export interface Permission {
 }
 
 export enum ResourceType {
-  CHANNEL = 'channel',
-  SENDER_NUMBER = 'senderNumber',
-  TEMPLATE = 'template',
-  MESSAGE = 'message',
-  USER = 'user',
-  ROLE = 'role',
-  AUDIT_LOG = 'auditLog',
-  ANALYTICS = 'analytics'
+  CHANNEL = "channel",
+  SENDER_NUMBER = "senderNumber",
+  TEMPLATE = "template",
+  MESSAGE = "message",
+  USER = "user",
+  ROLE = "role",
+  AUDIT_LOG = "auditLog",
+  ANALYTICS = "analytics",
 }
 
 export enum ActionType {
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  VERIFY = 'verify',
-  SUSPEND = 'suspend',
-  ACTIVATE = 'activate',
-  SEND = 'send',
-  MANAGE = 'manage'
+  CREATE = "create",
+  READ = "read",
+  UPDATE = "update",
+  DELETE = "delete",
+  VERIFY = "verify",
+  SUSPEND = "suspend",
+  ACTIVATE = "activate",
+  SEND = "send",
+  MANAGE = "manage",
 }
 
 export enum PermissionScope {
-  GLOBAL = 'global',
-  ORGANIZATION = 'organization',
-  TEAM = 'team',
-  PERSONAL = 'personal'
+  GLOBAL = "global",
+  ORGANIZATION = "organization",
+  TEAM = "team",
+  PERSONAL = "personal",
 }
 
 export interface PermissionCondition {
   field: string;
-  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'contains' | 'starts_with';
+  operator:
+    | "equals"
+    | "not_equals"
+    | "in"
+    | "not_in"
+    | "contains"
+    | "starts_with";
   value: any;
 }
 
@@ -107,20 +113,25 @@ export class PermissionManager extends EventEmitter {
   }
 
   // User Management
-  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+  async createUser(
+    userData: Omit<User, "id" | "createdAt" | "updatedAt">,
+  ): Promise<User> {
     const userId = this.generateUserId();
-    
+
     const user: User = {
       ...userData,
       id: userId,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(userId, user);
-    this.updateUserRoleCache(userId, user.roles.map(r => r.id));
+    this.updateUserRoleCache(
+      userId,
+      user.roles.map((r) => r.id),
+    );
 
-    this.emit('user:created', { user });
+    this.emit("user:created", { user });
     return user;
   }
 
@@ -131,27 +142,30 @@ export class PermissionManager extends EventEmitter {
   async updateUser(userId: string, updates: Partial<User>): Promise<User> {
     const user = this.users.get(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     const updatedUser = {
       ...user,
       ...updates,
       id: userId,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(userId, updatedUser);
 
     // Update role cache if roles changed
     if (updates.roles) {
-      this.updateUserRoleCache(userId, updates.roles.map(r => r.id));
+      this.updateUserRoleCache(
+        userId,
+        updates.roles.map((r) => r.id),
+      );
     }
 
     // Clear permission cache for this user
     this.clearUserPermissionCache(userId);
 
-    this.emit('user:updated', { user: updatedUser, previousUser: user });
+    this.emit("user:updated", { user: updatedUser, previousUser: user });
     return updatedUser;
   }
 
@@ -165,24 +179,26 @@ export class PermissionManager extends EventEmitter {
     this.userRoleCache.delete(userId);
     this.clearUserPermissionCache(userId);
 
-    this.emit('user:deleted', { user });
+    this.emit("user:deleted", { user });
     return true;
   }
 
   // Role Management
-  async createRole(roleData: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): Promise<Role> {
+  async createRole(
+    roleData: Omit<Role, "id" | "createdAt" | "updatedAt">,
+  ): Promise<Role> {
     const roleId = this.generateRoleId();
-    
+
     const role: Role = {
       ...roleData,
       id: roleId,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.roles.set(roleId, role);
 
-    this.emit('role:created', { role });
+    this.emit("role:created", { role });
     return role;
   }
 
@@ -193,18 +209,18 @@ export class PermissionManager extends EventEmitter {
   async updateRole(roleId: string, updates: Partial<Role>): Promise<Role> {
     const role = this.roles.get(roleId);
     if (!role) {
-      throw new Error('Role not found');
+      throw new Error("Role not found");
     }
 
     if (role.isSystem && updates.permissions) {
-      throw new Error('Cannot modify permissions of system roles');
+      throw new Error("Cannot modify permissions of system roles");
     }
 
     const updatedRole = {
       ...role,
       ...updates,
       id: roleId,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.roles.set(roleId, updatedRole);
@@ -212,7 +228,7 @@ export class PermissionManager extends EventEmitter {
     // Clear permission cache for all users with this role
     this.clearRolePermissionCache(roleId);
 
-    this.emit('role:updated', { role: updatedRole, previousRole: role });
+    this.emit("role:updated", { role: updatedRole, previousRole: role });
     return updatedRole;
   }
 
@@ -223,20 +239,21 @@ export class PermissionManager extends EventEmitter {
     }
 
     if (role.isSystem) {
-      throw new Error('Cannot delete system roles');
+      throw new Error("Cannot delete system roles");
     }
 
     // Check if role is assigned to any users
-    const usersWithRole = Array.from(this.users.values())
-      .filter(user => user.roles.some(r => r.id === roleId));
+    const usersWithRole = Array.from(this.users.values()).filter((user) =>
+      user.roles.some((r) => r.id === roleId),
+    );
 
     if (usersWithRole.length > 0) {
-      throw new Error('Cannot delete role that is assigned to users');
+      throw new Error("Cannot delete role that is assigned to users");
     }
 
     this.roles.delete(roleId);
 
-    this.emit('role:deleted', { role });
+    this.emit("role:deleted", { role });
     return true;
   }
 
@@ -246,33 +263,36 @@ export class PermissionManager extends EventEmitter {
     const role = this.roles.get(roleId);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
     if (!role) {
-      throw new Error('Role not found');
+      throw new Error("Role not found");
     }
 
     // Check if role is already assigned
-    if (user.roles.some(r => r.id === roleId)) {
+    if (user.roles.some((r) => r.id === roleId)) {
       return;
     }
 
     user.roles.push(role);
     user.updatedAt = new Date();
 
-    this.updateUserRoleCache(userId, user.roles.map(r => r.id));
+    this.updateUserRoleCache(
+      userId,
+      user.roles.map((r) => r.id),
+    );
     this.clearUserPermissionCache(userId);
 
-    this.emit('role:assigned', { userId, roleId });
+    this.emit("role:assigned", { userId, roleId });
   }
 
   async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
     const user = this.users.get(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
-    const roleIndex = user.roles.findIndex(r => r.id === roleId);
+    const roleIndex = user.roles.findIndex((r) => r.id === roleId);
     if (roleIndex === -1) {
       return;
     }
@@ -280,10 +300,13 @@ export class PermissionManager extends EventEmitter {
     user.roles.splice(roleIndex, 1);
     user.updatedAt = new Date();
 
-    this.updateUserRoleCache(userId, user.roles.map(r => r.id));
+    this.updateUserRoleCache(
+      userId,
+      user.roles.map((r) => r.id),
+    );
     this.clearUserPermissionCache(userId);
 
-    this.emit('role:removed', { userId, roleId });
+    this.emit("role:removed", { userId, roleId });
   }
 
   // Permission Checking
@@ -308,14 +331,14 @@ export class PermissionManager extends EventEmitter {
     resource: ResourceType,
     action: ActionType,
     resourceId?: string,
-    context?: AccessContext
+    context?: AccessContext,
   ): Promise<boolean> {
     const result = await this.checkPermission({
       userId,
       resource,
       action,
       resourceId,
-      context
+      context,
     });
 
     return result.granted;
@@ -326,10 +349,16 @@ export class PermissionManager extends EventEmitter {
     resource: ResourceType,
     action: ActionType,
     resourceId?: string,
-    context?: AccessContext
+    context?: AccessContext,
   ): Promise<void> {
-    const hasAccess = await this.hasPermission(userId, resource, action, resourceId, context);
-    
+    const hasAccess = await this.hasPermission(
+      userId,
+      resource,
+      action,
+      resourceId,
+      context,
+    );
+
     if (!hasAccess) {
       throw new Error(`Access denied: ${action} on ${resource}`);
     }
@@ -343,14 +372,15 @@ export class PermissionManager extends EventEmitter {
     }
 
     const permissions: Permission[] = [];
-    
+
     for (const role of user.roles) {
       permissions.push(...role.permissions);
     }
 
     // Remove duplicates
-    const uniquePermissions = permissions.filter((permission, index, self) =>
-      index === self.findIndex(p => p.id === permission.id)
+    const uniquePermissions = permissions.filter(
+      (permission, index, self) =>
+        index === self.findIndex((p) => p.id === permission.id),
     );
 
     return uniquePermissions;
@@ -361,18 +391,15 @@ export class PermissionManager extends EventEmitter {
     return user ? user.roles : [];
   }
 
-  listUsers(filters?: {
-    isActive?: boolean;
-    roleId?: string;
-  }): User[] {
+  listUsers(filters?: { isActive?: boolean; roleId?: string }): User[] {
     let users = Array.from(this.users.values());
 
     if (filters?.isActive !== undefined) {
-      users = users.filter(u => u.isActive === filters.isActive);
+      users = users.filter((u) => u.isActive === filters.isActive);
     }
 
     if (filters?.roleId) {
-      users = users.filter(u => u.roles.some(r => r.id === filters.roleId));
+      users = users.filter((u) => u.roles.some((r) => r.id === filters.roleId));
     }
 
     return users;
@@ -383,23 +410,25 @@ export class PermissionManager extends EventEmitter {
   }
 
   // Private Methods
-  private async performPermissionCheck(check: PermissionCheck): Promise<PermissionResult> {
+  private async performPermissionCheck(
+    check: PermissionCheck,
+  ): Promise<PermissionResult> {
     const user = this.users.get(check.userId);
     if (!user) {
       return {
         granted: false,
-        reason: 'User not found',
+        reason: "User not found",
         matchedPermissions: [],
-        deniedReasons: ['User not found']
+        deniedReasons: ["User not found"],
       };
     }
 
     if (!user.isActive) {
       return {
         granted: false,
-        reason: 'User is inactive',
+        reason: "User is inactive",
         matchedPermissions: [],
-        deniedReasons: ['User is inactive']
+        deniedReasons: ["User is inactive"],
       };
     }
 
@@ -414,7 +443,9 @@ export class PermissionManager extends EventEmitter {
           if (await this.checkConditions(permission, check)) {
             matchedPermissions.push(permission);
           } else {
-            deniedReasons.push(`Conditions not met for permission ${permission.id}`);
+            deniedReasons.push(
+              `Conditions not met for permission ${permission.id}`,
+            );
           }
         }
       }
@@ -424,24 +455,33 @@ export class PermissionManager extends EventEmitter {
 
     return {
       granted,
-      reason: granted ? undefined : 'No matching permissions found',
+      reason: granted ? undefined : "No matching permissions found",
       matchedPermissions,
-      deniedReasons: granted ? [] : deniedReasons
+      deniedReasons: granted ? [] : deniedReasons,
     };
   }
 
-  private doesPermissionMatch(permission: Permission, check: PermissionCheck): boolean {
-    return permission.resource === check.resource && permission.action === check.action;
+  private doesPermissionMatch(
+    permission: Permission,
+    check: PermissionCheck,
+  ): boolean {
+    return (
+      permission.resource === check.resource &&
+      permission.action === check.action
+    );
   }
 
-  private async checkConditions(permission: Permission, check: PermissionCheck): Promise<boolean> {
+  private async checkConditions(
+    permission: Permission,
+    check: PermissionCheck,
+  ): Promise<boolean> {
     if (!permission.conditions || permission.conditions.length === 0) {
       return true;
     }
 
     // For simplicity, all conditions must be met (AND logic)
     for (const condition of permission.conditions) {
-      if (!await this.evaluateCondition(condition, check)) {
+      if (!(await this.evaluateCondition(condition, check))) {
         return false;
       }
     }
@@ -449,21 +489,24 @@ export class PermissionManager extends EventEmitter {
     return true;
   }
 
-  private async evaluateCondition(condition: PermissionCondition, check: PermissionCheck): Promise<boolean> {
+  private async evaluateCondition(
+    condition: PermissionCondition,
+    check: PermissionCheck,
+  ): Promise<boolean> {
     let actualValue: any;
 
     // Get the actual value based on the field
     switch (condition.field) {
-      case 'userId':
+      case "userId":
         actualValue = check.userId;
         break;
-      case 'organizationId':
+      case "organizationId":
         actualValue = check.context?.organizationId;
         break;
-      case 'teamId':
+      case "teamId":
         actualValue = check.context?.teamId;
         break;
-      case 'resourceOwnerId':
+      case "resourceOwnerId":
         actualValue = check.context?.resourceOwnerId;
         break;
       default:
@@ -472,17 +515,23 @@ export class PermissionManager extends EventEmitter {
 
     // Evaluate the condition
     switch (condition.operator) {
-      case 'equals':
+      case "equals":
         return actualValue === condition.value;
-      case 'not_equals':
+      case "not_equals":
         return actualValue !== condition.value;
-      case 'in':
-        return Array.isArray(condition.value) && condition.value.includes(actualValue);
-      case 'not_in':
-        return Array.isArray(condition.value) && !condition.value.includes(actualValue);
-      case 'contains':
+      case "in":
+        return (
+          Array.isArray(condition.value) &&
+          condition.value.includes(actualValue)
+        );
+      case "not_in":
+        return (
+          Array.isArray(condition.value) &&
+          !condition.value.includes(actualValue)
+        );
+      case "contains":
         return String(actualValue).includes(String(condition.value));
-      case 'starts_with':
+      case "starts_with":
         return String(actualValue).startsWith(String(condition.value));
       default:
         return false;
@@ -492,101 +541,101 @@ export class PermissionManager extends EventEmitter {
   private initializeSystemRoles(): void {
     // Super Admin Role
     const superAdminRole: Role = {
-      id: 'super-admin',
-      name: 'Super Admin',
-      description: 'Full system access',
+      id: "super-admin",
+      name: "Super Admin",
+      description: "Full system access",
       isSystem: true,
       permissions: [
         // Global permissions for all resources and actions
-        ...Object.values(ResourceType).flatMap(resource =>
-          Object.values(ActionType).map(action => ({
+        ...Object.values(ResourceType).flatMap((resource) =>
+          Object.values(ActionType).map((action) => ({
             id: `super-admin-${resource}-${action}`,
             resource,
             action,
-            scope: PermissionScope.GLOBAL
-          }))
-        )
+            scope: PermissionScope.GLOBAL,
+          })),
+        ),
       ],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Channel Admin Role
     const channelAdminRole: Role = {
-      id: 'channel-admin',
-      name: 'Channel Admin',
-      description: 'Manage channels and sender numbers',
+      id: "channel-admin",
+      name: "Channel Admin",
+      description: "Manage channels and sender numbers",
       isSystem: true,
       permissions: [
         {
-          id: 'channel-admin-channel-manage',
+          id: "channel-admin-channel-manage",
           resource: ResourceType.CHANNEL,
           action: ActionType.MANAGE,
-          scope: PermissionScope.ORGANIZATION
+          scope: PermissionScope.ORGANIZATION,
         },
         {
-          id: 'channel-admin-sender-manage',
+          id: "channel-admin-sender-manage",
           resource: ResourceType.SENDER_NUMBER,
           action: ActionType.MANAGE,
-          scope: PermissionScope.ORGANIZATION
-        }
+          scope: PermissionScope.ORGANIZATION,
+        },
       ],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Message Sender Role
     const messageSenderRole: Role = {
-      id: 'message-sender',
-      name: 'Message Sender',
-      description: 'Send messages using configured channels',
+      id: "message-sender",
+      name: "Message Sender",
+      description: "Send messages using configured channels",
       isSystem: true,
       permissions: [
         {
-          id: 'message-sender-channel-read',
+          id: "message-sender-channel-read",
           resource: ResourceType.CHANNEL,
           action: ActionType.READ,
-          scope: PermissionScope.ORGANIZATION
+          scope: PermissionScope.ORGANIZATION,
         },
         {
-          id: 'message-sender-message-send',
+          id: "message-sender-message-send",
           resource: ResourceType.MESSAGE,
           action: ActionType.SEND,
-          scope: PermissionScope.ORGANIZATION
-        }
+          scope: PermissionScope.ORGANIZATION,
+        },
       ],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Viewer Role
     const viewerRole: Role = {
-      id: 'viewer',
-      name: 'Viewer',
-      description: 'Read-only access',
+      id: "viewer",
+      name: "Viewer",
+      description: "Read-only access",
       isSystem: true,
       permissions: [
         {
-          id: 'viewer-channel-read',
+          id: "viewer-channel-read",
           resource: ResourceType.CHANNEL,
           action: ActionType.READ,
-          scope: PermissionScope.ORGANIZATION
+          scope: PermissionScope.ORGANIZATION,
         },
         {
-          id: 'viewer-sender-read',
+          id: "viewer-sender-read",
           resource: ResourceType.SENDER_NUMBER,
           action: ActionType.READ,
-          scope: PermissionScope.ORGANIZATION
+          scope: PermissionScope.ORGANIZATION,
         },
         {
-          id: 'viewer-analytics-read',
+          id: "viewer-analytics-read",
           resource: ResourceType.ANALYTICS,
           action: ActionType.READ,
-          scope: PermissionScope.ORGANIZATION
-        }
+          scope: PermissionScope.ORGANIZATION,
+        },
       ],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.roles.set(superAdminRole.id, superAdminRole);
@@ -601,14 +650,14 @@ export class PermissionManager extends EventEmitter {
 
   private clearUserPermissionCache(userId: string): void {
     const keysToDelete: string[] = [];
-    
+
     for (const key of this.permissionCache.keys()) {
       if (key.startsWith(`${userId}:`)) {
         keysToDelete.push(key);
       }
     }
 
-    keysToDelete.forEach(key => {
+    keysToDelete.forEach((key) => {
       this.permissionCache.delete(key);
       this.cacheExpiry.delete(key);
     });
@@ -624,8 +673,8 @@ export class PermissionManager extends EventEmitter {
   }
 
   private getCacheKey(check: PermissionCheck): string {
-    const contextKey = check.context ? JSON.stringify(check.context) : '';
-    return `${check.userId}:${check.resource}:${check.action}:${check.resourceId || ''}:${contextKey}`;
+    const contextKey = check.context ? JSON.stringify(check.context) : "";
+    return `${check.userId}:${check.resource}:${check.action}:${check.resourceId || ""}:${contextKey}`;
   }
 
   private getFromCache(key: string): PermissionResult | null {

@@ -1,8 +1,8 @@
-import * as crypto from 'crypto';
-import type { WebhookConfig } from '../types/webhook.types';
+import * as crypto from "crypto";
+import type { WebhookConfig } from "../types/webhook.types";
 
 export interface SecurityConfig {
-  algorithm: 'sha256' | 'sha1';
+  algorithm: "sha256" | "sha1";
   header: string;
   prefix?: string;
 }
@@ -16,9 +16,9 @@ export class SecurityManager {
 
   constructor(webhookConfig: WebhookConfig) {
     this.config = {
-      algorithm: webhookConfig.algorithm || 'sha256',
-      header: webhookConfig.signatureHeader || 'X-Webhook-Signature',
-      prefix: webhookConfig.signaturePrefix || 'sha256='
+      algorithm: webhookConfig.algorithm || "sha256",
+      header: webhookConfig.signatureHeader || "X-Webhook-Signature",
+      prefix: webhookConfig.signaturePrefix || "sha256=",
     };
   }
 
@@ -27,9 +27,9 @@ export class SecurityManager {
    */
   generateSignature(payload: string, secret: string): string {
     const hmac = crypto.createHmac(this.config.algorithm, secret);
-    hmac.update(payload, 'utf8');
-    const signature = hmac.digest('hex');
-    
+    hmac.update(payload, "utf8");
+    const signature = hmac.digest("hex");
+
     return this.config.prefix ? `${this.config.prefix}${signature}` : signature;
   }
 
@@ -39,11 +39,11 @@ export class SecurityManager {
   verifySignature(payload: string, signature: string, secret: string): boolean {
     try {
       const expectedSignature = this.generateSignature(payload, secret);
-      
+
       // 타이밍 공격 방지를 위한 constant-time 비교
       return this.constantTimeCompare(signature, expectedSignature);
     } catch (error) {
-      console.error('Signature verification failed:', error);
+      console.error("Signature verification failed:", error);
       return false;
     }
   }
@@ -53,28 +53,31 @@ export class SecurityManager {
    */
   extractSignature(headers: Record<string, string>): string | null {
     const headerName = this.config.header.toLowerCase();
-    
+
     for (const [key, value] of Object.entries(headers)) {
       if (key.toLowerCase() === headerName) {
         return value;
       }
     }
-    
+
     return null;
   }
 
   /**
    * Webhook 전송을 위한 보안 헤더 생성
    */
-  createSecurityHeaders(payload: string, secret: string): Record<string, string> {
+  createSecurityHeaders(
+    payload: string,
+    secret: string,
+  ): Record<string, string> {
     const signature = this.generateSignature(payload, secret);
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    
+
     return {
       [this.config.header]: signature,
-      'X-Webhook-Timestamp': timestamp,
-      'X-Webhook-ID': this.generateWebhookId(),
-      'User-Agent': 'K-Message-Webhook/1.0'
+      "X-Webhook-Timestamp": timestamp,
+      "X-Webhook-ID": this.generateWebhookId(),
+      "User-Agent": "K-Message-Webhook/1.0",
     };
   }
 
@@ -86,7 +89,7 @@ export class SecurityManager {
       const webhookTime = parseInt(timestamp, 10);
       const currentTime = Math.floor(Date.now() / 1000);
       const timeDiff = Math.abs(currentTime - webhookTime);
-      
+
       return timeDiff <= toleranceSeconds;
     } catch (error) {
       return false;
@@ -97,7 +100,7 @@ export class SecurityManager {
    * Webhook ID 생성 (추적용)
    */
   private generateWebhookId(): string {
-    return `wh_${crypto.randomBytes(16).toString('hex')}`;
+    return `wh_${crypto.randomBytes(16).toString("hex")}`;
   }
 
   /**

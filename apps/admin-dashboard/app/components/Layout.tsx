@@ -1,12 +1,14 @@
-import { FC } from 'hono/jsx';
-import type { Child } from 'hono/jsx';
+import type { Child, FC } from "hono/jsx";
 
 interface LayoutProps {
   title?: string;
   children: Child;
 }
 
-export const Layout: FC<LayoutProps> = ({ title = 'K-Message Admin Dashboard', children }) => {
+export const Layout: FC<LayoutProps> = ({
+  title = "K-Message Admin Dashboard",
+  children,
+}) => {
   return (
     <html lang="ko">
       <head>
@@ -15,9 +17,7 @@ export const Layout: FC<LayoutProps> = ({ title = 'K-Message Admin Dashboard', c
         <title>{title}</title>
         <script src="https://cdn.tailwindcss.com"></script>
       </head>
-      <body class="bg-gray-100">
-        {children}
-      </body>
+      <body class="bg-gray-100">{children}</body>
     </html>
   );
 };

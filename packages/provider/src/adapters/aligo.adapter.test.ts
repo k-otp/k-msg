@@ -104,7 +104,9 @@ describe("AligoAdapter", () => {
       to: "01011112222",
       from: "01012345678",
       text: "친구톡 프로모션",
-      buttons: [{ name: "자세히 보기", type: "WL", urlPc: "https://example.com" }],
+      buttons: [
+        { name: "자세히 보기", type: "WL", urlPc: "https://example.com" },
+      ],
     });
 
     expect(result.isSuccess).toBe(true);
@@ -227,7 +229,13 @@ describe("AligoAdapter", () => {
       variables: { title: "2월 이벤트" },
       text: "친구톡 바로가기 안내",
       imageUrl: "https://img.example.com/event.png",
-      buttons: [{ name: "쿠폰받기", type: "WL", urlMobile: "https://m.example.com/coupon" }],
+      buttons: [
+        {
+          name: "쿠폰받기",
+          type: "WL",
+          urlMobile: "https://m.example.com/coupon",
+        },
+      ],
       options: {
         subject: "이벤트",
       },

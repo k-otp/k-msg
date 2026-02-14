@@ -1,4 +1,4 @@
-import type { WebhookConfig } from '../types/webhook.types';
+import type { WebhookConfig } from "../types/webhook.types";
 
 export interface RetryConfig {
   maxRetries: number;
@@ -29,7 +29,7 @@ export class RetryManager {
       baseDelayMs: webhookConfig.retryDelayMs,
       maxDelayMs: webhookConfig.maxDelayMs || 300000, // 5분
       backoffMultiplier: webhookConfig.backoffMultiplier || 2,
-      jitter: webhookConfig.jitter !== false // 기본값 true
+      jitter: webhookConfig.jitter !== false, // 기본값 true
     };
   }
 
@@ -38,15 +38,18 @@ export class RetryManager {
    */
   calculateNextRetry(attemptNumber: number): Date {
     if (attemptNumber >= this.config.maxRetries) {
-      throw new Error(`Maximum retry attempts (${this.config.maxRetries}) exceeded`);
+      throw new Error(
+        `Maximum retry attempts (${this.config.maxRetries}) exceeded`,
+      );
     }
 
     // 지수 백오프 계산
-    let delay = this.config.baseDelayMs * Math.pow(this.config.backoffMultiplier, attemptNumber);
-    
+    let delay =
+      this.config.baseDelayMs * this.config.backoffMultiplier ** attemptNumber;
+
     // 최대 지연 시간 제한
     delay = Math.min(delay, this.config.maxDelayMs);
-    
+
     // 지터 추가 (랜덤성으로 thundering herd 방지)
     if (this.config.jitter) {
       delay = delay * (0.5 + Math.random() * 0.5);
@@ -77,19 +80,19 @@ export class RetryManager {
    */
   private isRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    
+
     // 네트워크 관련 에러들은 재시도 가능
     const retryableErrors = [
-      'timeout',
-      'network',
-      'connection',
-      'econnreset',
-      'enotfound',
-      'econnrefused',
-      'socket hang up'
+      "timeout",
+      "network",
+      "connection",
+      "econnreset",
+      "enotfound",
+      "econnrefused",
+      "socket hang up",
     ];
 
-    return retryableErrors.some(keyword => message.includes(keyword));
+    return retryableErrors.some((keyword) => message.includes(keyword));
   }
 
   /**
@@ -128,31 +131,35 @@ export class RetryManager {
         successfulAttempts: 0,
         failedAttempts: 0,
         averageDelayMs: 0,
-        totalTimeMs: 0
+        totalTimeMs: 0,
       };
     }
 
-    const successful = attempts.filter(a => a.success).length;
+    const successful = attempts.filter((a) => a.success).length;
     const failed = attempts.length - successful;
-    
+
     // 시도 간 평균 지연 시간 계산
     let totalDelay = 0;
     for (let i = 1; i < attempts.length; i++) {
-      totalDelay += attempts[i].timestamp.getTime() - attempts[i - 1].timestamp.getTime();
+      totalDelay +=
+        attempts[i].timestamp.getTime() - attempts[i - 1].timestamp.getTime();
     }
-    const averageDelay = attempts.length > 1 ? totalDelay / (attempts.length - 1) : 0;
+    const averageDelay =
+      attempts.length > 1 ? totalDelay / (attempts.length - 1) : 0;
 
     // 전체 소요 시간
-    const totalTime = attempts.length > 0 
-      ? attempts[attempts.length - 1].timestamp.getTime() - attempts[0].timestamp.getTime()
-      : 0;
+    const totalTime =
+      attempts.length > 0
+        ? attempts[attempts.length - 1].timestamp.getTime() -
+          attempts[0].timestamp.getTime()
+        : 0;
 
     return {
       totalAttempts: attempts.length,
       successfulAttempts: successful,
       failedAttempts: failed,
       averageDelayMs: averageDelay,
-      totalTimeMs: totalTime
+      totalTimeMs: totalTime,
     };
   }
 
@@ -174,7 +181,8 @@ export class RetryManager {
    * 백오프 지연 시간 계산 (테스트용)
    */
   getBackoffDelay(attemptNumber: number): number {
-    let delay = this.config.baseDelayMs * Math.pow(this.config.backoffMultiplier, attemptNumber);
+    const delay =
+      this.config.baseDelayMs * this.config.backoffMultiplier ** attemptNumber;
     return Math.min(delay, this.config.maxDelayMs);
   }
 }

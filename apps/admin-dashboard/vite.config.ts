@@ -1,15 +1,15 @@
-import { defineConfig } from 'vite';
-import honox from 'honox/vite';
+import honox from "honox/vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     honox({
       client: {
-        input: ['./app/global.ts']
-      }
-    })
+        input: ["./app/global.ts"],
+      },
+    }),
   ],
   server: {
-    port: 3000
-  }
+    port: 3000,
+  },
 });

@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, test } from "bun:test";
+import path from "node:path";
 import { spawn } from "bun";
-import path from "path";
 
 const CLI_PATH = path.join(import.meta.dir, "cli.ts");
 const FIXTURE_PLUGIN_PATH = path.join(
@@ -13,7 +13,7 @@ const FIXTURE_PLUGIN_PATH = path.join(
   "mock-provider.plugin.ts",
 );
 const TEST_TIMEOUT = 30000;
-const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
+const ANSI_PATTERN = new RegExp("\\u001b\\[[0-9;]*m", "g");
 
 function stripAnsi(value: string): string {
   return value.replace(ANSI_PATTERN, "");
@@ -215,7 +215,17 @@ describe("CLI E2E Tests", () => {
 
       const phones = "01000000001,01000000002,01000000003,01000000004";
       const proc = spawn(
-        ["bun", CLI_PATH, "bulk-send", "--phones", phones, "-c", "SMS", "--text", "test"],
+        [
+          "bun",
+          CLI_PATH,
+          "bulk-send",
+          "--phones",
+          phones,
+          "-c",
+          "SMS",
+          "--text",
+          "test",
+        ],
         {
           env: pluginEnv,
         },

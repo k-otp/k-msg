@@ -25,9 +25,7 @@
 
     // Path Aliases for Editor - Point to src folder
     "paths": {
-      "@k-msg/*": [
-        "./packages/*/src"
-      ]
+      "@k-msg/*": ["./packages/*/src"]
     }
   },
   "exclude": ["dist", "node_modules", "**/*.test.ts"]

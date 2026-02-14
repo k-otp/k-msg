@@ -1,14 +1,14 @@
 import { describe, expect, it, mock } from "bun:test";
-import { TemplateService } from "./service";
-import { 
-  TemplateProvider, 
-  Template, 
-  KMsgError, 
-  KMsgErrorCode, 
-  Result, 
-  ok, 
-  fail 
+import {
+  fail,
+  KMsgError,
+  KMsgErrorCode,
+  ok,
+  Result,
+  type Template,
+  type TemplateProvider,
 } from "@k-msg/core";
+import { TemplateService } from "./service";
 
 describe("TemplateService", () => {
   const mockTemplate: Template = {
@@ -77,17 +77,17 @@ describe("TemplateService", () => {
     });
 
     it("should return failure if code is missing", async () => {
-        const result = await service.create({
-          code: "",
-          name: "Name",
-          content: "Content",
-        });
-  
-        expect(result.isFailure).toBe(true);
-        if (result.isFailure) {
-          expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
-        }
+      const result = await service.create({
+        code: "",
+        name: "Name",
+        content: "Content",
       });
+
+      expect(result.isFailure).toBe(true);
+      if (result.isFailure) {
+        expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      }
+    });
   });
 
   describe("get", () => {
@@ -112,7 +112,9 @@ describe("TemplateService", () => {
       const result = await service.update("WELCOME_001", { name: "New Name" });
 
       expect(result.isSuccess).toBe(true);
-      expect(mockProvider.updateTemplate).toHaveBeenCalledWith("WELCOME_001", { name: "New Name" });
+      expect(mockProvider.updateTemplate).toHaveBeenCalledWith("WELCOME_001", {
+        name: "New Name",
+      });
     });
   });
 
