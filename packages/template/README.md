@@ -21,24 +21,13 @@ bun add @k-msg/template @k-msg/core
 ## Basic Usage
 
 ```typescript
-import { TemplateService } from '@k-msg/template';
-import { IWINVAdapter } from '@k-msg/provider';
+import { interpolate } from '@k-msg/template';
 
-const adapter = new IWINVAdapter(config);
-const templateService = new TemplateService(adapter);
-
-// Create a new template
-const result = await templateService.create({
-  code: 'OTP_001',
-  name: 'OTP Verification',
-  content: '[MyApp] Your verification code is #{code}.',
-  category: 'AUTHENTICATION'
+const text = interpolate('[MyApp] Your verification code is #{code}.', {
+  code: '123456',
 });
 
-if (result.isSuccess) {
-  const template = result.value;
-  console.log('Template created:', template.id);
-}
+console.log(text); // "[MyApp] Your verification code is 123456."
 ```
 
 ## Template Registry
@@ -60,6 +49,26 @@ await registry.register({
 const templates = await registry.search({
   category: 'AUTHENTICATION',
   status: 'ACTIVE'
+});
+```
+
+## Provider-backed TemplateService (Optional)
+
+`TemplateService` is a small helper around the `TemplateProvider` interface from
+`@k-msg/core`.
+
+```typescript
+import { TemplateService } from '@k-msg/template';
+import type { TemplateProvider } from '@k-msg/core';
+
+const provider: TemplateProvider = /* your implementation */;
+const templateService = new TemplateService(provider);
+
+await templateService.create({
+  code: 'OTP_001',
+  name: 'OTP Verification',
+  content: '[MyApp] Your verification code is #{code}.',
+  category: 'AUTHENTICATION'
 });
 ```
 

@@ -2,17 +2,26 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  ok,
+  type MessageBinaryInput,
   type MessageType,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import type { AligoConfig, AligoResponse, AligoSMSRequest } from "../types/aligo";
+import type {
+  AligoConfig,
+  AligoResponse,
+  AligoSMSRequest,
+} from "./types/aligo";
 
 type AligoMessageType = "SMS" | "LMS" | "MMS" | "ALIMTALK" | "FRIENDTALK";
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export class AligoProvider implements Provider {
   readonly id = "aligo";
@@ -89,13 +98,19 @@ export class AligoProvider implements Provider {
     try {
       switch (normalized.type as AligoMessageType) {
         case "ALIMTALK":
-          return await this.sendAlimTalk(normalized as any);
+          return await this.sendAlimTalk(
+            normalized as Extract<SendOptions, { type: "ALIMTALK" }>,
+          );
         case "FRIENDTALK":
-          return await this.sendFriendTalk(normalized as any);
+          return await this.sendFriendTalk(
+            normalized as Extract<SendOptions, { type: "FRIENDTALK" }>,
+          );
         case "SMS":
         case "LMS":
         case "MMS":
-          return await this.sendSMS(normalized as any);
+          return await this.sendSMS(
+            normalized as Extract<SendOptions, { type: "SMS" | "LMS" | "MMS" }>,
+          );
         default:
           return fail(
             new KMsgError(
@@ -108,6 +123,31 @@ export class AligoProvider implements Provider {
     } catch (error) {
       return fail(this.mapAligoError(error));
     }
+  }
+
+  private resolveImageRef(options: {
+    imageUrl?: string;
+    media?: { image?: MessageBinaryInput };
+  }): string | undefined {
+    const imageUrl =
+      typeof options.imageUrl === "string" && options.imageUrl.trim().length > 0
+        ? options.imageUrl.trim()
+        : undefined;
+    if (imageUrl) return imageUrl;
+
+    const image = options.media?.image;
+    if (!image) return undefined;
+
+    if ("ref" in image) {
+      const ref = image.ref.trim();
+      return ref.length > 0 ? ref : undefined;
+    }
+
+    throw new KMsgError(
+      KMsgErrorCode.INVALID_REQUEST,
+      "Aligo MMS/FriendTalk image requires `options.imageUrl` or `options.media.image.ref` (url/path).",
+      { providerId: this.id },
+    );
   }
 
   private getEndpoint(operation: string): string {
@@ -136,11 +176,15 @@ export class AligoProvider implements Provider {
     };
   }
 
-  private async request(host: string, endpoint: string, data: any): Promise<any> {
+  private async request(
+    host: string,
+    endpoint: string,
+    data: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     const formData = new FormData();
-    for (const key in data) {
-      if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, String(data[key]));
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
       }
     }
 
@@ -157,18 +201,27 @@ export class AligoProvider implements Provider {
       );
     }
 
-    return response.json();
+    return (await response.json()) as Record<string, unknown>;
   }
 
-  private mapAligoError(error: any): KMsgError {
+  private mapAligoError(error: unknown): KMsgError {
     if (error instanceof KMsgError) return error;
 
+    const record = isObjectRecord(error) ? error : {};
+    const resultCodeRaw = record.result_code;
     const resultCode =
-      error && error.result_code ? String(error.result_code) : "UNKNOWN";
+      resultCodeRaw !== undefined && resultCodeRaw !== null
+        ? String(resultCodeRaw)
+        : "UNKNOWN";
+
     const message =
-      error && (error.message || error.msg)
-        ? error.message || error.msg
-        : "Unknown Aligo error";
+      typeof record.message === "string" && record.message.length > 0
+        ? record.message
+        : typeof record.msg === "string" && record.msg.length > 0
+          ? record.msg
+          : error instanceof Error
+            ? error.message
+            : "Unknown Aligo error";
 
     let code: KMsgErrorCode = KMsgErrorCode.PROVIDER_ERROR;
 
@@ -199,12 +252,14 @@ export class AligoProvider implements Provider {
   }
 
   private interpolateMessage(
-    variables: Record<string, any> | undefined,
+    variables: Record<string, unknown> | undefined,
     templateContent?: string,
   ): string {
     if (!variables) return "";
-    if (variables._full_text) return String(variables._full_text);
-    if (!templateContent) return Object.values(variables).map(String).join("\n");
+    const fullText = variables._full_text;
+    if (fullText !== undefined && fullText !== null) return String(fullText);
+    if (!templateContent)
+      return Object.values(variables).map(String).join("\n");
 
     let result = templateContent;
     for (const [key, value] of Object.entries(variables)) {
@@ -232,9 +287,9 @@ export class AligoProvider implements Provider {
       user_id: this.config.userId,
       sender,
       receiver: options.to,
-      msg: (options as any).text,
+      msg: options.text,
       msg_type: options.type,
-      title: (options as any).subject,
+      title: options.subject,
       testmode_yn: this.config.testMode ? "Y" : "N",
     };
 
@@ -245,15 +300,25 @@ export class AligoProvider implements Provider {
       body.rtime = time;
     }
 
-    if (options.type === "MMS" && typeof (options as any).imageUrl === "string") {
-      body.image = (options as any).imageUrl;
+    if (options.type === "MMS") {
+      const imageRef = this.resolveImageRef(options);
+      if (!imageRef) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            "image is required for MMS (options.imageUrl or options.media.image.ref)",
+            { providerId: this.id },
+          ),
+        );
+      }
+      body.image = imageRef;
     }
 
     const response = (await this.request(
       this.SMS_HOST,
       this.getEndpoint("sendSMS"),
-      body,
-    )) as AligoResponse;
+      body as unknown as Record<string, unknown>,
+    )) as unknown as AligoResponse;
 
     if (response.result_code !== "1") {
       return fail(this.mapAligoError(response));
@@ -274,7 +339,9 @@ export class AligoProvider implements Provider {
     options: Extract<SendOptions, { type: "ALIMTALK" }>,
   ): Promise<Result<SendResult, KMsgError>> {
     const senderKey =
-      (options as any).kakao?.profileId || this.config.senderKey || "";
+      (typeof options.kakao?.profileId === "string"
+        ? options.kakao.profileId
+        : this.config.senderKey) || "";
     if (!senderKey) {
       return fail(
         new KMsgError(
@@ -296,20 +363,21 @@ export class AligoProvider implements Provider {
       );
     }
 
-    const variables =
-      (options as any).variables && typeof (options as any).variables === "object"
-        ? (options as any).variables
-        : {};
+    const variables = options.variables as Record<string, unknown>;
+    const templateContent =
+      typeof options.providerOptions?.templateContent === "string"
+        ? options.providerOptions.templateContent
+        : undefined;
 
     const body: Record<string, unknown> = {
       apikey: this.config.apiKey,
       userid: this.config.userId,
       senderkey: senderKey,
-      tpl_code: (options as any).templateCode,
+      tpl_code: options.templateCode,
       sender,
       receiver_1: options.to,
       subject_1: "알림톡",
-      message_1: this.interpolateMessage(variables, (options as any).providerOptions?.templateContent),
+      message_1: this.interpolateMessage(variables, templateContent),
       testMode: this.config.testMode ? "Y" : "N",
     };
 
@@ -325,7 +393,7 @@ export class AligoProvider implements Provider {
       this.ALIMTALK_HOST,
       this.getEndpoint("sendAlimTalk"),
       body,
-    )) as AligoResponse;
+    )) as unknown as AligoResponse;
 
     if (response.result_code !== "0") {
       return fail(this.mapAligoError(response));
@@ -346,7 +414,9 @@ export class AligoProvider implements Provider {
     options: Extract<SendOptions, { type: "FRIENDTALK" }>,
   ): Promise<Result<SendResult, KMsgError>> {
     const senderKey =
-      (options as any).kakao?.profileId || this.config.senderKey || "";
+      (typeof options.kakao?.profileId === "string"
+        ? options.kakao.profileId
+        : this.config.senderKey) || "";
     if (!senderKey) {
       return fail(
         new KMsgError(
@@ -375,18 +445,18 @@ export class AligoProvider implements Provider {
       sender,
       receiver_1: options.to,
       subject_1: "친구톡",
-      message_1: (options as any).text,
+      message_1: options.text,
       testMode: this.config.testMode ? "Y" : "N",
     };
 
-    if (typeof (options as any).imageUrl === "string") {
-      body.image_1 = (options as any).imageUrl;
+    const imageRef = this.resolveImageRef(options);
+    if (imageRef) {
+      body.image_1 = imageRef;
     }
 
-    const buttons =
-      Array.isArray((options as any).kakao?.buttons)
-        ? (options as any).kakao.buttons
-        : (options as any).buttons;
+    const buttons = Array.isArray(options.kakao?.buttons)
+      ? options.kakao.buttons
+      : options.buttons;
     if (buttons) {
       body.button_1 = JSON.stringify(buttons);
     }
@@ -403,7 +473,7 @@ export class AligoProvider implements Provider {
       this.ALIMTALK_HOST,
       this.getEndpoint("sendFriendTalk"),
       body,
-    )) as AligoResponse;
+    )) as unknown as AligoResponse;
 
     if (response.result_code !== "0") {
       return fail(this.mapAligoError(response));
@@ -421,7 +491,8 @@ export class AligoProvider implements Provider {
   }
 }
 
-export const createAligoProvider = (config: AligoConfig) => new AligoProvider(config);
+export const createAligoProvider = (config: AligoConfig) =>
+  new AligoProvider(config);
 
 export const createDefaultAligoProvider = () => {
   const config: AligoConfig = {
@@ -453,4 +524,3 @@ export class AligoProviderFactory {
 }
 
 export function initializeAligo(): void {}
-
