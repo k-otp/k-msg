@@ -105,7 +105,19 @@ export interface DeliveryAttempt {
 }
 
 // Bulk messaging types
+export type BulkMessageType =
+  | "ALIMTALK"
+  | "NSA"
+  | "RCS_TPL"
+  | "RCS_ITPL"
+  | "RCS_LTPL";
+
 export interface BulkMessageRequest {
+  /**
+   * BulkMessageSender currently targets template-based channels.
+   * Default: "ALIMTALK"
+   */
+  type?: BulkMessageType;
   templateCode: string;
   recipients: BulkRecipient[];
   commonVariables?: VariableMap;
@@ -119,6 +131,14 @@ export interface BulkRecipient {
 }
 
 export interface BulkSendingOptions extends SendingOptions {
+  /**
+   * Sender number / id for bulk sends (optional if KMsg defaults cover it).
+   */
+  from?: string;
+  /**
+   * Back-compat alias for legacy callers.
+   */
+  senderNumber?: string;
   batchSize?: number; // 배치 크기
   batchDelay?: number; // 배치 간 지연 시간 (ms)
   maxConcurrency?: number; // 최대 동시 처리 수

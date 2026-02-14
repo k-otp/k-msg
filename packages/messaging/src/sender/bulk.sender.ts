@@ -1,9 +1,19 @@
-import { KMsgError, KMsgErrorCode, RetryHandler } from "@k-msg/core";
+import {
+  ErrorUtils,
+  fail,
+  KMsgError,
+  KMsgErrorCode,
+  type RetryOptions,
+  type Result,
+  type SendInput,
+  type SendResult,
+} from "@k-msg/core";
 import type { KMsg } from "../k-msg";
 import {
   type BulkBatchResult,
   type BulkMessageRequest,
   type BulkMessageResult,
+  type BulkRecipient,
   MessageStatus,
   type RecipientResult,
 } from "../types/message.types";
@@ -56,7 +66,7 @@ export class BulkMessageSender {
 
   private async processBatchesAsync(
     bulkJob: BulkJob,
-    batches: any[][],
+    batches: BulkRecipient[][],
     batchDelay: number,
   ): Promise<void> {
     try {
@@ -137,95 +147,189 @@ export class BulkMessageSender {
 
   private async processBatch(
     request: BulkMessageRequest,
-    batchRecipients: any[],
+    batchRecipients: BulkRecipient[],
     batchId: string,
   ): Promise<RecipientResult[]> {
-    const results: RecipientResult[] = [];
     const maxConcurrency = request.options?.maxConcurrency || 10;
+    void batchId;
 
-    // Process recipients in parallel with concurrency limit
-    const promises: Promise<RecipientResult>[] = [];
+    const type = request.type ?? "ALIMTALK";
+    const from = request.options?.from || request.options?.senderNumber;
 
-    for (let i = 0; i < batchRecipients.length; i += maxConcurrency) {
-      const chunk = batchRecipients.slice(i, i + maxConcurrency);
+    const inputs: SendInput[] = batchRecipients.map((recipient) => {
+      const variables = {
+        ...(request.commonVariables || {}),
+        ...(recipient.variables || {}),
+      };
 
-      const chunkPromises = chunk.map((recipient) =>
-        this.processRecipient(request, recipient),
-      );
+      if (type === "NSA") {
+        return {
+          type: "NSA",
+          to: recipient.phoneNumber,
+          ...(from ? { from } : {}),
+          templateCode: request.templateCode,
+          variables,
+        };
+      }
 
-      const chunkResults = await Promise.allSettled(chunkPromises);
+      if (type === "RCS_TPL" || type === "RCS_ITPL" || type === "RCS_LTPL") {
+        return {
+          type,
+          to: recipient.phoneNumber,
+          ...(from ? { from } : {}),
+          templateCode: request.templateCode,
+          variables,
+        };
+      }
 
-      for (const result of chunkResults) {
-        if (result.status === "fulfilled") {
-          results.push(result.value);
-        } else {
-          // Handle promise rejection
-          results.push({
-            phoneNumber: "unknown",
-            status: MessageStatus.FAILED,
-            error: {
-              code: "PROCESSING_ERROR",
-              message: result.reason?.message || "Unknown processing error",
-            },
-          });
+      return {
+        type: "ALIMTALK",
+        to: recipient.phoneNumber,
+        ...(from ? { from } : {}),
+        templateCode: request.templateCode,
+        variables,
+      };
+    });
+
+    const results = await this.sendManyWithRetry(inputs, maxConcurrency, {
+      ...request.options?.retryOptions,
+    });
+
+    return results.map((result, idx) =>
+      this.toRecipientResult(batchRecipients[idx]!, result),
+    );
+  }
+
+  private async sendManyWithRetry(
+    inputs: SendInput[],
+    concurrency: number,
+    retryOptions: Partial<RetryOptions> = {},
+  ): Promise<Array<Result<SendResult, KMsgError>>> {
+    if (inputs.length === 0) return [];
+
+    const maxAttempts =
+      typeof retryOptions.maxAttempts === "number" && retryOptions.maxAttempts > 0
+        ? Math.floor(retryOptions.maxAttempts)
+        : 3;
+    const initialDelay =
+      typeof retryOptions.initialDelay === "number" && retryOptions.initialDelay > 0
+        ? retryOptions.initialDelay
+        : 1000;
+    const maxDelay =
+      typeof retryOptions.maxDelay === "number" && retryOptions.maxDelay > 0
+        ? retryOptions.maxDelay
+        : 30000;
+    const backoffMultiplier =
+      typeof retryOptions.backoffMultiplier === "number" &&
+      retryOptions.backoffMultiplier > 1
+        ? retryOptions.backoffMultiplier
+        : 2;
+    const jitter =
+      typeof retryOptions.jitter === "boolean" ? retryOptions.jitter : true;
+    const retryCondition =
+      retryOptions.retryCondition ||
+      ((error: Error) => ErrorUtils.isRetryable(error));
+
+    const safeConcurrency =
+      typeof concurrency === "number" && concurrency > 0
+        ? Math.floor(concurrency)
+        : 10;
+
+    const results: Array<Result<SendResult, KMsgError>> = new Array(inputs.length);
+    let pending = inputs.map((_, i) => i);
+    let delayMs = initialDelay;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      if (pending.length === 0) break;
+
+      const attemptInputs = pending.map((idx) => inputs[idx]!);
+      const attemptResults = await this.kmsg.sendMany(attemptInputs, {
+        concurrency: safeConcurrency,
+      });
+
+      const nextPending: number[] = [];
+      for (let i = 0; i < attemptResults.length; i += 1) {
+        const originalIdx = pending[i]!;
+        const result = attemptResults[i]!;
+
+        if (result.isSuccess) {
+          results[originalIdx] = result;
+          continue;
         }
+
+        let shouldRetry = false;
+        if (attempt < maxAttempts) {
+          try {
+            shouldRetry = retryCondition(result.error, attempt);
+          } catch {
+            shouldRetry = false;
+          }
+        }
+
+        if (shouldRetry) {
+          retryOptions.onRetry?.(result.error, attempt);
+          nextPending.push(originalIdx);
+        } else {
+          results[originalIdx] = result;
+        }
+      }
+
+      pending = nextPending;
+      if (pending.length === 0) break;
+      if (attempt >= maxAttempts) break;
+
+      const actualDelay = jitter
+        ? delayMs + Math.random() * delayMs * 0.1
+        : delayMs;
+      await this.delay(actualDelay);
+      delayMs = Math.min(delayMs * backoffMultiplier, maxDelay);
+    }
+
+    // Safety fill (should not happen; defensive in case of unexpected sendMany behavior).
+    for (let i = 0; i < results.length; i += 1) {
+      if (results[i] === undefined) {
+        results[i] = fail(
+          new KMsgError(
+            KMsgErrorCode.MESSAGE_SEND_FAILED,
+            "Bulk send failed (no result)",
+          ),
+        );
       }
     }
 
     return results;
   }
 
-  private async processRecipient(
-    request: BulkMessageRequest,
-    recipient: any,
-  ): Promise<RecipientResult> {
-    const retryOptions = {
-      maxAttempts: 3,
-      initialDelay: 1000,
-      backoffMultiplier: 2,
-      ...request.options?.retryOptions,
-    };
+  private toRecipientResult(
+    recipient: BulkRecipient,
+    result: Result<SendResult, KMsgError>,
+  ): RecipientResult {
+    if (result.isSuccess) {
+      const status =
+        result.value.status === "SENT"
+          ? MessageStatus.SENT
+          : result.value.status === "FAILED"
+            ? MessageStatus.FAILED
+            : MessageStatus.QUEUED;
 
-    try {
-      const variables = { ...request.commonVariables, ...recipient.variables };
-
-      return await RetryHandler.execute(async () => {
-        const result = await this.kmsg.send({
-          type: "ALIMTALK",
-          to: recipient.phoneNumber,
-          from:
-            (request.options as any)?.from ||
-            (request.options as any)?.senderNumber ||
-            "",
-          templateCode: request.templateCode,
-          variables: variables as Record<string, string>,
-        });
-
-        if (result.isSuccess) {
-          return {
-            phoneNumber: recipient.phoneNumber,
-            messageId: result.value.messageId,
-            status:
-              result.value.status === "SENT"
-                ? MessageStatus.SENT
-                : MessageStatus.QUEUED,
-            metadata: recipient.metadata,
-          };
-        } else {
-          throw result.error;
-        }
-      }, retryOptions);
-    } catch (error) {
       return {
         phoneNumber: recipient.phoneNumber,
-        status: MessageStatus.FAILED,
-        error: {
-          code: error instanceof KMsgError ? error.code : "RECIPIENT_ERROR",
-          message: error instanceof Error ? error.message : "Unknown error",
-        },
+        messageId: result.value.messageId,
+        status,
         metadata: recipient.metadata,
       };
     }
+
+    return {
+      phoneNumber: recipient.phoneNumber,
+      status: MessageStatus.FAILED,
+      error: {
+        code: result.error.code,
+        message: result.error.message,
+        details: result.error.details,
+      },
+      metadata: recipient.metadata,
+    };
   }
 
   private createBatches<T>(items: T[], batchSize: number): T[][] {
