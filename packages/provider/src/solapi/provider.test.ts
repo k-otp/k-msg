@@ -127,6 +127,98 @@ describe("SolapiProvider (SendOptions-based)", () => {
     );
   });
 
+  test("sends FRIENDTALK image as CTI with media.image.ref (imageUrl alias)", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        kakaoPfId: "pf_1",
+        debug: false,
+      } satisfies SolapiConfig,
+      client as any,
+    );
+
+    const result = await provider.send({
+      type: "FRIENDTALK",
+      to: "01012345678",
+      text: "hi",
+      media: {
+        image: { ref: "https://example.com/a.png" },
+      },
+      buttons: [{ name: "go", type: "WL", urlMobile: "https://m.example.com" }],
+      kakao: { profileId: "pf_1" },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.uploadFile).toHaveLength(1);
+    expect(calls.uploadFile[0]?.fileType).toBe("KAKAO");
+    expect(calls.uploadFile[0]?.filePath).toBe("https://example.com/a.png");
+    expect(calls.uploadFile[0]?.link).toBe("https://m.example.com");
+    expect(calls.sendOne[0]?.message?.type).toBe("CTI");
+    expect(calls.sendOne[0]?.message?.kakaoOptions?.imageId).toBe(
+      "KAKAO_file_1",
+    );
+  });
+
+  test("sends MMS by uploading media.image.ref", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client as any,
+    );
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "mms hi",
+      media: {
+        image: { ref: "https://example.com/mms.jpg" },
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.uploadFile).toHaveLength(1);
+    expect(calls.uploadFile[0]?.fileType).toBe("MMS");
+    expect(calls.uploadFile[0]?.filePath).toBe("https://example.com/mms.jpg");
+    expect(calls.sendOne[0]?.message?.type).toBe("MMS");
+    expect(calls.sendOne[0]?.message?.imageId).toBe("MMS_file_1");
+  });
+
+  test("MMS requires an image (imageUrl or media.image.ref)", async () => {
+    const { client } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client as any,
+    );
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "mms hi",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+    }
+  });
+
   test("sends NSA with naverOptions (talkId/templateId/variables merge)", async () => {
     const { client, calls } = createStubClient();
     const provider = new SolapiProvider(
@@ -259,4 +351,3 @@ describe("SolapiProvider (SendOptions-based)", () => {
     ]);
   });
 });
-
