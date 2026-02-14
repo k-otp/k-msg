@@ -48,6 +48,7 @@ export * from "./utils";
 // Abstract base provider (from provider-adapter)
 export { BaseAlimTalkProvider } from "./abstract/provider.base";
 export { AligoAdapter } from "./adapters/aligo.adapter";
+export { SolapiAdapter } from "./adapters/solapi.adapter";
 
 // ADAPTER PATTERN IMPLEMENTATION (using @k-msg/core)
 export {
@@ -108,6 +109,14 @@ export {
 } from "./iwinv/provider-sms";
 export type * from "./iwinv/types/iwinv";
 export type * from "./types/aligo";
+export type { SolapiConfig } from "./solapi/types/solapi";
+export {
+  createDefaultSolapiProvider,
+  createSolapiProvider,
+  initializeSolapi,
+  SolapiProvider,
+  SolapiProviderFactory,
+} from "./solapi/provider";
 
 // =============================================================================
 // NEW TYPE SAFETY SYSTEMS

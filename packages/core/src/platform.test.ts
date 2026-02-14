@@ -233,6 +233,28 @@ describe("AlimTalkPlatform unified send API", () => {
     expect(provider.requests[0]?.variables?.message).toBe("친구톡 안내 메시지");
   });
 
+  test("uses direct fallback template for RCS_SMS", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new MockBaseProvider(
+      "default-provider",
+      "Default Provider",
+    );
+    platform.registerProvider(provider);
+
+    const result = await platform.messages.send({
+      channel: "RCS_SMS",
+      recipients: ["01055556666"],
+      text: "RCS 안내 메시지",
+      variables: {},
+    });
+
+    expect(result.summary.total).toBe(1);
+    expect(result.summary.sent).toBe(1);
+    expect(provider.requests[0]?.templateCode).toBe("RCS_SMS_DIRECT");
+    expect(provider.requests[0]?.options?.channel).toBe("rcs");
+    expect(provider.requests[0]?.variables?.message).toBe("RCS 안내 메시지");
+  });
+
   test("validates direct-message channel has text payload", async () => {
     const platform = new AlimTalkPlatform(createConfig());
     const provider = new MockBaseProvider(
@@ -312,6 +334,21 @@ describe("AlimTalkPlatform balance/history common APIs", () => {
     expect(balance.currency).toBe("KRW");
   });
 
+  test("exposes RCS balance via platform.balance().get()", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new AdapterBackedProvider("default-provider", "Default", {
+      getSmsCharge: async () => 5000,
+    });
+    platform.registerProvider(provider);
+
+    const balance = await (await platform.balance()).get({ channel: "RCS_SMS" });
+
+    expect(balance.providerId).toBe("default-provider");
+    expect(balance.channel).toBe("RCS_SMS");
+    expect(balance.amount).toBe(5000);
+    expect(balance.currency).toBe("KRW");
+  });
+
   test("exposes SMS history via platform.history().list(query)", async () => {
     const platform = new AlimTalkPlatform(createConfig());
     const provider = new AdapterBackedProvider("default-provider", "Default", {
@@ -351,6 +388,45 @@ describe("AlimTalkPlatform balance/history common APIs", () => {
     expect(result.items[0]?.to).toBe("01000000000");
     expect(result.items[0]?.from).toBe("16884879");
     expect(result.items[0]?.statusCode).toBe("06");
+  });
+
+  test("supports cursor-based history payloads (messageList + nextKey)", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new AdapterBackedProvider("default-provider", "Default", {
+      getSmsHistory: async () => ({
+        totalCount: 1,
+        nextKey: "next_1",
+        messageList: {
+          a: {
+            messageId: "m1",
+            to: "01012345678",
+            from: "01000000000",
+            statusCode: "2000",
+            statusMessage: "ok",
+            dateSent: "2021-01-01T00:00:00.000Z",
+          },
+        },
+        message: "ok",
+      }),
+    });
+    platform.registerProvider(provider);
+
+    const history = await platform.history();
+    const result = await history.list({
+      channel: "SMS",
+      startDate: "2021-01-01",
+      endDate: "2021-01-02",
+      startKey: "cursor_0",
+      pageSize: 15,
+    });
+
+    expect(result.nextKey).toBe("next_1");
+    expect(result.totalCount).toBe(1);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.messageId).toBe("m1");
+    expect(result.items[0]?.to).toBe("01012345678");
+    expect(result.items[0]?.from).toBe("01000000000");
+    expect(result.items[0]?.statusCode).toBe("2000");
   });
 
   test("supports legacy platform.history().list(page, size, filters)", async () => {

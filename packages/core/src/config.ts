@@ -60,7 +60,7 @@ export const IWINVConfigSchema = z.object({
 });
 
 export const SMSConfigSchema = z.object({
-  provider: z.enum(["iwinv", "aligo", "coolsms"]),
+  provider: z.enum(["iwinv", "aligo", "solapi", "coolsms"]),
   apiKey: z.string().min(1),
   apiSecret: z.string().optional(),
   senderId: z.string().min(1),
@@ -253,10 +253,10 @@ export class ConfigLoader {
 
         sms: process.env.SMS_PROVIDER
           ? {
-              provider: process.env.SMS_PROVIDER as
-                | "iwinv"
-                | "aligo"
-                | "coolsms",
+              // Backward-compatible alias: "coolsms" -> "solapi"
+              provider: (process.env.SMS_PROVIDER === "coolsms"
+                ? "solapi"
+                : process.env.SMS_PROVIDER) as "iwinv" | "aligo" | "solapi",
               apiKey: process.env.SMS_API_KEY!,
               apiSecret: process.env.SMS_API_SECRET,
               senderId: process.env.SMS_SENDER_ID!,

@@ -44,6 +44,31 @@ export interface StandardRequest {
     scheduledAt?: Date;
     senderNumber?: string;
     subject?: string;
+    /**
+     * Provider-specific KakaoTalk options (e.g. SOLAPI kakaoOptions).
+     */
+    kakaoOptions?: {
+      pfId?: string;
+      templateId?: string;
+      variables?: Record<string, string>;
+      disableSms?: boolean;
+      adFlag?: boolean;
+      buttons?: any[];
+      imageId?: string;
+      [key: string]: any;
+    };
+    /**
+     * Provider-specific RCS options (e.g. SOLAPI rcsOptions).
+     */
+    rcsOptions?: {
+      brandId?: string;
+      templateId?: string;
+      variables?: Record<string, string>;
+      disableSms?: boolean;
+      buttons?: any[];
+      additionalBody?: any;
+      [key: string]: any;
+    };
     [key: string]: any;
   };
 }
