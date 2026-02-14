@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+      NPMRC_PATH: ${{ runner.temp }}/.npmrc
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,10 +38,10 @@ jobs:
         run: |
           set -euo pipefail
           # Ensure Bun's publish step can authenticate. Some tools override the
-          # npm user config path, so we write to both the default location and
-          # the workspace and force the userconfig env when running Sampo.
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$GITHUB_WORKSPACE/.npmrc"
+          # npm user config path. Never write an auth token into the repo
+          # workspace, because Sampo can commit untracked files into release PRs.
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$NPMRC_PATH"
+          chmod 0600 "$NPMRC_PATH"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -74,7 +75,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # bun publish supports token-based auth in CI via NPM_CONFIG_TOKEN.
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
+          NPM_CONFIG_USERCONFIG: ${{ env.NPMRC_PATH }}
 
       - name: Update bun.lock in release PR branch
         if: ${{ env.HAS_NPM_TOKEN == 'true' }}
