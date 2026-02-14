@@ -1,5 +1,7 @@
+import type { BalanceQuery, BalanceResult } from "./balance";
+import type { HistoryQuery, HistoryResult } from "./history";
 import type { Button, MessageType } from "./message";
-import type { ProviderHealthStatus } from "./provider";
+import type { BaseProvider } from "./provider";
 
 export interface PlatformHealthStatus {
   healthy: boolean;
@@ -17,14 +19,14 @@ export interface LegacyMessageSendOptions {
   templateId: string;
   recipients: {
     phoneNumber: string;
-    variables?: Record<string, any>;
+    variables?: Record<string, unknown>;
   }[];
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
 }
 
 export interface UnifiedMessageRecipient {
   phoneNumber: string;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 }
 
 export interface UnifiedMessageSendOptions {
@@ -32,7 +34,7 @@ export interface UnifiedMessageSendOptions {
   recipients: Array<string | UnifiedMessageRecipient>;
   providerId?: string;
   templateCode?: string;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
   text?: string;
   subject?: string;
   imageUrl?: string;
@@ -41,7 +43,7 @@ export interface UnifiedMessageSendOptions {
     scheduledAt?: Date;
     senderNumber?: string;
     subject?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -67,10 +69,23 @@ export interface MessageSendResult {
 
 export interface KMsg {
   getInfo(): PlatformInfo;
-  registerProvider(provider: any): void;
-  getProvider(providerId: string): any | null;
+  registerProvider(provider: BaseProvider): void;
+  getProvider(providerId: string): BaseProvider | null;
   listProviders(): string[];
   healthCheck(): Promise<PlatformHealthStatus>;
+  balance(providerId?: string): Promise<{
+    get(query?: BalanceQuery): Promise<BalanceResult>;
+  }>;
+  history(providerId?: string): Promise<{
+    list(query: HistoryQuery): Promise<HistoryResult>;
+    list(
+      page?: number,
+      pageSize?: number,
+      filters?: Partial<Omit<HistoryQuery, "page" | "pageSize">> & {
+        channel?: HistoryQuery["channel"];
+      },
+    ): Promise<HistoryResult>;
+  }>;
   messages: {
     send(options: MessageSendOptions): Promise<MessageSendResult>;
     getStatus(messageId: string): Promise<string>;
