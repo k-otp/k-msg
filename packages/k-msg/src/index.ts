@@ -15,7 +15,7 @@ export type {
   ProviderMessageResult,
 } from "@k-msg/provider";
 // Re-export the most essential classes for basic usage
-export { AligoProvider, IWINVProvider } from "@k-msg/provider";
+export { AligoProvider, IWINVProvider, SolapiProvider } from "@k-msg/provider";
 
 // Re-export simple modules for CLI/scripts
 export {
