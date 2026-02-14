@@ -69,6 +69,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # bun publish supports token-based auth in CI via NPM_CONFIG_TOKEN.
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
 
       - name: Update bun.lock in release PR branch
