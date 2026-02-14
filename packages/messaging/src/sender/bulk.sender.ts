@@ -3,8 +3,8 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  type RetryOptions,
   type Result,
+  type RetryOptions,
   type SendInput,
   type SendResult,
 } from "@k-msg/core";
@@ -139,7 +139,7 @@ export class BulkMessageSender {
 
       bulkJob.status = "completed";
       bulkJob.result.completedAt = new Date();
-    } catch (error) {
+    } catch (_error) {
       bulkJob.status = "failed";
       bulkJob.result.completedAt = new Date();
     }
@@ -196,7 +196,7 @@ export class BulkMessageSender {
     });
 
     return results.map((result, idx) =>
-      this.toRecipientResult(batchRecipients[idx]!, result),
+      this.toRecipientResult(batchRecipients[idx], result),
     );
   }
 
@@ -208,11 +208,13 @@ export class BulkMessageSender {
     if (inputs.length === 0) return [];
 
     const maxAttempts =
-      typeof retryOptions.maxAttempts === "number" && retryOptions.maxAttempts > 0
+      typeof retryOptions.maxAttempts === "number" &&
+      retryOptions.maxAttempts > 0
         ? Math.floor(retryOptions.maxAttempts)
         : 3;
     const initialDelay =
-      typeof retryOptions.initialDelay === "number" && retryOptions.initialDelay > 0
+      typeof retryOptions.initialDelay === "number" &&
+      retryOptions.initialDelay > 0
         ? retryOptions.initialDelay
         : 1000;
     const maxDelay =
@@ -235,22 +237,24 @@ export class BulkMessageSender {
         ? Math.floor(concurrency)
         : 10;
 
-    const results: Array<Result<SendResult, KMsgError>> = new Array(inputs.length);
+    const results: Array<Result<SendResult, KMsgError>> = new Array(
+      inputs.length,
+    );
     let pending = inputs.map((_, i) => i);
     let delayMs = initialDelay;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       if (pending.length === 0) break;
 
-      const attemptInputs = pending.map((idx) => inputs[idx]!);
+      const attemptInputs = pending.map((idx) => inputs[idx]);
       const attemptResults = await this.kmsg.sendMany(attemptInputs, {
         concurrency: safeConcurrency,
       });
 
       const nextPending: number[] = [];
       for (let i = 0; i < attemptResults.length; i += 1) {
-        const originalIdx = pending[i]!;
-        const result = attemptResults[i]!;
+        const originalIdx = pending[i];
+        const result = attemptResults[i];
 
         if (result.isSuccess) {
           results[originalIdx] = result;
@@ -414,7 +418,7 @@ export class BulkMessageSender {
       batch.completedAt = new Date();
 
       return batch;
-    } catch (error) {
+    } catch (_error) {
       batch.status = "failed";
       batch.completedAt = new Date();
       return batch;

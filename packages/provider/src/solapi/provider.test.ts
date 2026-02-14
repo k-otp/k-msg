@@ -1,10 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { SolapiProvider } from "./provider";
+import { SolapiProvider, type SolapiSdkClient } from "./provider";
 import type { SolapiConfig } from "./types/solapi";
 
 function createStubClient() {
+  type SendOneRequest = Parameters<SolapiSdkClient["sendOne"]>[0];
+  type SendOneResponse = Awaited<ReturnType<SolapiSdkClient["sendOne"]>>;
+  type UploadFileResponse = Awaited<ReturnType<SolapiSdkClient["uploadFile"]>>;
+  type GetBalanceResponse = Awaited<ReturnType<SolapiSdkClient["getBalance"]>>;
+  type GetMessagesResponse = Awaited<
+    ReturnType<SolapiSdkClient["getMessages"]>
+  >;
+
   const calls: {
-    sendOne: Array<{ message: any; appId?: string }>;
+    sendOne: Array<{ message: Record<string, unknown>; appId?: string }>;
     uploadFile: Array<{
       filePath: string;
       fileType: string;
@@ -16,10 +24,13 @@ function createStubClient() {
     uploadFile: [],
   };
 
-  const client = {
-    sendOne: async (message: any, appId?: string) => {
-      calls.sendOne.push({ message, appId });
-      return { messageId: "msg_1" };
+  const client: SolapiSdkClient = {
+    sendOne: async (message: SendOneRequest, appId?: string) => {
+      calls.sendOne.push({
+        message: message as unknown as Record<string, unknown>,
+        appId,
+      });
+      return { messageId: "msg_1" } as unknown as SendOneResponse;
     },
     uploadFile: async (
       filePath: string,
@@ -28,10 +39,14 @@ function createStubClient() {
       link?: string,
     ) => {
       calls.uploadFile.push({ filePath, fileType, name, link });
-      return { fileId: `${fileType}_file_${calls.uploadFile.length}` };
+      return {
+        fileId: `${fileType}_file_${calls.uploadFile.length}`,
+      } as unknown as UploadFileResponse;
     },
-    getBalance: async () => ({ balance: 0, point: 0 }),
-    getMessages: async () => ({ messageList: {} }),
+    getBalance: async () =>
+      ({ balance: 0, point: 0 }) as unknown as GetBalanceResponse,
+    getMessages: async () =>
+      ({ messageList: {} }) as unknown as GetMessagesResponse,
   };
 
   return { client, calls };
@@ -48,7 +63,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         defaultFrom: "01000000000",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -75,7 +90,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         kakaoPfId: "pf_default",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -105,7 +120,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         kakaoPfId: "pf_1",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -137,7 +152,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         kakaoPfId: "pf_1",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -172,7 +187,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         defaultFrom: "01000000000",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -203,7 +218,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         defaultFrom: "01000000000",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -229,7 +244,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         naverTalkId: "talk_default",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -270,7 +285,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         rcsBrandId: "brand_default",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -303,7 +318,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         defaultFrom: "01000000000",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({
@@ -327,7 +342,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
         defaultFrom: "01000000000",
         debug: false,
       } satisfies SolapiConfig,
-      client as any,
+      client,
     );
 
     const result = await provider.send({

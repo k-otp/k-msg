@@ -5,9 +5,9 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  ok,
   type MessageBinaryInput,
   type MessageType,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -161,25 +161,34 @@ export class IWINVProvider implements Provider {
       if (typeof image.ref === "string" && image.ref.trim().length > 0) {
         return {
           ref: image.ref.trim(),
-          filename: typeof image.filename === "string" ? image.filename : undefined,
+          filename:
+            typeof image.filename === "string" ? image.filename : undefined,
           contentType:
-            typeof image.contentType === "string" ? image.contentType : undefined,
+            typeof image.contentType === "string"
+              ? image.contentType
+              : undefined,
         };
       }
       if (image.bytes instanceof Uint8Array) {
         return {
           bytes: image.bytes,
-          filename: typeof image.filename === "string" ? image.filename : undefined,
+          filename:
+            typeof image.filename === "string" ? image.filename : undefined,
           contentType:
-            typeof image.contentType === "string" ? image.contentType : undefined,
+            typeof image.contentType === "string"
+              ? image.contentType
+              : undefined,
         };
       }
       if (image.blob instanceof Blob) {
         return {
           blob: image.blob,
-          filename: typeof image.filename === "string" ? image.filename : undefined,
+          filename:
+            typeof image.filename === "string" ? image.filename : undefined,
           contentType:
-            typeof image.contentType === "string" ? image.contentType : undefined,
+            typeof image.contentType === "string"
+              ? image.contentType
+              : undefined,
         };
       }
     }
@@ -192,9 +201,12 @@ export class IWINVProvider implements Provider {
     return undefined;
   }
 
-  private async toImageBlob(
-    input: MessageBinaryInput,
-  ): Promise<{ blob: Blob; filename: string; contentType: string; size: number }> {
+  private async toImageBlob(input: MessageBinaryInput): Promise<{
+    blob: Blob;
+    filename: string;
+    contentType: string;
+    size: number;
+  }> {
     if ("blob" in input) {
       const contentType =
         input.contentType || input.blob.type || "application/octet-stream";
@@ -253,7 +265,9 @@ export class IWINVProvider implements Provider {
 
     const bytes = await readFile(ref);
     const contentType =
-      input.contentType || this.guessImageContentType(ref) || "application/octet-stream";
+      input.contentType ||
+      this.guessImageContentType(ref) ||
+      "application/octet-stream";
     const filename = input.filename || basename(ref) || "image";
     const blob = new Blob([bytes], { type: contentType });
     return { blob, filename, contentType, size: blob.size };
@@ -278,7 +292,10 @@ export class IWINVProvider implements Provider {
       base["X-Forwarded-For"] = this.config.xForwardedFor;
     }
 
-    if (this.config.extraHeaders && typeof this.config.extraHeaders === "object") {
+    if (
+      this.config.extraHeaders &&
+      typeof this.config.extraHeaders === "object"
+    ) {
       return { ...base, ...this.config.extraHeaders };
     }
 
@@ -555,9 +572,10 @@ export class IWINVProvider implements Provider {
     const legacyAuthKey = this.config.smsAuthKey || this.config.smsApiKey;
     if (!legacyAuthKey) return "";
 
-    return Buffer.from(`${this.config.apiKey}&${legacyAuthKey}`, "utf8").toString(
-      "base64",
-    );
+    return Buffer.from(
+      `${this.config.apiKey}&${legacyAuthKey}`,
+      "utf8",
+    ).toString("base64");
   }
 
   private formatSmsReserveDate(date: Date): string {
@@ -656,7 +674,7 @@ export class IWINVProvider implements Provider {
       );
     }
 
-    const title = this.buildLmsTitle(text, (options as any).subject);
+    const title = this.buildLmsTitle(text, options.subject);
 
     const imageInput = this.resolveImageInput(options);
     if (!imageInput) {
@@ -669,7 +687,12 @@ export class IWINVProvider implements Provider {
       );
     }
 
-    let image: { blob: Blob; filename: string; contentType: string; size: number };
+    let image: {
+      blob: Blob;
+      filename: string;
+      contentType: string;
+      size: number;
+    };
     try {
       image = await this.toImageBlob(imageInput);
     } catch (error) {
@@ -741,7 +764,10 @@ export class IWINVProvider implements Provider {
     }
 
     const mergedHeaders: Record<string, string> = { ...headers };
-    if (this.config.extraHeaders && typeof this.config.extraHeaders === "object") {
+    if (
+      this.config.extraHeaders &&
+      typeof this.config.extraHeaders === "object"
+    ) {
       for (const [key, value] of Object.entries(this.config.extraHeaders)) {
         // Never override multipart boundary handling.
         if (key.toLowerCase() === "content-type") continue;
@@ -836,7 +862,7 @@ export class IWINVProvider implements Provider {
       );
     }
 
-    const text = (options as any).text as string | undefined;
+    const text = options.text;
     if (!text || text.trim().length === 0) {
       return fail(
         new KMsgError(
@@ -885,7 +911,7 @@ export class IWINVProvider implements Provider {
     };
 
     if (options.type === "LMS") {
-      payload.title = this.buildLmsTitle(text, (options as any).subject);
+      payload.title = this.buildLmsTitle(text, options.subject);
     } else {
       const msgTypeOverride =
         typeof options.providerOptions?.msgType === "string" &&
@@ -988,12 +1014,14 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export const createIWINVProvider = (config: IWINVConfig) => new IWINVProvider(config);
+export const createIWINVProvider = (config: IWINVConfig) =>
+  new IWINVProvider(config);
 
 export const createDefaultIWINVProvider = () => {
   const config: IWINVConfig = {
     apiKey: process.env.IWINV_API_KEY || "",
-    baseUrl: process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
+    baseUrl:
+      process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
     smsApiKey: process.env.IWINV_SMS_API_KEY,
     smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
     smsCompanyId: process.env.IWINV_SMS_COMPANY_ID,

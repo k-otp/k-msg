@@ -156,15 +156,21 @@ describe("IWINVProvider", () => {
   test("ALIMTALK uses providerOptions.templateParam when provided", async () => {
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = async (
+      _input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
         string,
         unknown
       >;
 
-      return new Response(JSON.stringify({ code: 200, message: "ok", seqNo: 1 }), {
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({ code: 200, message: "ok", seqNo: 1 }),
+        {
+          status: 200,
+        },
+      );
     };
 
     const provider = new IWINVProvider({
@@ -182,15 +188,31 @@ describe("IWINVProvider", () => {
       providerOptions: { templateParam: ["A", "B", "C"] },
     });
 
-    expect(Array.isArray((calledBody as any).list)).toBe(true);
-    expect((calledBody as any).list[0].templateParam).toEqual(["A", "B", "C"]);
+    const list = (calledBody as Record<string, unknown>).list;
+    expect(Array.isArray(list)).toBe(true);
+    if (Array.isArray(list)) {
+      const first = list[0];
+      expect(first && typeof first === "object" && !Array.isArray(first)).toBe(
+        true,
+      );
+      if (first && typeof first === "object" && !Array.isArray(first)) {
+        expect((first as Record<string, unknown>).templateParam).toEqual([
+          "A",
+          "B",
+          "C",
+        ]);
+      }
+    }
     expect(result.isSuccess).toBe(true);
   });
 
   test("SMS supports providerOptions.msgType override (e.g. GSMS)", async () => {
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = async (
+      _input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
         string,
         unknown
@@ -221,19 +243,19 @@ describe("IWINVProvider", () => {
       providerOptions: { msgType: "GSMS" },
     });
 
-    expect((calledBody as any).msgType).toBe("GSMS");
+    expect(calledBody.msgType).toBe("GSMS");
     expect(result.isFailure).toBe(true);
   });
 
   test("MMS uses multipart/form-data with secret header and image", async () => {
     let calledUrl = "";
     let calledSecret = "";
-    let calledBody: any = null;
+    let calledBody: BodyInit | null = null;
 
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledSecret = new Headers(init?.headers).get("secret") || "";
-      calledBody = init?.body;
+      calledBody = init?.body ?? null;
 
       return new Response(
         JSON.stringify({
@@ -315,10 +337,13 @@ describe("IWINVProvider", () => {
   });
 
   test("MMS scheduledAt returns PENDING and includes date field", async () => {
-    let calledBody: any = null;
+    let calledBody: BodyInit | null = null;
 
-    globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
-      calledBody = init?.body;
+    globalThis.fetch = async (
+      _input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
+      calledBody = init?.body ?? null;
       return new Response(
         JSON.stringify({
           resultCode: 0,
