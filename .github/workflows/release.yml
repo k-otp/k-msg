@@ -32,6 +32,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Configure npm auth (bun publish)
+        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
+        run: |
+          set -euo pipefail
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Install dependencies
         if: ${{ env.HAS_NPM_TOKEN == 'true' }}
         run: bun install --frozen-lockfile
