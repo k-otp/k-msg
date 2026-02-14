@@ -38,56 +38,28 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
       - name: Run Sampo (release PR only)
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
           command: release
-          create-github-release: true
+          create-github-release: false
           base-branch: main
           pr-branch: sampo/release
           pr-title: "chore(release): publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish check (npm OIDC)
+        id: publish_check
+        run: |
+          chmod +x ./scripts/publish-oidc.sh
+          ./scripts/publish-oidc.sh --check
+
       - name: Publish packages (npm OIDC)
+        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           chmod +x ./scripts/publish-oidc.sh
           ./scripts/publish-oidc.sh
-
-      - name: Update bun.lock in release PR branch
-        run: |
-          set -euo pipefail
-          BRANCH="sampo/release"
-
-          if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
-            echo "Release branch '$BRANCH' not found; skipping."
-            exit 0
-          fi
-
-          git fetch origin "$BRANCH:$BRANCH"
-          git checkout "$BRANCH"
-
-          # Important: Bun rewrites `workspace:*` dependencies at pack/publish time
-          # using the workspace versions recorded in bun.lock. When Sampo bumps
-          # package versions, bun.lock can become stale, causing published
-          # packages to depend on the *previous* version.
-          #
-          # Bun currently doesn't update the workspace version metadata in-place,
-          # so we regenerate the lockfile.
-          rm -f bun.lock
-          bun install --save-text-lockfile
-
-          if git diff --quiet -- bun.lock; then
-            echo "bun.lock unchanged."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bun.lock
-          git commit -m "chore(release): update bun.lock"
-          git push origin "HEAD:$BRANCH"
