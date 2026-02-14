@@ -51,3 +51,6 @@ const kmsg = new KMsg({
 await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
+## Provider README Template
+
+When adding a new provider, start from `packages/provider/PROVIDER_README_TEMPLATE.md` and include official vendor doc links.
