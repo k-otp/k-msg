@@ -43,6 +43,57 @@ export interface UnifiedMessageSendOptions {
     scheduledAt?: Date;
     senderNumber?: string;
     subject?: string;
+    country?: string;
+    customFields?: Record<string, string>;
+    kakaoOptions?: {
+      pfId?: string;
+      templateId?: string;
+      variables?: Record<string, string>;
+      disableSms?: boolean;
+      adFlag?: boolean;
+      buttons?: unknown[];
+      imageId?: string;
+      [key: string]: unknown;
+    };
+    naverOptions?: {
+      talkId?: string;
+      templateId?: string;
+      disableSms?: boolean;
+      variables?: Record<string, string>;
+      buttons?: unknown[];
+      [key: string]: unknown;
+    };
+    voiceOptions?: {
+      voiceType: "FEMALE" | "MALE";
+      headerMessage?: string;
+      tailMessage?: string;
+      replyRange?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+      counselorNumber?: string;
+      [key: string]: unknown;
+    };
+    faxOptions?: {
+      fileIds?: string[];
+      fileUrls?: string[];
+      [key: string]: unknown;
+    };
+    rcsOptions?: {
+      brandId?: string;
+      templateId?: string;
+      copyAllowed?: boolean;
+      variables?: Record<string, string>;
+      mmsType?: "M3" | "S3" | "M4" | "S4" | "M5" | "S5" | "M6" | "S6";
+      commercialType?: boolean;
+      disableSms?: boolean;
+      buttons?: unknown[];
+      additionalBody?: {
+        title?: string;
+        description?: string;
+        imageId?: string;
+        buttons?: unknown[];
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    };
     [key: string]: unknown;
   };
 }

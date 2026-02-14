@@ -28,6 +28,8 @@ export class AlimTalkPlatform implements KMsg {
     LMS: "LMS_DIRECT",
     MMS: "MMS_DIRECT",
     FRIENDTALK: "FRIENDTALK_DIRECT",
+    VOICE: "VOICE_DIRECT",
+    FAX: "FAX_DIRECT",
     RCS_SMS: "RCS_SMS_DIRECT",
     RCS_LMS: "RCS_LMS_DIRECT",
     RCS_MMS: "RCS_MMS_DIRECT",
@@ -280,6 +282,7 @@ export class AlimTalkPlatform implements KMsg {
       options.channel === "SMS" ||
       options.channel === "LMS" ||
       options.channel === "MMS" ||
+      options.channel === "VOICE" ||
       options.channel === "RCS_SMS" ||
       options.channel === "RCS_LMS" ||
       options.channel === "RCS_MMS" ||
