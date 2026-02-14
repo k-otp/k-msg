@@ -611,12 +611,27 @@ export class IWINVProvider extends UniversalProvider {
     }
 
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json;charset=UTF-8",
+        secret: secretHeader,
+      };
+
+      if (
+        typeof this.iwinvConfig.xForwardedFor === "string" &&
+        this.iwinvConfig.xForwardedFor.length > 0
+      ) {
+        headers["X-Forwarded-For"] = this.iwinvConfig.xForwardedFor;
+      }
+
+      const extraHeaders = this.iwinvConfig.extraHeaders;
+      const mergedHeaders =
+        extraHeaders && typeof extraHeaders === "object"
+          ? { ...headers, ...extraHeaders }
+          : headers;
+
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          secret: secretHeader,
-        },
+        headers: mergedHeaders,
         body: JSON.stringify(payload),
       });
 
@@ -710,6 +725,7 @@ export const createDefaultIWINVProvider = () => {
     senderNumber:
       process.env.IWINV_SENDER_NUMBER || process.env.IWINV_SMS_SENDER_NUMBER,
     sendEndpoint: process.env.IWINV_SEND_ENDPOINT || "/api/v2/send/",
+    xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
     ipRetryCount: process.env.IWINV_IP_RETRY_COUNT
       ? Number(process.env.IWINV_IP_RETRY_COUNT)
       : undefined,

@@ -7,6 +7,7 @@ export * from "./provider";
 export * from "./provider-registry";
 export * from "./resilience/index";
 export * from "./result";
+export * from "./router/round-robin-router-provider";
 export * from "./test-utils";
 export * from "./types/index";
 export * from "./universal-provider";

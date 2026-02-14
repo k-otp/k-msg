@@ -71,3 +71,37 @@ describe("IWINVAdapter adaptRequest", () => {
     expect(mapped.retryable).toBe(false);
   });
 });
+
+describe("IWINVAdapter getAuthHeaders", () => {
+  test("builds AUTH base64 header in Node-compatible way", () => {
+    const adapter = new IWINVAdapter({
+      apiKey: "test-api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+    });
+
+    const headers = adapter.getAuthHeaders();
+
+    expect(headers["Content-Type"]).toBe("application/json;charset=UTF-8");
+    expect(headers.AUTH).toBe(
+      Buffer.from("test-api-key", "utf8").toString("base64"),
+    );
+  });
+
+  test("includes X-Forwarded-For and merges extra headers (overridable)", () => {
+    const adapter = new IWINVAdapter({
+      apiKey: "test-api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      xForwardedFor: "1.1.1.1",
+      extraHeaders: {
+        "X-Forwarded-For": "2.2.2.2",
+        "X-Custom": "ok",
+      },
+    });
+
+    const headers = adapter.getAuthHeaders();
+
+    // extraHeaders should override the default XFF value.
+    expect(headers["X-Forwarded-For"]).toBe("2.2.2.2");
+    expect(headers["X-Custom"]).toBe("ok");
+  });
+});

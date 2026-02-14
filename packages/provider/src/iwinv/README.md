@@ -79,6 +79,13 @@ IWINV_IP_RETRY_DELAY_MS=800
 IWINV_IP_ALERT_WEBHOOK_URL=https://your-alert-webhook
 ```
 
+Optional proxy/IP override (testing / controlled environments):
+
+```bash
+# Adds X-Forwarded-For to IWINV requests (AlimTalk + SMS v2)
+IWINV_X_FORWARDED_FOR=1.1.1.1
+```
+
 ## TypeScript Usage
 
 ```typescript
@@ -92,6 +99,11 @@ const provider = new IWINVProvider({
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,
   sendEndpoint: "/api/v2/send/",
+  xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
+  extraHeaders: {
+    // Example: inject custom headers (use with care).
+    // "X-Custom": "value",
+  },
 });
 
 // SMS

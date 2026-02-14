@@ -79,6 +79,13 @@ IWINV_IP_RETRY_DELAY_MS=800
 IWINV_IP_ALERT_WEBHOOK_URL=https://your-alert-webhook
 ```
 
+프록시/IP 우회(테스트 / 통제된 환경에서만):
+
+```bash
+# IWINV 요청(알림톡 + SMS v2)에 X-Forwarded-For 헤더를 추가합니다.
+IWINV_X_FORWARDED_FOR=1.1.1.1
+```
+
 ## TypeScript 사용 예시
 
 ```typescript
@@ -92,6 +99,11 @@ const provider = new IWINVProvider({
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,
   sendEndpoint: "/api/v2/send/",
+  xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
+  extraHeaders: {
+    // 예: 커스텀 헤더 주입(주의: AUTH/secret을 덮어쓰면 실패할 수 있습니다)
+    // "X-Custom": "value",
+  },
 });
 
 // SMS

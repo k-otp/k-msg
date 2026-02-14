@@ -3,6 +3,8 @@
  * IWINV 알림톡 REST API 규격서 기반
  */
 
+import type { ProviderConfig } from "@k-msg/core";
+
 // =============================================================================
 // 공통 응답 타입
 // =============================================================================
@@ -156,15 +158,23 @@ export interface BalanceResponse extends IWINVBaseResponse {
 // 설정 타입
 // =============================================================================
 
-export interface IWINVConfig {
-  apiKey: string;
-  baseUrl: string;
+export interface IWINVConfig extends ProviderConfig {
   smsApiKey?: string;
   smsAuthKey?: string;
   smsBaseUrl?: string;
   senderNumber?: string;
   smsSenderNumber?: string;
   sendEndpoint?: string;
+  /**
+   * Optional proxy/IP override header for IP-restricted IWINV endpoints.
+   * Intended for testing or controlled environments; production should whitelist real egress IPs.
+   */
+  xForwardedFor?: string;
+  /**
+   * Extra HTTP headers merged into outgoing requests.
+   * Use with care: overriding AUTH/secret can break requests.
+   */
+  extraHeaders?: Record<string, string>;
   ipRetryCount?: number;
   ipRetryDelayMs?: number;
   ipAlertWebhookUrl?: string;
@@ -172,7 +182,6 @@ export interface IWINVConfig {
     payload: IWINVIPRestrictionAlert,
   ) => void | Promise<void>;
   debug?: boolean;
-  [key: string]: unknown;
 }
 
 export interface IWINVIPRestrictionAlert {

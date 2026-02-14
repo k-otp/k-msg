@@ -17,6 +17,9 @@ bun add @k-msg/core
 - **Provider Management**: Multi-provider support and switching
 - **Feature Flags**: Configurable platform capabilities
 
+### 🔁 **Provider Rotation**
+- **RoundRobinRouterProvider**: Rotate across multiple upstream providers (round-robin)
+
 ### ⚠️ **Comprehensive Error Handling**
 - **KMessageError Hierarchy**: Structured error types for different scenarios
 - **Error Context**: Rich error information with operation context
@@ -57,6 +60,25 @@ console.log(`Supported providers: ${info.supportedProviders.join(', ')}`);
 // Perform comprehensive health check
 const health = await platform.healthCheck();
 console.log(`Health: ${health.status}, Services: ${Object.keys(health.services).length}`);
+```
+
+### Round-robin Provider Rotation
+
+```typescript
+import { RoundRobinRouterProvider, type BaseProvider } from "@k-msg/core";
+
+const router = new RoundRobinRouterProvider({
+  id: "router",
+  providers: [providerA, providerB] satisfies BaseProvider[],
+});
+
+await router.send({
+  channel: "SMS",
+  templateCode: "SMS_DIRECT",
+  phoneNumber: "01012345678",
+  variables: {},
+  text: "hello",
+});
 ```
 
 ### Error Handling Patterns
