@@ -255,6 +255,48 @@ describe("AlimTalkPlatform unified send API", () => {
     expect(provider.requests[0]?.variables?.message).toBe("RCS 안내 메시지");
   });
 
+  test("uses direct fallback template for VOICE", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new MockBaseProvider(
+      "default-provider",
+      "Default Provider",
+    );
+    platform.registerProvider(provider);
+
+    const result = await platform.messages.send({
+      channel: "VOICE",
+      recipients: ["01055556666"],
+      text: "음성 안내 메시지",
+      variables: {},
+    });
+
+    expect(result.summary.total).toBe(1);
+    expect(result.summary.sent).toBe(1);
+    expect(provider.requests[0]?.channel).toBe("VOICE");
+    expect(provider.requests[0]?.templateCode).toBe("VOICE_DIRECT");
+    expect(provider.requests[0]?.variables?.message).toBe("음성 안내 메시지");
+  });
+
+  test("uses direct fallback template for FAX", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new MockBaseProvider(
+      "default-provider",
+      "Default Provider",
+    );
+    platform.registerProvider(provider);
+
+    const result = await platform.messages.send({
+      channel: "FAX",
+      recipients: ["01055556666"],
+    });
+
+    expect(result.summary.total).toBe(1);
+    expect(result.summary.sent).toBe(1);
+    expect(provider.requests[0]?.channel).toBe("FAX");
+    expect(provider.requests[0]?.templateCode).toBe("FAX_DIRECT");
+    expect(provider.requests[0]?.variables?.message).toBeUndefined();
+  });
+
   test("validates direct-message channel has text payload", async () => {
     const platform = new AlimTalkPlatform(createConfig());
     const provider = new MockBaseProvider(
@@ -270,6 +312,23 @@ describe("AlimTalkPlatform unified send API", () => {
         variables: {},
       }),
     ).rejects.toThrow("text or variables.message is required for SMS");
+  });
+
+  test("validates VOICE channel has text payload", async () => {
+    const platform = new AlimTalkPlatform(createConfig());
+    const provider = new MockBaseProvider(
+      "default-provider",
+      "Default Provider",
+    );
+    platform.registerProvider(provider);
+
+    await expect(
+      platform.messages.send({
+        channel: "VOICE",
+        recipients: ["01012340000"],
+        variables: {},
+      }),
+    ).rejects.toThrow("text or variables.message is required for VOICE");
   });
 
   test("counts FAILED provider results as failed without exceptions", async () => {

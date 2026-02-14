@@ -372,6 +372,17 @@ export class SolapiAdapter extends BaseProviderAdapter {
       );
     }
 
+    if (
+      query.channel === "NSA" ||
+      query.channel === "VOICE" ||
+      query.channel === "FAX"
+    ) {
+      baseQuery.type = query.channel;
+      return await this.client.getMessages(
+        baseQuery as unknown as SolapiGetMessagesRequest,
+      );
+    }
+
     if (query.channel === "FRIENDTALK") {
       const response = await this.client.getMessages(
         baseQuery as unknown as SolapiGetMessagesRequest,
@@ -415,6 +426,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
       case "SMS":
       case "LMS":
       case "MMS":
+      case "NSA":
+      case "VOICE":
+      case "FAX":
       case "RCS_SMS":
       case "RCS_LMS":
       case "RCS_MMS":
@@ -484,6 +498,8 @@ export class SolapiAdapter extends BaseProviderAdapter {
     if (templateCode === "LMS_DIRECT") return "LMS";
     if (templateCode === "SMS_DIRECT") return "SMS";
     if (templateCode === "FRIENDTALK_DIRECT") return "FRIENDTALK";
+    if (templateCode === "VOICE_DIRECT") return "VOICE";
+    if (templateCode === "FAX_DIRECT") return "FAX";
     if (templateCode === "RCS_SMS_DIRECT") return "RCS_SMS";
     if (templateCode === "RCS_LMS_DIRECT") return "RCS_LMS";
     if (templateCode === "RCS_MMS_DIRECT") return "RCS_MMS";
@@ -501,6 +517,9 @@ export class SolapiAdapter extends BaseProviderAdapter {
       case "SMS":
       case "LMS":
       case "MMS":
+      case "NSA":
+      case "VOICE":
+      case "FAX":
       case "RCS_SMS":
       case "RCS_LMS":
       case "RCS_MMS":
@@ -588,8 +607,27 @@ export class SolapiAdapter extends BaseProviderAdapter {
       type,
     };
 
-    if (typeof this.solapiConfig.defaultCountry === "string") {
-      base.country = this.solapiConfig.defaultCountry;
+    const country =
+      typeof request.options?.country === "string" &&
+      request.options.country.length > 0
+        ? request.options.country
+        : typeof this.solapiConfig.defaultCountry === "string"
+          ? this.solapiConfig.defaultCountry
+          : undefined;
+    if (country) {
+      base.country = country;
+    }
+
+    const customFieldsRaw = request.options?.customFields;
+    if (isObjectRecord(customFieldsRaw)) {
+      const customFields: Record<string, string> = {};
+      for (const [key, value] of Object.entries(customFieldsRaw)) {
+        if (value === undefined) continue;
+        customFields[key] = typeof value === "string" ? value : String(value);
+      }
+      if (Object.keys(customFields).length > 0) {
+        base.customFields = customFields;
+      }
     }
 
     if (scheduledAt) {
@@ -601,6 +639,8 @@ export class SolapiAdapter extends BaseProviderAdapter {
       type === "SMS" ||
       type === "LMS" ||
       type === "MMS" ||
+      type === "VOICE" ||
+      type === "FAX" ||
       String(type).startsWith("RCS_");
 
     if (requiresFrom) {
@@ -737,6 +777,111 @@ export class SolapiAdapter extends BaseProviderAdapter {
       return base as unknown as SolapiSendOneMessage;
     }
 
+    if (type === "NSA") {
+      const naverOptions = request.options?.naverOptions;
+
+      const talkId =
+        typeof naverOptions?.talkId === "string" &&
+        naverOptions.talkId.length > 0
+          ? naverOptions.talkId
+          : this.solapiConfig.naverTalkId;
+
+      if (!talkId || talkId.length === 0) {
+        throw new Error(
+          "naver talkId is required (options.naverOptions.talkId or config.naverTalkId)",
+        );
+      }
+
+      const templateId =
+        typeof naverOptions?.templateId === "string" &&
+        naverOptions.templateId.length > 0
+          ? naverOptions.templateId
+          : request.templateCode;
+
+      const buttons = Array.isArray(naverOptions?.buttons)
+        ? naverOptions.buttons
+        : this.toKakaoButtons(request.buttons);
+
+      const variables = {
+        ...this.stringifyVariables(request.variables),
+        ...this.stringifyVariables(naverOptions?.variables),
+      };
+
+      base.naverOptions = {
+        talkId,
+        templateId,
+        variables,
+        disableSms: naverOptions?.disableSms,
+        buttons,
+      };
+
+      return base as unknown as SolapiSendOneMessage;
+    }
+
+    if (type === "VOICE") {
+      if (!messageText) {
+        throw new Error("text or variables.message is required");
+      }
+
+      const voiceOptionsRaw = request.options?.voiceOptions;
+      const voiceTypeRaw = isObjectRecord(voiceOptionsRaw)
+        ? voiceOptionsRaw.voiceType
+        : undefined;
+      const voiceType =
+        voiceTypeRaw === "FEMALE" || voiceTypeRaw === "MALE"
+          ? voiceTypeRaw
+          : "FEMALE";
+
+      base.text = messageText;
+      base.voiceOptions = isObjectRecord(voiceOptionsRaw)
+        ? { ...voiceOptionsRaw, voiceType }
+        : { voiceType };
+
+      return base as unknown as SolapiSendOneMessage;
+    }
+
+    if (type === "FAX") {
+      const faxOptions = request.options?.faxOptions;
+      const fileIdsFromOptions = Array.isArray(faxOptions?.fileIds)
+        ? faxOptions.fileIds.filter((value): value is string => {
+            return typeof value === "string" && value.length > 0;
+          })
+        : [];
+
+      let fileIds = fileIdsFromOptions;
+
+      if (fileIds.length === 0) {
+        const fileUrls = Array.isArray(faxOptions?.fileUrls)
+          ? faxOptions.fileUrls.filter((value): value is string => {
+              return typeof value === "string" && value.length > 0;
+            })
+          : [];
+
+        if (fileUrls.length === 0) {
+          throw new Error(
+            "fax fileIds or fileUrls is required (options.faxOptions.fileIds/fileUrls)",
+          );
+        }
+
+        fileIds = [];
+        for (const url of fileUrls) {
+          const upload = await this.client.uploadFile(url, "FAX");
+          const fileId = upload.fileId;
+          if (typeof fileId === "string" && fileId.length > 0) {
+            fileIds.push(fileId);
+          }
+        }
+      }
+
+      if (fileIds.length === 0) {
+        throw new Error("Failed to resolve fax fileIds");
+      }
+
+      base.faxOptions = { fileIds };
+
+      return base as unknown as SolapiSendOneMessage;
+    }
+
     // RCS
     const rcsOptions = request.options?.rcsOptions;
 
@@ -755,11 +900,19 @@ export class SolapiAdapter extends BaseProviderAdapter {
       ? rcsOptions.buttons
       : this.toRcsButtons(request.buttons);
 
+    const rcsVariables = {
+      ...this.stringifyVariables(request.variables),
+      ...this.stringifyVariables(rcsOptions?.variables),
+    };
+
     const rcsPayload: Record<string, unknown> = {
       brandId,
       buttons: rcsButtons,
+      copyAllowed: rcsOptions?.copyAllowed,
+      mmsType: rcsOptions?.mmsType,
+      commercialType: rcsOptions?.commercialType,
       disableSms: rcsOptions?.disableSms,
-      variables: this.stringifyVariables(request.variables),
+      variables: rcsVariables,
     };
 
     // For template types, templateCode is used as templateId unless caller provided it explicitly.
@@ -784,34 +937,56 @@ export class SolapiAdapter extends BaseProviderAdapter {
       base.subject = subject;
     }
 
+    const additionalBodyRaw = rcsOptions?.additionalBody;
+    const additionalBody = isObjectRecord(additionalBodyRaw)
+      ? additionalBodyRaw
+      : undefined;
+    const additionalBodyImageId =
+      additionalBody &&
+      typeof additionalBody.imageId === "string" &&
+      additionalBody.imageId.length > 0
+        ? additionalBody.imageId
+        : additionalBody &&
+            typeof additionalBody.imaggeId === "string" &&
+            additionalBody.imaggeId.length > 0
+          ? additionalBody.imaggeId
+          : undefined;
+
+    const buildAdditionalBody = (uploadedImageId?: string) => {
+      const record = additionalBody ? { ...additionalBody } : {};
+      const title =
+        typeof record.title === "string" && record.title.length > 0
+          ? record.title
+          : subject || "RCS";
+      const description =
+        typeof record.description === "string" && record.description.length > 0
+          ? record.description
+          : messageText || "";
+      const imaggeId = additionalBodyImageId ?? uploadedImageId;
+
+      const normalized: Record<string, unknown> = {
+        ...record,
+        title,
+        description,
+      };
+
+      if (typeof imaggeId === "string" && imaggeId.length > 0) {
+        normalized.imaggeId = imaggeId;
+      }
+
+      return normalized;
+    };
+
     if (type === "RCS_MMS" && typeof request.imageUrl === "string") {
       const upload = await this.client.uploadFile(request.imageUrl, "RCS");
       const fileId = upload.fileId;
       if (typeof fileId === "string" && fileId.length > 0) {
-        const additionalBodyRaw = rcsOptions?.additionalBody;
-        const additionalBody = isObjectRecord(additionalBodyRaw)
-          ? additionalBodyRaw
-          : {};
-        const title =
-          typeof additionalBody.title === "string" &&
-          additionalBody.title.length > 0
-            ? additionalBody.title
-            : subject || "RCS";
-        const description =
-          typeof additionalBody.description === "string" &&
-          additionalBody.description.length > 0
-            ? additionalBody.description
-            : messageText || "";
-
-        rcsPayload.additionalBody = {
-          ...additionalBody,
-          title,
-          description,
-          imaggeId: fileId,
-        };
+        rcsPayload.additionalBody = buildAdditionalBody(fileId);
+      } else if (additionalBody) {
+        rcsPayload.additionalBody = buildAdditionalBody(undefined);
       }
-    } else if (rcsOptions?.additionalBody !== undefined) {
-      rcsPayload.additionalBody = rcsOptions.additionalBody;
+    } else if (additionalBody) {
+      rcsPayload.additionalBody = buildAdditionalBody(undefined);
     }
 
     base.rcsOptions = rcsPayload;
