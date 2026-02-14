@@ -67,7 +67,7 @@ export interface Template {
   templateStatusMsg?: string;
   templateStatusComments?: string;
   createDate: string;
-  buttons: any[];
+  buttons: unknown[];
 }
 
 export interface TemplateListRequest {

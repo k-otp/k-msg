@@ -62,9 +62,11 @@ export class IWINVProvider extends UniversalProvider {
   }
 
   // Unified send entrypoint: route SMS/LMS/MMS to SMS API, others to AlimTalk adapter.
-  async send(params: SendOptions | StandardRequest | any): Promise<any> {
+  async send(params: StandardRequest): Promise<StandardResult>;
+  async send(params: SendOptions): Promise<unknown>;
+  async send(params: unknown): Promise<unknown> {
     if (!this.isStandardRequest(params)) {
-      return super.send(params);
+      return super.send(params as unknown as StandardRequest);
     }
 
     if (this.isSmsChannelRequest(params)) {
@@ -201,12 +203,11 @@ export class IWINVProvider extends UniversalProvider {
     return {
       totalCount:
         typeof (response as unknown as Record<string, unknown>).totalCount ===
-          "number"
-          ? ((response as unknown as Record<string, unknown>).totalCount as number)
+        "number"
+          ? ((response as unknown as Record<string, unknown>)
+              .totalCount as number)
           : 0,
-      list: Array.isArray(
-        (response as unknown as Record<string, unknown>).list,
-      )
+      list: Array.isArray((response as unknown as Record<string, unknown>).list)
         ? (((response as unknown as Record<string, unknown>).list ??
             []) as IWINVSmsHistoryItem[])
         : [],
@@ -262,20 +263,6 @@ export class IWINVProvider extends UniversalProvider {
     );
     baseUrl = baseUrl.replace(/\/api\/?$/, "");
     return baseUrl.replace(/\/+$/, "");
-  }
-
-  private isLongMessage(request: StandardRequest, message: string): boolean {
-    const channel = (request.channel || "").toUpperCase();
-    if (channel === "LMS" || channel === "MMS") {
-      return true;
-    }
-    if (
-      request.templateCode === "LMS_DIRECT" ||
-      request.templateCode === "MMS_DIRECT"
-    ) {
-      return true;
-    }
-    return message.length > 90;
   }
 
   private resolveSmsMessageType(
@@ -960,6 +947,7 @@ export const createDefaultIWINVProvider = () => {
   return createIWINVProvider(config);
 };
 
+// biome-ignore lint/complexity/noStaticOnlyClass: kept for back-compat with existing imports
 export class IWINVProviderFactory {
   static create(config: IWINVConfig): IWINVProvider {
     return new IWINVProvider(config);

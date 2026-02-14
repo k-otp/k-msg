@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { AlimTalkPlatform } from "./platform";
 import type {
   BaseProvider,
-  HistoryResult,
   Config,
+  HistoryResult,
   StandardRequest,
   StandardResult,
 } from "./types/index";
@@ -334,7 +334,8 @@ describe("AlimTalkPlatform balance/history common APIs", () => {
     });
     platform.registerProvider(provider);
 
-    const result = (await (await platform.history()).list({
+    const history = await platform.history();
+    const result = (await history.list({
       channel: "SMS",
       startDate: "2021-04-05",
       endDate: "2021-06-23",
@@ -363,7 +364,8 @@ describe("AlimTalkPlatform balance/history common APIs", () => {
     });
     platform.registerProvider(provider);
 
-    const result = await (await platform.history()).list(1, 15, {
+    const history = await platform.history();
+    const result = await history.list(1, 15, {
       channel: "SMS",
       startDate: "2021-04-05",
       endDate: "2021-06-23",

@@ -1,7 +1,7 @@
 import type {
-  BaseProvider,
   BalanceQuery,
   BalanceResult,
+  BaseProvider,
   Config,
   HistoryQuery,
   HistoryResult,
@@ -294,8 +294,6 @@ export class AlimTalkPlatform implements KMsg {
         return "friendtalk";
       case "MMS":
         return "mms";
-      case "SMS":
-      case "LMS":
       default:
         return "sms";
     }
@@ -371,7 +369,7 @@ export class AlimTalkPlatform implements KMsg {
       channelDefaults?.subject ??
       this.config.messageDefaults?.subject;
 
-    const requestOptions: Record<string, any> = {
+    const requestOptions: Record<string, unknown> = {
       ...options.options,
       channel: this.toProviderChannel(options.channel),
     };
@@ -481,7 +479,7 @@ export class AlimTalkPlatform implements KMsg {
         return this.sendUnifiedMessages(provider, options);
       },
 
-      getStatus: async (messageId: string): Promise<string> => {
+      getStatus: async (_messageId: string): Promise<string> => {
         const provider = this.getDefaultProvider();
         if (!provider) {
           throw new Error("No provider available");
@@ -504,15 +502,15 @@ export class AlimTalkPlatform implements KMsg {
 
         // Prefer channel-specific balance when applicable.
         if (this.isSmsChannel(channel)) {
-          const getSmsCharge =
-            adapter && typeof (adapter as any).getSmsCharge === "function"
-              ? (adapter as any).getSmsCharge.bind(adapter)
-              : typeof (provider as any).getSmsCharge === "function"
-                ? (provider as any).getSmsCharge.bind(provider)
-                : undefined;
+          const adapterFn = this.getFunction(adapter, "getSmsCharge");
+          const providerFn = this.getFunction(provider, "getSmsCharge");
+          const amount = adapterFn
+            ? await adapterFn.call(adapter)
+            : providerFn
+              ? await providerFn.call(provider)
+              : undefined;
 
-          if (getSmsCharge) {
-            const amount = await getSmsCharge();
+          if (amount !== undefined) {
             return {
               providerId: providerKey,
               channel,
@@ -522,18 +520,20 @@ export class AlimTalkPlatform implements KMsg {
           }
         }
 
-        const getBalance =
-          adapter && typeof (adapter as any).getBalance === "function"
-            ? (adapter as any).getBalance.bind(adapter)
-            : typeof (provider as any).getBalance === "function"
-              ? (provider as any).getBalance.bind(provider)
-              : undefined;
+        const adapterFn = this.getFunction(adapter, "getBalance");
+        const providerFn = this.getFunction(provider, "getBalance");
+        const getBalanceTarget = adapterFn
+          ? adapter
+          : providerFn
+            ? provider
+            : null;
+        const getBalanceFn = adapterFn ?? providerFn;
 
-        if (!getBalance) {
+        if (!getBalanceFn || !getBalanceTarget) {
           throw new Error(`Provider ${providerKey} does not support balance()`);
         }
 
-        const amount = await getBalance();
+        const amount = await getBalanceFn.call(getBalanceTarget);
         return {
           providerId: providerKey,
           channel,
@@ -557,7 +557,11 @@ export class AlimTalkPlatform implements KMsg {
 
     return {
       /** @deprecated Not yet implemented */
-      list: async (_page: number = 1, _size: number = 15, _filters?: any) => {
+      list: async (
+        _page: number = 1,
+        _size: number = 15,
+        _filters?: Record<string, unknown>,
+      ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
         );
@@ -567,8 +571,8 @@ export class AlimTalkPlatform implements KMsg {
         _name: string,
         _content: string,
         _category?: string,
-        _variables?: any[],
-        _buttons?: any[],
+        _variables?: unknown[],
+        _buttons?: unknown[],
       ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
@@ -579,7 +583,7 @@ export class AlimTalkPlatform implements KMsg {
         _templateCode: string,
         _name: string,
         _content: string,
-        _buttons?: any[],
+        _buttons?: unknown[],
       ) => {
         throw new Error(
           "Template operations not yet migrated to new provider interface",
@@ -622,20 +626,18 @@ export class AlimTalkPlatform implements KMsg {
 
         const channel = query.channel;
         if (this.isSmsChannel(channel)) {
-          const getSmsHistory =
-            adapter && typeof (adapter as any).getSmsHistory === "function"
-              ? (adapter as any).getSmsHistory.bind(adapter)
-              : typeof (provider as any).getSmsHistory === "function"
-                ? (provider as any).getSmsHistory.bind(provider)
-                : undefined;
+          const adapterFn = this.getFunction(adapter, "getSmsHistory");
+          const providerFn = this.getFunction(provider, "getSmsHistory");
+          const target = adapterFn ? adapter : providerFn ? provider : null;
+          const fn = adapterFn ?? providerFn;
 
-          if (!getSmsHistory) {
+          if (!fn || !target) {
             throw new Error(
               `Provider ${providerKey} does not support SMS history()`,
             );
           }
 
-          const payload = await getSmsHistory({
+          const payload = await fn.call(target, {
             companyId: query.companyId,
             startDate: query.startDate,
             endDate: query.endDate,
@@ -645,8 +647,12 @@ export class AlimTalkPlatform implements KMsg {
             phone: query.phone,
           });
 
-          const rawList = Array.isArray((payload as any).list)
-            ? ((payload as any).list as unknown[])
+          const payloadRecord =
+            payload && typeof payload === "object" && !Array.isArray(payload)
+              ? (payload as Record<string, unknown>)
+              : {};
+          const rawList = Array.isArray(payloadRecord.list)
+            ? (payloadRecord.list as unknown[])
             : [];
 
           const items = rawList.map((raw) => {
@@ -698,26 +704,24 @@ export class AlimTalkPlatform implements KMsg {
             providerId: providerKey,
             channel,
             totalCount:
-              typeof (payload as any).totalCount === "number"
-                ? (payload as any).totalCount
+              typeof payloadRecord.totalCount === "number"
+                ? payloadRecord.totalCount
                 : items.length,
             items,
             raw: payload,
           };
         }
 
-        const getHistory =
-          adapter && typeof (adapter as any).getHistory === "function"
-            ? (adapter as any).getHistory.bind(adapter)
-            : typeof (provider as any).getHistory === "function"
-              ? (provider as any).getHistory.bind(provider)
-              : undefined;
+        const adapterFn = this.getFunction(adapter, "getHistory");
+        const providerFn = this.getFunction(provider, "getHistory");
+        const target = adapterFn ? adapter : providerFn ? provider : null;
+        const fn = adapterFn ?? providerFn;
 
-        if (!getHistory) {
+        if (!fn || !target) {
           throw new Error(`Provider ${providerKey} does not support history()`);
         }
 
-        const raw = await getHistory(query);
+        const raw = await fn.call(target, query);
         return {
           providerId: providerKey,
           channel,
@@ -743,9 +747,10 @@ export class AlimTalkPlatform implements KMsg {
   }
 
   private getProviderAdapter(provider: BaseProvider): unknown | null {
-    const anyProvider = provider as any;
-    if (anyProvider && typeof anyProvider.getAdapter === "function") {
-      return anyProvider.getAdapter();
+    const record = provider as unknown as Record<string, unknown>;
+    const fn = record.getAdapter;
+    if (typeof fn === "function") {
+      return (fn as () => unknown).call(provider);
     }
     return null;
   }
@@ -773,7 +778,9 @@ export class AlimTalkPlatform implements KMsg {
     const startDate = filters.startDate;
     const endDate = filters.endDate;
     if (!startDate || !endDate) {
-      throw new Error("history.list requires filters.startDate and filters.endDate");
+      throw new Error(
+        "history.list requires filters.startDate and filters.endDate",
+      );
     }
 
     return {
@@ -786,5 +793,18 @@ export class AlimTalkPlatform implements KMsg {
       requestNo: filters.requestNo,
       companyId: filters.companyId,
     };
+  }
+
+  private getFunction(
+    target: unknown,
+    key: string,
+  ): ((...args: unknown[]) => unknown) | null {
+    if (!target || typeof target !== "object") {
+      return null;
+    }
+    const value = (target as Record<string, unknown>)[key];
+    return typeof value === "function"
+      ? (value as (...args: unknown[]) => unknown)
+      : null;
   }
 }
