@@ -44,7 +44,26 @@ jobs:
           chmod +x ./scripts/publish-oidc.sh
           ./scripts/publish-oidc.sh --check
 
+      - name: Detect pending changesets
+        id: changesets
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          files=(.sampo/changesets/*.md)
+          has_changesets=false
+
+          for f in "${files[@]}"; do
+            if [[ "$(basename "$f")" != ".gitignore" ]]; then
+              has_changesets=true
+              break
+            fi
+          done
+
+          echo "has_changesets=${has_changesets}" >>"$GITHUB_OUTPUT"
+
       - name: Run Sampo (release PR only)
+        if: ${{ steps.changesets.outputs.has_changesets == 'true' && steps.publish_check.outputs.should_publish != 'true' }}
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
         with:
