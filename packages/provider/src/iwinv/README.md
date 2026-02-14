@@ -14,6 +14,11 @@ npm install @k-msg/provider @k-msg/core
 bun add @k-msg/provider @k-msg/core
 ```
 
+## Official IWINV Docs (Source)
+
+- SMS API: https://docs.iwinv.kr/api/Message_api/
+- Kakao (AlimTalk) API: https://docs.iwinv.kr/api/kakao_api/
+
 ## Channel Endpoints and Headers
 
 ### 1) AlimTalk (v2)
@@ -62,6 +67,10 @@ Important:
   - Header: `secret: base64(SMS_API_KEY&SMS_AUTH_KEY)`
   - Body: `{"version":"1.0"}`
 
+Note:
+- `IWINVProvider` currently focuses on unified `send()` for AlimTalk + SMS/LMS/MMS.
+- History/charge endpoints are documented here for reference, but are not wrapped as SDK methods yet.
+
 ## Environment Variables
 
 Minimum:
@@ -75,7 +84,6 @@ IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
 IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
-IWINV_SMS_COMPANY_ID=your_company_id   # required for history (optional if passed per-call)
 
 # Optional common sender
 IWINV_SENDER_NUMBER=01000000000
@@ -109,6 +117,7 @@ const provider = new IWINVProvider({
   smsApiKey: process.env.IWINV_SMS_API_KEY,
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
   sendEndpoint: "/api/v2/send/",
   xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
   extraHeaders: {
@@ -118,35 +127,24 @@ const provider = new IWINVProvider({
 });
 
 // SMS
-await provider.send({
-  channel: "SMS",
-  templateCode: "SMS_DIRECT",
-  phoneNumber: "01012345678",
+const sms = await provider.send({
+  type: "SMS",
+  to: "01012345678",
+  from: "01000000000",
   text: "hello",
-  variables: { message: "hello" },
-  options: { senderNumber: "01000000000" },
 });
-
-// SMS charge
-const charge = await provider.getSmsCharge();
-
-// SMS history (90-day window)
-const history = await provider.getSmsHistory({
-  // companyId can be omitted if you set IWINV_SMS_COMPANY_ID / smsCompanyId in config
-  startDate: "2021-04-05",
-  endDate: "2021-06-23",
-  pageNum: 1,
-  pageSize: 15,
-  phone: "010-0000-0000",
-});
+if (sms.isFailure) throw sms.error;
 
 // AlimTalk
-await provider.send({
-  channel: "ALIMTALK",
+const alimtalk = await provider.send({
+  type: "ALIMTALK",
+  to: "01012345678",
   templateCode: "YOUR_TEMPLATE_CODE",
-  phoneNumber: "01012345678",
   variables: { name: "Jane" },
+  // Optional: set `from` to enable SMS fallback (IWINV's `reSend` flow).
+  from: "01000000000",
 });
+if (alimtalk.isFailure) throw alimtalk.error;
 ```
 
 ## CLI Usage
