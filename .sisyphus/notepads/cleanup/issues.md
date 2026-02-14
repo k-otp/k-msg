@@ -1,3 +1,0 @@
-- Type mismatch in StandardResult and StandardError during migration was a major point of friction.
-- MockProvider in test-utils needed update to match new SendOptions (to instead of phoneNumber).
-- IWINVProvider needed to inherit from UniversalProvider to satisfy new architecture expectations in tests.

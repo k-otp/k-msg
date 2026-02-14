@@ -1,1 +1,0 @@
-- Encountered SQLiteError: no such table: main.jobs during sequential test execution. Tests pass when run in isolation. This suggests an issue with SQLite file handling/WAL mode in the test environment.

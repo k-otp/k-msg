@@ -1,3 +1,0 @@
-- IWINV template API endpoints follow the pattern `/template/{action}`.
-- Result pattern in @k-msg/core uses `ok` and `fail` utility functions.
-- Monorepo package dependencies require building the base package (`@k-msg/core`) before the dependent package (`@k-msg/provider`) for TypeScript types to be recognized correctly in some scenarios.
