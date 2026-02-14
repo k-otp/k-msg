@@ -38,6 +38,12 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Publish check (npm OIDC)
+        id: publish_check
+        run: |
+          chmod +x ./scripts/publish-oidc.sh
+          ./scripts/publish-oidc.sh --check
+
       - name: Run Sampo (release PR only)
         id: sampo
         uses: bruits/sampo/crates/sampo-github-action@main
@@ -50,16 +56,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish check (npm OIDC)
-        id: publish_check
-        run: |
-          chmod +x ./scripts/publish-oidc.sh
-          ./scripts/publish-oidc.sh --check
+      # Sampo may update versions/changelogs in the working tree while preparing the release PR.
+      # To ensure publishing uses the exact merged `main` commit, we re-checkout at `github.sha`
+      # into a separate directory when publishing is required.
+      - name: Checkout publish source
+        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+          path: publish-src
 
       - name: Publish packages (npm OIDC)
         if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd publish-src
           chmod +x ./scripts/publish-oidc.sh
           ./scripts/publish-oidc.sh
