@@ -1,5 +1,15 @@
 # @k-msg/provider
 
+## 0.4.0 — 2026-02-14
+
+### Minor changes
+
+- [0663171](https://github.com/k-otp/k-msg/commit/0663171f8bc53e09df94508b31853031dbf39b0a) feat(solapi): support NSA/VOICE/FAX + expand RCS options in universal API — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.4.0
+
 ## 0.3.0 — 2026-02-14
 
 ### Minor changes
