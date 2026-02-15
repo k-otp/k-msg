@@ -57,6 +57,10 @@ export class WebhookRegistry {
       );
     }
 
+    if (eventType) {
+      deliveries = deliveries.filter((d) => d.eventType === eventType);
+    }
+
     if (status) {
       deliveries = deliveries.filter((d) => d.status === status);
     }
@@ -70,6 +74,15 @@ export class WebhookRegistry {
     endpointId?: string,
     eventType?: WebhookEventType,
   ): Promise<WebhookDelivery[]> {
-    return this.getDeliveries(endpointId, undefined, eventType, "failed");
+    const deliveries = await this.getDeliveries(
+      endpointId,
+      undefined,
+      eventType,
+      undefined,
+      1000,
+    );
+    return deliveries.filter(
+      (d) => d.status === "failed" || d.status === "exhausted",
+    );
   }
 }

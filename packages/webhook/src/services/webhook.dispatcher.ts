@@ -1,3 +1,5 @@
+import { RetryManager } from "../retry/retry.manager";
+import { SecurityManager } from "../security/security.manager";
 import type {
   WebhookAttempt,
   WebhookConfig,
@@ -52,24 +54,39 @@ export class MockHttpClient implements HttpClient {
 export class WebhookDispatcher {
   private config: WebhookConfig;
   private httpClient: HttpClient;
+  private securityManager: SecurityManager;
+  private retryManager: RetryManager;
 
   constructor(config: WebhookConfig, httpClient?: HttpClient) {
     this.config = config;
     this.httpClient = httpClient || new DefaultHttpClient();
+    this.securityManager = new SecurityManager(config);
+    this.retryManager = new RetryManager(config);
   }
 
   async dispatch(
     event: WebhookEvent,
     endpoint: WebhookEndpoint,
   ): Promise<WebhookDelivery> {
+    const payload = JSON.stringify(event);
+    const eventTimestamp = (() => {
+      if (event.timestamp instanceof Date) return event.timestamp;
+      const parsed = new Date(event.timestamp as unknown as string);
+      return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+    })();
+    const timestampSeconds = Math.floor(
+      eventTimestamp.getTime() / 1000,
+    ).toString();
+
     const delivery: WebhookDelivery = {
       id: this.generateDeliveryId(),
       endpointId: endpoint.id,
       eventId: event.id,
+      eventType: event.type,
       url: endpoint.url,
       httpMethod: "POST",
-      headers: this.buildHeaders(endpoint, event),
-      payload: JSON.stringify(event),
+      headers: this.buildHeaders(endpoint, event, payload, timestampSeconds),
+      payload,
       attempts: [],
       status: "pending",
       createdAt: new Date(),
@@ -104,19 +121,48 @@ export class WebhookDispatcher {
         return;
       }
 
-      if (attempt <= maxRetries) {
-        const delay = this.calculateRetryDelay(attempt, endpoint);
-        await this.sleep(delay);
+      const canRetry =
+        attempt <= maxRetries &&
+        this.shouldRetryAttempt(attempt, attemptResult);
+
+      if (!canRetry) {
+        delivery.status = "failed";
+        delivery.completedAt = new Date();
+        return;
       }
+
+      const delay = this.calculateRetryDelay(attempt, endpoint);
+      delivery.nextRetryAt = new Date(Date.now() + delay);
+      await this.sleep(delay);
     }
 
     delivery.status = "exhausted";
     delivery.completedAt = new Date();
   }
 
+  private shouldRetryAttempt(
+    attemptNumber: number,
+    attempt: WebhookAttempt,
+  ): boolean {
+    // If we got an HTTP response code, decide based on status.
+    if (typeof attempt.httpStatus === "number") {
+      return this.retryManager.shouldRetryStatus(attempt.httpStatus);
+    }
+
+    // Otherwise decide based on error message (network/timeouts etc).
+    if (attempt.error) {
+      return this.retryManager.shouldRetry(
+        attemptNumber,
+        new Error(attempt.error),
+      );
+    }
+
+    return true;
+  }
+
   private async makeHttpRequest(
     delivery: WebhookDelivery,
-    endpoint: WebhookEndpoint,
+    _endpoint: WebhookEndpoint,
     attemptNumber: number,
   ): Promise<WebhookAttempt> {
     const startTime = Date.now();
@@ -158,12 +204,14 @@ export class WebhookDispatcher {
   private buildHeaders(
     endpoint: WebhookEndpoint,
     event: WebhookEvent,
+    payload: string,
+    timestampSeconds: string,
   ): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "X-Webhook-ID": event.id,
       "X-Webhook-Event": event.type,
-      "X-Webhook-Timestamp": event.timestamp.toISOString(),
+      "X-Webhook-Timestamp": timestampSeconds,
       "User-Agent": "K-Message-Webhook/1.0",
     };
 
@@ -172,21 +220,28 @@ export class WebhookDispatcher {
       Object.assign(headers, endpoint.headers);
     }
 
-    // 보안 서명
-    if (endpoint.secret) {
-      const signature = this.generateSignature(
-        JSON.stringify(event),
-        endpoint.secret,
-      );
-      headers["X-Webhook-Signature"] = signature;
+    // Security (HMAC signature)
+    if (this.config.enableSecurity) {
+      const secret =
+        (typeof endpoint.secret === "string" && endpoint.secret.length > 0
+          ? endpoint.secret
+          : typeof this.config.secretKey === "string" &&
+              this.config.secretKey.length > 0
+            ? this.config.secretKey
+            : undefined) || undefined;
+
+      if (secret) {
+        const signature = this.securityManager.generateSignatureWithTimestamp(
+          payload,
+          timestampSeconds,
+          secret,
+        );
+        const signatureHeader = this.securityManager.getConfig().header;
+        headers[signatureHeader] = signature;
+      }
     }
 
     return headers;
-  }
-
-  private generateSignature(payload: string, secret: string): string {
-    // 실제 구현에서는 crypto 모듈 사용
-    return `sha256=${Buffer.from(payload + secret).toString("base64")}`;
   }
 
   private calculateRetryDelay(
@@ -195,8 +250,23 @@ export class WebhookDispatcher {
   ): number {
     const baseDelay =
       endpoint.retryConfig?.retryDelayMs || this.config.retryDelayMs;
-    const multiplier = endpoint.retryConfig?.backoffMultiplier || 2;
-    return baseDelay * multiplier ** (attempt - 1);
+    const multiplier =
+      endpoint.retryConfig?.backoffMultiplier ||
+      this.config.backoffMultiplier ||
+      2;
+
+    // `attempt` is 1-based and represents the retry number (after the initial attempt).
+    let delay = baseDelay * multiplier ** attempt;
+
+    if (typeof this.config.maxDelayMs === "number") {
+      delay = Math.min(delay, this.config.maxDelayMs);
+    }
+
+    if (this.config.jitter !== false) {
+      delay = delay * (0.5 + Math.random() * 0.5);
+    }
+
+    return Math.max(0, Math.floor(delay));
   }
 
   private sleep(ms: number): Promise<void> {

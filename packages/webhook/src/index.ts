@@ -58,5 +58,10 @@ export type {
   WebhookTestResult,
 } from "./types/webhook.types";
 
-// Enum 정의
-export { WebhookEventType } from "./types/webhook.types";
+// Zod schemas (useful for validating inbound/outbound payloads)
+export {
+  WebhookDeliverySchema,
+  WebhookEndpointSchema,
+  WebhookEventSchema,
+  WebhookEventType,
+} from "./types/webhook.types";
