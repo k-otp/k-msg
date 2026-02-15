@@ -4,7 +4,25 @@ import type { SendInput } from "k-msg";
 import { z } from "zod";
 import { loadRuntime } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
-import { exitCodeForError, parseJson, printError } from "../cli/utils";
+import { exitCodeForError, printError } from "../cli/utils";
+
+const sendInputJsonSchema = z
+  .string()
+  .min(1)
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value) as unknown;
+    } catch (error) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Invalid JSON for SendInput: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.record(z.string(), z.unknown()));
 
 async function readStdinText(): Promise<string> {
   // Bun exposes stdin as a BunFile.
@@ -18,12 +36,19 @@ export default defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    input: option(z.string().optional(), {
+    input: option(sendInputJsonSchema.optional(), {
       description: "SendInput JSON string",
     }),
-    file: option(z.string().optional(), {
+    file: option(
+      z
+        .string()
+        .min(1)
+        .transform((value) => (path.isAbsolute(value) ? value : path.resolve(value)))
+        .optional(),
+      {
       description: "Path to SendInput JSON file",
-    }),
+      },
+    ),
     stdin: option(z.coerce.boolean().default(false), {
       description: "Read SendInput JSON from stdin",
     }),
@@ -31,39 +56,29 @@ export default defineCommand({
   handler: async ({ flags }) => {
     try {
       const runtime = await loadRuntime(flags.config);
-      const modeCount = [
-        flags.input,
-        flags.file,
-        flags.stdin ? "stdin" : undefined,
-      ].filter((v): v is string => typeof v === "string" && v.trim().length > 0)
-        .length;
+      const modeCount =
+        (flags.input !== undefined ? 1 : 0) +
+        (typeof flags.file === "string" ? 1 : 0) +
+        (flags.stdin ? 1 : 0);
       if (modeCount !== 1) {
         throw new Error("Use exactly one of --input, --file, or --stdin");
       }
 
-      let raw: string | undefined;
-      if (typeof flags.input === "string") {
-        raw = flags.input;
+      let inputRecord: Record<string, unknown>;
+
+      if (flags.input !== undefined) {
+        inputRecord = flags.input;
       } else if (typeof flags.file === "string") {
-        const abs = path.isAbsolute(flags.file)
-          ? flags.file
-          : path.resolve(flags.file);
+        const abs = flags.file;
         const file = Bun.file(abs);
         if (!(await file.exists())) {
           throw new Error(`File not found: ${abs}`);
         }
-        raw = await file.text();
+        inputRecord = sendInputJsonSchema.parse(await file.text());
+      } else {
+        inputRecord = sendInputJsonSchema.parse(await readStdinText());
       }
 
-      const text =
-        raw !== undefined ? raw : flags.stdin ? await readStdinText() : "";
-
-      const parsed = parseJson(text, "SendInput");
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        throw new Error("SendInput must be a JSON object");
-      }
-
-      const inputRecord = parsed as Record<string, unknown>;
       const input = (flags.provider
         ? { ...inputRecord, providerId: flags.provider }
         : inputRecord) as unknown as SendInput;
