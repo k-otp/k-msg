@@ -109,6 +109,45 @@ describe("DeliveryTrackingService (InMemory)", () => {
     expect(record?.status).toBe("PENDING");
     expect(record?.nextCheckAt.getTime()).toBe(scheduledAt.getTime() + 1_000);
   });
+
+  test("scheduled sends do not timeout before scheduledAt + grace", async () => {
+    const provider = createMockProvider({ id: "mock", status: "DELIVERED" });
+    const store = new InMemoryDeliveryTrackingStore();
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { scheduledGraceMs: 1_000, maxTrackingDurationMs: 1_000 },
+    });
+
+    const scheduledAt = new Date(Date.now() + 20_000);
+    await service.recordSend(
+      {
+        messageId: "m3",
+        options: {
+          type: "SMS",
+          to: "01012345678",
+          text: "hi",
+          options: { scheduledAt },
+        },
+        timestamp: Date.now() - 30_000,
+      },
+      {
+        messageId: "m3",
+        providerId: "mock",
+        providerMessageId: "p3",
+        status: "PENDING",
+        type: "SMS",
+        to: "01012345678",
+      },
+    );
+
+    await service.runOnce();
+
+    const record = await service.getRecord("m3");
+    expect(record?.status).toBe("PENDING");
+    expect(record?.lastError).toBeUndefined();
+    expect(record?.nextCheckAt.getTime()).toBe(scheduledAt.getTime() + 1_000);
+  });
 });
 
 describe("DeliveryTrackingStore (SQLite)", () => {
