@@ -284,12 +284,28 @@ describe("TemplateBuilder", () => {
   });
 
   test("should clone builder", () => {
-    const original = new TemplateBuilder().name("원본").code("ORIG");
+    const original = new TemplateBuilder()
+      .name("원본")
+      .code("ORIG")
+      .content("안녕하세요, #{name}님!")
+      .category(TemplateCategory.NOTIFICATION)
+      .provider("test-provider");
 
     const cloned = original.clone().name("복사본").code("COPY");
 
-    expect(original.validate().errors).not.toContain("복사본");
-    expect(cloned.validate().errors).not.toContain("원본");
+    const originalBuilt = original.build();
+    const clonedBuilt = cloned.build();
+
+    // Ensure original is not mutated
+    expect(originalBuilt.name).toBe("원본");
+    expect(originalBuilt.code).toBe("ORIG");
+
+    expect(clonedBuilt.name).toBe("복사본");
+    expect(clonedBuilt.code).toBe("COPY");
+
+    // Dates should stay Dates (clone must not stringify them)
+    expect(originalBuilt.metadata.createdAt).toBeInstanceOf(Date);
+    expect(clonedBuilt.metadata.createdAt).toBeInstanceOf(Date);
   });
 });
 

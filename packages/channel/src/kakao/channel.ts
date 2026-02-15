@@ -202,8 +202,8 @@ export class KakaoChannelManager {
     channel.status = ChannelStatus.SUSPENDED;
     channel.updatedAt = new Date();
 
-    // Log suspension reason (in real implementation, save to audit log)
-    console.log(`Channel ${channelId} suspended: ${reason}`);
+    // In a real implementation, persist to an audit log (do not console.log in library code).
+    void reason;
   }
 
   async reactivateChannel(channelId: string): Promise<void> {

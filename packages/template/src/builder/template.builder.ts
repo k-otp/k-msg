@@ -246,8 +246,14 @@ export class TemplateBuilder {
    * Set template metadata
    */
   metadata(metadata: Partial<AlimTalkTemplate["metadata"]>): TemplateBuilder {
+    const baseMetadata = this.template.metadata ?? {
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      usage: { sent: 0, delivered: 0, failed: 0 },
+    };
+
     this.template.metadata = {
-      ...this.template.metadata!,
+      ...baseMetadata,
       ...metadata,
       updatedAt: new Date(),
     };
@@ -340,7 +346,8 @@ export class TemplateBuilder {
    */
   clone(): TemplateBuilder {
     const cloned = new TemplateBuilder();
-    cloned.template = JSON.parse(JSON.stringify(this.template));
+    // Preserve Dates in metadata (JSON stringify/parse would turn them into strings).
+    cloned.template = structuredClone(this.template);
     return cloned;
   }
 

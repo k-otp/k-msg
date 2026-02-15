@@ -27,6 +27,7 @@ export class KakaoSenderNumberManager {
 
     const senderNumber: SenderNumber = {
       id: senderNumberId,
+      channelId,
       phoneNumber: request.phoneNumber,
       status: SenderNumberStatus.PENDING,
       category: request.category,
@@ -84,9 +85,7 @@ export class KakaoSenderNumberManager {
     senderNumber.updatedAt = new Date();
 
     // In a real implementation, send SMS to the phone number
-    console.log(
-      `Verification code for ${senderNumber.phoneNumber}: ${verificationCode}`,
-    );
+    // Do not console.log sensitive information in library code.
 
     // Simulate SMS sending
     await this.sendVerificationSMS(senderNumber.phoneNumber, verificationCode);
@@ -97,9 +96,8 @@ export class KakaoSenderNumberManager {
     code: string,
   ): Promise<void> {
     // In a real implementation, this would use an SMS provider
-    console.log(
-      `Sending SMS to ${phoneNumber}: Your verification code is ${code}`,
-    );
+    void phoneNumber;
+    void code;
   }
 
   async verifySenderNumber(
@@ -178,6 +176,11 @@ export class KakaoSenderNumberManager {
     let senderNumbers = Array.from(this.senderNumbers.values());
 
     if (filters) {
+      if (filters.channelId) {
+        senderNumbers = senderNumbers.filter(
+          (sn) => sn.channelId === filters.channelId,
+        );
+      }
       if (filters.status) {
         senderNumbers = senderNumbers.filter(
           (sn) => sn.status === filters.status,
@@ -242,7 +245,7 @@ export class KakaoSenderNumberManager {
     return true;
   }
 
-  private async isSenderNumberInUse(senderNumberId: string): Promise<boolean> {
+  private async isSenderNumberInUse(_senderNumberId: string): Promise<boolean> {
     // In a real implementation, check if any templates or active campaigns use this sender number
     return false;
   }
@@ -259,8 +262,8 @@ export class KakaoSenderNumberManager {
     senderNumber.status = SenderNumberStatus.BLOCKED;
     senderNumber.updatedAt = new Date();
 
-    // Log blocking reason (in real implementation, save to audit log)
-    console.log(`Sender number ${senderNumberId} blocked: ${reason}`);
+    // In a real implementation, persist to an audit log (do not console.log in library code).
+    void reason;
   }
 
   async unblockSenderNumber(senderNumberId: string): Promise<void> {

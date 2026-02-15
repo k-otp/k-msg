@@ -3,7 +3,7 @@
  * 사업자 정보 및 서류 검증 시스템
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 import {
   Channel,
   DocumentStatus,
