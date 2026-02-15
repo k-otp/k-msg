@@ -3,7 +3,7 @@
  * 채널 생성, 조회, 수정, 삭제 통합 관리
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 import {
   type Channel,
   type ChannelCreateRequest,
@@ -218,8 +218,9 @@ export class ChannelCRUD extends EventEmitter {
 
       // Also delete associated sender numbers
       for (const [id, senderNumber] of this.senderNumbers) {
-        // In a real implementation, we'd have a channelId field in SenderNumber
-        // For now, we'll skip this cleanup
+        if (senderNumber.channelId === channelId) {
+          this.senderNumbers.delete(id);
+        }
       }
     }
 
@@ -338,6 +339,7 @@ export class ChannelCRUD extends EventEmitter {
 
     const senderNumber: SenderNumber = {
       id: senderNumberId,
+      channelId,
       phoneNumber: request.phoneNumber,
       status: SenderNumberStatus.PENDING,
       category: request.category,

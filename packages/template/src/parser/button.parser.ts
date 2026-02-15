@@ -110,27 +110,27 @@ export class ButtonParser {
   }
 
   private static validateDeliveryButton(
-    button: TemplateButton,
-    buttonIndex: number,
-    errors: string[],
+    _button: TemplateButton,
+    _buttonIndex: number,
+    _errors: string[],
   ): void {
     // 배송조회 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
   }
 
   private static validateBotKeywordButton(
-    button: TemplateButton,
-    buttonIndex: number,
-    errors: string[],
+    _button: TemplateButton,
+    _buttonIndex: number,
+    _errors: string[],
   ): void {
     // 봇키워드 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
   }
 
   private static validateMessageDeliveryButton(
-    button: TemplateButton,
-    buttonIndex: number,
-    errors: string[],
+    _button: TemplateButton,
+    _buttonIndex: number,
+    _errors: string[],
   ): void {
     // 메시지전달 버튼은 특별한 검증 로직이 필요할 수 있음
     // 현재는 기본 검증만 수행
@@ -154,6 +154,8 @@ export class ButtonParser {
       type: button.type,
       url_mobile: button.linkMobile,
       url_pc: button.linkPc,
+      url_ios: button.linkIos,
+      url_android: button.linkAndroid,
       scheme_ios: button.schemeIos,
       scheme_android: button.schemeAndroid,
     }));

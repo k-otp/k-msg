@@ -33,6 +33,11 @@ export enum ChannelStatus {
 
 export interface SenderNumber {
   id: string;
+  /**
+   * Optional association to a Channel.
+   * Some managers (e.g. KakaoSenderNumberManager) are channel-scoped.
+   */
+  channelId?: string;
   phoneNumber: string;
   status: SenderNumberStatus;
   verificationCode?: string;

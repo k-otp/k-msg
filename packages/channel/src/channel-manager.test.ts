@@ -737,6 +737,62 @@ describe("NumberVerifier", () => {
     ).rejects.toThrow("Rate limit exceeded");
   });
 
+  test("should not allow rate limit bypass via phone number formatting", async () => {
+    const verifier = new NumberVerifier({
+      smsProvider: mockSMSProvider,
+      rateLimitMinutes: 1,
+    });
+
+    await verifier.startVerification("sender-1", "010-1234-5678");
+
+    await expect(
+      verifier.startVerification("sender-2", "01012345678"),
+    ).rejects.toThrow("Rate limit exceeded");
+  });
+
+  test("should treat blocked numbers consistently regardless of formatting", async () => {
+    const verifier = new NumberVerifier({
+      smsProvider: mockSMSProvider,
+      blockedNumbers: ["010-1234-5678"],
+    });
+
+    await expect(
+      verifier.startVerification("sender-1", "01012345678"),
+    ).rejects.toThrow("Phone number is blocked");
+  });
+
+  test("should not count send failures as user verification attempts", async () => {
+    const verifier = new NumberVerifier({
+      maxAttempts: 3,
+      smsProvider: {
+        id: "mock-sms-fail",
+        name: "Mock SMS Provider (Fail)",
+        sendSMS: async () => ({
+          messageId: "msg-fail",
+          status: "failed" as const,
+          error: "SMS sending failed",
+        }),
+      },
+      voiceProvider: {
+        id: "mock-voice",
+        name: "Mock Voice Provider",
+        makeCall: async () => ({
+          callId: "call-1",
+          status: "initiated" as const,
+        }),
+      },
+      enableVoiceFallback: true,
+    });
+
+    const request = await verifier.startVerification("sender-1", "01012345678");
+
+    // First invalid code should leave 2 attempts remaining (send failure must not consume attempts)
+    const result = await verifier.verifyCode(request.id, "000000");
+    expect(result.success).toBe(false);
+    expect(result.status).toBe("failed");
+    expect(result.message).toContain("2 attempts remaining");
+  });
+
   test("should get verification statistics", async () => {
     const verifier = new NumberVerifier({
       smsProvider: mockSMSProvider,
