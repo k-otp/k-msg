@@ -282,6 +282,18 @@ export async function reconcileDeliveryStatuses(
         statusUpdatedAt: now,
         nextCheckAt,
         lastError: undefined,
+        ...(typeof value.statusCode === "string" && value.statusCode.length > 0
+          ? { providerStatusCode: value.statusCode }
+          : {}),
+        ...(typeof value.statusMessage === "string" &&
+        value.statusMessage.length > 0
+          ? { providerStatusMessage: value.statusMessage }
+          : {}),
+        ...(isValidDate(value.sentAt) ? { sentAt: value.sentAt } : {}),
+        ...(isValidDate(value.deliveredAt)
+          ? { deliveredAt: value.deliveredAt }
+          : {}),
+        ...(isValidDate(value.failedAt) ? { failedAt: value.failedAt } : {}),
         raw: value.raw,
       },
       nextCheckAt,

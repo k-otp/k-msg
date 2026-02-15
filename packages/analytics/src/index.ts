@@ -44,6 +44,7 @@ export type {
 export { DashboardGenerator, ExportManager } from "./reports/index";
 // 핵심 서비스
 export { AnalyticsService } from "./services/analytics.service";
+export { DeliveryTrackingAnalyticsService } from "./services/delivery-tracking.analytics";
 export { InsightEngine } from "./services/insight.engine";
 export { MetricsCollector } from "./services/metrics.collector";
 export { ReportGenerator } from "./services/report.generator";
