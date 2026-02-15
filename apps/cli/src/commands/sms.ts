@@ -2,8 +2,8 @@ import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "k-msg";
 import { z } from "zod";
 import { loadRuntime } from "../runtime";
-import { optConfig, optJson, optProvider } from "./options";
-import { exitCodeForError, parseIsoDate, printError } from "./utils";
+import { optConfig, optJson, optProvider } from "../cli/options";
+import { exitCodeForError, parseIsoDate, printError } from "../cli/utils";
 
 const sendCmd = defineCommand({
   name: "send",

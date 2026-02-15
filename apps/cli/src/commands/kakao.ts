@@ -10,13 +10,13 @@ import { loadKMsgConfig } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { ProviderWithCapabilities } from "../providers/registry";
 import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
-import { optConfig, optJson, optProvider } from "./options";
+import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
   exitCodeForError,
   parseJson,
   printError,
-} from "./utils";
+} from "../cli/utils";
 
 function requireProviderById(
   runtime: ReturnType<typeof loadRuntime>,

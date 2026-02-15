@@ -4,7 +4,7 @@ import { z } from "zod";
 import { loadKMsgConfig, resolveConfigPath } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { KMsgCliConfig } from "../config/schema";
-import { optConfig, optJson } from "./options";
+import { optConfig, optJson } from "../cli/options";
 
 const sampleConfig: KMsgCliConfig = {
   version: 1,

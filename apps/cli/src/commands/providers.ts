@@ -1,7 +1,7 @@
 import { defineCommand } from "@bunli/core";
 import { loadRuntime } from "../runtime";
-import { optConfig, optJson } from "./options";
-import { printError } from "./utils";
+import { optConfig, optJson } from "../cli/options";
+import { printError } from "../cli/utils";
 
 function detectCapabilities(provider: Record<string, unknown>): string[] {
   const caps: string[] = [];
