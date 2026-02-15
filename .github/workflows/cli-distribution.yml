@@ -29,7 +29,7 @@ env:
 
 jobs:
   build-and-release:
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,6 +50,14 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Debug runner
+        run: |
+          set -euo pipefail
+          uname -a
+          uname -m
+          bun --version
+          node --version
 
       - name: Read CLI version
         id: meta
