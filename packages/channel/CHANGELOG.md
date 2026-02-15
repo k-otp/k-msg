@@ -1,5 +1,11 @@
 # @k-msg/channel
 
+## 0.7.2 — 2026-02-15
+
+### Patch changes
+
+- [39d52c9](https://github.com/k-otp/k-msg/commit/39d52c91f036d5c9fbcd4abf83f4aa5f26af6552) Fix template button (de)serialization for iOS/Android links, preserve Dates when cloning TemplateBuilder, and harden channel number verification (normalization + attempt tracking). — Thanks @imjlk!
+
 ## 0.7.1 — 2026-02-15
 
 ### Patch changes

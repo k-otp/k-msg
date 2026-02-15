@@ -1,5 +1,11 @@
 # @k-msg/messaging
 
+## 0.7.2 — 2026-02-15
+
+### Patch changes
+
+- Updated dependencies: core@0.7.2, provider@0.7.2, template@0.7.2
+
 ## 0.7.1 — 2026-02-15
 
 ### Patch changes
