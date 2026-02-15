@@ -484,16 +484,7 @@ export class IWINVProvider implements Provider {
 
       const sendDate = this.parseIwinvDateTime(item.sendDate);
 
-      const isSuccess = (() => {
-        if (statusCode === "06") return true; // SMS success
-        if (statusCode === "1000") return true; // LMS/MMS success
-        if (typeof statusMessage === "string" && statusMessage.includes("전송 성공")) {
-          return true;
-        }
-        return false;
-      })();
-
-      const status: DeliveryStatus = isSuccess ? "DELIVERED" : "FAILED";
+      const status = this.mapSmsV2HistoryStatus(statusCode, statusMessage);
 
       return ok({
         providerId: this.id,
@@ -502,8 +493,8 @@ export class IWINVProvider implements Provider {
         statusCode,
         statusMessage,
         sentAt: sendDate,
-        deliveredAt: isSuccess ? sendDate : undefined,
-        failedAt: isSuccess ? undefined : sendDate,
+        deliveredAt: status === "DELIVERED" ? sendDate : undefined,
+        failedAt: status === "FAILED" ? sendDate : undefined,
         raw: item,
       });
     } catch (error) {
@@ -515,6 +506,26 @@ export class IWINVProvider implements Provider {
         ),
       );
     }
+  }
+
+  private mapSmsV2HistoryStatus(
+    statusCode?: string,
+    statusMessage?: string,
+  ): DeliveryStatus {
+    if (statusCode === "06") return "DELIVERED"; // SMS success
+    if (statusCode === "1000") return "DELIVERED"; // LMS/MMS success
+
+    if (typeof statusMessage === "string") {
+      if (statusMessage.includes("전송 성공")) return "DELIVERED";
+      if (statusMessage.includes("대기") || statusMessage.includes("처리중")) {
+        return "PENDING";
+      }
+    }
+
+    if (statusCode === "00" || statusCode === "01") return "PENDING";
+    if (!statusCode && !statusMessage) return "UNKNOWN";
+
+    return "FAILED";
   }
 
   private toBase64(value: string): string {
