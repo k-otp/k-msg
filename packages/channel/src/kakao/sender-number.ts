@@ -245,9 +245,7 @@ export class KakaoSenderNumberManager {
     return true;
   }
 
-  private async isSenderNumberInUse(
-    _senderNumberId: string,
-  ): Promise<boolean> {
+  private async isSenderNumberInUse(_senderNumberId: string): Promise<boolean> {
     // In a real implementation, check if any templates or active campaigns use this sender number
     return false;
   }
