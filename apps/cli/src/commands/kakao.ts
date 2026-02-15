@@ -9,7 +9,7 @@ import { z } from "zod";
 import { loadKMsgConfig } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { ProviderWithCapabilities } from "../providers/registry";
-import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
+import { loadRuntime, resolveKakaoChannelSenderKey, type Runtime } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
@@ -19,7 +19,7 @@ import {
 } from "../cli/utils";
 
 function requireProviderById(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   providerId: string,
 ): ProviderWithCapabilities {
   const found = runtime.providersById.get(providerId);
@@ -30,7 +30,7 @@ function requireProviderById(
 }
 
 function pickProvider(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   providerId: string | undefined,
   predicate: (p: ProviderWithCapabilities) => boolean,
   capabilityLabel: string,
@@ -60,7 +60,7 @@ function pickProvider(
 }
 
 function resolveTemplateContextSenderKey(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   input: { channelAlias?: string; senderKey?: string },
 ): TemplateContext | undefined {
   const senderKey = resolveKakaoChannelSenderKey(runtime.config, input);
@@ -68,7 +68,7 @@ function resolveTemplateContextSenderKey(
 }
 
 function resolveChannelAliasProviderId(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   channelAlias: string | undefined,
 ): string | undefined {
   const alias = channelAlias?.trim();
@@ -77,7 +77,7 @@ function resolveChannelAliasProviderId(
 }
 
 function resolveTemplateProviderHint(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   input: { channelAlias?: string },
 ): string | undefined {
   const explicit = resolveChannelAliasProviderId(runtime, input.channelAlias);
@@ -99,7 +99,7 @@ const channelCategoriesCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
@@ -152,7 +152,7 @@ const channelListCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
@@ -208,7 +208,7 @@ const channelAuthCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
@@ -261,7 +261,7 @@ const channelAddCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
@@ -284,7 +284,7 @@ const channelAddCmd = defineCommand({
       }
 
       if (flags.save && flags.save.trim().length > 0) {
-        const raw = loadKMsgConfig(flags.config);
+        const raw = await loadKMsgConfig(flags.config);
         raw.config.aliases = raw.config.aliases || {};
         raw.config.aliases.kakaoChannels =
           raw.config.aliases.kakaoChannels || {};
@@ -294,7 +294,7 @@ const channelAddCmd = defineCommand({
           senderKey: result.value.senderKey,
           ...(result.value.name ? { name: result.value.name } : {}),
         };
-        saveKMsgConfig(raw.path, raw.config);
+        await saveKMsgConfig(raw.path, raw.config);
       }
 
       if (flags.json) {
@@ -346,7 +346,7 @@ const templateListCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
@@ -415,7 +415,7 @@ const templateGetCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
@@ -480,7 +480,7 @@ const templateCreateCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
@@ -525,7 +525,7 @@ const templateCreateCmd = defineCommand({
       }
 
       if (flags.save && flags.save.trim().length > 0) {
-        const raw = loadKMsgConfig(flags.config);
+        const raw = await loadKMsgConfig(flags.config);
         raw.config.aliases = raw.config.aliases || {};
         raw.config.aliases.templates = raw.config.aliases.templates || {};
         raw.config.aliases.templates[flags.save] = {
@@ -533,7 +533,7 @@ const templateCreateCmd = defineCommand({
           templateCode: result.value.code,
           ...(flags.channel ? { kakaoChannel: flags.channel } : {}),
         };
-        saveKMsgConfig(raw.path, raw.config);
+        await saveKMsgConfig(raw.path, raw.config);
       }
 
       if (flags.json) {
@@ -578,7 +578,7 @@ const templateUpdateCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
@@ -656,7 +656,7 @@ const templateDeleteCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
@@ -712,7 +712,7 @@ const templateRequestCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });

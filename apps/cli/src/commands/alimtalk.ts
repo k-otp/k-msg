@@ -30,7 +30,7 @@ const sendCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const scheduledAt = parseIsoDate(flags["scheduled-at"], "scheduled-at");
       const rawVars = parseJson(flags.vars, "vars");
       if (!rawVars || typeof rawVars !== "object" || Array.isArray(rawVars)) {

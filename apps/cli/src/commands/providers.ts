@@ -23,7 +23,7 @@ const listCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const data = runtime.providers.map((p) => ({
         id: p.id,
         name: p.name,
@@ -59,7 +59,7 @@ const healthCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
 
       const results = await Promise.all(
         runtime.providers.map(async (p) => ({

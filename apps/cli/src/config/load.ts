@@ -1,5 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
+import path from "path";
 import { type KMsgCliConfig, kMsgCliConfigSchema } from "./schema";
 
 export type LoadedKMsgConfig = {
@@ -51,13 +50,16 @@ function substituteEnvValues(
   return value;
 }
 
-export function loadKMsgConfig(configPath?: string): LoadedKMsgConfig {
+export async function loadKMsgConfig(
+  configPath?: string,
+): Promise<LoadedKMsgConfig> {
   const resolved = resolveConfigPath(configPath);
-  if (!existsSync(resolved)) {
+  const file = Bun.file(resolved);
+  if (!(await file.exists())) {
     throw new Error(`Config file not found: ${resolved}`);
   }
 
-  const raw = readFileSync(resolved, "utf8");
+  const raw = await file.text();
   let parsed: unknown;
   try {
     parsed = raw.trim().length > 0 ? JSON.parse(raw) : {};

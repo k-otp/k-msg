@@ -1,5 +1,4 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
+import path from "path";
 import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "k-msg";
 import { z } from "zod";
@@ -38,7 +37,7 @@ export default defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const modeCount = [
         flags.input,
         flags.file,
@@ -49,16 +48,19 @@ export default defineCommand({
         throw new Error("Use exactly one of --input, --file, or --stdin");
       }
 
-      const raw = (() => {
-        if (typeof flags.input === "string") return flags.input;
-        if (typeof flags.file === "string") {
-          const abs = path.isAbsolute(flags.file)
-            ? flags.file
-            : path.resolve(process.cwd(), flags.file);
-          return readFileSync(abs, "utf8");
+      let raw: string | undefined;
+      if (typeof flags.input === "string") {
+        raw = flags.input;
+      } else if (typeof flags.file === "string") {
+        const abs = path.isAbsolute(flags.file)
+          ? flags.file
+          : path.resolve(process.cwd(), flags.file);
+        const file = Bun.file(abs);
+        if (!(await file.exists())) {
+          throw new Error(`File not found: ${abs}`);
         }
-        return undefined;
-      })();
+        raw = await file.text();
+      }
 
       const text =
         raw !== undefined ? raw : flags.stdin ? await readStdinText() : "";

@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { defineCommand, option } from "@bunli/core";
 import { z } from "zod";
 import { loadKMsgConfig, resolveConfigPath } from "../config/load";
@@ -84,14 +83,14 @@ const initCmd = defineCommand({
   handler: async ({ flags }) => {
     const targetPath = resolveConfigPath(flags.config);
     if (!flags.force) {
-      if (existsSync(targetPath)) {
+      if (await Bun.file(targetPath).exists()) {
         console.error(`Config already exists: ${targetPath}`);
         process.exitCode = 2;
         return;
       }
     }
 
-    saveKMsgConfig(targetPath, sampleConfig);
+    await saveKMsgConfig(targetPath, sampleConfig);
     console.log(targetPath);
   },
 });
@@ -104,7 +103,7 @@ const showCmd = defineCommand({
     json: optJson,
   },
   handler: async ({ flags }) => {
-    const loaded = loadKMsgConfig(flags.config);
+    const loaded = await loadKMsgConfig(flags.config);
 
     if (flags.json) {
       console.log(JSON.stringify(loaded, null, 2));
@@ -130,7 +129,7 @@ const validateCmd = defineCommand({
     config: optConfig,
   },
   handler: async ({ flags }) => {
-    const loaded = loadKMsgConfig(flags.config);
+    const loaded = await loadKMsgConfig(flags.config);
     console.log(`OK: ${loaded.path}`);
   },
 });
