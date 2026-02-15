@@ -80,13 +80,21 @@ const initCmd = defineCommand({
       short: "f",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, prompt, terminal }) => {
     const targetPath = resolveConfigPath(flags.config);
     if (!flags.force) {
       if (await Bun.file(targetPath).exists()) {
-        console.error(`Config already exists: ${targetPath}`);
-        process.exitCode = 2;
-        return;
+        if (terminal.isInteractive && !terminal.isCI) {
+          const ok = await prompt.confirm(
+            `Config already exists: ${targetPath}\nOverwrite?`,
+            { default: false },
+          );
+          if (!ok) return;
+        } else {
+          console.error(`Config already exists: ${targetPath}`);
+          process.exitCode = 2;
+          return;
+        }
       }
     }
 

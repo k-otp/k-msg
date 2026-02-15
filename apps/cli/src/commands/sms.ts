@@ -3,7 +3,7 @@ import type { SendInput } from "k-msg";
 import { z } from "zod";
 import { loadRuntime } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
-import { exitCodeForError, parseIsoDate, printError } from "../cli/utils";
+import { exitCodeForError, printError } from "../cli/utils";
 
 const sendCmd = defineCommand({
   name: "send",
@@ -18,14 +18,14 @@ const sendCmd = defineCommand({
     type: option(z.enum(["SMS", "LMS", "MMS"]).optional(), {
       description: "Force message type",
     }),
-    "scheduled-at": option(z.string().optional(), {
+    "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
   },
   handler: async ({ flags }) => {
     try {
       const runtime = await loadRuntime(flags.config);
-      const scheduledAt = parseIsoDate(flags["scheduled-at"], "scheduled-at");
+      const scheduledAt = flags["scheduled-at"];
       const input: SendInput =
         flags.type !== undefined
           ? {

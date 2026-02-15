@@ -3,7 +3,7 @@ import type { MessageVariables, SendInput } from "k-msg";
 import { z } from "zod";
 import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
-import { exitCodeForError, parseIsoDate, parseJson, printError } from "../cli/utils";
+import { exitCodeForError, printError } from "../cli/utils";
 
 const sendCmd = defineCommand({
   name: "send",
@@ -17,25 +17,41 @@ const sendCmd = defineCommand({
     "template-code": option(z.string().min(1), {
       description: "Template code",
     }),
-    vars: option(z.string().min(1), { description: "Variables as JSON" }),
+    vars: option(
+      z
+        .string()
+        .min(1)
+        .transform((value, ctx) => {
+          try {
+            return JSON.parse(value) as unknown;
+          } catch (error) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Invalid JSON for vars: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            });
+            return z.NEVER;
+          }
+        })
+        .pipe(z.record(z.string(), z.unknown())),
+      { description: "Variables as JSON object" },
+    ),
     channel: option(z.string().optional(), {
       description: "Kakao channel alias (from config)",
     }),
     "sender-key": option(z.string().optional(), {
       description: "Kakao channel senderKey override",
     }),
-    "scheduled-at": option(z.string().optional(), {
+    "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
   },
   handler: async ({ flags }) => {
     try {
       const runtime = await loadRuntime(flags.config);
-      const scheduledAt = parseIsoDate(flags["scheduled-at"], "scheduled-at");
-      const rawVars = parseJson(flags.vars, "vars");
-      if (!rawVars || typeof rawVars !== "object" || Array.isArray(rawVars)) {
-        throw new Error("vars must be a JSON object");
-      }
+      const scheduledAt = flags["scheduled-at"];
+      const rawVars = flags.vars;
 
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
         channelAlias: flags.channel,

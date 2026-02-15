@@ -17,18 +17,6 @@ export function parseJson(value: string, label: string): unknown {
   }
 }
 
-export function parseIsoDate(
-  value: string | undefined,
-  label: string,
-): Date | undefined {
-  if (typeof value !== "string" || value.trim().length === 0) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    throw new Error(`Invalid date for ${label}: ${value}`);
-  }
-  return date;
-}
-
 export function exitCodeForError(error: unknown): number {
   if (error instanceof CapabilityNotSupportedError) return 4;
   if (error instanceof KMsgError) {

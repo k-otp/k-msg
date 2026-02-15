@@ -1,16 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { createCLI } from "@bunli/core";
 import { expectCommand } from "@bunli/test";
 import path from "path";
 
-import alimtalk from "./commands/alimtalk";
-import config from "./commands/config";
-import kakao from "./commands/kakao";
-import providers from "./commands/providers";
-import send from "./commands/send";
-import sms from "./commands/sms";
-
-import pkg from "../package.json";
+import { createKMsgCli } from "./cli/app";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
 const FIXTURE_CONFIG_URL = new URL("./fixtures/k-msg.config.json", import.meta.url);
@@ -70,18 +62,7 @@ async function runCli(
   try {
     process.chdir(CLI_ROOT);
 
-    const cli = await createCLI({
-      name: "k-msg",
-      version: typeof pkg.version === "string" ? pkg.version : "0.0.0",
-      description: "k-msg CLI",
-    });
-
-    cli.command(config);
-    cli.command(providers);
-    cli.command(sms);
-    cli.command(alimtalk);
-    cli.command(send);
-    cli.command(kakao);
+    const cli = await createKMsgCli();
 
     await cli.run(argv);
   } catch (e) {
