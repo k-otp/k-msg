@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.7.1 — 2026-02-15
+
+### Patch changes
+
+- [41c5f8d](https://github.com/k-otp/k-msg/commit/41c5f8dda1770d6d7213de8a99ef2eb693fbf50c) Fix delivery tracking for scheduled messages and preserve IWINV "pending" statuses during polling. — Thanks @imjlk!
+
 ## 0.7.0 — 2026-02-15
 
 ### Minor changes
