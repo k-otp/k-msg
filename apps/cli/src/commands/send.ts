@@ -43,9 +43,8 @@ export default defineCommand({
         flags.input,
         flags.file,
         flags.stdin ? "stdin" : undefined,
-      ].filter(
-        (v) => v !== undefined && v !== false && String(v).length > 0,
-      ).length;
+      ].filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+        .length;
       if (modeCount !== 1) {
         throw new Error("Use exactly one of --input, --file, or --stdin");
       }

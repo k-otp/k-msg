@@ -5,12 +5,15 @@
   "description": "k-msg CLI tool",
   "type": "module",
   "bin": {
-    "k-msg": "./dist/cli.js",
-    "kmsg": "./dist/cli.js"
+    "k-msg": "./dist/k-msg.js",
+    "kmsg": "./dist/k-msg.js"
   },
   "scripts": {
-    "build": "bun build src/cli.ts --outdir=dist --format=esm --target=node",
-    "dev": "bun --watch src/cli.ts",
+    "build": "bunli build",
+    "build:all": "bunli build --targets all",
+    "build:native": "bunli build --targets native",
+    "build:js": "bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
+    "dev": "bun --watch src/k-msg.ts",
     "test": "bun test",
     "clean": "rm -rf dist"
   },
@@ -20,6 +23,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "bunli": "^0.5.3",
     "typescript": "catalog:",
     "@types/bun": "catalog:",
     "@types/node": "catalog:"

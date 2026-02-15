@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 
-import { readFileSync } from "node:fs";
 import { createCLI } from "@bunli/core";
 
 import alimtalk from "./commands/alimtalk";
@@ -10,6 +9,8 @@ import providers from "./commands/providers";
 import send from "./commands/send";
 import sms from "./commands/sms";
 
+import pkg from "../package.json";
+
 class BunliExit extends Error {
   constructor(readonly exitCode: number) {
     super(`process.exit(${exitCode})`);
@@ -18,15 +19,7 @@ class BunliExit extends Error {
 }
 
 function readCliVersion(): string {
-  try {
-    const pkgPath = new URL("../package.json", import.meta.url);
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as {
-      version?: unknown;
-    };
-    return typeof pkg.version === "string" ? pkg.version : "0.0.0";
-  } catch {
-    return "0.0.0";
-  }
+  return typeof pkg.version === "string" ? pkg.version : "0.0.0";
 }
 
 async function main(): Promise<void> {

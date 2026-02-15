@@ -5,8 +5,8 @@ import path from "node:path";
 import { spawn } from "bun";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
-const CLI_SRC_PATH = path.join(import.meta.dir, "cli.ts");
-const CLI_DIST_PATH = path.join(CLI_ROOT, "dist", "cli.js");
+const CLI_BIN_NAME = process.platform === "win32" ? "k-msg.exe" : "k-msg";
+const CLI_DIST_PATH = path.join(CLI_ROOT, "dist", CLI_BIN_NAME);
 const FIXTURE_CONFIG_PATH = path.join(
   import.meta.dir,
   "fixtures",
@@ -18,7 +18,7 @@ async function runCli(
   args: string[],
   env: Record<string, string | undefined>,
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-  const proc = spawn(["bun", CLI_DIST_PATH, ...args], { env, cwd: CLI_ROOT });
+  const proc = spawn([CLI_DIST_PATH, ...args], { env, cwd: CLI_ROOT });
   const [stdout, stderr, exitCode] = await Promise.all([
     proc.stdout ? new Response(proc.stdout).text() : "",
     proc.stderr ? new Response(proc.stderr).text() : "",
@@ -38,17 +38,10 @@ function createTempConfig(): string {
 
 describe("k-msg CLI (bunli) E2E", () => {
   beforeAll(async () => {
-    const build = spawn(
-      [
-        "bun",
-        "build",
-        CLI_SRC_PATH,
-        "--outdir=dist",
-        "--format=esm",
-        "--target=node",
-      ],
-      { cwd: CLI_ROOT, env: process.env },
-    );
+    const build = spawn(["bun", "run", "build"], {
+      cwd: CLI_ROOT,
+      env: process.env,
+    });
     const [exitCode, stderr] = await Promise.all([
       build.exited,
       build.stderr ? new Response(build.stderr).text() : "",
