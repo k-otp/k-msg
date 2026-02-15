@@ -37,9 +37,9 @@ jobs:
           HEAD="${{ github.sha }}"
           CHANGED="$(git diff --name-only "$BASE" "$HEAD")"
 
-          if echo "$CHANGED" | grep -q '^packages/'; then
+          if echo "$CHANGED" | grep -Eq '^(packages/|apps/cli/)'; then
             if ! echo "$CHANGED" | grep -q '^\.sampo/changesets/.*\.md$'; then
-              echo "::warning::Package changes detected without a Sampo changeset. Run 'sampo add' and commit the generated file under .sampo/changesets/."
+              echo "::warning::Releaseable changes detected without a Sampo changeset. Run 'sampo add' and commit the generated file under .sampo/changesets/."
             fi
           fi
 

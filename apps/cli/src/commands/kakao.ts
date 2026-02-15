@@ -4,22 +4,31 @@ import type {
   TemplateContext,
   TemplateInspectionProvider,
   TemplateProvider,
+  TemplateUpdateInput,
 } from "k-msg";
 import { z } from "zod";
-import { loadKMsgConfig } from "../config/load";
-import { saveKMsgConfig } from "../config/save";
-import type { ProviderWithCapabilities } from "../providers/registry";
-import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
-import { optConfig, optJson, optProvider } from "./options";
+import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
   exitCodeForError,
   parseJson,
   printError,
-} from "./utils";
+} from "../cli/utils";
+import { loadKMsgConfig } from "../config/load";
+import { saveKMsgConfig } from "../config/save";
+import type { ProviderWithCapabilities } from "../providers/registry";
+import {
+  loadRuntime,
+  type Runtime,
+  resolveKakaoChannelSenderKey,
+} from "../runtime";
+
+function hasFunction(provider: ProviderWithCapabilities, key: string): boolean {
+  return typeof (provider as Record<string, unknown>)[key] === "function";
+}
 
 function requireProviderById(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   providerId: string,
 ): ProviderWithCapabilities {
   const found = runtime.providersById.get(providerId);
@@ -30,7 +39,7 @@ function requireProviderById(
 }
 
 function pickProvider(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   providerId: string | undefined,
   predicate: (p: ProviderWithCapabilities) => boolean,
   capabilityLabel: string,
@@ -46,7 +55,13 @@ function pickProvider(
   }
 
   const candidates = runtime.providers.filter((p) => predicate(p));
-  if (candidates.length === 1) return candidates[0]!;
+  if (candidates.length === 1) {
+    const only = candidates[0];
+    if (!only) {
+      throw new Error("Invariant violation: expected exactly one candidate");
+    }
+    return only;
+  }
   if (candidates.length === 0) {
     throw new CapabilityNotSupportedError(
       `No configured provider supports ${capabilityLabel}`,
@@ -60,7 +75,7 @@ function pickProvider(
 }
 
 function resolveTemplateContextSenderKey(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   input: { channelAlias?: string; senderKey?: string },
 ): TemplateContext | undefined {
   const senderKey = resolveKakaoChannelSenderKey(runtime.config, input);
@@ -68,7 +83,7 @@ function resolveTemplateContextSenderKey(
 }
 
 function resolveChannelAliasProviderId(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   channelAlias: string | undefined,
 ): string | undefined {
   const alias = channelAlias?.trim();
@@ -77,7 +92,7 @@ function resolveChannelAliasProviderId(
 }
 
 function resolveTemplateProviderHint(
-  runtime: ReturnType<typeof loadRuntime>,
+  runtime: Runtime,
   input: { channelAlias?: string },
 ): string | undefined {
   const explicit = resolveChannelAliasProviderId(runtime, input.channelAlias);
@@ -99,17 +114,23 @@ const channelCategoriesCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
-        (p) => typeof (p as any).listKakaoChannelCategories === "function",
+        (p) => hasFunction(p, "listKakaoChannelCategories"),
         "kakao channel categories",
       );
 
-      const result = await (
-        provider as unknown as KakaoChannelProvider
-      ).listKakaoChannelCategories!.call(provider);
+      const fn = (provider as unknown as KakaoChannelProvider)
+        .listKakaoChannelCategories;
+      if (typeof fn !== "function") {
+        throw new CapabilityNotSupportedError(
+          `Provider '${provider.id}' does not support kakao channel categories`,
+        );
+      }
+
+      const result = await fn.call(provider);
       if (result.isFailure) {
         printError(result.error, flags.json);
         process.exitCode = exitCodeForError(result.error);
@@ -152,11 +173,11 @@ const channelListCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
-        (p) => typeof (p as any).listKakaoChannels === "function",
+        (p) => hasFunction(p, "listKakaoChannels"),
         "kakao channel list",
       );
 
@@ -208,17 +229,23 @@ const channelAuthCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
-        (p) => typeof (p as any).requestKakaoChannelAuth === "function",
+        (p) => hasFunction(p, "requestKakaoChannelAuth"),
         "kakao channel auth",
       );
 
-      const result = await (
-        provider as unknown as KakaoChannelProvider
-      ).requestKakaoChannelAuth!.call(provider, {
+      const fn = (provider as unknown as KakaoChannelProvider)
+        .requestKakaoChannelAuth;
+      if (typeof fn !== "function") {
+        throw new CapabilityNotSupportedError(
+          `Provider '${provider.id}' does not support kakao channel auth`,
+        );
+      }
+
+      const result = await fn.call(provider, {
         plusId: flags["plus-id"],
         phoneNumber: flags.phone,
       });
@@ -261,17 +288,22 @@ const channelAddCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
         runtime,
         flags.provider,
-        (p) => typeof (p as any).addKakaoChannel === "function",
+        (p) => hasFunction(p, "addKakaoChannel"),
         "kakao channel add",
       );
 
-      const result = await (
-        provider as unknown as KakaoChannelProvider
-      ).addKakaoChannel!.call(provider, {
+      const fn = (provider as unknown as KakaoChannelProvider).addKakaoChannel;
+      if (typeof fn !== "function") {
+        throw new CapabilityNotSupportedError(
+          `Provider '${provider.id}' does not support kakao channel add`,
+        );
+      }
+
+      const result = await fn.call(provider, {
         plusId: flags["plus-id"],
         authNum: flags["auth-num"],
         phoneNumber: flags.phone,
@@ -284,7 +316,7 @@ const channelAddCmd = defineCommand({
       }
 
       if (flags.save && flags.save.trim().length > 0) {
-        const raw = loadKMsgConfig(flags.config);
+        const raw = await loadKMsgConfig(flags.config);
         raw.config.aliases = raw.config.aliases || {};
         raw.config.aliases.kakaoChannels =
           raw.config.aliases.kakaoChannels || {};
@@ -294,7 +326,7 @@ const channelAddCmd = defineCommand({
           senderKey: result.value.senderKey,
           ...(result.value.name ? { name: result.value.name } : {}),
         };
-        saveKMsgConfig(raw.path, raw.config);
+        await saveKMsgConfig(raw.path, raw.config);
       }
 
       if (flags.json) {
@@ -346,14 +378,14 @@ const templateListCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).listTemplates === "function",
+        (p) => hasFunction(p, "listTemplates"),
         "kakao template list",
       );
 
@@ -415,14 +447,14 @@ const templateGetCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).getTemplate === "function",
+        (p) => hasFunction(p, "getTemplate"),
         "kakao template get",
       );
 
@@ -480,14 +512,14 @@ const templateCreateCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).createTemplate === "function",
+        (p) => hasFunction(p, "createTemplate"),
         "kakao template create",
       );
 
@@ -525,7 +557,7 @@ const templateCreateCmd = defineCommand({
       }
 
       if (flags.save && flags.save.trim().length > 0) {
-        const raw = loadKMsgConfig(flags.config);
+        const raw = await loadKMsgConfig(flags.config);
         raw.config.aliases = raw.config.aliases || {};
         raw.config.aliases.templates = raw.config.aliases.templates || {};
         raw.config.aliases.templates[flags.save] = {
@@ -533,7 +565,7 @@ const templateCreateCmd = defineCommand({
           templateCode: result.value.code,
           ...(flags.channel ? { kakaoChannel: flags.channel } : {}),
         };
-        saveKMsgConfig(raw.path, raw.config);
+        await saveKMsgConfig(raw.path, raw.config);
       }
 
       if (flags.json) {
@@ -578,14 +610,14 @@ const templateUpdateCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).updateTemplate === "function",
+        (p) => hasFunction(p, "updateTemplate"),
         "kakao template update",
       );
 
@@ -594,7 +626,7 @@ const templateUpdateCmd = defineCommand({
         senderKey: flags["sender-key"],
       });
 
-      const patch: Record<string, unknown> = {};
+      const patch: TemplateUpdateInput = {};
       if (typeof flags.name === "string") patch.name = flags.name;
       if (typeof flags.content === "string") patch.content = flags.content;
       if (
@@ -605,17 +637,12 @@ const templateUpdateCmd = defineCommand({
         if (!Array.isArray(parsed)) {
           throw new Error("buttons must be a JSON array");
         }
-        patch.buttons = parsed;
+        patch.buttons = parsed as unknown[];
       }
 
       const result = await (
         provider as unknown as TemplateProvider
-      ).updateTemplate.call(
-        provider,
-        flags["template-code"],
-        patch as any,
-        ctx,
-      );
+      ).updateTemplate.call(provider, flags["template-code"], patch, ctx);
       if (result.isFailure) {
         printError(result.error, flags.json);
         process.exitCode = exitCodeForError(result.error);
@@ -656,14 +683,14 @@ const templateDeleteCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).deleteTemplate === "function",
+        (p) => hasFunction(p, "deleteTemplate"),
         "kakao template delete",
       );
 
@@ -712,14 +739,14 @@ const templateRequestCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
         channelAlias: flags.channel,
       });
       const provider = pickProvider(
         runtime,
         flags.provider ?? providerHint,
-        (p) => typeof (p as any).requestTemplateInspection === "function",
+        (p) => hasFunction(p, "requestTemplateInspection"),
         "kakao template inspection request",
       );
 

@@ -1,10 +1,9 @@
-import { existsSync } from "node:fs";
 import { defineCommand, option } from "@bunli/core";
 import { z } from "zod";
+import { optConfig, optJson } from "../cli/options";
 import { loadKMsgConfig, resolveConfigPath } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { KMsgCliConfig } from "../config/schema";
-import { optConfig, optJson } from "./options";
 
 const sampleConfig: KMsgCliConfig = {
   version: 1,
@@ -81,17 +80,25 @@ const initCmd = defineCommand({
       short: "f",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, prompt, terminal }) => {
     const targetPath = resolveConfigPath(flags.config);
     if (!flags.force) {
-      if (existsSync(targetPath)) {
-        console.error(`Config already exists: ${targetPath}`);
-        process.exitCode = 2;
-        return;
+      if (await Bun.file(targetPath).exists()) {
+        if (terminal.isInteractive && !terminal.isCI) {
+          const ok = await prompt.confirm(
+            `Config already exists: ${targetPath}\nOverwrite?`,
+            { default: false },
+          );
+          if (!ok) return;
+        } else {
+          console.error(`Config already exists: ${targetPath}`);
+          process.exitCode = 2;
+          return;
+        }
       }
     }
 
-    saveKMsgConfig(targetPath, sampleConfig);
+    await saveKMsgConfig(targetPath, sampleConfig);
     console.log(targetPath);
   },
 });
@@ -104,7 +111,7 @@ const showCmd = defineCommand({
     json: optJson,
   },
   handler: async ({ flags }) => {
-    const loaded = loadKMsgConfig(flags.config);
+    const loaded = await loadKMsgConfig(flags.config);
 
     if (flags.json) {
       console.log(JSON.stringify(loaded, null, 2));
@@ -130,7 +137,7 @@ const validateCmd = defineCommand({
     config: optConfig,
   },
   handler: async ({ flags }) => {
-    const loaded = loadKMsgConfig(flags.config);
+    const loaded = await loadKMsgConfig(flags.config);
     console.log(`OK: ${loaded.path}`);
   },
 });

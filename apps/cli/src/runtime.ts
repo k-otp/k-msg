@@ -35,8 +35,8 @@ export function resolveKakaoChannelSenderKey(
   return undefined;
 }
 
-export function loadRuntime(configPath?: string): Runtime {
-  const loadedRaw = loadKMsgConfig(configPath);
+export async function loadRuntime(configPath?: string): Promise<Runtime> {
+  const loadedRaw = await loadKMsgConfig(configPath);
   let resolved: KMsgCliConfig;
   try {
     resolved = resolveKMsgConfigEnv(loadedRaw.config);

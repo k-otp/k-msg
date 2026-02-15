@@ -1,7 +1,7 @@
 import { defineCommand } from "@bunli/core";
+import { optConfig, optJson } from "../cli/options";
+import { printError } from "../cli/utils";
 import { loadRuntime } from "../runtime";
-import { optConfig, optJson } from "./options";
-import { printError } from "./utils";
 
 function detectCapabilities(provider: Record<string, unknown>): string[] {
   const caps: string[] = [];
@@ -23,7 +23,7 @@ const listCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
       const data = runtime.providers.map((p) => ({
         id: p.id,
         name: p.name,
@@ -57,22 +57,52 @@ const healthCmd = defineCommand({
     config: optConfig,
     json: optJson,
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, spinner, terminal }) => {
     try {
-      const runtime = loadRuntime(flags.config);
+      const runtime = await loadRuntime(flags.config);
 
-      const results = await Promise.all(
-        runtime.providers.map(async (p) => ({
-          id: p.id,
-          name: p.name,
-          health: await p.healthCheck(),
-        })),
-      );
+      const showProgress =
+        !flags.json && terminal.isInteractive && !terminal.isCI;
+      const spin = showProgress ? spinner("Running health checks...") : null;
+
+      if (spin) spin.start();
+
+      const results: Array<{
+        id: string;
+        name: string;
+        health: Awaited<
+          ReturnType<(typeof runtime.providers)[number]["healthCheck"]>
+        >;
+      }> = [];
+
+      if (spin) {
+        for (const p of runtime.providers) {
+          spin.update(`Checking ${p.id}...`);
+          results.push({
+            id: p.id,
+            name: p.name,
+            health: await p.healthCheck(),
+          });
+        }
+      } else {
+        results.push(
+          ...(await Promise.all(
+            runtime.providers.map(async (p) => ({
+              id: p.id,
+              name: p.name,
+              health: await p.healthCheck(),
+            })),
+          )),
+        );
+      }
 
       if (flags.json) {
+        if (spin) spin.stop();
         console.log(JSON.stringify(results, null, 2));
         return;
       }
+
+      if (spin) spin.succeed("Health checks complete");
 
       for (const r of results) {
         console.log(`${r.health.healthy ? "OK" : "FAIL"} ${r.id}: ${r.name}`);
