@@ -10,9 +10,9 @@ export function resolveConfigPath(inputPath: string | undefined): string {
   if (typeof inputPath === "string" && inputPath.trim().length > 0) {
     return path.isAbsolute(inputPath)
       ? inputPath
-      : path.resolve(process.cwd(), inputPath);
+      : path.resolve(inputPath);
   }
-  return path.resolve(process.cwd(), "k-msg.config.json");
+  return path.resolve("k-msg.config.json");
 }
 
 function substituteEnvValues(
@@ -25,7 +25,7 @@ function substituteEnvValues(
     const key = trimmed.slice("env:".length).trim();
     if (key.length === 0) return value;
 
-    const resolved = process.env[key];
+    const resolved = (Bun.env as Record<string, string | undefined>)[key];
     if (resolved === undefined || resolved.trim().length === 0) {
       const at = pathParts.length > 0 ? ` at ${pathParts.join(".")}` : "";
       throw new Error(`Missing environment variable: ${key}${at}`);

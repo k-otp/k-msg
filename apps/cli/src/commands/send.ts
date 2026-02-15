@@ -7,15 +7,8 @@ import { optConfig, optJson, optProvider } from "../cli/options";
 import { exitCodeForError, parseJson, printError } from "../cli/utils";
 
 async function readStdinText(): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => {
-      data += chunk;
-    });
-    process.stdin.on("end", () => resolve(data));
-    process.stdin.on("error", reject);
-  });
+  // Bun exposes stdin as a BunFile.
+  return await Bun.stdin.text();
 }
 
 export default defineCommand({
@@ -54,7 +47,7 @@ export default defineCommand({
       } else if (typeof flags.file === "string") {
         const abs = path.isAbsolute(flags.file)
           ? flags.file
-          : path.resolve(process.cwd(), flags.file);
+          : path.resolve(flags.file);
         const file = Bun.file(abs);
         if (!(await file.exists())) {
           throw new Error(`File not found: ${abs}`);
