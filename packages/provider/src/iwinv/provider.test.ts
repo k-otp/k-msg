@@ -540,6 +540,45 @@ describe("IWINVProvider", () => {
     }
   });
 
+  test("getDeliveryStatus(SMS) keeps pending-like statuses as PENDING", async () => {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "OK",
+          list: [
+            {
+              requestNo: "REQ_2",
+              sendStatusCode: "01",
+              sendStatusMsg: "처리중",
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      smsCompanyId: "company",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "REQ_2",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value?.status).toBe("PENDING");
+    }
+  });
   test("getDeliveryStatus(SMS) fails when smsCompanyId is missing", async () => {
     const provider = new IWINVProvider({
       apiKey: "api-key",

@@ -31,6 +31,14 @@ function computeNextCheckAt(
   return new Date(now.getTime() + delay);
 }
 
+function getTrackingStartTime(
+  record: TrackingRecord,
+  scheduledGraceMs: number,
+): Date {
+  if (!isValidDate(record.scheduledAt)) return record.requestedAt;
+  return new Date(record.scheduledAt.getTime() + scheduledGraceMs);
+}
+
 export async function reconcileDeliveryStatuses(
   providers: Provider[],
   records: TrackingRecord[],
@@ -82,11 +90,30 @@ export async function reconcileDeliveryStatuses(
       return;
     }
 
+    if (isValidDate(record.scheduledAt)) {
+      const graceUntil = new Date(
+        record.scheduledAt.getTime() + polling.scheduledGraceMs,
+      );
+      if (now.getTime() < graceUntil.getTime()) {
+        updates.push({
+          messageId: record.messageId,
+          patch: { ...patchBase, nextCheckAt: graceUntil },
+          nextCheckAt: graceUntil,
+          terminal: false,
+        });
+        return;
+      }
+    }
+
     const maxDurationMs = polling.maxTrackingDurationMs;
+    const trackingStartAt = getTrackingStartTime(
+      record,
+      polling.scheduledGraceMs,
+    );
     if (
       typeof maxDurationMs === "number" &&
       maxDurationMs > 0 &&
-      now.getTime() - record.requestedAt.getTime() > maxDurationMs &&
+      now.getTime() - trackingStartAt.getTime() > maxDurationMs &&
       !isTerminalDeliveryStatus(record.status)
     ) {
       const terminalPatch: Partial<TrackingRecord> = {
@@ -106,21 +133,6 @@ export async function reconcileDeliveryStatuses(
         terminal: true,
       });
       return;
-    }
-
-    if (isValidDate(record.scheduledAt)) {
-      const graceUntil = new Date(
-        record.scheduledAt.getTime() + polling.scheduledGraceMs,
-      );
-      if (now.getTime() < graceUntil.getTime()) {
-        updates.push({
-          messageId: record.messageId,
-          patch: { ...patchBase, nextCheckAt: graceUntil },
-          nextCheckAt: graceUntil,
-          terminal: false,
-        });
-        return;
-      }
     }
 
     const provider = providersById.get(record.providerId);
