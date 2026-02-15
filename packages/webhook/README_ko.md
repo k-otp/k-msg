@@ -1,25 +1,25 @@
 # @k-msg/webhook
 
-Webhook delivery helpers for emitting real-time message events to HTTP endpoints.
+HTTP 엔드포인트로 실시간 메시지 이벤트를 전달하기 위한 웹훅(Webhook) 전송 도구입니다.
 
-This package provides:
-- `WebhookService`: a convenience facade (in-memory endpoint registry + batching)
-- `WebhookDispatcher`: HTTP delivery with retries/backoff
-- `SecurityManager`: HMAC signature generation/verification
-- Zod schemas: `WebhookEventSchema`, `WebhookEndpointSchema`, `WebhookDeliverySchema`
+이 패키지는 아래 기능을 제공합니다.
+- `WebhookService`: 편의용 Facade (in-memory 엔드포인트 레지스트리 + 배치 처리)
+- `WebhookDispatcher`: HTTP 전송 + 재시도(백오프)
+- `SecurityManager`: HMAC 서명 생성/검증
+- Zod 스키마: `WebhookEventSchema`, `WebhookEndpointSchema`, `WebhookDeliverySchema`
 
-Note:
-- The default `WebhookService` storage is in-memory. For persistence/advanced workflows, see the exported building blocks such as `EndpointManager` and `DeliveryStore`.
+참고:
+- 기본 `WebhookService` 저장소는 in-memory입니다. 영속 저장/고급 워크플로우가 필요하면 `EndpointManager`, `DeliveryStore` 같은 빌딩 블록을 활용하세요.
 
-## Install
+## 설치
 
 ```bash
 npm install @k-msg/webhook
-# or
+# 또는
 bun add @k-msg/webhook
 ```
 
-## Quickstart (WebhookService)
+## 빠른 시작 (WebhookService)
 
 ```ts
 import {
@@ -34,7 +34,7 @@ const config: WebhookConfig = {
   // Optional: maxDelayMs, backoffMultiplier, jitter
   timeoutMs: 30_000,
   enableSecurity: true,
-  // Optional: used when an endpoint does not provide its own secret
+  // Optional: 엔드포인트에 secret이 없을 때 fallback으로 사용됩니다.
   secretKey: process.env.WEBHOOK_SECRET,
   // Optional: algorithm, signatureHeader, signaturePrefix
   enabledEvents: [
@@ -52,15 +52,15 @@ const endpoint = await service.registerEndpoint({
   url: "https://example.com/webhooks/k-msg",
   active: true,
   events: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
-  // Optional: endpoint-specific secret (preferred over config.secretKey)
+  // Optional: 엔드포인트별 secret (config.secretKey보다 우선)
   secret: process.env.WEBHOOK_SECRET,
-  // Optional: per-endpoint retry overrides
+  // Optional: 엔드포인트별 재시도 설정
   retryConfig: { maxRetries: 5, retryDelayMs: 1000, backoffMultiplier: 2 },
-  // Optional: metadata-based filters
+  // Optional: 메타데이터 기반 필터
   filters: { providerId: ["iwinv", "solapi"] },
 });
 
-// Asynchronous emit (batched)
+// 비동기 emit (배치 처리됨)
 await service.emit({
   id: crypto.randomUUID(),
   type: WebhookEventType.MESSAGE_SENT,
@@ -70,7 +70,7 @@ await service.emit({
   version: "1.0",
 });
 
-// Synchronous emit (returns delivery attempts)
+// 동기 emit (딜리버리 결과를 반환)
 const deliveries = await service.emitSync({
   id: crypto.randomUUID(),
   type: WebhookEventType.MESSAGE_FAILED,
@@ -80,39 +80,38 @@ const deliveries = await service.emitSync({
   version: "1.0",
 });
 
-// Inspect recent deliveries (in-memory)
+// 최근 딜리버리 조회(in-memory)
 const recent = await service.getDeliveries(endpoint.id);
 console.log(deliveries.length, recent.length);
 
 await service.shutdown();
 ```
 
-### Endpoint Registration Behavior
+### 엔드포인트 등록 동작
 
-`registerEndpoint()` validates the URL and sends a test webhook once (a `system.maintenance` event via `testEndpoint()`).
+`registerEndpoint()`는 URL 유효성 검증 후, `testEndpoint()`를 통해 테스트 웹훅(`system.maintenance`)을 1회 전송합니다.
 
-## Security (HMAC Signatures)
+## 보안 (HMAC 서명)
 
-When security is enabled and a secret is available (`endpoint.secret` or `config.secretKey`), outgoing requests include:
+보안이 활성화되어 있고 secret이 존재하면(`endpoint.secret` 또는 `config.secretKey`), 아래 헤더가 포함됩니다.
 - `X-Webhook-Timestamp`: unix epoch seconds (string)
-- `X-Webhook-Signature`: HMAC signature (default: `sha256=<hex>`)
+- `X-Webhook-Signature`: HMAC 서명 (기본: `sha256=<hex>`)
 
-Signature input is:
+서명 입력 문자열은 아래 형식입니다.
 
 ```
 ${timestamp}.${rawBody}
 ```
 
-To verify a webhook, you must use the exact raw request body string.
+수신 측에서는 반드시 "raw body 문자열" 그대로 검증해야 합니다.
 
-### Hono Example
+### Hono 예시
 
 ```ts
 import { Hono } from "hono";
 import { SecurityManager } from "@k-msg/webhook";
 
 const app = new Hono();
-
 const security = new SecurityManager({
   algorithm: "sha256",
   signatureHeader: "X-Webhook-Signature",
@@ -138,18 +137,18 @@ app.post("/webhooks/k-msg", async (c) => {
 });
 ```
 
-## Retries and Delivery Status
+## 재시도 및 상태
 
-`WebhookDispatcher` retries failed deliveries with exponential backoff.
+`WebhookDispatcher`는 실패한 전송을 지수 백오프로 재시도합니다.
 
-Delivery status:
-- `success`: received a 2xx response
-- `failed`: non-retryable failure (typically non-retryable 4xx)
-- `exhausted`: retryable failure, but retries were used up
+딜리버리 상태:
+- `success`: 2xx 응답을 받음
+- `failed`: 재시도 대상이 아닌 실패(주로 non-retryable 4xx)
+- `exhausted`: 재시도 가능한 실패였지만, 재시도 횟수 소진
 
-## Filtering
+## 필터링
 
-Endpoints can filter deliveries based on event metadata:
+엔드포인트는 이벤트 메타데이터 기반으로 전달을 필터링할 수 있습니다.
 
 ```ts
 await service.registerEndpoint({
@@ -164,13 +163,14 @@ await service.registerEndpoint({
 });
 ```
 
-## Zod Schemas
+## Zod 스키마
 
-This package exports Zod schemas for validation:
-- `WebhookEventSchema` (timestamp is coerced from string/number to `Date`)
+이 패키지는 검증용 Zod 스키마를 export 합니다.
+- `WebhookEventSchema` (timestamp는 string/number 입력을 `Date`로 coerce)
 - `WebhookEndpointSchema`
 - `WebhookDeliverySchema`
 
 ## License
 
 MIT
+

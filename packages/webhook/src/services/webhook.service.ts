@@ -1,5 +1,3 @@
-import { RetryManager } from "../retry/retry.manager";
-import { SecurityManager } from "../security/security.manager";
 import type {
   WebhookConfig,
   WebhookDelivery,
@@ -16,8 +14,6 @@ export class WebhookService {
   private config: WebhookConfig;
   private dispatcher: WebhookDispatcher;
   private registry: WebhookRegistry;
-  private securityManager: SecurityManager;
-  private retryManager: RetryManager;
   private eventQueue: WebhookEvent[] = [];
   private batchProcessor: NodeJS.Timeout | null = null;
 
@@ -25,8 +21,6 @@ export class WebhookService {
     this.config = config;
     this.dispatcher = new WebhookDispatcher(config, httpClient);
     this.registry = new WebhookRegistry();
-    this.securityManager = new SecurityManager(config);
-    this.retryManager = new RetryManager(config);
 
     this.startBatchProcessor();
   }
@@ -48,7 +42,7 @@ export class WebhookService {
       id: this.generateEndpointId(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      status: "active",
+      status: endpoint.active ? "active" : "inactive",
     };
 
     await this.registry.addEndpoint(newEndpoint);
@@ -139,6 +133,7 @@ export class WebhookService {
 
     for (const endpoint of endpoints) {
       const delivery = await this.dispatcher.dispatch(event, endpoint);
+      await this.registry.addDelivery(delivery);
       deliveries.push(delivery);
     }
 
@@ -172,6 +167,7 @@ export class WebhookService {
 
     try {
       const delivery = await this.dispatcher.dispatch(testEvent, endpoint);
+      await this.registry.addDelivery(delivery);
       const endTime = Date.now();
 
       return {
@@ -215,11 +211,17 @@ export class WebhookService {
       return sum + (lastAttempt?.latencyMs || 0);
     }, 0);
 
-    const eventBreakdown: Record<WebhookEventType, number> = {} as any;
+    const eventBreakdown = Object.fromEntries(
+      Object.values(WebhookEventType).map((type) => [type, 0]),
+    ) as Record<WebhookEventType, number>;
     const errorBreakdown: Record<string, number> = {};
 
     for (const delivery of deliveries) {
-      // 이벤트 유형별 집계는 실제 구현에서 이벤트 정보를 조회해야 함
+      // 이벤트 유형별 집계
+      if (delivery.eventType) {
+        eventBreakdown[delivery.eventType] =
+          (eventBreakdown[delivery.eventType] || 0) + 1;
+      }
 
       // 에러 유형별 집계
       if (delivery.status === "failed" || delivery.status === "exhausted") {
@@ -261,20 +263,41 @@ export class WebhookService {
     let retriedCount = 0;
 
     for (const delivery of failedDeliveries) {
-      const attemptCount = delivery.attempts.length;
-      if (this.retryManager.shouldRetry(attemptCount)) {
-        // 재시도 스케줄링 (실제 구현에서는 큐 시스템 사용)
-        setTimeout(async () => {
-          const endpoint = await this.registry.getEndpoint(delivery.endpointId);
-          if (endpoint) {
-            await this.dispatcher.dispatch(
-              JSON.parse(delivery.payload),
-              endpoint,
-            );
-          }
-        }, this.retryManager.getBackoffDelay(attemptCount));
-        retriedCount++;
+      const endpoint = await this.registry.getEndpoint(delivery.endpointId);
+      if (!endpoint) continue;
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(delivery.payload);
+      } catch {
+        continue;
       }
+
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        continue;
+      }
+
+      const record = parsed as Record<string, unknown>;
+      const timestamp =
+        record.timestamp instanceof Date
+          ? record.timestamp
+          : typeof record.timestamp === "string" ||
+              typeof record.timestamp === "number"
+            ? new Date(record.timestamp)
+            : undefined;
+
+      const event: WebhookEvent = {
+        ...(record as unknown as WebhookEvent),
+        // Ensure we always pass a Date to the dispatcher.
+        timestamp:
+          timestamp && !Number.isNaN(timestamp.getTime())
+            ? timestamp
+            : new Date(),
+      };
+
+      const retried = await this.dispatcher.dispatch(event, endpoint);
+      await this.registry.addDelivery(retried);
+      retriedCount++;
     }
 
     return retriedCount;
@@ -325,12 +348,15 @@ export class WebhookService {
 
         for (const endpoint of endpoints) {
           // 비동기로 전달 (에러가 발생해도 다른 엔드포인트에 영향 없음)
-          this.dispatcher.dispatch(event, endpoint).catch((error) => {
-            console.error(
-              `Failed to dispatch webhook to ${endpoint.url}:`,
-              error,
-            );
-          });
+          this.dispatcher
+            .dispatch(event, endpoint)
+            .then((delivery) => this.registry.addDelivery(delivery))
+            .catch((error) => {
+              console.error(
+                `Failed to dispatch webhook to ${endpoint.url}:`,
+                error,
+              );
+            });
         }
       }
     } catch (error) {
@@ -348,6 +374,10 @@ export class WebhookService {
     return allEndpoints.filter((endpoint) => {
       // 비활성 엔드포인트 제외
       if (endpoint.status !== "active") {
+        return false;
+      }
+
+      if (!endpoint.active) {
         return false;
       }
 
@@ -396,6 +426,12 @@ export class WebhookService {
 
     if (!event.timestamp) {
       throw new Error("Event timestamp is required");
+    }
+    if (
+      !(event.timestamp instanceof Date) ||
+      Number.isNaN(event.timestamp.getTime())
+    ) {
+      throw new Error("Event timestamp must be a valid Date");
     }
 
     if (!event.version) {
