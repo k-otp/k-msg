@@ -2,10 +2,39 @@
 
 This CLI is built with Bunli and uses the unified `k-msg` package (KMsg + Providers).
 
-## Run
+## Install (recommended)
+
+The distribution workflow publishes prebuilt binaries to GitHub Releases as:
+
+- `k-msg-cli-<version>-darwin-arm64.tar.gz`
+- `k-msg-cli-<version>-darwin-x64.tar.gz`
+- `k-msg-cli-<version>-linux-arm64.tar.gz`
+- `k-msg-cli-<version>-linux-x64.tar.gz`
+- `k-msg-cli-<version>-windows-x64.tar.gz`
+
+After extracting, you'll find the binary at `<target>/k-msg` (or `<target>/k-msg.exe`).
+
+### macOS/Linux
 
 ```bash
-# Build native binary (default)
+tar -xzf k-msg-cli-<version>-<target>.tar.gz
+sudo install -m 0755 <target>/k-msg /usr/local/bin/k-msg
+
+# optional alias
+sudo ln -sf /usr/local/bin/k-msg /usr/local/bin/kmsg
+
+k-msg --help
+```
+
+### Windows
+
+Extract the archive and put `k-msg.exe` somewhere on your `PATH`.
+Optionally copy it as `kmsg.exe` as an alias.
+
+## Run (local/dev)
+
+```bash
+# Build native binary
 bun run --cwd apps/cli build
 ./apps/cli/dist/k-msg --help
 
@@ -13,7 +42,7 @@ bun run --cwd apps/cli build
 bun run --cwd apps/cli build:js
 bun --cwd apps/cli dist/k-msg.js --help
 
-# or run TS directly (dev)
+# Or run TS directly (dev)
 bun --cwd apps/cli src/k-msg.ts --help
 ```
 
@@ -24,14 +53,14 @@ Default config path: `./k-msg.config.json`
 Override:
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts --config /path/to/k-msg.config.json providers list
+k-msg --config /path/to/k-msg.config.json providers list
 ```
 
 Example file: `apps/cli/k-msg.config.example.json`
 
 ### `env:` substitution
 
-Any string value like `"env:NAME"` is replaced with `process.env.NAME` at runtime.
+Any string value like `"env:NAME"` is replaced with the `NAME` environment variable at runtime.
 If the env var is missing/empty, commands that need runtime providers will fail with exit code `2`.
 
 ## Commands
@@ -49,7 +78,7 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 ### SMS
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts sms send --to 01012345678 --text "hello"
+k-msg sms send --to 01012345678 --text "hello"
 ```
 
 ### AlimTalk
@@ -57,7 +86,7 @@ bun --cwd apps/cli src/k-msg.ts sms send --to 01012345678 --text "hello"
 Terminology: the CLI uses **Kakao Channel** and **senderKey** (never “profile”).
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts alimtalk send \
+k-msg alimtalk send \
   --to 01012345678 \
   --template-code TPL_001 \
   --vars '{"name":"Jane"}' \
@@ -67,16 +96,16 @@ bun --cwd apps/cli src/k-msg.ts alimtalk send \
 ### Advanced JSON send
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts send --input '{"to":"01012345678","text":"hello"}'
+k-msg send --input '{"to":"01012345678","text":"hello"}'
 ```
 
 ## Kakao Channel (Aligo capability)
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts kakao channel categories
-bun --cwd apps/cli src/k-msg.ts kakao channel list
-bun --cwd apps/cli src/k-msg.ts kakao channel auth --plus-id @my_channel --phone 01012345678
-bun --cwd apps/cli src/k-msg.ts kakao channel add \
+k-msg kakao channel categories
+k-msg kakao channel list
+k-msg kakao channel auth --plus-id @my_channel --phone 01012345678
+k-msg kakao channel add \
   --plus-id @my_channel \
   --auth-num 123456 \
   --phone 01012345678 \
@@ -89,14 +118,14 @@ bun --cwd apps/cli src/k-msg.ts kakao channel add \
 Channel scope (Aligo): use `--channel <alias>` or `--sender-key <value>`.
 
 ```bash
-bun --cwd apps/cli src/k-msg.ts kakao template list
-bun --cwd apps/cli src/k-msg.ts kakao template get --template-code TPL_001
-bun --cwd apps/cli src/k-msg.ts kakao template create --name "Welcome" --content "Hello #{name}" --channel main
-bun --cwd apps/cli src/k-msg.ts kakao template update --template-code TPL_001 --name "Updated"
-bun --cwd apps/cli src/k-msg.ts kakao template delete --template-code TPL_001
+k-msg kakao template list
+k-msg kakao template get --template-code TPL_001
+k-msg kakao template create --name "Welcome" --content "Hello #{name}" --channel main
+k-msg kakao template update --template-code TPL_001 --name "Updated"
+k-msg kakao template delete --template-code TPL_001
 
 # inspection request is provider-dependent (supported by Aligo)
-bun --cwd apps/cli src/k-msg.ts kakao template request --template-code TPL_001 --channel main
+k-msg kakao template request --template-code TPL_001 --channel main
 ```
 
 ## Output / Exit Codes
