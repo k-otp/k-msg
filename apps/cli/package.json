@@ -1,28 +1,42 @@
 {
   "name": "@k-msg/cli",
   "version": "0.1.1",
-  "private": true,
-  "description": "k-msg CLI tool",
+  "private": false,
+  "description": "k-msg CLI (prebuilt binaries via GitHub Releases)",
   "type": "module",
-  "bin": {
-    "k-msg": "./dist/cli.js",
-    "kmsg": "./dist/cli.js"
+  "engines": {
+    "node": ">=18"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "k-msg": "./bin/k-msg.js",
+    "kmsg": "./bin/k-msg.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
-    "build": "bun build src/cli.ts --outdir=dist --format=esm --target=node",
-    "dev": "bun --watch src/cli.ts",
+    "build": "bunli build",
+    "build:all": "bunli build --targets all",
+    "build:native": "bunli build --targets native",
+    "build:js": "bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
+    "dev": "bun --watch src/k-msg.ts",
     "test": "bun test",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@bunli/core": "^0.5.4",
-    "k-msg": "workspace:*",
-    "zod": "catalog:"
-  },
   "devDependencies": {
-    "typescript": "catalog:",
+    "@bunli/core": "^0.5.4",
+    "@bunli/test": "^0.3.2",
     "@types/bun": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "k-msg": "workspace:*",
+    "bunli": "^0.5.3",
+    "typescript": "catalog:",
+    "zod": "catalog:"
   },
   "keywords": [
     "alimtalk",

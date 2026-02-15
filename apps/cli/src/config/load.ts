@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { type KMsgCliConfig, kMsgCliConfigSchema } from "./schema";
 
@@ -9,11 +8,9 @@ export type LoadedKMsgConfig = {
 
 export function resolveConfigPath(inputPath: string | undefined): string {
   if (typeof inputPath === "string" && inputPath.trim().length > 0) {
-    return path.isAbsolute(inputPath)
-      ? inputPath
-      : path.resolve(process.cwd(), inputPath);
+    return path.isAbsolute(inputPath) ? inputPath : path.resolve(inputPath);
   }
-  return path.resolve(process.cwd(), "k-msg.config.json");
+  return path.resolve("k-msg.config.json");
 }
 
 function substituteEnvValues(
@@ -26,7 +23,7 @@ function substituteEnvValues(
     const key = trimmed.slice("env:".length).trim();
     if (key.length === 0) return value;
 
-    const resolved = process.env[key];
+    const resolved = (Bun.env as Record<string, string | undefined>)[key];
     if (resolved === undefined || resolved.trim().length === 0) {
       const at = pathParts.length > 0 ? ` at ${pathParts.join(".")}` : "";
       throw new Error(`Missing environment variable: ${key}${at}`);
@@ -51,13 +48,16 @@ function substituteEnvValues(
   return value;
 }
 
-export function loadKMsgConfig(configPath?: string): LoadedKMsgConfig {
+export async function loadKMsgConfig(
+  configPath?: string,
+): Promise<LoadedKMsgConfig> {
   const resolved = resolveConfigPath(configPath);
-  if (!existsSync(resolved)) {
+  const file = Bun.file(resolved);
+  if (!(await file.exists())) {
     throw new Error(`Config file not found: ${resolved}`);
   }
 
-  const raw = readFileSync(resolved, "utf8");
+  const raw = await file.text();
   let parsed: unknown;
   try {
     parsed = raw.trim().length > 0 ? JSON.parse(raw) : {};

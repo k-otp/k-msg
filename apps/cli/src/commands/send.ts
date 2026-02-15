@@ -1,22 +1,32 @@
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "k-msg";
 import { z } from "zod";
+import { optConfig, optJson, optProvider } from "../cli/options";
+import { exitCodeForError, printError } from "../cli/utils";
 import { loadRuntime } from "../runtime";
-import { optConfig, optJson, optProvider } from "./options";
-import { exitCodeForError, parseJson, printError } from "./utils";
+
+const sendInputJsonSchema = z
+  .string()
+  .min(1)
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value) as unknown;
+    } catch (error) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Invalid JSON for SendInput: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.record(z.string(), z.unknown()));
 
 async function readStdinText(): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => {
-      data += chunk;
-    });
-    process.stdin.on("end", () => resolve(data));
-    process.stdin.on("error", reject);
-  });
+  // Bun exposes stdin as a BunFile.
+  return await Bun.stdin.text();
 }
 
 export default defineCommand({
@@ -26,50 +36,51 @@ export default defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    input: option(z.string().optional(), {
+    input: option(sendInputJsonSchema.optional(), {
       description: "SendInput JSON string",
     }),
-    file: option(z.string().optional(), {
-      description: "Path to SendInput JSON file",
-    }),
+    file: option(
+      z
+        .string()
+        .min(1)
+        .transform((value) =>
+          path.isAbsolute(value) ? value : path.resolve(value),
+        )
+        .optional(),
+      {
+        description: "Path to SendInput JSON file",
+      },
+    ),
     stdin: option(z.coerce.boolean().default(false), {
       description: "Read SendInput JSON from stdin",
     }),
   },
   handler: async ({ flags }) => {
     try {
-      const runtime = loadRuntime(flags.config);
-      const modeCount = [
-        flags.input,
-        flags.file,
-        flags.stdin ? "stdin" : undefined,
-      ].filter(
-        (v) => v !== undefined && v !== false && String(v).length > 0,
-      ).length;
+      const runtime = await loadRuntime(flags.config);
+      const modeCount =
+        (flags.input !== undefined ? 1 : 0) +
+        (typeof flags.file === "string" ? 1 : 0) +
+        (flags.stdin ? 1 : 0);
       if (modeCount !== 1) {
         throw new Error("Use exactly one of --input, --file, or --stdin");
       }
 
-      const raw = (() => {
-        if (typeof flags.input === "string") return flags.input;
-        if (typeof flags.file === "string") {
-          const abs = path.isAbsolute(flags.file)
-            ? flags.file
-            : path.resolve(process.cwd(), flags.file);
-          return readFileSync(abs, "utf8");
+      let inputRecord: Record<string, unknown>;
+
+      if (flags.input !== undefined) {
+        inputRecord = flags.input;
+      } else if (typeof flags.file === "string") {
+        const abs = flags.file;
+        const file = Bun.file(abs);
+        if (!(await file.exists())) {
+          throw new Error(`File not found: ${abs}`);
         }
-        return undefined;
-      })();
-
-      const text =
-        raw !== undefined ? raw : flags.stdin ? await readStdinText() : "";
-
-      const parsed = parseJson(text, "SendInput");
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        throw new Error("SendInput must be a JSON object");
+        inputRecord = sendInputJsonSchema.parse(await file.text());
+      } else {
+        inputRecord = sendInputJsonSchema.parse(await readStdinText());
       }
 
-      const inputRecord = parsed as Record<string, unknown>;
       const input = (flags.provider
         ? { ...inputRecord, providerId: flags.provider }
         : inputRecord) as unknown as SendInput;
