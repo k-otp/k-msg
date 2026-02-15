@@ -1,88 +1,104 @@
-# K-Message CLI (`apps/cli`)
+# k-msg CLI (`apps/cli`)
 
-Unified CLI for sending Korean messaging traffic (SMS/LMS/MMS, AlimTalk, FriendTalk) through pluggable providers.
+This CLI is built with Bunli and uses the unified `k-msg` package (KMsg + Providers).
 
 ## Run
 
 ```bash
+bun --cwd apps/cli run build
+bun --cwd apps/cli dist/cli.js --help
+
+# or run TS directly (dev)
 bun --cwd apps/cli src/cli.ts --help
-bun --cwd apps/cli src/cli.ts info
 ```
 
-## Provider Loading (Plugin Manifest)
+## Config (`k-msg.config.json`)
 
-This CLI runs in **plugin-manifest mode** by default. It loads providers from:
+Default config path: `./k-msg.config.json`
 
-- `K_MSG_PROVIDER_PLUGINS` (inline JSON), or
-- `K_MSG_PROVIDER_PLUGIN_FILE` (JSON file path), or
-- `k-msg.providers.json` in the current working directory, or
-- `apps/cli/k-msg.providers.json` (repo default).
-
-If you only want to run locally without providers, set:
+Override:
 
 ```bash
-export K_MSG_MOCK=true
+bun --cwd apps/cli src/cli.ts --config /path/to/k-msg.config.json providers list
 ```
 
-### Default Manifest
+Example file: `apps/cli/k-msg.config.example.json`
 
-This repo includes a safe default manifest at `apps/cli/k-msg.providers.json` (no secrets). It loads providers using env vars.
+### `env:` substitution
 
-## Environment Variables
-
-Put your secrets in `apps/cli/.env` (Bun loads it automatically when running from `apps/cli`).
-
-### IWINV (SMS v2 + AlimTalk)
-
-- `IWINV_API_KEY`: AlimTalk API key
-- `IWINV_SMS_API_KEY`: SMS v2 API key
-- `IWINV_SMS_AUTH_KEY`: SMS v2 auth key
-- `IWINV_SENDER_NUMBER`: sender phone number
-
-Optional (IP restriction alert/retry):
-
-- `IWINV_IP_RETRY_COUNT`
-- `IWINV_IP_RETRY_DELAY_MS`
-- `IWINV_IP_ALERT_WEBHOOK_URL`
-
-### ALIGO (optional)
-
-- `ALIGO_API_KEY`
-- `ALIGO_USER_ID`
-- `ALIGO_SENDER_KEY`
-- `ALIGO_SENDER`
+Any string value like `"env:NAME"` is replaced with `process.env.NAME` at runtime.
+If the env var is missing/empty, commands that need runtime providers will fail with exit code `2`.
 
 ## Commands
 
-### Send (single)
+- `k-msg config init|show|validate`
+- `k-msg providers list|health`
+- `k-msg sms send`
+- `k-msg alimtalk send`
+- `k-msg send --input <json> | --file <path> | --stdin`
+- `k-msg kakao channel categories|list|auth|add`
+- `k-msg kakao template list|get|create|update|delete|request`
+
+## Send
+
+### SMS
 
 ```bash
-bun --cwd apps/cli src/cli.ts send -c SMS -p 01012345678 --text "hello" --sender 01000000000
+bun --cwd apps/cli src/cli.ts sms send --to 01012345678 --text "hello"
 ```
 
-Notes:
+### AlimTalk
 
-- `ALIMTALK` requires `--template`.
-- `SMS/LMS/MMS/FRIENDTALK` require `--text` (or `--variables '{"message":"..."}'`).
-
-### Bulk Send (multi)
+Terminology: the CLI uses **Kakao Channel** and **senderKey** (never “profile”).
 
 ```bash
-bun --cwd apps/cli src/cli.ts bulk-send -c SMS --phones 01011112222,01033334444 --text "hello" --sender 01000000000
+bun --cwd apps/cli src/cli.ts alimtalk send \
+  --to 01012345678 \
+  --template-code TPL_001 \
+  --vars '{"name":"Jane"}' \
+  --channel main
 ```
 
-From a file:
+### Advanced JSON send
 
 ```bash
-bun --cwd apps/cli src/cli.ts bulk-send -c SMS --phones-file ./phones.txt --text "hello" --sender 01000000000
+bun --cwd apps/cli src/cli.ts send --input '{"to":"01012345678","text":"hello"}'
 ```
 
-### Round-Robin Rotation (bulk)
-
-The default manifest sets the default provider to `sms-rr`, a router that round-robins across `iwinv` and `aligo` (when both are enabled). If only one upstream provider is enabled, it behaves like that provider.
-
-Override explicitly:
+## Kakao Channel (Aligo capability)
 
 ```bash
-bun --cwd apps/cli src/cli.ts bulk-send -c SMS --provider iwinv --phones 01011112222,01033334444 --text "hello"
+bun --cwd apps/cli src/cli.ts kakao channel categories
+bun --cwd apps/cli src/cli.ts kakao channel list
+bun --cwd apps/cli src/cli.ts kakao channel auth --plus-id @my_channel --phone 01012345678
+bun --cwd apps/cli src/cli.ts kakao channel add \
+  --plus-id @my_channel \
+  --auth-num 123456 \
+  --phone 01012345678 \
+  --category-code 001001001 \
+  --save main
 ```
+
+## Kakao Template (IWINV/Aligo)
+
+Channel scope (Aligo): use `--channel <alias>` or `--sender-key <value>`.
+
+```bash
+bun --cwd apps/cli src/cli.ts kakao template list
+bun --cwd apps/cli src/cli.ts kakao template get --template-code TPL_001
+bun --cwd apps/cli src/cli.ts kakao template create --name "Welcome" --content "Hello #{name}" --channel main
+bun --cwd apps/cli src/cli.ts kakao template update --template-code TPL_001 --name "Updated"
+bun --cwd apps/cli src/cli.ts kakao template delete --template-code TPL_001
+
+# inspection request is provider-dependent (supported by Aligo)
+bun --cwd apps/cli src/cli.ts kakao template request --template-code TPL_001 --channel main
+```
+
+## Output / Exit Codes
+
+- `--json`: print machine-readable JSON
+- exit code:
+  - `0`: success
+  - `2`: input/config error
+  - `3`: provider/network error
+  - `4`: capability not supported

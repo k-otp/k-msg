@@ -6,6 +6,7 @@ import {
   ok,
   Result,
   type Template,
+  type TemplateCreateInput,
   type TemplateProvider,
 } from "@k-msg/core";
 import { TemplateService } from "./service";
@@ -34,8 +35,7 @@ describe("TemplateService", () => {
 
   describe("create", () => {
     it("should create a template successfully", async () => {
-      const input = {
-        code: "WELCOME_001",
+      const input: TemplateCreateInput = {
         name: "Welcome Template",
         content: "Hello, #{name}!",
         category: "NOTIFICATION",
@@ -52,7 +52,6 @@ describe("TemplateService", () => {
 
     it("should return failure if name is missing", async () => {
       const result = await service.create({
-        code: "WELCOME_001",
         name: "",
         content: "Hello",
       });
@@ -65,22 +64,8 @@ describe("TemplateService", () => {
 
     it("should return failure if content is missing", async () => {
       const result = await service.create({
-        code: "WELCOME_001",
         name: "Name",
         content: "",
-      });
-
-      expect(result.isFailure).toBe(true);
-      if (result.isFailure) {
-        expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
-      }
-    });
-
-    it("should return failure if code is missing", async () => {
-      const result = await service.create({
-        code: "",
-        name: "Name",
-        content: "Content",
       });
 
       expect(result.isFailure).toBe(true);
@@ -98,7 +83,10 @@ describe("TemplateService", () => {
       if (result.isSuccess) {
         expect(result.value).toEqual(mockTemplate);
       }
-      expect(mockProvider.getTemplate).toHaveBeenCalledWith("WELCOME_001");
+      expect(mockProvider.getTemplate).toHaveBeenCalledWith(
+        "WELCOME_001",
+        undefined,
+      );
     });
 
     it("should return failure if code is missing", async () => {
@@ -112,9 +100,13 @@ describe("TemplateService", () => {
       const result = await service.update("WELCOME_001", { name: "New Name" });
 
       expect(result.isSuccess).toBe(true);
-      expect(mockProvider.updateTemplate).toHaveBeenCalledWith("WELCOME_001", {
-        name: "New Name",
-      });
+      expect(mockProvider.updateTemplate).toHaveBeenCalledWith(
+        "WELCOME_001",
+        {
+          name: "New Name",
+        },
+        undefined,
+      );
     });
   });
 
@@ -123,7 +115,10 @@ describe("TemplateService", () => {
       const result = await service.delete("WELCOME_001");
 
       expect(result.isSuccess).toBe(true);
-      expect(mockProvider.deleteTemplate).toHaveBeenCalledWith("WELCOME_001");
+      expect(mockProvider.deleteTemplate).toHaveBeenCalledWith(
+        "WELCOME_001",
+        undefined,
+      );
     });
   });
 

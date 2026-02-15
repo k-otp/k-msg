@@ -70,6 +70,52 @@ export interface AligoTemplateDeleteRequest {
   tpl_code: string;
 }
 
+export interface AligoTemplateModifyRequest {
+  apikey: string;
+  userid: string;
+  senderkey: string;
+  tpl_code: string;
+  tpl_name: string;
+  tpl_content: string;
+  tpl_button?: string;
+  tpl_secure?: "Y" | "N";
+  tpl_type?: string;
+  tpl_emtype?: string;
+  tpl_extra?: string;
+  tpl_title?: string;
+  tpl_stitle?: string;
+}
+
+export interface AligoTemplateInspectionRequest {
+  apikey: string;
+  userid: string;
+  senderkey: string;
+  tpl_code: string;
+}
+
+export interface AligoKakaoChannelListRequest {
+  apikey: string;
+  userid: string;
+  plusid?: string;
+  senderkey?: string;
+}
+
+export interface AligoKakaoChannelAuthRequest {
+  apikey: string;
+  userid: string;
+  plusid: string;
+  phonenumber: string;
+}
+
+export interface AligoKakaoChannelAddRequest {
+  apikey: string;
+  userid: string;
+  plusid: string;
+  authnum: string;
+  phonenumber: string;
+  categorycode: string;
+}
+
 export interface AligoRemainResponse {
   result_code: string;
   message: string;
