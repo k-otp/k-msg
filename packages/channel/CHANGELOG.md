@@ -1,5 +1,11 @@
 # @k-msg/channel
 
+## 0.8.0 — 2026-02-15
+
+### Minor changes
+
+- Bumped due to fixed dependency group policy
+
 ## 0.7.3 — 2026-02-15
 
 ### Patch changes
