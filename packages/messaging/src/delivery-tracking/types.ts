@@ -19,6 +19,11 @@ export interface TrackingRecord {
   requestedAt: Date;
   scheduledAt?: Date;
   status: DeliveryStatus;
+  providerStatusCode?: string;
+  providerStatusMessage?: string;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  failedAt?: Date;
   statusUpdatedAt: Date;
   attemptCount: number;
   lastCheckedAt?: Date;

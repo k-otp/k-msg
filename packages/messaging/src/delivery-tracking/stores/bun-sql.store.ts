@@ -1,5 +1,11 @@
 import type { SQL } from "bun";
-import type { DeliveryTrackingStore } from "../store.interface";
+import type {
+  DeliveryTrackingCountByField,
+  DeliveryTrackingCountByRow,
+  DeliveryTrackingListOptions,
+  DeliveryTrackingRecordFilter,
+  DeliveryTrackingStore,
+} from "../store.interface";
 import type { TrackingRecord } from "../types";
 
 type TrackingRow = {
@@ -10,6 +16,11 @@ type TrackingRow = {
   to: string;
   from: string | null;
   status: string;
+  provider_status_code: string | null;
+  provider_status_message: string | null;
+  sent_at: number | null;
+  delivered_at: number | null;
+  failed_at: number | null;
   requested_at: number;
   scheduled_at: number | null;
   status_updated_at: number;
@@ -28,6 +39,11 @@ function safeJsonParse<T>(value: string | null): T | undefined {
   } catch {
     return undefined;
   }
+}
+
+function toArray<T>(value: T | T[] | undefined): T[] | undefined {
+  if (value === undefined) return undefined;
+  return Array.isArray(value) ? value : [value];
 }
 
 export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
@@ -63,6 +79,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
         ${q}to${q} ${phoneType} NOT NULL,
         ${q}from${q} ${phoneType},
         ${q}status${q} ${shortType} NOT NULL,
+        ${q}provider_status_code${q} ${shortType},
+        ${q}provider_status_message${q} ${shortType},
+        ${q}sent_at${q} BIGINT,
+        ${q}delivered_at${q} BIGINT,
+        ${q}failed_at${q} BIGINT,
         ${q}requested_at${q} BIGINT NOT NULL,
         ${q}scheduled_at${q} BIGINT,
         ${q}status_updated_at${q} BIGINT NOT NULL,
@@ -89,6 +110,28 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     try {
       await this.sql.unsafe(providerMsgIndex);
     } catch {}
+
+    // Helpful for analytics queries.
+    const requestedAtIndex = isMySql
+      ? `CREATE INDEX idx_kmsg_delivery_requested_at ON ${q}kmsg_delivery_tracking${q} (${q}requested_at${q});`
+      : `CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_requested_at ON ${q}kmsg_delivery_tracking${q} (${q}requested_at${q});`;
+    try {
+      await this.sql.unsafe(requestedAtIndex);
+    } catch {}
+
+    // Best-effort migrations for existing DBs.
+    const alterStatements = [
+      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_code${q} ${shortType};`,
+      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_message${q} ${shortType};`,
+      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}sent_at${q} BIGINT;`,
+      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}delivered_at${q} BIGINT;`,
+      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}failed_at${q} BIGINT;`,
+    ];
+    for (const stmt of alterStatements) {
+      try {
+        await this.sql.unsafe(stmt);
+      } catch {}
+    }
   }
 
   async upsert(record: TrackingRecord): Promise<void> {
@@ -106,6 +149,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       to: sql("to"),
       from: sql("from"),
       status: sql("status"),
+      provider_status_code: sql("provider_status_code"),
+      provider_status_message: sql("provider_status_message"),
+      sent_at: sql("sent_at"),
+      delivered_at: sql("delivered_at"),
+      failed_at: sql("failed_at"),
       requested_at: sql("requested_at"),
       scheduled_at: sql("scheduled_at"),
       status_updated_at: sql("status_updated_at"),
@@ -125,6 +173,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       to: record.to,
       from: record.from ?? null,
       status: record.status,
+      providerStatusCode: record.providerStatusCode ?? null,
+      providerStatusMessage: record.providerStatusMessage ?? null,
+      sentAt: record.sentAt ? record.sentAt.getTime() : null,
+      deliveredAt: record.deliveredAt ? record.deliveredAt.getTime() : null,
+      failedAt: record.failedAt ? record.failedAt.getTime() : null,
       requestedAt: record.requestedAt.getTime(),
       scheduledAt: record.scheduledAt ? record.scheduledAt.getTime() : null,
       statusUpdatedAt: record.statusUpdatedAt.getTime(),
@@ -148,6 +201,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
           ${c.to},
           ${c.from},
           ${c.status},
+          ${c.provider_status_code},
+          ${c.provider_status_message},
+          ${c.sent_at},
+          ${c.delivered_at},
+          ${c.failed_at},
           ${c.requested_at},
           ${c.scheduled_at},
           ${c.status_updated_at},
@@ -165,6 +223,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
           ${values.to},
           ${values.from},
           ${values.status},
+          ${values.providerStatusCode},
+          ${values.providerStatusMessage},
+          ${values.sentAt},
+          ${values.deliveredAt},
+          ${values.failedAt},
           ${values.requestedAt},
           ${values.scheduledAt},
           ${values.statusUpdatedAt},
@@ -182,6 +245,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
           ${c.to} = VALUES(${c.to}),
           ${c.from} = VALUES(${c.from}),
           ${c.status} = VALUES(${c.status}),
+          ${c.provider_status_code} = VALUES(${c.provider_status_code}),
+          ${c.provider_status_message} = VALUES(${c.provider_status_message}),
+          ${c.sent_at} = VALUES(${c.sent_at}),
+          ${c.delivered_at} = VALUES(${c.delivered_at}),
+          ${c.failed_at} = VALUES(${c.failed_at}),
           ${c.requested_at} = VALUES(${c.requested_at}),
           ${c.scheduled_at} = VALUES(${c.scheduled_at}),
           ${c.status_updated_at} = VALUES(${c.status_updated_at}),
@@ -204,6 +272,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
         ${c.to},
         ${c.from},
         ${c.status},
+        ${c.provider_status_code},
+        ${c.provider_status_message},
+        ${c.sent_at},
+        ${c.delivered_at},
+        ${c.failed_at},
         ${c.requested_at},
         ${c.scheduled_at},
         ${c.status_updated_at},
@@ -221,6 +294,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
         ${values.to},
         ${values.from},
         ${values.status},
+        ${values.providerStatusCode},
+        ${values.providerStatusMessage},
+        ${values.sentAt},
+        ${values.deliveredAt},
+        ${values.failedAt},
         ${values.requestedAt},
         ${values.scheduledAt},
         ${values.statusUpdatedAt},
@@ -238,6 +316,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
         ${c.to} = ${excluded}.${c.to},
         ${c.from} = ${excluded}.${c.from},
         ${c.status} = ${excluded}.${c.status},
+        ${c.provider_status_code} = ${excluded}.${c.provider_status_code},
+        ${c.provider_status_message} = ${excluded}.${c.provider_status_message},
+        ${c.sent_at} = ${excluded}.${c.sent_at},
+        ${c.delivered_at} = ${excluded}.${c.delivered_at},
+        ${c.failed_at} = ${excluded}.${c.failed_at},
         ${c.requested_at} = ${excluded}.${c.requested_at},
         ${c.scheduled_at} = ${excluded}.${c.scheduled_at},
         ${c.status_updated_at} = ${excluded}.${c.status_updated_at},
@@ -293,6 +376,132 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     return rows.map((row) => this.rowToRecord(row));
   }
 
+  async listRecords(
+    options: DeliveryTrackingListOptions,
+  ): Promise<TrackingRecord[]> {
+    const safeLimit = Number.isFinite(options.limit)
+      ? Math.max(0, Math.floor(options.limit))
+      : 0;
+    if (safeLimit === 0) return [];
+
+    const safeOffset = Number.isFinite(options.offset)
+      ? Math.max(0, Math.floor(options.offset ?? 0))
+      : 0;
+
+    const orderBy = options.orderBy ?? "requestedAt";
+    const orderDirection = options.orderDirection ?? "desc";
+    const orderByColumn =
+      orderBy === "statusUpdatedAt" ? "status_updated_at" : "requested_at";
+    const dir = orderDirection === "asc" ? "ASC" : "DESC";
+
+    const { whereSql, args, placeholder } = this.buildWhere(options);
+    const q = this.getQuote();
+    const table = `${q}kmsg_delivery_tracking${q}`;
+
+    const limitPlaceholder = placeholder(args.length + 1);
+    args.push(safeLimit);
+    const offsetPlaceholder = placeholder(args.length + 1);
+    args.push(safeOffset);
+
+    const sql = `
+      SELECT
+        message_id,
+        provider_id,
+        provider_message_id,
+        type,
+        ${q}to${q},
+        ${q}from${q},
+        status,
+        provider_status_code,
+        provider_status_message,
+        sent_at,
+        delivered_at,
+        failed_at,
+        requested_at,
+        scheduled_at,
+        status_updated_at,
+        attempt_count,
+        last_checked_at,
+        next_check_at,
+        last_error,
+        raw,
+        metadata
+      FROM ${table}
+      ${whereSql}
+      ORDER BY ${q}${orderByColumn}${q} ${dir}
+      LIMIT ${limitPlaceholder}
+      OFFSET ${offsetPlaceholder}
+    `;
+
+    const rows = (await this.sql.unsafe(sql, args)) as unknown as TrackingRow[];
+    return rows.map((row) => this.rowToRecord(row));
+  }
+
+  async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    const { whereSql, args } = this.buildWhere(filter);
+    const q = this.getQuote();
+    const table = `${q}kmsg_delivery_tracking${q}`;
+
+    const sql = `
+      SELECT COUNT(1) as count
+      FROM ${table}
+      ${whereSql}
+    `;
+
+    const rows = (await this.sql.unsafe(sql, args)) as unknown as Array<{
+      count: number;
+    }>;
+    const row = rows[0];
+    return row ? Number(row.count) : 0;
+  }
+
+  async countBy(
+    filter: DeliveryTrackingRecordFilter,
+    groupBy: readonly DeliveryTrackingCountByField[],
+  ): Promise<DeliveryTrackingCountByRow[]> {
+    const fields = Array.from(groupBy).filter(Boolean);
+    if (fields.length === 0) return [];
+
+    const fieldToColumn: Record<DeliveryTrackingCountByField, string> = {
+      providerId: "provider_id",
+      type: "type",
+      status: "status",
+    };
+
+    const columns = fields.map((f) => fieldToColumn[f]).filter(Boolean);
+    const q = this.getQuote();
+    const table = `${q}kmsg_delivery_tracking${q}`;
+
+    const selectCols = columns.map((c) => `${q}${c}${q}`).join(", ");
+    const groupCols = columns.map((c) => `${q}${c}${q}`).join(", ");
+
+    const { whereSql, args } = this.buildWhere(filter);
+
+    const sql = `
+      SELECT ${selectCols}, COUNT(1) as count
+      FROM ${table}
+      ${whereSql}
+      GROUP BY ${groupCols}
+    `;
+
+    const rows = (await this.sql.unsafe(sql, args)) as unknown as Array<
+      Record<string, unknown>
+    >;
+    return rows.map((row) => {
+      const key: Record<string, string> = {};
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const col = columns[i];
+        const raw = row[col];
+        key[field] = raw === undefined || raw === null ? "" : String(raw);
+      }
+      return {
+        key,
+        count: Number(row.count ?? 0),
+      };
+    });
+  }
+
   async patch(
     messageId: string,
     patch: Partial<TrackingRecord>,
@@ -326,6 +535,11 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       requestedAt: new Date(row.requested_at),
       scheduledAt: row.scheduled_at ? new Date(row.scheduled_at) : undefined,
       status: row.status as TrackingRecord["status"],
+      providerStatusCode: row.provider_status_code ?? undefined,
+      providerStatusMessage: row.provider_status_message ?? undefined,
+      sentAt: row.sent_at ? new Date(row.sent_at) : undefined,
+      deliveredAt: row.delivered_at ? new Date(row.delivered_at) : undefined,
+      failedAt: row.failed_at ? new Date(row.failed_at) : undefined,
       statusUpdatedAt: new Date(row.status_updated_at),
       attemptCount: row.attempt_count,
       lastCheckedAt: row.last_checked_at
@@ -335,6 +549,104 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       lastError: safeJsonParse<TrackingRecord["lastError"]>(row.last_error),
       raw: safeJsonParse<unknown>(row.raw),
       metadata: safeJsonParse<TrackingRecord["metadata"]>(row.metadata),
+    };
+  }
+
+  private getQuote(): string {
+    const adapter = this.sql.options?.adapter;
+    return adapter === "mysql" || adapter === "mariadb" ? "`" : '"';
+  }
+
+  private buildWhere(filter: DeliveryTrackingRecordFilter): {
+    whereSql: string;
+    args: unknown[];
+    placeholder: (index: number) => string;
+  } {
+    const adapter = this.sql.options?.adapter;
+    const q = this.getQuote();
+    const isPostgres = adapter === "postgres";
+
+    const args: unknown[] = [];
+    const placeholder = (index: number) => (isPostgres ? `$${index}` : "?");
+
+    const clauses: string[] = [];
+
+    // Helper: push a single value and return its placeholder.
+    const pushValue = (value: unknown) => {
+      const ph = placeholder(args.length + 1);
+      args.push(value);
+      return ph;
+    };
+
+    const pushInList = (columnSql: string, values: unknown[]) => {
+      const placeholders: string[] = [];
+      for (const v of values) {
+        placeholders.push(pushValue(v));
+      }
+      clauses.push(`${columnSql} IN (${placeholders.join(", ")})`);
+    };
+
+    const messageIds = toArray(filter.messageId);
+    if (messageIds && messageIds.length > 0) {
+      pushInList(`${q}message_id${q}`, messageIds);
+    }
+
+    const providerIds = toArray(filter.providerId);
+    if (providerIds && providerIds.length > 0) {
+      pushInList(`${q}provider_id${q}`, providerIds);
+    }
+
+    const providerMessageIds = toArray(filter.providerMessageId);
+    if (providerMessageIds && providerMessageIds.length > 0) {
+      pushInList(`${q}provider_message_id${q}`, providerMessageIds);
+    }
+
+    const types = toArray(filter.type);
+    if (types && types.length > 0) {
+      pushInList(`${q}type${q}`, types);
+    }
+
+    const statuses = toArray(filter.status);
+    if (statuses && statuses.length > 0) {
+      pushInList(`${q}status${q}`, statuses);
+    }
+
+    const tos = toArray(filter.to);
+    if (tos && tos.length > 0) {
+      pushInList(`${q}to${q}`, tos);
+    }
+
+    const froms = toArray(filter.from);
+    if (froms && froms.length > 0) {
+      pushInList(`${q}from${q}`, froms);
+    }
+
+    if (filter.requestedAtFrom instanceof Date) {
+      clauses.push(
+        `${q}requested_at${q} >= ${pushValue(filter.requestedAtFrom.getTime())}`,
+      );
+    }
+    if (filter.requestedAtTo instanceof Date) {
+      clauses.push(
+        `${q}requested_at${q} <= ${pushValue(filter.requestedAtTo.getTime())}`,
+      );
+    }
+
+    if (filter.statusUpdatedAtFrom instanceof Date) {
+      clauses.push(
+        `${q}status_updated_at${q} >= ${pushValue(filter.statusUpdatedAtFrom.getTime())}`,
+      );
+    }
+    if (filter.statusUpdatedAtTo instanceof Date) {
+      clauses.push(
+        `${q}status_updated_at${q} <= ${pushValue(filter.statusUpdatedAtTo.getTime())}`,
+      );
+    }
+
+    return {
+      whereSql: clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "",
+      args,
+      placeholder,
     };
   }
 }

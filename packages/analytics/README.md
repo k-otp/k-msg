@@ -1,6 +1,6 @@
 # @k-msg/analytics
 
-Analytics and insights engine for the K-Message platform.
+Analytics and reporting for `k-msg`, built on top of delivery-tracking records.
 
 ## Installation
 
@@ -12,85 +12,68 @@ bun add @k-msg/analytics @k-msg/core
 
 ## Features
 
-- **Metrics Collection**: Comprehensive message and system metrics collection
-- **Real-time Analytics**: Live analytics processing and aggregation
-- **Anomaly Detection**: Intelligent anomaly detection for message patterns
-- **Recommendation Engine**: AI-powered recommendations for optimization
-- **Dashboard Generation**: Automated dashboard and report generation
-- **Data Export**: Multiple export formats (CSV, JSON, Excel)
+- **Query-based (recommended)**: compute KPIs by reading `DeliveryTrackingStore` records (SQLite / Bun.SQL / memory)
+- **Breakdowns**: by status, provider, message type
+- **(Experimental)** in-memory collectors/insights/reporting utilities (subject to change)
 
-## Basic Usage
+## Basic Usage (Query-Based)
 
 ```typescript
-import { AnalyticsService, MetricsCollector } from '@k-msg/analytics';
+import { KMsg } from "k-msg";
+import {
+  DeliveryTrackingService,
+  SqliteDeliveryTrackingStore,
+  createDeliveryTrackingHooks,
+} from "k-msg";
+import { DeliveryTrackingAnalyticsService } from "@k-msg/analytics";
 
-const analytics = new AnalyticsService();
-const collector = new MetricsCollector();
+const providers = [
+  /* new SolapiProvider(...), new IWINVProvider(...), ... */
+];
 
-// Collect message metrics
-await collector.collect({
-  type: 'MESSAGE_SENT',
-  provider: 'iwinv',
-  channel: 'alimtalk',
-  count: 1,
-  metadata: {
-    templateId: 'TPL001',
-    region: 'KR'
-  }
+// 1) Tracking (writes to store)
+const store = new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" });
+const tracking = new DeliveryTrackingService({ providers, store });
+await tracking.init();
+
+const kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking),
 });
 
-// Generate dashboard data
-const dashboard = await analytics.generateDashboard({
-  timeRange: '24h',
-  metrics: ['delivery_rate', 'failure_rate', 'response_time']
-});
+await kmsg.send({ to: "01012345678", text: "hello" });
+
+// 2) Analytics (reads from the same store)
+const analytics = new DeliveryTrackingAnalyticsService({ store });
+const summary = await analytics.getSummary(
+  { requestedAt: { start: new Date(Date.now() - 24 * 60 * 60 * 1000), end: new Date() } },
+  { includeByProviderId: true, includeByType: true },
+);
+
+console.log(summary);
 ```
 
-## Insights and Recommendations
+## Using Bun.SQL (Postgres/MySQL/SQLite)
 
 ```typescript
-import { InsightEngine, RecommendationEngine } from '@k-msg/analytics';
+import { BunSqlDeliveryTrackingStore } from "k-msg";
+import { DeliveryTrackingAnalyticsService } from "@k-msg/analytics";
 
-const insightEngine = new InsightEngine();
-const recommendationEngine = new RecommendationEngine();
-
-// Generate insights
-const insights = await insightEngine.generateInsights({
-  timeRange: '7d',
-  providers: ['iwinv'],
-  includeAnomalies: true
+const store = new BunSqlDeliveryTrackingStore({
+  options: {
+    adapter: "postgres",
+    url: process.env.DATABASE_URL!,
+  },
 });
 
-// Get optimization recommendations
-const recommendations = await recommendationEngine.generateRecommendations({
-  metrics: insights.metrics,
-  thresholds: {
-    deliveryRate: 0.95,
-    errorRate: 0.05
-  }
-});
+const analytics = new DeliveryTrackingAnalyticsService({ store });
+await analytics.init();
 ```
 
-## Export and Reporting
+## Notes
 
-```typescript
-import { ExportManager } from '@k-msg/analytics';
-
-const exportManager = new ExportManager();
-
-// Export metrics to CSV
-await exportManager.exportToCSV({
-  metrics: dashboard.metrics,
-  filename: 'monthly-report.csv',
-  timeRange: '30d'
-});
-
-// Export to JSON for API consumption
-const jsonReport = await exportManager.exportToJSON({
-  includeRawData: true,
-  format: 'detailed'
-});
-```
+- `@k-msg/analytics` does not create its own database. It reads from the `kmsg_delivery_tracking` table written by `DeliveryTrackingService`.
+- For production usage, prefer a durable store (`SqliteDeliveryTrackingStore` or `BunSqlDeliveryTrackingStore`).
 
 ## License
 

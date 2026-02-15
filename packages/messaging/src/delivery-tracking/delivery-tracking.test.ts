@@ -72,6 +72,7 @@ describe("DeliveryTrackingService (InMemory)", () => {
 
     const after = await service.getRecord("m1");
     expect(after?.status).toBe("DELIVERED");
+    expect(after?.providerStatusCode).toBe("OK");
   });
 
   test("scheduled sends start as PENDING and delay polling until scheduledAt + grace", async () => {
@@ -164,6 +165,9 @@ describe("DeliveryTrackingStore (SQLite)", () => {
       to: "01012345678",
       requestedAt: now,
       status: "SENT",
+      providerStatusCode: "2000",
+      providerStatusMessage: "queued",
+      sentAt: now,
       statusUpdatedAt: now,
       attemptCount: 0,
       nextCheckAt: new Date(now.getTime() - 1),
@@ -171,6 +175,24 @@ describe("DeliveryTrackingStore (SQLite)", () => {
 
     const due = await store.listDue(new Date(), 10);
     expect(due).toHaveLength(1);
+
+    const list = await store.listRecords({
+      limit: 10,
+      providerId: "mock",
+      requestedAtFrom: new Date(now.getTime() - 10),
+      requestedAtTo: new Date(now.getTime() + 10),
+    });
+    expect(list).toHaveLength(1);
+
+    const count = await store.countRecords({
+      providerId: "mock",
+      requestedAtFrom: new Date(now.getTime() - 10),
+      requestedAtTo: new Date(now.getTime() + 10),
+    });
+    expect(count).toBe(1);
+
+    const byStatus = await store.countBy({ providerId: "mock" }, ["status"]);
+    expect(byStatus).toEqual([{ key: { status: "SENT" }, count: 1 }]);
 
     await store.patch("m1", {
       status: "DELIVERED",
@@ -180,6 +202,7 @@ describe("DeliveryTrackingStore (SQLite)", () => {
 
     const record = await store.get("m1");
     expect(record?.status).toBe("DELIVERED");
+    expect(record?.providerStatusCode).toBe("2000");
   });
 });
 
@@ -200,6 +223,9 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
       from: "01000000000",
       requestedAt: now,
       status: "SENT",
+      providerStatusCode: "2000",
+      providerStatusMessage: "queued",
+      sentAt: now,
       statusUpdatedAt: now,
       attemptCount: 0,
       nextCheckAt: new Date(now.getTime() - 1),
@@ -210,6 +236,24 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
     expect(due).toHaveLength(1);
     expect(due[0]?.from).toBe("01000000000");
 
+    const list = await store.listRecords({
+      limit: 10,
+      providerId: "mock",
+      requestedAtFrom: new Date(now.getTime() - 10),
+      requestedAtTo: new Date(now.getTime() + 10),
+    });
+    expect(list).toHaveLength(1);
+
+    const count = await store.countRecords({
+      providerId: "mock",
+      requestedAtFrom: new Date(now.getTime() - 10),
+      requestedAtTo: new Date(now.getTime() + 10),
+    });
+    expect(count).toBe(1);
+
+    const byStatus = await store.countBy({ providerId: "mock" }, ["status"]);
+    expect(byStatus).toEqual([{ key: { status: "SENT" }, count: 1 }]);
+
     await store.patch("m1", {
       status: "DELIVERED",
       statusUpdatedAt: new Date(),
@@ -218,6 +262,7 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
 
     const record = await store.get("m1");
     expect(record?.status).toBe("DELIVERED");
+    expect(record?.providerStatusCode).toBe("2000");
 
     await store.close();
   });

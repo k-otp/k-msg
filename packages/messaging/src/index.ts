@@ -3,7 +3,13 @@ export { DeliveryTracker } from "./delivery/tracker";
 export { createDeliveryTrackingHooks } from "./delivery-tracking/hooks";
 // Delivery tracking (PULL + persistence)
 export { DeliveryTrackingService } from "./delivery-tracking/service";
-export type { DeliveryTrackingStore } from "./delivery-tracking/store.interface";
+export type {
+  DeliveryTrackingCountByField,
+  DeliveryTrackingCountByRow,
+  DeliveryTrackingListOptions,
+  DeliveryTrackingRecordFilter,
+  DeliveryTrackingStore,
+} from "./delivery-tracking/store.interface";
 export { BunSqlDeliveryTrackingStore } from "./delivery-tracking/stores/bun-sql.store";
 export { InMemoryDeliveryTrackingStore } from "./delivery-tracking/stores/memory.store";
 export { SqliteDeliveryTrackingStore } from "./delivery-tracking/stores/sqlite.store";
