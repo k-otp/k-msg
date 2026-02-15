@@ -1,4 +1,4 @@
-import * as crypto from "crypto";
+import * as crypto from "node:crypto";
 import type { WebhookConfig } from "../types/webhook.types";
 
 export interface SecurityConfig {
@@ -14,12 +14,25 @@ export interface SecurityConfig {
 export class SecurityManager {
   private config: SecurityConfig;
 
-  constructor(webhookConfig: WebhookConfig) {
+  constructor(
+    webhookConfig: Pick<
+      WebhookConfig,
+      "algorithm" | "signatureHeader" | "signaturePrefix"
+    >,
+  ) {
     this.config = {
       algorithm: webhookConfig.algorithm || "sha256",
       header: webhookConfig.signatureHeader || "X-Webhook-Signature",
       prefix: webhookConfig.signaturePrefix || "sha256=",
     };
+  }
+
+  /**
+   * Canonical string to sign when a timestamp header is present.
+   * Format: `${timestamp}.${payload}`
+   */
+  createSignedPayload(payload: string, timestamp: string): string {
+    return `${timestamp}.${payload}`;
   }
 
   /**
@@ -31,6 +44,21 @@ export class SecurityManager {
     const signature = hmac.digest("hex");
 
     return this.config.prefix ? `${this.config.prefix}${signature}` : signature;
+  }
+
+  /**
+   * Generate signature for a timestamped webhook.
+   * (Recommended when also validating `X-Webhook-Timestamp` to prevent replay.)
+   */
+  generateSignatureWithTimestamp(
+    payload: string,
+    timestamp: string,
+    secret: string,
+  ): string {
+    return this.generateSignature(
+      this.createSignedPayload(payload, timestamp),
+      secret,
+    );
   }
 
   /**
@@ -46,6 +74,22 @@ export class SecurityManager {
       console.error("Signature verification failed:", error);
       return false;
     }
+  }
+
+  /**
+   * Verify signature for a timestamped webhook.
+   */
+  verifySignatureWithTimestamp(
+    payload: string,
+    timestamp: string,
+    signature: string,
+    secret: string,
+  ): boolean {
+    return this.verifySignature(
+      this.createSignedPayload(payload, timestamp),
+      signature,
+      secret,
+    );
   }
 
   /**
@@ -70,8 +114,12 @@ export class SecurityManager {
     payload: string,
     secret: string,
   ): Record<string, string> {
-    const signature = this.generateSignature(payload, secret);
     const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signature = this.generateSignatureWithTimestamp(
+      payload,
+      timestamp,
+      secret,
+    );
 
     return {
       [this.config.header]: signature,
@@ -86,12 +134,22 @@ export class SecurityManager {
    */
   verifyTimestamp(timestamp: string, toleranceSeconds: number = 300): boolean {
     try {
-      const webhookTime = parseInt(timestamp, 10);
+      const webhookTime = (() => {
+        // epoch seconds (recommended)
+        if (/^[0-9]+$/.test(timestamp.trim())) {
+          return parseInt(timestamp, 10);
+        }
+        // ISO date string (fallback)
+        const parsed = new Date(timestamp);
+        if (Number.isNaN(parsed.getTime())) return NaN;
+        return Math.floor(parsed.getTime() / 1000);
+      })();
+
       const currentTime = Math.floor(Date.now() / 1000);
       const timeDiff = Math.abs(currentTime - webhookTime);
 
       return timeDiff <= toleranceSeconds;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

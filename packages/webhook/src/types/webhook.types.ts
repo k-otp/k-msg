@@ -58,6 +58,7 @@ export enum WebhookEventType {
   THRESHOLD_EXCEEDED = "analytics.threshold_exceeded",
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: event payload shape is caller-defined
 export interface WebhookEvent<T = any> {
   id: string;
   type: WebhookEventType;
@@ -105,6 +106,11 @@ export interface WebhookDelivery {
   id: string;
   endpointId: string;
   eventId: string;
+  /**
+   * Optional event type for filtering/stats.
+   * (Helpful because `payload` is a JSON string and timestamps need revival when parsed.)
+   */
+  eventType?: WebhookEventType;
   url: string;
   httpMethod: "POST" | "PUT" | "PATCH";
   headers: Record<string, string>;
@@ -170,7 +176,13 @@ export interface WebhookTestResult {
 export const WebhookEventSchema = z.object({
   id: z.string(),
   type: z.string(),
-  timestamp: z.date(),
+  timestamp: z.preprocess((value) => {
+    if (value instanceof Date) return value;
+    if (typeof value === "string" || typeof value === "number") {
+      return new Date(value);
+    }
+    return value;
+  }, z.date()),
   data: z.any(),
   metadata: z.object({
     providerId: z.string().optional(),
@@ -218,6 +230,7 @@ export const WebhookDeliverySchema = z.object({
   id: z.string(),
   endpointId: z.string(),
   eventId: z.string(),
+  eventType: z.string().optional(),
   url: z.string().url(),
   httpMethod: z.enum(["POST", "PUT", "PATCH"]),
   headers: z.record(z.string(), z.string()),

@@ -47,7 +47,8 @@
   ],
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "README_ko.md"
   ],
   "repository": {
     "type": "git",

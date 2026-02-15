@@ -660,7 +660,7 @@ program
 program
   .command("info")
   .description("Show runtime information")
-  .action(() => {
+  .action(async () => {
     console.log(chalk.cyan("📋 Platform Information:"));
     console.log("Version: 0.2.0");
 
