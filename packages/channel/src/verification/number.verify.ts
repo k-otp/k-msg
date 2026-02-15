@@ -3,7 +3,7 @@
  * 발신번호 인증 및 검증 시스템
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 import {
   SenderNumber,
   SenderNumberCategory,
@@ -31,6 +31,11 @@ export interface PhoneVerificationRequest {
 }
 
 export interface VerificationAttempt {
+  /**
+   * Distinguish provider/send attempts from user verification attempts.
+   * This prevents send failures from consuming user attempt limits.
+   */
+  purpose?: "send" | "verify";
   attemptNumber: number;
   attemptedAt: Date;
   method: VerificationMethod;
@@ -171,7 +176,7 @@ export class NumberVerifier extends EventEmitter {
 
     // Initialize blocked numbers
     this.options.blockedNumbers?.forEach((number) => {
-      this.blockedNumbers.add(number);
+      this.blockedNumbers.add(this.normalizePhoneNumber(number));
     });
   }
 
@@ -184,24 +189,26 @@ export class NumberVerifier extends EventEmitter {
     verificationType: VerificationType = VerificationType.SMS,
     metadata: PhoneVerificationRequest["metadata"] = {},
   ): Promise<PhoneVerificationRequest> {
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+
     // Validate phone number
-    const phoneInfo = await this.getPhoneNumberInfo(phoneNumber);
+    const phoneInfo = await this.getPhoneNumberInfo(normalizedPhoneNumber);
     if (!phoneInfo.isValid) {
       throw new Error("Invalid phone number format");
     }
 
     // Check if number is blocked
-    if (this.isNumberBlocked(phoneNumber)) {
+    if (this.isNumberBlocked(normalizedPhoneNumber)) {
       throw new Error("Phone number is blocked");
     }
 
     // Check rate limiting
-    if (this.isRateLimited(phoneNumber)) {
+    if (this.isRateLimited(normalizedPhoneNumber)) {
       throw new Error("Rate limit exceeded. Please try again later.");
     }
 
     // Check daily attempt limit
-    if (this.isDailyLimitExceeded(phoneNumber)) {
+    if (this.isDailyLimitExceeded(normalizedPhoneNumber)) {
       throw new Error("Daily verification attempt limit exceeded");
     }
 
@@ -214,7 +221,7 @@ export class NumberVerifier extends EventEmitter {
     const verificationRequest: PhoneVerificationRequest = {
       id: requestId,
       senderNumberId,
-      phoneNumber,
+      phoneNumber: normalizedPhoneNumber,
       verificationType,
       verificationCode,
       status: PhoneVerificationStatus.PENDING,
@@ -225,8 +232,8 @@ export class NumberVerifier extends EventEmitter {
     };
 
     this.verificationRequests.set(requestId, verificationRequest);
-    this.updateRateLimit(phoneNumber);
-    this.updateDailyAttempts(phoneNumber);
+    this.updateRateLimit(normalizedPhoneNumber);
+    this.updateDailyAttempts(normalizedPhoneNumber);
 
     this.emit("verification:started", { verificationRequest, phoneInfo });
 
@@ -306,6 +313,7 @@ export class NumberVerifier extends EventEmitter {
     } else {
       // Add failed verification attempt
       const failedAttempt: VerificationAttempt = {
+        purpose: "verify",
         attemptNumber: request.attempts.length + 1,
         attemptedAt: new Date(),
         method: VerificationMethod.SMS, // Assuming SMS for verification attempts
@@ -315,7 +323,7 @@ export class NumberVerifier extends EventEmitter {
 
       // Handle failed attempt
       const failedAttempts = request.attempts.filter(
-        (a) => a.status === "failed",
+        (a) => a.purpose === "verify" && a.status === "failed",
       ).length;
 
       if (failedAttempts >= this.options.maxAttempts!) {
@@ -423,27 +431,29 @@ export class NumberVerifier extends EventEmitter {
    * Block a phone number from verification
    */
   blockPhoneNumber(phoneNumber: string, reason?: string): void {
-    this.blockedNumbers.add(phoneNumber);
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+    this.blockedNumbers.add(normalizedPhoneNumber);
 
     // Cancel any pending verifications for this number
     for (const [requestId, request] of this.verificationRequests) {
       if (
-        request.phoneNumber === phoneNumber &&
+        request.phoneNumber === normalizedPhoneNumber &&
         request.status !== PhoneVerificationStatus.VERIFIED
       ) {
         request.status = PhoneVerificationStatus.BLOCKED;
       }
     }
 
-    this.emit("phone:blocked", { phoneNumber, reason });
+    this.emit("phone:blocked", { phoneNumber: normalizedPhoneNumber, reason });
   }
 
   /**
    * Unblock a phone number
    */
   unblockPhoneNumber(phoneNumber: string): void {
-    this.blockedNumbers.delete(phoneNumber);
-    this.emit("phone:unblocked", { phoneNumber });
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+    this.blockedNumbers.delete(normalizedPhoneNumber);
+    this.emit("phone:unblocked", { phoneNumber: normalizedPhoneNumber });
   }
 
   /**
@@ -563,6 +573,7 @@ export class NumberVerifier extends EventEmitter {
     method: VerificationMethod,
   ): Promise<void> {
     const attempt: VerificationAttempt = {
+      purpose: "send",
       attemptNumber: request.attempts.length + 1,
       attemptedAt: new Date(),
       method,
@@ -693,16 +704,18 @@ export class NumberVerifier extends EventEmitter {
   private async getPhoneNumberInfo(
     phoneNumber: string,
   ): Promise<PhoneNumberInfo> {
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+
     // Check cache first
-    if (this.phoneNumberCache.has(phoneNumber)) {
-      return this.phoneNumberCache.get(phoneNumber)!;
+    if (this.phoneNumberCache.has(normalizedPhoneNumber)) {
+      return this.phoneNumberCache.get(normalizedPhoneNumber)!;
     }
 
     // Basic Korean phone number validation and parsing
-    const phoneInfo = this.parseKoreanPhoneNumber(phoneNumber);
+    const phoneInfo = this.parseKoreanPhoneNumber(normalizedPhoneNumber);
 
     // Cache the result
-    this.phoneNumberCache.set(phoneNumber, phoneInfo);
+    this.phoneNumberCache.set(normalizedPhoneNumber, phoneInfo);
 
     return phoneInfo;
   }
@@ -768,11 +781,13 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private isNumberBlocked(phoneNumber: string): boolean {
-    return this.blockedNumbers.has(phoneNumber);
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+    return this.blockedNumbers.has(normalizedPhoneNumber);
   }
 
   private isRateLimited(phoneNumber: string): boolean {
-    const timestamps = this.rateLimitTracker.get(phoneNumber) || [];
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+    const timestamps = this.rateLimitTracker.get(normalizedPhoneNumber) || [];
     const rateWindow = this.options.rateLimitMinutes! * 60 * 1000;
     const now = new Date();
 
@@ -784,8 +799,9 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private isDailyLimitExceeded(phoneNumber: string): boolean {
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
     const today = new Date().toISOString().split("T")[0];
-    const dailyData = this.dailyAttemptTracker.get(phoneNumber);
+    const dailyData = this.dailyAttemptTracker.get(normalizedPhoneNumber);
 
     if (!dailyData || dailyData.date !== today) {
       return false;
@@ -795,20 +811,29 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private updateRateLimit(phoneNumber: string): void {
-    const timestamps = this.rateLimitTracker.get(phoneNumber) || [];
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
+    const timestamps = this.rateLimitTracker.get(normalizedPhoneNumber) || [];
     timestamps.push(new Date());
-    this.rateLimitTracker.set(phoneNumber, timestamps);
+    this.rateLimitTracker.set(normalizedPhoneNumber, timestamps);
   }
 
   private updateDailyAttempts(phoneNumber: string): void {
+    const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
     const today = new Date().toISOString().split("T")[0];
-    const dailyData = this.dailyAttemptTracker.get(phoneNumber);
+    const dailyData = this.dailyAttemptTracker.get(normalizedPhoneNumber);
 
     if (!dailyData || dailyData.date !== today) {
-      this.dailyAttemptTracker.set(phoneNumber, { date: today, count: 1 });
+      this.dailyAttemptTracker.set(normalizedPhoneNumber, {
+        date: today,
+        count: 1,
+      });
     } else {
       dailyData.count++;
     }
+  }
+
+  private normalizePhoneNumber(phoneNumber: string): string {
+    return phoneNumber.replace(/\D/g, "");
   }
 
   private validateCode(expected: string, provided: string): boolean {
