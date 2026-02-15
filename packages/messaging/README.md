@@ -91,3 +91,39 @@ const results = await kmsg.sendMany(
 );
 ```
 
+## Delivery Tracking (PULL)
+
+After a message is accepted by a provider (including scheduled sends), you can **poll provider status APIs** to
+reconcile delivery state and update your internal records.
+
+`DeliveryTrackingService` is storage-backed and supports:
+- In-memory store (no DB)
+- SQLite (default: `./kmsg.sqlite`, via `bun:sqlite`)
+- Bun.SQL store (sqlite/postgres/mysql, via `Bun.SQL`)
+
+```ts
+import { KMsg, createDeliveryTrackingHooks, DeliveryTrackingService } from "@k-msg/messaging";
+import { SolapiProvider } from "@k-msg/provider";
+
+const providers = [
+  new SolapiProvider({
+    apiKey: process.env.SOLAPI_API_KEY!,
+    apiSecret: process.env.SOLAPI_API_SECRET!,
+  }),
+];
+
+const tracking = new DeliveryTrackingService({ providers });
+
+const kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking),
+});
+
+// On successful send, providerMessageId is recorded into the tracking store.
+await kmsg.send({ to: "01012345678", text: "hello" });
+
+// Run as a cron/worker loop
+tracking.start();
+// or single pass (manual/cron)
+await tracking.runOnce();
+```

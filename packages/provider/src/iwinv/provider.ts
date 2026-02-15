@@ -2,6 +2,9 @@ import { Buffer } from "node:buffer";
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import {
+  type DeliveryStatus,
+  type DeliveryStatusQuery,
+  type DeliveryStatusResult,
   fail,
   KMsgError,
   KMsgErrorCode,
@@ -123,8 +126,395 @@ export class IWINVProvider implements Provider {
     }
   }
 
+  async getDeliveryStatus(
+    query: DeliveryStatusQuery,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
+    switch (query.type) {
+      case "ALIMTALK":
+        return this.getAlimTalkDeliveryStatus(query);
+      case "SMS":
+      case "LMS":
+      case "MMS":
+        return this.getSmsV2DeliveryStatus(query);
+      default:
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            `IWINVProvider does not support type ${query.type}`,
+            { providerId: this.id, type: query.type },
+          ),
+        );
+    }
+  }
+
   private normalizePhoneNumber(value: string): string {
     return value.replace(/[^0-9]/g, "");
+  }
+
+  private addDays(date: Date, days: number): Date {
+    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
+  private formatSmsHistoryDate(date: Date): string {
+    const pad = (v: number) => v.toString().padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  private parseIwinvDateTime(value: unknown): Date | undefined {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    const match =
+      /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(trimmed);
+    if (!match) return undefined;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    const second = Number(match[6]);
+
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(month) ||
+      !Number.isFinite(day) ||
+      !Number.isFinite(hour) ||
+      !Number.isFinite(minute) ||
+      !Number.isFinite(second)
+    ) {
+      return undefined;
+    }
+
+    const date = new Date(year, month - 1, day, hour, minute, second);
+    if (Number.isNaN(date.getTime())) return undefined;
+    return date;
+  }
+
+  private async getAlimTalkDeliveryStatus(
+    query: DeliveryStatusQuery,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
+    const providerMessageId = query.providerMessageId.trim();
+    if (!providerMessageId) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "providerMessageId is required",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const to = this.normalizePhoneNumber(query.to);
+    if (!to) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "to is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    const seqNoValue = Number(providerMessageId);
+    const seqNo = Number.isFinite(seqNoValue) ? seqNoValue : undefined;
+
+    const startDate = this.formatIWINVDate(this.addDays(query.requestedAt, -1));
+    const endDate = this.formatIWINVDate(new Date());
+
+    const payload: Record<string, unknown> = {
+      pageNum: 1,
+      pageSize: 15,
+      phone: to,
+      startDate,
+      endDate,
+      ...(seqNo !== undefined ? { seqNo } : {}),
+      ...(query.scheduledAt instanceof Date &&
+      !Number.isNaN(query.scheduledAt.getTime())
+        ? { reserve: "Y" }
+        : {}),
+    };
+
+    const url = `${this.config.baseUrl}/api/history/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed) ? parsed : {};
+      const codeRaw = data.code;
+      const code = typeof codeRaw === "number" ? codeRaw : undefined;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV history query failed";
+
+      if (!response.ok || code !== 200) {
+        return fail(
+          new KMsgError(
+            this.mapIwinvCodeToKMsgErrorCode(
+              code ?? this.normalizeIwinvCode(parsed) ?? response.status,
+            ),
+            message,
+            { providerId: this.id, originalCode: codeRaw ?? response.status },
+          ),
+        );
+      }
+
+      const listRaw = data.list;
+      const list = Array.isArray(listRaw)
+        ? (listRaw as Array<unknown>)
+        : [];
+      if (list.length === 0) return ok(null);
+
+      const item = (() => {
+        if (seqNo === undefined) return list[0];
+        return (
+          list.find((v) => isObjectRecord(v) && v.seqNo === seqNo) ?? list[0]
+        );
+      })();
+
+      if (!isObjectRecord(item)) return ok(null);
+
+      const statusCode =
+        typeof item.statusCode === "string" ? item.statusCode : undefined;
+      const statusMessage =
+        typeof item.statusCodeName === "string"
+          ? item.statusCodeName
+          : undefined;
+
+      const sendDate = this.parseIwinvDateTime(item.sendDate);
+      const receiveDate = this.parseIwinvDateTime(item.receiveDate);
+
+      const isDelivered =
+        statusCode === "OK" ||
+        (typeof statusMessage === "string" && statusMessage.includes("성공"));
+
+      const status: DeliveryStatus = isDelivered
+        ? "DELIVERED"
+        : sendDate
+          ? "FAILED"
+          : "PENDING";
+
+      return ok({
+        providerId: this.id,
+        providerMessageId,
+        status,
+        statusCode,
+        statusMessage,
+        sentAt: sendDate,
+        deliveredAt: isDelivered ? receiveDate || sendDate : undefined,
+        failedAt: !isDelivered && sendDate ? sendDate : undefined,
+        raw: item,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  private async getSmsV2DeliveryStatus(
+    query: DeliveryStatusQuery,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
+    if (!this.canSendSmsV2()) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "SMS v2 configuration missing (smsApiKey/smsAuthKey)",
+          { providerId: this.id },
+        ),
+      );
+    }
+    if (!this.config.smsCompanyId || this.config.smsCompanyId.length === 0) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "smsCompanyId required for history (config.smsCompanyId)",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const providerMessageId = query.providerMessageId.trim();
+    if (!providerMessageId) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "providerMessageId is required",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const to = this.normalizePhoneNumber(query.to);
+    if (!to) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "to is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    const start = this.addDays(query.requestedAt, -1);
+    const end = new Date();
+    const rangeMs = end.getTime() - start.getTime();
+    const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
+    if (rangeMs > maxRangeMs) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "SMS history date range must be within 90 days",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const payload: Record<string, unknown> = {
+      version: "1.0",
+      companyid: this.config.smsCompanyId,
+      startDate: this.formatSmsHistoryDate(start),
+      endDate: this.formatSmsHistoryDate(end),
+      requestNo: providerMessageId,
+      pageNum: 1,
+      pageSize: 15,
+      phone: to,
+    };
+
+    const secretHeader = this.buildSmsSecretHeader();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json;charset=UTF-8",
+      secret: secretHeader,
+    };
+
+    if (
+      typeof this.config.xForwardedFor === "string" &&
+      this.config.xForwardedFor.length > 0
+    ) {
+      headers["X-Forwarded-For"] = this.config.xForwardedFor;
+    }
+
+    const mergedHeaders =
+      this.config.extraHeaders && typeof this.config.extraHeaders === "object"
+        ? { ...headers, ...this.config.extraHeaders }
+        : headers;
+
+    const url = `${this.resolveSmsBaseUrl()}/api/history/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: mergedHeaders,
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed) ? parsed : {};
+      const codeRaw = data.resultCode;
+      const code =
+        typeof codeRaw === "number"
+          ? codeRaw
+          : typeof codeRaw === "string"
+            ? Number(codeRaw)
+            : NaN;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV SMS history query failed";
+
+      if (!response.ok || code !== 0) {
+        return fail(
+          new KMsgError(KMsgErrorCode.PROVIDER_ERROR, message, {
+            providerId: this.id,
+            originalCode: codeRaw ?? response.status,
+          }),
+        );
+      }
+
+      const listRaw = data.list;
+      const list = Array.isArray(listRaw)
+        ? (listRaw as Array<unknown>)
+        : [];
+      if (list.length === 0) return ok(null);
+
+      const item = (() => {
+        const found = list.find((v) => {
+          if (!isObjectRecord(v)) return false;
+          const req = v.requestNo;
+          return req !== undefined && req !== null
+            ? String(req) === providerMessageId
+            : false;
+        });
+        return found ?? list[0];
+      })();
+
+      if (!isObjectRecord(item)) return ok(null);
+
+      const statusCode =
+        typeof item.sendStatusCode === "string"
+          ? item.sendStatusCode
+          : undefined;
+      const statusMessage =
+        typeof item.sendStatusMsg === "string"
+          ? item.sendStatusMsg
+          : typeof item.sendStatus === "string"
+            ? item.sendStatus
+            : undefined;
+
+      const sendDate = this.parseIwinvDateTime(item.sendDate);
+
+      const isSuccess = (() => {
+        if (statusCode === "06") return true; // SMS success
+        if (statusCode === "1000") return true; // LMS/MMS success
+        if (typeof statusMessage === "string" && statusMessage.includes("전송 성공")) {
+          return true;
+        }
+        return false;
+      })();
+
+      const status: DeliveryStatus = isSuccess ? "DELIVERED" : "FAILED";
+
+      return ok({
+        providerId: this.id,
+        providerMessageId,
+        status,
+        statusCode,
+        statusMessage,
+        sentAt: sendDate,
+        deliveredAt: isSuccess ? sendDate : undefined,
+        failedAt: isSuccess ? undefined : sendDate,
+        raw: item,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
   }
 
   private toBase64(value: string): string {

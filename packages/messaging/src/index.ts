@@ -1,5 +1,13 @@
 // Delivery tracking
 export { DeliveryTracker } from "./delivery/tracker";
+// Delivery tracking (PULL + persistence)
+export { DeliveryTrackingService } from "./delivery-tracking/service";
+export { createDeliveryTrackingHooks } from "./delivery-tracking/hooks";
+export type { DeliveryTrackingStore } from "./delivery-tracking/store.interface";
+export * from "./delivery-tracking/types";
+export { InMemoryDeliveryTrackingStore } from "./delivery-tracking/stores/memory.store";
+export { SqliteDeliveryTrackingStore } from "./delivery-tracking/stores/sqlite.store";
+export { BunSqlDeliveryTrackingStore } from "./delivery-tracking/stores/bun-sql.store";
 export * from "./hooks";
 export { KMsg } from "./k-msg";
 // Personalization
