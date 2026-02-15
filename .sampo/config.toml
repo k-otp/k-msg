@@ -9,12 +9,11 @@ short_tags = "k-msg"
 repository = "k-otp/k-msg"
 
 [packages]
-# Ignore any package that can't be published (e.g. "private": true).
-ignore_unpublished = true
+# Allow versioning private packages (e.g. CLI binaries) without publishing them.
+ignore_unpublished = false
 
-# Extra safety: keep apps + workspace root out of versioning/release flows.
+# Extra safety: keep non-releaseable apps + workspace root out of versioning/release flows.
 ignore = [
-  "npm/@k-msg/cli",
   "npm/@k-msg/admin-dashboard",
   "npm/@apps/message-service",
   "npm/k-msg-workspace",
