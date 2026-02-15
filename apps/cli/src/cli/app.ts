@@ -1,13 +1,11 @@
 import { createCLI } from "@bunli/core";
-
+import pkg from "../../package.json";
 import alimtalk from "../commands/alimtalk";
 import config from "../commands/config";
 import kakao from "../commands/kakao";
 import providers from "../commands/providers";
 import send from "../commands/send";
 import sms from "../commands/sms";
-
-import pkg from "../../package.json";
 
 function readCliVersion(): string {
   return typeof pkg.version === "string" ? pkg.version : "0.0.0";

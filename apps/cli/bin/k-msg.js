@@ -1,13 +1,14 @@
 #!/usr/bin/env node
+
 /* eslint-disable no-console */
 
-import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
+import { get as httpsGet } from "node:https";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { get as httpsGet } from "node:https";
 import { gunzipSync } from "node:zlib";
 
 function pkgRoot() {

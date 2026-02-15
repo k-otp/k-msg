@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import path from "node:path";
 import { expectCommand } from "@bunli/test";
-import path from "path";
 
 import { createKMsgCli } from "./cli/app";
 

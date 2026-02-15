@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { type KMsgCliConfig, kMsgCliConfigSchema } from "./schema";
 
 export type LoadedKMsgConfig = {

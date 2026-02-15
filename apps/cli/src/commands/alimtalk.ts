@@ -1,9 +1,9 @@
 import { defineCommand, option } from "@bunli/core";
 import type { MessageVariables, SendInput } from "k-msg";
 import { z } from "zod";
-import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import { exitCodeForError, printError } from "../cli/utils";
+import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
 
 const sendCmd = defineCommand({
   name: "send",

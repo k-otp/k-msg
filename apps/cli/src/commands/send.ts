@@ -1,10 +1,10 @@
-import path from "path";
+import path from "node:path";
 import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "k-msg";
 import { z } from "zod";
-import { loadRuntime } from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import { exitCodeForError, printError } from "../cli/utils";
+import { loadRuntime } from "../runtime";
 
 const sendInputJsonSchema = z
   .string()
