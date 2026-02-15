@@ -19,10 +19,16 @@ function createStubClient() {
       name?: string;
       link?: string;
     }>;
+    getMessages: Array<{ params?: Record<string, unknown> }>;
   } = {
     sendOne: [],
     uploadFile: [],
+    getMessages: [],
   };
+
+  let getMessagesResponse: GetMessagesResponse = ({
+    messageList: {},
+  } as unknown) as GetMessagesResponse;
 
   const client: SolapiSdkClient = {
     sendOne: async (message: SendOneRequest, appId?: string) => {
@@ -45,11 +51,21 @@ function createStubClient() {
     },
     getBalance: async () =>
       ({ balance: 0, point: 0 }) as unknown as GetBalanceResponse,
-    getMessages: async () =>
-      ({ messageList: {} }) as unknown as GetMessagesResponse,
+    getMessages: async (data?: unknown) => {
+      calls.getMessages.push({
+        params: (data as Record<string, unknown> | undefined) ?? undefined,
+      });
+      return getMessagesResponse;
+    },
   };
 
-  return { client, calls };
+  return {
+    client,
+    calls,
+    setGetMessagesResponse: (value: GetMessagesResponse) => {
+      getMessagesResponse = value;
+    },
+  };
 }
 
 describe("SolapiProvider (SendOptions-based)", () => {
@@ -364,5 +380,71 @@ describe("SolapiProvider (SendOptions-based)", () => {
       "FAX_file_1",
       "FAX_file_2",
     ]);
+  });
+
+  test("getDeliveryStatus returns null when message is not found", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "msg_404",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value).toBe(null);
+    }
+    expect(calls.getMessages).toHaveLength(1);
+    expect(calls.getMessages[0]?.params?.messageId).toBe("msg_404");
+  });
+
+  test("getDeliveryStatus maps statusCode and timestamps", async () => {
+    const { client, setGetMessagesResponse } = createStubClient();
+    setGetMessagesResponse({
+      messageList: {
+        msg_1: {
+          messageId: "msg_1",
+          statusCode: "4000",
+          dateSent: "2026-01-01T00:00:00.000Z",
+          dateCompleted: "2026-01-01T00:00:10.000Z",
+        },
+      },
+    } as any);
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "msg_1",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value?.status).toBe("DELIVERED");
+      expect(result.value?.sentAt instanceof Date).toBe(true);
+      expect(result.value?.deliveredAt instanceof Date).toBe(true);
+      expect(result.value?.statusCode).toBe("4000");
+    }
   });
 });

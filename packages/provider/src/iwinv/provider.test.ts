@@ -2,9 +2,11 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { IWINVProvider } from "./provider";
 
 const originalFetch = globalThis.fetch;
+const originalDateNow = Date.now;
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  Date.now = originalDateNow;
 });
 
 describe("IWINVProvider", () => {
@@ -384,6 +386,180 @@ describe("IWINVProvider", () => {
     expect(result.isSuccess).toBe(true);
     if (result.isSuccess) {
       expect(result.value.status).toBe("PENDING");
+    }
+  });
+
+  test("getDeliveryStatus(ALIMTALK) queries history and maps delivered status", async () => {
+    let calledUrl = "";
+    let calledAuth = "";
+    let calledBody: Record<string, unknown> = {};
+
+    const fixedNow = new Date(2030, 0, 2, 3, 4, 5).getTime();
+    Date.now = () => fixedNow;
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledAuth = new Headers(init?.headers).get("AUTH") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          message: "데이터가 조회되었습니다.",
+          totalCount: 1,
+          list: [
+            {
+              seqNo: 17,
+              phone: "01012345678",
+              callback: "01000000000",
+              templateCode: "TPL_1",
+              sendMessage: "hi",
+              reserve: "N",
+              requestDate: "2030-01-01 00:00:00",
+              sendDate: "2030-01-01 00:00:10",
+              receiveDate: "2030-01-01 00:00:20",
+              statusCode: "OK",
+              statusCodeName: "성공",
+              resendStatus: null,
+              resendStatusName: null,
+              buttons: {
+                link1: null,
+                link2: null,
+                link3: null,
+                link4: null,
+                link5: null,
+              },
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const requestedAt = new Date(2030, 0, 1, 0, 0, 0);
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "17",
+      type: "ALIMTALK",
+      to: "010-1234-5678",
+      requestedAt,
+    });
+
+    expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/history/");
+    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledBody.seqNo).toBe(17);
+    expect(calledBody.phone).toBe("01012345678");
+    expect(calledBody.pageNum).toBe(1);
+    expect(calledBody.pageSize).toBe(15);
+    expect(typeof calledBody.startDate).toBe("string");
+    expect(typeof calledBody.endDate).toBe("string");
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value?.status).toBe("DELIVERED");
+      expect(result.value?.deliveredAt?.getTime()).toBe(
+        new Date(2030, 0, 1, 0, 0, 20).getTime(),
+      );
+    }
+  });
+
+  test("getDeliveryStatus(SMS) queries v2 history and maps delivered status", async () => {
+    let calledUrl = "";
+    let calledSecret = "";
+    let calledBody: Record<string, unknown> = {};
+
+    const fixedNow = new Date(2030, 0, 2, 3, 4, 5).getTime();
+    Date.now = () => fixedNow;
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledSecret = new Headers(init?.headers).get("secret") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "데이터가 조회되었습니다.",
+          totalCount: 1,
+          list: [
+            {
+              requestNo: "REQ_1",
+              companyid: "cid",
+              msgType: "SMS",
+              phone: "01012345678",
+              callback: "01000000000",
+              sendStatusCode: "06",
+              sendStatusMsg: "전송 성공",
+              sendDate: "2030-01-01 00:00:10",
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      smsCompanyId: "cid",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const requestedAt = new Date(2030, 0, 1, 0, 0, 0);
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "REQ_1",
+      type: "SMS",
+      to: "010-1234-5678",
+      requestedAt,
+    });
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/history/");
+    expect(calledSecret).toBe(
+      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
+    );
+    expect(calledBody.companyid).toBe("cid");
+    expect(calledBody.requestNo).toBe("REQ_1");
+    expect(calledBody.phone).toBe("01012345678");
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value?.status).toBe("DELIVERED");
+    }
+  });
+
+  test("getDeliveryStatus(SMS) fails when smsCompanyId is missing", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "REQ_1",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
     }
   });
 });

@@ -5,5 +5,12 @@
 
 export * from "@k-msg/core";
 export { KMsg } from "@k-msg/messaging";
+export {
+  BunSqlDeliveryTrackingStore,
+  createDeliveryTrackingHooks,
+  DeliveryTrackingService,
+  InMemoryDeliveryTrackingStore,
+  SqliteDeliveryTrackingStore,
+} from "@k-msg/messaging";
 export { AligoProvider, IWINVProvider, MockProvider, SolapiProvider } from "@k-msg/provider";
 export type { AligoConfig, IWINVConfig, SolapiConfig } from "@k-msg/provider";

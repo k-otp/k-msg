@@ -1,4 +1,7 @@
 import {
+  type DeliveryStatus,
+  type DeliveryStatusQuery,
+  type DeliveryStatusResult,
   fail,
   KMsgError,
   KMsgErrorCode,
@@ -132,6 +135,81 @@ export class SolapiProvider implements Provider {
     }
   }
 
+  async getDeliveryStatus(
+    query: DeliveryStatusQuery,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
+    const providerMessageId = query.providerMessageId.trim();
+    if (!providerMessageId) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "providerMessageId is required",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    try {
+      const response = await this.client.getMessages({
+        messageId: providerMessageId,
+        limit: 1,
+      });
+
+      const record = (isObjectRecord(response) ? response : {}) as Record<
+        string,
+        unknown
+      >;
+      const messageList = record.messageList;
+      if (
+        !messageList ||
+        typeof messageList !== "object" ||
+        Array.isArray(messageList)
+      ) {
+        return ok(null);
+      }
+
+      const recordList = messageList as Record<string, unknown>;
+      const direct = recordList[providerMessageId];
+
+      const values = Object.values(recordList);
+      const found = values.find((v) => {
+        if (!isObjectRecord(v)) return false;
+        const mid = v.messageId;
+        return typeof mid === "string" ? mid === providerMessageId : false;
+      });
+
+      const message = isObjectRecord(direct)
+        ? direct
+        : isObjectRecord(found)
+          ? found
+          : undefined;
+      if (!message) return ok(null);
+
+      const statusCode =
+        typeof message.statusCode === "string" ? message.statusCode : undefined;
+      const status = this.mapSolapiStatusCode(statusCode);
+
+      const sentAt = this.parseDate(message.dateSent);
+      const deliveredAt = this.parseDate(message.dateCompleted);
+
+      return ok({
+        providerId: this.id,
+        providerMessageId,
+        status,
+        statusCode,
+        statusMessage:
+          typeof message.statusMessage === "string"
+            ? message.statusMessage
+            : undefined,
+        sentAt,
+        deliveredAt,
+        raw: message,
+      });
+    } catch (error) {
+      return fail(this.mapError(error));
+    }
+  }
+
   private adaptSendResult(options: SendOptions, response: unknown): SendResult {
     const record = isObjectRecord(response) ? response : {};
     const providerMessageId =
@@ -218,6 +296,24 @@ export class SolapiProvider implements Provider {
       error instanceof Error ? error.message : String(error),
       { providerId: this.id },
     );
+  }
+
+  private mapSolapiStatusCode(statusCode?: string): DeliveryStatus {
+    if (!statusCode) return "UNKNOWN";
+    if (statusCode === "2000") return "PENDING";
+    if (statusCode === "3000") return "SENT";
+    if (statusCode === "4000") return "DELIVERED";
+    if (/^[123]\\d{3}$/.test(statusCode)) return "FAILED";
+    return "UNKNOWN";
+  }
+
+  private parseDate(value: unknown): Date | undefined {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return undefined;
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return undefined;
+    return date;
   }
 
   private normalizePhoneNumber(phone: string): string {

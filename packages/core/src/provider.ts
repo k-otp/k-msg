@@ -1,6 +1,12 @@
 import type { KMsgError } from "./errors";
 import type { Result } from "./result";
-import type { MessageType, SendOptions, SendResult } from "./types/index";
+import type {
+  DeliveryStatusQuery,
+  DeliveryStatusResult,
+  MessageType,
+  SendOptions,
+  SendResult,
+} from "./types/index";
 
 export interface Template {
   id: string;
@@ -48,4 +54,7 @@ export interface Provider {
 
   healthCheck(): Promise<ProviderHealthStatus>;
   send(params: SendOptions): Promise<Result<SendResult, KMsgError>>;
+  getDeliveryStatus?(
+    query: DeliveryStatusQuery,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>>;
 }
