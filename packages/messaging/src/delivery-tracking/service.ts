@@ -27,6 +27,7 @@ export class DeliveryTrackingService {
 
   private initPromise?: Promise<void>;
   private timer?: NodeJS.Timeout;
+  private runOnceInFlight?: Promise<void>;
 
   constructor(config: DeliveryTrackingServiceConfig) {
     if (!config || typeof config !== "object") {
@@ -59,7 +60,9 @@ export class DeliveryTrackingService {
   start(): void {
     if (this.timer) return;
     this.timer = setInterval(() => {
-      void this.runOnce();
+      void this.runOnce().catch(() => {
+        // Best-effort polling. Delivery tracking must not crash the host process.
+      });
     }, this.polling.intervalMs);
   }
 
@@ -132,6 +135,12 @@ export class DeliveryTrackingService {
   async runOnce(): Promise<void> {
     await this.ensureInit();
 
+    if (this.runOnceInFlight) {
+      await this.runOnceInFlight;
+      return;
+    }
+
+    const op = (async () => {
     const now = new Date();
     const due = await this.store.listDue(now, this.polling.batchSize);
     if (due.length === 0) return;
@@ -155,6 +164,14 @@ export class DeliveryTrackingService {
         await this.store.patch(u.messageId, patch);
       }),
     );
+    })();
+
+    this.runOnceInFlight = op;
+    try {
+      await op;
+    } finally {
+      if (this.runOnceInFlight === op) this.runOnceInFlight = undefined;
+    }
   }
 
   private async ensureInit(): Promise<void> {
@@ -164,4 +181,3 @@ export class DeliveryTrackingService {
     await this.initPromise;
   }
 }
-
