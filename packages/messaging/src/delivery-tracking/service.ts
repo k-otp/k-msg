@@ -1,14 +1,14 @@
 import type { DeliveryStatus, Provider, SendResult } from "@k-msg/core";
 import type { HookContext } from "../hooks";
-import type { DeliveryTrackingStore } from "./store.interface";
 import { reconcileDeliveryStatuses } from "./reconciler";
+import type { DeliveryTrackingStore } from "./store.interface";
+import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
 import {
   DEFAULT_POLLING_CONFIG,
-  isTerminalDeliveryStatus,
   type DeliveryTrackingPollingConfig,
+  isTerminalDeliveryStatus,
   type TrackingRecord,
 } from "./types";
-import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
 
 function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -39,7 +39,8 @@ export class DeliveryTrackingService {
 
     this.providers = config.providers;
     this.store =
-      config.store ?? new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" });
+      config.store ??
+      new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" });
 
     const polling = config.polling ?? {};
     this.polling = {
@@ -49,7 +50,8 @@ export class DeliveryTrackingService {
         ? polling.backoffMs
         : DEFAULT_POLLING_CONFIG.backoffMs,
       unsupportedProviderStrategy:
-        polling.unsupportedProviderStrategy ?? DEFAULT_POLLING_CONFIG.unsupportedProviderStrategy,
+        polling.unsupportedProviderStrategy ??
+        DEFAULT_POLLING_CONFIG.unsupportedProviderStrategy,
     };
   }
 
@@ -91,7 +93,9 @@ export class DeliveryTrackingService {
       : new Date(requestedAt.getTime() + this.polling.initialDelayMs);
 
     const providerMessageIdRaw =
-      typeof result.providerMessageId === "string" ? result.providerMessageId : "";
+      typeof result.providerMessageId === "string"
+        ? result.providerMessageId
+        : "";
     const providerMessageId = providerMessageIdRaw.trim();
 
     const record: TrackingRecord = {
@@ -141,29 +145,29 @@ export class DeliveryTrackingService {
     }
 
     const op = (async () => {
-    const now = new Date();
-    const due = await this.store.listDue(now, this.polling.batchSize);
-    if (due.length === 0) return;
+      const now = new Date();
+      const due = await this.store.listDue(now, this.polling.batchSize);
+      if (due.length === 0) return;
 
-    const { updates } = await reconcileDeliveryStatuses(
-      this.providers,
-      due,
-      now,
-      this.polling,
-    );
+      const { updates } = await reconcileDeliveryStatuses(
+        this.providers,
+        due,
+        now,
+        this.polling,
+      );
 
-    await Promise.all(
-      updates.map(async (u) => {
-        const patch = { ...u.patch, nextCheckAt: u.nextCheckAt };
+      await Promise.all(
+        updates.map(async (u) => {
+          const patch = { ...u.patch, nextCheckAt: u.nextCheckAt };
 
-        // If the record is terminal, keep it out of the due list.
-        if (patch.status && isTerminalDeliveryStatus(patch.status)) {
-          patch.nextCheckAt = now;
-        }
+          // If the record is terminal, keep it out of the due list.
+          if (patch.status && isTerminalDeliveryStatus(patch.status)) {
+            patch.nextCheckAt = now;
+          }
 
-        await this.store.patch(u.messageId, patch);
-      }),
-    );
+          await this.store.patch(u.messageId, patch);
+        }),
+      );
     })();
 
     this.runOnceInFlight = op;

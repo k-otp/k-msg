@@ -26,9 +26,9 @@ function createStubClient() {
     getMessages: [],
   };
 
-  let getMessagesResponse: GetMessagesResponse = ({
+  let getMessagesResponse: GetMessagesResponse = {
     messageList: {},
-  } as unknown) as GetMessagesResponse;
+  } as unknown as GetMessagesResponse;
 
   const client: SolapiSdkClient = {
     sendOne: async (message: SendOneRequest, appId?: string) => {
@@ -62,8 +62,8 @@ function createStubClient() {
   return {
     client,
     calls,
-    setGetMessagesResponse: (value: GetMessagesResponse) => {
-      getMessagesResponse = value;
+    setGetMessagesResponse: (value: unknown) => {
+      getMessagesResponse = value as GetMessagesResponse;
     },
   };
 }
@@ -420,7 +420,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
           dateCompleted: "2026-01-01T00:00:10.000Z",
         },
       },
-    } as any);
+    });
 
     const provider = new SolapiProvider(
       {

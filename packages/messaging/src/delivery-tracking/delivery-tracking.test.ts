@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { ok, type DeliveryStatusQuery, type Provider } from "@k-msg/core";
+import { type DeliveryStatusQuery, ok, type Provider } from "@k-msg/core";
 import { DeliveryTrackingService } from "./service";
+import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
-import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 
 function createMockProvider(params: {
   id: string;
@@ -40,7 +40,12 @@ describe("DeliveryTrackingService (InMemory)", () => {
     const service = new DeliveryTrackingService({
       providers: [provider],
       store,
-      polling: { initialDelayMs: 0, intervalMs: 10, batchSize: 10, concurrency: 2 },
+      polling: {
+        initialDelayMs: 0,
+        intervalMs: 10,
+        batchSize: 10,
+        concurrency: 2,
+      },
     });
 
     const now = Date.now();
@@ -178,4 +183,3 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
     await store.close();
   });
 });
-
