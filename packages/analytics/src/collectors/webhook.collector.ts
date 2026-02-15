@@ -184,10 +184,15 @@ export class WebhookCollector extends EventEmitter {
       );
     }
 
+    const secretKey = this.config.secretKey;
+    if (!secretKey) {
+      throw new Error("secretKey is required for signature validation");
+    }
+
     // 간단한 HMAC 검증 (실제로는 crypto 모듈 사용)
     const expectedSignature = await this.generateSignature(
       webhook.body,
-      this.config.secretKey!,
+      secretKey,
     );
 
     if (signature !== expectedSignature) {

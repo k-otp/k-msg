@@ -3,6 +3,8 @@ import type { Result } from "./result";
 import type {
   DeliveryStatusQuery,
   DeliveryStatusResult,
+  KakaoChannel,
+  KakaoChannelCategories,
   MessageType,
   SendOptions,
   SendResult,
@@ -21,23 +23,72 @@ export interface Template {
   updatedAt: Date;
 }
 
+export type TemplateCreateInput = {
+  name: string;
+  content: string;
+  category?: string;
+  buttons?: unknown[];
+  variables?: string[];
+};
+
+export type TemplateUpdateInput = Partial<TemplateCreateInput>;
+
+export type TemplateContext = {
+  /**
+   * Provider-specific Kakao channel key (e.g. Aligo senderKey).
+   */
+  kakaoChannelSenderKey?: string;
+};
+
 export interface TemplateProvider {
   createTemplate(
-    template: Omit<Template, "id" | "status" | "createdAt" | "updatedAt">,
+    input: TemplateCreateInput,
+    ctx?: TemplateContext,
   ): Promise<Result<Template, KMsgError>>;
   updateTemplate(
     code: string,
-    template: Partial<
-      Omit<Template, "id" | "code" | "status" | "createdAt" | "updatedAt">
-    >,
+    patch: TemplateUpdateInput,
+    ctx?: TemplateContext,
   ): Promise<Result<Template, KMsgError>>;
-  deleteTemplate(code: string): Promise<Result<void, KMsgError>>;
-  getTemplate(code: string): Promise<Result<Template, KMsgError>>;
-  listTemplates(params?: {
-    status?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<Result<Template[], KMsgError>>;
+  deleteTemplate(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<void, KMsgError>>;
+  getTemplate(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>>;
+  listTemplates(
+    params?: { status?: string; page?: number; limit?: number },
+    ctx?: TemplateContext,
+  ): Promise<Result<Template[], KMsgError>>;
+}
+
+export interface TemplateInspectionProvider {
+  requestTemplateInspection(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<void, KMsgError>>;
+}
+
+export interface KakaoChannelProvider {
+  listKakaoChannels(params?: {
+    plusId?: string;
+    senderKey?: string;
+  }): Promise<Result<KakaoChannel[], KMsgError>>;
+  listKakaoChannelCategories?(): Promise<
+    Result<KakaoChannelCategories, KMsgError>
+  >;
+  requestKakaoChannelAuth?(params: {
+    plusId: string;
+    phoneNumber: string;
+  }): Promise<Result<void, KMsgError>>;
+  addKakaoChannel?(params: {
+    plusId: string;
+    authNum: string;
+    phoneNumber: string;
+    categoryCode: string;
+  }): Promise<Result<KakaoChannel, KMsgError>>;
 }
 
 export interface ProviderHealthStatus {
