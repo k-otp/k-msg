@@ -15,7 +15,7 @@ export interface Template {
   content: string;
   category?: string;
   status: "APPROVED" | "REJECTED" | "PENDING" | "INSPECTION";
-  buttons?: any[];
+  buttons?: unknown[];
   variables?: string[];
   createdAt: Date;
   updatedAt: Date;

@@ -27,4 +27,3 @@ export interface DeliveryStatusResult {
   failedAt?: Date;
   raw?: unknown;
 }
-

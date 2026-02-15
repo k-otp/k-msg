@@ -135,8 +135,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     );
   }
 
-	  async get(messageId: string): Promise<TrackingRecord | undefined> {
-	    const stmt = this.db.prepare(`
+  async get(messageId: string): Promise<TrackingRecord | undefined> {
+    const stmt = this.db.prepare(`
 	      SELECT
 	        message_id,
 	        provider_id,
@@ -163,11 +163,13 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     return this.rowToRecord(row);
   }
 
-	  async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
-	    const safeLimit = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
-	    if (safeLimit === 0) return [];
+  async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
+    const safeLimit = Number.isFinite(limit)
+      ? Math.max(0, Math.floor(limit))
+      : 0;
+    if (safeLimit === 0) return [];
 
-	    const stmt = this.db.prepare(`
+    const stmt = this.db.prepare(`
 	      SELECT
 	        message_id,
 	        provider_id,
@@ -196,7 +198,10 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     return rows.map((row) => this.rowToRecord(row));
   }
 
-  async patch(messageId: string, patch: Partial<TrackingRecord>): Promise<void> {
+  async patch(
+    messageId: string,
+    patch: Partial<TrackingRecord>,
+  ): Promise<void> {
     const existing = await this.get(messageId);
     if (!existing) return;
 
@@ -226,7 +231,9 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
       status: row.status as TrackingRecord["status"],
       statusUpdatedAt: new Date(row.status_updated_at),
       attemptCount: row.attempt_count,
-      lastCheckedAt: row.last_checked_at ? new Date(row.last_checked_at) : undefined,
+      lastCheckedAt: row.last_checked_at
+        ? new Date(row.last_checked_at)
+        : undefined,
       nextCheckAt: new Date(row.next_check_at),
       lastError: safeJsonParse<TrackingRecord["lastError"]>(row.last_error),
       raw: safeJsonParse<unknown>(row.raw),

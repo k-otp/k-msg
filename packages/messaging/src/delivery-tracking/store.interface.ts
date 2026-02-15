@@ -8,4 +8,3 @@ export interface DeliveryTrackingStore {
   patch(messageId: string, patch: Partial<TrackingRecord>): Promise<void>;
   close?(): Promise<void> | void;
 }
-

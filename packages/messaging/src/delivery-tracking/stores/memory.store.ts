@@ -7,7 +7,9 @@ function cloneRecord(record: TrackingRecord): TrackingRecord {
     requestedAt: new Date(record.requestedAt),
     scheduledAt: record.scheduledAt ? new Date(record.scheduledAt) : undefined,
     statusUpdatedAt: new Date(record.statusUpdatedAt),
-    lastCheckedAt: record.lastCheckedAt ? new Date(record.lastCheckedAt) : undefined,
+    lastCheckedAt: record.lastCheckedAt
+      ? new Date(record.lastCheckedAt)
+      : undefined,
     nextCheckAt: new Date(record.nextCheckAt),
     lastError: record.lastError ? { ...record.lastError } : undefined,
     metadata: record.metadata ? { ...record.metadata } : undefined,
@@ -33,7 +35,9 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
     const due: TrackingRecord[] = [];
     const nowMs = now.getTime();
-    const safeLimit = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
+    const safeLimit = Number.isFinite(limit)
+      ? Math.max(0, Math.floor(limit))
+      : 0;
 
     for (const record of this.records.values()) {
       if (isTerminalDeliveryStatus(record.status)) continue;
@@ -45,7 +49,10 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
     return safeLimit > 0 ? due.slice(0, safeLimit) : [];
   }
 
-  async patch(messageId: string, patch: Partial<TrackingRecord>): Promise<void> {
+  async patch(
+    messageId: string,
+    patch: Partial<TrackingRecord>,
+  ): Promise<void> {
     const existing = this.records.get(messageId);
     if (!existing) return;
 
