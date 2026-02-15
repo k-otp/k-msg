@@ -6,6 +6,9 @@ export default defineConfig({
   name: "k-msg",
   version: typeof pkg.version === "string" ? pkg.version : "0.0.0",
   description: "k-msg CLI",
+  commands: {
+    directory: "./src/commands",
+  },
   build: {
     entry: "./src/k-msg.ts",
     outdir: "./dist",
