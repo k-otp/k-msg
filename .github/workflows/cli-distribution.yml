@@ -47,7 +47,7 @@ jobs:
         id: meta
         run: |
           set -euo pipefail
-          VERSION="$(bun -e 'console.log((await Bun.file(\"apps/cli/package.json\").json()).version)')"
+          VERSION="$(bun -e 'console.log((await Bun.file("apps/cli/package.json").json()).version)')"
           echo "version=${VERSION}" >>"$GITHUB_OUTPUT"
           echo "tag=cli-v${VERSION}" >>"$GITHUB_OUTPUT"
 
