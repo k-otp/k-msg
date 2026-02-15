@@ -1,5 +1,11 @@
 # @k-msg/webhook
 
+## 0.7.2 — 2026-02-15
+
+### Patch changes
+
+- Updated dependencies: messaging@0.7.2
+
 ## 0.7.1 — 2026-02-15
 
 ### Patch changes
