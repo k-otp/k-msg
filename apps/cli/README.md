@@ -4,7 +4,29 @@ This CLI is built with Bunli and uses the unified `k-msg` package (KMsg + Provid
 
 ## Install (recommended)
 
-The distribution workflow publishes prebuilt binaries to GitHub Releases as:
+### npm
+
+```bash
+npm install -g @k-msg/cli
+# or: pnpm add -g @k-msg/cli
+
+k-msg --help
+```
+
+Note: the npm package downloads a native binary from GitHub Releases on first run
+(`bunli build:all` artifacts: `k-msg-cli-<version>-<target>.tar.gz`), verifies it
+using `checksums.txt`, then extracts and caches it under your OS cache directory
+(`K_MSG_CLI_CACHE_DIR` to override).
+
+Env overrides:
+
+- `K_MSG_CLI_BASE_URL`: override GitHub release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+- `K_MSG_CLI_CACHE_DIR`: override where the extracted binary is cached
+- `K_MSG_CLI_LOCAL_BINARY`: copy a local binary instead of downloading (useful for local testing)
+
+### GitHub Releases (manual)
+
+The distribution workflow also publishes prebuilt binaries to GitHub Releases as:
 
 - `k-msg-cli-<version>-darwin-arm64.tar.gz`
 - `k-msg-cli-<version>-darwin-x64.tar.gz`
