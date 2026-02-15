@@ -165,8 +165,9 @@ export class IWINVProvider implements Provider {
     const trimmed = value.trim();
     if (!trimmed) return undefined;
 
-    const match =
-      /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(trimmed);
+    const match = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(
+      trimmed,
+    );
     if (!match) return undefined;
 
     const year = Number(match[1]);
@@ -272,9 +273,7 @@ export class IWINVProvider implements Provider {
       }
 
       const listRaw = data.list;
-      const list = Array.isArray(listRaw)
-        ? (listRaw as Array<unknown>)
-        : [];
+      const list = Array.isArray(listRaw) ? (listRaw as Array<unknown>) : [];
       if (list.length === 0) return ok(null);
 
       const item = (() => {
@@ -453,9 +452,7 @@ export class IWINVProvider implements Provider {
       }
 
       const listRaw = data.list;
-      const list = Array.isArray(listRaw)
-        ? (listRaw as Array<unknown>)
-        : [];
+      const list = Array.isArray(listRaw) ? (listRaw as Array<unknown>) : [];
       if (list.length === 0) return ok(null);
 
       const item = (() => {

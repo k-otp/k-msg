@@ -31,7 +31,10 @@ function computeNextCheckAt(
   return new Date(now.getTime() + delay);
 }
 
-function getTrackingStartTime(record: TrackingRecord, scheduledGraceMs: number): Date {
+function getTrackingStartTime(
+  record: TrackingRecord,
+  scheduledGraceMs: number,
+): Date {
   if (!isValidDate(record.scheduledAt)) return record.requestedAt;
   return new Date(record.scheduledAt.getTime() + scheduledGraceMs);
 }
