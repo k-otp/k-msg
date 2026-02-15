@@ -1,5 +1,14 @@
 # @k-msg/core
 
+## 0.8.0 — 2026-02-15
+
+### Minor changes
+
+- [02d8e88](https://github.com/k-otp/k-msg/commit/02d8e885003795c3a198053514d6598e657ba855) Replace the legacy CLI with a Bunli-based CLI and add Kakao Channel/Template
+  management commands. Extend core/provider template APIs (TemplateProvider ctx,
+  KakaoChannelProvider, TemplateInspectionProvider) and implement capabilities in
+  IWINV/Aligo providers. — Thanks @imjlk!
+
 ## 0.7.3 — 2026-02-15
 
 ### Patch changes
