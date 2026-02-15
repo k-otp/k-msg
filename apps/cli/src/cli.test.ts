@@ -5,7 +5,10 @@ import path from "path";
 import { createKMsgCli } from "./cli/app";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
-const FIXTURE_CONFIG_URL = new URL("./fixtures/k-msg.config.json", import.meta.url);
+const FIXTURE_CONFIG_URL = new URL(
+  "./fixtures/k-msg.config.json",
+  import.meta.url,
+);
 const TEST_TIMEOUT = 30_000;
 
 let fixtureConfigRaw = "";
@@ -29,9 +32,7 @@ async function createTempConfig(): Promise<string> {
   return target;
 }
 
-async function runCli(
-  argv: string[],
-): Promise<{
+async function runCli(argv: string[]): Promise<{
   exitCode: number;
   stdout: string;
   stderr: string;
@@ -84,7 +85,8 @@ async function runCli(
   }
 
   const exitCode =
-    exitCodeFromExit ?? (typeof process.exitCode === "number" ? process.exitCode : 0);
+    exitCodeFromExit ??
+    (typeof process.exitCode === "number" ? process.exitCode : 0);
 
   // Avoid leaking exit codes between runs inside a single Bun test process.
   process.exitCode = 0;
@@ -213,7 +215,13 @@ describe("k-msg CLI (bunli) E2E", () => {
       const configPath = await createTempConfig();
 
       const categories = expectCommand(
-        await runCli(["kakao", "channel", "categories", "--config", configPath]),
+        await runCli([
+          "kakao",
+          "channel",
+          "categories",
+          "--config",
+          configPath,
+        ]),
       );
       categories.toHaveSucceeded();
       expect(categories.stdout).toContain("first");

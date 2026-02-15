@@ -42,7 +42,8 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
     resolved = resolveKMsgConfigEnv(loadedRaw.config);
   } catch (error) {
     throw new Error(
-      `Failed to resolve env vars for config (${loadedRaw.path}): ${error instanceof Error ? error.message : String(error)
+      `Failed to resolve env vars for config (${loadedRaw.path}): ${
+        error instanceof Error ? error.message : String(error)
       }`,
     );
   }
@@ -61,10 +62,10 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
 
   const routing = resolved.routing
     ? {
-      byType: resolved.routing.byType,
-      defaultProviderId: resolved.routing.defaultProviderId,
-      strategy: resolved.routing.strategy,
-    }
+        byType: resolved.routing.byType,
+        defaultProviderId: resolved.routing.defaultProviderId,
+        strategy: resolved.routing.strategy,
+      }
     : undefined;
 
   const kmsg = new KMsg({

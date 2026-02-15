@@ -59,50 +59,58 @@ function cacheBaseDir() {
 
 function downloadText(url) {
   return new Promise((resolve, reject) => {
-    const req = httpsGet(url, { headers: { "User-Agent": "@k-msg/cli" } }, (res) => {
-      const status = res.statusCode || 0;
-      if (status >= 300 && status < 400 && res.headers.location) {
-        const redirected = new URL(res.headers.location, url).toString();
-        res.resume();
-        downloadText(redirected).then(resolve, reject);
-        return;
-      }
-      if (status !== 200) {
-        res.resume();
-        reject(new Error(`GET ${url} failed (status=${status})`));
-        return;
-      }
-      res.setEncoding("utf8");
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => resolve(data));
-    });
+    const req = httpsGet(
+      url,
+      { headers: { "User-Agent": "@k-msg/cli" } },
+      (res) => {
+        const status = res.statusCode || 0;
+        if (status >= 300 && status < 400 && res.headers.location) {
+          const redirected = new URL(res.headers.location, url).toString();
+          res.resume();
+          downloadText(redirected).then(resolve, reject);
+          return;
+        }
+        if (status !== 200) {
+          res.resume();
+          reject(new Error(`GET ${url} failed (status=${status})`));
+          return;
+        }
+        res.setEncoding("utf8");
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve(data));
+      },
+    );
     req.on("error", reject);
   });
 }
 
 function downloadToFile(url, destPath) {
   return new Promise((resolve, reject) => {
-    const req = httpsGet(url, { headers: { "User-Agent": "@k-msg/cli" } }, (res) => {
-      const status = res.statusCode || 0;
-      if (status >= 300 && status < 400 && res.headers.location) {
-        const redirected = new URL(res.headers.location, url).toString();
-        res.resume();
-        downloadToFile(redirected, destPath).then(resolve, reject);
-        return;
-      }
-      if (status !== 200) {
-        res.resume();
-        reject(new Error(`GET ${url} failed (status=${status})`));
-        return;
-      }
+    const req = httpsGet(
+      url,
+      { headers: { "User-Agent": "@k-msg/cli" } },
+      (res) => {
+        const status = res.statusCode || 0;
+        if (status >= 300 && status < 400 && res.headers.location) {
+          const redirected = new URL(res.headers.location, url).toString();
+          res.resume();
+          downloadToFile(redirected, destPath).then(resolve, reject);
+          return;
+        }
+        if (status !== 200) {
+          res.resume();
+          reject(new Error(`GET ${url} failed (status=${status})`));
+          return;
+        }
 
-      fs.mkdirSync(path.dirname(destPath), { recursive: true });
-      const file = fs.createWriteStream(destPath);
-      res.pipe(file);
-      file.on("finish", () => file.close(resolve));
-      file.on("error", reject);
-    });
+        fs.mkdirSync(path.dirname(destPath), { recursive: true });
+        const file = fs.createWriteStream(destPath);
+        res.pipe(file);
+        file.on("finish", () => file.close(resolve));
+        file.on("error", reject);
+      },
+    );
     req.on("error", reject);
   });
 }

@@ -9,7 +9,11 @@ import { z } from "zod";
 import { loadKMsgConfig } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { ProviderWithCapabilities } from "../providers/registry";
-import { loadRuntime, resolveKakaoChannelSenderKey, type Runtime } from "../runtime";
+import {
+  loadRuntime,
+  resolveKakaoChannelSenderKey,
+  type Runtime,
+} from "../runtime";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
@@ -499,12 +503,12 @@ const templateCreateCmd = defineCommand({
       const buttons =
         typeof flags.buttons === "string" && flags.buttons.trim().length > 0
           ? (() => {
-            const parsed = parseJson(flags.buttons, "buttons");
-            if (!Array.isArray(parsed)) {
-              throw new Error("buttons must be a JSON array");
-            }
-            return parsed as unknown[];
-          })()
+              const parsed = parseJson(flags.buttons, "buttons");
+              if (!Array.isArray(parsed)) {
+                throw new Error("buttons must be a JSON array");
+              }
+              return parsed as unknown[];
+            })()
           : undefined;
 
       const result = await (

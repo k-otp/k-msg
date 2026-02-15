@@ -1,5 +1,5 @@
 ---
-npm/@k-msg/cli: patch
+npm/@k-msg/cli: minor
 ---
 
 Publish `@k-msg/cli` to npm as a lightweight Node launcher that downloads and runs

@@ -61,7 +61,8 @@ const healthCmd = defineCommand({
     try {
       const runtime = await loadRuntime(flags.config);
 
-      const showProgress = !flags.json && terminal.isInteractive && !terminal.isCI;
+      const showProgress =
+        !flags.json && terminal.isInteractive && !terminal.isCI;
       const spin = showProgress ? spinner("Running health checks...") : null;
 
       if (spin) spin.start();
@@ -69,13 +70,19 @@ const healthCmd = defineCommand({
       const results: Array<{
         id: string;
         name: string;
-        health: Awaited<ReturnType<(typeof runtime.providers)[number]["healthCheck"]>>;
+        health: Awaited<
+          ReturnType<(typeof runtime.providers)[number]["healthCheck"]>
+        >;
       }> = [];
 
       if (spin) {
         for (const p of runtime.providers) {
           spin.update(`Checking ${p.id}...`);
-          results.push({ id: p.id, name: p.name, health: await p.healthCheck() });
+          results.push({
+            id: p.id,
+            name: p.name,
+            health: await p.healthCheck(),
+          });
         }
       } else {
         results.push(

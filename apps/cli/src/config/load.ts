@@ -8,9 +8,7 @@ export type LoadedKMsgConfig = {
 
 export function resolveConfigPath(inputPath: string | undefined): string {
   if (typeof inputPath === "string" && inputPath.trim().length > 0) {
-    return path.isAbsolute(inputPath)
-      ? inputPath
-      : path.resolve(inputPath);
+    return path.isAbsolute(inputPath) ? inputPath : path.resolve(inputPath);
   }
   return path.resolve("k-msg.config.json");
 }

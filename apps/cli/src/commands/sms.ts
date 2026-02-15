@@ -29,20 +29,20 @@ const sendCmd = defineCommand({
       const input: SendInput =
         flags.type !== undefined
           ? {
-            type: flags.type,
-            to: flags.to,
-            from: flags.from,
-            text: flags.text,
-            ...(flags.provider ? { providerId: flags.provider } : {}),
-            ...(scheduledAt ? { options: { scheduledAt } } : {}),
-          }
+              type: flags.type,
+              to: flags.to,
+              from: flags.from,
+              text: flags.text,
+              ...(flags.provider ? { providerId: flags.provider } : {}),
+              ...(scheduledAt ? { options: { scheduledAt } } : {}),
+            }
           : {
-            to: flags.to,
-            from: flags.from,
-            text: flags.text,
-            ...(flags.provider ? { providerId: flags.provider } : {}),
-            ...(scheduledAt ? { options: { scheduledAt } } : {}),
-          };
+              to: flags.to,
+              from: flags.from,
+              text: flags.text,
+              ...(flags.provider ? { providerId: flags.provider } : {}),
+              ...(scheduledAt ? { options: { scheduledAt } } : {}),
+            };
 
       const result = await runtime.kmsg.send(input);
 
