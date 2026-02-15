@@ -44,5 +44,9 @@
     "messaging",
     "kakao"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/k-otp/k-msg"
+  },
   "license": "MIT"
 }
