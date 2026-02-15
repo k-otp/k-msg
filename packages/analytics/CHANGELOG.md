@@ -1,5 +1,15 @@
 # @k-msg/analytics
 
+## 0.7.3 — 2026-02-15
+
+### Patch changes
+
+- [e9825cf](https://github.com/k-otp/k-msg/commit/e9825cfa0bfdf8c4ec2745c0fa42f46dd4b59a7e) Add query-based delivery tracking analytics.
+  
+  - `@k-msg/messaging`: extend `DeliveryTrackingStore` with optional query/count APIs and persist provider status/timestamps for reporting.
+  - `@k-msg/analytics`: add `DeliveryTrackingAnalyticsService` that computes KPIs/breakdowns by querying a `DeliveryTrackingStore` (SQLite/Bun.SQL/memory). — Thanks @imjlk!
+- Updated dependencies: messaging@0.7.3
+
 ## 0.7.2 — 2026-02-15
 
 ### Patch changes
