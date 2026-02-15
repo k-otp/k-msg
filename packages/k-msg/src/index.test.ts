@@ -1,11 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  AligoProvider,
-  fail,
-  IWINVProvider,
-  KMsg,
-  ok,
-} from "./index";
+import { AligoProvider, fail, IWINVProvider, KMsg, ok } from "./index";
 
 describe("k-msg package exports", () => {
   test("exports Result helpers", () => {

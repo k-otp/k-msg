@@ -16,6 +16,11 @@ import {
   type Result,
   type SendOptions,
   type SendResult,
+  type Template,
+  type TemplateContext,
+  type TemplateCreateInput,
+  type TemplateProvider,
+  type TemplateUpdateInput,
 } from "@k-msg/core";
 import type { IWINVConfig } from "./types/iwinv";
 
@@ -38,7 +43,7 @@ type SmsV2SendResponse = Record<string, unknown> & {
 
 type SmsV2MessageType = "SMS" | "LMS" | "MMS";
 
-export class IWINVProvider implements Provider {
+export class IWINVProvider implements Provider, TemplateProvider {
   readonly id = "iwinv";
   readonly name = "IWINV Messaging Provider";
   readonly supportedTypes: readonly MessageType[];
@@ -144,6 +149,497 @@ export class IWINVProvider implements Provider {
             { providerId: this.id, type: query.type },
           ),
         );
+    }
+  }
+
+  async createTemplate(
+    input: TemplateCreateInput,
+    _ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    if (!input || typeof input !== "object") {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "Template input is required",
+          { providerId: this.id },
+        ),
+      );
+    }
+    if (!input.name || input.name.trim().length === 0) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "name is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+    if (!input.content || input.content.trim().length === 0) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "content is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    const url = `${this.config.baseUrl}/api/template/add/`;
+    const payload: Record<string, unknown> = {
+      templateName: input.name,
+      templateContent: input.content,
+      ...(input.buttons ? { buttons: input.buttons } : {}),
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed)
+        ? parsed
+        : {
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          };
+
+      const code = this.normalizeIwinvCode(data.code) ?? response.status;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV template create failed";
+
+      if (!response.ok || code !== 200) {
+        return fail(
+          new KMsgError(this.mapIwinvCodeToKMsgErrorCode(code), message, {
+            providerId: this.id,
+            originalCode: code,
+          }),
+        );
+      }
+
+      const templateCodeRaw = data.templateCode;
+      const templateCode =
+        typeof templateCodeRaw === "string" && templateCodeRaw.trim().length > 0
+          ? templateCodeRaw.trim()
+          : "";
+      if (!templateCode) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "IWINV template create did not return templateCode",
+            { providerId: this.id, raw: data },
+          ),
+        );
+      }
+
+      const now = new Date();
+      return ok({
+        id: templateCode,
+        code: templateCode,
+        name: input.name,
+        content: input.content,
+        category: input.category,
+        status: "INSPECTION",
+        buttons: input.buttons,
+        variables: input.variables,
+        createdAt: now,
+        updatedAt: now,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  async updateTemplate(
+    code: string,
+    patch: TemplateUpdateInput,
+    ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    const templateCode = typeof code === "string" ? code.trim() : "";
+    if (!templateCode) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    // IWINV requires templateName/templateContent for modify, so fetch existing to fill missing fields.
+    const existingResult = await this.getTemplate(templateCode, ctx);
+    if (existingResult.isFailure) return existingResult;
+    const existing = existingResult.value;
+
+    const nextName =
+      typeof patch.name === "string" && patch.name.trim().length > 0
+        ? patch.name.trim()
+        : existing.name;
+    const nextContent =
+      typeof patch.content === "string" && patch.content.trim().length > 0
+        ? patch.content
+        : existing.content;
+    const nextButtons =
+      patch.buttons !== undefined ? patch.buttons : existing.buttons;
+
+    const url = `${this.config.baseUrl}/api/template/modify/`;
+    const payload: Record<string, unknown> = {
+      templateCode,
+      templateName: nextName,
+      templateContent: nextContent,
+      ...(nextButtons ? { buttons: nextButtons } : {}),
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed)
+        ? parsed
+        : {
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          };
+
+      const statusCode = this.normalizeIwinvCode(data.code) ?? response.status;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV template update failed";
+
+      if (!response.ok || statusCode !== 200) {
+        return fail(
+          new KMsgError(this.mapIwinvCodeToKMsgErrorCode(statusCode), message, {
+            providerId: this.id,
+            originalCode: statusCode,
+          }),
+        );
+      }
+
+      // Refresh from list to get updated status/comments.
+      const refreshed = await this.getTemplate(templateCode, ctx);
+      if (refreshed.isSuccess) return refreshed;
+
+      return ok({
+        ...existing,
+        name: nextName,
+        content: nextContent,
+        ...(patch.category !== undefined ? { category: patch.category } : {}),
+        ...(patch.variables !== undefined
+          ? { variables: patch.variables }
+          : {}),
+        ...(patch.buttons !== undefined ? { buttons: patch.buttons } : {}),
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  async deleteTemplate(
+    code: string,
+    _ctx?: TemplateContext,
+  ): Promise<Result<void, KMsgError>> {
+    const templateCode = typeof code === "string" ? code.trim() : "";
+    if (!templateCode) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    const url = `${this.config.baseUrl}/api/template/delete/`;
+    const payload: Record<string, unknown> = { templateCode };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed)
+        ? parsed
+        : {
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          };
+
+      const statusCode = this.normalizeIwinvCode(data.code) ?? response.status;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : typeof data.messgae === "string" && data.messgae.length > 0
+            ? data.messgae
+            : "IWINV template delete failed";
+
+      if (!response.ok || statusCode !== 200) {
+        return fail(
+          new KMsgError(this.mapIwinvCodeToKMsgErrorCode(statusCode), message, {
+            providerId: this.id,
+            originalCode: statusCode,
+          }),
+        );
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  async getTemplate(
+    code: string,
+    _ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    const templateCode = typeof code === "string" ? code.trim() : "";
+    if (!templateCode) {
+      return fail(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+          providerId: this.id,
+        }),
+      );
+    }
+
+    const payload: Record<string, unknown> = {
+      pageNum: "1",
+      pageSize: "15",
+      templateCode,
+    };
+
+    const url = `${this.config.baseUrl}/api/template/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed)
+        ? parsed
+        : {
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          };
+
+      const statusCode = this.normalizeIwinvCode(data.code) ?? response.status;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV template get failed";
+
+      if (!response.ok || statusCode !== 200) {
+        return fail(
+          new KMsgError(this.mapIwinvCodeToKMsgErrorCode(statusCode), message, {
+            providerId: this.id,
+            originalCode: statusCode,
+          }),
+        );
+      }
+
+      const listRaw = data.list;
+      const list = Array.isArray(listRaw) ? listRaw : [];
+      const first = list.find(isObjectRecord);
+      if (!first) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.TEMPLATE_NOT_FOUND,
+            "Template not found",
+            {
+              providerId: this.id,
+              templateCode,
+            },
+          ),
+        );
+      }
+
+      const templateCodeValue = first.templateCode;
+      const resolvedCode =
+        typeof templateCodeValue === "string"
+          ? templateCodeValue
+          : String(templateCodeValue ?? "");
+      const name =
+        typeof first.templateName === "string" ? first.templateName : "";
+      const content =
+        typeof first.templateContent === "string" ? first.templateContent : "";
+      const status = this.mapIwinvTemplateStatus(first.status);
+      const createdAt = this.parseIwinvDateTime(first.createDate) ?? new Date();
+
+      return ok({
+        id: resolvedCode,
+        code: resolvedCode,
+        name,
+        content,
+        status,
+        buttons: Array.isArray(first.buttons) ? first.buttons : undefined,
+        createdAt,
+        updatedAt: createdAt,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  async listTemplates(
+    params?: { status?: string; page?: number; limit?: number },
+    _ctx?: TemplateContext,
+  ): Promise<Result<Template[], KMsgError>> {
+    const pageNum =
+      typeof params?.page === "number" && params.page > 0
+        ? Math.floor(params.page)
+        : 1;
+    const pageSize =
+      typeof params?.limit === "number" && params.limit > 0
+        ? Math.floor(params.limit)
+        : 15;
+
+    const templateStatus = this.toIwinvTemplateStatus(params?.status);
+    const payload: Record<string, unknown> = {
+      pageNum: String(pageNum),
+      pageSize: String(pageSize),
+      ...(templateStatus ? { templateStatus } : {}),
+    };
+
+    const url = `${this.config.baseUrl}/api/template/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: this.getAlimTalkHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parsed: unknown;
+      try {
+        parsed = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        parsed = responseText;
+      }
+
+      const data = isObjectRecord(parsed)
+        ? parsed
+        : {
+            code: this.normalizeIwinvCode(parsed) ?? response.status,
+            message: responseText || String(parsed || ""),
+          };
+
+      const statusCode = this.normalizeIwinvCode(data.code) ?? response.status;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV template list failed";
+
+      if (!response.ok || statusCode !== 200) {
+        return fail(
+          new KMsgError(this.mapIwinvCodeToKMsgErrorCode(statusCode), message, {
+            providerId: this.id,
+            originalCode: statusCode,
+          }),
+        );
+      }
+
+      const listRaw = data.list;
+      const list = Array.isArray(listRaw) ? listRaw : [];
+
+      const templates: Template[] = list
+        .filter(isObjectRecord)
+        .map((item) => {
+          const templateCodeValue = item.templateCode;
+          const templateCode =
+            typeof templateCodeValue === "string"
+              ? templateCodeValue
+              : String(templateCodeValue ?? "");
+          const name =
+            typeof item.templateName === "string" ? item.templateName : "";
+          const content =
+            typeof item.templateContent === "string"
+              ? item.templateContent
+              : "";
+          const status = this.mapIwinvTemplateStatus(item.status);
+          const createdAt =
+            this.parseIwinvDateTime(item.createDate) ?? new Date();
+
+          return {
+            id: templateCode,
+            code: templateCode,
+            name,
+            content,
+            status,
+            buttons: Array.isArray(item.buttons) ? item.buttons : undefined,
+            createdAt,
+            updatedAt: createdAt,
+          };
+        })
+        .filter((tpl) => tpl.code.length > 0);
+
+      return ok(templates);
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
     }
   }
 
@@ -942,6 +1438,45 @@ export class IWINVProvider implements Provider {
       if (Number.isFinite(num)) return num;
     }
     return undefined;
+  }
+
+  private toIwinvTemplateStatus(
+    value: string | undefined,
+  ): "Y" | "I" | "R" | undefined {
+    if (typeof value !== "string") return undefined;
+    const normalized = value.trim().toUpperCase();
+    if (!normalized) return undefined;
+
+    switch (normalized) {
+      case "Y":
+      case "APPROVED":
+        return "Y";
+      case "I":
+      case "INSPECTION":
+        return "I";
+      case "R":
+      case "REJECTED":
+        return "R";
+      case "PENDING":
+        return "I";
+      default:
+        return undefined;
+    }
+  }
+
+  private mapIwinvTemplateStatus(value: unknown): Template["status"] {
+    const normalized =
+      typeof value === "string" ? value.trim().toUpperCase() : "";
+    switch (normalized) {
+      case "Y":
+        return "APPROVED";
+      case "I":
+        return "INSPECTION";
+      case "R":
+        return "REJECTED";
+      default:
+        return "PENDING";
+    }
   }
 
   private resolveSmsBaseUrl(): string {

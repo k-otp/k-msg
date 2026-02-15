@@ -601,4 +601,126 @@ describe("IWINVProvider", () => {
       expect(result.error.code).toBe("INVALID_REQUEST");
     }
   });
+
+  test("Template list uses AUTH header and maps status", async () => {
+    let calledUrl = "";
+    let calledAuth = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledAuth = new Headers(init?.headers).get("AUTH") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          message: "ok",
+          totalCount: 1,
+          list: [
+            {
+              templateCode: "10036",
+              templateName: "알림",
+              templateContent: "#{이름} 고객님 감사합니다.",
+              status: "Y",
+              createDate: "2021-06-21 10:01:31",
+              buttons: [],
+            },
+          ],
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.listTemplates({ status: "APPROVED" });
+
+    expect(calledUrl).toBe(
+      "https://alimtalk.bizservice.iwinv.kr/api/template/",
+    );
+    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledBody.templateStatus).toBe("Y");
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value[0]?.code).toBe("10036");
+      expect(result.value[0]?.status).toBe("APPROVED");
+    }
+  });
+
+  test("Template create uses add endpoint and returns templateCode", async () => {
+    let calledUrl = "";
+    let calledAuth = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledAuth = new Headers(init?.headers).get("AUTH") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          templateCode: "10031",
+          message: "created",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.createTemplate({
+      name: "템플릿명",
+      content: "템플릿 내용",
+    });
+
+    expect(calledUrl).toBe(
+      "https://alimtalk.bizservice.iwinv.kr/api/template/add/",
+    );
+    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledBody.templateName).toBe("템플릿명");
+    expect(calledBody.templateContent).toBe("템플릿 내용");
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.code).toBe("10031");
+      expect(result.value.status).toBe("INSPECTION");
+    }
+  });
+
+  test("Template get fails with TEMPLATE_NOT_FOUND when list is empty", async () => {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({ code: 200, message: "ok", totalCount: 0, list: [] }),
+        { status: 200 },
+      );
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.getTemplate("99999");
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("TEMPLATE_NOT_FOUND");
+    }
+  });
 });

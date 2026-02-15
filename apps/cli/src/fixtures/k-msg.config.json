@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "type": "mock",
+      "id": "mock",
+      "config": {}
+    }
+  ],
+  "routing": {
+    "defaultProviderId": "mock",
+    "strategy": "first"
+  },
+  "defaults": {
+    "from": "0299999999",
+    "kakao": {
+      "senderKey": "mock-sender-seed"
+    }
+  },
+  "aliases": {
+    "kakaoChannels": {
+      "seed": {
+        "providerId": "mock",
+        "plusId": "@mock",
+        "senderKey": "mock-sender-seed",
+        "name": "Mock Seed Channel"
+      }
+    }
+  }
+}

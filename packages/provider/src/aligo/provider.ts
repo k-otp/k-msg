@@ -1,5 +1,9 @@
 import {
   fail,
+  type KakaoCategoryEntry,
+  type KakaoChannel,
+  type KakaoChannelCategories,
+  type KakaoChannelProvider,
   KMsgError,
   KMsgErrorCode,
   type MessageBinaryInput,
@@ -10,6 +14,12 @@ import {
   type Result,
   type SendOptions,
   type SendResult,
+  type Template,
+  type TemplateContext,
+  type TemplateCreateInput,
+  type TemplateInspectionProvider,
+  type TemplateProvider,
+  type TemplateUpdateInput,
 } from "@k-msg/core";
 import type {
   AligoConfig,
@@ -23,7 +33,13 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export class AligoProvider implements Provider {
+export class AligoProvider
+  implements
+    Provider,
+    TemplateProvider,
+    TemplateInspectionProvider,
+    KakaoChannelProvider
+{
   readonly id = "aligo";
   readonly name = "Aligo Smart SMS";
   readonly supportedTypes: readonly MessageType[] = [
@@ -125,6 +141,573 @@ export class AligoProvider implements Provider {
     }
   }
 
+  async listKakaoChannels(params?: {
+    plusId?: string;
+    senderKey?: string;
+  }): Promise<Result<KakaoChannel[], KMsgError>> {
+    try {
+      const body: Record<string, unknown> = {
+        apikey: this.config.apiKey,
+        userid: this.config.userId,
+        ...(typeof params?.plusId === "string" &&
+        params.plusId.trim().length > 0
+          ? { plusid: params.plusId.trim() }
+          : {}),
+        ...(typeof params?.senderKey === "string" &&
+        params.senderKey.trim().length > 0
+          ? { senderkey: params.senderKey.trim() }
+          : {}),
+      };
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/profile/list/",
+        body,
+      );
+
+      const okResult = this.ensureAligoKakaoOk(response, "channel list failed");
+      if (okResult.isFailure) return okResult;
+
+      const listRaw = response.list;
+      const list = Array.isArray(listRaw) ? listRaw : [];
+      const channels: KakaoChannel[] = list
+        .filter(isObjectRecord)
+        .map((item) => ({
+          providerId: this.id,
+          senderKey: String(item.senderKey ?? ""),
+          plusId: typeof item.uuid === "string" ? item.uuid : undefined,
+          name: typeof item.name === "string" ? item.name : undefined,
+          status: typeof item.status === "string" ? item.status : undefined,
+          createdAt: this.parseAligoDateTime(item.cdate),
+          updatedAt: this.parseAligoDateTime(item.udate),
+          raw: item,
+        }))
+        .filter((c) => c.senderKey.length > 0);
+
+      return ok(channels);
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async listKakaoChannelCategories(): Promise<
+    Result<KakaoChannelCategories, KMsgError>
+  > {
+    try {
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/category/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "category list failed",
+      );
+      if (okResult.isFailure) return okResult;
+
+      const data = isObjectRecord(response.data) ? response.data : {};
+
+      const mapEntries = (raw: unknown): KakaoCategoryEntry[] => {
+        const arr = Array.isArray(raw) ? raw : [];
+        return arr
+          .filter(isObjectRecord)
+          .map((entry) => ({
+            code: String(entry.code ?? ""),
+            name: String(entry.name ?? ""),
+            parentCode:
+              typeof entry.parentCode === "string" &&
+              entry.parentCode.length > 0
+                ? entry.parentCode
+                : undefined,
+          }))
+          .filter((e) => e.code.length > 0);
+      };
+
+      return ok({
+        first: mapEntries(data.firstBusinessType),
+        second: mapEntries(data.secondBusinessType),
+        third: mapEntries(data.thirdBusinessType),
+      });
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async requestKakaoChannelAuth(params: {
+    plusId: string;
+    phoneNumber: string;
+  }): Promise<Result<void, KMsgError>> {
+    try {
+      const plusId = params.plusId.trim();
+      const phoneNumber = params.phoneNumber.trim();
+      if (!plusId || !phoneNumber) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            "plusId and phoneNumber are required",
+            { providerId: this.id },
+          ),
+        );
+      }
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/profile/auth/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          plusid: plusId,
+          phonenumber: phoneNumber,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(response, "channel auth failed");
+      if (okResult.isFailure) return okResult;
+      return ok(undefined);
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async addKakaoChannel(params: {
+    plusId: string;
+    authNum: string;
+    phoneNumber: string;
+    categoryCode: string;
+  }): Promise<Result<KakaoChannel, KMsgError>> {
+    try {
+      const plusId = params.plusId.trim();
+      const authNum = params.authNum.trim();
+      const phoneNumber = params.phoneNumber.trim();
+      const categoryCode = params.categoryCode.trim();
+      if (!plusId || !authNum || !phoneNumber || !categoryCode) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            "plusId, authNum, phoneNumber, categoryCode are required",
+            { providerId: this.id },
+          ),
+        );
+      }
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/profile/add/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          plusid: plusId,
+          authnum: authNum,
+          phonenumber: phoneNumber,
+          categorycode: categoryCode,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(response, "channel add failed");
+      if (okResult.isFailure) return okResult;
+
+      const dataRaw = response.data;
+      const data = Array.isArray(dataRaw)
+        ? dataRaw.find(isObjectRecord)
+        : isObjectRecord(dataRaw)
+          ? dataRaw
+          : undefined;
+      if (!data) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "channel add returned empty data",
+            { providerId: this.id, raw: response },
+          ),
+        );
+      }
+
+      const senderKey = String(data.senderKey ?? "");
+      if (!senderKey) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "channel add did not return senderKey",
+            { providerId: this.id, raw: data },
+          ),
+        );
+      }
+
+      return ok({
+        providerId: this.id,
+        senderKey,
+        plusId: typeof data.uuid === "string" ? data.uuid : plusId,
+        name: typeof data.name === "string" ? data.name : undefined,
+        status: typeof data.status === "string" ? data.status : undefined,
+        createdAt: this.parseAligoDateTime(data.cdate),
+        updatedAt: this.parseAligoDateTime(data.udate),
+        raw: data,
+      });
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async createTemplate(
+    input: TemplateCreateInput,
+    ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      if (!input.name || input.name.trim().length === 0) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "name is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+      if (!input.content || input.content.trim().length === 0) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "content is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+
+      const body: Record<string, unknown> = {
+        apikey: this.config.apiKey,
+        userid: this.config.userId,
+        senderkey: senderKey,
+        tpl_name: input.name,
+        tpl_content: input.content,
+      };
+
+      const tplButton = this.toAligoTplButton(input.buttons);
+      if (tplButton) body.tpl_button = tplButton;
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/add/",
+        body,
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "template create failed",
+      );
+      if (okResult.isFailure) return okResult;
+
+      const data = isObjectRecord(response.data) ? response.data : {};
+      const code = String(data.templtCode ?? "");
+      if (!code) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "template create did not return templtCode",
+            { providerId: this.id, raw: response },
+          ),
+        );
+      }
+
+      const createdAt = this.parseAligoDateTime(data.cdate) ?? new Date();
+      const updatedAt =
+        this.parseAligoDateTime(data.udate) ??
+        this.parseAligoDateTime(data.cdate) ??
+        createdAt;
+
+      return ok({
+        id: code,
+        code,
+        name: String(data.templtName ?? input.name),
+        content: String(data.templtContent ?? input.content),
+        category: input.category,
+        status: this.mapAligoTemplateStatus(data),
+        buttons: Array.isArray(data.buttons) ? data.buttons : input.buttons,
+        variables: input.variables,
+        createdAt,
+        updatedAt,
+      });
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async updateTemplate(
+    code: string,
+    patch: TemplateUpdateInput,
+    ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      const templateCode = code.trim();
+      if (!templateCode) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+
+      const existingResult = await this.getTemplate(templateCode, {
+        kakaoChannelSenderKey: senderKey,
+      });
+      if (existingResult.isFailure) return existingResult;
+      const existing = existingResult.value;
+
+      const nextName =
+        typeof patch.name === "string" && patch.name.trim().length > 0
+          ? patch.name.trim()
+          : existing.name;
+      const nextContent =
+        typeof patch.content === "string" && patch.content.trim().length > 0
+          ? patch.content
+          : existing.content;
+      const nextButtons =
+        patch.buttons !== undefined ? patch.buttons : existing.buttons;
+
+      const body: Record<string, unknown> = {
+        apikey: this.config.apiKey,
+        userid: this.config.userId,
+        senderkey: senderKey,
+        tpl_code: templateCode,
+        tpl_name: nextName,
+        tpl_content: nextContent,
+      };
+
+      const tplButton = this.toAligoTplButton(nextButtons);
+      if (tplButton) body.tpl_button = tplButton;
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/modify/",
+        body,
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "template update failed",
+      );
+      if (okResult.isFailure) return okResult;
+
+      const refreshed = await this.getTemplate(templateCode, {
+        kakaoChannelSenderKey: senderKey,
+      });
+      if (refreshed.isSuccess) return refreshed;
+
+      return ok({
+        ...existing,
+        name: nextName,
+        content: nextContent,
+        ...(patch.category !== undefined ? { category: patch.category } : {}),
+        ...(patch.variables !== undefined
+          ? { variables: patch.variables }
+          : {}),
+        ...(patch.buttons !== undefined ? { buttons: patch.buttons } : {}),
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async deleteTemplate(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<void, KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      const templateCode = code.trim();
+      if (!templateCode) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/del/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          senderkey: senderKey,
+          tpl_code: templateCode,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "template delete failed",
+      );
+      if (okResult.isFailure) return okResult;
+      return ok(undefined);
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async getTemplate(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<Template, KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      const templateCode = code.trim();
+      if (!templateCode) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/list/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          senderkey: senderKey,
+          tpl_code: templateCode,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(response, "template get failed");
+      if (okResult.isFailure) return okResult;
+
+      const listRaw = response.list;
+      const list = Array.isArray(listRaw) ? listRaw : [];
+      const first = list.find(isObjectRecord);
+      if (!first) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.TEMPLATE_NOT_FOUND,
+            "Template not found",
+            {
+              providerId: this.id,
+              templateCode,
+            },
+          ),
+        );
+      }
+
+      const tplCode = String(first.templtCode ?? templateCode);
+      const createdAt = this.parseAligoDateTime(first.cdate) ?? new Date();
+      const updatedAt =
+        this.parseAligoDateTime(first.udate) ??
+        this.parseAligoDateTime(first.cdate) ??
+        createdAt;
+
+      return ok({
+        id: tplCode,
+        code: tplCode,
+        name: String(first.templtName ?? ""),
+        content: String(first.templtContent ?? ""),
+        status: this.mapAligoTemplateStatus(first),
+        buttons: Array.isArray(first.buttons) ? first.buttons : undefined,
+        createdAt,
+        updatedAt,
+      });
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async listTemplates(
+    params?: { status?: string; page?: number; limit?: number },
+    ctx?: TemplateContext,
+  ): Promise<Result<Template[], KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/list/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          senderkey: senderKey,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "template list failed",
+      );
+      if (okResult.isFailure) return okResult;
+
+      const listRaw = response.list;
+      const list = Array.isArray(listRaw) ? listRaw : [];
+      const templates = list
+        .filter(isObjectRecord)
+        .map((item) => {
+          const tplCode = String(item.templtCode ?? "");
+          const createdAt = this.parseAligoDateTime(item.cdate) ?? new Date();
+          const updatedAt =
+            this.parseAligoDateTime(item.udate) ??
+            this.parseAligoDateTime(item.cdate) ??
+            createdAt;
+
+          return {
+            id: tplCode,
+            code: tplCode,
+            name: String(item.templtName ?? ""),
+            content: String(item.templtContent ?? ""),
+            status: this.mapAligoTemplateStatus(item),
+            buttons: Array.isArray(item.buttons) ? item.buttons : undefined,
+            createdAt,
+            updatedAt,
+          } satisfies Template;
+        })
+        .filter((tpl) => tpl.code.length > 0);
+
+      if (params?.status) {
+        const status = params.status.trim().toUpperCase();
+        return ok(templates.filter((tpl) => tpl.status === status));
+      }
+
+      return ok(templates);
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
+  async requestTemplateInspection(
+    code: string,
+    ctx?: TemplateContext,
+  ): Promise<Result<void, KMsgError>> {
+    try {
+      const senderKey = this.resolveKakaoSenderKey(ctx);
+      const templateCode = code.trim();
+      if (!templateCode) {
+        return fail(
+          new KMsgError(KMsgErrorCode.INVALID_REQUEST, "code is required", {
+            providerId: this.id,
+          }),
+        );
+      }
+
+      const response = await this.request(
+        this.ALIMTALK_HOST,
+        "/akv10/template/request/",
+        {
+          apikey: this.config.apiKey,
+          userid: this.config.userId,
+          senderkey: senderKey,
+          tpl_code: templateCode,
+        },
+      );
+
+      const okResult = this.ensureAligoKakaoOk(
+        response,
+        "template inspection request failed",
+      );
+      if (okResult.isFailure) return okResult;
+      return ok(undefined);
+    } catch (error) {
+      return fail(this.mapAligoKakaoError(error));
+    }
+  }
+
   private resolveImageRef(options: {
     imageUrl?: string;
     media?: { image?: MessageBinaryInput };
@@ -202,6 +785,123 @@ export class AligoProvider implements Provider {
     }
 
     return (await response.json()) as Record<string, unknown>;
+  }
+
+  private normalizeAligoKakaoCode(value: unknown): number | undefined {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return undefined;
+      const num = Number(trimmed);
+      if (Number.isFinite(num)) return num;
+    }
+    return undefined;
+  }
+
+  private ensureAligoKakaoOk(
+    response: Record<string, unknown>,
+    fallbackMessage: string,
+  ): Result<void, KMsgError> {
+    const rawCode = response.code;
+    const code = this.normalizeAligoKakaoCode(rawCode);
+    if (code === 0) return ok(undefined);
+
+    const message =
+      typeof response.message === "string" && response.message.length > 0
+        ? response.message
+        : fallbackMessage;
+    const mapped =
+      code === 509 || code === -99
+        ? KMsgErrorCode.INVALID_REQUEST
+        : KMsgErrorCode.PROVIDER_ERROR;
+    return fail(
+      new KMsgError(mapped, message, {
+        providerId: this.id,
+        originalCode: rawCode,
+        raw: response,
+      }),
+    );
+  }
+
+  private resolveKakaoSenderKey(ctx?: TemplateContext): string {
+    const senderKey =
+      (typeof ctx?.kakaoChannelSenderKey === "string" &&
+      ctx.kakaoChannelSenderKey.trim().length > 0
+        ? ctx.kakaoChannelSenderKey.trim()
+        : this.config.senderKey) || "";
+    if (!senderKey) {
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "kakao channel senderKey is required (ctx.kakaoChannelSenderKey or config.senderKey)",
+        { providerId: this.id },
+      );
+    }
+    return senderKey;
+  }
+
+  private toAligoTplButton(value: unknown): string | undefined {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    }
+    if (Array.isArray(value)) {
+      return JSON.stringify({ button: value });
+    }
+    if (typeof value === "object") {
+      return JSON.stringify(value);
+    }
+    return undefined;
+  }
+
+  private mapAligoTemplateStatus(
+    item: Record<string, unknown>,
+  ): Template["status"] {
+    const insp =
+      typeof item.inspStatus === "string"
+        ? item.inspStatus.trim().toUpperCase()
+        : "";
+    switch (insp) {
+      case "APR":
+        return "APPROVED";
+      case "REJ":
+        return "REJECTED";
+      case "REQ":
+      case "REG":
+        return "INSPECTION";
+      default:
+        return "PENDING";
+    }
+  }
+
+  private parseAligoDateTime(value: unknown): Date | undefined {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(
+      trimmed,
+    );
+    if (!match) return undefined;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    const second = Number(match[6]);
+
+    const date = new Date(year, month - 1, day, hour, minute, second);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  }
+
+  private mapAligoKakaoError(error: unknown): KMsgError {
+    if (error instanceof KMsgError) return error;
+    return new KMsgError(
+      KMsgErrorCode.PROVIDER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      { providerId: this.id },
+    );
   }
 
   private mapAligoError(error: unknown): KMsgError {

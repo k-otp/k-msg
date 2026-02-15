@@ -1,26 +1,18 @@
-/**
- * E2E Integration tests for CLI commands
- */
-
 import { beforeAll, describe, expect, test } from "bun:test";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "bun";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
 const CLI_SRC_PATH = path.join(import.meta.dir, "cli.ts");
 const CLI_DIST_PATH = path.join(CLI_ROOT, "dist", "cli.js");
-const FIXTURE_PLUGIN_PATH = path.join(
+const FIXTURE_CONFIG_PATH = path.join(
   import.meta.dir,
   "fixtures",
-  "mock-provider.plugin.ts",
+  "k-msg.config.json",
 );
-const TEST_TIMEOUT = 30000;
-// biome-ignore lint/complexity/useRegexLiterals: avoid embedding control characters in a regex literal
-const ANSI_PATTERN = new RegExp("\\u001b\\[[0-9;]*m", "g");
-
-function stripAnsi(value: string): string {
-  return value.replace(ANSI_PATTERN, "");
-}
+const TEST_TIMEOUT = 30_000;
 
 async function runCli(
   args: string[],
@@ -36,14 +28,16 @@ async function runCli(
   return { exitCode, stdout, stderr };
 }
 
-describe("CLI E2E Tests", () => {
-  const mockEnv = {
-    ...process.env,
-    K_MSG_MOCK: "true",
-  };
+function createTempConfig(): string {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "k-msg-cli-"));
+  const target = path.join(dir, "k-msg.config.json");
+  const raw = readFileSync(FIXTURE_CONFIG_PATH, "utf8");
+  writeFileSync(target, raw, "utf8");
+  return target;
+}
 
+describe("k-msg CLI (bunli) E2E", () => {
   beforeAll(async () => {
-    // Use the built JS CLI to avoid flaky TS runtime/transpiler issues in CI.
     const build = spawn(
       [
         "bun",
@@ -67,170 +61,249 @@ describe("CLI E2E Tests", () => {
   });
 
   test(
-    "should show help",
+    "help/version",
     async () => {
-      const { exitCode, stdout, stderr } = await runCli(["--help"], mockEnv);
-      const plain = stripAnsi(stdout + stderr);
+      const {
+        exitCode: helpCode,
+        stdout: helpOut,
+        stderr: helpErr,
+      } = await runCli(["--help"], process.env);
+      expect([0, 2]).toContain(helpCode);
+      expect((helpOut + helpErr).toLowerCase()).toContain("k-msg");
 
-      expect([0, 1]).toContain(exitCode);
-      expect(plain).toContain("K-Message CLI");
-      expect(plain).toContain("-h, --help");
+      const { exitCode: verCode, stdout: verOut } = await runCli(
+        ["--version"],
+        process.env,
+      );
+      expect(verCode).toBe(0);
+      expect(verOut).toContain("k-msg v");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should show version",
+    "config validate/show",
     async () => {
-      const { exitCode, stdout, stderr } = await runCli(["--version"], mockEnv);
-      const plain = stripAnsi(stdout + stderr);
-
+      const configPath = createTempConfig();
+      const { exitCode, stdout } = await runCli(
+        ["config", "validate", "--config", configPath],
+        process.env,
+      );
       expect(exitCode).toBe(0);
-      expect(plain).toContain("0.2.0");
+      expect(stdout).toContain("OK:");
+
+      const shown = await runCli(
+        ["config", "show", "--config", configPath],
+        process.env,
+      );
+      expect(shown.exitCode).toBe(0);
+      expect(shown.stdout).toContain("Config:");
+      expect(shown.stdout).toContain("Providers:");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should show info",
+    "providers list/health",
     async () => {
-      const { exitCode, stdout, stderr } = await runCli(["info"], mockEnv);
-      const plain = stripAnsi(stdout + stderr);
+      const configPath = createTempConfig();
 
-      expect(exitCode).toBe(0);
-      expect(plain).toContain("Platform Information");
-      expect(plain).toContain("Providers: mock");
-      expect(plain).toContain("Supported Channels:");
+      const listed = await runCli(
+        ["providers", "list", "--config", configPath],
+        process.env,
+      );
+      expect(listed.exitCode).toBe(0);
+      expect(listed.stdout).toContain("mock:");
+
+      const health = await runCli(
+        ["providers", "health", "--config", configPath],
+        process.env,
+      );
+      expect(health.exitCode).toBe(0);
+      expect(health.stdout).toContain("mock");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should perform health check with mock provider",
+    "sms/alimtalk/advanced send",
     async () => {
-      const { exitCode, stdout, stderr } = await runCli(["health"], mockEnv);
-      const plain = stripAnsi(stdout + stderr);
+      const configPath = createTempConfig();
 
-      expect(exitCode).toBe(0);
-      expect(plain).toContain("Checking provider health");
-      expect(plain).toContain("Mock Provider (mock)");
-      expect(plain).toContain("Platform healthy");
-    },
-    TEST_TIMEOUT,
-  );
+      const sms = await runCli(
+        [
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "test",
+        ],
+        process.env,
+      );
+      expect(sms.exitCode).toBe(0);
+      expect(sms.stdout).toContain("OK");
 
-  test(
-    "should send SMS with mock provider",
-    async () => {
-      const { exitCode, stdout, stderr } = await runCli(
+      const alimtalk = await runCli(
+        [
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-code",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+        ],
+        process.env,
+      );
+      expect(alimtalk.exitCode).toBe(0);
+      expect(alimtalk.stdout).toContain("OK ALIMTALK");
+
+      const advanced = await runCli(
         [
           "send",
-          "-p",
-          "01012345678",
-          "-c",
-          "SMS",
-          "--text",
-          "인증번호는 123456 입니다",
-          "--variables",
-          '{"code":"123456"}',
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"advanced"}',
         ],
-        mockEnv,
+        process.env,
       );
-      const plain = stripAnsi(stdout + stderr);
-
-      expect(exitCode).toBe(0);
-      expect(plain).toContain("Message sent successfully");
-      expect(plain).toContain("Message ID: mock-");
-      expect(plain).toContain("Channel: SMS");
+      expect(advanced.exitCode).toBe(0);
+      expect(advanced.stdout).toContain("OK");
     },
     TEST_TIMEOUT,
   );
 
   test(
-    "should reject ALIMTALK without template",
+    "kakao channel/template commands",
     async () => {
-      const { exitCode } = await runCli(
-        ["send", "-p", "01012345678", "-c", "ALIMTALK"],
-        mockEnv,
+      const configPath = createTempConfig();
+
+      const categories = await runCli(
+        ["kakao", "channel", "categories", "--config", configPath],
+        process.env,
       );
-      expect(exitCode).toBe(1);
-    },
-    TEST_TIMEOUT,
-  );
+      expect(categories.exitCode).toBe(0);
+      expect(categories.stdout).toContain("first");
 
-  test(
-    "should load provider from plugin manifest env",
-    async () => {
-      const pluginEnv = {
-        ...process.env,
-        K_MSG_PROVIDER_PLUGINS: JSON.stringify([
-          {
-            id: "fixture-plugin",
-            module: FIXTURE_PLUGIN_PATH,
-            exportName: "FixtureProvider",
-            default: true,
-            config: {
-              id: "fixture-plugin",
-              name: "Fixture Plugin",
-            },
-          },
-        ]),
-      };
-
-      const { exitCode, stdout, stderr } = await runCli(["info"], pluginEnv);
-      const plain = stripAnsi(stdout + stderr);
-
-      expect(exitCode).toBe(0);
-      expect(plain).toContain("Providers: fixture-plugin");
-      expect(plain).toContain("Runtime Source: plugin-manifest");
-    },
-    TEST_TIMEOUT,
-  );
-
-  test(
-    "should round-robin providers during bulk send",
-    async () => {
-      const pluginEnv = {
-        ...process.env,
-        K_MSG_PROVIDER_PLUGINS: JSON.stringify({
-          defaultProviderId: "rr",
-          providers: [
-            {
-              id: "p1",
-              module: FIXTURE_PLUGIN_PATH,
-              exportName: "FixtureProvider",
-              config: { id: "p1", name: "P1" },
-            },
-            {
-              id: "p2",
-              module: FIXTURE_PLUGIN_PATH,
-              exportName: "FixtureProvider",
-              config: { id: "p2", name: "P2" },
-            },
-            {
-              kind: "router",
-              id: "rr",
-              strategy: "round_robin",
-              providers: ["p1", "p2"],
-              default: true,
-            },
-          ],
-        }),
-      };
-
-      const phones = "01000000001,01000000002,01000000003,01000000004";
-      const { exitCode, stdout, stderr } = await runCli(
-        ["bulk-send", "--phones", phones, "-c", "SMS", "--text", "test"],
-        pluginEnv,
+      const list = await runCli(
+        ["kakao", "channel", "list", "--config", configPath],
+        process.env,
       );
-      const plain = stripAnsi(stdout + stderr);
+      expect(list.exitCode).toBe(0);
+      expect(list.stdout).toContain("mock-sender-seed");
 
-      expect(exitCode).toBe(0);
-      expect(plain).toContain("[p1] 01000000001");
-      expect(plain).toContain("[p2] 01000000002");
-      expect(plain).toContain("[p1] 01000000003");
-      expect(plain).toContain("[p2] 01000000004");
-      expect(plain).toContain("Bulk send completed");
+      const auth = await runCli(
+        [
+          "kakao",
+          "channel",
+          "auth",
+          "--config",
+          configPath,
+          "--plus-id",
+          "@mock",
+          "--phone",
+          "01012345678",
+        ],
+        process.env,
+      );
+      expect(auth.exitCode).toBe(0);
+      expect(auth.stdout).toContain("OK");
+
+      const add = await runCli(
+        [
+          "kakao",
+          "channel",
+          "add",
+          "--config",
+          configPath,
+          "--plus-id",
+          "@mock",
+          "--auth-num",
+          "1234",
+          "--phone",
+          "01012345678",
+          "--category-code",
+          "001",
+          "--save",
+          "test",
+        ],
+        process.env,
+      );
+      expect(add.exitCode).toBe(0);
+      expect(add.stdout).toContain("saved=test");
+
+      const tplList = await runCli(
+        ["kakao", "template", "list", "--config", configPath],
+        process.env,
+      );
+      expect(tplList.exitCode).toBe(0);
+      expect(tplList.stdout).toContain("MOCK_TPL_SEED");
+
+      const tplGet = await runCli(
+        [
+          "kakao",
+          "template",
+          "get",
+          "--config",
+          configPath,
+          "--template-code",
+          "MOCK_TPL_SEED",
+        ],
+        process.env,
+      );
+      expect(tplGet.exitCode).toBe(0);
+      expect(tplGet.stdout).toContain("MOCK_TPL_SEED");
+
+      const tplUpdate = await runCli(
+        [
+          "kakao",
+          "template",
+          "update",
+          "--config",
+          configPath,
+          "--template-code",
+          "MOCK_TPL_SEED",
+          "--name",
+          "Updated Name",
+        ],
+        process.env,
+      );
+      expect(tplUpdate.exitCode).toBe(0);
+
+      const tplRequest = await runCli(
+        [
+          "kakao",
+          "template",
+          "request",
+          "--config",
+          configPath,
+          "--template-code",
+          "MOCK_TPL_SEED",
+        ],
+        process.env,
+      );
+      expect(tplRequest.exitCode).toBe(0);
+
+      const tplDelete = await runCli(
+        [
+          "kakao",
+          "template",
+          "delete",
+          "--config",
+          configPath,
+          "--template-code",
+          "MOCK_TPL_SEED",
+        ],
+        process.env,
+      );
+      expect(tplDelete.exitCode).toBe(0);
     },
     TEST_TIMEOUT,
   );

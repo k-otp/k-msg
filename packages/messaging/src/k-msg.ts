@@ -2,9 +2,9 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  ok,
   type MessageType,
   type MessageVariables,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -262,9 +262,7 @@ export class KMsg {
     );
   }
 
-  private selectProvider(
-    options: SendOptions,
-  ): Result<Provider, KMsgError> {
+  private selectProvider(options: SendOptions): Result<Provider, KMsgError> {
     const requestedProviderId = options.providerId;
     if (requestedProviderId) {
       const provider = this.providersById.get(requestedProviderId);
@@ -356,7 +354,9 @@ export class KMsg {
     return filtered[0];
   }
 
-  private normalizeInput(input: SendInput): SendOptions & { messageId: string } {
+  private normalizeInput(
+    input: SendInput,
+  ): SendOptions & { messageId: string } {
     const explicitType =
       typeof (input as unknown as Record<string, unknown>).type === "string";
 
@@ -418,14 +418,17 @@ export class KMsg {
 
     // Interpolate for text-based types when variables exist.
     const interpolated = this.interpolateTextOptions(patched);
-    return { ...interpolated, messageId } as SendOptions & { messageId: string };
+    return { ...interpolated, messageId } as SendOptions & {
+      messageId: string;
+    };
   }
 
   private applyDefaults(options: SendOptions): SendOptions {
     const from =
       typeof options.from === "string" && options.from.length > 0
         ? options.from
-        : typeof this.defaults.from === "string" && this.defaults.from.length > 0
+        : typeof this.defaults.from === "string" &&
+            this.defaults.from.length > 0
           ? this.defaults.from
           : undefined;
 
@@ -433,7 +436,8 @@ export class KMsg {
 
     if (base.type === "ALIMTALK" || base.type === "FRIENDTALK") {
       const profileId =
-        typeof base.kakao?.profileId === "string" && base.kakao.profileId.length > 0
+        typeof base.kakao?.profileId === "string" &&
+        base.kakao.profileId.length > 0
           ? base.kakao.profileId
           : typeof this.defaults.kakao?.profileId === "string"
             ? this.defaults.kakao.profileId
