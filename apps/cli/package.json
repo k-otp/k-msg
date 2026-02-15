@@ -23,10 +23,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "bunli": "^0.5.3",
-    "typescript": "catalog:",
+    "@bunli/test": "^0.3.2",
     "@types/bun": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "bunli": "^0.5.3",
+    "typescript": "catalog:"
   },
   "keywords": [
     "alimtalk",
