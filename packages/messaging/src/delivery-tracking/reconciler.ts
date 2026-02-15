@@ -1,10 +1,16 @@
 import {
-  ErrorUtils,
   type DeliveryStatus,
   type DeliveryStatusQuery,
+  ErrorUtils,
   type Provider,
 } from "@k-msg/core";
-import { DEFAULT_POLLING_CONFIG, isTerminalDeliveryStatus, type TrackingReconcileResult, type TrackingRecord, type TrackingUpdate } from "./types";
+import {
+  DEFAULT_POLLING_CONFIG,
+  isTerminalDeliveryStatus,
+  type TrackingReconcileResult,
+  type TrackingRecord,
+  type TrackingUpdate,
+} from "./types";
 
 function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -19,10 +25,9 @@ function computeNextCheckAt(
     ? Math.max(0, Math.floor(attemptCountAfter))
     : 0;
   const idx = Math.min(Math.max(0, safeAttempt - 1), backoffMs.length - 1);
+  const candidate = backoffMs.length > 0 ? backoffMs[idx] : undefined;
   const delay =
-    backoffMs.length > 0 && typeof backoffMs[idx] === "number"
-      ? Math.max(0, Math.floor(backoffMs[idx]!))
-      : 60_000;
+    typeof candidate === "number" ? Math.max(0, Math.floor(candidate)) : 60_000;
   return new Date(now.getTime() + delay);
 }
 
@@ -38,7 +43,8 @@ export async function reconcileDeliveryStatuses(
   const providersById = new Map<string, Provider>();
   for (const provider of providers) {
     if (!provider || typeof provider.id !== "string") continue;
-    if (!providersById.has(provider.id)) providersById.set(provider.id, provider);
+    if (!providersById.has(provider.id))
+      providersById.set(provider.id, provider);
   }
 
   const concurrency =
@@ -53,13 +59,19 @@ export async function reconcileDeliveryStatuses(
       attemptCount: record.attemptCount + 1,
     };
 
-    if (!record.providerMessageId || record.providerMessageId.trim().length === 0) {
+    if (
+      !record.providerMessageId ||
+      record.providerMessageId.trim().length === 0
+    ) {
       const terminalPatch: Partial<TrackingRecord> = {
         ...patchBase,
         status: "UNKNOWN",
         statusUpdatedAt: now,
         nextCheckAt: now,
-        lastError: { code: "MISSING_PROVIDER_MESSAGE_ID", message: "providerMessageId missing" },
+        lastError: {
+          code: "MISSING_PROVIDER_MESSAGE_ID",
+          message: "providerMessageId missing",
+        },
       };
       updates.push({
         messageId: record.messageId,
@@ -82,7 +94,10 @@ export async function reconcileDeliveryStatuses(
         status: "UNKNOWN",
         statusUpdatedAt: now,
         nextCheckAt: now,
-        lastError: { code: "TRACKING_TIMEOUT", message: "max tracking duration exceeded" },
+        lastError: {
+          code: "TRACKING_TIMEOUT",
+          message: "max tracking duration exceeded",
+        },
       };
       updates.push({
         messageId: record.messageId,
@@ -94,7 +109,9 @@ export async function reconcileDeliveryStatuses(
     }
 
     if (isValidDate(record.scheduledAt)) {
-      const graceUntil = new Date(record.scheduledAt.getTime() + polling.scheduledGraceMs);
+      const graceUntil = new Date(
+        record.scheduledAt.getTime() + polling.scheduledGraceMs,
+      );
       if (now.getTime() < graceUntil.getTime()) {
         updates.push({
           messageId: record.messageId,
@@ -113,7 +130,10 @@ export async function reconcileDeliveryStatuses(
         status: "UNKNOWN",
         statusUpdatedAt: now,
         nextCheckAt: now,
-        lastError: { code: "PROVIDER_NOT_FOUND", message: `Provider not found: ${record.providerId}` },
+        lastError: {
+          code: "PROVIDER_NOT_FOUND",
+          message: `Provider not found: ${record.providerId}`,
+        },
       };
       updates.push({
         messageId: record.messageId,
@@ -131,7 +151,10 @@ export async function reconcileDeliveryStatuses(
           status: "UNKNOWN",
           statusUpdatedAt: now,
           nextCheckAt: now,
-          lastError: { code: "UNSUPPORTED_PROVIDER", message: "Provider has no getDeliveryStatus()" },
+          lastError: {
+            code: "UNSUPPORTED_PROVIDER",
+            message: "Provider has no getDeliveryStatus()",
+          },
         };
         updates.push({
           messageId: record.messageId,
@@ -152,7 +175,10 @@ export async function reconcileDeliveryStatuses(
         patch: {
           ...patchBase,
           nextCheckAt,
-          lastError: { code: "UNSUPPORTED_PROVIDER", message: "Provider has no getDeliveryStatus()" },
+          lastError: {
+            code: "UNSUPPORTED_PROVIDER",
+            message: "Provider has no getDeliveryStatus()",
+          },
         },
         nextCheckAt,
         terminal: false,
@@ -165,7 +191,9 @@ export async function reconcileDeliveryStatuses(
       type: record.type,
       to: record.to,
       requestedAt: record.requestedAt,
-      ...(isValidDate(record.scheduledAt) ? { scheduledAt: record.scheduledAt } : {}),
+      ...(isValidDate(record.scheduledAt)
+        ? { scheduledAt: record.scheduledAt }
+        : {}),
     };
 
     const result = await provider.getDeliveryStatus(query);
@@ -254,7 +282,9 @@ export async function reconcileDeliveryStatuses(
     while (true) {
       const current = idx++;
       if (current >= records.length) return;
-      await processOne(records[current]!);
+      const record = records[current];
+      if (!record) return;
+      await processOne(record);
     }
   };
 

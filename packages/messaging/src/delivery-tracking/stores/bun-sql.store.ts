@@ -49,7 +49,7 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   async init(): Promise<void> {
     const adapter = this.sql.options?.adapter;
     const isMySql = adapter === "mysql" || adapter === "mariadb";
-    const q = isMySql ? "`" : "\"";
+    const q = isMySql ? "`" : '"';
     const idType = isMySql ? "VARCHAR(255)" : "TEXT";
     const shortType = isMySql ? "VARCHAR(64)" : "TEXT";
     const phoneType = isMySql ? "VARCHAR(32)" : "TEXT";
@@ -129,7 +129,9 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       scheduledAt: record.scheduledAt ? record.scheduledAt.getTime() : null,
       statusUpdatedAt: record.statusUpdatedAt.getTime(),
       attemptCount: record.attemptCount,
-      lastCheckedAt: record.lastCheckedAt ? record.lastCheckedAt.getTime() : null,
+      lastCheckedAt: record.lastCheckedAt
+        ? record.lastCheckedAt.getTime()
+        : null,
       nextCheckAt: record.nextCheckAt.getTime(),
       lastError: record.lastError ? JSON.stringify(record.lastError) : null,
       raw: record.raw !== undefined ? JSON.stringify(record.raw) : null,
@@ -265,7 +267,9 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
-    const safeLimit = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
+    const safeLimit = Number.isFinite(limit)
+      ? Math.max(0, Math.floor(limit))
+      : 0;
     if (safeLimit === 0) return [];
 
     const sql = this.sql;
@@ -289,7 +293,10 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     return rows.map((row) => this.rowToRecord(row));
   }
 
-  async patch(messageId: string, patch: Partial<TrackingRecord>): Promise<void> {
+  async patch(
+    messageId: string,
+    patch: Partial<TrackingRecord>,
+  ): Promise<void> {
     const existing = await this.get(messageId);
     if (!existing) return;
 
@@ -321,7 +328,9 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       status: row.status as TrackingRecord["status"],
       statusUpdatedAt: new Date(row.status_updated_at),
       attemptCount: row.attempt_count,
-      lastCheckedAt: row.last_checked_at ? new Date(row.last_checked_at) : undefined,
+      lastCheckedAt: row.last_checked_at
+        ? new Date(row.last_checked_at)
+        : undefined,
       nextCheckAt: new Date(row.next_check_at),
       lastError: safeJsonParse<TrackingRecord["lastError"]>(row.last_error),
       raw: safeJsonParse<unknown>(row.raw),
