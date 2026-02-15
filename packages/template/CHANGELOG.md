@@ -1,5 +1,15 @@
 # @k-msg/template
 
+## 0.7.0 — 2026-02-15
+
+### Minor changes
+
+- [8531a52](https://github.com/k-otp/k-msg/commit/8531a525c925995ca8ec2d2813e55c526e8e6196) Add delivery status tracking via provider polling (PULL), with pluggable stores (memory / SQLite / Bun.SQL) and provider delivery-status query capability. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.7.0
+
 ## 0.6.0 — 2026-02-14
 
 ### Patch changes
