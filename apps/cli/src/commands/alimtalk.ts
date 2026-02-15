@@ -27,9 +27,8 @@ const sendCmd = defineCommand({
           } catch (error) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: `Invalid JSON for vars: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              message: `Invalid JSON for vars: ${error instanceof Error ? error.message : String(error)
+                }`,
             });
             return z.NEVER;
           }

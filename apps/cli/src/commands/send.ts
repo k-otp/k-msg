@@ -15,9 +15,8 @@ const sendInputJsonSchema = z
     } catch (error) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Invalid JSON for SendInput: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: `Invalid JSON for SendInput: ${error instanceof Error ? error.message : String(error)
+          }`,
       });
       return z.NEVER;
     }
@@ -46,7 +45,7 @@ export default defineCommand({
         .transform((value) => (path.isAbsolute(value) ? value : path.resolve(value)))
         .optional(),
       {
-      description: "Path to SendInput JSON file",
+        description: "Path to SendInput JSON file",
       },
     ),
     stdin: option(z.coerce.boolean().default(false), {
