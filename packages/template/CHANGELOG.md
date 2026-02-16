@@ -1,5 +1,11 @@
 # @k-msg/template
 
+## 0.10.0 — 2026-02-16
+
+### Patch changes
+
+- Updated dependencies: core@0.10.0
+
 ## 0.9.0 — 2026-02-16
 
 ### Minor changes
