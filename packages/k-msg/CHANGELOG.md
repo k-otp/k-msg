@@ -1,5 +1,19 @@
 # k-msg
 
+## 0.14.0 — 2026-02-16
+
+### Minor changes
+
+- [d5aa989](https://github.com/k-otp/k-msg/commit/d5aa9890a458226417ab95826ffad8d849c8b1e4) Refocus the `k-msg` root facade on the basic send flow.
+  
+  - Keep only `KMsg` exported from `k-msg`.
+  - Remove root re-exports of provider constructors, tracking APIs, and core utilities.
+  - Update docs and internal workspace usage to import advanced APIs from package-specific entry points such as `@k-msg/provider` and `@k-msg/messaging/*`. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: messaging@0.14.0
+
 ## 0.13.0 — 2026-02-16
 
 ### Minor changes
