@@ -94,7 +94,6 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
     providers,
     routing,
     defaults: {
-      from: resolved.defaults?.from,
       sms: {
         autoLmsBytes: resolved.defaults?.sms?.autoLmsBytes,
       },

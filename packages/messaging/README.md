@@ -27,7 +27,6 @@ const kmsg = new KMsg({
     }),
   ],
   defaults: {
-    from: "01000000000",
     sms: { autoLmsBytes: 90 },
   },
 });

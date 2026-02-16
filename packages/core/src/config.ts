@@ -46,7 +46,6 @@ export const HealthConfigSchema = z.object({
 // Provider-specific configurations
 export const IWINVConfigSchema = z.object({
   apiKey: z.string().min(1),
-  baseUrl: z.string().url().default("https://alimtalk.bizservice.iwinv.kr"),
   timeout: z.number().min(1000).max(60000).default(10000),
   retryAttempts: z.number().min(0).max(5).default(3),
   retryDelay: z.number().min(100).default(1000),
@@ -247,7 +246,6 @@ export class ConfigLoader {
         iwinv: process.env.IWINV_API_KEY
           ? {
               apiKey: process.env.IWINV_API_KEY,
-              baseUrl: process.env.IWINV_BASE_URL,
               debug: process.env.IWINV_DEBUG === "true",
             }
           : undefined,

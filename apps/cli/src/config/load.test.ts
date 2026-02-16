@@ -5,6 +5,7 @@ import {
   resolveConfigPathForRead,
   resolveConfigPathForWrite,
   resolveDefaultConfigPath,
+  resolveKMsgConfigEnv,
   resolveLegacyCwdConfigPath,
 } from "./load";
 
@@ -126,5 +127,60 @@ describe("config path resolution", () => {
     expect(windowsPath).toContain("AppData");
     expect(windowsPath).toContain("k-msg.config.json");
     expect(linuxPath).toBe("/tmp/xdg-config/k-msg/k-msg.config.json");
+  });
+
+  test("does not fail when defaults.from env var is missing", () => {
+    const resolved = resolveKMsgConfigEnv({
+      version: 1,
+      providers: [{ type: "mock", id: "mock", config: {} }],
+      defaults: {
+        from: "env:K_MSG_DEFAULT_FROM",
+      },
+    });
+
+    const defaults = resolved.defaults as Record<string, unknown> | undefined;
+    expect(defaults?.from).toBeUndefined();
+  });
+
+  test("does not fail when optional provider sender env vars are missing", () => {
+    const resolved = resolveKMsgConfigEnv({
+      version: 1,
+      providers: [
+        {
+          type: "iwinv",
+          id: "iwinv",
+          config: {
+            apiKey: "test-api-key",
+            senderNumber: "env:IWINV_SENDER_NUMBER",
+          },
+        },
+      ],
+    });
+
+    const providerConfig = resolved.providers[0]?.config as
+      | Record<string, unknown>
+      | undefined;
+    expect(providerConfig?.senderNumber).toBeUndefined();
+    expect(providerConfig?.apiKey).toBe("test-api-key");
+  });
+
+  test("does not fail when optional kakao alias senderKey env var is missing", () => {
+    const resolved = resolveKMsgConfigEnv({
+      version: 1,
+      providers: [{ type: "iwinv", id: "iwinv", config: { apiKey: "x" } }],
+      aliases: {
+        kakaoChannels: {
+          main: {
+            providerId: "iwinv",
+            senderKey: "env:IWINV_SENDER_KEY",
+            plusId: "@channel",
+          },
+        },
+      },
+    });
+
+    const senderKey = resolved.aliases?.kakaoChannels?.main?.senderKey;
+    expect(senderKey).toBeUndefined();
+    expect(resolved.aliases?.kakaoChannels?.main?.plusId).toBe("@channel");
   });
 });

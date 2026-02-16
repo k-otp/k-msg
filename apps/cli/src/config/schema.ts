@@ -26,7 +26,6 @@ export const routingSchema = z
 
 export const defaultsSchema = z
   .object({
-    from: z.string().min(1).optional(),
     sms: z
       .object({
         autoLmsBytes: z.number().int().positive().optional(),
@@ -73,7 +72,7 @@ export const aliasesSchema = z
           .object({
             providerId: z.string().min(1),
             plusId: z.string().min(1).optional(),
-            senderKey: z.string().min(1),
+            senderKey: z.string().min(1).optional(),
             name: z.string().min(1).optional(),
           })
           .passthrough(),
