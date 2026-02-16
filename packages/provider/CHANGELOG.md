@@ -2,6 +2,14 @@
 
 ## 0.11.0 — 2026-02-16
 
+### Breaking changes
+
+- `IWINVProvider` MMS image input is now `blob/bytes` only.
+  - `media.image.ref` and `imageUrl` are rejected with `INVALID_REQUEST`.
+  - Local-file/URL image fetch resolution has been removed from provider runtime.
+- Remove Node.js runtime dependencies from `IWINVProvider` (`node:buffer`, `node:fs/promises`, `node:path`) for edge/runtime-neutral usage.
+- Add provider subpath export for edge-friendly imports: `@k-msg/provider/iwinv`.
+
 ### Patch changes
 
 - Updated dependencies: core@0.11.0
@@ -173,4 +181,3 @@
 
 - [117d592](https://github.com/imjlk/k-msg/commit/117d59224e655dde1a599e8f694e421a12474a42) Bootstrap Sampo-driven release PR automation and Bun-based CI/CD. — Thanks @imjlk!
 - Updated dependencies: core@0.1.2
-

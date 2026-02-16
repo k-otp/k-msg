@@ -10,14 +10,14 @@ export type {
   ApiFailoverSender,
   DeliveryTrackingApiFailoverConfig,
   DeliveryTrackingServiceConfig,
+  Job,
+  JobQueue,
 } from "@k-msg/messaging";
 export {
-  BunSqlDeliveryTrackingStore,
   createDeliveryTrackingHooks,
   DeliveryTrackingService,
   InMemoryDeliveryTrackingStore,
   KMsg,
-  SqliteDeliveryTrackingStore,
 } from "@k-msg/messaging";
 export type { AligoConfig, IWINVConfig, SolapiConfig } from "@k-msg/provider";
 export {

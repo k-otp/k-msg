@@ -3,6 +3,25 @@ import { IWINVProvider } from "./provider";
 
 const originalFetch = globalThis.fetch;
 const originalDateNow = Date.now;
+const BASE64_ALPHABET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function toBase64Utf8(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let output = "";
+  let i = 0;
+  while (i < bytes.length) {
+    const a = bytes[i++] ?? 0;
+    const b = bytes[i++] ?? 0;
+    const c = bytes[i++] ?? 0;
+    const chunk = (a << 16) | (b << 8) | c;
+    output += BASE64_ALPHABET[(chunk >> 18) & 63];
+    output += BASE64_ALPHABET[(chunk >> 12) & 63];
+    output += i - 2 < bytes.length ? BASE64_ALPHABET[(chunk >> 6) & 63] : "=";
+    output += i - 1 < bytes.length ? BASE64_ALPHABET[chunk & 63] : "=";
+  }
+  return output;
+}
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
@@ -73,9 +92,7 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/v2/send/");
-    expect(calledSecret).toBe(
-      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
-    );
+    expect(calledSecret).toBe(toBase64Utf8("sms-api-key&sms-auth-key"));
     expect(calledBody.version).toBe("1.0");
     expect(calledBody.from).toBe("01000000000");
     expect(calledBody.to).toEqual(["01012345678"]);
@@ -143,7 +160,7 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/v2/send/");
-    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledAuth).toBe(toBase64Utf8("api-key"));
     expect(calledBody.templateCode).toBe("TPL_1");
     expect(calledBody.reserve).toBe("N");
     expect(Array.isArray(calledBody.list)).toBe(true);
@@ -356,9 +373,7 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/v2/send/");
-    expect(calledSecret).toBe(
-      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
-    );
+    expect(calledSecret).toBe(toBase64Utf8("sms-api-key&sms-auth-key"));
     expect(calledBody instanceof FormData).toBe(true);
     if (calledBody instanceof FormData) {
       expect(calledBody.get("version")).toBe("1.0");
@@ -395,6 +410,108 @@ describe("IWINVProvider", () => {
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
       expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toContain("blob or bytes");
+    }
+  });
+
+  test("MMS supports blob input", async () => {
+    let calledBody: BodyInit | null = null;
+
+    globalThis.fetch = async (
+      _input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
+      calledBody = init?.body ?? null;
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "전송 성공",
+          requestNo: "REQ_3",
+          msgType: "MMS",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      debug: false,
+    });
+
+    const blob = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], {
+      type: "image/jpeg",
+    });
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      media: {
+        image: {
+          blob,
+          filename: "photo.jpg",
+        },
+      },
+    });
+
+    expect(calledBody instanceof FormData).toBe(true);
+    if (calledBody instanceof FormData) {
+      const image = calledBody.get("image");
+      expect(image instanceof Blob).toBe(true);
+    }
+    expect(result.isSuccess).toBe(true);
+  });
+
+  test("MMS rejects media.image.ref with INVALID_REQUEST", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      media: {
+        image: {
+          ref: "https://example.com/image.jpg",
+        },
+      },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toContain("caller must provide blob/bytes");
+    }
+  });
+
+  test("MMS rejects imageUrl alias with INVALID_REQUEST", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "MMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+      imageUrl: "https://example.com/image.jpg",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toContain("caller must provide blob/bytes");
     }
   });
 
@@ -511,7 +628,7 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/history/");
-    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledAuth).toBe(toBase64Utf8("api-key"));
     expect(calledBody.seqNo).toBe(17);
     expect(calledBody.phone).toBe("01012345678");
     expect(calledBody.pageNum).toBe(1);
@@ -583,9 +700,7 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/history/");
-    expect(calledSecret).toBe(
-      Buffer.from("sms-api-key&sms-auth-key").toString("base64"),
-    );
+    expect(calledSecret).toBe(toBase64Utf8("sms-api-key&sms-auth-key"));
     expect(calledBody.companyid).toBe("cid");
     expect(calledBody.requestNo).toBe("REQ_1");
     expect(calledBody.phone).toBe("01012345678");
@@ -696,7 +811,7 @@ describe("IWINVProvider", () => {
     expect(calledUrl).toBe(
       "https://alimtalk.bizservice.iwinv.kr/api/template/",
     );
-    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledAuth).toBe(toBase64Utf8("api-key"));
     expect(calledBody.templateStatus).toBe("Y");
 
     expect(result.isSuccess).toBe(true);
@@ -742,7 +857,7 @@ describe("IWINVProvider", () => {
     expect(calledUrl).toBe(
       "https://alimtalk.bizservice.iwinv.kr/api/template/add/",
     );
-    expect(calledAuth).toBe(Buffer.from("api-key", "utf8").toString("base64"));
+    expect(calledAuth).toBe(toBase64Utf8("api-key"));
     expect(calledBody.templateName).toBe("템플릿명");
     expect(calledBody.templateContent).toBe("템플릿 내용");
 
