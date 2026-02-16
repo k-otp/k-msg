@@ -65,9 +65,6 @@ jobs:
           bun --version
           node --version
 
-      - name: Build workspace packages (for CLI bundle)
-        run: bun run build:all
-
       - name: Read CLI version
         id: meta
         run: |
@@ -76,10 +73,41 @@ jobs:
           echo "version=${VERSION}" >>"$GITHUB_OUTPUT"
           echo "tag=cli-v${VERSION}" >>"$GITHUB_OUTPUT"
 
+      - name: Check if GitHub Release already exists
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.meta.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if CLI version is already on npm
+        id: npm
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.meta.outputs.version }}"
+
+          if npm view "@k-msg/cli@${VERSION}" version >/dev/null 2>&1; then
+            echo "should_publish=false" >>"$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Build workspace packages (for CLI bundle)
+        if: ${{ steps.release.outputs.exists != 'true' }}
+        run: bun run build:all
+
       - name: Build CLI (all targets)
+        if: ${{ steps.release.outputs.exists != 'true' }}
         run: bun run --cwd apps/cli build:all
 
       - name: Prepare release assets
+        if: ${{ steps.release.outputs.exists != 'true' }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.meta.outputs.version }}"
@@ -96,19 +124,6 @@ jobs:
 
           (cd apps/cli/dist/release && shasum -a 256 *.tar.gz > checksums.txt)
 
-      - name: Check if GitHub Release already exists
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          TAG="${{ steps.meta.outputs.tag }}"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "exists=true" >>"$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >>"$GITHUB_OUTPUT"
-          fi
-
       - name: Upload assets to GitHub Release
         if: ${{ steps.release.outputs.exists != 'true' }}
         uses: softprops/action-gh-release@v2
@@ -118,18 +133,6 @@ jobs:
           name: k-msg CLI v${{ steps.meta.outputs.version }}
           files: apps/cli/dist/release/*
           fail_on_unmatched_files: true
-
-      - name: Check if CLI version is already on npm
-        id: npm
-        run: |
-          set -euo pipefail
-          VERSION="${{ steps.meta.outputs.version }}"
-
-          if npm view "@k-msg/cli@${VERSION}" version >/dev/null 2>&1; then
-            echo "should_publish=false" >>"$GITHUB_OUTPUT"
-          else
-            echo "should_publish=true" >>"$GITHUB_OUTPUT"
-          fi
 
       - name: Pack CLI for npm
         id: pack

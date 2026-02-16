@@ -8,6 +8,16 @@ import providers from "../commands/providers";
 import send from "../commands/send";
 import sms from "../commands/sms";
 
+function hasAnyNonEmptyEnv(
+  env: NodeJS.ProcessEnv,
+  keys: readonly string[],
+): boolean {
+  return keys.some((key) => {
+    const value = env[key];
+    return typeof value === "string" && value.trim().length > 0;
+  });
+}
+
 function readCliVersion(): string {
   return typeof pkg.version === "string" ? pkg.version : "0.0.0";
 }
@@ -24,13 +34,21 @@ export async function createKMsgCli() {
             name: "codex",
             envVars: ["CODEX_CI", "CODEX_SHELL", "CODEX_THREAD_ID"],
             detect: (env) =>
-              Object.keys(env).some((key) => key.startsWith("CODEX_")),
+              hasAnyNonEmptyEnv(env, [
+                "CODEX_CI",
+                "CODEX_SHELL",
+                "CODEX_THREAD_ID",
+              ]),
           },
           {
             name: "mcp",
             envVars: ["MCP_SERVER_NAME", "MCP_SESSION_ID", "MCP_TOOL_NAME"],
             detect: (env) =>
-              Object.keys(env).some((key) => key.startsWith("MCP_")),
+              hasAnyNonEmptyEnv(env, [
+                "MCP_SERVER_NAME",
+                "MCP_SESSION_ID",
+                "MCP_TOOL_NAME",
+              ]),
           },
         ],
       }),
