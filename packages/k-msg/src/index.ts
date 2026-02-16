@@ -4,21 +4,23 @@
  */
 
 export * from "@k-msg/core";
+export { KMsg } from "@k-msg/messaging";
+export type {
+  Job,
+  JobQueue,
+} from "@k-msg/messaging/queue";
 export type {
   ApiFailoverAttemptContext,
   ApiFailoverClassificationContext,
   ApiFailoverSender,
   DeliveryTrackingApiFailoverConfig,
   DeliveryTrackingServiceConfig,
-  Job,
-  JobQueue,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
 export {
   createDeliveryTrackingHooks,
   DeliveryTrackingService,
   InMemoryDeliveryTrackingStore,
-  KMsg,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
 export type { AligoConfig, IWINVConfig, SolapiConfig } from "@k-msg/provider";
 export {
   AligoProvider,

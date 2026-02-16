@@ -10,10 +10,20 @@
   - `SQLiteJobQueue`
   - `JobProcessor`
   - `MessageRetryHandler`
+  - `createDeliveryTrackingHooks`
+  - `DeliveryTrackingService`
+  - `InMemoryDeliveryTrackingStore`
+  - `BulkMessageSender`
+  - `Job`
+  - `JobQueue`
 - Runtime-specific implementations now live under adapter subpaths:
   - `@k-msg/messaging/adapters/bun`
   - `@k-msg/messaging/adapters/node`
   - `@k-msg/messaging/adapters/cloudflare`
+- Optional messaging features now live under dedicated subpaths:
+  - `@k-msg/messaging/tracking`
+  - `@k-msg/messaging/sender`
+  - `@k-msg/messaging/queue` (`JobStatus` 포함)
 - `JobProcessor` / `MessageJobProcessor` now require explicit `jobQueue` injection.
 - Cloudflare adapters now support:
   - Hyperdrive/Postgres/MySQL (driver-injected SQL client)
