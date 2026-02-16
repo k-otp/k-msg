@@ -77,10 +77,6 @@
     "defaults": {
       "type": "object",
       "properties": {
-        "from": {
-          "type": "string",
-          "minLength": 1
-        },
         "sms": {
           "type": "object",
           "properties": {
@@ -141,7 +137,7 @@
                 "minLength": 1
               }
             },
-            "required": ["providerId", "senderKey"],
+            "required": ["providerId"],
             "additionalProperties": {}
           }
         },
@@ -215,7 +211,7 @@
   },
   "required": ["version", "providers"],
   "additionalProperties": {},
-  "$id": "https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json",
+  "$id": "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json",
   "title": "k-msg CLI config",
   "description": "Schema for k-msg.config.json used by @k-msg/cli (version 1)"
 }

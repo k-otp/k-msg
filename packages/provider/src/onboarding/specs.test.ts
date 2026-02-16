@@ -23,6 +23,13 @@ describe("Provider onboarding specs", () => {
     expect(spec).toBeDefined();
     expect(spec?.channelOnboarding).toBe("manual");
     expect(spec?.plusIdPolicy).toBe("optional");
+    const configCheck = spec?.checks.find(
+      (check) => check.id === "iwinv_config_required",
+    );
+    expect(configCheck?.kind).toBe("config");
+    if (configCheck?.kind === "config") {
+      expect(configCheck.configKeys).toEqual(["apiKey"]);
+    }
     expect(
       spec?.checks.some(
         (check) => check.id === "channel_registered_in_console",
@@ -40,7 +47,6 @@ describe("Provider onboarding specs", () => {
   test("provider instances expose getOnboardingSpec()", () => {
     const iwinv = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
     });
     const aligo = new AligoProvider({
       apiKey: "api-key",

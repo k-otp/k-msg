@@ -93,6 +93,47 @@ describe("KMsg", () => {
     expect(onError).toHaveBeenCalled();
   });
 
+  test("ignores legacy defaults.from and requires per-message or provider-level sender", async () => {
+    const sendMock = mock(async (options: any) =>
+      ok({
+        messageId: options.messageId || "test-id",
+        status: "SENT" as const,
+        providerId: "mock",
+        type: options.type,
+        to: options.to,
+      }),
+    );
+
+    const mockProvider: Provider = {
+      id: "mock",
+      name: "Mock Provider",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: sendMock,
+    };
+
+    const legacyDefaults = {
+      // Backward-compat: legacy configs may still include this key.
+      from: "029999999",
+    };
+
+    const kmsg = new KMsg({
+      providers: [mockProvider],
+      defaults: legacyDefaults as unknown as {
+        sms?: { autoLmsBytes?: number };
+      },
+    });
+
+    const result = await kmsg.send({
+      to: "01012345678",
+      text: "Hello",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    const sentOptions = sendMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(sentOptions.from).toBeUndefined();
+  });
+
   test("ALIMTALK fails when plusId policy requires explicit value and inference is unsupported", async () => {
     const sendMock = mock(async (options: any) =>
       ok({
