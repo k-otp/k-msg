@@ -1,11 +1,6 @@
 import { createCLI } from "@bunli/core";
 import { aiAgentPlugin } from "@bunli/plugin-ai-detect";
-import alimtalk from "../commands/alimtalk";
-import config from "../commands/config";
-import kakao from "../commands/kakao";
-import providers from "../commands/providers";
-import send from "../commands/send";
-import sms from "../commands/sms";
+import { cli as generatedCli } from "../../.bunli/commands.gen";
 
 function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   return keys.some((key) => {
@@ -43,14 +38,7 @@ export async function createKMsgCli() {
       }),
     ],
   });
-
-  // Keep explicit registration so CLI tests do not depend on generated `.bunli/*` artifacts.
-  cli.command(config);
-  cli.command(providers);
-  cli.command(sms);
-  cli.command(alimtalk);
-  cli.command(send);
-  cli.command(kakao);
+  generatedCli.register(cli);
 
   return cli;
 }

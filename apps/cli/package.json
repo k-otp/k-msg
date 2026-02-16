@@ -20,12 +20,13 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "generate": "bunli generate",
     "build": "bunli build",
     "build:all": "bunli build --targets all",
     "build:native": "bunli build --targets native",
-    "build:js": "bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
-    "dev": "bun --watch src/k-msg.ts",
-    "test": "bun test",
+    "build:js": "bun run generate && bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
+    "dev": "bun run generate && bun --watch src/k-msg.ts",
+    "test": "bun run generate && bun test",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
