@@ -1,5 +1,16 @@
 # @k-msg/cli
 
+## 0.5.0 — 2026-02-16
+
+### Minor changes
+
+- [9f91c30](https://github.com/k-otp/k-msg/commit/9f91c30c7ca372fc9c4caa8ba1d72cdd5eb83cdf) Improve CLI config onboarding and schema distribution:
+  
+  - Make `k-msg config init` interactive by default, with automatic `--template full` fallback in non-interactive environments.
+  - Add `k-msg config provider add [type]` for incremental provider setup via prompts.
+  - Switch default config lookup to home-based config directories with legacy `./k-msg.config.json` fallback.
+  - Publish `k-msg.config.json` schema files (`latest` and `v1`) to GitHub Pages and include `$schema` in generated configs. — Thanks @imjlk!
+
 ## 0.4.1 — 2026-02-16
 
 ### Patch changes
