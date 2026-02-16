@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { MessageType } from "@k-msg/core";
-import { InMemoryDeliveryTrackingStore } from "@k-msg/messaging";
+import { InMemoryDeliveryTrackingStore } from "@k-msg/messaging/tracking";
 import { DeliveryTrackingAnalyticsService } from "./services/delivery-tracking.analytics";
 
 describe("DeliveryTrackingAnalyticsService", () => {

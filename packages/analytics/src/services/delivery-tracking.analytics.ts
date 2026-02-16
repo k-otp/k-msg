@@ -3,7 +3,7 @@ import type {
   DeliveryTrackingCountByRow,
   DeliveryTrackingRecordFilter,
   DeliveryTrackingStore,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
 
 const ALL_DELIVERY_STATUSES: readonly DeliveryStatus[] = [
   "PENDING",
