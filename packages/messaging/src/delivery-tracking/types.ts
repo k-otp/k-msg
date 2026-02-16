@@ -1,4 +1,11 @@
-import type { DeliveryStatus, KMsgError, MessageType } from "@k-msg/core";
+import type {
+  DeliveryStatus,
+  KMsgError,
+  MessageType,
+  Result,
+  SendInput,
+  SendResult,
+} from "@k-msg/core";
 
 export interface TrackingError {
   code: string;
@@ -31,6 +38,39 @@ export interface TrackingRecord {
   lastError?: TrackingError;
   raw?: unknown;
   metadata?: Record<string, unknown>;
+}
+
+export interface DeliveryTrackingApiFailoverRule {
+  statusCodes?: string[];
+  messageIncludes?: string[];
+}
+
+export interface ApiFailoverClassificationContext {
+  record: TrackingRecord;
+  statusCode?: string;
+  statusMessage?: string;
+  raw?: unknown;
+}
+
+export interface ApiFailoverAttemptContext {
+  originalMessageId: string;
+  originalProviderId: string;
+  originalProviderMessageId: string;
+  fallbackMessageId: string;
+  fallbackType: "SMS" | "LMS";
+  record: TrackingRecord;
+}
+
+export type ApiFailoverSender = (
+  input: SendInput,
+  context: ApiFailoverAttemptContext,
+) => Promise<Result<SendResult, KMsgError>>;
+
+export interface DeliveryTrackingApiFailoverConfig {
+  enabled?: boolean;
+  sender: ApiFailoverSender;
+  classifyNonKakaoUser?: (context: ApiFailoverClassificationContext) => boolean;
+  rulesByProviderId?: Record<string, DeliveryTrackingApiFailoverRule>;
 }
 
 export type UnsupportedProviderStrategy = "skip" | "unknown";

@@ -1239,6 +1239,7 @@ export class IWINVProvider implements Provider, TemplateProvider {
       : Object.values(options.variables || {}).map((v) =>
           v === null || v === undefined ? "" : String(v),
         );
+    const failover = options.failover;
 
     // SMS fallback fields are optional. Enable only if we have a sender number.
     const senderNumber =
@@ -1257,7 +1258,14 @@ export class IWINVProvider implements Provider, TemplateProvider {
       reSendOverrideRaw === "Y" || reSendOverrideRaw === "N"
         ? (reSendOverrideRaw as "Y" | "N")
         : undefined;
-    const reSend = reSendOverride ?? (normalizedSender ? "Y" : "N");
+    const reSendFromFailover =
+      failover?.enabled === true
+        ? "Y"
+        : failover?.enabled === false
+          ? "N"
+          : undefined;
+    const reSend =
+      reSendOverride ?? reSendFromFailover ?? (normalizedSender ? "Y" : "N");
 
     const resendCallbackOverride =
       typeof options.providerOptions?.resendCallback === "string"
@@ -1296,17 +1304,29 @@ export class IWINVProvider implements Provider, TemplateProvider {
         ),
       );
     }
+    const resendTypeFromFailover =
+      failover?.fallbackChannel === "lms"
+        ? "Y"
+        : failover?.fallbackChannel === "sms"
+          ? "N"
+          : undefined;
 
     const resendTitle =
       typeof options.providerOptions?.resendTitle === "string" &&
       options.providerOptions.resendTitle.trim().length > 0
         ? options.providerOptions.resendTitle.trim()
-        : undefined;
+        : typeof failover?.fallbackTitle === "string" &&
+            failover.fallbackTitle.trim().length > 0
+          ? failover.fallbackTitle.trim()
+          : undefined;
     const resendContent =
       typeof options.providerOptions?.resendContent === "string" &&
       options.providerOptions.resendContent.trim().length > 0
         ? options.providerOptions.resendContent.trim()
-        : undefined;
+        : typeof failover?.fallbackContent === "string" &&
+            failover.fallbackContent.trim().length > 0
+          ? failover.fallbackContent.trim()
+          : undefined;
 
     const payload: Record<string, unknown> = {
       templateCode: options.templateCode,
@@ -1320,7 +1340,9 @@ export class IWINVProvider implements Provider, TemplateProvider {
       ],
       reSend,
       ...(resendCallback ? { resendCallback } : {}),
-      ...(resendType ? { resendType } : {}),
+      ...((resendType ?? resendTypeFromFailover)
+        ? { resendType: resendType ?? resendTypeFromFailover }
+        : {}),
       ...(resendTitle ? { resendTitle } : {}),
       ...(resendContent ? { resendContent } : {}),
     };

@@ -32,6 +32,7 @@ export interface SendingOptions {
     enabled: boolean;
     fallbackChannel?: "sms" | "lms";
     fallbackContent?: string;
+    fallbackTitle?: string;
   };
   deduplication?: {
     enabled: boolean;
@@ -235,6 +236,7 @@ export const SendingOptionsSchema = z.object({
       enabled: z.boolean(),
       fallbackChannel: z.enum(["sms", "lms"]).optional(),
       fallbackContent: z.string().optional(),
+      fallbackTitle: z.string().optional(),
     })
     .optional(),
   deduplication: z

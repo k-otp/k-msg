@@ -59,6 +59,37 @@ await kmsg.send({
 });
 ```
 
+## ALIMTALK failover
+
+Use standardized failover options on ALIMTALK:
+
+```ts
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateCode: "AUTH_OTP",
+  variables: { code: "123456" },
+  failover: {
+    enabled: true,
+    fallbackChannel: "sms",
+    fallbackContent: "Fallback SMS text",
+    fallbackTitle: "Fallback title (LMS)",
+  },
+});
+```
+
+If provider-native mapping is unsupported or partial, providers return warnings such as:
+
+- `FAILOVER_UNSUPPORTED_PROVIDER`
+- `FAILOVER_PARTIAL_PROVIDER`
+
+Delivery-tracking API-level fallback can then auto-retry SMS/LMS once when:
+
+- message type is `ALIMTALK`
+- failover is enabled
+- delivery status becomes `FAILED`
+- failure is classified as non-Kakao-user failure
+
 ## Monorepo Packages
 
 - `@k-msg/core`: core types/utilities (`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
@@ -72,4 +103,3 @@ await kmsg.send({
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` public APIs were removed.
 - Message discriminant is `type` (old `channel` naming was removed).
 - `templateId` was renamed to `templateCode`.
-

@@ -149,3 +149,53 @@ describe("AligoProvider (Kakao APIs)", () => {
     expect(result.isSuccess).toBe(true);
   });
 });
+
+describe("AligoProvider (send)", () => {
+  test("maps ALIMTALK failover fields and returns partial warning", async () => {
+    let calledUrl = "";
+    let calledBody: Record<string, string> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledBody = await formDataToObject(init?.body);
+      return new Response(
+        JSON.stringify({
+          result_code: "0",
+          msg_id: "ALIGO_MSG_1",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new AligoProvider({
+      apiKey: "api-key",
+      userId: "user",
+      senderKey: "SENDERKEY",
+      sender: "01000000000",
+    });
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateCode: "TPL_1",
+      variables: { name: "Jane" },
+      failover: {
+        enabled: true,
+        fallbackChannel: "lms",
+        fallbackTitle: "fallback title",
+        fallbackContent: "fallback body",
+      },
+    });
+
+    expect(calledUrl).toBe("https://kakaoapi.aligo.in/akv10/alimtalk/send/");
+    expect(calledBody.failover).toBe("Y");
+    expect(calledBody.fsubject_1).toBe("fallback title");
+    expect(calledBody.fmessage_1).toBe("fallback body");
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.warnings?.[0]?.code).toBe(
+        "FAILOVER_PARTIAL_PROVIDER",
+      );
+    }
+  });
+});

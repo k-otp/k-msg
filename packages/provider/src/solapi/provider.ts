@@ -127,9 +127,10 @@ export class SolapiProvider implements Provider {
     const normalized = { ...options, messageId } as SendOptions;
 
     try {
+      const warnings = this.collectSendWarnings(normalized);
       const message = await this.buildSolapiSendOneMessage(normalized);
       const response = await this.client.sendOne(message, this.config.appId);
-      return ok(this.adaptSendResult(normalized, response));
+      return ok(this.adaptSendResult(normalized, response, warnings));
     } catch (error) {
       return fail(this.mapError(error));
     }
@@ -210,7 +211,11 @@ export class SolapiProvider implements Provider {
     }
   }
 
-  private adaptSendResult(options: SendOptions, response: unknown): SendResult {
+  private adaptSendResult(
+    options: SendOptions,
+    response: unknown,
+    warnings?: SendResult["warnings"],
+  ): SendResult {
     const record = isObjectRecord(response) ? response : {};
     const providerMessageId =
       typeof record.messageId === "string" ? record.messageId : undefined;
@@ -222,8 +227,27 @@ export class SolapiProvider implements Provider {
       status: "SENT",
       type: options.type,
       to: options.to,
+      ...(Array.isArray(warnings) && warnings.length > 0 ? { warnings } : {}),
       raw: response,
     };
+  }
+
+  private collectSendWarnings(options: SendOptions): SendResult["warnings"] {
+    if (options.type !== "ALIMTALK") return undefined;
+    if (options.failover?.enabled !== true) return undefined;
+
+    return [
+      {
+        code: "FAILOVER_PARTIAL_PROVIDER",
+        message:
+          "SOLAPI failover mapping is partial. API-level fallback may be attempted for non-Kakao-user failures.",
+        details: {
+          providerId: this.id,
+          mappedFields: ["kakao.disableSms", "text", "subject"],
+          unsupportedFields: ["fallbackChannel"],
+        },
+      },
+    ];
   }
 
   private mapError(error: unknown): KMsgError {
@@ -528,6 +552,7 @@ export class SolapiProvider implements Provider {
         SendOptions,
         { type: "ALIMTALK" }
       >;
+      const failover = alimtalkOptions.failover;
       const pfId =
         typeof alimtalkOptions.kakao?.profileId === "string" &&
         alimtalkOptions.kakao.profileId.length > 0
@@ -542,11 +567,35 @@ export class SolapiProvider implements Provider {
         );
       }
 
+      const fallbackContent =
+        typeof failover?.fallbackContent === "string" &&
+        failover.fallbackContent.trim().length > 0
+          ? failover.fallbackContent.trim()
+          : undefined;
+      const fallbackTitle =
+        typeof failover?.fallbackTitle === "string" &&
+        failover.fallbackTitle.trim().length > 0
+          ? failover.fallbackTitle.trim()
+          : undefined;
+      const disableSms =
+        failover?.enabled === true
+          ? false
+          : failover?.enabled === false
+            ? true
+            : alimtalkOptions.kakao?.disableSms;
+
+      if (fallbackContent) {
+        base.text = fallbackContent;
+      }
+      if (fallbackTitle) {
+        base.subject = fallbackTitle;
+      }
+
       base.kakaoOptions = {
         pfId,
         templateId: alimtalkOptions.templateCode,
         variables: this.stringifyVariables(alimtalkOptions.variables),
-        disableSms: alimtalkOptions.kakao?.disableSms,
+        disableSms,
         adFlag: alimtalkOptions.kakao?.adFlag,
         buttons: Array.isArray(alimtalkOptions.kakao?.buttons)
           ? alimtalkOptions.kakao.buttons

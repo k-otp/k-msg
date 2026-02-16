@@ -130,6 +130,21 @@ k-msg alimtalk send \
   --channel main
 ```
 
+Failover options:
+
+```bash
+k-msg alimtalk send \
+  --to 01012345678 \
+  --template-code TPL_001 \
+  --vars '{"name":"Jane"}' \
+  --failover true \
+  --fallback-channel sms \
+  --fallback-content "Fallback SMS text" \
+  --fallback-title "Fallback LMS title"
+```
+
+When providers return send warnings (for example failover partial/unsupported), CLI prints `WARNING ...` lines in text mode and includes them in `--json` output.
+
 ### Advanced JSON send
 
 ```bash

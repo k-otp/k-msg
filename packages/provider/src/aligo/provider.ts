@@ -951,6 +951,24 @@ export class AligoProvider
     });
   }
 
+  private collectSendWarnings(options: SendOptions): SendResult["warnings"] {
+    if (options.type !== "ALIMTALK") return undefined;
+    if (options.failover?.enabled !== true) return undefined;
+
+    return [
+      {
+        code: "FAILOVER_PARTIAL_PROVIDER",
+        message:
+          "Aligo failover mapping is partial. API-level fallback may be attempted for non-Kakao-user failures.",
+        details: {
+          providerId: this.id,
+          mappedFields: ["failover", "fmessage_1", "fsubject_1"],
+          unsupportedFields: ["fallbackChannel"],
+        },
+      },
+    ];
+  }
+
   private interpolateMessage(
     variables: Record<string, unknown> | undefined,
     templateContent?: string,
@@ -1038,6 +1056,7 @@ export class AligoProvider
   private async sendAlimTalk(
     options: Extract<SendOptions, { type: "ALIMTALK" }>,
   ): Promise<Result<SendResult, KMsgError>> {
+    const warnings = this.collectSendWarnings(options);
     const senderKey =
       (typeof options.kakao?.profileId === "string"
         ? options.kakao.profileId
@@ -1081,6 +1100,48 @@ export class AligoProvider
       testMode: this.config.testMode ? "Y" : "N",
     };
 
+    const failoverOverrideRaw =
+      typeof options.providerOptions?.failover === "string"
+        ? options.providerOptions.failover.trim().toUpperCase()
+        : "";
+    const failoverOverride =
+      failoverOverrideRaw === "Y" || failoverOverrideRaw === "N"
+        ? failoverOverrideRaw
+        : undefined;
+    const failoverFromOptions =
+      options.failover?.enabled === true
+        ? "Y"
+        : options.failover?.enabled === false
+          ? "N"
+          : undefined;
+    const failover = failoverOverride ?? failoverFromOptions;
+
+    const fallbackTitle =
+      typeof options.providerOptions?.fsubject_1 === "string" &&
+      options.providerOptions.fsubject_1.trim().length > 0
+        ? options.providerOptions.fsubject_1.trim()
+        : typeof options.failover?.fallbackTitle === "string" &&
+            options.failover.fallbackTitle.trim().length > 0
+          ? options.failover.fallbackTitle.trim()
+          : undefined;
+    const fallbackContent =
+      typeof options.providerOptions?.fmessage_1 === "string" &&
+      options.providerOptions.fmessage_1.trim().length > 0
+        ? options.providerOptions.fmessage_1.trim()
+        : typeof options.failover?.fallbackContent === "string" &&
+            options.failover.fallbackContent.trim().length > 0
+          ? options.failover.fallbackContent.trim()
+          : undefined;
+    if (failover) {
+      body.failover = failover;
+    }
+    if (fallbackTitle) {
+      body.fsubject_1 = fallbackTitle;
+    }
+    if (fallbackContent) {
+      body.fmessage_1 = fallbackContent;
+    }
+
     const scheduledAt = options.options?.scheduledAt;
     if (scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime())) {
       const { date, time } = this.formatAligoDate(scheduledAt);
@@ -1106,6 +1167,7 @@ export class AligoProvider
       status: "PENDING",
       type: options.type,
       to: options.to,
+      ...(Array.isArray(warnings) && warnings.length > 0 ? { warnings } : {}),
       raw: response,
     });
   }

@@ -6,6 +6,7 @@ import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   exitCodeForError,
   printError,
+  printWarnings,
   shouldUseJsonOutput,
 } from "../cli/utils";
 import { loadRuntime } from "../runtime";
@@ -111,6 +112,7 @@ export default defineCommand({
       if (result.value.providerMessageId) {
         console.log(`providerMessageId=${result.value.providerMessageId}`);
       }
+      printWarnings(result.value.warnings);
     } catch (error) {
       printError(error, asJson);
       process.exitCode = exitCodeForError(error);
