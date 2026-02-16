@@ -1,6 +1,6 @@
 {
   "name": "k-msg",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "packageManager": "bun@1.3.8",
   "description": "K-Message: Korean Multi-Channel Messaging Platform - Unified Package",
   "type": "module",
