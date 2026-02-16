@@ -267,6 +267,63 @@ describe("k-msg CLI (bunli) E2E", () => {
       alimtalkResult.toHaveSucceeded();
       expect(alimtalkResult.stdout).toContain("OK ALIMTALK");
 
+      const alimtalkFailover = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-code",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--failover",
+          "true",
+          "--fallback-content",
+          "fallback text",
+        ]),
+      );
+      alimtalkFailover.toHaveSucceeded();
+      expect(alimtalkFailover.stdout).toContain(
+        "WARNING FAILOVER_UNSUPPORTED_PROVIDER",
+      );
+
+      const alimtalkFailoverJson = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--json",
+          "true",
+          "--to",
+          "01012345678",
+          "--template-code",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--failover",
+          "true",
+          "--fallback-content",
+          "fallback text",
+        ]),
+      );
+      alimtalkFailoverJson.toHaveSucceeded();
+      const failoverJsonParsed = JSON.parse(
+        alimtalkFailoverJson.stdout,
+      ) as Record<string, unknown>;
+      const failoverJsonResult = failoverJsonParsed.result as Record<
+        string,
+        unknown
+      >;
+      const warnings = failoverJsonResult.warnings as Array<
+        Record<string, unknown>
+      >;
+      expect(Array.isArray(warnings)).toBe(true);
+      expect(warnings[0]?.code).toBe("FAILOVER_UNSUPPORTED_PROVIDER");
+
       const advanced = expectCommand(
         await runCli([
           "send",

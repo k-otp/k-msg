@@ -5,6 +5,7 @@ import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   exitCodeForError,
   printError,
+  printWarnings,
   shouldUseJsonOutput,
 } from "../cli/utils";
 import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
@@ -50,6 +51,19 @@ const sendCmd = defineCommand({
     "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
+    failover: option(z.coerce.boolean().default(false), {
+      description:
+        "Enable SMS/LMS failover when recipient is not a KakaoTalk user",
+    }),
+    "fallback-channel": option(z.enum(["sms", "lms"]).optional(), {
+      description: "Fallback channel (sms|lms)",
+    }),
+    "fallback-content": option(z.string().optional(), {
+      description: "Fallback SMS/LMS content",
+    }),
+    "fallback-title": option(z.string().optional(), {
+      description: "Fallback LMS title",
+    }),
   },
   handler: async ({ flags, context }) => {
     const asJson = shouldUseJsonOutput(flags.json, context);
@@ -57,6 +71,14 @@ const sendCmd = defineCommand({
       const runtime = await loadRuntime(flags.config);
       const scheduledAt = flags["scheduled-at"];
       const rawVars = flags.vars;
+      const fallbackChannel = flags["fallback-channel"];
+      const fallbackContent = flags["fallback-content"];
+      const fallbackTitle = flags["fallback-title"];
+      const failoverEnabled =
+        flags.failover ||
+        fallbackChannel !== undefined ||
+        fallbackContent !== undefined ||
+        fallbackTitle !== undefined;
 
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
         channelAlias: flags.channel,
@@ -72,6 +94,18 @@ const sendCmd = defineCommand({
         ...(senderKey ? { kakao: { profileId: senderKey } } : {}),
         ...(flags.provider ? { providerId: flags.provider } : {}),
         ...(scheduledAt ? { options: { scheduledAt } } : {}),
+        ...(failoverEnabled
+          ? {
+              failover: {
+                enabled: true,
+                ...(fallbackChannel ? { fallbackChannel } : {}),
+                ...(typeof fallbackContent === "string"
+                  ? { fallbackContent }
+                  : {}),
+                ...(typeof fallbackTitle === "string" ? { fallbackTitle } : {}),
+              },
+            }
+          : {}),
       };
 
       const result = await runtime.kmsg.send(input);
@@ -95,6 +129,7 @@ const sendCmd = defineCommand({
       if (result.value.providerMessageId) {
         console.log(`providerMessageId=${result.value.providerMessageId}`);
       }
+      printWarnings(result.value.warnings);
     } catch (error) {
       printError(error, asJson);
       process.exitCode = exitCodeForError(error);

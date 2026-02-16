@@ -4,6 +4,13 @@
  */
 
 export * from "@k-msg/core";
+export type {
+  ApiFailoverAttemptContext,
+  ApiFailoverClassificationContext,
+  ApiFailoverSender,
+  DeliveryTrackingApiFailoverConfig,
+  DeliveryTrackingServiceConfig,
+} from "@k-msg/messaging";
 export {
   BunSqlDeliveryTrackingStore,
   createDeliveryTrackingHooks,

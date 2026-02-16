@@ -132,6 +132,53 @@ describe("IWINVProvider", () => {
     }
   });
 
+  test("ALIMTALK maps failover options to IWINV resend fields", async () => {
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (
+      _input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => {
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+      return new Response(
+        JSON.stringify({ code: 200, message: "ok", seqNo: 456 }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      from: "01000000000",
+      templateCode: "TPL_1",
+      variables: { code: 1234 },
+      failover: {
+        enabled: true,
+        fallbackChannel: "lms",
+        fallbackTitle: "fallback title",
+        fallbackContent: "fallback body",
+      },
+    });
+
+    expect(calledBody.reSend).toBe("Y");
+    expect(calledBody.resendType).toBe("Y");
+    expect(calledBody.resendTitle).toBe("fallback title");
+    expect(calledBody.resendContent).toBe("fallback body");
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.warnings).toBeUndefined();
+    }
+  });
+
   test("ALIMTALK maps numeric-only response code 501 to TEMPLATE_NOT_FOUND", async () => {
     globalThis.fetch = async () => new Response("501", { status: 200 });
 

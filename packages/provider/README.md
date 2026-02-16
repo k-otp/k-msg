@@ -21,6 +21,22 @@ All providers implement the `Provider` interface from `@k-msg/core`:
 - `supportedTypes` declares supported message `type`s
 - `send(options: SendOptions)` returns `Result<SendResult, KMsgError>` (never throws)
 
+## ALIMTALK failover responsibilities
+
+`failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.
+
+| Provider | Native mapping | Warning |
+| --- | --- | --- |
+| `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` | none (treated as native) |
+| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` |
+| `aligo` | `failover`, `fmessage_1`, `fsubject_1` | `FAILOVER_PARTIAL_PROVIDER` |
+| `mock` | no native mapping | `FAILOVER_UNSUPPORTED_PROVIDER` |
+
+Boundary:
+
+- Provider package maps to vendor-native fields and returns warning metadata.
+- Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`.
+
 ## Usage (with KMsg)
 
 ```ts
