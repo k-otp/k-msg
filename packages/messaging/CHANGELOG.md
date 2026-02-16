@@ -2,6 +2,24 @@
 
 ## 0.11.0 — 2026-02-16
 
+### Breaking changes
+
+- Runtime-coupled symbols were removed from `@k-msg/messaging` root export:
+  - `BunSqlDeliveryTrackingStore`
+  - `SqliteDeliveryTrackingStore`
+  - `SQLiteJobQueue`
+  - `JobProcessor`
+  - `MessageRetryHandler`
+- Runtime-specific implementations now live under adapter subpaths:
+  - `@k-msg/messaging/adapters/bun`
+  - `@k-msg/messaging/adapters/node`
+  - `@k-msg/messaging/adapters/cloudflare`
+- `JobProcessor` / `MessageJobProcessor` now require explicit `jobQueue` injection.
+- Cloudflare adapters now support:
+  - Hyperdrive/Postgres/MySQL (driver-injected SQL client)
+  - D1 (`createD1SqlClient`/`createD1DeliveryTrackingStore`/`createD1JobQueue`)
+  - KV/R2/DO-backed object-store adapters
+
 ### Patch changes
 
 - Updated dependencies: core@0.11.0, provider@0.11.0, template@0.11.0
@@ -153,4 +171,3 @@
 
 - [117d592](https://github.com/imjlk/k-msg/commit/117d59224e655dde1a599e8f694e421a12474a42) Bootstrap Sampo-driven release PR automation and Bun-based CI/CD. — Thanks @imjlk!
 - Updated dependencies: core@0.1.2, provider@0.1.2, template@0.1.2
-

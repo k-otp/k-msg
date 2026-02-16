@@ -2,6 +2,12 @@
 
 ## 0.11.0 — 2026-02-16
 
+### Breaking changes
+
+- Remove `test-utils` from the public root API.
+  - `export * from "./test-utils"` was removed from `@k-msg/core`.
+  - `MockProvider` / `TestAssertions` are no longer importable from `@k-msg/core`.
+
 ### Minor changes
 
 - [3cb2106](https://github.com/k-otp/k-msg/commit/3cb210636587f392ef1c7edd9e2a0f6b65a36972) Align IWINV onboarding/default behavior across core/provider/messaging/CLI:
@@ -131,4 +137,3 @@
 ### Patch changes
 
 - [117d592](https://github.com/imjlk/k-msg/commit/117d59224e655dde1a599e8f694e421a12474a42) Bootstrap Sampo-driven release PR automation and Bun-based CI/CD. — Thanks @imjlk!
-

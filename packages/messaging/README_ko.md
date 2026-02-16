@@ -1,63 +1,103 @@
 # @k-msg/messaging
 
-K-Message 플랫폼의 메시징 및 발송 추적 시스템입니다.
+K-Message 플랫폼의 런타임 중립 메시징 코어 패키지입니다.
 
 ## 설치
 
 ```bash
 npm install @k-msg/messaging @k-msg/core
-# or  
+# or
 bun add @k-msg/messaging @k-msg/core
 ```
 
-## 주요 기능
+## 런타임 어댑터 경로
 
-- **DeliveryTracker**: 메시지 발송 상태 추적
-- **메시지 이벤트**: 발송, 전달, 실패 등 이벤트 관리
-- **재시도 처리**: 실패한 메시지 재발송 로직
-- **대량 발송**: 효율적인 벌크 메시지 처리
+루트(`@k-msg/messaging`)는 런타임 중립 API만 제공합니다.
 
-## 기본 사용법
+- `@k-msg/messaging/adapters/bun`
+  - `BunSqlDeliveryTrackingStore`, `SqliteDeliveryTrackingStore`, `SQLiteJobQueue`
+- `@k-msg/messaging/adapters/node`
+  - `DeliveryTracker`, `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
+- `@k-msg/messaging/adapters/cloudflare`
+  - Hyperdrive/Postgres/MySQL/D1 SQL 어댑터
+  - KV/R2/DO 기반 object storage 어댑터
 
-```typescript
-import { DeliveryTracker, MessageEventType } from '@k-msg/messaging';
+## 마이그레이션 (Breaking)
 
-const tracker = new DeliveryTracker({
-  retryAttempts: 3,
-  retryDelay: 1000
+- 루트(`@k-msg/messaging`)에서 제거된 심볼:
+  - `BunSqlDeliveryTrackingStore`, `SqliteDeliveryTrackingStore`, `SQLiteJobQueue`
+  - `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
+- 대체 경로:
+  - Bun 관련: `@k-msg/messaging/adapters/bun`
+  - Node 관련: `@k-msg/messaging/adapters/node`
+- `JobProcessor`/`MessageJobProcessor`는 이제 `jobQueue`를 반드시 주입해야 합니다.
+
+## 기본 사용
+
+```ts
+import { KMsg } from "@k-msg/messaging";
+import { SolapiProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({
+  providers: [
+    new SolapiProvider({
+      apiKey: process.env.SOLAPI_API_KEY!,
+      apiSecret: process.env.SOLAPI_API_SECRET!,
+      defaultFrom: "01000000000",
+    }),
+  ],
 });
 
-// 웹훅 URL 설정
-tracker.setWebhookUrl('https://your-app.com/webhook');
-
-// 메시지 추적 시작
-await tracker.trackMessage({
-  messageId: 'msg-123',
-  phone: '01012345678',
-  provider: 'iwinv',
-  templateCode: 'TPL001',
-  variables: { code: '123456' }
-});
-
-// 상태 조회
-const status = await tracker.getMessageStatus('msg-123');
+await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
-## 이벤트 처리
+## Delivery Tracking
 
-```typescript
-import { MessageEvent, MessageEventType } from '@k-msg/messaging';
+```ts
+import {
+  KMsg,
+  createDeliveryTrackingHooks,
+  DeliveryTrackingService,
+  InMemoryDeliveryTrackingStore,
+} from "@k-msg/messaging";
 
-// 이벤트 리스너 등록
-tracker.on(MessageEventType.MESSAGE_SENT, (event: MessageEvent) => {
-  console.log('메시지가 발송되었습니다:', event);
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: new InMemoryDeliveryTrackingStore(),
 });
 
-tracker.on(MessageEventType.MESSAGE_DELIVERED, (event: MessageEvent) => {
-  console.log('메시지가 전달되었습니다:', event);
+const kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking),
 });
 ```
 
-## 라이센스
+### Bun(SQLite) 예시
 
-MIT
+```ts
+import { DeliveryTrackingService } from "@k-msg/messaging";
+import { SqliteDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
+
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" }),
+});
+```
+
+### Cloudflare(D1/KV/R2/DO) 예시
+
+```ts
+import { DeliveryTrackingService } from "@k-msg/messaging";
+import {
+  createD1DeliveryTrackingStore,
+  createKvDeliveryTrackingStore,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+const d1Store = createD1DeliveryTrackingStore(env.DB);
+const kvStore = createKvDeliveryTrackingStore(env.KMSG_KV);
+
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: d1Store, // 필요 시 kvStore / R2 / DO 스토어로 교체
+});
+```

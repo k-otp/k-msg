@@ -20,7 +20,6 @@ import {
   type RecipientResult,
 } from "../types/message.types";
 import type { Job, JobQueue } from "./job-queue.interface";
-import { SQLiteJobQueue } from "./sqlite-job-queue";
 
 export interface JobProcessorOptions {
   concurrency: number;
@@ -67,7 +66,12 @@ export class JobProcessor extends EventEmitter {
     jobQueue?: JobQueue<any>,
   ) {
     super();
-    this.queue = jobQueue ?? new SQLiteJobQueue({ dbPath: ":memory:" });
+    if (!jobQueue) {
+      throw new Error(
+        "JobProcessor requires an explicit jobQueue. Use adapters/* to choose a runtime-specific queue implementation.",
+      );
+    }
+    this.queue = jobQueue;
 
     this.metrics = {
       processed: 0,
@@ -350,6 +354,12 @@ export class MessageJobProcessor extends JobProcessor {
     options: Partial<JobProcessorOptions> = {},
     jobQueue?: JobQueue<any>,
   ) {
+    if (!jobQueue) {
+      throw new Error(
+        "MessageJobProcessor requires an explicit jobQueue. Use adapters/* to choose a runtime-specific queue implementation.",
+      );
+    }
+
     super(
       {
         concurrency: 5,

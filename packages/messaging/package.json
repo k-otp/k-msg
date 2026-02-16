@@ -12,6 +12,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./adapters/bun": {
+      "types": "./dist/adapters/bun/index.d.ts",
+      "import": "./dist/adapters/bun/index.mjs",
+      "require": "./dist/adapters/bun/index.js"
+    },
+    "./adapters/node": {
+      "types": "./dist/adapters/node/index.d.ts",
+      "import": "./dist/adapters/node/index.mjs",
+      "require": "./dist/adapters/node/index.js"
+    },
+    "./adapters/cloudflare": {
+      "types": "./dist/adapters/cloudflare/index.d.ts",
+      "import": "./dist/adapters/cloudflare/index.mjs",
+      "require": "./dist/adapters/cloudflare/index.js"
     }
   },
   "publishConfig": {
@@ -19,8 +34,8 @@
   },
   "scripts": {
     "build": "bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test' --external 'bun:sqlite'",
-    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test' --external 'bun:sqlite'",
+    "build:esm": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
+    "build:cjs": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",

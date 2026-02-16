@@ -7,7 +7,7 @@ import type {
 import type { HookContext } from "../hooks";
 import { reconcileDeliveryStatuses } from "./reconciler";
 import type { DeliveryTrackingStore } from "./store.interface";
-import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
+import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import {
   type ApiFailoverAttemptContext,
   type ApiFailoverClassificationContext,
@@ -86,9 +86,7 @@ export class DeliveryTrackingService {
     }
 
     this.providers = config.providers;
-    this.store =
-      config.store ??
-      new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" });
+    this.store = config.store ?? new InMemoryDeliveryTrackingStore();
     this.apiFailover = config.apiFailover;
 
     const polling = config.polling ?? {};
