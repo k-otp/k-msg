@@ -10,6 +10,15 @@ const FIXTURE_CONFIG_URL = new URL(
   import.meta.url,
 );
 const TEST_TIMEOUT = 30_000;
+const DIRECT_AI_ENV_KEYS = new Set(["CLAUDECODE", "CURSOR_AGENT"]);
+
+function isAIEnvKey(key: string): boolean {
+  return (
+    DIRECT_AI_ENV_KEYS.has(key) ||
+    key.startsWith("CODEX_") ||
+    key.startsWith("MCP_")
+  );
+}
 
 let fixtureConfigRaw = "";
 
@@ -32,7 +41,12 @@ async function createTempConfig(): Promise<string> {
   return target;
 }
 
-async function runCli(argv: string[]): Promise<{
+async function runCli(
+  argv: string[],
+  options?: {
+    env?: Record<string, string | undefined>;
+  },
+): Promise<{
   exitCode: number;
   stdout: string;
   stderr: string;
@@ -49,7 +63,28 @@ async function runCli(argv: string[]): Promise<{
   const originalError = console.error;
   const originalExit = process.exit;
   const originalCwd = process.cwd();
+  const originalEnv = new Map<string, string | undefined>();
   process.exitCode = 0;
+
+  const setEnv = (key: string, value: string | undefined) => {
+    if (!originalEnv.has(key)) {
+      originalEnv.set(key, process.env[key]);
+    }
+    if (value === undefined) {
+      delete process.env[key];
+      return;
+    }
+    process.env[key] = value;
+  };
+
+  for (const key of Object.keys(process.env)) {
+    if (isAIEnvKey(key)) {
+      setEnv(key, undefined);
+    }
+  }
+  for (const [key, value] of Object.entries(options?.env ?? {})) {
+    setEnv(key, value);
+  }
 
   console.log = (...args) => stdout.push(args.join(" "));
   console.error = (...args) => stderr.push(args.join(" "));
@@ -82,6 +117,13 @@ async function runCli(argv: string[]): Promise<{
     console.error = originalError;
     process.exit = originalExit;
     process.chdir(originalCwd);
+    for (const [key, value] of originalEnv.entries()) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   }
 
   const exitCode =
@@ -153,6 +195,22 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       health.toHaveSucceeded();
       expect(health.stdout).toContain("mock");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "AI env auto-enables JSON output",
+    async () => {
+      const configPath = await createTempConfig();
+      const listed = expectCommand(
+        await runCli(["providers", "list", "--config", configPath], {
+          env: { CODEX_SHELL: "1" },
+        }),
+      );
+      listed.toHaveSucceeded();
+      const parsed = JSON.parse(listed.stdout) as unknown;
+      expect(Array.isArray(parsed)).toBe(true);
     },
     TEST_TIMEOUT,
   );

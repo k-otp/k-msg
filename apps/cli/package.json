@@ -30,11 +30,12 @@
   },
   "devDependencies": {
     "@bunli/core": "^0.5.4",
+    "@bunli/plugin-ai-detect": "^0.5.2",
     "@bunli/test": "^0.3.2",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
-    "k-msg": "workspace:*",
     "bunli": "^0.5.3",
+    "k-msg": "workspace:*",
     "typescript": "catalog:",
     "zod": "catalog:"
   },

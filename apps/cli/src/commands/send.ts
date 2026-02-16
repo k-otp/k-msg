@@ -3,7 +3,11 @@ import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "k-msg";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
-import { exitCodeForError, printError } from "../cli/utils";
+import {
+  exitCodeForError,
+  printError,
+  shouldUseJsonOutput,
+} from "../cli/utils";
 import { loadRuntime } from "../runtime";
 
 const sendInputJsonSchema = z
@@ -55,7 +59,8 @@ export default defineCommand({
       description: "Read SendInput JSON from stdin",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const modeCount =
@@ -87,12 +92,12 @@ export default defineCommand({
 
       const result = await runtime.kmsg.send(input);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -107,7 +112,7 @@ export default defineCommand({
         console.log(`providerMessageId=${result.value.providerMessageId}`);
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
