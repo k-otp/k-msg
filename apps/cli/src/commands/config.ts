@@ -1,6 +1,7 @@
 import { defineCommand, option } from "@bunli/core";
 import { z } from "zod";
 import { optConfig, optJson } from "../cli/options";
+import { shouldUseJsonOutput } from "../cli/utils";
 import { loadKMsgConfig, resolveConfigPath } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import type { KMsgCliConfig } from "../config/schema";
@@ -110,10 +111,11 @@ const showCmd = defineCommand({
     config: optConfig,
     json: optJson,
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     const loaded = await loadKMsgConfig(flags.config);
 
-    if (flags.json) {
+    if (asJson) {
       console.log(JSON.stringify(loaded, null, 2));
       return;
     }
