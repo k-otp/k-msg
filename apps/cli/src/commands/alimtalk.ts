@@ -2,7 +2,11 @@ import { defineCommand, option } from "@bunli/core";
 import type { MessageVariables, SendInput } from "k-msg";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
-import { exitCodeForError, printError } from "../cli/utils";
+import {
+  exitCodeForError,
+  printError,
+  shouldUseJsonOutput,
+} from "../cli/utils";
 import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
 
 const sendCmd = defineCommand({
@@ -47,7 +51,8 @@ const sendCmd = defineCommand({
       description: "Schedule time (ISO string)",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const scheduledAt = flags["scheduled-at"];
@@ -71,12 +76,12 @@ const sendCmd = defineCommand({
 
       const result = await runtime.kmsg.send(input);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -91,7 +96,7 @@ const sendCmd = defineCommand({
         console.log(`providerMessageId=${result.value.providerMessageId}`);
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },

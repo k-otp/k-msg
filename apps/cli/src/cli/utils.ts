@@ -1,5 +1,14 @@
 import { KMsgError, KMsgErrorCode } from "k-msg";
 
+type AIContext = {
+  env?: {
+    isAIAgent?: boolean;
+  };
+  store?: {
+    isAIAgent?: boolean;
+  };
+};
+
 export class CapabilityNotSupportedError extends Error {
   constructor(message: string) {
     super(message);
@@ -29,6 +38,16 @@ export function exitCodeForError(error: unknown): number {
     }
   }
   return 2;
+}
+
+export function shouldUseJsonOutput(
+  explicitJsonFlag: boolean | undefined,
+  context?: AIContext,
+): boolean {
+  if (explicitJsonFlag === true) {
+    return true;
+  }
+  return context?.env?.isAIAgent === true || context?.store?.isAIAgent === true;
 }
 
 export function printError(error: unknown, asJson: boolean): void {

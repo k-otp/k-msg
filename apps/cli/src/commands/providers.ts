@@ -1,6 +1,6 @@
 import { defineCommand } from "@bunli/core";
 import { optConfig, optJson } from "../cli/options";
-import { printError } from "../cli/utils";
+import { printError, shouldUseJsonOutput } from "../cli/utils";
 import { loadRuntime } from "../runtime";
 
 function detectCapabilities(provider: Record<string, unknown>): string[] {
@@ -21,7 +21,8 @@ const listCmd = defineCommand({
     config: optConfig,
     json: optJson,
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const data = runtime.providers.map((p) => ({
@@ -33,7 +34,7 @@ const listCmd = defineCommand({
         ),
       }));
 
-      if (flags.json) {
+      if (asJson) {
         console.log(JSON.stringify(data, null, 2));
         return;
       }
@@ -44,7 +45,7 @@ const listCmd = defineCommand({
         console.log(`  caps: ${p.capabilities.join(", ") || "(none)"}`);
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = 2;
     }
   },
@@ -57,12 +58,12 @@ const healthCmd = defineCommand({
     config: optConfig,
     json: optJson,
   },
-  handler: async ({ flags, spinner, terminal }) => {
+  handler: async ({ flags, spinner, terminal, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
 
-      const showProgress =
-        !flags.json && terminal.isInteractive && !terminal.isCI;
+      const showProgress = !asJson && terminal.isInteractive && !terminal.isCI;
       const spin = showProgress ? spinner("Running health checks...") : null;
 
       if (spin) spin.start();
@@ -96,7 +97,7 @@ const healthCmd = defineCommand({
         );
       }
 
-      if (flags.json) {
+      if (asJson) {
         if (spin) spin.stop();
         console.log(JSON.stringify(results, null, 2));
         return;
@@ -117,7 +118,7 @@ const healthCmd = defineCommand({
         process.exitCode = 3;
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = 2;
     }
   },

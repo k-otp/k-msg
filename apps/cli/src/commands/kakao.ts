@@ -13,6 +13,7 @@ import {
   exitCodeForError,
   parseJson,
   printError,
+  shouldUseJsonOutput,
 } from "../cli/utils";
 import { loadKMsgConfig } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
@@ -112,7 +113,8 @@ const channelCategoriesCmd = defineCommand({
     json: optJson,
     provider: optProvider,
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
@@ -132,12 +134,12 @@ const channelCategoriesCmd = defineCommand({
 
       const result = await fn.call(provider);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -151,7 +153,7 @@ const channelCategoriesCmd = defineCommand({
         }
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -171,7 +173,8 @@ const channelListCmd = defineCommand({
       description: "Filter by senderKey",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
@@ -188,12 +191,12 @@ const channelListCmd = defineCommand({
         senderKey: flags["sender-key"],
       });
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -209,7 +212,7 @@ const channelListCmd = defineCommand({
         console.log(`${ch.senderKey}${ch.plusId ? ` ${ch.plusId}` : ""}`);
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -227,7 +230,8 @@ const channelAuthCmd = defineCommand({
     }),
     phone: option(z.string().min(1), { description: "Phone number" }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
@@ -250,18 +254,18 @@ const channelAuthCmd = defineCommand({
         phoneNumber: flags.phone,
       });
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(JSON.stringify({ ok: true }, null, 2));
         return;
       }
       console.log("OK");
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -286,7 +290,8 @@ const channelAddCmd = defineCommand({
       description: "Save as aliases.kakaoChannels.<alias>",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const provider = pickProvider(
@@ -310,7 +315,7 @@ const channelAddCmd = defineCommand({
         categoryCode: flags["category-code"],
       });
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
@@ -329,7 +334,7 @@ const channelAddCmd = defineCommand({
         await saveKMsgConfig(raw.path, raw.config);
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -339,7 +344,7 @@ const channelAddCmd = defineCommand({
       console.log(`OK senderKey=${result.value.senderKey}`);
       if (flags.save) console.log(`saved=${flags.save}`);
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -376,7 +381,8 @@ const templateListCmd = defineCommand({
       description: "Kakao channel senderKey override",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -402,12 +408,12 @@ const templateListCmd = defineCommand({
         ctx,
       );
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -422,7 +428,7 @@ const templateListCmd = defineCommand({
         console.log(`${t.code} ${t.status} ${t.name}`);
       }
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -445,7 +451,8 @@ const templateGetCmd = defineCommand({
       description: "Kakao channel senderKey override",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -467,12 +474,12 @@ const templateGetCmd = defineCommand({
         provider as unknown as TemplateProvider
       ).getTemplate.call(provider, flags["template-code"], ctx);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -482,7 +489,7 @@ const templateGetCmd = defineCommand({
       console.log(result.value.code);
       console.log(result.value.content);
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -510,7 +517,8 @@ const templateCreateCmd = defineCommand({
       description: "Save as aliases.templates.<alias>",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -551,7 +559,7 @@ const templateCreateCmd = defineCommand({
         ctx,
       );
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
@@ -568,7 +576,7 @@ const templateCreateCmd = defineCommand({
         await saveKMsgConfig(raw.path, raw.config);
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -578,7 +586,7 @@ const templateCreateCmd = defineCommand({
       console.log(`OK templateCode=${result.value.code}`);
       if (flags.save) console.log(`saved=${flags.save}`);
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -608,7 +616,8 @@ const templateUpdateCmd = defineCommand({
       description: "Kakao channel senderKey override",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -644,12 +653,12 @@ const templateUpdateCmd = defineCommand({
         provider as unknown as TemplateProvider
       ).updateTemplate.call(provider, flags["template-code"], patch, ctx);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(
           JSON.stringify({ ok: true, result: result.value }, null, 2),
         );
@@ -658,7 +667,7 @@ const templateUpdateCmd = defineCommand({
 
       console.log(`OK templateCode=${result.value.code}`);
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -681,7 +690,8 @@ const templateDeleteCmd = defineCommand({
       description: "Kakao channel senderKey override",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -703,18 +713,18 @@ const templateDeleteCmd = defineCommand({
         provider as unknown as TemplateProvider
       ).deleteTemplate.call(provider, flags["template-code"], ctx);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(JSON.stringify({ ok: true }, null, 2));
         return;
       }
       console.log("OK");
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },
@@ -737,7 +747,8 @@ const templateRequestCmd = defineCommand({
       description: "Kakao channel senderKey override",
     }),
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
       const providerHint = resolveTemplateProviderHint(runtime, {
@@ -759,18 +770,18 @@ const templateRequestCmd = defineCommand({
         provider as unknown as TemplateInspectionProvider
       ).requestTemplateInspection.call(provider, flags["template-code"], ctx);
       if (result.isFailure) {
-        printError(result.error, flags.json);
+        printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
         return;
       }
 
-      if (flags.json) {
+      if (asJson) {
         console.log(JSON.stringify({ ok: true }, null, 2));
         return;
       }
       console.log("OK");
     } catch (error) {
-      printError(error, flags.json);
+      printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
   },

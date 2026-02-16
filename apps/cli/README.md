@@ -153,6 +153,8 @@ k-msg kakao template request --template-code TPL_001 --channel main
 ## Output / Exit Codes
 
 - `--json`: print machine-readable JSON
+- AI environments (Bunli `@bunli/plugin-ai-detect`): JSON output is auto-enabled
+  when an agent is detected (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX_*`, `MCP_*`)
 - exit code:
   - `0`: success
   - `2`: input/config error
