@@ -13,6 +13,21 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./tracking": {
+      "types": "./dist/tracking/index.d.ts",
+      "import": "./dist/tracking/index.mjs",
+      "require": "./dist/tracking/index.js"
+    },
+    "./sender": {
+      "types": "./dist/sender/index.d.ts",
+      "import": "./dist/sender/index.mjs",
+      "require": "./dist/sender/index.js"
+    },
+    "./queue": {
+      "types": "./dist/queue/index.d.ts",
+      "import": "./dist/queue/index.mjs",
+      "require": "./dist/queue/index.js"
+    },
     "./adapters/bun": {
       "types": "./dist/adapters/bun/index.d.ts",
       "import": "./dist/adapters/bun/index.mjs",
@@ -34,8 +49,8 @@
   },
   "scripts": {
     "build": "bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
-    "build:cjs": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
+    "build:esm": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
+    "build:cjs": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'bun:sqlite' --external 'events' --external 'node:events'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",

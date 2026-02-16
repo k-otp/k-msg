@@ -27,9 +27,15 @@ bun add @k-msg/messaging @k-msg/core
 - 루트(`@k-msg/messaging`)에서 제거된 심볼:
   - `BunSqlDeliveryTrackingStore`, `SqliteDeliveryTrackingStore`, `SQLiteJobQueue`
   - `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
+  - `createDeliveryTrackingHooks`, `DeliveryTrackingService`, `InMemoryDeliveryTrackingStore`
+  - `BulkMessageSender`
+  - `Job`, `JobQueue`, `JobStatus`
 - 대체 경로:
   - Bun 관련: `@k-msg/messaging/adapters/bun`
   - Node 관련: `@k-msg/messaging/adapters/node`
+  - Tracking 관련: `@k-msg/messaging/tracking`
+  - Sender 관련: `@k-msg/messaging/sender`
+  - Queue 관련: `@k-msg/messaging/queue`
 - `JobProcessor`/`MessageJobProcessor`는 이제 `jobQueue`를 반드시 주입해야 합니다.
 
 ## 기본 사용
@@ -55,11 +61,11 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 
 ```ts
 import {
-  KMsg,
   createDeliveryTrackingHooks,
   DeliveryTrackingService,
   InMemoryDeliveryTrackingStore,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
+import { KMsg } from "@k-msg/messaging";
 
 const tracking = new DeliveryTrackingService({
   providers,
@@ -75,7 +81,7 @@ const kmsg = new KMsg({
 ### Bun(SQLite) 예시
 
 ```ts
-import { DeliveryTrackingService } from "@k-msg/messaging";
+import { DeliveryTrackingService } from "@k-msg/messaging/tracking";
 import { SqliteDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
 
 const tracking = new DeliveryTrackingService({
@@ -87,7 +93,7 @@ const tracking = new DeliveryTrackingService({
 ### Cloudflare(D1/KV/R2/DO) 예시
 
 ```ts
-import { DeliveryTrackingService } from "@k-msg/messaging";
+import { DeliveryTrackingService } from "@k-msg/messaging/tracking";
 import {
   createD1DeliveryTrackingStore,
   createKvDeliveryTrackingStore,

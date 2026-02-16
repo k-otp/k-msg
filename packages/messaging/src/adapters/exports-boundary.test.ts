@@ -9,9 +9,36 @@ describe("messaging export boundaries", () => {
     expect("SQLiteJobQueue" in root).toBe(false);
     expect("JobProcessor" in root).toBe(false);
     expect("MessageRetryHandler" in root).toBe(false);
+    expect("createDeliveryTrackingHooks" in root).toBe(false);
+    expect("DeliveryTrackingService" in root).toBe(false);
+    expect("InMemoryDeliveryTrackingStore" in root).toBe(false);
+    expect("BulkMessageSender" in root).toBe(false);
+    expect("JobStatus" in root).toBe(false);
 
     expect(typeof root.KMsg).toBe("function");
-    expect(typeof root.InMemoryDeliveryTrackingStore).toBe("function");
+  });
+
+  test("tracking subpath exports tracking symbols", async () => {
+    const tracking = await import("../tracking/index");
+
+    expect(typeof tracking.createDeliveryTrackingHooks).toBe("function");
+    expect(typeof tracking.DeliveryTrackingService).toBe("function");
+    expect(typeof tracking.InMemoryDeliveryTrackingStore).toBe("function");
+    expect(typeof tracking.isTerminalDeliveryStatus).toBe("function");
+    expect(typeof tracking.DEFAULT_POLLING_CONFIG).toBe("object");
+  });
+
+  test("sender subpath exports sender symbols", async () => {
+    const sender = await import("../sender/index");
+
+    expect(typeof sender.BulkMessageSender).toBe("function");
+  });
+
+  test("queue subpath exports queue symbols", async () => {
+    const queue = await import("../queue/index");
+
+    expect(typeof queue.JobStatus).toBe("object");
+    expect(queue.JobStatus.PENDING).toBe("pending");
   });
 
   test("bun adapter exports runtime-specific bun symbols", async () => {
