@@ -1,5 +1,12 @@
 # @k-msg/cli
 
+## 0.3.1 — 2026-02-16
+
+### Patch changes
+
+- [4aaa986](https://github.com/k-otp/k-msg/commit/4aaa9865c6df4d611e8f64bdd509a500cb9cda42) Narrow AI auto-JSON detection to explicit Codex/MCP runtime env keys to avoid
+  switching human CLI output to JSON on unrelated environment variables. — Thanks @imjlk!
+
 ## 0.3.0 — 2026-02-16
 
 ### Minor changes
