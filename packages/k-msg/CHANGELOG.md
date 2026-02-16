@@ -1,5 +1,11 @@
 # k-msg
 
+## 0.10.1 — 2026-02-16
+
+### Patch changes
+
+- Updated dependencies: analytics@0.10.1, channel@0.10.1, core@0.10.1, messaging@0.10.1, provider@0.10.1, template@0.10.1, webhook@0.10.1
+
 ## 0.10.0 — 2026-02-16
 
 ### Minor changes
