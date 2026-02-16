@@ -33,6 +33,9 @@ bun add @k-msg/messaging @k-msg/core
 | `SQLiteJobQueue` | `@k-msg/messaging/adapters/bun` |
 | `JobProcessor` / `MessageJobProcessor` | `@k-msg/messaging/adapters/node` |
 | `MessageRetryHandler` | `@k-msg/messaging/adapters/node` |
+| `createDeliveryTrackingHooks` / `DeliveryTrackingService` / `InMemoryDeliveryTrackingStore` | `@k-msg/messaging/tracking` |
+| `BulkMessageSender` | `@k-msg/messaging/sender` |
+| `Job` / `JobQueue` / `JobStatus` | `@k-msg/messaging/queue` |
 
 `JobProcessor` and `MessageJobProcessor` now require explicit `jobQueue` injection.
 
@@ -126,11 +129,11 @@ reconcile delivery state and update your internal records.
 
 ```ts
 import {
-  KMsg,
   createDeliveryTrackingHooks,
   DeliveryTrackingService,
   InMemoryDeliveryTrackingStore,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
+import { KMsg } from "@k-msg/messaging";
 import { SolapiProvider } from "@k-msg/provider";
 
 const providers = [
@@ -162,7 +165,7 @@ await tracking.runOnce();
 ### Bun SQLite Example
 
 ```ts
-import { DeliveryTrackingService } from "@k-msg/messaging";
+import { DeliveryTrackingService } from "@k-msg/messaging/tracking";
 import { SqliteDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
 
 const tracking = new DeliveryTrackingService({
@@ -174,7 +177,7 @@ const tracking = new DeliveryTrackingService({
 ### Cloudflare D1/KV/R2/DO Example
 
 ```ts
-import { DeliveryTrackingService } from "@k-msg/messaging";
+import { DeliveryTrackingService } from "@k-msg/messaging/tracking";
 import {
   createD1DeliveryTrackingStore,
   createKvDeliveryTrackingStore,
@@ -205,8 +208,8 @@ When provider-native ALIMTALK failover is unsupported or partial, you can enable
 import {
   createDeliveryTrackingHooks,
   DeliveryTrackingService,
-  KMsg,
-} from "@k-msg/messaging";
+} from "@k-msg/messaging/tracking";
+import { KMsg } from "@k-msg/messaging";
 import { SolapiProvider } from "@k-msg/provider";
 
 const providers = [
