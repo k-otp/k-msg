@@ -1,5 +1,20 @@
 # k-msg
 
+## 0.9.0 — 2026-02-16
+
+### Minor changes
+
+- [e313781](https://github.com/k-otp/k-msg/commit/e313781eb869fb3f8baf83c376e38ba359cd61d1) Formalize ALIMTALK `failover` options and expose provider warning metadata.
+  
+  - Add standardized failover fields (`enabled`, `fallbackChannel`, `fallbackContent`, `fallbackTitle`) and `warnings` in send results.
+  - Add provider failover mapping/warnings for `iwinv`, `solapi`, `aligo`, and `mock`.
+  - Add delivery-tracking-based API-level SMS/LMS fallback for non-Kakao-user ALIMTALK failures (single attempt).
+  - Add CLI failover flags and warning output to make behavior consistent across providers. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: analytics@0.9.0, channel@0.9.0, core@0.9.0, messaging@0.9.0, provider@0.9.0, template@0.9.0, webhook@0.9.0
+
 ## 0.8.0 — 2026-02-15
 
 ### Minor changes
