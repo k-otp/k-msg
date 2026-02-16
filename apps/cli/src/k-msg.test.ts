@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import path from "node:path";
 import { expectCommand } from "@bunli/test";
 
-import { createKMsgCli } from "./cli/app";
+import { createKMsgCli } from "./cli/create";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
 const FIXTURE_CONFIG_URL = new URL(
