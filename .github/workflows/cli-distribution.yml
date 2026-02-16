@@ -7,6 +7,10 @@ on:
       - "apps/cli/package.json"
       - "apps/cli/CHANGELOG.md"
       - "apps/cli/install/**"
+      - "apps/cli/src/config/schema.ts"
+      - "apps/cli/src/config/constants.ts"
+      - "apps/cli/scripts/generate-config-schema.ts"
+      - "apps/cli/schemas/**"
       - ".github/workflows/cli-distribution.yml"
   workflow_dispatch:
     inputs:
@@ -56,6 +60,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Verify config schema artifacts
+        run: bun run --cwd apps/cli schema:check
 
       - name: Debug runner
         run: |
@@ -164,11 +171,15 @@ jobs:
           TAG="${{ needs.build-and-release.outputs.tag }}"
           PAGES_DIR=".pages"
           CLI_DIR="${PAGES_DIR}/cli"
+          SCHEMA_DIR="${PAGES_DIR}/schemas"
 
           mkdir -p "$CLI_DIR"
+          mkdir -p "$SCHEMA_DIR"
 
           sed "s/__CLI_VERSION__/${VERSION}/g" apps/cli/install/install.sh > "${CLI_DIR}/install.sh"
           chmod +x "${CLI_DIR}/install.sh"
+
+          cp apps/cli/schemas/*.json "${SCHEMA_DIR}/"
 
           cat > "${CLI_DIR}/latest.json" <<EOF
           {

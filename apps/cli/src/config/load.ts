@@ -1,3 +1,4 @@
+import os from "node:os";
 import path from "node:path";
 import { type KMsgCliConfig, kMsgCliConfigSchema } from "./schema";
 
@@ -6,11 +7,114 @@ export type LoadedKMsgConfig = {
   config: KMsgCliConfig;
 };
 
-export function resolveConfigPath(inputPath: string | undefined): string {
+type ConfigPathResolveOptions = {
+  platform?: NodeJS.Platform;
+  env?: Record<string, string | undefined>;
+  cwd?: string;
+  homeDir?: string;
+};
+
+const DEFAULT_CONFIG_FILE_NAME = "k-msg.config.json";
+const DEFAULT_CONFIG_DIR_NAME = "k-msg";
+
+function getResolveContext(
+  options?: ConfigPathResolveOptions,
+): Required<ConfigPathResolveOptions> {
+  return {
+    platform: options?.platform ?? process.platform,
+    env:
+      options?.env ??
+      (Bun.env as unknown as Record<string, string | undefined>),
+    cwd: options?.cwd ?? process.cwd(),
+    homeDir: options?.homeDir ?? os.homedir(),
+  };
+}
+
+function normalizeEnvPath(value: string | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function resolveHomeConfigBaseDir(
+  options?: ConfigPathResolveOptions,
+): string {
+  const ctx = getResolveContext(options);
+  if (ctx.platform === "win32") {
+    return (
+      normalizeEnvPath(ctx.env.APPDATA) ??
+      path.join(ctx.homeDir, "AppData", "Roaming")
+    );
+  }
+  return (
+    normalizeEnvPath(ctx.env.XDG_CONFIG_HOME) ??
+    path.join(ctx.homeDir, ".config")
+  );
+}
+
+export function resolveDefaultConfigPath(
+  options?: ConfigPathResolveOptions,
+): string {
+  const baseDir = resolveHomeConfigBaseDir(options);
+  return path.join(baseDir, DEFAULT_CONFIG_DIR_NAME, DEFAULT_CONFIG_FILE_NAME);
+}
+
+export function resolveLegacyCwdConfigPath(
+  options?: ConfigPathResolveOptions,
+): string {
+  const ctx = getResolveContext(options);
+  return path.resolve(ctx.cwd, DEFAULT_CONFIG_FILE_NAME);
+}
+
+function resolveExplicitConfigPath(inputPath: string): string {
   if (typeof inputPath === "string" && inputPath.trim().length > 0) {
     return path.isAbsolute(inputPath) ? inputPath : path.resolve(inputPath);
   }
-  return path.resolve("k-msg.config.json");
+  return inputPath;
+}
+
+async function pathExists(targetPath: string): Promise<boolean> {
+  return Bun.file(targetPath).exists();
+}
+
+export async function resolveConfigPathForRead(
+  inputPath: string | undefined,
+  options?: ConfigPathResolveOptions,
+): Promise<string> {
+  if (typeof inputPath === "string" && inputPath.trim().length > 0) {
+    return resolveExplicitConfigPath(inputPath);
+  }
+
+  const preferred = resolveDefaultConfigPath(options);
+  if (await pathExists(preferred)) return preferred;
+
+  const legacy = resolveLegacyCwdConfigPath(options);
+  if (await pathExists(legacy)) return legacy;
+
+  return preferred;
+}
+
+export async function resolveConfigPathForWrite(
+  inputPath: string | undefined,
+  options?: ConfigPathResolveOptions,
+): Promise<string> {
+  if (typeof inputPath === "string" && inputPath.trim().length > 0) {
+    return resolveExplicitConfigPath(inputPath);
+  }
+
+  const preferred = resolveDefaultConfigPath(options);
+  if (await pathExists(preferred)) return preferred;
+
+  const legacy = resolveLegacyCwdConfigPath(options);
+  if (await pathExists(legacy)) return legacy;
+
+  return preferred;
+}
+
+export async function resolveConfigPath(
+  inputPath: string | undefined,
+): Promise<string> {
+  return resolveConfigPathForWrite(inputPath);
 }
 
 function substituteEnvValues(
@@ -51,7 +155,7 @@ function substituteEnvValues(
 export async function loadKMsgConfig(
   configPath?: string,
 ): Promise<LoadedKMsgConfig> {
-  const resolved = resolveConfigPath(configPath);
+  const resolved = await resolveConfigPathForRead(configPath);
   const file = Bun.file(resolved);
   if (!(await file.exists())) {
     throw new Error(`Config file not found: ${resolved}`);

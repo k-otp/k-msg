@@ -85,7 +85,11 @@ bun --cwd apps/cli src/k-msg.ts --help
 
 ## Config (`k-msg.config.json`)
 
-Default config path: `./k-msg.config.json`
+Default config path:
+
+- macOS/Linux: `${XDG_CONFIG_HOME:-~/.config}/k-msg/k-msg.config.json`
+- Windows: `%APPDATA%\\k-msg\\k-msg.config.json`
+- Fallback: `./k-msg.config.json` (used when home path file does not exist)
 
 Override:
 
@@ -95,6 +99,25 @@ k-msg --config /path/to/k-msg.config.json providers list
 
 Example file: `apps/cli/k-msg.config.example.json`
 
+Schema URLs:
+
+- Latest: `https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json`
+- Versioned (`v1`): `https://k-otp.github.io/k-msg/schemas/k-msg.config.v1.schema.json`
+
+Initialize config:
+
+```bash
+# default: interactive wizard (TTY)
+k-msg config init
+
+# force full template (also auto-used in non-interactive environments)
+k-msg config init --template full
+
+# add providers incrementally
+k-msg config provider add
+k-msg config provider add iwinv
+```
+
 ### `env:` substitution
 
 Any string value like `"env:NAME"` is replaced with the `NAME` environment variable at runtime.
@@ -103,6 +126,7 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 ## Commands
 
 - `k-msg config init|show|validate`
+- `k-msg config provider add [type]`
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`

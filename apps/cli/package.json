@@ -27,6 +27,8 @@
     "build:js": "bun run generate && bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
     "dev": "bun run generate && bun --watch src/k-msg.ts",
     "test": "bun run generate && bun test",
+    "schema:generate": "bun run scripts/generate-config-schema.ts",
+    "schema:check": "bun run scripts/generate-config-schema.ts --check",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

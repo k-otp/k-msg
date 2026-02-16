@@ -97,6 +97,7 @@ export const aliasesSchema = z
 
 export const kMsgCliConfigSchema = z
   .object({
+    $schema: z.string().url().optional(),
     version: z.literal(1).default(1),
     providers: z.array(providerEntrySchema).default([]),
     routing: routingSchema,
