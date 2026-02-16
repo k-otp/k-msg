@@ -1,6 +1,6 @@
 # k-msg CLI (`apps/cli`)
 
-This CLI is built with Bunli and uses the unified `k-msg` package (KMsg + Providers).
+This CLI is built with [Bunli](https://bunli.dev/) and uses the unified `k-msg` package (KMsg + Providers).
 
 ## Install (recommended)
 

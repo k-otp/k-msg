@@ -90,6 +90,15 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 - 딜리버리 상태가 `FAILED`
 - 실패 원인이 카카오 미사용자로 판별됨
 
+## 프로젝트 로드맵
+
+향후 개발 방향은 구현 상태 기반 로드맵을 기준으로 진행합니다:
+
+- 영문 로드맵: [`ROADMAP.md`](./ROADMAP.md)
+- 국문 로드맵: [`ROADMAP_ko.md`](./ROADMAP_ko.md)
+
+로드맵은 운영 지표와 사용자 피드백을 반영해 분기별로 업데이트합니다.
+
 ## 패키지 구성
 
 - `@k-msg/core`: 표준 타입/에러/Result/복원력 유틸(`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)

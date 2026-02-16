@@ -59,7 +59,7 @@ await kmsg.send({
 });
 ```
 
-## ALIMTALK failover
+## ALIMTALK Failover
 
 Use standardized failover options on ALIMTALK:
 
@@ -89,6 +89,15 @@ Delivery-tracking API-level fallback can then auto-retry SMS/LMS once when:
 - failover is enabled
 - delivery status becomes `FAILED`
 - failure is classified as non-Kakao-user failure
+
+## Project Roadmap
+
+Future development follows the implementation-aware roadmap:
+
+- English roadmap: [`ROADMAP.md`](./ROADMAP.md)
+- Korean roadmap: [`ROADMAP_ko.md`](./ROADMAP_ko.md)
+
+The roadmap is a living document and is updated quarterly based on operational metrics and user feedback.
 
 ## Monorepo Packages
 
