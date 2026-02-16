@@ -31,7 +31,6 @@ bun src/test-client.ts
 ```bash
 # .env 파일 생성
 IWINV_API_KEY=your_api_key_here
-IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
 PORT=3002
 ```
 

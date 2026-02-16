@@ -27,7 +27,7 @@ export const providerOnboardingSpecs: Readonly<
         kind: "config",
         severity: "blocker",
         scopes: ["doctor", "preflight"],
-        configKeys: ["apiKey", "baseUrl"],
+        configKeys: ["apiKey"],
       },
       {
         id: "template_capability_available",

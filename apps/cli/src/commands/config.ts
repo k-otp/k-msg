@@ -381,7 +381,6 @@ function createFullTemplateConfig(): KMsgCliConfig {
       },
     },
     defaults: {
-      from: "env:K_MSG_DEFAULT_FROM",
       sms: { autoLmsBytes: 90 },
       kakao: { channel: "main", plusId: "@your_channel" },
     },
@@ -418,14 +417,16 @@ function routeAsList(value: unknown): string[] {
   return [];
 }
 
-function getSenderKeyHintByProviderType(type: ProviderType): string {
+function getSenderKeyHintByProviderType(
+  type: ProviderType,
+): string | undefined {
   switch (type) {
     case "aligo":
       return "env:ALIGO_SENDER_KEY";
     case "solapi":
       return "env:SOLAPI_KAKAO_PF_ID";
     case "iwinv":
-      return "env:IWINV_SENDER_KEY";
+      return undefined;
     case "mock":
       return "env:MOCK_SENDER_KEY";
   }
@@ -518,10 +519,6 @@ function ensureIwinvManualCheck(config: KMsgCliConfig): void {
 function ensureRuntimeDefaults(config: KMsgCliConfig): void {
   if (!config.defaults) config.defaults = {};
 
-  if (!config.defaults.from || config.defaults.from.trim().length === 0) {
-    config.defaults.from = "env:K_MSG_DEFAULT_FROM";
-  }
-
   if (!config.defaults.sms) {
     config.defaults.sms = {};
   }
@@ -541,10 +538,13 @@ function ensureKakaoAliasDefaults(config: KMsgCliConfig): void {
   if (!config.aliases.kakaoChannels) config.aliases.kakaoChannels = {};
 
   if (!config.aliases.kakaoChannels.main) {
+    const senderKeyHint = getSenderKeyHintByProviderType(
+      primaryAlimTalkProvider.type,
+    );
     config.aliases.kakaoChannels.main = {
       providerId: primaryAlimTalkProvider.id,
       plusId: "@your_channel",
-      senderKey: getSenderKeyHintByProviderType(primaryAlimTalkProvider.type),
+      ...(senderKeyHint ? { senderKey: senderKeyHint } : {}),
       name: "Main Channel",
     };
   }

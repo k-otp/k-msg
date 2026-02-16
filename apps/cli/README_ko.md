@@ -101,8 +101,8 @@ k-msg --config /path/to/k-msg.config.json providers list
 
 스키마 URL:
 
-- latest: `https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json`
-- 버전 고정(`v1`): `https://k-otp.github.io/k-msg/schemas/k-msg.config.v1.schema.json`
+- latest: `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json`
+- 버전 고정(`v1`): `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.v1.schema.json`
 
 설정 초기화:
 

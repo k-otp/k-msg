@@ -12,13 +12,11 @@ class KMessageService {
 
   constructor(config: {
     iwinvApiKey: string;
-    iwinvBaseUrl?: string;
     debug?: boolean;
   }) {
     // Provider 초기화
     this.provider = new IWINVProvider({
       apiKey: config.iwinvApiKey,
-      baseUrl: config.iwinvBaseUrl || "https://alimtalk.bizservice.iwinv.kr",
       debug: config.debug || false,
     });
 
@@ -297,7 +295,6 @@ class KMessageService {
 // 환경 변수 설정
 const config = {
   iwinvApiKey: process.env.IWINV_API_KEY || "test-key",
-  iwinvBaseUrl: process.env.IWINV_BASE_URL,
   debug: process.env.NODE_ENV !== "production",
 };
 

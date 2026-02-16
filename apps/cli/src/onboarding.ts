@@ -77,6 +77,13 @@ function getProviderConfig(
   return (entry?.config ?? {}) as Record<string, unknown>;
 }
 
+function getProviderEntry(
+  config: KMsgCliConfig,
+  providerId: string,
+): KMsgCliConfig["providers"][number] | undefined {
+  return config.providers.find((entry) => entry.id === providerId);
+}
+
 function getPathValue(root: Record<string, unknown>, path: string): unknown {
   const parts = path.split(".").filter((v) => v.length > 0);
   let current: unknown = root;
@@ -101,6 +108,55 @@ function hasNonEmptyString(value: unknown): boolean {
 
 function isBlockerFailure(check: OnboardingCheckResult): boolean {
   return check.severity === "blocker" && check.status === "fail";
+}
+
+function evaluateSmsSenderCheck(params: {
+  config: KMsgCliConfig;
+  provider: ProviderWithCapabilities;
+}): OnboardingCheckResult | null {
+  const { config, provider } = params;
+  const entry = getProviderEntry(config, provider.id);
+  if (!entry) return null;
+
+  const providerConfig = getProviderConfig(config, provider.id);
+
+  if (entry.type === "aligo") {
+    const hasSender = hasNonEmptyString(providerConfig.sender);
+    return {
+      id: "sms_lms_sender_config",
+      title: "SMS/LMS sender configuration",
+      kind: "config",
+      severity: "warning",
+      status: hasSender ? "pass" : "fail",
+      message: hasSender
+        ? "aligo.config.sender is configured"
+        : "SMS/LMS sender is not configured (set aligo.config.sender)",
+      details: {
+        requiredKeys: ["sender"],
+      },
+    };
+  }
+
+  if (entry.type === "iwinv") {
+    const hasSenderNumber =
+      hasNonEmptyString(providerConfig.senderNumber) ||
+      hasNonEmptyString(providerConfig.smsSenderNumber);
+    return {
+      id: "sms_lms_sender_config",
+      title: "SMS/LMS sender configuration",
+      kind: "config",
+      severity: "warning",
+      status: hasSenderNumber ? "pass" : "fail",
+      message: hasSenderNumber
+        ? "iwinv sender number is configured"
+        : "SMS/LMS sender is not configured (set iwinv.config.senderNumber or iwinv.config.smsSenderNumber)",
+      details: {
+        requiredAnyOf: ["senderNumber", "smsSenderNumber"],
+      },
+    };
+  }
+
+  return null;
 }
 
 async function runApiProbe(
@@ -389,6 +445,14 @@ export async function runProviderDoctor(input: {
       status: "fail",
       message: `Provider '${provider.id}' does not expose onboarding spec`,
     });
+  }
+
+  const smsSenderCheck = evaluateSmsSenderCheck({
+    config: runtime.config,
+    provider,
+  });
+  if (smsSenderCheck) {
+    checks.push(smsSenderCheck);
   }
 
   const ok = !checks.some(isBlockerFailure);

@@ -123,7 +123,6 @@ bun run release                     # Full release process via script
 Required environment variables for IWINV provider:
 ```bash
 IWINV_API_KEY="your-api-key"
-IWINV_BASE_URL="https://alimtalk.bizservice.iwinv.kr"
 ```
 
 ## APIs and Conventions

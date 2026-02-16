@@ -4,14 +4,12 @@ import { MessageServiceFactory } from "k-msg";
 // 환경 변수 설정
 const config = {
   iwinvApiKey: process.env.IWINV_API_KEY || "test-key",
-  iwinvBaseUrl: process.env.IWINV_BASE_URL,
   debug: process.env.NODE_ENV !== "production",
 };
 
 // 🎉 새로운 방식: 팩토리로 간단하게 서비스 생성
 const kmsgService = MessageServiceFactory.createIWINVService({
   apiKey: config.iwinvApiKey,
-  baseUrl: config.iwinvBaseUrl,
   debug: config.debug,
   autoLoad: true, // 자동으로 채널과 템플릿 로드
 });
