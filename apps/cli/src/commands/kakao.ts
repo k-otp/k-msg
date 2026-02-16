@@ -5,7 +5,7 @@ import type {
   TemplateInspectionProvider,
   TemplateProvider,
   TemplateUpdateInput,
-} from "k-msg";
+} from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {

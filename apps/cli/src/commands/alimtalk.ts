@@ -1,5 +1,5 @@
 import { defineCommand, option } from "@bunli/core";
-import type { MessageVariables, SendInput } from "k-msg";
+import type { MessageVariables, SendInput } from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {

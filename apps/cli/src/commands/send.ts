@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineCommand, option } from "@bunli/core";
-import type { SendInput } from "k-msg";
+import type { SendInput } from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {

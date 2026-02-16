@@ -5,9 +5,9 @@
 ## 설치
 
 ```bash
-npm install @k-msg/analytics @k-msg/core
+npm install @k-msg/analytics k-msg @k-msg/messaging @k-msg/provider
 # or
-bun add @k-msg/analytics @k-msg/core
+bun add @k-msg/analytics k-msg @k-msg/messaging @k-msg/provider
 ```
 
 ## 주요 기능
@@ -22,9 +22,9 @@ bun add @k-msg/analytics @k-msg/core
 import { KMsg } from "k-msg";
 import {
   DeliveryTrackingService,
-  SqliteDeliveryTrackingStore,
   createDeliveryTrackingHooks,
-} from "k-msg";
+} from "@k-msg/messaging/tracking";
+import { SqliteDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
 import { DeliveryTrackingAnalyticsService } from "@k-msg/analytics";
 
 const providers = [
@@ -56,7 +56,7 @@ console.log(summary);
 ## Bun.SQL 사용 (Postgres/MySQL/SQLite)
 
 ```typescript
-import { BunSqlDeliveryTrackingStore } from "k-msg";
+import { BunSqlDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
 import { DeliveryTrackingAnalyticsService } from "@k-msg/analytics";
 
 const store = new BunSqlDeliveryTrackingStore({
