@@ -24,7 +24,9 @@ describe("Provider onboarding specs", () => {
     expect(spec?.channelOnboarding).toBe("manual");
     expect(spec?.plusIdPolicy).toBe("optional");
     expect(
-      spec?.checks.some((check) => check.id === "channel_registered_in_console"),
+      spec?.checks.some(
+        (check) => check.id === "channel_registered_in_console",
+      ),
     ).toBe(true);
   });
 
