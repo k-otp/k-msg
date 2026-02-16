@@ -25,14 +25,6 @@ type PromptApi = {
     },
   ): Promise<T>;
   confirm(message: string, options?: { default?: boolean }): Promise<boolean>;
-  select<T = string>(
-    message: string,
-    options: {
-      options: Array<{ label: string; value: T; hint?: string }>;
-      default?: T;
-      hint?: string;
-    },
-  ): Promise<T>;
 };
 
 interface ProviderFieldSpec {
@@ -82,6 +74,12 @@ const providerSupportedTypes: Record<ProviderType, readonly MessageType[]> = {
   solapi: ["ALIMTALK", "SMS", "LMS", "MMS"],
 };
 
+type SelectOption<T> = {
+  label: string;
+  value: T;
+  hint?: string;
+};
+
 function canPromptInTerminal(terminal: {
   isInteractive: boolean;
   isCI: boolean;
@@ -89,11 +87,69 @@ function canPromptInTerminal(terminal: {
   return terminal.isInteractive && !terminal.isCI;
 }
 
+function renderNumberedSelect<T>(
+  message: string,
+  options: SelectOption<T>[],
+  defaultIndex: number,
+): void {
+  console.log(message);
+  for (const [index, option] of options.entries()) {
+    const marker = index === defaultIndex ? "*" : " ";
+    const hint = option.hint ? ` (${option.hint})` : "";
+    console.log(`  ${marker} ${index + 1}) ${option.label}${hint}`);
+  }
+}
+
+async function promptSelectByNumber<T>(
+  prompt: PromptApi,
+  message: string,
+  options: {
+    options: SelectOption<T>[];
+    default?: T;
+  },
+): Promise<T> {
+  if (options.options.length === 0) {
+    throw new Error("Select options cannot be empty");
+  }
+
+  let defaultIndex = 0;
+  if (options.default !== undefined) {
+    const resolved = options.options.findIndex(
+      (option) => option.value === options.default,
+    );
+    if (resolved >= 0) {
+      defaultIndex = resolved;
+    }
+  }
+
+  renderNumberedSelect(message, options.options, defaultIndex);
+  const raw = await prompt<string>("Select number", {
+    default: String(defaultIndex + 1),
+    validate: (value) => {
+      const index = Number.parseInt(value.trim(), 10);
+      if (!Number.isInteger(index)) return "Enter a numeric index";
+      if (index < 1 || index > options.options.length) {
+        return `Enter a number between 1 and ${options.options.length}`;
+      }
+      return true;
+    },
+  });
+  const parsedIndex = Number.parseInt(raw.trim(), 10) - 1;
+  const selected = options.options[parsedIndex];
+  if (!selected) {
+    throw new Error(
+      `Invalid selection index: ${parsedIndex + 1}. Range is 1-${options.options.length}`,
+    );
+  }
+
+  return selected.value;
+}
+
 function parseProviderType(
   input: string | undefined,
 ): ProviderType | undefined {
   if (typeof input !== "string") return undefined;
-  const parsed = providerTypeSchema.safeParse(input.trim());
+  const parsed = providerTypeSchema.safeParse(input.trim().toLowerCase());
   return parsed.success ? parsed.data : undefined;
 }
 
@@ -419,13 +475,17 @@ async function promptProviderType(input: {
     return input.preselected;
   }
 
-  return input.prompt.select<ProviderType>("Select provider type", {
-    options: providerTypeSchema.options.map((type) => ({
-      label: providerTypeLabels[type],
-      value: type,
-    })),
-    default: "iwinv",
-  });
+  return promptSelectByNumber<ProviderType>(
+    input.prompt,
+    "Select provider type",
+    {
+      options: providerTypeSchema.options.map((type) => ({
+        label: providerTypeLabels[type],
+        value: type,
+      })),
+      default: "iwinv",
+    },
+  );
 }
 
 async function promptProviderEntry(input: {
