@@ -42,14 +42,7 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
-    "@k-msg/core": "workspace:*",
-    "@k-msg/messaging": "workspace:*",
-    "@k-msg/template": "workspace:*",
-    "@k-msg/webhook": "workspace:*",
-    "@k-msg/analytics": "workspace:*",
-    "@k-msg/channel": "workspace:*",
-    "@k-msg/provider": "workspace:*",
-    "zod": "catalog:"
+    "@k-msg/messaging": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

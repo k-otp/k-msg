@@ -1,13 +1,15 @@
+import type {
+  KakaoChannelProvider,
+  Provider,
+  TemplateInspectionProvider,
+  TemplateProvider,
+} from "@k-msg/core";
 import {
   AligoProvider,
   IWINVProvider,
-  type KakaoChannelProvider,
   MockProvider,
-  type Provider,
   SolapiProvider,
-  type TemplateInspectionProvider,
-  type TemplateProvider,
-} from "k-msg";
+} from "@k-msg/provider";
 import type { KMsgCliConfig } from "../config/schema";
 
 export type ProviderWithCapabilities = Provider &

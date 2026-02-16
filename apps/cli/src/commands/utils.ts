@@ -1,4 +1,4 @@
-import { KMsgError, KMsgErrorCode, type SendWarning } from "k-msg";
+import { KMsgError, KMsgErrorCode, type SendWarning } from "@k-msg/core";
 
 export class CapabilityNotSupportedError extends Error {
   constructor(message: string) {
