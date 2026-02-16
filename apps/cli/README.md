@@ -68,6 +68,9 @@ Optionally copy it as `kmsg.exe` as an alias.
 ## Run (local/dev)
 
 ```bash
+# Generate command types
+bun run --cwd apps/cli generate
+
 # Build native binary
 bun run --cwd apps/cli build
 ./apps/cli/dist/k-msg --help
