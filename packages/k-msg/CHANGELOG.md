@@ -2,6 +2,14 @@
 
 ## 0.11.0 — 2026-02-16
 
+### Breaking changes
+
+- Runtime-coupled messaging symbols were removed from `k-msg` root export.
+- Runtime-specific adapters are now exposed via:
+  - `k-msg/adapters/bun`
+  - `k-msg/adapters/node`
+  - `k-msg/adapters/cloudflare`
+
 ### Patch changes
 
 - Updated dependencies: analytics@0.11.0, channel@0.11.0, core@0.11.0, messaging@0.11.0, provider@0.11.0, template@0.11.0, webhook@0.11.0
@@ -160,4 +168,3 @@
 
 - [117d592](https://github.com/imjlk/k-msg/commit/117d59224e655dde1a599e8f694e421a12474a42) Bootstrap Sampo-driven release PR automation and Bun-based CI/CD. — Thanks @imjlk!
 - Updated dependencies: analytics@0.1.2, channel@0.1.2, core@0.1.2, messaging@0.1.2, provider@0.1.2, template@0.1.2, webhook@0.1.2
-

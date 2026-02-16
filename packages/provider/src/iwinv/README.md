@@ -68,6 +68,8 @@ AlimTalk `code` quick reference:
 Important:
 - In our runtime verification, lowercase header key `secret` worked for SMS v2.
 - If your service is IP-restricted, whitelist the real egress IP.
+- MMS image input is `options.media.image.bytes` or `options.media.image.blob` only.
+- `media.image.ref` and `imageUrl` are rejected with `INVALID_REQUEST` (`caller must provide blob/bytes`).
 
 ### 3) SMS History / Charge (v2)
 
@@ -123,7 +125,7 @@ IWINV_X_FORWARDED_FOR=1.1.1.1
 ## TypeScript Usage
 
 ```typescript
-import { IWINVProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider/iwinv";
 
 const provider = new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,

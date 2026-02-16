@@ -5,5 +5,4 @@ export * from "./logger";
 export * from "./provider";
 export * from "./resilience/index";
 export * from "./result";
-export * from "./test-utils";
 export * from "./types/index";

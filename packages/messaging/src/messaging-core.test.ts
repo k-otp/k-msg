@@ -5,13 +5,20 @@
 import { describe, expect, test } from "bun:test";
 import {
   DeliveryTracker,
-  defaultVariableReplacer,
   JobProcessor,
   MessageJobProcessor,
   MessageRetryHandler,
+} from "./adapters/node/index";
+import {
+  defaultVariableReplacer,
   VariableReplacer,
   VariableUtils,
 } from "./index";
+import {
+  type Job,
+  type JobQueue,
+  JobStatus,
+} from "./queue/job-queue.interface";
 import {
   type DeliveryReport,
   MessageEventType,
@@ -19,28 +26,176 @@ import {
   MessageStatus,
 } from "./types/message.types";
 
-describe("JobProcessor", () => {
-  test("should create job processor with default options", () => {
-    const processor = new JobProcessor({
-      concurrency: 2,
-      retryDelays: [1000, 2000],
-      maxRetries: 2,
-      pollInterval: 500,
-      enableMetrics: true,
+class InMemoryJobQueue<T> implements JobQueue<T> {
+  private readonly jobs = new Map<string, Job<T>>();
+
+  private makeId(): string {
+    return `job_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  async enqueue(
+    type: string,
+    data: T,
+    options: {
+      priority?: number;
+      delay?: number;
+      maxAttempts?: number;
+      metadata?: Record<string, any>;
+    } = {},
+  ): Promise<Job<T>> {
+    const now = Date.now();
+    const job: Job<T> = {
+      id: this.makeId(),
+      type,
+      data,
+      status: JobStatus.PENDING,
+      priority: options.priority ?? 0,
+      attempts: 0,
+      maxAttempts: options.maxAttempts ?? 3,
+      delay: options.delay ?? 0,
+      createdAt: new Date(now),
+      processAt: new Date(now + (options.delay ?? 0)),
+      metadata: options.metadata ?? {},
+    };
+    this.jobs.set(job.id, job);
+    return { ...job };
+  }
+
+  async dequeue(): Promise<Job<T> | undefined> {
+    const now = Date.now();
+    const candidates = Array.from(this.jobs.values())
+      .filter((job) => job.status === JobStatus.PENDING)
+      .filter((job) => job.processAt.getTime() <= now)
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        if (a.processAt.getTime() !== b.processAt.getTime()) {
+          return a.processAt.getTime() - b.processAt.getTime();
+        }
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      });
+
+    const job = candidates[0];
+    if (!job) return undefined;
+
+    const next: Job<T> = { ...job, status: JobStatus.PROCESSING };
+    this.jobs.set(job.id, next);
+    return { ...next };
+  }
+
+  async complete(jobId: string): Promise<void> {
+    const job = this.jobs.get(jobId);
+    if (!job) return;
+    this.jobs.set(jobId, {
+      ...job,
+      status: JobStatus.COMPLETED,
+      completedAt: new Date(),
     });
+  }
+
+  async fail(
+    jobId: string,
+    error: string | Error,
+    shouldRetry = false,
+  ): Promise<void> {
+    const job = this.jobs.get(jobId);
+    if (!job) return;
+    const attempts = job.attempts + 1;
+    const errorText = error instanceof Error ? error.message : error;
+    if (shouldRetry && attempts < job.maxAttempts) {
+      this.jobs.set(jobId, {
+        ...job,
+        attempts,
+        status: JobStatus.PENDING,
+        error: errorText,
+      });
+      return;
+    }
+
+    this.jobs.set(jobId, {
+      ...job,
+      attempts,
+      status: JobStatus.FAILED,
+      failedAt: new Date(),
+      error: errorText,
+    });
+  }
+
+  async peek(): Promise<Job<T> | undefined> {
+    const now = Date.now();
+    const candidates = Array.from(this.jobs.values())
+      .filter((job) => job.status === JobStatus.PENDING)
+      .filter((job) => job.processAt.getTime() <= now)
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        return a.processAt.getTime() - b.processAt.getTime();
+      });
+    const job = candidates[0];
+    return job ? { ...job } : undefined;
+  }
+
+  async size(): Promise<number> {
+    const now = Date.now();
+    return Array.from(this.jobs.values()).filter(
+      (job) =>
+        job.status === JobStatus.PENDING && job.processAt.getTime() <= now,
+    ).length;
+  }
+
+  async getJob(jobId: string): Promise<Job<T> | undefined> {
+    const job = this.jobs.get(jobId);
+    return job ? { ...job } : undefined;
+  }
+
+  async remove(jobId: string): Promise<boolean> {
+    return this.jobs.delete(jobId);
+  }
+
+  async clear(): Promise<void> {
+    this.jobs.clear();
+  }
+}
+
+describe("JobProcessor", () => {
+  test("should require explicit jobQueue injection", () => {
+    expect(
+      () =>
+        new JobProcessor({
+          concurrency: 2,
+          retryDelays: [1000, 2000],
+          maxRetries: 2,
+          pollInterval: 500,
+          enableMetrics: true,
+        }),
+    ).toThrow("requires an explicit jobQueue");
+  });
+
+  test("should create job processor with default options", () => {
+    const processor = new JobProcessor(
+      {
+        concurrency: 2,
+        retryDelays: [1000, 2000],
+        maxRetries: 2,
+        pollInterval: 500,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
 
     expect(processor).toBeDefined();
     expect(processor.getMetrics().processed).toBe(0);
   });
 
   test("should add and process jobs", async () => {
-    const processor = new JobProcessor({
-      concurrency: 1,
-      retryDelays: [100],
-      maxRetries: 1,
-      pollInterval: 100,
-      enableMetrics: true,
-    });
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [100],
+        maxRetries: 1,
+        pollInterval: 100,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
 
     let processedData: any;
     processor.handle("test-job", async (job) => {
@@ -62,13 +217,16 @@ describe("JobProcessor", () => {
   });
 
   test("should retry failed jobs", async () => {
-    const processor = new JobProcessor({
-      concurrency: 1,
-      retryDelays: [50, 100],
-      maxRetries: 2,
-      pollInterval: 50,
-      enableMetrics: true,
-    });
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [50, 100],
+        maxRetries: 2,
+        pollInterval: 50,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
 
     let attempts = 0;
     processor.handle("failing-job", async (job) => {
@@ -108,10 +266,14 @@ describe("MessageJobProcessor", () => {
   } as any;
 
   test("should process message requests", async () => {
-    const processor = new MessageJobProcessor(mockProvider, {
-      concurrency: 1,
-      pollInterval: 100,
-    });
+    const processor = new MessageJobProcessor(
+      mockProvider,
+      {
+        concurrency: 1,
+        pollInterval: 100,
+      },
+      new InMemoryJobQueue(),
+    );
 
     const messageRequest: MessageRequest = {
       templateCode: "test_template",
@@ -136,10 +298,14 @@ describe("MessageJobProcessor", () => {
   });
 
   test("should handle scheduled messages", async () => {
-    const processor = new MessageJobProcessor(mockProvider, {
-      concurrency: 1,
-      pollInterval: 100,
-    });
+    const processor = new MessageJobProcessor(
+      mockProvider,
+      {
+        concurrency: 1,
+        pollInterval: 100,
+      },
+      new InMemoryJobQueue(),
+    );
 
     const messageRequest: MessageRequest = {
       templateCode: "scheduled_template",
@@ -482,10 +648,14 @@ describe("Integration Tests", () => {
 
   test("should work together in realistic scenario", async () => {
     // Create components
-    const processor = new MessageJobProcessor(mockProvider, {
-      concurrency: 1,
-      pollInterval: 100,
-    });
+    const processor = new MessageJobProcessor(
+      mockProvider,
+      {
+        concurrency: 1,
+        pollInterval: 100,
+      },
+      new InMemoryJobQueue(),
+    );
     const tracker = new DeliveryTracker({
       trackingInterval: 100,
       maxTrackingDuration: 60000,
