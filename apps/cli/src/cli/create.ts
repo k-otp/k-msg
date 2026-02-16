@@ -7,10 +7,7 @@ import providers from "../commands/providers";
 import send from "../commands/send";
 import sms from "../commands/sms";
 
-function hasAnyNonEmptyEnv(
-  env: Bun.Env,
-  keys: readonly string[],
-): boolean {
+function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   return keys.some((key) => {
     const value = env[key];
     return typeof value === "string" && value.trim().length > 0;
