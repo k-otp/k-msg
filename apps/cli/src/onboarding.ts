@@ -7,7 +7,7 @@ import type {
   ProviderOnboardingSpec,
   TemplateContext,
   TemplateProvider,
-} from "k-msg";
+} from "@k-msg/core";
 import type { KMsgCliConfig } from "./config/schema";
 import type { ProviderWithCapabilities } from "./providers/registry";
 import type { Runtime } from "./runtime";
