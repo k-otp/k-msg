@@ -25,6 +25,7 @@ import {
   ServerError,
   SolapiMessageService,
 } from "solapi";
+import { getProviderOnboardingSpec } from "../onboarding/specs";
 import type { SolapiConfig } from "./types/solapi";
 
 export type SolapiSdkClient = Pick<
@@ -68,6 +69,14 @@ export class SolapiProvider implements Provider {
 
   private readonly config: SolapiConfig;
   private readonly client: SolapiSdkClient;
+
+  getOnboardingSpec() {
+    const spec = getProviderOnboardingSpec(this.id);
+    if (!spec) {
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
 
   constructor(config: SolapiConfig, client?: SolapiSdkClient) {
     if (!config || typeof config !== "object") {

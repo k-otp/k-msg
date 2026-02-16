@@ -34,6 +34,7 @@ export interface KMsgDefaultsConfig {
   };
   kakao?: {
     profileId?: string;
+    plusId?: string;
   };
   naver?: {
     talkId?: string;
@@ -142,6 +143,13 @@ export class KMsg {
       }
 
       const provider = providerResult.value;
+      const onboardingError = this.validateSendOnboarding(provider, normalized);
+      if (onboardingError) {
+        if (this.hooks.onError) {
+          await this.hooks.onError(context, onboardingError);
+        }
+        return fail(onboardingError);
+      }
       const result = await provider.send(normalized);
 
       if (result.isSuccess) {
@@ -213,7 +221,10 @@ export class KMsg {
         const current = idx++;
         if (current >= inputs.length) return;
 
-        const result = await this.send(inputs[current]!);
+        const currentInput = inputs[current];
+        if (!currentInput) return;
+
+        const result = await this.send(currentInput);
         results[current] = result;
 
         if (stopOnFailure && result.isFailure) {
@@ -318,7 +329,7 @@ export class KMsg {
     const fallbackProviderId = this.routing.defaultProviderId;
     if (fallbackProviderId) {
       const provider = this.providersById.get(fallbackProviderId);
-      if (provider && provider.supportedTypes.includes(options.type)) {
+      if (provider?.supportedTypes.includes(options.type)) {
         return ok(provider);
       }
     }
@@ -346,7 +357,8 @@ export class KMsg {
 
     if (strategy === "round_robin") {
       const current = this.rrIndexByKey.get(key) ?? 0;
-      const next = filtered[current % filtered.length]!;
+      const next = filtered[current % filtered.length];
+      if (!next) return filtered[0];
       this.rrIndexByKey.set(key, (current + 1) % filtered.length);
       return next;
     }
@@ -442,10 +454,21 @@ export class KMsg {
           : typeof this.defaults.kakao?.profileId === "string"
             ? this.defaults.kakao.profileId
             : undefined;
-      if (profileId) {
+      const plusId =
+        typeof base.kakao?.plusId === "string" && base.kakao.plusId.length > 0
+          ? base.kakao.plusId
+          : typeof this.defaults.kakao?.plusId === "string" &&
+              this.defaults.kakao.plusId.length > 0
+            ? this.defaults.kakao.plusId
+            : undefined;
+      if (profileId || plusId) {
         return {
           ...base,
-          kakao: { ...(base.kakao || {}), profileId },
+          kakao: {
+            ...(base.kakao || {}),
+            ...(profileId ? { profileId } : {}),
+            ...(plusId ? { plusId } : {}),
+          },
         };
       }
     }
@@ -550,5 +573,59 @@ export class KMsg {
       bytes += code <= 0x7f ? 1 : 2;
     }
     return bytes;
+  }
+
+  private validateSendOnboarding(
+    provider: Provider,
+    options: SendOptions,
+  ): KMsgError | undefined {
+    if (options.type !== "ALIMTALK") return undefined;
+    if (typeof provider.getOnboardingSpec !== "function") return undefined;
+
+    const spec = provider.getOnboardingSpec();
+    if (!spec) return undefined;
+
+    if (spec.plusIdPolicy === "optional") return undefined;
+
+    const plusId = this.resolveKakaoPlusId(options);
+    if (plusId) return undefined;
+
+    if (spec.plusIdPolicy === "required") {
+      return new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `kakao plusId is required for provider '${provider.id}'`,
+        {
+          providerId: provider.id,
+          policy: spec.plusIdPolicy,
+        },
+      );
+    }
+
+    if (
+      spec.plusIdPolicy === "required_if_no_inference" &&
+      spec.plusIdInference === "unsupported"
+    ) {
+      return new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `kakao plusId is required for provider '${provider.id}' when plusId inference is unavailable`,
+        {
+          providerId: provider.id,
+          policy: spec.plusIdPolicy,
+          plusIdInference: spec.plusIdInference,
+        },
+      );
+    }
+
+    return undefined;
+  }
+
+  private resolveKakaoPlusId(options: SendOptions): string | undefined {
+    if (options.type !== "ALIMTALK" && options.type !== "FRIENDTALK") {
+      return undefined;
+    }
+    const plusId =
+      typeof options.kakao?.plusId === "string" ? options.kakao.plusId : "";
+    const trimmed = plusId.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
   }
 }

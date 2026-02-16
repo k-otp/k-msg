@@ -208,15 +208,8 @@ export interface IWINVConfig {
    */
   apiKey: string;
 
-  /**
-   * IWINV AlimTalk base URL.
-   * Default: https://alimtalk.bizservice.iwinv.kr
-   */
-  baseUrl: string;
-
   smsApiKey?: string;
   smsAuthKey?: string;
-  smsBaseUrl?: string;
   /**
    * SMS v2 전송 내역 조회시 필요한 조직(업체) 발송 아이디.
    * (API 문서의 `companyid`)

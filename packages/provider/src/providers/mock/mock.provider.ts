@@ -18,6 +18,7 @@ import {
   type TemplateProvider,
   type TemplateUpdateInput,
 } from "@k-msg/core";
+import { getProviderOnboardingSpec } from "../../onboarding/specs";
 
 export class MockProvider
   implements
@@ -51,6 +52,14 @@ export class MockProvider
   private templateSeq = 0;
   private channelSeq = 0;
   private kakaoChannels: Map<string, KakaoChannel> = new Map();
+
+  getOnboardingSpec() {
+    const spec = getProviderOnboardingSpec(this.id);
+    if (!spec) {
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
 
   constructor() {
     // Seed with a deterministic channel/template so CLI calls can be tested

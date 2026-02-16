@@ -21,6 +21,11 @@ export {
   initializeIWINV,
 } from "./iwinv/provider";
 export type { IWINVConfig } from "./iwinv/types/iwinv";
+export {
+  getProviderOnboardingSpec,
+  listProviderOnboardingSpecs,
+  providerOnboardingSpecs,
+} from "./onboarding/specs";
 export { MockProvider } from "./providers/mock/mock.provider";
 export {
   createDefaultSolapiProvider,
