@@ -24,6 +24,18 @@ Env overrides:
 - `K_MSG_CLI_CACHE_DIR`: override where the extracted binary is cached
 - `K_MSG_CLI_LOCAL_BINARY`: copy a local binary instead of downloading (useful for local testing)
 
+### curl installer (GitHub Pages)
+
+```bash
+curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
+```
+
+Installer environment variables:
+
+- `K_MSG_CLI_VERSION`: override target version (default: latest Pages script version)
+- `K_MSG_CLI_INSTALL_DIR`: target directory (default: `~/.local/bin`)
+- `K_MSG_CLI_BASE_URL`: override release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+
 ### GitHub Releases (manual)
 
 The distribution workflow also publishes prebuilt binaries to GitHub Releases as:
