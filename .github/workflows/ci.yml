@@ -85,6 +85,9 @@ jobs:
       - name: Typecheck
         run: bun run typecheck:all
 
+      - name: Build messaging package (subpath exports)
+        run: bun run --cwd packages/messaging build
+
       - name: Unit tests
         run: bun run test:unit
 
