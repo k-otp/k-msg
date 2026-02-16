@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { expectCommand } from "@bunli/test";
 
@@ -41,10 +42,17 @@ async function createTempConfig(): Promise<string> {
   return target;
 }
 
+async function createTempCwd(): Promise<string> {
+  const dir = path.join(tmpRootDir(), `k-msg-cli-cwd-${crypto.randomUUID()}`);
+  await mkdir(dir, { recursive: true });
+  return dir;
+}
+
 async function runCli(
   argv: string[],
   options?: {
     env?: Record<string, string | undefined>;
+    cwd?: string;
   },
 ): Promise<{
   exitCode: number;
@@ -96,7 +104,7 @@ async function runCli(
   };
 
   try {
-    process.chdir(CLI_ROOT);
+    process.chdir(options?.cwd ?? CLI_ROOT);
 
     const cli = await createKMsgCli();
 
@@ -155,6 +163,17 @@ describe("k-msg CLI (bunli) E2E", () => {
       const ver = expectCommand(await runCli(["--version"]));
       ver.toHaveExitCode(0);
       expect(ver.stdout).toContain("k-msg v");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "runs from cwd without bunli config",
+    async () => {
+      const cwd = await createTempCwd();
+      const help = expectCommand(await runCli(["--help"], { cwd }));
+      help.toHaveExitCode(0);
+      expect(help.stdout.toLowerCase()).toContain("k-msg");
     },
     TEST_TIMEOUT,
   );

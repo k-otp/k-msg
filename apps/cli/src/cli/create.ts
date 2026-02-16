@@ -1,6 +1,7 @@
 import { createCLI } from "@bunli/core";
 import { aiAgentPlugin } from "@bunli/plugin-ai-detect";
 import { cli as generatedCli } from "../../.bunli/commands.gen";
+import pkg from "../../package.json";
 
 function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   return keys.some((key) => {
@@ -9,8 +10,21 @@ function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   });
 }
 
+const CLI_NAME = "k-msg";
+const CLI_VERSION =
+  typeof pkg.version === "string" && pkg.version.trim().length > 0
+    ? pkg.version
+    : "0.0.0";
+const CLI_DESCRIPTION =
+  typeof pkg.description === "string" && pkg.description.trim().length > 0
+    ? pkg.description
+    : "k-msg CLI";
+
 export async function createKMsgCli() {
   const cli = await createCLI({
+    name: CLI_NAME,
+    version: CLI_VERSION,
+    description: CLI_DESCRIPTION,
     plugins: [
       aiAgentPlugin({
         customAgents: [
