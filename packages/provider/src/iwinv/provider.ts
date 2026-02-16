@@ -1,6 +1,3 @@
-import { Buffer } from "node:buffer";
-import { readFile } from "node:fs/promises";
-import { basename, extname } from "node:path";
 import {
   type DeliveryStatus,
   type DeliveryStatusQuery,
@@ -8,7 +5,6 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  type MessageBinaryInput,
   type MessageType,
   ok,
   type Provider,
@@ -45,6 +41,43 @@ type SmsV2SendResponse = Record<string, unknown> & {
 type SmsV2MessageType = "SMS" | "LMS" | "MMS";
 const IWINV_ALIMTALK_BASE_URL = "https://alimtalk.bizservice.iwinv.kr";
 const IWINV_SMS_BASE_URL = "https://sms.bizservice.iwinv.kr";
+const BASE64_ALPHABET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+type IWINVImageInput =
+  | {
+      bytes: Uint8Array;
+      filename?: string;
+      contentType?: string;
+    }
+  | {
+      blob: Blob;
+      filename?: string;
+      contentType?: string;
+    };
+
+function toBase64(bytes: Uint8Array): string {
+  let output = "";
+  let i = 0;
+
+  while (i < bytes.length) {
+    const a = bytes[i++] ?? 0;
+    const b = bytes[i++] ?? 0;
+    const c = bytes[i++] ?? 0;
+
+    const chunk = (a << 16) | (b << 8) | c;
+    output += BASE64_ALPHABET[(chunk >> 18) & 63];
+    output += BASE64_ALPHABET[(chunk >> 12) & 63];
+    output += i - 2 < bytes.length ? BASE64_ALPHABET[(chunk >> 6) & 63] : "=";
+    output += i - 1 < bytes.length ? BASE64_ALPHABET[chunk & 63] : "=";
+  }
+
+  return output;
+}
+
+function utf8ToBase64(value: string): string {
+  return toBase64(new TextEncoder().encode(value));
+}
 
 export class IWINVProvider implements Provider, TemplateProvider {
   readonly id = "iwinv";
@@ -1033,15 +1066,18 @@ export class IWINVProvider implements Provider, TemplateProvider {
   }
 
   private toBase64(value: string): string {
-    return Buffer.from(value, "utf8").toString("base64");
+    return utf8ToBase64(value);
   }
 
-  private isHttpUrl(value: string): boolean {
-    return /^https?:\/\//i.test(value);
+  private getFileExtension(filename: string): string {
+    const safe = filename.split(/[?#]/, 1)[0] ?? filename;
+    const lastDot = safe.lastIndexOf(".");
+    if (lastDot <= 0 || lastDot === safe.length - 1) return "";
+    return safe.slice(lastDot).toLowerCase();
   }
 
-  private guessImageContentType(refOrFilename: string): string | undefined {
-    const ext = extname(refOrFilename).toLowerCase();
+  private guessImageContentType(filename: string): string | undefined {
+    const ext = this.getFileExtension(filename);
     switch (ext) {
       case ".jpg":
       case ".jpeg":
@@ -1057,25 +1093,22 @@ export class IWINVProvider implements Provider, TemplateProvider {
     }
   }
 
-  private resolveImageInput(options: unknown): MessageBinaryInput | undefined {
-    const record = options as Record<string, unknown>;
-    const media = record.media as Record<string, unknown> | undefined;
+  private resolveImageInput(
+    options: unknown,
+  ): Result<IWINVImageInput | undefined, KMsgError> {
+    const record =
+      options && typeof options === "object"
+        ? (options as Record<string, unknown>)
+        : {};
+    const media =
+      record.media && typeof record.media === "object"
+        ? (record.media as Record<string, unknown>)
+        : undefined;
     const image = media?.image as Record<string, unknown> | undefined;
 
     if (image && typeof image === "object") {
-      if (typeof image.ref === "string" && image.ref.trim().length > 0) {
-        return {
-          ref: image.ref.trim(),
-          filename:
-            typeof image.filename === "string" ? image.filename : undefined,
-          contentType:
-            typeof image.contentType === "string"
-              ? image.contentType
-              : undefined,
-        };
-      }
       if (image.bytes instanceof Uint8Array) {
-        return {
+        return ok({
           bytes: image.bytes,
           filename:
             typeof image.filename === "string" ? image.filename : undefined,
@@ -1083,10 +1116,10 @@ export class IWINVProvider implements Provider, TemplateProvider {
             typeof image.contentType === "string"
               ? image.contentType
               : undefined,
-        };
+        });
       }
       if (image.blob instanceof Blob) {
-        return {
+        return ok({
           blob: image.blob,
           filename:
             typeof image.filename === "string" ? image.filename : undefined,
@@ -1094,19 +1127,34 @@ export class IWINVProvider implements Provider, TemplateProvider {
             typeof image.contentType === "string"
               ? image.contentType
               : undefined,
-        };
+        });
+      }
+      if (typeof image.ref === "string" && image.ref.trim().length > 0) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            "IWINV MMS caller must provide blob/bytes in options.media.image",
+            { providerId: this.id, field: "media.image.ref" },
+          ),
+        );
       }
     }
 
     const imageUrlRaw = record.imageUrl;
     if (typeof imageUrlRaw === "string" && imageUrlRaw.trim().length > 0) {
-      return { ref: imageUrlRaw.trim() };
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "IWINV MMS caller must provide blob/bytes in options.media.image",
+          { providerId: this.id, field: "imageUrl" },
+        ),
+      );
     }
 
-    return undefined;
+    return ok(undefined);
   }
 
-  private async toImageBlob(input: MessageBinaryInput): Promise<{
+  private async toImageBlob(input: IWINVImageInput): Promise<{
     blob: Blob;
     filename: string;
     contentType: string;
@@ -1124,57 +1172,13 @@ export class IWINVProvider implements Provider, TemplateProvider {
       return { blob, filename, contentType, size: blob.size };
     }
 
-    if ("bytes" in input) {
-      const contentType = input.contentType || "application/octet-stream";
-      // TS 5.9 models typed arrays as `Uint8Array<ArrayBufferLike>` which doesn't satisfy
-      // DOM's `BlobPart` constraint. Copy into a fresh `Uint8Array<ArrayBuffer>` first.
-      const copied = new Uint8Array(input.bytes.byteLength);
-      copied.set(input.bytes);
-      const blob = new Blob([copied], { type: contentType });
-      const filename = input.filename || "image";
-      return { blob, filename, contentType, size: blob.size };
-    }
-
-    const ref = input.ref;
-    if (this.isHttpUrl(ref)) {
-      const response = await fetch(ref);
-      if (!response.ok) {
-        throw new KMsgError(
-          KMsgErrorCode.NETWORK_ERROR,
-          `Failed to fetch image: ${response.status}`,
-          { providerId: this.id, url: ref },
-        );
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const header =
-        response.headers.get("content-type")?.split(";")[0]?.trim() || "";
-      const contentType =
-        input.contentType ||
-        (header.length > 0 ? header : undefined) ||
-        this.guessImageContentType(ref) ||
-        "application/octet-stream";
-      const filenameFromUrl = (() => {
-        try {
-          const u = new URL(ref);
-          const last = basename(u.pathname);
-          return last || undefined;
-        } catch {
-          return undefined;
-        }
-      })();
-      const filename = input.filename || filenameFromUrl || "image";
-      const blob = new Blob([arrayBuffer], { type: contentType });
-      return { blob, filename, contentType, size: blob.size };
-    }
-
-    const bytes = await readFile(ref);
-    const contentType =
-      input.contentType ||
-      this.guessImageContentType(ref) ||
-      "application/octet-stream";
-    const filename = input.filename || basename(ref) || "image";
-    const blob = new Blob([bytes], { type: contentType });
+    const contentType = input.contentType || "application/octet-stream";
+    // TS 5.9 models typed arrays as `Uint8Array<ArrayBufferLike>` which doesn't satisfy
+    // DOM's `BlobPart` constraint. Copy into a fresh `Uint8Array<ArrayBuffer>` first.
+    const copied = new Uint8Array(input.bytes.byteLength);
+    copied.set(input.bytes);
+    const blob = new Blob([copied], { type: contentType });
+    const filename = input.filename || "image";
     return { blob, filename, contentType, size: blob.size };
   }
 
@@ -1524,20 +1528,16 @@ export class IWINVProvider implements Provider, TemplateProvider {
   private buildSmsSecretHeader(): string {
     // Preferred mode: SMS API key + SMS auth key
     if (this.config.smsApiKey && this.config.smsAuthKey) {
-      return Buffer.from(
+      return this.toBase64(
         `${this.config.smsApiKey}&${this.config.smsAuthKey}`,
-        "utf8",
-      ).toString("base64");
+      );
     }
 
     // Legacy-compatible mode: existing IWINV apiKey + one extra SMS key.
     const legacyAuthKey = this.config.smsAuthKey || this.config.smsApiKey;
     if (!legacyAuthKey) return "";
 
-    return Buffer.from(
-      `${this.config.apiKey}&${legacyAuthKey}`,
-      "utf8",
-    ).toString("base64");
+    return this.toBase64(`${this.config.apiKey}&${legacyAuthKey}`);
   }
 
   private formatSmsReserveDate(date: Date): string {
@@ -1638,12 +1638,15 @@ export class IWINVProvider implements Provider, TemplateProvider {
 
     const title = this.buildLmsTitle(text, options.subject);
 
-    const imageInput = this.resolveImageInput(options);
+    const imageInputResult = this.resolveImageInput(options);
+    if (imageInputResult.isFailure) return imageInputResult;
+
+    const imageInput = imageInputResult.value;
     if (!imageInput) {
       return fail(
         new KMsgError(
           KMsgErrorCode.INVALID_REQUEST,
-          "image is required for MMS (options.media.image or options.imageUrl)",
+          "image is required for MMS; caller must provide options.media.image.blob or bytes",
           { providerId: this.id },
         ),
       );
@@ -1692,7 +1695,7 @@ export class IWINVProvider implements Provider, TemplateProvider {
     }
 
     const filename = (() => {
-      const hasExt = extname(image.filename).length > 0;
+      const hasExt = this.getFileExtension(image.filename).length > 0;
       if (hasExt) return image.filename;
       const guessedExt =
         this.guessImageContentType(image.filename) === "image/png"

@@ -68,6 +68,8 @@ CLI 기준:
 중요:
 - SMS v2는 실제 검증에서 소문자 `secret` 헤더로 정상 동작했습니다.
 - IP 화이트리스트가 걸려 있으면 실제 egress IP를 반드시 등록해야 합니다.
+- MMS 이미지 입력은 `options.media.image.bytes` 또는 `options.media.image.blob`만 지원합니다.
+- `media.image.ref`, `imageUrl` 입력은 `INVALID_REQUEST`(`caller must provide blob/bytes`)로 실패합니다.
 
 ### 3) SMS 전송내역/잔액 조회 (v2)
 
@@ -123,7 +125,7 @@ IWINV_X_FORWARDED_FOR=1.1.1.1
 ## TypeScript 사용 예시
 
 ```typescript
-import { IWINVProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider/iwinv";
 
 const provider = new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,

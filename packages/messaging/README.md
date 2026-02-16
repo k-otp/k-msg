@@ -12,6 +12,30 @@ npm install @k-msg/messaging @k-msg/core
 bun add @k-msg/messaging @k-msg/core
 ```
 
+## Runtime Adapters
+
+`@k-msg/messaging` root export is runtime-neutral.
+
+- Bun runtime adapters: `@k-msg/messaging/adapters/bun`
+  - `BunSqlDeliveryTrackingStore`, `SqliteDeliveryTrackingStore`, `SQLiteJobQueue`
+- Node runtime adapters: `@k-msg/messaging/adapters/node`
+  - `DeliveryTracker`, `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
+- Cloudflare runtime adapters: `@k-msg/messaging/adapters/cloudflare`
+  - SQL adapters for Hyperdrive/Postgres/MySQL and D1 (driver-injected)
+  - Object-storage adapters for KV/R2/DO-backed tracking/queue
+
+## Migration (Breaking)
+
+| Old import (removed from root) | New import |
+| --- | --- |
+| `BunSqlDeliveryTrackingStore` | `@k-msg/messaging/adapters/bun` |
+| `SqliteDeliveryTrackingStore` | `@k-msg/messaging/adapters/bun` |
+| `SQLiteJobQueue` | `@k-msg/messaging/adapters/bun` |
+| `JobProcessor` / `MessageJobProcessor` | `@k-msg/messaging/adapters/node` |
+| `MessageRetryHandler` | `@k-msg/messaging/adapters/node` |
+
+`JobProcessor` and `MessageJobProcessor` now require explicit `jobQueue` injection.
+
 ## Quick Start
 
 ```ts
@@ -96,12 +120,17 @@ After a message is accepted by a provider (including scheduled sends), you can *
 reconcile delivery state and update your internal records.
 
 `DeliveryTrackingService` is storage-backed and supports:
-- In-memory store (no DB)
-- SQLite (default: `./kmsg.sqlite`, via `bun:sqlite`)
-- Bun.SQL store (sqlite/postgres/mysql, via `Bun.SQL`)
+- In-memory store (runtime-neutral default)
+- SQLite/Bun.SQL via `@k-msg/messaging/adapters/bun`
+- Cloudflare SQL/KV/R2/DO via `@k-msg/messaging/adapters/cloudflare`
 
 ```ts
-import { KMsg, createDeliveryTrackingHooks, DeliveryTrackingService } from "@k-msg/messaging";
+import {
+  KMsg,
+  createDeliveryTrackingHooks,
+  DeliveryTrackingService,
+  InMemoryDeliveryTrackingStore,
+} from "@k-msg/messaging";
 import { SolapiProvider } from "@k-msg/provider";
 
 const providers = [
@@ -111,7 +140,10 @@ const providers = [
   }),
 ];
 
-const tracking = new DeliveryTrackingService({ providers });
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: new InMemoryDeliveryTrackingStore(),
+});
 
 const kmsg = new KMsg({
   providers,
@@ -125,6 +157,39 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 tracking.start();
 // or single pass (manual/cron)
 await tracking.runOnce();
+```
+
+### Bun SQLite Example
+
+```ts
+import { DeliveryTrackingService } from "@k-msg/messaging";
+import { SqliteDeliveryTrackingStore } from "@k-msg/messaging/adapters/bun";
+
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: new SqliteDeliveryTrackingStore({ dbPath: "./kmsg.sqlite" }),
+});
+```
+
+### Cloudflare D1/KV/R2/DO Example
+
+```ts
+import { DeliveryTrackingService } from "@k-msg/messaging";
+import {
+  createD1DeliveryTrackingStore,
+  createKvDeliveryTrackingStore,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+// D1
+const d1Store = createD1DeliveryTrackingStore(env.DB);
+
+// KV (or use createR2DeliveryTrackingStore / createDurableObjectDeliveryTrackingStore)
+const kvStore = createKvDeliveryTrackingStore(env.KMSG_KV);
+
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: d1Store, // swap to kvStore as needed
+});
 ```
 
 ## Tracking-based API failover

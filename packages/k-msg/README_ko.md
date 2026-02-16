@@ -28,7 +28,6 @@ const kmsg = new KMsg({
     }),
     new IWINVProvider({
       apiKey: process.env.IWINV_API_KEY!,
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       smsApiKey: process.env.IWINV_SMS_API_KEY,
       smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
     }),
@@ -54,4 +53,17 @@ await kmsg.send({
   templateCode: "AUTH_OTP",
   variables: { code: "123456" },
 });
+```
+
+## 런타임 어댑터 경로
+
+런타임 전용 구현은 아래 서브패스로 사용합니다.
+
+- `k-msg/adapters/bun`
+- `k-msg/adapters/node`
+- `k-msg/adapters/cloudflare`
+
+```ts
+import { SqliteDeliveryTrackingStore } from "k-msg/adapters/bun";
+import { createD1DeliveryTrackingStore } from "k-msg/adapters/cloudflare";
 ```

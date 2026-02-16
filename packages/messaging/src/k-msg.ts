@@ -12,8 +12,18 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import { interpolate } from "@k-msg/template";
 import type { HookContext, KMsgHooks } from "./hooks";
+
+function interpolateTemplate(
+  text: string,
+  vars: Record<string, string>,
+): string {
+  if (!text) return "";
+  return text.replace(/#\{([^}]+)\}/g, (match, key) => {
+    const value = vars[key];
+    return value === undefined || value === null ? match : String(value);
+  });
+}
 
 export type RoutingStrategy = "first" | "round_robin";
 
@@ -509,7 +519,7 @@ export class KMsg {
   private interpolateText(text: string, variables?: MessageVariables): string {
     if (!variables) return text;
     if (!text || text.trim().length === 0) return text;
-    return interpolate(text, this.stringifyVariables(variables));
+    return interpolateTemplate(text, this.stringifyVariables(variables));
   }
 
   private interpolateTextOptions(options: SendOptions): SendOptions {
