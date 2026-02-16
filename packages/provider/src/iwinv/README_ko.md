@@ -19,6 +19,18 @@ bun add @k-msg/provider @k-msg/core
 - SMS API: https://docs.iwinv.kr/api/Message_api/
 - 알림톡(Kakao) API: https://docs.iwinv.kr/api/kakao_api/
 
+## 온보딩 요구사항
+
+- 채널 온보딩: 현재 통합에서는 IWINV 콘솔에서 수동 처리(채널 add/auth API 미노출).
+- 템플릿 라이프사이클: API 지원(`createTemplate`, `updateTemplate`, `deleteTemplate`, `getTemplate`, `listTemplates`).
+- `plusId`: `k-msg` 온보딩 정책에서 iwinv는 optional.
+
+CLI 기준:
+
+- `k-msg providers doctor`, `k-msg alimtalk preflight`에서
+  `channel_registered_in_console` manual 체크를 평가합니다.
+- 체크 상태는 `k-msg.config.json`의 `onboarding.manualChecks.iwinv`에 유지하세요.
+
 ## 채널별 엔드포인트 / 헤더
 
 ### 1) 알림톡 (v2)
@@ -73,19 +85,22 @@ bun add @k-msg/provider @k-msg/core
 
 ## 환경변수
 
-최소 필수:
+필수(알림톡):
 
 ```bash
-# 알림톡
 IWINV_API_KEY=your_alimtalk_api_key
-IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
+```
 
-# SMS/LMS/MMS v2
-IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
+SMS/LMS/MMS v2 사용 시에만 필수:
+
+```bash
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
+```
 
-# 공통 발신번호(선택)
+발신번호 기본값(선택):
+
+```bash
 IWINV_SENDER_NUMBER=01000000000
 ```
 
@@ -112,8 +127,6 @@ import { IWINVProvider } from "@k-msg/provider";
 
 const provider = new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,
-  baseUrl: process.env.IWINV_BASE_URL ?? "https://alimtalk.bizservice.iwinv.kr",
-  smsBaseUrl: process.env.IWINV_SMS_BASE_URL ?? "https://sms.bizservice.iwinv.kr",
   smsApiKey: process.env.IWINV_SMS_API_KEY,
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,

@@ -6,6 +6,7 @@ import type {
   KakaoChannel,
   KakaoChannelCategories,
   MessageType,
+  ProviderOnboardingSpec,
   SendOptions,
   SendResult,
 } from "./types/index";
@@ -108,4 +109,5 @@ export interface Provider {
   getDeliveryStatus?(
     query: DeliveryStatusQuery,
   ): Promise<Result<DeliveryStatusResult | null, KMsgError>>;
+  getOnboardingSpec?(): ProviderOnboardingSpec;
 }

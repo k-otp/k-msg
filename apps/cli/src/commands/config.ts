@@ -25,8 +25,6 @@ const sampleConfig: KMsgCliConfig = {
       id: "iwinv",
       config: {
         apiKey: "env:IWINV_API_KEY",
-        baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-        smsBaseUrl: "https://sms.bizservice.iwinv.kr",
         smsApiKey: "env:IWINV_SMS_API_KEY",
         smsAuthKey: "env:IWINV_SMS_AUTH_KEY",
         smsCompanyId: "env:IWINV_SMS_COMPANY_ID",
@@ -57,7 +55,7 @@ const sampleConfig: KMsgCliConfig = {
   defaults: {
     from: "env:K_MSG_DEFAULT_FROM",
     sms: { autoLmsBytes: 90 },
-    kakao: { channel: "main" },
+    kakao: { channel: "main", plusId: "@your_channel" },
   },
   aliases: {
     kakaoChannels: {
@@ -66,6 +64,16 @@ const sampleConfig: KMsgCliConfig = {
         plusId: "@your_channel",
         senderKey: "env:ALIGO_SENDER_KEY",
         name: "Main Channel",
+      },
+    },
+  },
+  onboarding: {
+    manualChecks: {
+      iwinv: {
+        channel_registered_in_console: {
+          done: false,
+          note: "Set true after Kakao channel onboarding is completed in IWINV console.",
+        },
       },
     },
   },

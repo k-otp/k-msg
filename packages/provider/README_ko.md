@@ -21,6 +21,22 @@ bun add @k-msg/provider @k-msg/core
 - `supportedTypes`: 지원하는 메시지 `type` 선언
 - `send(options: SendOptions)`: `Result<SendResult, KMsgError>` 반환 (throw 하지 않음)
 
+## Provider 온보딩 매트릭스
+
+단일 소스: `packages/provider/src/onboarding/specs.ts`
+
+| Provider | 채널 온보딩 | 템플릿 API | plusId 정책 | plusId 추론 | 라이브 테스트 지원 |
+| --- | --- | --- | --- | --- | --- |
+| `iwinv` | 수동(콘솔) | 가능 | optional | unsupported | supported |
+| `aligo` | API | 가능 | required_if_no_inference | supported | supported |
+| `solapi` | 없음(벤더 메타 의존) | 미지원 | required_if_no_inference | unsupported | partial |
+| `mock` | API(테스트용) | 가능 | optional | supported | none |
+
+런타임 접근:
+
+- 각 built-in provider는 `getOnboardingSpec()`를 노출합니다.
+- 레지스트리 헬퍼: `getProviderOnboardingSpec`, `listProviderOnboardingSpecs`, `providerOnboardingSpecs`.
+
 ## ALIMTALK failover 책임 범위
 
 ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider별 native 매핑은 다릅니다.
@@ -52,7 +68,6 @@ const kmsg = new KMsg({
     }),
     new IWINVProvider({
       apiKey: process.env.IWINV_API_KEY!,
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       smsApiKey: process.env.IWINV_SMS_API_KEY,
       smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
       smsSenderNumber: "01000000000",

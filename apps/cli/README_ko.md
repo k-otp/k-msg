@@ -103,12 +103,29 @@ k-msg --config /path/to/k-msg.config.json providers list
 ## 명령어
 
 - `k-msg config init|show|validate`
-- `k-msg providers list|health`
+- `k-msg providers list|health|doctor`
 - `k-msg sms send`
-- `k-msg alimtalk send`
+- `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin`
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
+
+## 권장 AlimTalk 운영 흐름
+
+1. provider 진단(`doctor`)을 먼저 실행합니다.
+2. 실제 발송 전에 `preflight`로 채널/템플릿/정책 검증을 수행합니다.
+3. 통과 후 `send`를 실행합니다.
+
+```bash
+k-msg providers doctor
+k-msg alimtalk preflight --provider iwinv --template-code TPL_001 --channel main
+k-msg alimtalk send --provider iwinv --template-code TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
+```
+
+참고:
+
+- iwinv는 카카오 채널 온보딩이 벤더 콘솔 수동 절차이므로 config의 manual 체크 상태를 유지해야 합니다.
+- `required_if_no_inference` 정책 provider는 `plusId` 미입력 + 추론 불가 조합이면 preflight가 실패합니다.
 
 ## Send
 
@@ -127,7 +144,8 @@ k-msg alimtalk send \
   --to 01012345678 \
   --template-code TPL_001 \
   --vars '{"name":"Jane"}' \
-  --channel main
+  --channel main \
+  --plus-id @my_channel
 ```
 
 Failover 옵션:
@@ -145,6 +163,19 @@ k-msg alimtalk send \
 
 프로바이더가 전송 warning(예: failover partial/unsupported)을 반환하면,
 CLI는 텍스트 모드에서 `WARNING ...` 라인을 출력하고 `--json` 출력에도 포함합니다.
+
+### Preflight
+
+```bash
+k-msg alimtalk preflight \
+  --provider iwinv \
+  --template-code TPL_001 \
+  --channel main \
+  --sender-key your_sender_key \
+  --plus-id @my_channel
+```
+
+`preflight`는 발송 전에 onboarding check(수동/설정/capability/api probe)와 템플릿 조회를 검증합니다.
 
 ### 고급 JSON 전송
 
@@ -193,3 +224,24 @@ k-msg kakao template request --template-code TPL_001 --channel main
   - `2`: 입력/설정 오류
   - `3`: provider/network 오류
   - `4`: capability 미지원
+
+## Manual 체크 설정 예시
+
+`k-msg.config.json`에 수동 온보딩 증빙을 저장해 `doctor/preflight`에서 사용합니다.
+
+```json
+{
+  "onboarding": {
+    "manualChecks": {
+      "iwinv": {
+        "channel_registered_in_console": {
+          "done": true,
+          "checkedAt": "2026-02-16T09:00:00+09:00",
+          "note": "IWINV 콘솔에서 채널 승인 완료",
+          "evidence": "internal-ticket-1234"
+        }
+      }
+    }
+  }
+}
+```

@@ -22,6 +22,7 @@ import {
   type TemplateProvider,
   type TemplateUpdateInput,
 } from "@k-msg/core";
+import { getProviderOnboardingSpec } from "../onboarding/specs";
 import type { IWINVConfig } from "./types/iwinv";
 
 type IWINVSendResponse = {
@@ -42,13 +43,26 @@ type SmsV2SendResponse = Record<string, unknown> & {
 };
 
 type SmsV2MessageType = "SMS" | "LMS" | "MMS";
+const IWINV_ALIMTALK_BASE_URL = "https://alimtalk.bizservice.iwinv.kr";
+const IWINV_SMS_BASE_URL = "https://sms.bizservice.iwinv.kr";
 
 export class IWINVProvider implements Provider, TemplateProvider {
   readonly id = "iwinv";
   readonly name = "IWINV Messaging Provider";
   readonly supportedTypes: readonly MessageType[];
 
-  private readonly config: IWINVConfig;
+  private readonly config: IWINVConfig & {
+    baseUrl: string;
+    sendEndpoint: string;
+  };
+
+  getOnboardingSpec() {
+    const spec = getProviderOnboardingSpec(this.id);
+    if (!spec) {
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
 
   constructor(config: IWINVConfig) {
     if (!config || typeof config !== "object") {
@@ -57,13 +71,10 @@ export class IWINVProvider implements Provider, TemplateProvider {
     if (!config.apiKey || config.apiKey.length === 0) {
       throw new Error("IWINVProvider requires `apiKey`");
     }
-    if (!config.baseUrl || config.baseUrl.length === 0) {
-      throw new Error("IWINVProvider requires `baseUrl`");
-    }
 
     this.config = {
       ...config,
-      baseUrl: config.baseUrl || "https://alimtalk.bizservice.iwinv.kr",
+      baseUrl: IWINV_ALIMTALK_BASE_URL,
       sendEndpoint: config.sendEndpoint || "/api/v2/send/",
     };
 
@@ -1502,11 +1513,7 @@ export class IWINVProvider implements Provider, TemplateProvider {
   }
 
   private resolveSmsBaseUrl(): string {
-    return (
-      this.config.smsBaseUrl ||
-      process.env.IWINV_SMS_BASE_URL ||
-      "https://sms.bizservice.iwinv.kr"
-    );
+    return IWINV_SMS_BASE_URL;
   }
 
   private canSendSmsV2(): boolean {
@@ -1975,12 +1982,9 @@ export const createIWINVProvider = (config: IWINVConfig) =>
 export const createDefaultIWINVProvider = () => {
   const config: IWINVConfig = {
     apiKey: process.env.IWINV_API_KEY || "",
-    baseUrl:
-      process.env.IWINV_BASE_URL || "https://alimtalk.bizservice.iwinv.kr",
     smsApiKey: process.env.IWINV_SMS_API_KEY,
     smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
     smsCompanyId: process.env.IWINV_SMS_COMPANY_ID,
-    smsBaseUrl: process.env.IWINV_SMS_BASE_URL,
     senderNumber:
       process.env.IWINV_SENDER_NUMBER || process.env.IWINV_SMS_SENDER_NUMBER,
     smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,

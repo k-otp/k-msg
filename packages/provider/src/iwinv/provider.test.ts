@@ -10,6 +10,33 @@ afterEach(() => {
 });
 
 describe("IWINVProvider", () => {
+  test("uses default AlimTalk base URL when baseUrl is omitted", async () => {
+    let calledUrl = "";
+
+    globalThis.fetch = async (input: RequestInfo | URL) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      return new Response(
+        JSON.stringify({ code: 200, message: "ok", seqNo: 1 }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      debug: false,
+    });
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateCode: "TPL_1",
+      variables: { code: 1234 },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/v2/send/");
+  });
+
   test("SMS uses v2 endpoint with Secret header and v2 payload", async () => {
     let calledUrl = "";
     let calledSecret = "";
@@ -35,8 +62,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -68,8 +93,6 @@ describe("IWINVProvider", () => {
     const provider = new IWINVProvider({
       apiKey: "test-api-key",
       smsAuthKey: "legacy-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -108,7 +131,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -151,7 +173,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -184,7 +205,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -224,7 +244,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -279,8 +298,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -321,8 +338,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -367,8 +382,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -408,8 +421,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -488,7 +499,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -561,8 +571,6 @@ describe("IWINVProvider", () => {
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
       smsCompanyId: "cid",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -609,8 +617,6 @@ describe("IWINVProvider", () => {
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
       smsCompanyId: "company",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -631,8 +637,6 @@ describe("IWINVProvider", () => {
       apiKey: "api-key",
       smsApiKey: "sms-api-key",
       smsAuthKey: "sms-auth-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
-      smsBaseUrl: "https://sms.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -684,7 +688,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -728,7 +731,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 
@@ -760,7 +762,6 @@ describe("IWINVProvider", () => {
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       debug: false,
     });
 

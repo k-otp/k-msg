@@ -1,6 +1,7 @@
 import { defineCommand } from "@bunli/core";
 import { optConfig, optJson } from "../cli/options";
 import { printError, shouldUseJsonOutput } from "../cli/utils";
+import { runProviderDoctor } from "../onboarding";
 import { loadRuntime } from "../runtime";
 
 function detectCapabilities(provider: Record<string, unknown>): string[] {
@@ -124,11 +125,70 @@ const healthCmd = defineCommand({
   },
 });
 
+const doctorCmd = defineCommand({
+  name: "doctor",
+  description: "Run onboarding checks for configured providers",
+  options: {
+    config: optConfig,
+    json: optJson,
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const runtime = await loadRuntime(flags.config);
+      const results = await Promise.all(
+        runtime.providers.map((provider) =>
+          runProviderDoctor({ runtime, provider }),
+        ),
+      );
+
+      if (asJson) {
+        console.log(
+          JSON.stringify({ ok: results.every((r) => r.ok), results }, null, 2),
+        );
+        if (results.some((r) => !r.ok)) {
+          process.exitCode = 2;
+        }
+        return;
+      }
+
+      for (const result of results) {
+        console.log(
+          `${result.ok ? "OK" : "FAIL"} ${result.providerId}: ${result.providerName}`,
+        );
+        if (result.spec) {
+          console.log(
+            `  onboarding: channel=${result.spec.channelOnboarding}, templateApi=${result.spec.templateLifecycleApi}, plusIdPolicy=${result.spec.plusIdPolicy}, live=${result.spec.liveTestSupport ?? "unknown"}`,
+          );
+        }
+        for (const check of result.checks) {
+          const marker =
+            check.status === "pass"
+              ? "PASS"
+              : check.status === "fail"
+                ? "FAIL"
+                : "SKIP";
+          console.log(
+            `  [${marker}] (${check.severity}) ${check.id}: ${check.message}`,
+          );
+        }
+      }
+
+      if (results.some((r) => !r.ok)) {
+        process.exitCode = 2;
+      }
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = 2;
+    }
+  },
+});
+
 export default defineCommand({
   name: "providers",
   description: "Provider utilities",
-  commands: [listCmd, healthCmd],
+  commands: [listCmd, healthCmd, doctorCmd],
   handler: async () => {
-    console.log("Use a subcommand: list | health");
+    console.log("Use a subcommand: list | health | doctor");
   },
 });

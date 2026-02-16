@@ -103,12 +103,29 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 ## Commands
 
 - `k-msg config init|show|validate`
-- `k-msg providers list|health`
+- `k-msg providers list|health|doctor`
 - `k-msg sms send`
-- `k-msg alimtalk send`
+- `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin`
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
+
+## Recommended AlimTalk flow
+
+1. Run provider-level diagnostics.
+2. Run AlimTalk preflight for the selected provider/channel/template.
+3. Run send after preflight passes.
+
+```bash
+k-msg providers doctor
+k-msg alimtalk preflight --provider iwinv --template-code TPL_001 --channel main
+k-msg alimtalk send --provider iwinv --template-code TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
+```
+
+Notes:
+
+- For IWINV, Kakao channel onboarding is manual in vendor console. Keep the manual ack in config updated.
+- For providers with `required_if_no_inference`, preflight fails when `plusId` is missing and inference cannot resolve it.
 
 ## Send
 
@@ -127,7 +144,8 @@ k-msg alimtalk send \
   --to 01012345678 \
   --template-code TPL_001 \
   --vars '{"name":"Jane"}' \
-  --channel main
+  --channel main \
+  --plus-id @my_channel
 ```
 
 Failover options:
@@ -144,6 +162,19 @@ k-msg alimtalk send \
 ```
 
 When providers return send warnings (for example failover partial/unsupported), CLI prints `WARNING ...` lines in text mode and includes them in `--json` output.
+
+### Preflight
+
+```bash
+k-msg alimtalk preflight \
+  --provider iwinv \
+  --template-code TPL_001 \
+  --channel main \
+  --sender-key your_sender_key \
+  --plus-id @my_channel
+```
+
+`preflight` runs onboarding checks (manual/config/capability/api probes) and template lookup before send.
 
 ### Advanced JSON send
 
@@ -192,3 +223,24 @@ k-msg kakao template request --template-code TPL_001 --channel main
   - `2`: input/config error
   - `3`: provider/network error
   - `4`: capability not supported
+
+## Manual Check Config Example
+
+`k-msg.config.json` can store manual onboarding evidence used by `doctor/preflight`:
+
+```json
+{
+  "onboarding": {
+    "manualChecks": {
+      "iwinv": {
+        "channel_registered_in_console": {
+          "done": true,
+          "checkedAt": "2026-02-16T09:00:00+09:00",
+          "note": "Approved in IWINV console",
+          "evidence": "internal-ticket-1234"
+        }
+      }
+    }
+  }
+}
+```

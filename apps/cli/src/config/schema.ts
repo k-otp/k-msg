@@ -36,7 +36,29 @@ export const defaultsSchema = z
       .object({
         channel: z.string().min(1).optional(),
         senderKey: z.string().min(1).optional(),
+        plusId: z.string().min(1).optional(),
       })
+      .optional(),
+  })
+  .passthrough()
+  .optional();
+
+const onboardingManualCheckStateSchema = z
+  .object({
+    done: z.boolean(),
+    checkedAt: z.string().optional(),
+    note: z.string().optional(),
+    evidence: z.string().optional(),
+  })
+  .passthrough();
+
+export const onboardingSchema = z
+  .object({
+    manualChecks: z
+      .record(
+        z.string().min(1),
+        z.record(z.string().min(1), onboardingManualCheckStateSchema),
+      )
       .optional(),
   })
   .passthrough()
@@ -80,6 +102,7 @@ export const kMsgCliConfigSchema = z
     routing: routingSchema,
     defaults: defaultsSchema,
     aliases: aliasesSchema,
+    onboarding: onboardingSchema,
   })
   .passthrough();
 

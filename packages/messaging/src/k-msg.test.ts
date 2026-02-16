@@ -92,4 +92,96 @@ describe("KMsg", () => {
     expect(result.isFailure).toBe(true);
     expect(onError).toHaveBeenCalled();
   });
+
+  test("ALIMTALK fails when plusId policy requires explicit value and inference is unsupported", async () => {
+    const sendMock = mock(async (options: any) =>
+      ok({
+        messageId: options.messageId || "test-id",
+        status: "SENT" as const,
+        providerId: "solapi",
+        type: options.type,
+        to: options.to,
+      }),
+    );
+    const provider: Provider = {
+      id: "solapi",
+      name: "SOLAPI",
+      supportedTypes: ["ALIMTALK"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: sendMock,
+      getOnboardingSpec: () => ({
+        providerId: "solapi",
+        channelOnboarding: "none",
+        templateLifecycleApi: "unavailable",
+        plusIdPolicy: "required_if_no_inference",
+        plusIdInference: "unsupported",
+        checks: [],
+      }),
+    };
+
+    const kmsg = new KMsg({
+      providers: [provider],
+      defaults: {
+        kakao: { profileId: "pf-id" },
+      },
+    });
+
+    const result = await kmsg.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateCode: "TPL_1",
+      variables: { code: "1234" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(result.error.message).toContain("plusId is required");
+    }
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  test("ALIMTALK passes when provider plusId policy is optional", async () => {
+    const sendMock = mock(async (options: any) =>
+      ok({
+        messageId: options.messageId || "test-id",
+        status: "SENT" as const,
+        providerId: "iwinv",
+        type: options.type,
+        to: options.to,
+      }),
+    );
+    const provider: Provider = {
+      id: "iwinv",
+      name: "IWINV",
+      supportedTypes: ["ALIMTALK"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: sendMock,
+      getOnboardingSpec: () => ({
+        providerId: "iwinv",
+        channelOnboarding: "manual",
+        templateLifecycleApi: "available",
+        plusIdPolicy: "optional",
+        plusIdInference: "unsupported",
+        checks: [],
+      }),
+    };
+
+    const kmsg = new KMsg({
+      providers: [provider],
+      defaults: {
+        kakao: { profileId: "sender-key" },
+      },
+    });
+
+    const result = await kmsg.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateCode: "TPL_1",
+      variables: { code: "1234" },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(sendMock).toHaveBeenCalled();
+  });
 });

@@ -3,12 +3,67 @@ import type { MessageVariables, SendInput } from "k-msg";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
+  CapabilityNotSupportedError,
   exitCodeForError,
   printError,
   printWarnings,
   shouldUseJsonOutput,
 } from "../cli/utils";
-import { loadRuntime, resolveKakaoChannelSenderKey } from "../runtime";
+import { runAlimTalkPreflight } from "../onboarding";
+import {
+  loadRuntime,
+  type Runtime,
+  resolveKakaoChannelPlusId,
+  resolveKakaoChannelSenderKey,
+} from "../runtime";
+
+function pickAlimTalkProvider(
+  runtime: Runtime,
+  requestedProviderId?: string,
+): Runtime["providers"][number] {
+  if (requestedProviderId) {
+    const provider = runtime.providersById.get(requestedProviderId);
+    if (!provider) {
+      throw new Error(`Unknown provider id: ${requestedProviderId}`);
+    }
+    if (!provider.supportedTypes.includes("ALIMTALK")) {
+      throw new CapabilityNotSupportedError(
+        `Provider '${requestedProviderId}' does not support ALIMTALK`,
+      );
+    }
+    return provider;
+  }
+
+  const routeByType = runtime.config.routing?.byType?.ALIMTALK;
+  if (Array.isArray(routeByType)) {
+    const first = routeByType
+      .map((id) => runtime.providersById.get(id))
+      .find((provider) => provider?.supportedTypes.includes("ALIMTALK"));
+    if (first) return first;
+  } else if (typeof routeByType === "string" && routeByType.length > 0) {
+    const provider = runtime.providersById.get(routeByType);
+    if (provider?.supportedTypes.includes("ALIMTALK")) {
+      return provider;
+    }
+  }
+
+  const defaultProviderId = runtime.config.routing?.defaultProviderId;
+  if (typeof defaultProviderId === "string" && defaultProviderId.length > 0) {
+    const provider = runtime.providersById.get(defaultProviderId);
+    if (provider?.supportedTypes.includes("ALIMTALK")) {
+      return provider;
+    }
+  }
+
+  const supported = runtime.providers.find((provider) =>
+    provider.supportedTypes.includes("ALIMTALK"),
+  );
+  if (supported) return supported;
+
+  throw new CapabilityNotSupportedError(
+    "No configured provider supports ALIMTALK",
+  );
+}
 
 const sendCmd = defineCommand({
   name: "send",
@@ -48,6 +103,9 @@ const sendCmd = defineCommand({
     "sender-key": option(z.string().optional(), {
       description: "Kakao channel senderKey override",
     }),
+    "plus-id": option(z.string().optional(), {
+      description: "Kakao channel plusId override",
+    }),
     "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
@@ -84,6 +142,14 @@ const sendCmd = defineCommand({
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
+      const plusId = resolveKakaoChannelPlusId(runtime.config, {
+        channelAlias: flags.channel,
+        plusId: flags["plus-id"],
+      });
+      const kakao = {
+        ...(senderKey ? { profileId: senderKey } : {}),
+        ...(plusId ? { plusId } : {}),
+      };
 
       const input: SendInput = {
         type: "ALIMTALK",
@@ -91,7 +157,7 @@ const sendCmd = defineCommand({
         from: flags.from,
         templateCode: flags["template-code"],
         variables: rawVars as MessageVariables,
-        ...(senderKey ? { kakao: { profileId: senderKey } } : {}),
+        ...(Object.keys(kakao).length > 0 ? { kakao } : {}),
         ...(flags.provider ? { providerId: flags.provider } : {}),
         ...(scheduledAt ? { options: { scheduledAt } } : {}),
         ...(failoverEnabled
@@ -137,11 +203,94 @@ const sendCmd = defineCommand({
   },
 });
 
+const preflightCmd = defineCommand({
+  name: "preflight",
+  description: "Run ALIMTALK onboarding preflight checks",
+  options: {
+    config: optConfig,
+    json: optJson,
+    provider: optProvider,
+    channel: option(z.string().optional(), {
+      description: "Kakao channel alias (from config)",
+    }),
+    "sender-key": option(z.string().optional(), {
+      description: "Kakao channel senderKey override",
+    }),
+    "plus-id": option(z.string().optional(), {
+      description: "Kakao channel plusId override",
+    }),
+    "template-code": option(z.string().min(1), {
+      description: "Template code to validate",
+    }),
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const runtime = await loadRuntime(flags.config);
+      const provider = pickAlimTalkProvider(runtime, flags.provider);
+      const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
+        channelAlias: flags.channel,
+        senderKey: flags["sender-key"],
+      });
+      const plusId = resolveKakaoChannelPlusId(runtime.config, {
+        channelAlias: flags.channel,
+        plusId: flags["plus-id"],
+      });
+
+      const preflight = await runAlimTalkPreflight({
+        runtime,
+        provider,
+        senderKey,
+        plusId,
+        templateCode: flags["template-code"],
+      });
+
+      if (asJson) {
+        console.log(
+          JSON.stringify({ ok: preflight.ok, result: preflight }, null, 2),
+        );
+        if (!preflight.ok) process.exitCode = 2;
+        return;
+      }
+
+      console.log(
+        `${preflight.ok ? "OK" : "FAIL"} preflight (${preflight.providerId})`,
+      );
+      if (preflight.spec) {
+        console.log(
+          `policy: plusId=${preflight.spec.plusIdPolicy}, inference=${preflight.spec.plusIdInference}`,
+        );
+      }
+      if (preflight.inferredPlusId) {
+        console.log(`inferredPlusId=${preflight.inferredPlusId}`);
+      }
+      for (const check of preflight.checks) {
+        const marker =
+          check.status === "pass"
+            ? "PASS"
+            : check.status === "fail"
+              ? "FAIL"
+              : "SKIP";
+        console.log(
+          `[${marker}] (${check.severity}) ${check.id}: ${check.message}`,
+        );
+      }
+
+      if (!preflight.ok) {
+        process.exitCode = 2;
+      }
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = exitCodeForError(error);
+    }
+  },
+});
+
 export default defineCommand({
   name: "alimtalk",
   description: "AlimTalk utilities",
-  commands: [sendCmd],
+  commands: [sendCmd, preflightCmd],
   handler: async () => {
-    console.log("Use a subcommand: send");
+    console.log("Use a subcommand: send | preflight");
   },
 });

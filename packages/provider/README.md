@@ -21,6 +21,22 @@ All providers implement the `Provider` interface from `@k-msg/core`:
 - `supportedTypes` declares supported message `type`s
 - `send(options: SendOptions)` returns `Result<SendResult, KMsgError>` (never throws)
 
+## Provider Onboarding Matrix
+
+Single source of truth: `packages/provider/src/onboarding/specs.ts`
+
+| Provider | Channel onboarding | Template API | plusId policy | plusId inference | Live test support |
+| --- | --- | --- | --- | --- | --- |
+| `iwinv` | manual (console) | available | optional | unsupported | supported |
+| `aligo` | api | available | required_if_no_inference | supported | supported |
+| `solapi` | none (vendor metadata) | unavailable | required_if_no_inference | unsupported | partial |
+| `mock` | api (test fixture) | available | optional | supported | none |
+
+Runtime access:
+
+- Each built-in provider exposes `getOnboardingSpec()`.
+- Registry helpers are exported: `getProviderOnboardingSpec`, `listProviderOnboardingSpecs`, `providerOnboardingSpecs`.
+
 ## ALIMTALK failover responsibilities
 
 `failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.
@@ -52,7 +68,6 @@ const kmsg = new KMsg({
     }),
     new IWINVProvider({
       apiKey: process.env.IWINV_API_KEY!,
-      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
       smsApiKey: process.env.IWINV_SMS_API_KEY,
       smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
       smsSenderNumber: "01000000000",

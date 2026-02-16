@@ -28,6 +28,9 @@ function wrapProviderId(
     ...(typeof provider.getDeliveryStatus === "function"
       ? { getDeliveryStatus: provider.getDeliveryStatus.bind(provider) }
       : {}),
+    ...(typeof provider.getOnboardingSpec === "function"
+      ? { getOnboardingSpec: provider.getOnboardingSpec.bind(provider) }
+      : {}),
   };
 
   const any = provider as unknown as Record<string, unknown>;
@@ -103,13 +106,7 @@ export function createProviders(
         break;
       }
       case "iwinv": {
-        provider = new IWINVProvider({
-          ...cfg,
-          baseUrl:
-            typeof cfg.baseUrl === "string" && cfg.baseUrl.length > 0
-              ? cfg.baseUrl
-              : "https://alimtalk.bizservice.iwinv.kr",
-        } as any) as ProviderWithCapabilities;
+        provider = new IWINVProvider(cfg as any) as ProviderWithCapabilities;
         break;
       }
       case "aligo": {

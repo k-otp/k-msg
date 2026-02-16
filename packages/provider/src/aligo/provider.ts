@@ -21,6 +21,7 @@ import {
   type TemplateProvider,
   type TemplateUpdateInput,
 } from "@k-msg/core";
+import { getProviderOnboardingSpec } from "../onboarding/specs";
 import type {
   AligoConfig,
   AligoResponse,
@@ -52,6 +53,14 @@ export class AligoProvider
 
   private readonly SMS_HOST: string;
   private readonly ALIMTALK_HOST: string;
+
+  getOnboardingSpec() {
+    const spec = getProviderOnboardingSpec(this.id);
+    if (!spec) {
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
 
   constructor(private readonly config: AligoConfig) {
     if (!config || typeof config !== "object") {

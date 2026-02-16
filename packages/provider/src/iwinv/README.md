@@ -19,6 +19,18 @@ bun add @k-msg/provider @k-msg/core
 - SMS API: https://docs.iwinv.kr/api/Message_api/
 - Kakao (AlimTalk) API: https://docs.iwinv.kr/api/kakao_api/
 
+## Onboarding Requirements
+
+- Channel onboarding: manual in IWINV console (API is not exposed for channel add/auth in current integration).
+- Template lifecycle: available via API (`createTemplate`, `updateTemplate`, `deleteTemplate`, `getTemplate`, `listTemplates`).
+- `plusId`: optional for IWINV policy in `k-msg` onboarding spec.
+
+For CLI:
+
+- `k-msg providers doctor` and `k-msg alimtalk preflight` include the manual check id
+  `channel_registered_in_console`.
+- Keep this check state in `k-msg.config.json` under `onboarding.manualChecks.iwinv`.
+
 ## Channel Endpoints and Headers
 
 ### 1) AlimTalk (v2)
@@ -73,19 +85,22 @@ Note:
 
 ## Environment Variables
 
-Minimum:
+Required (AlimTalk):
 
 ```bash
-# AlimTalk
 IWINV_API_KEY=your_alimtalk_api_key
-IWINV_BASE_URL=https://alimtalk.bizservice.iwinv.kr
+```
 
-# SMS/LMS/MMS v2
-IWINV_SMS_BASE_URL=https://sms.bizservice.iwinv.kr
+Required only when using SMS/LMS/MMS v2:
+
+```bash
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
+```
 
-# Optional common sender
+Optional sender defaults:
+
+```bash
 IWINV_SENDER_NUMBER=01000000000
 ```
 
@@ -112,8 +127,6 @@ import { IWINVProvider } from "@k-msg/provider";
 
 const provider = new IWINVProvider({
   apiKey: process.env.IWINV_API_KEY!,
-  baseUrl: process.env.IWINV_BASE_URL ?? "https://alimtalk.bizservice.iwinv.kr",
-  smsBaseUrl: process.env.IWINV_SMS_BASE_URL ?? "https://sms.bizservice.iwinv.kr",
   smsApiKey: process.env.IWINV_SMS_API_KEY,
   smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
   senderNumber: process.env.IWINV_SENDER_NUMBER,

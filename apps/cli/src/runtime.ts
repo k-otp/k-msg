@@ -35,6 +35,27 @@ export function resolveKakaoChannelSenderKey(
   return undefined;
 }
 
+export function resolveKakaoChannelPlusId(
+  config: KMsgCliConfig,
+  input?: { channelAlias?: string; plusId?: string },
+): string | undefined {
+  const explicit = input?.plusId?.trim();
+  if (explicit) return explicit;
+
+  const alias = input?.channelAlias?.trim();
+  if (alias) {
+    const entry = config.aliases?.kakaoChannels?.[alias];
+    if (entry?.plusId) return entry.plusId;
+  }
+
+  const defaults = config.defaults?.kakao;
+  if (defaults?.plusId) return defaults.plusId;
+  if (defaults?.channel) {
+    return config.aliases?.kakaoChannels?.[defaults.channel]?.plusId;
+  }
+  return undefined;
+}
+
 export async function loadRuntime(configPath?: string): Promise<Runtime> {
   const loadedRaw = await loadKMsgConfig(configPath);
   let resolved: KMsgCliConfig;
@@ -59,6 +80,7 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
   }
 
   const senderKey = resolveKakaoChannelSenderKey(resolved);
+  const plusId = resolveKakaoChannelPlusId(resolved);
 
   const routing = resolved.routing
     ? {
@@ -76,7 +98,14 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
       sms: {
         autoLmsBytes: resolved.defaults?.sms?.autoLmsBytes,
       },
-      ...(senderKey ? { kakao: { profileId: senderKey } } : {}),
+      ...(senderKey || plusId
+        ? {
+            kakao: {
+              ...(senderKey ? { profileId: senderKey } : {}),
+              ...(plusId ? { plusId } : {}),
+            },
+          }
+        : {}),
     },
   });
 
