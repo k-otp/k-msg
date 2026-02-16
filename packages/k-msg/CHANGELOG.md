@@ -1,5 +1,19 @@
 # k-msg
 
+## 0.10.0 — 2026-02-16
+
+### Minor changes
+
+- [09fb135](https://github.com/k-otp/k-msg/commit/09fb135888bb5d764f5dc37f8b3555b30db25d09) Formalize provider onboarding specs and add CLI doctor/preflight flow for AlimTalk readiness checks.
+  
+  Introduce provider onboarding registry metadata, plusId policy enforcement for ALIMTALK send, and opt-in provider live integration workflow scaffolding.
+  
+  Lock IWINV endpoint handling to built-in defaults (no base URL env/config overrides) and remove those fields from CLI/provider examples and docs. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: analytics@0.10.0, channel@0.10.0, core@0.10.0, messaging@0.10.0, provider@0.10.0, template@0.10.0, webhook@0.10.0
+
 ## 0.9.0 — 2026-02-16
 
 ### Minor changes

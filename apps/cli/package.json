@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/cli",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "private": false,
   "description": "k-msg CLI (prebuilt binaries via GitHub Releases)",
   "type": "module",
