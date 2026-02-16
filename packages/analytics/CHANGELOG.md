@@ -1,5 +1,18 @@
 # @k-msg/analytics
 
+## 0.13.0 — 2026-02-16
+
+### Patch changes
+
+- [d6440b8](https://github.com/k-otp/k-msg/commit/d6440b88137510a696cbbbe407f90b9828795599) Restructure messaging APIs into dedicated subpaths and keep the root export send-focused.
+  
+  - Move delivery-tracking APIs to `@k-msg/messaging/tracking`.
+  - Move bulk sender to `@k-msg/messaging/sender`.
+  - Move queue contracts to `@k-msg/messaging/queue` and expose `JobStatus` there.
+  - Remove these symbols from `@k-msg/messaging` root.
+  - Update `k-msg` and analytics internals to consume the new subpaths. — Thanks @imjlk!
+- Updated dependencies: messaging@0.13.0
+
 ## 0.12.0 — 2026-02-16
 
 ### Patch changes
