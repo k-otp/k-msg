@@ -101,8 +101,8 @@ Example file: `apps/cli/k-msg.config.example.json`
 
 Schema URLs:
 
-- Latest: `https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json`
-- Versioned (`v1`): `https://k-otp.github.io/k-msg/schemas/k-msg.config.v1.schema.json`
+- Latest: `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json`
+- Versioned (`v1`): `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.v1.schema.json`
 
 Initialize config:
 

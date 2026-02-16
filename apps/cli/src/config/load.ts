@@ -7,6 +7,48 @@ export type LoadedKMsgConfig = {
   config: KMsgCliConfig;
 };
 
+const OPTIONAL_ENV_PATHS = new Set([
+  "defaults.from",
+  "defaults.kakao.senderKey",
+  "defaults.kakao.plusId",
+]);
+const OPTIONAL_PROVIDER_CONFIG_ENV_KEYS = new Set([
+  "sender",
+  "senderNumber",
+  "smsSenderNumber",
+]);
+
+function isOptionalMissingEnvPath(pathParts: string[]): boolean {
+  const dotPath = pathParts.join(".");
+  if (OPTIONAL_ENV_PATHS.has(dotPath)) {
+    return true;
+  }
+
+  if (
+    pathParts.length >= 4 &&
+    pathParts[0] === "aliases" &&
+    pathParts[1] === "kakaoChannels" &&
+    typeof pathParts[3] === "string" &&
+    (pathParts[3] === "senderKey" || pathParts[3] === "plusId")
+  ) {
+    return true;
+  }
+
+  if (
+    pathParts.length >= 4 &&
+    pathParts[0] === "providers" &&
+    pathParts[2] === "config"
+  ) {
+    const configKey = pathParts[3];
+    return (
+      typeof configKey === "string" &&
+      OPTIONAL_PROVIDER_CONFIG_ENV_KEYS.has(configKey)
+    );
+  }
+
+  return false;
+}
+
 type ConfigPathResolveOptions = {
   platform?: NodeJS.Platform;
   env?: Record<string, string | undefined>;
@@ -129,6 +171,9 @@ function substituteEnvValues(
 
     const resolved = (Bun.env as Record<string, string | undefined>)[key];
     if (resolved === undefined || resolved.trim().length === 0) {
+      if (isOptionalMissingEnvPath(pathParts)) {
+        return undefined;
+      }
       const at = pathParts.length > 0 ? ` at ${pathParts.join(".")}` : "";
       throw new Error(`Missing environment variable: ${key}${at}`);
     }
@@ -144,7 +189,10 @@ function substituteEnvValues(
   if (value && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) {
-      out[k] = substituteEnvValues(v, [...pathParts, k]);
+      const resolved = substituteEnvValues(v, [...pathParts, k]);
+      if (resolved !== undefined) {
+        out[k] = resolved;
+      }
     }
     return out;
   }

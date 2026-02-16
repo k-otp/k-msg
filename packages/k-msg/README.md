@@ -40,7 +40,6 @@ const kmsg = new KMsg({
     },
   },
   defaults: {
-    from: "01000000000",
     sms: { autoLmsBytes: 90 },
   },
 });
@@ -56,4 +55,3 @@ await kmsg.send({
   variables: { code: "123456" },
 });
 ```
-

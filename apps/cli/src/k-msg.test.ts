@@ -229,10 +229,12 @@ describe("k-msg CLI (bunli) E2E", () => {
         unknown
       >;
       expect(parsed.$schema).toBe(
-        "https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json",
+        "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json",
       );
       expect(Array.isArray(parsed.providers)).toBe(true);
       expect((parsed.providers as unknown[]).length).toBeGreaterThan(0);
+      const defaults = parsed.defaults as Record<string, unknown> | undefined;
+      expect(defaults?.from).toBeUndefined();
     },
     TEST_TIMEOUT,
   );
@@ -301,6 +303,44 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
+    "providers doctor warns when SMS/LMS sender config is missing",
+    async () => {
+      const configPath = await createTempConfigFromObject({
+        version: 1,
+        providers: [
+          {
+            type: "iwinv",
+            id: "iwinv",
+            config: {
+              apiKey: "api-key",
+            },
+          },
+        ],
+        routing: { defaultProviderId: "iwinv", strategy: "first" },
+        onboarding: {
+          manualChecks: {
+            iwinv: {
+              channel_registered_in_console: {
+                done: true,
+              },
+            },
+          },
+        },
+      });
+
+      const doctor = expectCommand(
+        await runCli(["providers", "doctor", "--config", configPath]),
+      );
+      doctor.toHaveSucceeded();
+      expect(doctor.stdout).toContain("sms_lms_sender_config");
+      expect(doctor.stdout).toContain(
+        "SMS/LMS sender is not configured (set iwinv.config.senderNumber or iwinv.config.smsSenderNumber)",
+      );
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "alimtalk preflight fails when manual prerequisite is not acknowledged",
     async () => {
       const originalFetch = globalThis.fetch;
@@ -332,7 +372,6 @@ describe("k-msg CLI (bunli) E2E", () => {
               id: "iwinv",
               config: {
                 apiKey: "api-key",
-                baseUrl: "https://alimtalk.bizservice.iwinv.kr",
               },
             },
           ],
