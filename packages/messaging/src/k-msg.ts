@@ -24,7 +24,6 @@ export interface KMsgRoutingConfig {
 }
 
 export interface KMsgDefaultsConfig {
-  from?: string;
   sms?: {
     /**
      * If type is omitted (SMS default input), upgrade to LMS when estimated bytes exceed this value.
@@ -376,12 +375,7 @@ export class KMsg {
       // SMS default input path (type omitted)
       const record = input as unknown as Record<string, unknown>;
       const to = typeof record.to === "string" ? record.to : "";
-      const from =
-        typeof record.from === "string"
-          ? record.from
-          : typeof this.defaults.from === "string"
-            ? this.defaults.from
-            : undefined;
+      const from = typeof record.from === "string" ? record.from : undefined;
       const textRaw =
         typeof record.text === "string"
           ? record.text
@@ -425,7 +419,7 @@ export class KMsg {
 
     const withMessageId = { ...options, messageId } as SendOptions;
 
-    // Apply defaults (from/profileId/talkId/brandId)
+    // Apply defaults (profileId/talkId/brandId)
     const patched = this.applyDefaults(withMessageId);
 
     // Interpolate for text-based types when variables exist.
@@ -436,15 +430,7 @@ export class KMsg {
   }
 
   private applyDefaults(options: SendOptions): SendOptions {
-    const from =
-      typeof options.from === "string" && options.from.length > 0
-        ? options.from
-        : typeof this.defaults.from === "string" &&
-            this.defaults.from.length > 0
-          ? this.defaults.from
-          : undefined;
-
-    const base = from ? ({ ...options, from } as SendOptions) : options;
+    const base = options;
 
     if (base.type === "ALIMTALK" || base.type === "FRIENDTALK") {
       const profileId =

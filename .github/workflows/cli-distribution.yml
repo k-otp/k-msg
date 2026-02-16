@@ -171,15 +171,11 @@ jobs:
           TAG="${{ needs.build-and-release.outputs.tag }}"
           PAGES_DIR=".pages"
           CLI_DIR="${PAGES_DIR}/cli"
-          SCHEMA_DIR="${PAGES_DIR}/schemas"
 
           mkdir -p "$CLI_DIR"
-          mkdir -p "$SCHEMA_DIR"
 
           sed "s/__CLI_VERSION__/${VERSION}/g" apps/cli/install/install.sh > "${CLI_DIR}/install.sh"
           chmod +x "${CLI_DIR}/install.sh"
-
-          cp apps/cli/schemas/*.json "${SCHEMA_DIR}/"
 
           cat > "${CLI_DIR}/latest.json" <<EOF
           {

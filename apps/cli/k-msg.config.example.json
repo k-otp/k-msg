@@ -1,5 +1,5 @@
 {
-  "$schema": "https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json",
+  "$schema": "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json",
   "version": 1,
   "providers": [
     {
@@ -45,7 +45,6 @@
     }
   },
   "defaults": {
-    "from": "env:K_MSG_DEFAULT_FROM",
     "sms": { "autoLmsBytes": 90 },
     "kakao": {
       "channel": "main",

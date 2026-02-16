@@ -1,3 +1,4 @@
+import { createInterface } from "node:readline/promises";
 import { defineCommand, option } from "@bunli/core";
 import { z } from "zod";
 import { optConfig, optJson } from "../cli/options";
@@ -13,32 +14,15 @@ type MessageType = (typeof MESSAGE_TYPES)[number];
 type ProviderEntry = KMsgCliConfig["providers"][number];
 type ProviderType = z.infer<typeof providerTypeSchema>;
 
-type PromptApi = {
-  <T = string>(
-    message: string,
-    options?: {
-      default?: string;
-      validate?: (input: string) => boolean | string;
-      placeholder?: string;
-      multiline?: boolean;
-      schema?: unknown;
-    },
-  ): Promise<T>;
-  confirm(message: string, options?: { default?: boolean }): Promise<boolean>;
-  select<T = string>(
-    message: string,
-    options: {
-      options: Array<{ label: string; value: T; hint?: string }>;
-      default?: T;
-      hint?: string;
-    },
-  ): Promise<T>;
-};
-
 interface ProviderFieldSpec {
   key: string;
   defaultValue?: string;
   required?: boolean;
+}
+
+interface PlaintextCredentialLocation {
+  providerId: string;
+  keyPath: string;
 }
 
 const providerFieldSpecs: Record<ProviderType, ProviderFieldSpec[]> = {
@@ -82,6 +66,19 @@ const providerSupportedTypes: Record<ProviderType, readonly MessageType[]> = {
   solapi: ["ALIMTALK", "SMS", "LMS", "MMS"],
 };
 
+type SelectOption<T> = {
+  label: string;
+  value: T;
+  hint?: string;
+};
+
+const ESC = "\u001B";
+const CSI = `${ESC}[`;
+const CLEAR_LINE = `${CSI}2K`;
+const CURSOR_START = `${CSI}G`;
+const CURSOR_HIDE = `${CSI}?25l`;
+const CURSOR_SHOW = `${CSI}?25h`;
+
 function canPromptInTerminal(terminal: {
   isInteractive: boolean;
   isCI: boolean;
@@ -89,11 +86,241 @@ function canPromptInTerminal(terminal: {
   return terminal.isInteractive && !terminal.isCI;
 }
 
+function canUseArrowSelect(): boolean {
+  return (
+    process.stdin.isTTY === true &&
+    process.stdout.isTTY === true &&
+    typeof process.stdin.setRawMode === "function"
+  );
+}
+
+async function askText(input: {
+  message: string;
+  defaultValue?: string;
+  validate?: (value: string) => boolean | string;
+}): Promise<string> {
+  const defaultHint =
+    typeof input.defaultValue === "string" && input.defaultValue.length > 0
+      ? ` (${input.defaultValue})`
+      : "";
+  const promptText = `${input.message}${defaultHint} `;
+
+  while (true) {
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    let raw = "";
+    try {
+      raw = await rl.question(promptText);
+    } finally {
+      rl.close();
+    }
+
+    const value = raw.trim() || input.defaultValue || "";
+    if (!input.validate) {
+      return value;
+    }
+    const validated = input.validate(value);
+    if (validated === true) {
+      return value;
+    }
+    console.error(typeof validated === "string" ? validated : "Invalid input");
+  }
+}
+
+async function askConfirm(input: {
+  message: string;
+  defaultValue?: boolean;
+}): Promise<boolean> {
+  const defaultHint =
+    input.defaultValue === true
+      ? "Y/n"
+      : input.defaultValue === false
+        ? "y/N"
+        : "y/n";
+
+  while (true) {
+    const raw = await askText({
+      message: `${input.message} (${defaultHint})`,
+    });
+    const normalized = raw.trim().toLowerCase();
+    if (normalized.length === 0 && input.defaultValue !== undefined) {
+      return input.defaultValue;
+    }
+    if (normalized === "y" || normalized === "yes") return true;
+    if (normalized === "n" || normalized === "no") return false;
+    console.error("Please answer with y/yes or n/no");
+  }
+}
+
+function renderNumberedSelect<T>(
+  message: string,
+  options: SelectOption<T>[],
+  defaultIndex: number,
+): void {
+  console.log(message);
+  for (const [index, option] of options.entries()) {
+    const marker = index === defaultIndex ? "*" : " ";
+    const hint = option.hint ? ` (${option.hint})` : "";
+    console.log(`  ${marker} ${index + 1}) ${option.label}${hint}`);
+  }
+}
+
+async function promptSelectByNumber<T>(
+  message: string,
+  options: {
+    options: SelectOption<T>[];
+    default?: T;
+  },
+): Promise<T> {
+  if (options.options.length === 0) {
+    throw new Error("Select options cannot be empty");
+  }
+
+  let defaultIndex = 0;
+  if (options.default !== undefined) {
+    const resolved = options.options.findIndex(
+      (option) => option.value === options.default,
+    );
+    if (resolved >= 0) {
+      defaultIndex = resolved;
+    }
+  }
+
+  renderNumberedSelect(message, options.options, defaultIndex);
+  const raw = await askText({
+    message: "Select number",
+    defaultValue: String(defaultIndex + 1),
+    validate: (value) => {
+      const index = Number.parseInt(value.trim(), 10);
+      if (!Number.isInteger(index)) return "Enter a numeric index";
+      if (index < 1 || index > options.options.length) {
+        return `Enter a number between 1 and ${options.options.length}`;
+      }
+      return true;
+    },
+  });
+  const parsedIndex = Number.parseInt(raw.trim(), 10) - 1;
+  const selected = options.options[parsedIndex];
+  if (!selected) {
+    throw new Error(
+      `Invalid selection index: ${parsedIndex + 1}. Range is 1-${options.options.length}`,
+    );
+  }
+
+  return selected.value;
+}
+
+function clearRenderedOptions(optionCount: number): void {
+  for (let i = 0; i < optionCount; i += 1) {
+    process.stdout.write(`${CSI}1A${CLEAR_LINE}`);
+  }
+}
+
+function drawArrowOptions<T>(
+  options: SelectOption<T>[],
+  selectedIndex: number,
+): void {
+  clearRenderedOptions(options.length);
+  for (const [index, option] of options.entries()) {
+    process.stdout.write(CLEAR_LINE + CURSOR_START);
+    const prefix = index === selectedIndex ? "❯ " : "  ";
+    const hint = option.hint ? ` (${option.hint})` : "";
+    console.log(`${prefix}${option.label}${hint}`);
+  }
+}
+
+async function promptSelectWithArrows<T>(
+  message: string,
+  options: {
+    options: SelectOption<T>[];
+    default?: T;
+  },
+): Promise<T> {
+  if (!canUseArrowSelect()) {
+    return promptSelectByNumber(message, options);
+  }
+  if (options.options.length === 0) {
+    throw new Error("Select options cannot be empty");
+  }
+
+  let selectedIndex = 0;
+  if (options.default !== undefined) {
+    const resolved = options.options.findIndex(
+      (option) => option.value === options.default,
+    );
+    if (resolved >= 0) selectedIndex = resolved;
+  }
+
+  console.log(message);
+  process.stdout.write(CURSOR_HIDE);
+  for (const option of options.options) {
+    const hint = option.hint ? ` (${option.hint})` : "";
+    console.log(`  ${option.label}${hint}`);
+  }
+  drawArrowOptions(options.options, selectedIndex);
+
+  return new Promise<T>((resolve, reject) => {
+    const cleanup = () => {
+      process.stdin.off("data", onData);
+      try {
+        process.stdin.setRawMode(false);
+      } catch {
+        // ignore
+      }
+      process.stdin.pause();
+      process.stdout.write(CURSOR_SHOW);
+    };
+
+    const onData = (data: Buffer) => {
+      try {
+        const key = data.toString();
+        if (key === "\u001B[A") {
+          selectedIndex = Math.max(0, selectedIndex - 1);
+          drawArrowOptions(options.options, selectedIndex);
+          return;
+        }
+        if (key === "\u001B[B") {
+          selectedIndex = Math.min(
+            options.options.length - 1,
+            selectedIndex + 1,
+          );
+          drawArrowOptions(options.options, selectedIndex);
+          return;
+        }
+        if (key === "\r" || key === "\n") {
+          cleanup();
+          clearRenderedOptions(options.options.length);
+          const selected = options.options[selectedIndex];
+          if (!selected) {
+            throw new Error("Select option resolution failed");
+          }
+          console.log(`✓ ${selected.label}`);
+          resolve(selected.value);
+          return;
+        }
+        if (key === "\u0003") {
+          cleanup();
+          process.exit(0);
+        }
+      } catch (error) {
+        cleanup();
+        reject(error);
+      }
+    };
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on("data", onData);
+  });
+}
+
 function parseProviderType(
   input: string | undefined,
 ): ProviderType | undefined {
   if (typeof input !== "string") return undefined;
-  const parsed = providerTypeSchema.safeParse(input.trim());
+  const parsed = providerTypeSchema.safeParse(input.trim().toLowerCase());
   return parsed.success ? parsed.data : undefined;
 }
 
@@ -154,7 +381,6 @@ function createFullTemplateConfig(): KMsgCliConfig {
       },
     },
     defaults: {
-      from: "env:K_MSG_DEFAULT_FROM",
       sms: { autoLmsBytes: 90 },
       kakao: { channel: "main", plusId: "@your_channel" },
     },
@@ -191,14 +417,16 @@ function routeAsList(value: unknown): string[] {
   return [];
 }
 
-function getSenderKeyHintByProviderType(type: ProviderType): string {
+function getSenderKeyHintByProviderType(
+  type: ProviderType,
+): string | undefined {
   switch (type) {
     case "aligo":
       return "env:ALIGO_SENDER_KEY";
     case "solapi":
       return "env:SOLAPI_KAKAO_PF_ID";
     case "iwinv":
-      return "env:IWINV_SENDER_KEY";
+      return undefined;
     case "mock":
       return "env:MOCK_SENDER_KEY";
   }
@@ -291,10 +519,6 @@ function ensureIwinvManualCheck(config: KMsgCliConfig): void {
 function ensureRuntimeDefaults(config: KMsgCliConfig): void {
   if (!config.defaults) config.defaults = {};
 
-  if (!config.defaults.from || config.defaults.from.trim().length === 0) {
-    config.defaults.from = "env:K_MSG_DEFAULT_FROM";
-  }
-
   if (!config.defaults.sms) {
     config.defaults.sms = {};
   }
@@ -314,10 +538,13 @@ function ensureKakaoAliasDefaults(config: KMsgCliConfig): void {
   if (!config.aliases.kakaoChannels) config.aliases.kakaoChannels = {};
 
   if (!config.aliases.kakaoChannels.main) {
+    const senderKeyHint = getSenderKeyHintByProviderType(
+      primaryAlimTalkProvider.type,
+    );
     config.aliases.kakaoChannels.main = {
       providerId: primaryAlimTalkProvider.id,
       plusId: "@your_channel",
-      senderKey: getSenderKeyHintByProviderType(primaryAlimTalkProvider.type),
+      ...(senderKeyHint ? { senderKey: senderKeyHint } : {}),
       name: "Main Channel",
     };
   }
@@ -350,6 +577,58 @@ function applySharedConfigDefaults(config: KMsgCliConfig): void {
   }
 }
 
+function collectPlaintextCredentialLocations(
+  config: KMsgCliConfig,
+): PlaintextCredentialLocation[] {
+  const sensitiveKeyPattern =
+    /(api[-_]?key|secret|token|auth|password|passphrase)/i;
+  const warnings: PlaintextCredentialLocation[] = [];
+
+  for (const provider of config.providers) {
+    const providerConfig = provider.config as Record<string, unknown>;
+    for (const [key, value] of Object.entries(providerConfig)) {
+      if (!sensitiveKeyPattern.test(key)) continue;
+      if (typeof value !== "string") continue;
+
+      const trimmed = value.trim();
+      if (trimmed.length === 0) continue;
+      if (trimmed.startsWith("env:")) continue;
+
+      warnings.push({
+        providerId: provider.id,
+        keyPath: `config.${key}`,
+      });
+    }
+  }
+
+  return warnings;
+}
+
+function printConfigSavedSummary(input: {
+  targetPath: string;
+  providerCount: number;
+  plaintextCredentials: PlaintextCredentialLocation[];
+}): void {
+  console.log(`Config saved: ${input.targetPath}`);
+  console.log(`Providers configured: ${input.providerCount}`);
+  console.log(
+    "Next: run `k-msg providers doctor` to verify provider readiness.",
+  );
+
+  if (input.plaintextCredentials.length > 0) {
+    console.log("");
+    console.log(
+      "Warning: plain-text credential values were detected in the config file.",
+    );
+    for (const warning of input.plaintextCredentials) {
+      console.log(`  - ${warning.providerId}.${warning.keyPath}`);
+    }
+    console.log(
+      "Recommendation: use `env:VAR_NAME` references (example: `env:ALIGO_API_KEY`).",
+    );
+  }
+}
+
 function upsertProvider(
   config: KMsgCliConfig,
   provider: ProviderEntry,
@@ -373,53 +652,37 @@ function nextProviderId(type: ProviderType, existingIds: Set<string>): string {
 }
 
 async function promptProviderId(input: {
-  prompt: PromptApi;
   type: ProviderType;
   existingIds: Set<string>;
   allowReplace: boolean;
 }): Promise<string> {
-  const { prompt, type, existingIds, allowReplace } = input;
-  let defaultValue = nextProviderId(type, existingIds);
-
-  while (true) {
-    const raw = await prompt<string>("Provider id", {
-      default: defaultValue,
-      validate: (value) =>
-        value.trim().length > 0 ? true : "Provider id is required",
-    });
-    const candidate = raw.trim();
-
-    if (!existingIds.has(candidate)) {
-      return candidate;
-    }
-
-    if (!allowReplace) {
-      defaultValue = nextProviderId(type, existingIds);
-      continue;
-    }
-
-    const shouldReplace = await prompt.confirm(
-      `Provider '${candidate}' already exists. Replace it?`,
-      { default: false },
-    );
-
-    if (shouldReplace) {
-      return candidate;
-    }
-
-    defaultValue = nextProviderId(type, existingIds);
+  const { type, existingIds, allowReplace } = input;
+  const primaryId = type;
+  if (!existingIds.has(primaryId)) {
+    return primaryId;
   }
+  if (!allowReplace) {
+    return nextProviderId(type, existingIds);
+  }
+  const nextId = nextProviderId(type, existingIds);
+  const shouldReplace = await askConfirm({
+    message: `Provider '${primaryId}' already exists. Replace it? (No = create ${nextId})`,
+    defaultValue: false,
+  });
+  if (shouldReplace) {
+    return primaryId;
+  }
+  return nextId;
 }
 
 async function promptProviderType(input: {
-  prompt: PromptApi;
   preselected?: ProviderType;
 }): Promise<ProviderType> {
   if (input.preselected) {
     return input.preselected;
   }
 
-  return input.prompt.select<ProviderType>("Select provider type", {
+  return promptSelectWithArrows<ProviderType>("Select provider type", {
     options: providerTypeSchema.options.map((type) => ({
       label: providerTypeLabels[type],
       value: type,
@@ -429,18 +692,15 @@ async function promptProviderType(input: {
 }
 
 async function promptProviderEntry(input: {
-  prompt: PromptApi;
   preselectedType?: ProviderType;
   existingIds: Set<string>;
   allowReplace: boolean;
 }): Promise<ProviderEntry> {
   const type = await promptProviderType({
-    prompt: input.prompt,
     preselected: input.preselectedType,
   });
 
   const id = await promptProviderId({
-    prompt: input.prompt,
     type,
     existingIds: input.existingIds,
     allowReplace: input.allowReplace,
@@ -450,8 +710,9 @@ async function promptProviderEntry(input: {
   const config: Record<string, unknown> = {};
 
   for (const field of fieldSpecs) {
-    const raw = await input.prompt<string>(`${type}.config.${field.key}`, {
-      default: field.defaultValue,
+    const raw = await askText({
+      message: `${type}.config.${field.key}`,
+      defaultValue: field.defaultValue,
       validate: field.required
         ? (value) =>
             value.trim().length > 0
@@ -473,22 +734,20 @@ async function promptProviderEntry(input: {
   };
 }
 
-async function buildInteractiveTemplateConfig(
-  prompt: PromptApi,
-): Promise<KMsgCliConfig> {
+async function buildInteractiveTemplateConfig(): Promise<KMsgCliConfig> {
   const config = createConfigSkeleton();
 
   let addAnother = false;
   do {
     const entry = await promptProviderEntry({
-      prompt,
       existingIds: new Set(config.providers.map((provider) => provider.id)),
       allowReplace: true,
     });
     upsertProvider(config, entry);
 
-    addAnother = await prompt.confirm("Add another provider?", {
-      default: false,
+    addAnother = await askConfirm({
+      message: "Add another provider?",
+      defaultValue: false,
     });
   } while (addAnother || config.providers.length === 0);
 
@@ -523,7 +782,7 @@ const initCmd = defineCommand({
       description: "Template mode (interactive|full)",
     }),
   },
-  handler: async ({ flags, prompt, terminal }) => {
+  handler: async ({ flags, terminal }) => {
     const targetPath = await resolveConfigPathForWrite(flags.config);
 
     let templateMode: "interactive" | "full" = flags.template;
@@ -534,10 +793,10 @@ const initCmd = defineCommand({
 
     if (!flags.force && (await Bun.file(targetPath).exists())) {
       if (canPromptInTerminal(terminal)) {
-        const ok = await prompt.confirm(
-          `Config already exists: ${targetPath}\nOverwrite?`,
-          { default: false },
-        );
+        const ok = await askConfirm({
+          message: `Config already exists: ${targetPath}. Overwrite?`,
+          defaultValue: false,
+        });
         if (!ok) return;
       } else {
         console.error(`Config already exists: ${targetPath}`);
@@ -548,12 +807,17 @@ const initCmd = defineCommand({
 
     const config =
       templateMode === "interactive"
-        ? await buildInteractiveTemplateConfig(prompt)
+        ? await buildInteractiveTemplateConfig()
         : createFullTemplateConfig();
 
     applySharedConfigDefaults(config);
+    const plaintextCredentials = collectPlaintextCredentialLocations(config);
     await saveKMsgConfig(targetPath, config);
-    console.log(targetPath);
+    printConfigSavedSummary({
+      targetPath,
+      providerCount: config.providers.length,
+      plaintextCredentials,
+    });
   },
 });
 
@@ -563,7 +827,7 @@ const providerAddCmd = defineCommand({
   options: {
     config: optConfig,
   },
-  handler: async ({ flags, positional, prompt, terminal }) => {
+  handler: async ({ flags, positional, terminal }) => {
     if (!canPromptInTerminal(terminal)) {
       console.error("config provider add requires an interactive terminal");
       process.exitCode = 2;
@@ -584,7 +848,6 @@ const providerAddCmd = defineCommand({
     }
 
     const provider = await promptProviderEntry({
-      prompt,
       preselectedType: requestedType,
       existingIds: new Set(config.providers.map((entry) => entry.id)),
       allowReplace: true,
@@ -592,16 +855,17 @@ const providerAddCmd = defineCommand({
 
     const result = upsertProvider(config, provider);
 
-    const includeRouting = await prompt.confirm(
-      "Add provider to routing.byType for matching message types?",
-      { default: true },
-    );
+    const includeRouting = await askConfirm({
+      message: "Add provider to routing.byType for matching message types?",
+      defaultValue: true,
+    });
     if (includeRouting) {
       addProviderToRouting(config, provider);
     }
 
-    const shouldSetDefault = await prompt.confirm("Set as default provider?", {
-      default: config.providers.length === 1,
+    const shouldSetDefault = await askConfirm({
+      message: "Set as default provider?",
+      defaultValue: config.providers.length === 1,
     });
     if (shouldSetDefault && config.providers.length > 0) {
       ensureRoutingExists(config);
@@ -611,9 +875,14 @@ const providerAddCmd = defineCommand({
     }
 
     applySharedConfigDefaults(config);
+    const plaintextCredentials = collectPlaintextCredentialLocations(config);
 
     await saveKMsgConfig(targetPath, config);
-    console.log(targetPath);
+    printConfigSavedSummary({
+      targetPath,
+      providerCount: config.providers.length,
+      plaintextCredentials,
+    });
     console.log(`Provider ${provider.id} ${result}`);
   },
 });
