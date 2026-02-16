@@ -4,6 +4,7 @@ set -euo pipefail
 CLI_NAME="k-msg"
 CLI_ALIAS="kmsg"
 DEFAULT_VERSION="__CLI_VERSION__"
+TMP_DIR=""
 
 fail() {
   echo "Error: $*" >&2
@@ -40,12 +41,18 @@ detect_target() {
   echo "${os}-${arch}"
 }
 
+cleanup() {
+  if [[ -n "${TMP_DIR}" ]]; then
+    rm -rf "$TMP_DIR"
+  fi
+}
+
 main() {
   require_cmd curl
   require_cmd tar
 
   local version target base_url asset checksums_url archive_path checksums_path
-  local install_dir tmp_dir bin_path
+  local install_dir bin_path
 
   version="${K_MSG_CLI_VERSION:-$DEFAULT_VERSION}"
   target="$(detect_target)"
@@ -55,20 +62,20 @@ main() {
   asset="k-msg-cli-${version}-${target}.tar.gz"
   checksums_url="${base_url}/checksums.txt"
 
-  tmp_dir="$(mktemp -d)"
-  trap 'rm -rf "$tmp_dir"' EXIT
+  TMP_DIR="$(mktemp -d)"
+  trap cleanup EXIT
 
-  archive_path="${tmp_dir}/${asset}"
-  checksums_path="${tmp_dir}/checksums.txt"
+  archive_path="${TMP_DIR}/${asset}"
+  checksums_path="${TMP_DIR}/checksums.txt"
 
   echo "Downloading ${asset}..."
   curl -fsSL "${base_url}/${asset}" -o "$archive_path"
 
   if curl -fsSL "$checksums_url" -o "$checksums_path"; then
     if command -v shasum >/dev/null 2>&1; then
-      (cd "$tmp_dir" && shasum -a 256 -c --ignore-missing checksums.txt)
+      (cd "$TMP_DIR" && shasum -a 256 -c --ignore-missing checksums.txt)
     elif command -v sha256sum >/dev/null 2>&1; then
-      (cd "$tmp_dir" && sha256sum -c --ignore-missing checksums.txt)
+      (cd "$TMP_DIR" && sha256sum -c --ignore-missing checksums.txt)
     else
       echo "No checksum tool found (shasum/sha256sum); skipping verification."
     fi
@@ -76,9 +83,9 @@ main() {
     echo "Could not fetch checksums.txt; continuing without checksum verification."
   fi
 
-  tar -xzf "$archive_path" -C "$tmp_dir"
+  tar -xzf "$archive_path" -C "$TMP_DIR"
 
-  bin_path="${tmp_dir}/${target}/${CLI_NAME}"
+  bin_path="${TMP_DIR}/${target}/${CLI_NAME}"
   if [[ ! -f "$bin_path" ]]; then
     fail "extracted binary not found: ${target}/${CLI_NAME}"
   fi
