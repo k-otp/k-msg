@@ -1,5 +1,14 @@
 # @k-msg/cli
 
+## 0.3.2 — 2026-02-16
+
+### Patch changes
+
+- [4faaeec](https://github.com/k-otp/k-msg/commit/4faaeec2b7e81c20a7695e9d84214cdaf92afa6b) Align the CLI bootstrap with Bunli type-generation by registering commands from
+  `apps/cli/.bunli/commands.gen.ts`, and run `bunli generate` before local `test`,
+  `dev`, and `build:js` scripts so command registration works reliably in fresh
+  environments and CI. — Thanks @imjlk!
+
 ## 0.3.1 — 2026-02-16
 
 ### Patch changes
