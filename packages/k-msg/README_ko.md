@@ -3,8 +3,13 @@
 주요 공개 API를 재수출(re-export)하는 통합 패키지입니다:
 
 - `@k-msg/messaging`의 `KMsg`
-- `@k-msg/provider`의 기본 provider
-- `@k-msg/core`의 핵심 타입/유틸리티
+
+프로바이더 및 고급/런타임 전용 API는 각 패키지에서 직접 import 합니다.
+
+- `@k-msg/provider`
+- `@k-msg/messaging/tracking`
+- `@k-msg/messaging/{sender,queue}`
+- `@k-msg/messaging/adapters/*`
 
 ## 설치
 
@@ -17,7 +22,8 @@ bun add k-msg
 ## 빠른 시작
 
 ```ts
-import { IWINVProvider, KMsg, SolapiProvider } from "k-msg";
+import { KMsg } from "k-msg";
+import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
 
 const kmsg = new KMsg({
   providers: [

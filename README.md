@@ -18,7 +18,8 @@ bun add k-msg
 ## Quick Start
 
 ```ts
-import { IWINVProvider, KMsg, SolapiProvider } from "k-msg";
+import { KMsg } from "k-msg";
+import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
 
 const kmsg = new KMsg({
   providers: [
