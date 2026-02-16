@@ -1,5 +1,15 @@
 # @k-msg/cli
 
+## 0.3.4 — 2026-02-16
+
+### Patch changes
+
+- [8b5de1c](https://github.com/k-otp/k-msg/commit/8b5de1ca4e015f2cf1944ea4d067d4c880a53591) Fix global `@k-msg/cli` startup failure when running outside a project that has `bunli.config.*`.
+  
+  - `createKMsgCli()` now passes explicit CLI metadata (`name`, `version`, `description`) to Bunli.
+  - This allows `k-msg` to start correctly even when the current working directory does not contain a Bunli config file.
+  - Added an E2E test that runs CLI from a temporary directory without `bunli.config.*`. — Thanks @imjlk!
+
 ## 0.3.3 — 2026-02-16
 
 ### Patch changes
