@@ -1,5 +1,14 @@
 # @k-msg/provider
 
+## 0.10.1 — 2026-02-16
+
+### Patch changes
+
+- [f4c6f63](https://github.com/k-otp/k-msg/commit/f4c6f63786ea16381a6cd3e00e2f47d3a9291340) Follow-up patch release to keep CI green after onboarding-spec updates.
+  
+  This changeset captures the post-merge Biome formatting fix that unblocked CI for the onboarding provider specs tests. — Thanks @imjlk!
+- Updated dependencies: core@0.10.1
+
 ## 0.10.0 — 2026-02-16
 
 ### Minor changes
