@@ -1,4 +1,4 @@
-import { KMsgError, KMsgErrorCode } from "k-msg";
+import { KMsgError, KMsgErrorCode, type SendWarning } from "k-msg";
 
 export class CapabilityNotSupportedError extends Error {
   constructor(message: string) {
@@ -79,4 +79,20 @@ export function printError(error: unknown, asJson: boolean): void {
     return;
   }
   console.error(error instanceof Error ? error.message : String(error));
+}
+
+export function printWarnings(warnings: SendWarning[] | undefined): void {
+  if (!Array.isArray(warnings) || warnings.length === 0) return;
+
+  for (const warning of warnings) {
+    const code =
+      typeof warning.code === "string" && warning.code.length > 0
+        ? warning.code
+        : "UNKNOWN_WARNING";
+    const message =
+      typeof warning.message === "string" && warning.message.length > 0
+        ? warning.message
+        : code;
+    console.log(`WARNING ${code}: ${message}`);
+  }
 }

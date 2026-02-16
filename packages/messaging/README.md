@@ -127,3 +127,55 @@ tracking.start();
 // or single pass (manual/cron)
 await tracking.runOnce();
 ```
+
+## Tracking-based API failover
+
+When provider-native ALIMTALK failover is unsupported or partial, you can enable tracking-based API failover.
+
+- Triggers only for `ALIMTALK` with `failover.enabled === true`
+- Triggers only when tracking status is `FAILED` and classified as non-Kakao-user failure
+- Attempts fallback exactly once per original message
+- Requires providers with `getDeliveryStatus()` support
+
+```ts
+import {
+  createDeliveryTrackingHooks,
+  DeliveryTrackingService,
+  KMsg,
+} from "@k-msg/messaging";
+import { SolapiProvider } from "@k-msg/provider";
+
+const providers = [
+  new SolapiProvider({
+    apiKey: process.env.SOLAPI_API_KEY!,
+    apiSecret: process.env.SOLAPI_API_SECRET!,
+    defaultFrom: "01000000000",
+  }),
+];
+
+let kmsg!: KMsg;
+const tracking = new DeliveryTrackingService({
+  providers,
+  apiFailover: {
+    // Re-send fallback SMS/LMS through the same KMsg pipeline
+    sender: (input) => kmsg.send(input),
+  },
+});
+
+kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking),
+});
+
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateCode: "AUTH_OTP",
+  variables: { code: "123456" },
+  failover: {
+    enabled: true,
+    fallbackChannel: "sms",
+    fallbackContent: "[안내] 카카오톡 미사용자로 SMS 대체 발송",
+  },
+});
+```

@@ -188,6 +188,9 @@ export class BulkMessageSender {
         ...(from ? { from } : {}),
         templateCode: request.templateCode,
         variables,
+        ...(request.options?.failover
+          ? { failover: request.options.failover }
+          : {}),
       };
     });
 

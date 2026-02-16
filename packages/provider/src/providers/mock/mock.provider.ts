@@ -105,6 +105,18 @@ export class MockProvider
       providerMessageId: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       type: params.type,
       to: params.to,
+      ...(params.type === "ALIMTALK" && params.failover?.enabled === true
+        ? {
+            warnings: [
+              {
+                code: "FAILOVER_UNSUPPORTED_PROVIDER",
+                message:
+                  "Mock provider does not support native ALIMTALK failover.",
+                details: { providerId: this.id },
+              },
+            ],
+          }
+        : {}),
     };
 
     return ok(result);

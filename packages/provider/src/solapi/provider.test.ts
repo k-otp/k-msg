@@ -126,6 +126,44 @@ describe("SolapiProvider (SendOptions-based)", () => {
     );
   });
 
+  test("maps ALIMTALK failover options and returns partial warning", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        kakaoPfId: "pf_default",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateCode: "TPL_1",
+      variables: { code: 1234 },
+      failover: {
+        enabled: true,
+        fallbackChannel: "lms",
+        fallbackContent: "fallback text",
+        fallbackTitle: "fallback title",
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.sendOne[0]?.message?.type).toBe("ATA");
+    expect(calls.sendOne[0]?.message?.kakaoOptions?.disableSms).toBe(false);
+    expect(calls.sendOne[0]?.message?.text).toBe("fallback text");
+    expect(calls.sendOne[0]?.message?.subject).toBe("fallback title");
+    if (result.isSuccess) {
+      expect(result.value.warnings?.[0]?.code).toBe(
+        "FAILOVER_PARTIAL_PROVIDER",
+      );
+    }
+  });
+
   test("sends FRIENDTALK image as CTI and uploads KAKAO file with link", async () => {
     const { client, calls } = createStubClient();
     const provider = new SolapiProvider(
