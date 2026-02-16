@@ -1,6 +1,5 @@
 import { createCLI } from "@bunli/core";
 import { aiAgentPlugin } from "@bunli/plugin-ai-detect";
-import pkg from "../../package.json";
 import alimtalk from "../commands/alimtalk";
 import config from "../commands/config";
 import kakao from "../commands/kakao";
@@ -8,25 +7,15 @@ import providers from "../commands/providers";
 import send from "../commands/send";
 import sms from "../commands/sms";
 
-function hasAnyNonEmptyEnv(
-  env: NodeJS.ProcessEnv,
-  keys: readonly string[],
-): boolean {
+function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   return keys.some((key) => {
     const value = env[key];
     return typeof value === "string" && value.trim().length > 0;
   });
 }
 
-function readCliVersion(): string {
-  return typeof pkg.version === "string" ? pkg.version : "0.0.0";
-}
-
 export async function createKMsgCli() {
   const cli = await createCLI({
-    name: "k-msg",
-    version: readCliVersion(),
-    description: "k-msg CLI",
     plugins: [
       aiAgentPlugin({
         customAgents: [
@@ -55,6 +44,7 @@ export async function createKMsgCli() {
     ],
   });
 
+  // Keep explicit registration so CLI tests do not depend on generated `.bunli/*` artifacts.
   cli.command(config);
   cli.command(providers);
   cli.command(sms);
