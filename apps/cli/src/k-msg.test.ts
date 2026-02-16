@@ -42,6 +42,13 @@ async function createTempConfig(): Promise<string> {
   return target;
 }
 
+async function createTempConfigFromObject(value: unknown): Promise<string> {
+  const dir = path.join(tmpRootDir(), `k-msg-cli-${crypto.randomUUID()}`);
+  const target = path.join(dir, "k-msg.config.json");
+  await Bun.write(target, JSON.stringify(value, null, 2));
+  return target;
+}
+
 async function createTempCwd(): Promise<string> {
   const dir = path.join(tmpRootDir(), `k-msg-cli-cwd-${crypto.randomUUID()}`);
   await mkdir(dir, { recursive: true });
@@ -214,6 +221,105 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       health.toHaveSucceeded();
       expect(health.stdout).toContain("mock");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "providers doctor / alimtalk preflight",
+    async () => {
+      const configPath = await createTempConfig();
+
+      const doctor = expectCommand(
+        await runCli(["providers", "doctor", "--config", configPath]),
+      );
+      doctor.toHaveSucceeded();
+      expect(doctor.stdout).toContain("mock");
+
+      const preflight = expectCommand(
+        await runCli([
+          "alimtalk",
+          "preflight",
+          "--config",
+          configPath,
+          "--template-code",
+          "MOCK_TPL_SEED",
+          "--channel",
+          "seed",
+        ]),
+      );
+      preflight.toHaveSucceeded();
+      expect(preflight.stdout).toContain("preflight");
+      expect(preflight.stdout).toContain("template_exists_probe");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "alimtalk preflight fails when manual prerequisite is not acknowledged",
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        new Response(
+          JSON.stringify({
+            code: 200,
+            message: "ok",
+            totalCount: 1,
+            list: [
+              {
+                templateCode: "TPL_1",
+                templateName: "name",
+                templateContent: "content",
+                status: "Y",
+                createDate: "2026-02-16 10:00:00",
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+
+      try {
+        const configPath = await createTempConfigFromObject({
+          version: 1,
+          providers: [
+            {
+              type: "iwinv",
+              id: "iwinv",
+              config: {
+                apiKey: "api-key",
+                baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+              },
+            },
+          ],
+          routing: { defaultProviderId: "iwinv", strategy: "first" },
+          onboarding: {
+            manualChecks: {
+              iwinv: {
+                channel_registered_in_console: {
+                  done: false,
+                },
+              },
+            },
+          },
+        });
+
+        const preflight = expectCommand(
+          await runCli([
+            "alimtalk",
+            "preflight",
+            "--config",
+            configPath,
+            "--provider",
+            "iwinv",
+            "--template-code",
+            "TPL_1",
+          ]),
+        );
+        preflight.toHaveExitCode(2);
+        expect(preflight.stdout).toContain("channel_registered_in_console");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
     },
     TEST_TIMEOUT,
   );

@@ -93,6 +93,7 @@ export interface CommonSendOptions {
 
 export interface KakaoSendOptions {
   profileId?: string;
+  plusId?: string;
   disableSms?: boolean;
   adFlag?: boolean;
   buttons?: unknown[];

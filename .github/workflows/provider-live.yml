@@ -1,0 +1,80 @@
+name: Provider Live Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Provider target (all|iwinv|aligo|solapi)"
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - iwinv
+          - aligo
+          - solapi
+
+env:
+  BUN_VERSION: "1.3.8"
+
+jobs:
+  provider-live:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run provider live integration tests
+        env:
+          TARGET_PROVIDER: ${{ github.event.inputs.provider }}
+          IWINV_API_KEY: ${{ secrets.IWINV_API_KEY }}
+          IWINV_SMS_API_KEY: ${{ secrets.IWINV_SMS_API_KEY }}
+          IWINV_SMS_AUTH_KEY: ${{ secrets.IWINV_SMS_AUTH_KEY }}
+          IWINV_SMS_COMPANY_ID: ${{ secrets.IWINV_SMS_COMPANY_ID }}
+          IWINV_SENDER_NUMBER: ${{ secrets.IWINV_SENDER_NUMBER }}
+          ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY }}
+          ALIGO_USER_ID: ${{ secrets.ALIGO_USER_ID }}
+          ALIGO_SENDER_KEY: ${{ secrets.ALIGO_SENDER_KEY }}
+          ALIGO_SENDER: ${{ secrets.ALIGO_SENDER }}
+          ALIGO_SMS_BASE_URL: ${{ secrets.ALIGO_SMS_BASE_URL }}
+          ALIGO_ALIMTALK_BASE_URL: ${{ secrets.ALIGO_ALIMTALK_BASE_URL }}
+          SOLAPI_API_KEY: ${{ secrets.SOLAPI_API_KEY }}
+          SOLAPI_API_SECRET: ${{ secrets.SOLAPI_API_SECRET }}
+          SOLAPI_KAKAO_PF_ID: ${{ secrets.SOLAPI_KAKAO_PF_ID }}
+          SOLAPI_DEFAULT_FROM: ${{ secrets.SOLAPI_DEFAULT_FROM }}
+          SOLAPI_BASE_URL: ${{ secrets.SOLAPI_BASE_URL }}
+          SOLAPI_PROBE_MESSAGE_ID: ${{ secrets.SOLAPI_PROBE_MESSAGE_ID }}
+          SOLAPI_PROBE_TO: ${{ secrets.SOLAPI_PROBE_TO }}
+        run: |
+          set -euo pipefail
+
+          case "${TARGET_PROVIDER}" in
+            all)
+              export KMSG_LIVE_IWINV_ENABLED=true
+              export KMSG_LIVE_ALIGO_ENABLED=true
+              export KMSG_LIVE_SOLAPI_ENABLED=true
+              ;;
+            iwinv)
+              export KMSG_LIVE_IWINV_ENABLED=true
+              ;;
+            aligo)
+              export KMSG_LIVE_ALIGO_ENABLED=true
+              ;;
+            solapi)
+              export KMSG_LIVE_SOLAPI_ENABLED=true
+              ;;
+            *)
+              echo "Unsupported provider target: ${TARGET_PROVIDER}"
+              exit 1
+              ;;
+          esac
+
+          bun run --cwd packages/provider test:integration
