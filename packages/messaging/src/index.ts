@@ -1,6 +1,7 @@
 // Delivery tracking
 export { DeliveryTracker } from "./delivery/tracker";
 export { createDeliveryTrackingHooks } from "./delivery-tracking/hooks";
+export type { DeliveryTrackingServiceConfig } from "./delivery-tracking/service";
 // Delivery tracking (PULL + persistence)
 export { DeliveryTrackingService } from "./delivery-tracking/service";
 export type {

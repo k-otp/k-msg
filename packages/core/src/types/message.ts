@@ -105,6 +105,25 @@ export interface KakaoSendOptions {
   [key: string]: any;
 }
 
+export interface AlimTalkFailoverOptions {
+  enabled?: boolean;
+  fallbackChannel?: "sms" | "lms";
+  fallbackContent?: string;
+  fallbackTitle?: string;
+}
+
+export type SendWarningCode =
+  | "FAILOVER_UNSUPPORTED_PROVIDER"
+  | "FAILOVER_PARTIAL_PROVIDER"
+  | "FALLBACK_CONTENT_MISSING"
+  | (string & {});
+
+export interface SendWarning {
+  code: SendWarningCode;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
 export interface NaverSendOptions {
   talkId?: string;
   /**
@@ -183,6 +202,7 @@ export interface AlimTalkSendOptions extends CommonSendOptions {
   templateCode: string;
   variables: MessageVariables;
   kakao?: KakaoSendOptions;
+  failover?: AlimTalkFailoverOptions;
 }
 
 export interface FriendTalkSendOptions extends CommonSendOptions {
@@ -270,5 +290,6 @@ export interface SendResult {
   status: MessageStatus;
   type: MessageType;
   to: string;
+  warnings?: SendWarning[];
   raw?: unknown;
 }

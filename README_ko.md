@@ -59,6 +59,37 @@ await kmsg.send({
 });
 ```
 
+## ALIMTALK failover
+
+알림톡은 표준 failover 옵션을 사용할 수 있습니다:
+
+```ts
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateCode: "AUTH_OTP",
+  variables: { code: "123456" },
+  failover: {
+    enabled: true,
+    fallbackChannel: "sms",
+    fallbackContent: "대체 SMS 본문",
+    fallbackTitle: "대체 제목(LMS)",
+  },
+});
+```
+
+프로바이더 native 매핑이 미지원/부분지원이면 아래 warning 코드가 반환됩니다:
+
+- `FAILOVER_UNSUPPORTED_PROVIDER`
+- `FAILOVER_PARTIAL_PROVIDER`
+
+Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1회 재시도합니다:
+
+- 메시지 타입이 `ALIMTALK`
+- failover가 활성화됨
+- 딜리버리 상태가 `FAILED`
+- 실패 원인이 카카오 미사용자로 판별됨
+
 ## 패키지 구성
 
 - `@k-msg/core`: 표준 타입/에러/Result/복원력 유틸(`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
@@ -72,4 +103,3 @@ await kmsg.send({
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` 공개 API 제거
 - 메시지 구분 필드는 `type`로 통일(기존 `channel` 제거)
 - `templateId` → `templateCode`로 통일
-
