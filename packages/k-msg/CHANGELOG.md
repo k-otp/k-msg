@@ -1,5 +1,20 @@
 # k-msg
 
+## 0.12.0 — 2026-02-16
+
+### Minor changes
+
+- [191c4ea](https://github.com/k-otp/k-msg/commit/191c4ea6e037baa7469e0ef7ffe1af8040e2a047) Split runtime-specific messaging implementations into adapter subpaths and keep root APIs runtime-neutral.
+  
+  - Remove `test-utils` from `@k-msg/core` public exports.
+  - Enforce `IWINVProvider` MMS image input as `blob/bytes` only and drop Node-only file/path/buffer dependencies.
+  - Add `@k-msg/messaging/adapters/{bun,node,cloudflare}` with Cloudflare support for Hyperdrive/Postgres/MySQL/D1 and KV/R2/DO-backed object adapters.
+  - Sync `k-msg/adapters/{bun,node,cloudflare}` re-exports and package export maps. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: analytics@0.12.0, channel@0.12.0, core@0.12.0, messaging@0.12.0, provider@0.12.0, template@0.12.0, webhook@0.12.0
+
 ## 0.11.0 — 2026-02-16
 
 ### Breaking changes
