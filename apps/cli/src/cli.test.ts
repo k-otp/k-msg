@@ -216,6 +216,21 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
+    "non-agent CODEX env does not force JSON output",
+    async () => {
+      const configPath = await createTempConfig();
+      const listed = expectCommand(
+        await runCli(["providers", "list", "--config", configPath], {
+          env: { CODEX_HOME: "/tmp/codex-home" },
+        }),
+      );
+      listed.toHaveSucceeded();
+      expect(listed.stdout).toContain("mock:");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "sms/alimtalk/advanced send",
     async () => {
       const configPath = await createTempConfig();
