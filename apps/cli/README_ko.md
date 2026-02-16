@@ -85,7 +85,11 @@ bun --cwd apps/cli src/k-msg.ts --help
 
 ## 설정 (`k-msg.config.json`)
 
-기본 설정 경로: `./k-msg.config.json`
+기본 설정 경로:
+
+- macOS/Linux: `${XDG_CONFIG_HOME:-~/.config}/k-msg/k-msg.config.json`
+- Windows: `%APPDATA%\\k-msg\\k-msg.config.json`
+- fallback: `./k-msg.config.json` (홈 경로 파일이 없을 때 사용)
 
 덮어쓰기:
 
@@ -95,6 +99,25 @@ k-msg --config /path/to/k-msg.config.json providers list
 
 예시 파일: `apps/cli/k-msg.config.example.json`
 
+스키마 URL:
+
+- latest: `https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json`
+- 버전 고정(`v1`): `https://k-otp.github.io/k-msg/schemas/k-msg.config.v1.schema.json`
+
+설정 초기화:
+
+```bash
+# 기본: interactive wizard (TTY)
+k-msg config init
+
+# full 템플릿 강제 (non-interactive 환경에서는 자동 적용)
+k-msg config init --template full
+
+# provider를 단계적으로 추가
+k-msg config provider add
+k-msg config provider add iwinv
+```
+
 ### `env:` 치환
 
 `"env:NAME"` 형태 문자열은 런타임에 `NAME` 환경 변수 값으로 치환됩니다.
@@ -103,6 +126,7 @@ k-msg --config /path/to/k-msg.config.json providers list
 ## 명령어
 
 - `k-msg config init|show|validate`
+- `k-msg config provider add [type]`
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`

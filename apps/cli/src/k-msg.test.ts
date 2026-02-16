@@ -55,6 +55,15 @@ async function createTempCwd(): Promise<string> {
   return dir;
 }
 
+async function createTempConfigPath(): Promise<string> {
+  const dir = path.join(
+    tmpRootDir(),
+    `k-msg-cli-config-${crypto.randomUUID()}`,
+  );
+  await mkdir(dir, { recursive: true });
+  return path.join(dir, "k-msg.config.json");
+}
+
 async function runCli(
   argv: string[],
   options?: {
@@ -201,6 +210,42 @@ describe("k-msg CLI (bunli) E2E", () => {
       shown.toHaveSucceeded();
       expect(shown.stdout).toContain("Config:");
       expect(shown.stdout).toContain("Providers:");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "config init uses full template in non-interactive mode",
+    async () => {
+      const targetPath = await createTempConfigPath();
+      const initialized = expectCommand(
+        await runCli(["config", "init", "--config", targetPath]),
+      );
+      initialized.toHaveSucceeded();
+      expect(initialized.stdout).toContain(targetPath);
+
+      const parsed = JSON.parse(await Bun.file(targetPath).text()) as Record<
+        string,
+        unknown
+      >;
+      expect(parsed.$schema).toBe(
+        "https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json",
+      );
+      expect(Array.isArray(parsed.providers)).toBe(true);
+      expect((parsed.providers as unknown[]).length).toBeGreaterThan(0);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "config provider add requires interactive terminal",
+    async () => {
+      const targetPath = await createTempConfigPath();
+      const added = expectCommand(
+        await runCli(["config", "provider", "add", "--config", targetPath]),
+      );
+      added.toHaveExitCode(2);
+      expect(added.stderr).toContain("requires an interactive terminal");
     },
     TEST_TIMEOUT,
   );
