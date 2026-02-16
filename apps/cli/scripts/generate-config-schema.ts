@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import * as z from "zod";
 import {
@@ -44,11 +45,51 @@ function formatSchema(schema: Record<string, unknown>): string {
   return `${JSON.stringify(schema, null, 2)}\n`;
 }
 
+async function formatWithBiome(
+  source: string,
+  filePath: string,
+): Promise<string> {
+  const tmpDir = await mkdtemp(path.join(os.tmpdir(), "k-msg-schema-"));
+  const tmpFilePath = path.join(tmpDir, path.basename(filePath));
+
+  try {
+    await writeFile(tmpFilePath, source, "utf8");
+
+    const process = Bun.spawn(
+      ["bun", "x", "@biomejs/biome", "format", "--write", tmpFilePath],
+      {
+        stdout: "pipe",
+        stderr: "pipe",
+      },
+    );
+
+    const [exitCode, stderr] = await Promise.all([
+      process.exited,
+      new Response(process.stderr).text(),
+    ]);
+
+    if (exitCode !== 0) {
+      throw new Error(
+        `Biome format failed for ${filePath}: ${stderr.trim() || `exit ${exitCode}`}`,
+      );
+    }
+
+    return readFile(tmpFilePath, "utf8");
+  } finally {
+    await rm(tmpDir, { recursive: true, force: true });
+  }
+}
+
+async function renderSchema(target: OutputTarget): Promise<string> {
+  const raw = formatSchema(buildSchema(target.schemaId));
+  return formatWithBiome(raw, target.filePath);
+}
+
 async function writeSchemas(): Promise<void> {
   await mkdir(outputDir, { recursive: true });
 
   for (const target of outputTargets) {
-    const rendered = formatSchema(buildSchema(target.schemaId));
+    const rendered = await renderSchema(target);
     await writeFile(target.filePath, rendered, "utf8");
     console.log(`generated: ${target.filePath}`);
   }
@@ -58,7 +99,7 @@ async function checkSchemas(): Promise<void> {
   let hasMismatch = false;
 
   for (const target of outputTargets) {
-    const expected = formatSchema(buildSchema(target.schemaId));
+    const expected = await renderSchema(target);
 
     let actual: string;
     try {

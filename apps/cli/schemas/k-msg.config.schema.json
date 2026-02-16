@@ -19,12 +19,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "solapi",
-              "iwinv",
-              "aligo",
-              "mock"
-            ]
+            "enum": ["solapi", "iwinv", "aligo", "mock"]
           },
           "id": {
             "type": "string",
@@ -39,11 +34,7 @@
             "additionalProperties": {}
           }
         },
-        "required": [
-          "type",
-          "id",
-          "config"
-        ],
+        "required": ["type", "id", "config"],
         "additionalProperties": {}
       }
     },
@@ -56,10 +47,7 @@
         },
         "strategy": {
           "type": "string",
-          "enum": [
-            "first",
-            "round_robin"
-          ]
+          "enum": ["first", "round_robin"]
         },
         "byType": {
           "type": "object",
@@ -153,10 +141,7 @@
                 "minLength": 1
               }
             },
-            "required": [
-              "providerId",
-              "senderKey"
-            ],
+            "required": ["providerId", "senderKey"],
             "additionalProperties": {}
           }
         },
@@ -181,10 +166,7 @@
                 "minLength": 1
               }
             },
-            "required": [
-              "providerId",
-              "templateCode"
-            ],
+            "required": ["providerId", "templateCode"],
             "additionalProperties": {}
           }
         }
@@ -222,9 +204,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "done"
-              ],
+              "required": ["done"],
               "additionalProperties": {}
             }
           }
@@ -233,10 +213,7 @@
       "additionalProperties": {}
     }
   },
-  "required": [
-    "version",
-    "providers"
-  ],
+  "required": ["version", "providers"],
   "additionalProperties": {},
   "$id": "https://k-otp.github.io/k-msg/schemas/k-msg.config.schema.json",
   "title": "k-msg CLI config",
