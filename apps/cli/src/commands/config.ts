@@ -20,6 +20,11 @@ interface ProviderFieldSpec {
   required?: boolean;
 }
 
+interface PlaintextCredentialLocation {
+  providerId: string;
+  keyPath: string;
+}
+
 const providerFieldSpecs: Record<ProviderType, ProviderFieldSpec[]> = {
   mock: [],
   aligo: [
@@ -572,6 +577,58 @@ function applySharedConfigDefaults(config: KMsgCliConfig): void {
   }
 }
 
+function collectPlaintextCredentialLocations(
+  config: KMsgCliConfig,
+): PlaintextCredentialLocation[] {
+  const sensitiveKeyPattern =
+    /(api[-_]?key|secret|token|auth|password|passphrase)/i;
+  const warnings: PlaintextCredentialLocation[] = [];
+
+  for (const provider of config.providers) {
+    const providerConfig = provider.config as Record<string, unknown>;
+    for (const [key, value] of Object.entries(providerConfig)) {
+      if (!sensitiveKeyPattern.test(key)) continue;
+      if (typeof value !== "string") continue;
+
+      const trimmed = value.trim();
+      if (trimmed.length === 0) continue;
+      if (trimmed.startsWith("env:")) continue;
+
+      warnings.push({
+        providerId: provider.id,
+        keyPath: `config.${key}`,
+      });
+    }
+  }
+
+  return warnings;
+}
+
+function printConfigSavedSummary(input: {
+  targetPath: string;
+  providerCount: number;
+  plaintextCredentials: PlaintextCredentialLocation[];
+}): void {
+  console.log(`Config saved: ${input.targetPath}`);
+  console.log(`Providers configured: ${input.providerCount}`);
+  console.log(
+    "Next: run `k-msg providers doctor` to verify provider readiness.",
+  );
+
+  if (input.plaintextCredentials.length > 0) {
+    console.log("");
+    console.log(
+      "Warning: plain-text credential values were detected in the config file.",
+    );
+    for (const warning of input.plaintextCredentials) {
+      console.log(`  - ${warning.providerId}.${warning.keyPath}`);
+    }
+    console.log(
+      "Recommendation: use `env:VAR_NAME` references (example: `env:ALIGO_API_KEY`).",
+    );
+  }
+}
+
 function upsertProvider(
   config: KMsgCliConfig,
   provider: ProviderEntry,
@@ -754,8 +811,13 @@ const initCmd = defineCommand({
         : createFullTemplateConfig();
 
     applySharedConfigDefaults(config);
+    const plaintextCredentials = collectPlaintextCredentialLocations(config);
     await saveKMsgConfig(targetPath, config);
-    console.log(targetPath);
+    printConfigSavedSummary({
+      targetPath,
+      providerCount: config.providers.length,
+      plaintextCredentials,
+    });
   },
 });
 
@@ -813,9 +875,14 @@ const providerAddCmd = defineCommand({
     }
 
     applySharedConfigDefaults(config);
+    const plaintextCredentials = collectPlaintextCredentialLocations(config);
 
     await saveKMsgConfig(targetPath, config);
-    console.log(targetPath);
+    printConfigSavedSummary({
+      targetPath,
+      providerCount: config.providers.length,
+      plaintextCredentials,
+    });
     console.log(`Provider ${provider.id} ${result}`);
   },
 });
