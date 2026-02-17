@@ -1,0 +1,14 @@
+{
+  "name": "express-node-send-only-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.mjs",
+    "start": "node src/index.mjs"
+  },
+  "dependencies": {
+    "@k-msg/provider": "^0.14.0",
+    "express": "^4.21.2",
+    "k-msg": "^0.14.0"
+  }
+}

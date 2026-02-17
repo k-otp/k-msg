@@ -43,7 +43,7 @@ bun add @k-msg/messaging @k-msg/core
 
 ```ts
 import { KMsg } from "@k-msg/messaging";
-import { SolapiProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [
@@ -74,7 +74,8 @@ await kmsg.send({
 
 ```ts
 import { KMsg } from "@k-msg/messaging";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [
@@ -134,7 +135,7 @@ import {
   InMemoryDeliveryTrackingStore,
 } from "@k-msg/messaging/tracking";
 import { KMsg } from "@k-msg/messaging";
-import { SolapiProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const providers = [
   new SolapiProvider({
@@ -195,6 +196,42 @@ const tracking = new DeliveryTrackingService({
 });
 ```
 
+### SQL Schema (D1/Postgres/MySQL)
+
+`createD1DeliveryTrackingStore()` and `HyperdriveDeliveryTrackingStore` share the same logical table/index schema.
+`DeliveryTrackingService.init()` creates these automatically.
+
+Tracking table: `kmsg_delivery_tracking`
+
+- Primary key: `message_id`
+- Main columns: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
+- Time columns: `requested_at`, `status_updated_at`, `next_check_at`, `sent_at`, `delivered_at`, `failed_at`, `last_checked_at`, `scheduled_at`
+- Meta columns: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `raw`, `metadata`
+
+Indexes:
+
+- `idx_kmsg_delivery_due(status, next_check_at)`
+- `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
+- `idx_kmsg_delivery_requested_at(requested_at)`
+
+Notes by dialect:
+
+- D1 (SQLite): JSON fields are stored as `TEXT`
+- Postgres: JSON fields are stored as `JSONB`
+- MySQL: identifier type differs (`VARCHAR`), JSON fields currently stored as `TEXT`
+
+Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
+
+- Primary key: `id`
+- Main columns: `type`, `data`, `status`, `priority`, `attempts`, `max_attempts`, `delay`
+- Time columns: `created_at`, `process_at`, `completed_at`, `failed_at`
+- Meta columns: `error`, `metadata`
+
+Queue indexes:
+
+- `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
+- `idx_kmsg_jobs_id(id)`
+
 ## Tracking-based API failover
 
 When provider-native ALIMTALK failover is unsupported or partial, you can enable tracking-based API failover.
@@ -210,7 +247,7 @@ import {
   DeliveryTrackingService,
 } from "@k-msg/messaging/tracking";
 import { KMsg } from "@k-msg/messaging";
-import { SolapiProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const providers = [
   new SolapiProvider({

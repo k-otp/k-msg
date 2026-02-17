@@ -1,0 +1,5 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-hono-pages-send-only-example",
+  "compatibility_date": "2026-02-16"
+}

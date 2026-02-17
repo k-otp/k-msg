@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-hono-queue-do-example",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-16",
+  "durable_objects": {
+    "bindings": [{ "name": "KMSG_QUEUE", "class_name": "KMsgQueueDO" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KMsgQueueDO"] }]
+}

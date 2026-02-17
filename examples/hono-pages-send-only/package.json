@@ -1,0 +1,17 @@
+{
+  "name": "hono-pages-send-only-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "check": "wrangler check"
+  },
+  "dependencies": {
+    "@k-msg/provider": "^0.14.0",
+    "hono": "^4.8.10",
+    "k-msg": "^0.14.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.65.0"
+  }
+}

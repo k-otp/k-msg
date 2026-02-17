@@ -39,7 +39,7 @@
     },
     "apps/cli": {
       "name": "@k-msg/cli",
-      "version": "0.2.0",
+      "version": "0.5.4",
       "bin": {
         "k-msg": "./bin/k-msg.js",
         "kmsg": "./bin/k-msg.js",
@@ -48,10 +48,13 @@
         "@bunli/core": "^0.5.4",
         "@bunli/plugin-ai-detect": "^0.5.2",
         "@bunli/test": "^0.3.2",
+        "@k-msg/core": "workspace:*",
+        "@k-msg/provider": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "bunli": "^0.5.3",
         "k-msg": "workspace:*",
+        "solapi": "^5.5.4",
         "typescript": "catalog:",
         "zod": "catalog:",
       },
@@ -69,7 +72,7 @@
     },
     "packages/analytics": {
       "name": "@k-msg/analytics",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@k-msg/messaging": "workspace:*",
         "zod": "catalog:",
@@ -82,7 +85,7 @@
     },
     "packages/channel": {
       "name": "@k-msg/channel",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -94,7 +97,7 @@
     },
     "packages/core": {
       "name": "@k-msg/core",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -105,16 +108,9 @@
     },
     "packages/k-msg": {
       "name": "k-msg",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
-        "@k-msg/analytics": "workspace:*",
-        "@k-msg/channel": "workspace:*",
-        "@k-msg/core": "workspace:*",
         "@k-msg/messaging": "workspace:*",
-        "@k-msg/provider": "workspace:*",
-        "@k-msg/template": "workspace:*",
-        "@k-msg/webhook": "workspace:*",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -131,7 +127,7 @@
     },
     "packages/messaging": {
       "name": "@k-msg/messaging",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@k-msg/provider": "workspace:*",
@@ -146,21 +142,27 @@
     },
     "packages/provider": {
       "name": "@k-msg/provider",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
-        "solapi": "^5.5.4",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
+        "solapi": "^5.5.4",
         "typescript": "catalog:",
       },
+      "peerDependencies": {
+        "solapi": "^5.5.4",
+      },
+      "optionalPeers": [
+        "solapi",
+      ],
     },
     "packages/template": {
       "name": "@k-msg/template",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "zod": "catalog:",
@@ -173,7 +175,7 @@
     },
     "packages/webhook": {
       "name": "@k-msg/webhook",
-      "version": "0.8.0",
+      "version": "0.14.0",
       "dependencies": {
         "@k-msg/messaging": "workspace:*",
         "zod": "catalog:",

@@ -4,12 +4,8 @@ import type {
   TemplateInspectionProvider,
   TemplateProvider,
 } from "@k-msg/core";
-import {
-  AligoProvider,
-  IWINVProvider,
-  MockProvider,
-  SolapiProvider,
-} from "@k-msg/provider";
+import { AligoProvider, IWINVProvider, MockProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 import type { KMsgCliConfig } from "../config/schema";
 
 export type ProviderWithCapabilities = Provider &
