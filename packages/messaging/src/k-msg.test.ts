@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, mock, spyOn, test } from "bun:test";
 import {
   fail,
   KMsgError,
@@ -632,5 +632,110 @@ describe("KMsg", () => {
     const firstSaveCall = saveSpy.mock.calls[0]!;
     const saveOptions = firstSaveCall[1] as { strategy?: string };
     expect(saveOptions?.strategy).toBe("queue");
+  });
+
+  test("Smart Batching: respects individual provider limits in mixed batch", async () => {
+    let inFlightA = 0;
+    let maxInFlightA = 0;
+    let inFlightB = 0;
+    let maxInFlightB = 0;
+
+    const providerA: Provider & { batchLimit: number } = {
+      id: "mock-provider-a",
+      name: "Mock Provider A",
+      batchLimit: 2,
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: async (options: any) => {
+        inFlightA += 1;
+        maxInFlightA = Math.max(maxInFlightA, inFlightA);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlightA -= 1;
+
+        return ok({
+          messageId: options.messageId,
+          status: "SENT" as const,
+          providerId: "mock-provider-a",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+
+    const providerB: Provider & { batchLimit: number } = {
+      id: "mock-provider-b",
+      name: "Mock Provider B",
+      batchLimit: 10,
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: async (options: any) => {
+        inFlightB += 1;
+        maxInFlightB = Math.max(maxInFlightB, inFlightB);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlightB -= 1;
+
+        return ok({
+          messageId: options.messageId,
+          status: "SENT" as const,
+          providerId: "mock-provider-b",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+
+    const providerASendSpy = spyOn(providerA, "send");
+    const providerBSendSpy = spyOn(providerB, "send");
+
+    const kmsg = new KMsg({ providers: [providerA, providerB] });
+
+    const providerAInputs: SendInput[] = Array.from(
+      { length: 5 },
+      (_, index) => ({
+        type: "SMS",
+        providerId: "mock-provider-a",
+        to: `0104444000${index}`,
+        text: `A-${index}`,
+        messageId: `a-${index}`,
+      }),
+    );
+
+    const providerBInputs: SendInput[] = Array.from(
+      { length: 8 },
+      (_, index) => ({
+        type: "SMS",
+        providerId: "mock-provider-b",
+        to: `0105555000${index}`,
+        text: `B-${index}`,
+        messageId: `b-${index}`,
+      }),
+    );
+
+    const mixedBatchInput: SendInput[] = [];
+    for (
+      let index = 0;
+      index < Math.max(providerAInputs.length, providerBInputs.length);
+      index += 1
+    ) {
+      const currentA = providerAInputs[index];
+      const currentB = providerBInputs[index];
+      if (currentA) {
+        mixedBatchInput.push(currentA);
+      }
+      if (currentB) {
+        mixedBatchInput.push(currentB);
+      }
+    }
+
+    const result = await kmsg.send(mixedBatchInput);
+
+    expect(providerASendSpy).toHaveBeenCalledTimes(providerAInputs.length);
+    expect(providerBSendSpy).toHaveBeenCalledTimes(providerBInputs.length);
+
+    expect(maxInFlightA).toBe(2);
+    expect(maxInFlightB).toBe(8);
+
+    expect(result.total).toBe(mixedBatchInput.length);
+    expect(result.results).toHaveLength(mixedBatchInput.length);
   });
 });
