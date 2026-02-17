@@ -5,10 +5,10 @@
 이 패키지는 의도적으로 로우레벨로 유지됩니다:
 
 - 표준 메시지 모델: `MessageType`, `SendInput`, `SendOptions`, `SendResult`
-- Provider 인터페이스: `Provider`
+- Provider 인터페이스: `Provider`, 선택 capability `BalanceProvider`
 - Result 패턴: `Result`, `ok`, `fail`
 - 에러: `KMsgError`, `KMsgErrorCode`
-- 복원력 유틸: retry / circuit-breaker / rate-limit / health monitor
+- 복원력 유틸: retry / circuit-breaker / rate-limit / bulk operation
 
 최종 사용자용 "send" 경험이 필요하면 `@k-msg/messaging`(또는 `k-msg`)의 `KMsg`를 사용하세요.
 

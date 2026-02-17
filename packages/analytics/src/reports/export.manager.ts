@@ -3,6 +3,7 @@
  * 다양한 형식으로 데이터 내보내기
  */
 
+import { logger } from "@k-msg/core";
 import type {
   AggregatedMetric,
   AnalyticsReport,
@@ -314,7 +315,7 @@ export class ExportManager {
     }
 
     // 실제 구현에서는 파일 시스템에 저장
-    console.log(`Saving CSV to ${filePath}, size: ${fileSize} bytes`);
+    logger.info(`Saving CSV to ${filePath}, size: ${fileSize} bytes`);
 
     return {
       id: exportId,
@@ -348,7 +349,7 @@ export class ExportManager {
     const filePath = `/exports/${fileName}`;
     const fileSize = 10240; // 추정 크기
 
-    console.log(`Generating Excel file: ${fileName}`);
+    logger.info(`Generating Excel file: ${fileName}`);
 
     return {
       id: exportId,
@@ -371,7 +372,7 @@ export class ExportManager {
     const template = options.template || "standard";
     const orientation = options.orientation || "portrait";
 
-    console.log(
+    logger.info(
       `Generating PDF report with template: ${template}, orientation: ${orientation}`,
     );
 
@@ -638,7 +639,7 @@ export class ExportManager {
     exportId: string,
   ): Promise<ExportResult> {
     // PDF 생성 로직 (인사이트 특화)
-    console.log(`Generating insights PDF with ${insights.length} insights`);
+    logger.info(`Generating insights PDF with ${insights.length} insights`);
 
     const fileName = `insights_${Date.now()}.pdf`;
     const filePath = `/exports/${fileName}`;

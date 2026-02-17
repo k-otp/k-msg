@@ -82,8 +82,10 @@ Important:
   - Body: `{"version":"1.0"}`
 
 Note:
-- `IWINVProvider` currently focuses on unified `send()` for AlimTalk + SMS/LMS/MMS.
-- History/charge endpoints are documented here for reference, but are not wrapped as SDK methods yet.
+- `IWINVProvider` supports `getBalance(query?)`.
+  - default channel: `ALIMTALK` (uses AlimTalk charge API)
+  - `SMS/LMS/MMS`: uses SMS v2 charge API (`secret` auth)
+- History endpoint remains documented here for reference.
 
 ## Environment Variables
 

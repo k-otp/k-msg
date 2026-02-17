@@ -1,3 +1,4 @@
+import { logger } from "@k-msg/core";
 import type {
   AnalyticsConfig,
   MetricData,
@@ -172,7 +173,11 @@ export class MetricsCollector {
     try {
       await this.persistMetrics(metrics);
     } catch (error) {
-      console.error("Failed to persist metrics:", error);
+      logger.error(
+        "Failed to persist metrics",
+        {},
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // 실패한 메트릭을 다시 버퍼에 추가 (재시도 로직)
       this.buffer.unshift(...metrics);
       throw error;
@@ -243,7 +248,7 @@ export class MetricsCollector {
       this.storage.set(typeKey, existing);
     }
 
-    console.log(`Persisted ${metrics.length} metrics`);
+    logger.info(`Persisted ${metrics.length} metrics`);
   }
 
   private startBatchProcessor(): void {
@@ -251,7 +256,11 @@ export class MetricsCollector {
       try {
         await this.flush();
       } catch (error) {
-        console.error("Batch processing failed:", error);
+        logger.error(
+          "Batch processing failed",
+          {},
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     }, this.flushInterval);
 
@@ -261,7 +270,11 @@ export class MetricsCollector {
         try {
           await this.cleanup();
         } catch (error) {
-          console.error("Cleanup failed:", error);
+          logger.error(
+            "Cleanup failed",
+            {},
+            error instanceof Error ? error : new Error(String(error)),
+          );
         }
       },
       24 * 60 * 60 * 1000,

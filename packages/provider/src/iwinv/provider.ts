@@ -1,10 +1,14 @@
 import {
+  type BalanceProvider,
+  type BalanceQuery,
+  type BalanceResult,
   type DeliveryStatusQuery,
   type DeliveryStatusResult,
   fail,
   KMsgError,
   KMsgErrorCode,
   type MessageType,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -18,6 +22,11 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
+import {
+  getAlimTalkHeaders,
+  mapIwinvCodeToKMsgErrorCode,
+} from "./iwinv.alimtalk.helpers";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
 import {
   getAlimTalkDeliveryStatus,
@@ -28,7 +37,11 @@ import type {
   SmsV2MessageType,
 } from "./iwinv.internal.types";
 import { sendAlimTalk, sendSmsV2 } from "./iwinv.send";
-import { canSendSmsV2, resolveSmsBaseUrl } from "./iwinv.sms.helpers";
+import {
+  buildSmsSecretHeader,
+  canSendSmsV2,
+  resolveSmsBaseUrl,
+} from "./iwinv.sms.helpers";
 import {
   createTemplate,
   deleteTemplate,
@@ -38,7 +51,9 @@ import {
 } from "./iwinv.template";
 import type { IWINVConfig } from "./types/iwinv";
 
-export class IWINVProvider implements Provider, TemplateProvider {
+export class IWINVProvider
+  implements Provider, BalanceProvider, TemplateProvider
+{
   readonly id = "iwinv";
   readonly name = "IWINV Messaging Provider";
   readonly supportedTypes: readonly MessageType[];
@@ -168,6 +183,208 @@ export class IWINVProvider implements Provider, TemplateProvider {
             { providerId: this.id, type: query.type },
           ),
         );
+    }
+  }
+
+  async getBalance(
+    query?: BalanceQuery,
+  ): Promise<Result<BalanceResult, KMsgError>> {
+    const channel = query?.channel ?? "ALIMTALK";
+
+    switch (channel) {
+      case "ALIMTALK":
+        return this.getAlimTalkBalance(channel);
+      case "SMS":
+      case "LMS":
+      case "MMS":
+        return this.getSmsBalance(channel);
+      default:
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.INVALID_REQUEST,
+            `IWINVProvider does not support balance query for type ${channel}`,
+            { providerId: this.id, type: channel },
+          ),
+        );
+    }
+  }
+
+  private async getAlimTalkBalance(
+    channel: BalanceResult["channel"],
+  ): Promise<Result<BalanceResult, KMsgError>> {
+    const url = `${this.config.baseUrl}/api/charge/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: getAlimTalkHeaders(this.config),
+        body: JSON.stringify({}),
+      });
+
+      const responseText = await response.text();
+      const parsed = safeParseJson(responseText);
+      const data = toRecordOrFallback(parsed, {});
+
+      const codeRaw = data.code;
+      const parsedCode =
+        typeof codeRaw === "string" ? Number(codeRaw) : undefined;
+      const code =
+        typeof codeRaw === "number"
+          ? codeRaw
+          : typeof parsedCode === "number" && Number.isFinite(parsedCode)
+            ? parsedCode
+            : undefined;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV AlimTalk charge query failed";
+
+      if (!response.ok || code !== 200) {
+        return fail(
+          new KMsgError(
+            mapIwinvCodeToKMsgErrorCode(code ?? response.status),
+            message,
+            { providerId: this.id, originalCode: codeRaw ?? response.status },
+          ),
+        );
+      }
+
+      const chargeRaw = data.charge;
+      const amount =
+        typeof chargeRaw === "number"
+          ? chargeRaw
+          : typeof chargeRaw === "string"
+            ? Number(chargeRaw)
+            : NaN;
+
+      if (!Number.isFinite(amount)) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "Invalid charge value from IWINV AlimTalk charge API",
+            { providerId: this.id, raw: data },
+          ),
+        );
+      }
+
+      return ok({
+        providerId: this.id,
+        channel,
+        amount,
+        currency: "KRW",
+        raw: data,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
+    }
+  }
+
+  private async getSmsBalance(
+    channel: BalanceResult["channel"],
+  ): Promise<Result<BalanceResult, KMsgError>> {
+    if (!this.config.smsApiKey || !this.config.smsAuthKey) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.INVALID_REQUEST,
+          "smsApiKey and smsAuthKey are required for SMS/LMS/MMS balance query",
+          { providerId: this.id },
+        ),
+      );
+    }
+
+    const secretHeader = buildSmsSecretHeader(this.config);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json;charset=UTF-8",
+      secret: secretHeader,
+    };
+
+    if (
+      typeof this.config.xForwardedFor === "string" &&
+      this.config.xForwardedFor.length > 0
+    ) {
+      headers["X-Forwarded-For"] = this.config.xForwardedFor;
+    }
+
+    const mergedHeaders =
+      this.config.extraHeaders && typeof this.config.extraHeaders === "object"
+        ? { ...headers, ...this.config.extraHeaders }
+        : headers;
+
+    const url = `${resolveSmsBaseUrl()}/api/charge/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: mergedHeaders,
+        body: JSON.stringify({ version: "1.0" }),
+      });
+
+      const responseText = await response.text();
+      const parsed = safeParseJson(responseText);
+      const data = toRecordOrFallback(parsed, {});
+
+      const codeRaw = data.code ?? data.resultCode;
+      const parsedCode =
+        typeof codeRaw === "string" ? Number(codeRaw) : undefined;
+      const code =
+        typeof codeRaw === "number"
+          ? codeRaw
+          : typeof parsedCode === "number" && Number.isFinite(parsedCode)
+            ? parsedCode
+            : NaN;
+      const message =
+        typeof data.message === "string" && data.message.length > 0
+          ? data.message
+          : "IWINV SMS charge query failed";
+
+      if (!response.ok || code !== 0) {
+        return fail(
+          new KMsgError(KMsgErrorCode.PROVIDER_ERROR, message, {
+            providerId: this.id,
+            originalCode: codeRaw ?? response.status,
+          }),
+        );
+      }
+
+      const chargeRaw = data.charge;
+      const amount =
+        typeof chargeRaw === "number"
+          ? chargeRaw
+          : typeof chargeRaw === "string"
+            ? Number(chargeRaw)
+            : NaN;
+
+      if (!Number.isFinite(amount)) {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.PROVIDER_ERROR,
+            "Invalid charge value from IWINV SMS charge API",
+            { providerId: this.id, raw: data },
+          ),
+        );
+      }
+
+      return ok({
+        providerId: this.id,
+        channel,
+        amount,
+        currency: "KRW",
+        raw: data,
+      });
+    } catch (error) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.NETWORK_ERROR,
+          error instanceof Error ? error.message : String(error),
+          { providerId: this.id },
+        ),
+      );
     }
   }
 
