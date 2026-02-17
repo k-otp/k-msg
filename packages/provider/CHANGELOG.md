@@ -1,5 +1,19 @@
 # @k-msg/provider
 
+## 0.15.0 — 2026-02-17
+
+### Minor changes
+
+- [4c44fd6](https://github.com/k-otp/k-msg/commit/4c44fd69c33fc8c6a5ac64da136daeb37daf89ff) Split SOLAPI exports into `@k-msg/provider/solapi` and make `solapi` an optional peer dependency,
+  while keeping runtime-neutral exports on `@k-msg/provider`.
+  
+  Also updated messaging cloudflare DO storage typing compatibility and refreshed docs/examples
+  (including advanced Pages routes and new Bun/Express Node send-only templates). — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.15.0
+
 ## 0.14.0 — 2026-02-16
 
 ### Minor changes
