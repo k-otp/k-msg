@@ -74,6 +74,7 @@ await analytics.init();
 
 - `@k-msg/analytics`는 자체 데이터베이스를 만들지 않습니다. `DeliveryTrackingService`가 기록한 `kmsg_delivery_tracking` 테이블을 읽습니다.
 - 운영 환경에서는 내구성 있는 저장소(`SqliteDeliveryTrackingStore` 또는 `BunSqlDeliveryTrackingStore`) 사용을 권장합니다.
+- analytics 런타임 모듈의 진단 로그는 `@k-msg/core` logger를 사용합니다(`console.*` 직접 호출 제거).
 
 ## 라이선스
 

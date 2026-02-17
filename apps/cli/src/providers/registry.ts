@@ -1,4 +1,5 @@
 import type {
+  BalanceProvider,
   KakaoChannelProvider,
   Provider,
   TemplateInspectionProvider,
@@ -8,7 +9,12 @@ import { AligoProvider, IWINVProvider, MockProvider } from "@k-msg/provider";
 import type { KMsgCliConfig } from "../config/schema";
 
 export type ProviderWithCapabilities = Provider &
-  Partial<TemplateProvider & TemplateInspectionProvider & KakaoChannelProvider>;
+  Partial<
+    TemplateProvider &
+      TemplateInspectionProvider &
+      KakaoChannelProvider &
+      BalanceProvider
+  >;
 
 type SolapiProviderConstructor = new (
   config: Record<string, unknown>,
@@ -70,6 +76,12 @@ function hasKakaoChannelCapabilities(
   return typeof provider.listKakaoChannels === "function";
 }
 
+function hasBalanceCapability(
+  provider: ProviderWithCapabilities,
+): provider is ProviderWithCapabilities & BalanceProvider {
+  return typeof provider.getBalance === "function";
+}
+
 function wrapProviderId(
   provider: ProviderWithCapabilities,
   id: string,
@@ -116,6 +128,10 @@ function wrapProviderId(
     if (provider.addKakaoChannel) {
       wrapped.addKakaoChannel = provider.addKakaoChannel.bind(provider);
     }
+  }
+
+  if (hasBalanceCapability(provider)) {
+    wrapped.getBalance = provider.getBalance.bind(provider);
   }
 
   return wrapped;

@@ -5,10 +5,10 @@ Core types and utilities for the `k-msg` ecosystem.
 This package intentionally stays low-level:
 
 - Standard message model: `MessageType`, `SendInput`, `SendOptions`, `SendResult`
-- Provider interface: `Provider`
+- Provider interfaces: `Provider`, optional capability `BalanceProvider`
 - Result pattern: `Result`, `ok`, `fail`
 - Errors: `KMsgError`, `KMsgErrorCode`
-- Resilience helpers: retry / circuit-breaker / rate-limit / health monitor
+- Resilience helpers: retry / circuit-breaker / rate-limit / bulk operation
 
 If you want the end-user "send" experience, use `KMsg` from `@k-msg/messaging` (or `k-msg`).
 
@@ -70,4 +70,3 @@ export class MyProvider implements Provider {
   }
 }
 ```
-

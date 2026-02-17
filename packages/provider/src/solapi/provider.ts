@@ -1,25 +1,29 @@
 import {
+  type BalanceProvider,
+  type BalanceQuery,
+  type BalanceResult,
   type DeliveryStatusQuery,
   type DeliveryStatusResult,
   fail,
   type KMsgError,
   type MessageType,
+  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
+  readRuntimeEnv,
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
 import { SolapiMessageService } from "solapi";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
-import { readRuntimeEnv } from "../shared/runtime-env";
 import { getSolapiDeliveryStatus } from "./solapi.delivery";
 import { mapSolapiError } from "./solapi.error";
 import type { SolapiSdkClient } from "./solapi.internal.types";
 import { sendWithSolapi } from "./solapi.send";
 import type { SolapiConfig } from "./types/solapi";
 
-export class SolapiProvider implements Provider {
+export class SolapiProvider implements Provider, BalanceProvider {
   readonly id = "solapi";
   readonly name = "SOLAPI Messaging Provider";
   readonly supportedTypes: readonly MessageType[] = [
@@ -127,6 +131,50 @@ export class SolapiProvider implements Provider {
       client: this.client,
       query,
     });
+  }
+
+  async getBalance(
+    query?: BalanceQuery,
+  ): Promise<Result<BalanceResult, KMsgError>> {
+    try {
+      const raw = await this.client.getBalance();
+      const source = raw as Record<string, unknown>;
+      const amountCandidates = [source.balance, source.point];
+
+      let amount = Number.NaN;
+      for (const candidate of amountCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          amount = candidate;
+          break;
+        }
+        if (typeof candidate === "string") {
+          const numeric = Number(candidate);
+          if (Number.isFinite(numeric)) {
+            amount = numeric;
+            break;
+          }
+        }
+      }
+
+      if (!Number.isFinite(amount)) {
+        return fail(
+          mapSolapiError(
+            new Error("Invalid balance response from SOLAPI"),
+            this.id,
+          ),
+        );
+      }
+
+      return ok({
+        providerId: this.id,
+        channel: query?.channel,
+        amount,
+        currency: "KRW",
+        raw,
+      });
+    } catch (error) {
+      return fail(mapSolapiError(error, this.id));
+    }
   }
 }
 

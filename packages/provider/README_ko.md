@@ -28,6 +28,7 @@ bun add solapi
 
 - `supportedTypes`: 지원하는 메시지 `type` 선언
 - `send(options: SendOptions)`: `Result<SendResult, KMsgError>` 반환 (throw 하지 않음)
+- 일부 provider는 선택 capability인 `getBalance(query?)`를 함께 구현합니다.
 
 import 경로:
 

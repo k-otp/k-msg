@@ -3,6 +3,7 @@
  * 실시간 대시보드 데이터 생성
  */
 
+import { logger } from "@k-msg/core";
 import type {
   AggregatedMetric,
   AnalyticsQuery,
@@ -148,7 +149,11 @@ export class DashboardGenerator {
       // 인사이트 생성 (외부에서 주입)
       dashboard.insights = [];
     } catch (error) {
-      console.error("Dashboard generation failed:", error);
+      logger.error(
+        "Dashboard generation failed",
+        {},
+        error instanceof Error ? error : new Error(String(error)),
+      );
     }
 
     return dashboard;

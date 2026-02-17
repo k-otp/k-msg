@@ -82,8 +82,10 @@ CLI 기준:
   - BODY: `{"version":"1.0"}`
 
 참고:
-- `IWINVProvider`는 현재 알림톡 + SMS/LMS/MMS의 통합 `send()`에 집중합니다.
-- 전송내역/잔액 조회 엔드포인트는 참고용으로만 문서화되어 있으며, SDK 메서드로는 아직 제공되지 않습니다.
+- `IWINVProvider`는 `getBalance(query?)`를 지원합니다.
+  - 기본 채널: `ALIMTALK` (알림톡 charge API 사용)
+  - `SMS/LMS/MMS`: SMS v2 charge API(`secret` 인증) 사용
+- 전송내역(history) 엔드포인트는 참고용 문서로 유지됩니다.
 
 ## 환경변수
 

@@ -20,15 +20,22 @@ function createStubClient() {
       link?: string;
     }>;
     getMessages: Array<{ params?: Record<string, unknown> }>;
+    getBalance: Array<void>;
   } = {
     sendOne: [],
     uploadFile: [],
     getMessages: [],
+    getBalance: [],
   };
 
   let getMessagesResponse: GetMessagesResponse = {
     messageList: {},
   } as unknown as GetMessagesResponse;
+  let getBalanceResponse: GetBalanceResponse = {
+    balance: 0,
+    point: 0,
+  } as unknown as GetBalanceResponse;
+  let getBalanceError: unknown = null;
 
   const client: SolapiSdkClient = {
     sendOne: async (message: SendOneRequest, appId?: string) => {
@@ -49,8 +56,13 @@ function createStubClient() {
         fileId: `${fileType}_file_${calls.uploadFile.length}`,
       } as unknown as UploadFileResponse;
     },
-    getBalance: async () =>
-      ({ balance: 0, point: 0 }) as unknown as GetBalanceResponse,
+    getBalance: async () => {
+      calls.getBalance.push(undefined);
+      if (getBalanceError) {
+        throw getBalanceError;
+      }
+      return getBalanceResponse;
+    },
     getMessages: async (data?: unknown) => {
       calls.getMessages.push({
         params: (data as Record<string, unknown> | undefined) ?? undefined,
@@ -64,6 +76,12 @@ function createStubClient() {
     calls,
     setGetMessagesResponse: (value: unknown) => {
       getMessagesResponse = value as GetMessagesResponse;
+    },
+    setGetBalanceResponse: (value: unknown) => {
+      getBalanceResponse = value as GetBalanceResponse;
+    },
+    setGetBalanceError: (value: unknown) => {
+      getBalanceError = value;
     },
   };
 }
@@ -483,6 +501,56 @@ describe("SolapiProvider (SendOptions-based)", () => {
       expect(result.value?.sentAt instanceof Date).toBe(true);
       expect(result.value?.deliveredAt instanceof Date).toBe(true);
       expect(result.value?.statusCode).toBe("4000");
+    }
+  });
+
+  test("getBalance maps SOLAPI balance response", async () => {
+    const { client, calls, setGetBalanceResponse } = createStubClient();
+    setGetBalanceResponse({
+      balance: 9876,
+      point: 123,
+    });
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.getBalance({ channel: "SMS" });
+
+    expect(calls.getBalance).toHaveLength(1);
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.channel).toBe("SMS");
+      expect(result.value.amount).toBe(9876);
+      expect(result.value.currency).toBe("KRW");
+    }
+  });
+
+  test("getBalance returns mapped failure when SOLAPI SDK throws", async () => {
+    const { client, setGetBalanceError } = createStubClient();
+    setGetBalanceError(new Error("balance failed"));
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.getBalance();
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("UNKNOWN_ERROR");
     }
   });
 });

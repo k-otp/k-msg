@@ -3,6 +3,7 @@
  * 이상 징후 탐지 및 분석
  */
 
+import { logger } from "@k-msg/core";
 import type {
   AggregatedMetric,
   InsightData,
@@ -103,9 +104,10 @@ export class AnomalyDetector {
           anomalies.push(anomaly);
         }
       } catch (error) {
-        console.error(
-          `Anomaly detection failed for algorithm ${algorithm.name}:`,
-          error,
+        logger.error(
+          `Anomaly detection failed for algorithm ${algorithm.name}`,
+          {},
+          error instanceof Error ? error : new Error(String(error)),
         );
       }
     }

@@ -3,6 +3,7 @@
  * 데이터 기반 추천 시스템
  */
 
+import { logger } from "@k-msg/core";
 import type { AggregatedMetric, InsightData } from "../types/analytics.types";
 import { MetricType } from "../types/analytics.types";
 
@@ -255,7 +256,11 @@ export class RecommendationEngine {
           }
         }
       } catch (error) {
-        console.error(`Rule execution failed for rule ${rule.id}:`, error);
+        logger.error(
+          `Rule execution failed for rule ${rule.id}`,
+          {},
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     }
 
