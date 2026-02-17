@@ -1,5 +1,19 @@
 # @k-msg/cli
 
+## 0.5.6 — 2026-02-17
+
+### Patch changes
+
+- [d0b4040](https://github.com/k-otp/k-msg/commit/d0b404088e5aed87c7b7211a0dab6f36bee2de13) Improve package boundaries and runtime safety across provider/messaging/cli:
+  
+  - Make package builds deterministic by running `clean` before each build pipeline.
+  - Remove stale/unused dependencies and TS references in messaging/webhook/provider.
+  - Add `@k-msg/provider/aligo` subpath export and keep `@k-msg/provider/solapi` as a dedicated subpath.
+  - Externalize `solapi` from provider dist output while keeping it as optional peer dependency.
+  - Update CLI provider registry to lazy-load SOLAPI only when configured, with clear install guidance when missing.
+  - Remove unsafe `any` casting from CLI provider capability wiring and add registry boundary tests. — Thanks @imjlk!
+- Updated dependencies: core@0.16.0, provider@0.16.0, k-msg@0.16.0
+
 ## 0.5.5 — 2026-02-17
 
 ### Patch changes
