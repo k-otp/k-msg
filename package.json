@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "build": "bun run build:all",
-    "build:all": "bun run --filter='./packages/*' build",
+    "build:all": "bun run build:core && bun run build:provider && bun run build:template && bun run build:messaging && bun run build:analytics && bun run build:channel && bun run build:webhook && bun run build:k-msg",
     "build:core": "cd packages/core && bun run build",
     "build:messaging": "cd packages/messaging && bun run build",
     "build:template": "cd packages/template && bun run build",

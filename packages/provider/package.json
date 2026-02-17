@@ -13,6 +13,11 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./aligo": {
+      "types": "./dist/aligo/index.d.ts",
+      "import": "./dist/aligo/index.mjs",
+      "require": "./dist/aligo/index.js"
+    },
     "./iwinv": {
       "types": "./dist/iwinv/index.d.ts",
       "import": "./dist/iwinv/index.mjs",
@@ -28,9 +33,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
-    "build:cjs": "bun build ./src/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test'",
+    "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
+    "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi'",
+    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",
@@ -40,13 +45,12 @@
     "test:coverage": "bun test --coverage",
     "test:watch": "bun test --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },
   "dependencies": {
-    "@k-msg/core": "workspace:*",
-    "zod": "catalog:"
+    "@k-msg/core": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

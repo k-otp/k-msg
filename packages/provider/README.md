@@ -32,6 +32,7 @@ All providers implement the `Provider` interface from `@k-msg/core`:
 Import paths:
 
 - `@k-msg/provider`: runtime-neutral exports (`IWINVProvider`, `AligoProvider`, onboarding helpers, mock)
+- `@k-msg/provider/aligo`: Aligo provider exports
 - `@k-msg/provider/solapi`: SOLAPI provider exports
 
 ## Provider Onboarding Matrix

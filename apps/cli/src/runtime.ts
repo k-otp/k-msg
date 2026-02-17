@@ -69,7 +69,7 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
     );
   }
 
-  const providers = createProviders(resolved);
+  const providers = await createProviders(resolved);
 
   const providersById = new Map<string, ProviderWithCapabilities>();
   for (const provider of providers) {
