@@ -42,7 +42,7 @@ bun add @k-msg/messaging @k-msg/core
 
 ```ts
 import { KMsg } from "@k-msg/messaging";
-import { SolapiProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [
@@ -107,3 +107,39 @@ const tracking = new DeliveryTrackingService({
   store: d1Store, // 필요 시 kvStore / R2 / DO 스토어로 교체
 });
 ```
+
+### SQL 스키마 (D1/Postgres/MySQL)
+
+`createD1DeliveryTrackingStore()`와 `HyperdriveDeliveryTrackingStore`는 동일한 논리 스키마를 사용합니다.
+`DeliveryTrackingService.init()` 호출 시 테이블/인덱스가 자동 생성됩니다.
+
+Tracking 테이블: `kmsg_delivery_tracking`
+
+- 기본 키: `message_id`
+- 주요 컬럼: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
+- 시간 컬럼: `requested_at`, `status_updated_at`, `next_check_at`, `sent_at`, `delivered_at`, `failed_at`, `last_checked_at`, `scheduled_at`
+- 부가 컬럼: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `raw`, `metadata`
+
+인덱스:
+
+- `idx_kmsg_delivery_due(status, next_check_at)`
+- `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
+- `idx_kmsg_delivery_requested_at(requested_at)`
+
+DB별 차이:
+
+- D1(SQLite): JSON 계열 컬럼을 `TEXT`로 저장
+- Postgres: JSON 계열 컬럼을 `JSONB`로 저장
+- MySQL: 식별자 타입은 `VARCHAR`, JSON 계열 컬럼은 현재 `TEXT`로 저장
+
+Queue 테이블 (`HyperdriveJobQueue` / `createD1JobQueue` 사용 시): `kmsg_jobs`
+
+- 기본 키: `id`
+- 주요 컬럼: `type`, `data`, `status`, `priority`, `attempts`, `max_attempts`, `delay`
+- 시간 컬럼: `created_at`, `process_at`, `completed_at`, `failed_at`
+- 부가 컬럼: `error`, `metadata`
+
+Queue 인덱스:
+
+- `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
+- `idx_kmsg_jobs_id(id)`

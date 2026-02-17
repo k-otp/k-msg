@@ -1,0 +1,5 @@
+IWINV_API_KEY=your-iwinv-alimtalk-key
+IWINV_SMS_API_KEY=your-iwinv-sms-api-key
+IWINV_SMS_AUTH_KEY=your-iwinv-sms-auth-key
+IWINV_SMS_SENDER_NUMBER=01000000000
+TRACKING_ADMIN_TOKEN=local-admin-token
