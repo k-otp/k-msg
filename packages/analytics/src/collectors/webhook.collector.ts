@@ -3,8 +3,7 @@
  * 웹훅을 통한 외부 이벤트 수집
  */
 
-import { EventEmitter } from "events";
-import type { MetricData, MetricType } from "../types/analytics.types";
+import { EventEmitter } from "../shared/event-emitter";
 import type { EventData } from "./event.collector";
 
 export interface WebhookData {

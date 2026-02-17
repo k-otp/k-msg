@@ -12,6 +12,7 @@ import {
 } from "@k-msg/core";
 import { SolapiMessageService } from "solapi";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { readRuntimeEnv } from "../shared/runtime-env";
 import { getSolapiDeliveryStatus } from "./solapi.delivery";
 import { mapSolapiError } from "./solapi.error";
 import type { SolapiSdkClient } from "./solapi.internal.types";
@@ -134,16 +135,16 @@ export const createSolapiProvider = (config: SolapiConfig) =>
 
 export const createDefaultSolapiProvider = () => {
   const config: SolapiConfig = {
-    apiKey: process.env.SOLAPI_API_KEY || "",
-    apiSecret: process.env.SOLAPI_API_SECRET || "",
-    baseUrl: process.env.SOLAPI_BASE_URL || "https://api.solapi.com",
-    defaultFrom: process.env.SOLAPI_DEFAULT_FROM,
-    kakaoPfId: process.env.SOLAPI_KAKAO_PF_ID,
-    rcsBrandId: process.env.SOLAPI_RCS_BRAND_ID,
-    naverTalkId: process.env.SOLAPI_NAVER_TALK_ID,
-    appId: process.env.SOLAPI_APP_ID,
-    defaultCountry: process.env.SOLAPI_DEFAULT_COUNTRY,
-    debug: process.env.NODE_ENV === "development",
+    apiKey: readRuntimeEnv("SOLAPI_API_KEY") || "",
+    apiSecret: readRuntimeEnv("SOLAPI_API_SECRET") || "",
+    baseUrl: readRuntimeEnv("SOLAPI_BASE_URL") || "https://api.solapi.com",
+    defaultFrom: readRuntimeEnv("SOLAPI_DEFAULT_FROM"),
+    kakaoPfId: readRuntimeEnv("SOLAPI_KAKAO_PF_ID"),
+    rcsBrandId: readRuntimeEnv("SOLAPI_RCS_BRAND_ID"),
+    naverTalkId: readRuntimeEnv("SOLAPI_NAVER_TALK_ID"),
+    appId: readRuntimeEnv("SOLAPI_APP_ID"),
+    defaultCountry: readRuntimeEnv("SOLAPI_DEFAULT_COUNTRY"),
+    debug: readRuntimeEnv("NODE_ENV") === "development",
   };
 
   if (!config.apiKey || !config.apiSecret) {

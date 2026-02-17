@@ -79,7 +79,6 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "@types/node": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -102,7 +101,6 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "@types/node": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -114,7 +112,6 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "@types/node": "catalog:",
         "typescript": "catalog:",
       },
       "peerDependencies": {
@@ -134,7 +131,6 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "@types/node": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -146,7 +142,6 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "@types/node": "catalog:",
         "solapi": "^5.5.4",
         "typescript": "catalog:",
       },

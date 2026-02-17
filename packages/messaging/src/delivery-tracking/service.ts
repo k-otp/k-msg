@@ -74,7 +74,7 @@ export class DeliveryTrackingService {
   private readonly apiFailover?: DeliveryTrackingApiFailoverConfig;
 
   private initPromise?: Promise<void>;
-  private timer?: NodeJS.Timeout;
+  private timer?: ReturnType<typeof setInterval>;
   private runOnceInFlight?: Promise<void>;
 
   constructor(config: DeliveryTrackingServiceConfig) {

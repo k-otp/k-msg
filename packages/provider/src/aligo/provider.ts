@@ -17,6 +17,7 @@ import type {
   TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { readRuntimeEnv } from "../shared/runtime-env";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 import {
   addKakaoChannel,
@@ -210,13 +211,13 @@ export const createAligoProvider = (config: AligoConfig) =>
 
 export const createDefaultAligoProvider = () => {
   const config: AligoConfig = {
-    apiKey: process.env.ALIGO_API_KEY || "",
-    userId: process.env.ALIGO_USER_ID || "",
-    senderKey: process.env.ALIGO_SENDER_KEY || "",
-    sender: process.env.ALIGO_SENDER || "",
-    friendtalkEndpoint: process.env.ALIGO_FRIENDTALK_ENDPOINT,
-    testMode: process.env.NODE_ENV !== "production",
-    debug: process.env.NODE_ENV === "development",
+    apiKey: readRuntimeEnv("ALIGO_API_KEY") || "",
+    userId: readRuntimeEnv("ALIGO_USER_ID") || "",
+    senderKey: readRuntimeEnv("ALIGO_SENDER_KEY") || "",
+    sender: readRuntimeEnv("ALIGO_SENDER") || "",
+    friendtalkEndpoint: readRuntimeEnv("ALIGO_FRIENDTALK_ENDPOINT"),
+    testMode: readRuntimeEnv("NODE_ENV") !== "production",
+    debug: readRuntimeEnv("NODE_ENV") === "development",
   };
 
   if (!config.apiKey || !config.userId) {

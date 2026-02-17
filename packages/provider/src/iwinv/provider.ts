@@ -17,6 +17,7 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { readRuntimeEnv } from "../shared/runtime-env";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
 import {
   getAlimTalkDeliveryStatus,
@@ -236,16 +237,17 @@ export const createIWINVProvider = (config: IWINVConfig) =>
 
 export const createDefaultIWINVProvider = () => {
   const config: IWINVConfig = {
-    apiKey: process.env.IWINV_API_KEY || "",
-    smsApiKey: process.env.IWINV_SMS_API_KEY,
-    smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
-    smsCompanyId: process.env.IWINV_SMS_COMPANY_ID,
+    apiKey: readRuntimeEnv("IWINV_API_KEY") || "",
+    smsApiKey: readRuntimeEnv("IWINV_SMS_API_KEY"),
+    smsAuthKey: readRuntimeEnv("IWINV_SMS_AUTH_KEY"),
+    smsCompanyId: readRuntimeEnv("IWINV_SMS_COMPANY_ID"),
     senderNumber:
-      process.env.IWINV_SENDER_NUMBER || process.env.IWINV_SMS_SENDER_NUMBER,
-    smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
-    sendEndpoint: process.env.IWINV_SEND_ENDPOINT || "/api/v2/send/",
-    xForwardedFor: process.env.IWINV_X_FORWARDED_FOR,
-    debug: process.env.NODE_ENV === "development",
+      readRuntimeEnv("IWINV_SENDER_NUMBER") ||
+      readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
+    smsSenderNumber: readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
+    sendEndpoint: readRuntimeEnv("IWINV_SEND_ENDPOINT") || "/api/v2/send/",
+    xForwardedFor: readRuntimeEnv("IWINV_X_FORWARDED_FOR"),
+    debug: readRuntimeEnv("NODE_ENV") === "development",
   };
 
   if (!config.apiKey) {
