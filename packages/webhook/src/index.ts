@@ -29,9 +29,7 @@ export type {
   SearchResult,
   StorageConfig,
 } from "./registry/types";
-export type { FileStorageAdapter } from "./shared/file-storage";
 export { RetryManager } from "./retry/retry.manager";
-
 // 보안 및 재시도 관리
 export { SecurityManager } from "./security/security.manager";
 export {
@@ -43,6 +41,7 @@ export {
 export { WebhookRegistry } from "./services/webhook.registry";
 // 핵심 서비스
 export { WebhookService } from "./services/webhook.service";
+export type { FileStorageAdapter } from "./shared/file-storage";
 // 타입 정의
 export type {
   WebhookAttempt,

@@ -3,12 +3,12 @@
  * 웹훅 작업 큐 관리 시스템
  */
 
+import { EventEmitter } from "../shared/event-emitter";
 import {
   isFileNotFoundError,
   requireFileStorageAdapter,
   resolveStoragePath,
 } from "../shared/file-storage";
-import { EventEmitter } from "../shared/event-emitter";
 import type { DispatchJob, QueueConfig } from "./types";
 
 export class QueueManager extends EventEmitter {
@@ -368,7 +368,10 @@ export class QueueManager extends EventEmitter {
       };
 
       const json = JSON.stringify(data, null, 2);
-      const filePath = resolveStoragePath(this.config.diskPath, "webhook-queue.json");
+      const filePath = resolveStoragePath(
+        this.config.diskPath,
+        "webhook-queue.json",
+      );
       await fileAdapter.ensureDirForFile(filePath);
 
       // 파일 저장
@@ -389,7 +392,10 @@ export class QueueManager extends EventEmitter {
 
     try {
       const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
-      const filePath = resolveStoragePath(this.config.diskPath, "webhook-queue.json");
+      const filePath = resolveStoragePath(
+        this.config.diskPath,
+        "webhook-queue.json",
+      );
       const json = await fileAdapter.readFile(filePath);
       const data = JSON.parse(json);
 

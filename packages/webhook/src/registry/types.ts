@@ -2,8 +2,8 @@
  * Registry Type Definitions
  */
 
-import type { WebhookEventType } from "../types/webhook.types";
 import type { FileStorageAdapter } from "../shared/file-storage";
+import type { WebhookEventType } from "../types/webhook.types";
 
 export interface EndpointFilter {
   status?: "active" | "inactive" | "error" | "suspended";

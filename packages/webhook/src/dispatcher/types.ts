@@ -2,8 +2,8 @@
  * Dispatcher Type Definitions
  */
 
-import type { WebhookEndpoint, WebhookEvent } from "../types/webhook.types";
 import type { FileStorageAdapter } from "../shared/file-storage";
+import type { WebhookEndpoint, WebhookEvent } from "../types/webhook.types";
 
 export interface DispatchConfig {
   maxConcurrentRequests: number;
