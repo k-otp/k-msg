@@ -5,9 +5,9 @@
     "": {
       "name": "k-msg-workspace",
       "devDependencies": {
-        "@types/bun": "latest",
-        "@types/node": "^22.0.0",
-        "typescript": "^5.7.2",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
         "typescript": "^5",
@@ -39,7 +39,7 @@
     },
     "apps/cli": {
       "name": "@k-msg/cli",
-      "version": "0.5.4",
+      "version": "0.5.6",
       "bin": {
         "k-msg": "./bin/k-msg.js",
         "kmsg": "./bin/k-msg.js",
@@ -67,12 +67,12 @@
         "k-msg": "workspace:*",
       },
       "devDependencies": {
-        "bun-types": "latest",
+        "@types/bun": "catalog:",
       },
     },
     "packages/analytics": {
       "name": "@k-msg/analytics",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@k-msg/messaging": "workspace:*",
         "zod": "catalog:",
@@ -85,7 +85,7 @@
     },
     "packages/channel": {
       "name": "@k-msg/channel",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -97,18 +97,19 @@
     },
     "packages/core": {
       "name": "@k-msg/core",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.0.0",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/k-msg": {
       "name": "k-msg",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@k-msg/messaging": "workspace:*",
       },
@@ -127,11 +128,9 @@
     },
     "packages/messaging": {
       "name": "@k-msg/messaging",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
-        "@k-msg/provider": "workspace:*",
-        "@k-msg/template": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -142,10 +141,9 @@
     },
     "packages/provider": {
       "name": "@k-msg/provider",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -162,7 +160,7 @@
     },
     "packages/template": {
       "name": "@k-msg/template",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "zod": "catalog:",
@@ -175,9 +173,8 @@
     },
     "packages/webhook": {
       "name": "@k-msg/webhook",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
-        "@k-msg/messaging": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -190,7 +187,7 @@
   "catalog": {
     "@cloudflare/workers-types": "^4.20250131.0",
     "@hono/zod-validator": "^0.4.1",
-    "@types/bun": "latest",
+    "@types/bun": "^1.3.9",
     "@types/node": "^22.0.0",
     "hono": "^4.8.10",
     "honox": "^0.1.43",
