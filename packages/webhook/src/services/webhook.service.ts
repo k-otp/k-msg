@@ -1,3 +1,4 @@
+import { logger, readRuntimeEnv } from "@k-msg/core";
 import type {
   WebhookConfig,
   WebhookDelivery,
@@ -9,16 +10,6 @@ import type {
 import { WebhookEventType } from "../types/webhook.types";
 import { type HttpClient, WebhookDispatcher } from "./webhook.dispatcher";
 import { WebhookRegistry } from "./webhook.registry";
-
-type RuntimeProcess = {
-  env?: {
-    NODE_ENV?: string;
-  };
-};
-
-function getNodeEnv(): string | undefined {
-  return (globalThis as { process?: RuntimeProcess }).process?.env?.NODE_ENV;
-}
 
 export class WebhookService {
   private config: WebhookConfig;
@@ -362,15 +353,22 @@ export class WebhookService {
             .dispatch(event, endpoint)
             .then((delivery) => this.registry.addDelivery(delivery))
             .catch((error) => {
-              console.error(
-                `Failed to dispatch webhook to ${endpoint.url}:`,
-                error,
+              logger.error(
+                "Failed to dispatch webhook",
+                { endpointUrl: endpoint.url },
+                error instanceof Error ? error : new Error(String(error)),
               );
             });
         }
       }
     } catch (error) {
-      console.error("Batch processing failed:", error);
+      logger.error(
+        "Batch processing failed",
+        {
+          batchSize: batch.length,
+        },
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // 실패한 이벤트를 다시 큐에 추가 (재시도)
       this.eventQueue.unshift(...batch);
     }
@@ -463,7 +461,7 @@ export class WebhookService {
       }
 
       // 로컬호스트 및 프라이빗 IP 차단 (프로덕션에서)
-      if (getNodeEnv() === "production") {
+      if (readRuntimeEnv("NODE_ENV") === "production") {
         const hostname = parsedUrl.hostname;
         if (
           hostname === "localhost" ||
@@ -491,7 +489,11 @@ export class WebhookService {
       try {
         await this.processBatch();
       } catch (error) {
-        console.error("Batch processor error:", error);
+        logger.error(
+          "Batch processor error",
+          undefined,
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     }, this.config.batchTimeoutMs);
   }

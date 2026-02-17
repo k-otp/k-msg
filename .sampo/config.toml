@@ -14,8 +14,6 @@ ignore_unpublished = true
 
 # Extra safety: keep apps + workspace root out of versioning/release flows.
 ignore = [
-  "npm/@k-msg/admin-dashboard",
-  "npm/@apps/message-service",
   "npm/k-msg-workspace",
 ]
 

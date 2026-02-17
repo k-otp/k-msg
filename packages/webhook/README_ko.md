@@ -23,6 +23,7 @@ bun add @k-msg/webhook
 ## 빠른 시작 (WebhookService)
 
 ```ts
+import { readRuntimeEnv } from "@k-msg/core";
 import {
   WebhookEventType,
   WebhookService,
@@ -36,7 +37,7 @@ const config: WebhookConfig = {
   timeoutMs: 30_000,
   enableSecurity: true,
   // Optional: 엔드포인트에 secret이 없을 때 fallback으로 사용됩니다.
-  secretKey: process.env.WEBHOOK_SECRET,
+  secretKey: readRuntimeEnv("WEBHOOK_SECRET"),
   // Optional: algorithm, signatureHeader, signaturePrefix
   enabledEvents: [
     WebhookEventType.MESSAGE_SENT,
@@ -54,7 +55,7 @@ const endpoint = await service.registerEndpoint({
   active: true,
   events: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
   // Optional: 엔드포인트별 secret (config.secretKey보다 우선)
-  secret: process.env.WEBHOOK_SECRET,
+  secret: readRuntimeEnv("WEBHOOK_SECRET"),
   // Optional: 엔드포인트별 재시도 설정
   retryConfig: { maxRetries: 5, retryDelayMs: 1000, backoffMultiplier: 2 },
   // Optional: 메타데이터 기반 필터
@@ -110,6 +111,7 @@ ${timestamp}.${rawBody}
 
 ```ts
 import { Hono } from "hono";
+import { readRuntimeEnv } from "@k-msg/core";
 import { SecurityManager } from "@k-msg/webhook";
 
 const app = new Hono();
@@ -124,7 +126,7 @@ app.post("/webhooks/k-msg", async (c) => {
 
   const signature = c.req.header("X-Webhook-Signature") ?? "";
   const timestamp = c.req.header("X-Webhook-Timestamp") ?? "";
-  const secret = process.env.WEBHOOK_SECRET ?? "";
+  const secret = readRuntimeEnv("WEBHOOK_SECRET") ?? "";
 
   if (!security.verifyTimestamp(timestamp, 300)) {
     return c.json({ error: "Request too old" }, 401);

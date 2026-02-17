@@ -29,6 +29,7 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
+    "@k-msg/core": "workspace:*",
     "@noble/hashes": "^1.8.0",
     "zod": "catalog:"
   },

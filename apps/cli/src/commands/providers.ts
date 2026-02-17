@@ -1,12 +1,32 @@
-import { defineCommand } from "@bunli/core";
-import { optConfig, optJson } from "../cli/options";
+import { defineCommand, option } from "@bunli/core";
+import type { MessageType } from "@k-msg/core";
+import { z } from "zod";
+import { optConfig, optJson, optProvider } from "../cli/options";
 import { printError, shouldUseJsonOutput } from "../cli/utils";
 import { runProviderDoctor } from "../onboarding";
 import { loadRuntime } from "../runtime";
 
+const messageTypes = [
+  "ALIMTALK",
+  "FRIENDTALK",
+  "SMS",
+  "LMS",
+  "MMS",
+  "NSA",
+  "VOICE",
+  "FAX",
+  "RCS_SMS",
+  "RCS_LMS",
+  "RCS_MMS",
+  "RCS_TPL",
+  "RCS_ITPL",
+  "RCS_LTPL",
+] as const satisfies readonly MessageType[];
+
 function detectCapabilities(provider: Record<string, unknown>): string[] {
   const caps: string[] = [];
   if (typeof provider.getDeliveryStatus === "function") caps.push("delivery");
+  if (typeof provider.getBalance === "function") caps.push("balance");
   if (typeof provider.createTemplate === "function") caps.push("template");
   if (typeof provider.requestTemplateInspection === "function")
     caps.push("template_inspection");
@@ -184,11 +204,111 @@ const doctorCmd = defineCommand({
   },
 });
 
+const balanceCmd = defineCommand({
+  name: "balance",
+  description: "Query provider balance for providers that support it",
+  options: {
+    config: optConfig,
+    json: optJson,
+    provider: optProvider,
+    channel: option(z.enum(messageTypes).optional(), {
+      description: "Balance channel override (e.g. ALIMTALK, SMS, LMS, MMS)",
+    }),
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const runtime = await loadRuntime(flags.config);
+      const targets = flags.provider
+        ? runtime.providers.filter((provider) => provider.id === flags.provider)
+        : runtime.providers;
+
+      if (targets.length === 0) {
+        throw new Error(
+          flags.provider
+            ? `Provider not found: ${flags.provider}`
+            : "No providers configured",
+        );
+      }
+
+      const results = await Promise.all(
+        targets.map(async (provider) => {
+          if (typeof provider.getBalance !== "function") {
+            return {
+              id: provider.id,
+              name: provider.name,
+              supported: false as const,
+            };
+          }
+
+          const result = await provider.getBalance(
+            flags.channel ? { channel: flags.channel } : undefined,
+          );
+
+          if (result.isSuccess) {
+            return {
+              id: provider.id,
+              name: provider.name,
+              supported: true as const,
+              balance: result.value,
+            };
+          }
+
+          return {
+            id: provider.id,
+            name: provider.name,
+            supported: true as const,
+            error: {
+              code: result.error.code,
+              message: result.error.message,
+              context: result.error.context,
+            },
+          };
+        }),
+      );
+
+      if (asJson) {
+        console.log(JSON.stringify(results, null, 2));
+      } else {
+        for (const item of results) {
+          if (!item.supported) {
+            console.log(`SKIP ${item.id}: balance capability not supported`);
+            continue;
+          }
+
+          if ("error" in item) {
+            console.log(
+              `FAIL ${item.id}: ${item.error.code} - ${item.error.message}`,
+            );
+            continue;
+          }
+
+          console.log(
+            `OK ${item.id}: ${item.balance.amount}${item.balance.currency ? ` ${item.balance.currency}` : ""}`,
+          );
+        }
+      }
+
+      if (
+        results.some(
+          (item) =>
+            !item.supported || ("error" in item && item.error !== undefined),
+        )
+      ) {
+        process.exitCode = 3;
+      }
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = 2;
+    }
+  },
+});
+
 export default defineCommand({
   name: "providers",
   description: "Provider utilities",
-  commands: [listCmd, healthCmd, doctorCmd],
+  commands: [listCmd, healthCmd, balanceCmd, doctorCmd],
   handler: async () => {
-    console.log("Use a subcommand: list | health | doctor");
+    console.log("Use a subcommand: list | health | balance | doctor");
   },
 });

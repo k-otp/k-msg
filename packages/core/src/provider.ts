@@ -1,6 +1,8 @@
 import type { KMsgError } from "./errors";
 import type { Result } from "./result";
 import type {
+  BalanceQuery,
+  BalanceResult,
   DeliveryStatusQuery,
   DeliveryStatusResult,
   KakaoChannel,
@@ -97,6 +99,10 @@ export interface ProviderHealthStatus {
   issues: string[];
   latencyMs?: number;
   data?: Record<string, unknown>;
+}
+
+export interface BalanceProvider {
+  getBalance(query?: BalanceQuery): Promise<Result<BalanceResult, KMsgError>>;
 }
 
 export interface Provider {

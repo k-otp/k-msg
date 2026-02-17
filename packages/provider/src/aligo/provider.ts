@@ -1,23 +1,23 @@
-import type {
-  KakaoChannel,
-  KakaoChannelCategories,
-  KakaoChannelProvider,
-  KMsgError,
-  MessageType,
-  Provider,
-  ProviderHealthStatus,
-  Result,
-  SendOptions,
-  SendResult,
-  Template,
-  TemplateContext,
-  TemplateCreateInput,
-  TemplateInspectionProvider,
-  TemplateProvider,
-  TemplateUpdateInput,
+import {
+  type KakaoChannel,
+  type KakaoChannelCategories,
+  type KakaoChannelProvider,
+  type KMsgError,
+  type MessageType,
+  type Provider,
+  type ProviderHealthStatus,
+  type Result,
+  readRuntimeEnv,
+  type SendOptions,
+  type SendResult,
+  type Template,
+  type TemplateContext,
+  type TemplateCreateInput,
+  type TemplateInspectionProvider,
+  type TemplateProvider,
+  type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
-import { readRuntimeEnv } from "../shared/runtime-env";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 import {
   addKakaoChannel,

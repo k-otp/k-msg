@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  type BalanceQuery,
   ok,
   type Provider,
   type ProviderHealthStatus,
@@ -27,6 +28,15 @@ class FakeSolapiProvider implements Provider {
       status: "SENT" as const,
       type: "SMS" as const,
       to: "01000000000",
+    });
+  }
+
+  async getBalance(query?: BalanceQuery) {
+    return ok({
+      providerId: this.id,
+      channel: query?.channel,
+      amount: 100,
+      currency: "KRW",
     });
   }
 }
@@ -85,6 +95,7 @@ describe("provider registry", () => {
     expect(loadCalls).toBe(1);
     expect(providers[0]?.id).toBe("solapi-main");
     expect(providers[0]?.name).toBe("Fake Solapi Provider");
+    expect(typeof providers[0]?.getBalance).toBe("function");
   });
 
   test("throws install guidance when solapi loading fails", async () => {

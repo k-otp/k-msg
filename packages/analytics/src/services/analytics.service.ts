@@ -1,3 +1,4 @@
+import { logger } from "@k-msg/core";
 import type {
   AggregatedMetric,
   AnalyticsConfig,
@@ -290,7 +291,11 @@ export class AnalyticsService {
       try {
         await this.runAggregation(interval);
       } catch (error) {
-        console.error(`Aggregation failed for interval ${interval}:`, error);
+        logger.error(
+          `Aggregation failed for interval ${interval}`,
+          {},
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     }, scheduleMs);
   }
@@ -314,14 +319,14 @@ export class AnalyticsService {
 
   private async runAggregation(interval: string): Promise<void> {
     // 실제 집계 작업 실행
-    console.log(`Running ${interval} aggregation...`);
+    logger.info(`Running ${interval} aggregation...`);
   }
 
   private async notifyAnomalies(anomalies: InsightData[]): Promise<void> {
     // 이상 상황 알림 로직 (웹훅, 이메일 등)
     for (const anomaly of anomalies) {
       if (anomaly.severity === "critical" || anomaly.severity === "high") {
-        console.warn("Anomaly detected:", anomaly);
+        logger.warn("Anomaly detected", { anomaly });
         // 실제 알림 전송
       }
     }

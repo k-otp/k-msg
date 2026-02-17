@@ -35,6 +35,7 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
+    "@k-msg/core": "workspace:*",
     "zod": "catalog:",
     "@k-msg/messaging": "workspace:*"
   },
