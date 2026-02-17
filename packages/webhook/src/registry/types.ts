@@ -2,6 +2,7 @@
  * Registry Type Definitions
  */
 
+import type { FileStorageAdapter } from "../shared/file-storage";
 import type { WebhookEventType } from "../types/webhook.types";
 
 export interface EndpointFilter {
@@ -44,6 +45,7 @@ export interface StorageConfig {
 
   // File storage options
   filePath?: string;
+  fileAdapter?: FileStorageAdapter;
   enableCompression?: boolean;
   maxFileSize?: number;
 

@@ -2,6 +2,7 @@
  * Dispatcher Type Definitions
  */
 
+import type { FileStorageAdapter } from "../shared/file-storage";
 import type { WebhookEndpoint, WebhookEvent } from "../types/webhook.types";
 
 export interface DispatchConfig {
@@ -24,6 +25,7 @@ export interface QueueConfig {
   maxQueueSize: number;
   persistToDisk: boolean;
   diskPath?: string;
+  fileAdapter?: FileStorageAdapter;
   compressionEnabled: boolean;
   ttlMs: number;
 }

@@ -10,6 +10,7 @@ This package provides:
 
 Note:
 - The default `WebhookService` storage is in-memory. For persistence/advanced workflows, see the exported building blocks such as `EndpointManager` and `DeliveryStore`.
+- This package is runtime-neutral (Edge/Web/Node). Node built-ins are not required by default.
 
 ## Install
 
@@ -161,6 +162,31 @@ await service.registerEndpoint({
     channelId: ["marketing"],
     templateId: ["welcome-template"],
   },
+});
+```
+
+## File Storage Adapter (for `type: "file"`)
+
+`EndpointManager`, `EventStore`, `DeliveryStore`, and `QueueManager` no longer import Node `fs/path` directly.
+When using file persistence, provide `fileAdapter`.
+
+```ts
+import { DeliveryStore, type FileStorageAdapter } from "@k-msg/webhook";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+
+const nodeFileAdapter: FileStorageAdapter = {
+  appendFile: (filePath, data) => fs.appendFile(filePath, data, "utf8"),
+  readFile: (filePath) => fs.readFile(filePath, "utf8"),
+  writeFile: (filePath, data) => fs.writeFile(filePath, data, "utf8"),
+  ensureDirForFile: (filePath) =>
+    fs.mkdir(path.dirname(filePath), { recursive: true }),
+};
+
+const store = new DeliveryStore({
+  type: "file",
+  filePath: "./data/deliveries.log",
+  fileAdapter: nodeFileAdapter,
 });
 ```
 

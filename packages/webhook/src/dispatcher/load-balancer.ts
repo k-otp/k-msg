@@ -3,7 +3,7 @@
  * 웹훅 엔드포인트 간의 부하 분산 관리
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "../shared/event-emitter";
 import type { WebhookEndpoint } from "../types/webhook.types";
 import type { CircuitBreakerState, LoadBalancerConfig } from "./types";
 
@@ -22,7 +22,7 @@ export class LoadBalancer extends EventEmitter {
   private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
   private connectionCounts: Map<string, number> = new Map();
   private roundRobinIndex = 0;
-  private healthCheckInterval: NodeJS.Timeout | null = null;
+  private healthCheckInterval: ReturnType<typeof setInterval> | null = null;
 
   private defaultConfig: LoadBalancerConfig = {
     strategy: "round-robin",
