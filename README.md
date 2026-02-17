@@ -15,11 +15,14 @@ npm install k-msg
 bun add k-msg
 ```
 
+If you use SOLAPI, also install `solapi` and import from `@k-msg/provider/solapi`.
+
 ## Quick Start
 
 ```ts
 import { KMsg } from "k-msg";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [

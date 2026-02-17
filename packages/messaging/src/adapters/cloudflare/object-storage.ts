@@ -42,7 +42,7 @@ export interface CloudflareR2BucketLike {
 export interface CloudflareDurableObjectStorageLike {
   get<T>(key: string): Promise<T | undefined>;
   put<T>(key: string, value: T): Promise<void>;
-  delete(key: string): Promise<void>;
+  delete(key: string): Promise<boolean | undefined>;
   list<T>(options?: {
     prefix?: string;
     cursor?: string;

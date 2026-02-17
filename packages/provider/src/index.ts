@@ -27,11 +27,3 @@ export {
   providerOnboardingSpecs,
 } from "./onboarding/specs";
 export { MockProvider } from "./providers/mock/mock.provider";
-export {
-  createDefaultSolapiProvider,
-  createSolapiProvider,
-  initializeSolapi,
-  SolapiProvider,
-  SolapiProviderFactory,
-} from "./solapi/provider";
-export type { SolapiConfig } from "./solapi/types/solapi";

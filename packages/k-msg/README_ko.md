@@ -7,6 +7,7 @@
 프로바이더 및 고급/런타임 전용 API는 각 패키지에서 직접 import 합니다.
 
 - `@k-msg/provider`
+- `@k-msg/provider/solapi`
 - `@k-msg/messaging/tracking`
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
@@ -23,7 +24,8 @@ bun add k-msg
 
 ```ts
 import { KMsg } from "k-msg";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [
