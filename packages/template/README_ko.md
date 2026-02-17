@@ -18,6 +18,10 @@ bun add @k-msg/template @k-msg/core
 - **Template Registry**: 템플릿 중앙 저장/조회
 - **Template Builder**: 템플릿 동적 생성/수정
 
+## 런타임 호환성
+
+- 런타임에서 Node 내장 모듈에 의존하지 않아 Edge 환경에서 `nodejs_compat` 없이 동작합니다.
+
 ## 기본 사용법
 
 ```typescript
