@@ -3,7 +3,7 @@
  * 대량 웹훅 요청을 효율적으로 처리하는 배치 디스패처
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "../shared/event-emitter";
 import type {
   WebhookBatch,
   WebhookDelivery,
@@ -16,7 +16,7 @@ export class BatchDispatcher extends EventEmitter {
   private config: BatchConfig;
   private pendingJobs: Map<string, DispatchJob[]> = new Map(); // endpointId -> jobs
   private activeBatches: Map<string, WebhookBatch> = new Map();
-  private batchProcessor: NodeJS.Timeout | null = null;
+  private batchProcessor: ReturnType<typeof setInterval> | null = null;
 
   private defaultConfig: BatchConfig = {
     maxBatchSize: 100,
