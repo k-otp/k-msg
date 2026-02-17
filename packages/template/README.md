@@ -18,6 +18,10 @@ bun add @k-msg/template @k-msg/core
 - **Template Registry**: Centralized template storage and retrieval
 - **Template Builder**: Dynamic template creation and modification
 
+## Runtime Compatibility
+
+- Works in Edge runtimes without `nodejs_compat` (no runtime dependency on Node built-ins).
+
 ## Basic Usage
 
 ```typescript
