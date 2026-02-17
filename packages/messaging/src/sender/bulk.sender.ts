@@ -235,7 +235,7 @@ export class BulkMessageSender {
       retryOptions.retryCondition ||
       ((error: Error) => ErrorUtils.isRetryable(error));
 
-    const safeConcurrency =
+    const _safeConcurrency =
       typeof concurrency === "number" && concurrency > 0
         ? Math.floor(concurrency)
         : 10;
@@ -250,9 +250,8 @@ export class BulkMessageSender {
       if (pending.length === 0) break;
 
       const attemptInputs = pending.map((idx) => inputs[idx]);
-      const attemptResults = await this.kmsg.sendMany(attemptInputs, {
-        concurrency: safeConcurrency,
-      });
+      const batchResult = await this.kmsg.send(attemptInputs);
+      const attemptResults = batchResult.results;
 
       const nextPending: number[] = [];
       for (let i = 0; i < attemptResults.length; i += 1) {
