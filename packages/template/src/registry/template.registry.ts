@@ -2,8 +2,8 @@
  * Template Registry - Manages templates across providers and categories
  */
 
-import { EventEmitter } from "../shared/event-emitter";
 import { TemplateValidator } from "../parser/validator";
+import { EventEmitter } from "../shared/event-emitter";
 import type {
   AlimTalkTemplate,
   TemplateCategory,
@@ -94,7 +94,9 @@ export class TemplateRegistry extends EventEmitter {
     enableValidationOnRegister: true,
   };
 
-  constructor(private options: Partial<TemplateRegistryOptions> = {}) {
+  private options: TemplateRegistryOptions;
+
+  constructor(options: Partial<TemplateRegistryOptions> = {}) {
     super();
     this.options = { ...this.defaultOptions, ...options };
 
@@ -251,27 +253,25 @@ export class TemplateRegistry extends EventEmitter {
     }
 
     if (filters.createdAfter) {
-      templates = templates.filter(
-        (t) => t.metadata.createdAt >= filters.createdAfter!,
-      );
+      const createdAfter = filters.createdAfter;
+      templates = templates.filter((t) => t.metadata.createdAt >= createdAfter);
     }
 
     if (filters.createdBefore) {
+      const createdBefore = filters.createdBefore;
       templates = templates.filter(
-        (t) => t.metadata.createdAt <= filters.createdBefore!,
+        (t) => t.metadata.createdAt <= createdBefore,
       );
     }
 
     if (filters.usageMin !== undefined) {
-      templates = templates.filter(
-        (t) => t.metadata.usage.sent >= filters.usageMin!,
-      );
+      const usageMin = filters.usageMin;
+      templates = templates.filter((t) => t.metadata.usage.sent >= usageMin);
     }
 
     if (filters.usageMax !== undefined) {
-      templates = templates.filter(
-        (t) => t.metadata.usage.sent <= filters.usageMax!,
-      );
+      const usageMax = filters.usageMax;
+      templates = templates.filter((t) => t.metadata.usage.sent <= usageMax);
     }
 
     // Apply sorting
@@ -622,13 +622,19 @@ export class TemplateRegistry extends EventEmitter {
     if (!this.templatesByProvider.has(template.provider)) {
       this.templatesByProvider.set(template.provider, new Set());
     }
-    this.templatesByProvider.get(template.provider)!.add(template.id);
+    const providerIndex = this.templatesByProvider.get(template.provider);
+    if (providerIndex) {
+      providerIndex.add(template.id);
+    }
 
     // Update category index
     if (!this.templatesByCategory.has(template.category)) {
       this.templatesByCategory.set(template.category, new Set());
     }
-    this.templatesByCategory.get(template.category)!.add(template.id);
+    const categoryIndex = this.templatesByCategory.get(template.category);
+    if (categoryIndex) {
+      categoryIndex.add(template.id);
+    }
   }
 
   private initializeVersionHistory(template: AlimTalkTemplate): void {
@@ -690,10 +696,9 @@ export class TemplateRegistry extends EventEmitter {
     history.currentVersion = newVersion.version;
 
     // Keep only max versions
-    if (history.versions.length > this.options.maxVersionsPerTemplate!) {
-      history.versions = history.versions.slice(
-        -this.options.maxVersionsPerTemplate!,
-      );
+    const maxVersionsPerTemplate = this.options.maxVersionsPerTemplate;
+    if (history.versions.length > maxVersionsPerTemplate) {
+      history.versions = history.versions.slice(-maxVersionsPerTemplate);
     }
   }
 
@@ -717,11 +722,12 @@ export class TemplateRegistry extends EventEmitter {
   }
 
   private startAutoBackup(): void {
+    const backupInterval = this.options.backupInterval;
     this.backupTimer = setInterval(() => {
       this.emit("backup:requested", {
         data: this.export(),
         timestamp: new Date(),
       });
-    }, this.options.backupInterval!);
+    }, backupInterval);
   }
 }
