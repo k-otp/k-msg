@@ -42,6 +42,7 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
+    "@k-msg/core": "workspace:*",
     "@k-msg/messaging": "workspace:*"
   },
   "devDependencies": {
