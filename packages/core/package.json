@@ -38,8 +38,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.0.0"
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {},
   "files": [

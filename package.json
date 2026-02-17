@@ -45,9 +45,10 @@
     "check": "bun x @biomejs/biome check .",
     "clean": "bun run --filter='./packages/*' clean",
     "prepublishOnly": "bun run build",
-    "api": "bun --cwd apps/api --",
     "admin": "bun --cwd apps/admin-dashboard --",
     "cli": "bun --cwd apps/cli --",
+    "deps:outdated:core": "for d in . apps/cli apps/admin-dashboard apps/message-service packages/*; do [ -f \"$d/package.json\" ] || continue; echo \"\\n===== $d =====\"; (cd \"$d\" && bun outdated || true); done",
+    "deps:outdated:examples": "for d in examples/*; do [ -f \"$d/package.json\" ] || continue; echo \"\\n===== $d =====\"; (cd \"$d\" && bun outdated || true); done",
     "version:patch": "bun pm version patch",
     "version:minor": "bun pm version minor",
     "version:major": "bun pm version major",
@@ -56,17 +57,17 @@
     "publish:all": "bun run --filter './packages/*' publish --access public",
     "publish:beta": "bun run --filter './packages/*' publish --tag beta --access public",
     "release": "./scripts/release.sh",
-    "release:patch": "bun run version:patch && bun run build:all && bun run publish:all",
-    "release:minor": "bun run version:minor && bun run build:all && bun run publish:all",
-    "release:major": "bun run version:major && bun run build:all && bun run publish:all"
+    "release:patch": "bun run version:patch && bun install && bun run build:all && bun run publish:all",
+    "release:minor": "bun run version:minor && bun install && bun run build:all && bun run publish:all",
+    "release:major": "bun run version:major && bun install && bun run build:all && bun run publish:all"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^22.0.0",
-    "typescript": "^5.7.2"
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "korea",
@@ -98,7 +99,7 @@
     ],
     "catalog": {
       "typescript": "^5.7.2",
-      "@types/bun": "latest",
+      "@types/bun": "^1.3.9",
       "@types/node": "^22.0.0",
       "zod": "^4.0.14",
       "hono": "^4.8.10",

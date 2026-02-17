@@ -111,6 +111,12 @@ The roadmap is a living document and is updated quarterly based on operational m
 - `@k-msg/template`: template interpolation utilities
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: optional supporting packages
 
+## Dependency Policy
+
+- Core packages/apps (`packages/*`, `apps/*`) prioritize stability.
+- Example projects (`examples/*`) are upgraded on a separate, periodic track.
+- Use `bun run deps:outdated:core` and `bun run deps:outdated:examples` to review them independently.
+
 ## Release Ops
 
 Release automation and changeset policy are documented in:
