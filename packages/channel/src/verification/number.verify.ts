@@ -3,7 +3,7 @@
  * 발신번호 인증 및 검증 시스템
  */
 
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "../shared/event-emitter";
 import {
   SenderNumber,
   SenderNumberCategory,
