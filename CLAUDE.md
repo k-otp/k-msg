@@ -35,7 +35,7 @@ k-msg-platform/
 2. **@k-msg/provider** - Provider implementations (depends on core)
 3. **@k-msg/template** - Template engine and interpolation utilities (depends on core)
 4. **@k-msg/messaging** - `KMsg` facade, routing, queue/tracking modules (depends on core)
-5. **k-msg** - Public facade package (depends on messaging; re-exports `KMsg` + runtime adapter subpaths)
+5. **k-msg** - Public facade package (depends on core and messaging; re-exports `KMsg`, selected core utilities, and runtime adapter subpaths)
 6. **@k-msg/analytics** - Tracking-based analytics (depends on core, messaging)
 7. **@k-msg/webhook** - Webhook delivery/security (depends on core)
 8. **@k-msg/channel** - Channel/sender management (currently standalone package dependency-wise)
