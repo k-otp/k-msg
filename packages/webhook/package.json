@@ -29,8 +29,7 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
-    "zod": "catalog:",
-    "@k-msg/messaging": "workspace:*"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
