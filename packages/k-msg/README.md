@@ -7,6 +7,7 @@ Unified package that re-exports the main public API:
 Provider implementations and advanced/runtime-specific APIs should be imported directly from their packages:
 
 - `@k-msg/provider`
+- `@k-msg/provider/solapi`
 - `@k-msg/messaging/tracking`
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
@@ -23,7 +24,8 @@ bun add k-msg
 
 ```ts
 import { KMsg } from "k-msg";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [

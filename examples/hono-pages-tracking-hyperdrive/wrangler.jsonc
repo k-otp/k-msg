@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-hono-pages-tracking-hyperdrive-example",
+  "compatibility_date": "2026-02-16",
+  // Required: postgres.js currently depends on Node compatibility APIs.
+  "compatibility_flags": ["nodejs_compat"],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5432/kmsg_tracking"
+    }
+  ]
+}

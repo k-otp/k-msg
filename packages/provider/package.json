@@ -17,6 +17,11 @@
       "types": "./dist/iwinv/index.d.ts",
       "import": "./dist/iwinv/index.mjs",
       "require": "./dist/iwinv/index.js"
+    },
+    "./solapi": {
+      "types": "./dist/solapi/index.d.ts",
+      "import": "./dist/solapi/index.mjs",
+      "require": "./dist/solapi/index.js"
     }
   },
   "publishConfig": {
@@ -24,8 +29,8 @@
   },
   "scripts": {
     "build": "bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/iwinv/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
-    "build:cjs": "bun build ./src/index.ts ./src/iwinv/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test'",
+    "build:esm": "bun build ./src/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
+    "build:cjs": "bun build ./src/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",
@@ -41,13 +46,21 @@
   },
   "dependencies": {
     "@k-msg/core": "workspace:*",
-    "solapi": "^5.5.4",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
+    "solapi": "^5.5.4",
     "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "solapi": "^5.5.4"
+  },
+  "peerDependenciesMeta": {
+    "solapi": {
+      "optional": true
+    }
   },
   "keywords": [
     "provider",

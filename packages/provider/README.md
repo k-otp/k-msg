@@ -10,6 +10,14 @@ npm install @k-msg/provider @k-msg/core
 bun add @k-msg/provider @k-msg/core
 ```
 
+For SOLAPI provider usage, install `solapi` in your app as well:
+
+```bash
+npm install solapi
+# or
+bun add solapi
+```
+
 ## Built-in Providers
 
 - `SolapiProvider` (SOLAPI)
@@ -20,6 +28,11 @@ All providers implement the `Provider` interface from `@k-msg/core`:
 
 - `supportedTypes` declares supported message `type`s
 - `send(options: SendOptions)` returns `Result<SendResult, KMsgError>` (never throws)
+
+Import paths:
+
+- `@k-msg/provider`: runtime-neutral exports (`IWINVProvider`, `AligoProvider`, onboarding helpers, mock)
+- `@k-msg/provider/solapi`: SOLAPI provider exports
 
 ## Provider Onboarding Matrix
 
@@ -57,7 +70,8 @@ Boundary:
 
 ```ts
 import { KMsg } from "@k-msg/messaging";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [

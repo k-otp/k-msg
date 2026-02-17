@@ -10,6 +10,14 @@ npm install @k-msg/provider @k-msg/core
 bun add @k-msg/provider @k-msg/core
 ```
 
+SOLAPI provider를 사용할 경우, 앱에서 `solapi`를 별도로 설치해야 합니다:
+
+```bash
+npm install solapi
+# or
+bun add solapi
+```
+
 ## 기본 제공 Provider
 
 - `SolapiProvider` (SOLAPI)
@@ -20,6 +28,11 @@ bun add @k-msg/provider @k-msg/core
 
 - `supportedTypes`: 지원하는 메시지 `type` 선언
 - `send(options: SendOptions)`: `Result<SendResult, KMsgError>` 반환 (throw 하지 않음)
+
+import 경로:
+
+- `@k-msg/provider`: 런타임 중립 export (`IWINVProvider`, `AligoProvider`, 온보딩 헬퍼, mock)
+- `@k-msg/provider/solapi`: SOLAPI provider export
 
 ## Provider 온보딩 매트릭스
 
@@ -57,7 +70,8 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 
 ```ts
 import { KMsg } from "@k-msg/messaging";
-import { IWINVProvider, SolapiProvider } from "@k-msg/provider";
+import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const kmsg = new KMsg({
   providers: [
