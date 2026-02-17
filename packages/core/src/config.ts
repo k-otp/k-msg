@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LogLevel } from "./logger";
+import { getRuntimeEnvSource } from "./runtime/env";
 
 // Base configuration schemas
 export const DatabaseConfigSchema = z.object({
@@ -197,77 +198,71 @@ export type KMessageConfig = z.infer<typeof KMessageConfigSchema>;
 // biome-ignore lint/complexity/noStaticOnlyClass: kept as a static namespace for config helpers
 export class ConfigLoader {
   static loadFromEnv(): KMessageConfig {
+    const env = getRuntimeEnvSource();
+
     const config = {
-      environment: process.env.NODE_ENV || "development",
+      environment: env.NODE_ENV || "development",
 
       server: {
-        port: process.env.PORT ? parseInt(process.env.PORT, 10) : undefined,
-        host: process.env.HOST,
+        port: env.PORT ? parseInt(env.PORT, 10) : undefined,
+        host: env.HOST,
         cors: {
-          origins: process.env.CORS_ORIGINS
-            ? process.env.CORS_ORIGINS.split(",")
-            : undefined,
+          origins: env.CORS_ORIGINS ? env.CORS_ORIGINS.split(",") : undefined,
         },
       },
 
-      database: process.env.DATABASE_URL
+      database: env.DATABASE_URL
         ? {
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT
-              ? parseInt(process.env.DB_PORT, 10)
-              : undefined,
-            database: process.env.DB_NAME,
-            username: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            ssl: process.env.DB_SSL === "true",
+            host: env.DB_HOST,
+            port: env.DB_PORT ? parseInt(env.DB_PORT, 10) : undefined,
+            database: env.DB_NAME,
+            username: env.DB_USER,
+            password: env.DB_PASSWORD,
+            ssl: env.DB_SSL === "true",
           }
         : undefined,
 
-      redis: process.env.REDIS_URL
+      redis: env.REDIS_URL
         ? {
-            host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT
-              ? parseInt(process.env.REDIS_PORT, 10)
-              : undefined,
-            password: process.env.REDIS_PASSWORD,
-            db: process.env.REDIS_DB
-              ? parseInt(process.env.REDIS_DB, 10)
-              : undefined,
+            host: env.REDIS_HOST,
+            port: env.REDIS_PORT ? parseInt(env.REDIS_PORT, 10) : undefined,
+            password: env.REDIS_PASSWORD,
+            db: env.REDIS_DB ? parseInt(env.REDIS_DB, 10) : undefined,
           }
         : undefined,
 
       logger: {
-        level: process.env.LOG_LEVEL as LogLevel,
-        enableJson: process.env.LOG_JSON === "true",
-        enableColors: process.env.LOG_COLORS !== "false",
+        level: env.LOG_LEVEL as LogLevel,
+        enableJson: env.LOG_JSON === "true",
+        enableColors: env.LOG_COLORS !== "false",
       },
 
       providers: {
-        iwinv: process.env.IWINV_API_KEY
+        iwinv: env.IWINV_API_KEY
           ? {
-              apiKey: process.env.IWINV_API_KEY,
-              debug: process.env.IWINV_DEBUG === "true",
+              apiKey: env.IWINV_API_KEY,
+              debug: env.IWINV_DEBUG === "true",
             }
           : undefined,
 
-        sms: process.env.SMS_PROVIDER
+        sms: env.SMS_PROVIDER
           ? {
               // Backward-compatible alias: "coolsms" -> "solapi"
-              provider: (process.env.SMS_PROVIDER === "coolsms"
+              provider: (env.SMS_PROVIDER === "coolsms"
                 ? "solapi"
-                : process.env.SMS_PROVIDER) as "iwinv" | "aligo" | "solapi",
-              apiKey: process.env.SMS_API_KEY ?? "",
-              apiSecret: process.env.SMS_API_SECRET,
-              senderId: process.env.SMS_SENDER_ID ?? "",
+                : env.SMS_PROVIDER) as "iwinv" | "aligo" | "solapi",
+              apiKey: env.SMS_API_KEY ?? "",
+              apiSecret: env.SMS_API_SECRET,
+              senderId: env.SMS_SENDER_ID ?? "",
             }
           : undefined,
       },
 
       security: {
-        apiKeyRequired: process.env.API_KEY_REQUIRED !== "false",
-        rateLimitEnabled: process.env.RATE_LIMIT_ENABLED !== "false",
-        maxRequestsPerMinute: process.env.MAX_REQUESTS_PER_MINUTE
-          ? parseInt(process.env.MAX_REQUESTS_PER_MINUTE, 10)
+        apiKeyRequired: env.API_KEY_REQUIRED !== "false",
+        rateLimitEnabled: env.RATE_LIMIT_ENABLED !== "false",
+        maxRequestsPerMinute: env.MAX_REQUESTS_PER_MINUTE
+          ? parseInt(env.MAX_REQUESTS_PER_MINUTE, 10)
           : undefined,
       },
     };

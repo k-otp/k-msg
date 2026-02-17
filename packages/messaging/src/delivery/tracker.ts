@@ -2,7 +2,7 @@
  * Delivery tracking system for messages
  */
 
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "../shared/event-emitter";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -76,7 +76,7 @@ export interface WebhookDeliveryResult {
 export class DeliveryTracker extends EventEmitter {
   private trackingRecords = new Map<string, TrackingRecord>();
   private statusIndex = new Map<MessageStatus, Set<string>>();
-  private trackingTimer?: NodeJS.Timeout;
+  private trackingTimer?: ReturnType<typeof setTimeout>;
   private webhookQueue: Array<{ record: TrackingRecord; event: MessageEvent }> =
     [];
   private isRunning = false;
