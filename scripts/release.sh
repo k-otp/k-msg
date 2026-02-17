@@ -60,15 +60,19 @@ NEW_VERSION=$(bun pm pkg get version | tr -d '"')
 
 echo "✅ Version updated: $OLD_VERSION → $NEW_VERSION"
 
-# 6. 다시 빌드 (버전 정보 포함)
+# 6. lockfile 동기화
+echo "🔒 Syncing lockfile..."
+bun install
+
+# 7. 다시 빌드 (버전 정보 포함)
 echo "🔨 Rebuilding with new version..."
 bun run build:all
 
-# 7. 패킹 검증
+# 8. 패킹 검증
 echo "📦 Validating packages..."
 bun run pack:dry
 
-# 8. 배포 확인
+# 9. 배포 확인
 echo "🚀 Ready to publish packages:"
 echo "  - Version: $NEW_VERSION"
 NUM_PACKAGES=$(bun pm ls | grep "@workspace" | wc -l | tr -d ' ')
@@ -80,14 +84,14 @@ if [[ $confirm != "y" && $confirm != "Y" ]]; then
   exit 0
 fi
 
-# 9. 실제 배포
+# 10. 실제 배포
 echo "🚀 Publishing packages..."
 bun run publish:all || {
   echo "❌ Publish failed. Please check the errors above."
   exit 1
 }
 
-# 10. Git 태그 및 푸시
+# 11. Git 태그 및 푸시
 echo "🏷️ Creating git tag..."
 git add .
 git commit -m "Release v$NEW_VERSION" || echo "No changes to commit"
