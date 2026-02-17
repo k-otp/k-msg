@@ -2,8 +2,8 @@
  * Retry handler for failed message deliveries
  */
 
-import { EventEmitter } from "node:events";
 import { RetryHandler as CoreRetryHandler } from "@k-msg/core";
+import { EventEmitter } from "../shared/event-emitter";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -71,7 +71,7 @@ export interface RetryHandlerMetrics {
 export class MessageRetryHandler extends EventEmitter {
   private retryQueue: RetryQueueItem[] = [];
   private processing = new Set<string>();
-  private checkTimer?: NodeJS.Timeout;
+  private checkTimer?: ReturnType<typeof setTimeout>;
   private isRunning = false;
   private metrics: RetryHandlerMetrics;
 

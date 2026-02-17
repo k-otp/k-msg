@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "@types/node": "catalog:",
     "solapi": "^5.5.4",
     "typescript": "catalog:"
   },

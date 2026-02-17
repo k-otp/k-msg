@@ -46,8 +46,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/bun": "catalog:",
-    "@types/node": "catalog:"
+    "@types/bun": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
