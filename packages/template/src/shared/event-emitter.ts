@@ -1,4 +1,4 @@
-type Listener = (...args: any[]) => void;
+type Listener = (...args: unknown[]) => void;
 
 /**
  * Minimal event emitter implementation for runtime-neutral (Edge/Web) usage.
@@ -41,7 +41,7 @@ export class EventEmitter {
     return this.on(eventName, wrappedListener);
   }
 
-  emit(eventName: string, ...args: any[]): boolean {
+  emit(eventName: string, ...args: unknown[]): boolean {
     const listeners = this.listenersMap.get(eventName);
     if (!listeners || listeners.size === 0) {
       return false;
