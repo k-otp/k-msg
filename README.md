@@ -111,6 +111,12 @@ The roadmap is a living document and is updated quarterly based on operational m
 - `@k-msg/template`: template interpolation utilities
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: optional supporting packages
 
+## Release Ops
+
+Release automation and changeset policy are documented in:
+
+- [`./.sampo/README.md`](./.sampo/README.md)
+
 ## Breaking Changes
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` public APIs were removed.
