@@ -3,7 +3,7 @@
  * 채널 생성, 조회, 수정, 삭제 통합 관리
  */
 
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "../shared/event-emitter";
 import {
   type Channel,
   type ChannelCreateRequest,
@@ -69,7 +69,7 @@ export class ChannelCRUD extends EventEmitter {
   private channels = new Map<string, Channel>();
   private senderNumbers = new Map<string, SenderNumber>();
   private auditLogs: AuditLogEntry[] = [];
-  private cleanupTimer?: NodeJS.Timeout;
+  private cleanupTimer?: ReturnType<typeof setInterval>;
 
   private defaultOptions: ChannelCRUDOptions = {
     enableAuditLog: true,

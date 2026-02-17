@@ -3,7 +3,7 @@
  * 채널 및 발신번호 액세스 권한 관리
  */
 
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "../shared/event-emitter";
 
 export interface User {
   id: string;
