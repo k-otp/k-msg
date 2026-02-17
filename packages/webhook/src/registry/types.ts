@@ -3,6 +3,7 @@
  */
 
 import type { WebhookEventType } from "../types/webhook.types";
+import type { FileStorageAdapter } from "../shared/file-storage";
 
 export interface EndpointFilter {
   status?: "active" | "inactive" | "error" | "suspended";
@@ -44,6 +45,7 @@ export interface StorageConfig {
 
   // File storage options
   filePath?: string;
+  fileAdapter?: FileStorageAdapter;
   enableCompression?: boolean;
   maxFileSize?: number;
 

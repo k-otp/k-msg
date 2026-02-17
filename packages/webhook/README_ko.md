@@ -10,6 +10,7 @@ HTTP 엔드포인트로 실시간 메시지 이벤트를 전달하기 위한 웹
 
 참고:
 - 기본 `WebhookService` 저장소는 in-memory입니다. 영속 저장/고급 워크플로우가 필요하면 `EndpointManager`, `DeliveryStore` 같은 빌딩 블록을 활용하세요.
+- 이 패키지는 런타임 중립(Edge/Web/Node)으로 동작하며, 기본적으로 Node 내장 모듈에 의존하지 않습니다.
 
 ## 설치
 
@@ -163,6 +164,31 @@ await service.registerEndpoint({
 });
 ```
 
+## File Storage Adapter (`type: "file"` 사용 시)
+
+`EndpointManager`, `EventStore`, `DeliveryStore`, `QueueManager`는 Node `fs/path`를 직접 import하지 않습니다.
+파일 영속화를 사용하려면 `fileAdapter`를 주입해야 합니다.
+
+```ts
+import { DeliveryStore, type FileStorageAdapter } from "@k-msg/webhook";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+
+const nodeFileAdapter: FileStorageAdapter = {
+  appendFile: (filePath, data) => fs.appendFile(filePath, data, "utf8"),
+  readFile: (filePath) => fs.readFile(filePath, "utf8"),
+  writeFile: (filePath, data) => fs.writeFile(filePath, data, "utf8"),
+  ensureDirForFile: (filePath) =>
+    fs.mkdir(path.dirname(filePath), { recursive: true }),
+};
+
+const store = new DeliveryStore({
+  type: "file",
+  filePath: "./data/deliveries.log",
+  fileAdapter: nodeFileAdapter,
+});
+```
+
 ## Zod 스키마
 
 이 패키지는 검증용 Zod 스키마를 export 합니다.
@@ -173,4 +199,3 @@ await service.registerEndpoint({
 ## License
 
 MIT
-

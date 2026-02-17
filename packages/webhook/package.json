@@ -29,12 +29,12 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/bun": "catalog:",
-    "@types/node": "catalog:"
+    "@types/bun": "catalog:"
   },
   "keywords": [
     "webhook",

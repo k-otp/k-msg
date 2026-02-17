@@ -1,4 +1,7 @@
-import * as crypto from "node:crypto";
+import { hmac } from "@noble/hashes/hmac";
+import { sha1 } from "@noble/hashes/sha1";
+import { sha256 } from "@noble/hashes/sha2";
+import { bytesToHex } from "@noble/hashes/utils";
 import type { WebhookConfig } from "../types/webhook.types";
 
 export interface SecurityConfig {
@@ -13,6 +16,7 @@ export interface SecurityConfig {
  */
 export class SecurityManager {
   private config: SecurityConfig;
+  private encoder = new TextEncoder();
 
   constructor(
     webhookConfig: Pick<
@@ -39,9 +43,7 @@ export class SecurityManager {
    * Webhook 페이로드에 대한 서명 생성
    */
   generateSignature(payload: string, secret: string): string {
-    const hmac = crypto.createHmac(this.config.algorithm, secret);
-    hmac.update(payload, "utf8");
-    const signature = hmac.digest("hex");
+    const signature = this.generateSignatureDigest(payload, secret);
 
     return this.config.prefix ? `${this.config.prefix}${signature}` : signature;
   }
@@ -158,7 +160,28 @@ export class SecurityManager {
    * Webhook ID 생성 (추적용)
    */
   private generateWebhookId(): string {
-    return `wh_${crypto.randomBytes(16).toString("hex")}`;
+    const bytes = new Uint8Array(16);
+    if (globalThis.crypto?.getRandomValues) {
+      globalThis.crypto.getRandomValues(bytes);
+    } else {
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = Math.floor(Math.random() * 256);
+      }
+    }
+
+    return `wh_${bytesToHex(bytes)}`;
+  }
+
+  private generateSignatureDigest(payload: string, secret: string): string {
+    const key = this.encoder.encode(secret);
+    const message = this.encoder.encode(payload);
+
+    const digest =
+      this.config.algorithm === "sha1"
+        ? hmac(sha1, key, message)
+        : hmac(sha256, key, message);
+
+    return bytesToHex(digest);
   }
 
   /**

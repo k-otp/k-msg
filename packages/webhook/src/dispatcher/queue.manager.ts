@@ -3,9 +3,12 @@
  * 웹훅 작업 큐 관리 시스템
  */
 
-import { EventEmitter } from "events";
-import * as fs from "fs/promises";
-import * as path from "path";
+import {
+  isFileNotFoundError,
+  requireFileStorageAdapter,
+  resolveStoragePath,
+} from "../shared/file-storage";
+import { EventEmitter } from "../shared/event-emitter";
 import type { DispatchJob, QueueConfig } from "./types";
 
 export class QueueManager extends EventEmitter {
@@ -14,7 +17,8 @@ export class QueueManager extends EventEmitter {
   private highPriorityQueue: DispatchJob[] = [];
   private mediumPriorityQueue: DispatchJob[] = [];
   private lowPriorityQueue: DispatchJob[] = [];
-  private delayedJobs: Map<string, NodeJS.Timeout> = new Map();
+  private delayedJobs: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private ttlCleanupInterval: ReturnType<typeof setInterval> | null = null;
   private totalJobs = 0;
 
   private defaultConfig: QueueConfig = {
@@ -250,8 +254,6 @@ export class QueueManager extends EventEmitter {
     let removedCount = 0;
 
     for (const [queueName, queue] of this.queues.entries()) {
-      const initialLength = queue.length;
-
       // TTL 확인하여 만료된 작업 제거
       for (let i = queue.length - 1; i >= 0; i--) {
         const job = queue[i];
@@ -330,8 +332,12 @@ export class QueueManager extends EventEmitter {
    * TTL 정리 작업 시작
    */
   private startTTLCleanup(): void {
+    if (this.ttlCleanupInterval) {
+      clearInterval(this.ttlCleanupInterval);
+    }
+
     // 5분마다 만료된 작업 정리
-    setInterval(
+    this.ttlCleanupInterval = setInterval(
       async () => {
         try {
           await this.cleanupExpiredJobs();
@@ -350,6 +356,7 @@ export class QueueManager extends EventEmitter {
     if (!this.config.diskPath) return;
 
     try {
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
       const data = {
         queues: {
           high: this.highPriorityQueue,
@@ -361,13 +368,11 @@ export class QueueManager extends EventEmitter {
       };
 
       const json = JSON.stringify(data, null, 2);
-      const filePath = path.join(this.config.diskPath, "webhook-queue.json");
-
-      // 디렉토리 생성
-      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      const filePath = resolveStoragePath(this.config.diskPath, "webhook-queue.json");
+      await fileAdapter.ensureDirForFile(filePath);
 
       // 파일 저장
-      await fs.writeFile(filePath, json, "utf8");
+      await fileAdapter.writeFile(filePath, json);
 
       this.emit("diskSaved", { filePath, totalJobs: this.totalJobs });
     } catch (error) {
@@ -383,8 +388,9 @@ export class QueueManager extends EventEmitter {
     if (!this.config.diskPath) return;
 
     try {
-      const filePath = path.join(this.config.diskPath, "webhook-queue.json");
-      const json = await fs.readFile(filePath, "utf8");
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
+      const filePath = resolveStoragePath(this.config.diskPath, "webhook-queue.json");
+      const json = await fileAdapter.readFile(filePath);
       const data = JSON.parse(json);
 
       // 큐 복원
@@ -404,7 +410,7 @@ export class QueueManager extends EventEmitter {
         timestamp: data.timestamp,
       });
     } catch (error) {
-      if ((error as any).code !== "ENOENT") {
+      if (!isFileNotFoundError(error)) {
         this.emit("diskLoadError", error);
       }
       // 파일이 없는 경우는 정상 (처음 시작)
@@ -415,6 +421,11 @@ export class QueueManager extends EventEmitter {
    * 큐 관리자 종료
    */
   async shutdown(): Promise<void> {
+    if (this.ttlCleanupInterval) {
+      clearInterval(this.ttlCleanupInterval);
+      this.ttlCleanupInterval = null;
+    }
+
     // 지연된 작업들 취소
     for (const timeout of this.delayedJobs.values()) {
       clearTimeout(timeout);

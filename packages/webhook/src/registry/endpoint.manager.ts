@@ -3,9 +3,11 @@
  * 웹훅 엔드포인트 관리를 위한 고급 기능 제공
  */
 
-import { EventEmitter } from "events";
-import * as fs from "fs/promises";
-import * as path from "path";
+import {
+  isFileNotFoundError,
+  requireFileStorageAdapter,
+} from "../shared/file-storage";
+import { EventEmitter } from "../shared/event-emitter";
 import type { WebhookEndpoint } from "../types/webhook.types";
 import { WebhookEventType } from "../types/webhook.types";
 import type {
@@ -444,7 +446,8 @@ export class EndpointManager extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const data = await fs.readFile(this.config.filePath, "utf8");
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
+      const data = await fileAdapter.readFile(this.config.filePath);
       const parsed = JSON.parse(data);
 
       // 엔드포인트 복원
@@ -467,7 +470,7 @@ export class EndpointManager extends EventEmitter {
         endpointCount: this.endpoints.size,
       });
     } catch (error) {
-      if ((error as any).code !== "ENOENT") {
+      if (!isFileNotFoundError(error)) {
         this.emit("loadError", error);
       }
     }
@@ -480,6 +483,7 @@ export class EndpointManager extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
       const data = {
         endpoints: Array.from(this.endpoints.values()),
         savedAt: new Date().toISOString(),
@@ -487,11 +491,10 @@ export class EndpointManager extends EventEmitter {
 
       const json = JSON.stringify(data, null, 2);
 
-      // 디렉토리 생성
-      await fs.mkdir(path.dirname(this.config.filePath), { recursive: true });
+      await fileAdapter.ensureDirForFile(this.config.filePath);
 
       // 파일 저장
-      await fs.writeFile(this.config.filePath, json, "utf8");
+      await fileAdapter.writeFile(this.config.filePath, json);
 
       this.emit("dataSaved", {
         filePath: this.config.filePath,

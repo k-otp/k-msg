@@ -29,6 +29,7 @@ export type {
   SearchResult,
   StorageConfig,
 } from "./registry/types";
+export type { FileStorageAdapter } from "./shared/file-storage";
 export { RetryManager } from "./retry/retry.manager";
 
 // 보안 및 재시도 관리
