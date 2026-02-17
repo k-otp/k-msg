@@ -3,9 +3,11 @@
  * 웹훅 이벤트 저장 및 관리
  */
 
-import { EventEmitter } from "events";
-import * as fs from "fs/promises";
-import * as path from "path";
+import {
+  isFileNotFoundError,
+  requireFileStorageAdapter,
+} from "../shared/file-storage";
+import { EventEmitter } from "../shared/event-emitter";
 import type { WebhookEvent } from "../types/webhook.types";
 import { WebhookEventType } from "../types/webhook.types";
 import type {
@@ -22,7 +24,7 @@ export class EventStore extends EventEmitter {
   private indexByDate: Map<string, Set<string>> = new Map(); // YYYY-MM-DD -> event ids
   private indexByProvider: Map<string, Set<string>> = new Map();
   private indexByChannel: Map<string, Set<string>> = new Map();
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   private defaultConfig: StorageConfig = {
     type: "memory",
@@ -643,8 +645,10 @@ export class EventStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
       const line = JSON.stringify(event) + "\n";
-      await fs.appendFile(this.config.filePath, line, "utf8");
+      await fileAdapter.ensureDirForFile(this.config.filePath);
+      await fileAdapter.appendFile(this.config.filePath, line);
     } catch (error) {
       this.emit("appendError", error);
     }
@@ -657,7 +661,8 @@ export class EventStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
-      const data = await fs.readFile(this.config.filePath, "utf8");
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
+      const data = await fileAdapter.readFile(this.config.filePath);
       const lines = data
         .trim()
         .split("\n")
@@ -683,7 +688,7 @@ export class EventStore extends EventEmitter {
         eventCount: this.events.size,
       });
     } catch (error) {
-      if ((error as any).code !== "ENOENT") {
+      if (!isFileNotFoundError(error)) {
         this.emit("loadError", error);
       }
     }
@@ -696,15 +701,15 @@ export class EventStore extends EventEmitter {
     if (!this.config.filePath) return;
 
     try {
+      const fileAdapter = requireFileStorageAdapter(this.config.fileAdapter);
       const lines = Array.from(this.events.values())
         .map((event) => JSON.stringify(event))
         .join("\n");
 
-      // 디렉토리 생성
-      await fs.mkdir(path.dirname(this.config.filePath), { recursive: true });
+      await fileAdapter.ensureDirForFile(this.config.filePath);
 
       // 파일 저장
-      await fs.writeFile(this.config.filePath, lines + "\n", "utf8");
+      await fileAdapter.writeFile(this.config.filePath, lines + "\n");
 
       this.emit("dataSaved", {
         filePath: this.config.filePath,

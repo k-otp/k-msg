@@ -3,6 +3,7 @@
  */
 
 import type { WebhookEndpoint, WebhookEvent } from "../types/webhook.types";
+import type { FileStorageAdapter } from "../shared/file-storage";
 
 export interface DispatchConfig {
   maxConcurrentRequests: number;
@@ -24,6 +25,7 @@ export interface QueueConfig {
   maxQueueSize: number;
   persistToDisk: boolean;
   diskPath?: string;
+  fileAdapter?: FileStorageAdapter;
   compressionEnabled: boolean;
   ttlMs: number;
 }
