@@ -18,6 +18,10 @@ bun add @k-msg/channel @k-msg/core
 - **권한 관리**: 채널 대상 역할 기반 접근 제어
 - **상태 모니터링**: 채널 상태 실시간 모니터링
 
+## 런타임 호환성
+
+- 런타임에서 Node 내장 모듈에 의존하지 않아 Edge 환경에서 `nodejs_compat` 없이 동작합니다.
+
 ## 기본 사용법
 
 ```typescript
