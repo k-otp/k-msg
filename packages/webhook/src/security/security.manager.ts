@@ -1,3 +1,4 @@
+import { logger } from "@k-msg/core";
 import { hmac } from "@noble/hashes/hmac";
 import { sha1 } from "@noble/hashes/sha1";
 import { sha256 } from "@noble/hashes/sha2";
@@ -73,7 +74,11 @@ export class SecurityManager {
       // 타이밍 공격 방지를 위한 constant-time 비교
       return this.constantTimeCompare(signature, expectedSignature);
     } catch (error) {
-      console.error("Signature verification failed:", error);
+      logger.error(
+        "Signature verification failed",
+        undefined,
+        error instanceof Error ? error : new Error(String(error)),
+      );
       return false;
     }
   }

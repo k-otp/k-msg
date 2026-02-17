@@ -23,6 +23,7 @@ bun add @k-msg/webhook
 ## Quickstart (WebhookService)
 
 ```ts
+import { readRuntimeEnv } from "@k-msg/core";
 import {
   WebhookEventType,
   WebhookService,
@@ -36,7 +37,7 @@ const config: WebhookConfig = {
   timeoutMs: 30_000,
   enableSecurity: true,
   // Optional: used when an endpoint does not provide its own secret
-  secretKey: process.env.WEBHOOK_SECRET,
+  secretKey: readRuntimeEnv("WEBHOOK_SECRET"),
   // Optional: algorithm, signatureHeader, signaturePrefix
   enabledEvents: [
     WebhookEventType.MESSAGE_SENT,
@@ -54,7 +55,7 @@ const endpoint = await service.registerEndpoint({
   active: true,
   events: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
   // Optional: endpoint-specific secret (preferred over config.secretKey)
-  secret: process.env.WEBHOOK_SECRET,
+  secret: readRuntimeEnv("WEBHOOK_SECRET"),
   // Optional: per-endpoint retry overrides
   retryConfig: { maxRetries: 5, retryDelayMs: 1000, backoffMultiplier: 2 },
   // Optional: metadata-based filters
@@ -110,6 +111,7 @@ To verify a webhook, you must use the exact raw request body string.
 
 ```ts
 import { Hono } from "hono";
+import { readRuntimeEnv } from "@k-msg/core";
 import { SecurityManager } from "@k-msg/webhook";
 
 const app = new Hono();
@@ -125,7 +127,7 @@ app.post("/webhooks/k-msg", async (c) => {
 
   const signature = c.req.header("X-Webhook-Signature") ?? "";
   const timestamp = c.req.header("X-Webhook-Timestamp") ?? "";
-  const secret = process.env.WEBHOOK_SECRET ?? "";
+  const secret = readRuntimeEnv("WEBHOOK_SECRET") ?? "";
 
   if (!security.verifyTimestamp(timestamp, 300)) {
     return c.json({ error: "Request too old" }, 401);
