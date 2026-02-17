@@ -1,3 +1,4 @@
+import { readRuntimeEnv } from "@k-msg/core";
 import type {
   WebhookConfig,
   WebhookDelivery,
@@ -9,16 +10,6 @@ import type {
 import { WebhookEventType } from "../types/webhook.types";
 import { type HttpClient, WebhookDispatcher } from "./webhook.dispatcher";
 import { WebhookRegistry } from "./webhook.registry";
-
-type RuntimeProcess = {
-  env?: {
-    NODE_ENV?: string;
-  };
-};
-
-function getNodeEnv(): string | undefined {
-  return (globalThis as { process?: RuntimeProcess }).process?.env?.NODE_ENV;
-}
 
 export class WebhookService {
   private config: WebhookConfig;
@@ -463,7 +454,7 @@ export class WebhookService {
       }
 
       // 로컬호스트 및 프라이빗 IP 차단 (프로덕션에서)
-      if (getNodeEnv() === "production") {
+      if (readRuntimeEnv("NODE_ENV") === "production") {
         const hostname = parsedUrl.hostname;
         if (
           hostname === "localhost" ||

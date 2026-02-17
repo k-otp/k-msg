@@ -168,6 +168,7 @@
       "name": "@k-msg/webhook",
       "version": "0.16.0",
       "dependencies": {
+        "@k-msg/core": "workspace:*",
         "@noble/hashes": "^1.8.0",
         "zod": "catalog:",
       },
