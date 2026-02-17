@@ -25,7 +25,10 @@ let runtimePromise: Promise<Runtime> | undefined;
 
 function getRuntime(env: Env): Promise<Runtime> {
   if (!runtimePromise) {
-    runtimePromise = buildRuntime(env);
+    runtimePromise = buildRuntime(env).catch((error) => {
+      runtimePromise = undefined;
+      throw error;
+    });
   }
   return runtimePromise;
 }

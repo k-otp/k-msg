@@ -32,7 +32,12 @@ type AdvancedSendInput = Parameters<KMsg["send"]>[0];
 let appPromise: Promise<MessagingApp> | undefined;
 
 function getMessagingApp(env: Bindings): Promise<MessagingApp> {
-  if (!appPromise) appPromise = buildMessagingApp(env);
+  if (!appPromise) {
+    appPromise = buildMessagingApp(env).catch((error) => {
+      appPromise = undefined;
+      throw error;
+    });
+  }
   return appPromise;
 }
 

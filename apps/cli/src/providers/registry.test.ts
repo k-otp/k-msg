@@ -8,6 +8,9 @@ import {
 import type { KMsgCliConfig } from "../config/schema";
 import { createProviders, createProvidersWithLoaders } from "./registry";
 
+const SOLAPI_DEPENDENCY_ERROR_PREFIX =
+  "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.";
+
 class FakeSolapiProvider implements Provider {
   readonly id = "solapi";
   readonly name = "Fake Solapi Provider";
@@ -85,8 +88,10 @@ describe("provider registry", () => {
   });
 
   test("throws install guidance when solapi loading fails", async () => {
-    await expect(
-      createProvidersWithLoaders(
+    let thrown: Error | undefined;
+
+    try {
+      await createProvidersWithLoaders(
         createConfig([
           {
             type: "solapi",
@@ -102,8 +107,54 @@ describe("provider registry", () => {
             throw new Error("Cannot find module 'solapi'");
           },
         },
-      ),
-    ).rejects.toThrow("bun add solapi");
+      );
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown).toBeDefined();
+    expect(thrown?.message).toContain("bun add solapi");
+    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(
+      2,
+    );
+  });
+
+  test("does not double-wrap already wrapped solapi dependency errors", async () => {
+    const preWrapped = [
+      SOLAPI_DEPENDENCY_ERROR_PREFIX,
+      "Install it in the runtime app: `bun add solapi` or `npm i solapi`.",
+      "Original error: Cannot find module 'solapi'",
+    ].join("\n");
+
+    let thrown: Error | undefined;
+
+    try {
+      await createProvidersWithLoaders(
+        createConfig([
+          {
+            type: "solapi",
+            id: "solapi-main",
+            config: {
+              apiKey: "test-api-key",
+              apiSecret: "test-api-secret",
+            },
+          },
+        ]),
+        {
+          loadSolapiProvider: async () => {
+            throw new Error(preWrapped);
+          },
+        },
+      );
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown).toBeDefined();
+    expect(thrown?.message).toBe(preWrapped);
+    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(
+      2,
+    );
   });
 
   test("preserves provider capabilities when wrapping provider id", async () => {

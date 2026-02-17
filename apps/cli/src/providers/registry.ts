@@ -18,25 +18,31 @@ export type ProviderLoaders = {
   loadSolapiProvider: () => Promise<SolapiProviderConstructor>;
 };
 
+const SOLAPI_DEPENDENCY_ERROR_PREFIX =
+  "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.";
+
 function buildSolapiDependencyError(cause: unknown): Error {
   const detail = cause instanceof Error ? cause.message : String(cause);
   return new Error(
     [
-      "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.",
+      SOLAPI_DEPENDENCY_ERROR_PREFIX,
       "Install it in the runtime app: `bun add solapi` or `npm i solapi`.",
       `Original error: ${detail}`,
     ].join("\n"),
   );
 }
 
+function isSolapiDependencyError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    error.message.includes(SOLAPI_DEPENDENCY_ERROR_PREFIX)
+  );
+}
+
 const defaultProviderLoaders: ProviderLoaders = {
   async loadSolapiProvider() {
-    try {
-      const module = await import("@k-msg/provider/solapi");
-      return module.SolapiProvider as SolapiProviderConstructor;
-    } catch (error) {
-      throw buildSolapiDependencyError(error);
-    }
+    const module = await import("@k-msg/provider/solapi");
+    return module.SolapiProvider as SolapiProviderConstructor;
   },
 };
 
@@ -133,12 +139,16 @@ export async function createProvidersWithLoaders(
 
     switch (entry.type) {
       case "solapi": {
+        let SolapiProvider: SolapiProviderConstructor;
         try {
-          const SolapiProvider = await loaders.loadSolapiProvider();
-          provider = new SolapiProvider(cfg);
+          SolapiProvider = await loaders.loadSolapiProvider();
         } catch (error) {
+          if (isSolapiDependencyError(error)) {
+            throw error;
+          }
           throw buildSolapiDependencyError(error);
         }
+        provider = new SolapiProvider(cfg);
         break;
       }
       case "iwinv": {
