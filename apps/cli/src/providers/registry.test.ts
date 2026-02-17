@@ -114,7 +114,9 @@ describe("provider registry", () => {
 
     expect(thrown).toBeDefined();
     expect(thrown?.message).toContain("bun add solapi");
-    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(2);
+    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(
+      2,
+    );
   });
 
   test("does not double-wrap already wrapped solapi dependency errors", async () => {
@@ -150,7 +152,9 @@ describe("provider registry", () => {
 
     expect(thrown).toBeDefined();
     expect(thrown?.message).toBe(preWrapped);
-    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(2);
+    expect(thrown?.message?.split(SOLAPI_DEPENDENCY_ERROR_PREFIX).length).toBe(
+      2,
+    );
   });
 
   test("preserves provider capabilities when wrapping provider id", async () => {
