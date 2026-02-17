@@ -1,5 +1,11 @@
 # @k-msg/cli
 
+## 0.5.5 — 2026-02-17
+
+### Patch changes
+
+- Updated dependencies: core@0.15.0, provider@0.15.0, k-msg@0.15.0
+
 ## 0.5.4 — 2026-02-16
 
 ### Patch changes
