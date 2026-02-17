@@ -41,3 +41,4 @@ This directory contains runnable templates for common integration setups.
 
 - These templates are intentionally minimal and focused on wiring.
 - Copy one template into your own app and adjust provider/bindings/secrets.
+- `k-msg` and `@k-msg/*` dependencies in examples use the npm `latest` tag.
