@@ -45,7 +45,7 @@
     "test:coverage": "bun test --coverage",
     "test:watch": "bun test --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },

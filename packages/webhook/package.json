@@ -24,7 +24,7 @@
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },
