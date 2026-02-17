@@ -25,19 +25,36 @@ k-msg-platform/
 │   ├── channel/                       # Channel & sender number management
 │   ├── analytics/                     # Statistics & reporting engine
 │   ├── webhook/                       # Event-driven notifications
-│   └── k-msg/                         # Unified package (re-exports all)
+│   └── k-msg/                         # Unified facade package (currently thin facade)
 └── apps/                              # Application layer
     └── cli/                           # Command-line interface
 ```
 
-### Package Dependencies & Data Flow
-1. **@k-msg/core** - Foundation layer with error handling, retry mechanisms, and base types
-2. **@k-msg/provider** - Provider abstraction with IWINV implementation (depends on core)
-3. **@k-msg/template** - Template engine with variable substitution (depends on core)
-4. **@k-msg/messaging** - Message orchestration (depends on core, provider, template)
-5. **@k-msg/channel** - Channel management (depends on core, provider)
-6. **@k-msg/analytics** - Metrics collection (depends on core, messaging)
-7. **@k-msg/webhook** - Event system (depends on core, analytics)
+### Package Dependencies & Data Flow (Current)
+1. **@k-msg/core** - Foundation layer with base types, errors, logger, resilience utilities
+2. **@k-msg/provider** - Provider implementations (depends on core)
+3. **@k-msg/template** - Template engine and interpolation utilities (depends on core)
+4. **@k-msg/messaging** - `KMsg` facade, routing, queue/tracking modules (depends on core)
+5. **k-msg** - Public facade package (depends on messaging; re-exports `KMsg` + runtime adapter subpaths)
+6. **@k-msg/analytics** - Tracking-based analytics (depends on core, messaging)
+7. **@k-msg/webhook** - Webhook delivery/security (depends on core)
+8. **@k-msg/channel** - Channel/sender management (currently standalone package dependency-wise)
+
+### Facade Strategy Guidance (`k-msg`)
+
+Current state: `k-msg` is a **minimal facade** (intentionally small surface).
+
+Recommendation: keep **minimal facade as default policy** for now, and add selective unified exports only when there is repeated DX friction in real consumers.
+
+Rationale:
+- Keeps package boundary explicit (`k-msg` for send facade, feature packages for advanced APIs)
+- Reduces accidental API lock-in from over-broad re-exports
+- Avoids turning `k-msg` into a catch-all package that is harder to evolve semantically
+
+When to consider expanding toward unified facade:
+- 3+ real consumers repeatedly import the same core/provider symbols alongside `KMsg`
+- onboarding friction appears in issues/docs/support conversations
+- re-export candidates can be curated (not wildcard) and versioned with clear compatibility guarantees
 
 ### Key Architectural Patterns
 
@@ -45,13 +62,14 @@ k-msg-platform/
 - `ok(value)` - Success result with data
 - `fail(error)` - Failure result with error detail
 
-**Unified Client (KMsg)**: The `KMsg` class provides a unified entry point for all messaging operations:
+**Unified Client (KMsg)**: The `KMsg` class provides a unified entry point for send/routing operations:
 - `send()` - Send AlimTalk, SMS, or LMS messages
-- Integration with template and analytics services
+- `sendMany()` - Batch sending with concurrency control
+- Optional hooks/tracking integrations via `@k-msg/messaging/tracking`
 
-**Adapter-Based Provider System**: The provider system uses adapters to normalize external APIs:
-- `IWINVAdapter` - Implementation for IWINV
-- Standardized request/result formats (`StandardRequest`, `StandardResult`)
+**Provider-Based System**: The provider package supplies concrete providers implementing `Provider` contracts from core:
+- `IWINVProvider`, `AligoProvider`, `SolapiProvider`, `MockProvider`
+- Capability-based optional interfaces (template inspection, kakao channel, balance)
 
 **Error Recovery Strategy**: Multi-layered error handling with:
 - Circuit breakers for external API calls
@@ -136,9 +154,9 @@ IWINV_API_KEY="your-api-key"
 - Bun.$`ls` instead of execa
 
 ### Error Handling Patterns
-All errors use the centralized `KMessageError` hierarchy:
+All errors use the centralized `KMsgError` hierarchy:
 ```typescript
-import { KMessageError, KMessageErrorCode } from '@k-msg/core';
+import { KMsgError, KMsgErrorCode } from '@k-msg/core';
 
 // Specific error types available:
 // - ProviderError (provider failures)
@@ -155,54 +173,42 @@ import { test, expect } from "bun:test";
 test("hello world", () => {
   expect(1).toBe(1);
 });
-
-// Use TestData and TestAssertions utilities from @k-msg/core:
-import { TestData, TestAssertions } from '@k-msg/core';
 ```
 
 ## Common Development Scenarios
 
 ### Adding a New Provider
-1. Extend `BaseAlimTalkProvider` in `packages/provider/src/`
-2. Implement required contracts (messaging, templates, channels, etc.)
-3. Add provider-specific types in `types/` subdirectory
-4. Create comprehensive tests (unit tests for logic, skip external API tests)
-5. Update provider registry and exports
+1. Follow `packages/provider/src/PROVIDER_STRUCTURE.md` and existing provider layout (`aligo`, `iwinv`, `solapi`)
+2. Implement `Provider` contract and optional capabilities from `@k-msg/core`
+3. Expose provider via `packages/provider/src/index.ts` and subpath exports if needed
+4. Add tests (unit/integration first; external live tests can remain skipped with TODO)
+5. Update onboarding spec mapping in `packages/provider/src/onboarding/specs.ts`
 
 ### Working with Templates
 Template system supports variable substitution with `#{variableName}` syntax:
 ```typescript
-import { TemplateService } from '@k-msg/template';
-import { IWINVAdapter } from '@k-msg/provider';
+import { interpolate } from '@k-msg/template';
 
-const adapter = new IWINVAdapter(config);
-const templateService = new TemplateService(adapter);
-
-const result = await templateService.create({
-  name: 'welcome_message',
-  code: 'WELCOME_001',
-  content: 'Hello #{name}, welcome to #{service}!',
-  category: 'NOTIFICATION'
+const rendered = interpolate('Hello #{name}, welcome to #{service}!', {
+  name: 'Jane',
+  service: 'K-Message',
 });
 ```
 
 ### Handling Bulk Operations
-The messaging system provides sophisticated bulk processing:
+Use `KMsg.sendMany()` for controlled batch sending:
 ```typescript
-import { BulkMessageSender, KMsg } from '@k-msg/messaging';
+import { KMsg } from '@k-msg/messaging';
 
-const kmsg = new KMsg(provider);
-const bulkSender = new BulkMessageSender(kmsg);
+const kmsg = new KMsg({ providers: [provider] });
 
-// Configure fail-fast or continue-on-failure behavior
-const result = await bulkSender.sendBulk({
-  templateId: 'WELCOME_001',
-  recipients: [...],
-  options: {
-    batchSize: 10,
-    batchDelay: 1000
-  }
-});
+const result = await kmsg.sendMany(
+  [
+    { to: '01011112222', text: 'hello 1' },
+    { to: '01033334444', text: 'hello 2' },
+  ],
+  { concurrency: 10 },
+);
 ```
 
 ### Known Issues & Workarounds
