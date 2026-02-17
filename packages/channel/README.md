@@ -18,6 +18,10 @@ bun add @k-msg/channel @k-msg/core
 - **Permission Management**: Role-based access control for channels
 - **Status Monitoring**: Real-time channel status monitoring
 
+## Runtime Compatibility
+
+- Works in Edge runtimes without `nodejs_compat` (no runtime dependency on Node built-ins).
+
 ## Basic Usage
 
 ```typescript
