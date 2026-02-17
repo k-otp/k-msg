@@ -1,4 +1,4 @@
-import { readRuntimeEnv } from "@k-msg/core";
+import { logger, readRuntimeEnv } from "@k-msg/core";
 import type {
   WebhookConfig,
   WebhookDelivery,
@@ -353,15 +353,22 @@ export class WebhookService {
             .dispatch(event, endpoint)
             .then((delivery) => this.registry.addDelivery(delivery))
             .catch((error) => {
-              console.error(
-                `Failed to dispatch webhook to ${endpoint.url}:`,
-                error,
+              logger.error(
+                "Failed to dispatch webhook",
+                { endpointUrl: endpoint.url },
+                error instanceof Error ? error : new Error(String(error)),
               );
             });
         }
       }
     } catch (error) {
-      console.error("Batch processing failed:", error);
+      logger.error(
+        "Batch processing failed",
+        {
+          batchSize: batch.length,
+        },
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // 실패한 이벤트를 다시 큐에 추가 (재시도)
       this.eventQueue.unshift(...batch);
     }
@@ -482,7 +489,11 @@ export class WebhookService {
       try {
         await this.processBatch();
       } catch (error) {
-        console.error("Batch processor error:", error);
+        logger.error(
+          "Batch processor error",
+          undefined,
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     }, this.config.batchTimeoutMs);
   }
