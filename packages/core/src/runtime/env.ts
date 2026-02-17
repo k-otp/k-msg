@@ -19,7 +19,10 @@ type RuntimeGlobal = typeof globalThis & {
 export function getRuntimeEnvSource(): RuntimeEnvRecord {
   const runtimeGlobal = globalThis as RuntimeGlobal;
   return (
-    runtimeGlobal.__K_MSG_ENV__ ?? runtimeGlobal.__ENV__ ?? runtimeGlobal.process?.env ?? {}
+    runtimeGlobal.__K_MSG_ENV__ ??
+    runtimeGlobal.__ENV__ ??
+    runtimeGlobal.process?.env ??
+    {}
   );
 }
 
