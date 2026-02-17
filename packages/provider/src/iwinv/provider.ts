@@ -19,6 +19,7 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { isObjectRecord } from "../shared/type-guards";
 import type { IWINVConfig } from "./types/iwinv";
 
 type IWINVSendResponse = {
@@ -1973,10 +1974,6 @@ export class IWINVProvider implements Provider, TemplateProvider {
       );
     }
   }
-}
-
-function isObjectRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export const createIWINVProvider = (config: IWINVConfig) =>

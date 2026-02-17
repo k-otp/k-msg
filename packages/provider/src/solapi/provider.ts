@@ -26,6 +26,7 @@ import {
   SolapiMessageService,
 } from "solapi";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { isObjectRecord } from "../shared/type-guards";
 import type { SolapiConfig } from "./types/solapi";
 
 export type SolapiSdkClient = Pick<
@@ -35,10 +36,6 @@ export type SolapiSdkClient = Pick<
 
 type SolapiSendOneMessage = Parameters<SolapiSdkClient["sendOne"]>[0];
 type SolapiMessageType = Exclude<SolapiSendOneMessage["type"], undefined>;
-
-function isObjectRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 type SolapiKakaoButton = {
   buttonName: string;
