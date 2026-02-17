@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.18.0 — 2026-02-17
+
+### Minor changes
+
+- [373c0d3](https://github.com/k-otp/k-msg/commit/373c0d3b24986159045ddee065a05bfda1935cd3) Unify `KMsg.send` for single and batch inputs with built-in chunking, add configurable persistence strategies (`none`, `log`, `queue`, `full`) via a new message repository contract, and migrate bulk sending internals off `sendMany` to the unified `send` API. — Thanks @imjlk!
+
 ## 0.17.0 — 2026-02-17
 
 ### Minor changes

@@ -1,5 +1,21 @@
 # k-msg
 
+## 0.18.0 — 2026-02-17
+
+### Minor changes
+
+- [373c0d3](https://github.com/k-otp/k-msg/commit/373c0d3b24986159045ddee065a05bfda1935cd3) Unify `KMsg.send` for single and batch inputs with built-in chunking, add configurable persistence strategies (`none`, `log`, `queue`, `full`) via a new message repository contract, and migrate bulk sending internals off `sendMany` to the unified `send` API. — Thanks @imjlk!
+
+### Patch changes
+
+- [0ab7671](https://github.com/k-otp/k-msg/commit/0ab76719102c849ac0b024e7aac4277e92014ead) Expose selected core utilities from `k-msg` root (`KMsgError`, `KMsgErrorCode`, `ok`, `fail`, and key send-related types) to reduce onboarding friction while keeping provider and tracking APIs out of the root facade.
+  
+  Also updates root export boundary tests to match the new facade contract. — Thanks @imjlk!
+- [8d554ce](https://github.com/k-otp/k-msg/commit/8d554cee95b69570a3d87325331138a59f5a6170) Align `k-msg` packaging metadata with the current workspace release line by refreshing the lockfile, so packed dependencies resolve to the current `@k-msg/*` versions instead of stale `0.16.0`.
+  
+  Also updates facade docs/tests to match the current root export contract (`KMsgErrorCode` and `fail` checks included). — Thanks @imjlk!
+- Updated dependencies: core@0.18.0, messaging@0.18.0
+
 ## 0.17.0 — 2026-02-17
 
 ### Minor changes
