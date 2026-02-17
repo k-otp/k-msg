@@ -8,6 +8,7 @@ import {
   type Provider,
   type ProviderHealthStatus,
   type Result,
+  readRuntimeEnv,
   type SendOptions,
   type SendResult,
   type Template,
@@ -17,7 +18,6 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
-import { readRuntimeEnv } from "../shared/runtime-env";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
 import {
   getAlimTalkDeliveryStatus,

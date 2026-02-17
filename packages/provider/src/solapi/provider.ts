@@ -7,12 +7,12 @@ import {
   type Provider,
   type ProviderHealthStatus,
   type Result,
+  readRuntimeEnv,
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
 import { SolapiMessageService } from "solapi";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
-import { readRuntimeEnv } from "../shared/runtime-env";
 import { getSolapiDeliveryStatus } from "./solapi.delivery";
 import { mapSolapiError } from "./solapi.error";
 import type { SolapiSdkClient } from "./solapi.internal.types";
