@@ -1,5 +1,13 @@
 # @k-msg/template
 
+## 0.17.0 — 2026-02-17
+
+### Patch changes
+
+- [48e3bbb](https://github.com/k-otp/k-msg/commit/48e3bbb2b2a53d42b7c75bafad0ee79e1827bb94) Remove runtime dependence on Node's event module in `@k-msg/template` so it can run in Edge environments without `nodejs_compat`.
+  Also drops `@types/node` from the package's dev dependencies and documents Edge runtime compatibility in package README files. — Thanks @imjlk!
+- Updated dependencies: core@0.17.0
+
 ## 0.16.0 — 2026-02-17
 
 ### Minor changes

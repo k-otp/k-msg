@@ -1,5 +1,31 @@
 # @k-msg/analytics
 
+## 0.17.0 — 2026-02-17
+
+### Minor changes
+
+- [74549ef](https://github.com/k-otp/k-msg/commit/74549ef4ea2e9072829fb3ca7bf6aa145e91af90) Reorganize low-usage core APIs and expand real internal usage paths.
+  
+  - Removed `@k-msg/core` low-usage APIs: `config`, `health`, `types/history`, and high-level resilience helpers (`ErrorRecovery`, `GracefulDegradation`, `HealthMonitor`).
+  - Added optional provider capability `BalanceProvider#getBalance(query?)` and implemented it in:
+    - `IWINVProvider` (`ALIMTALK` default + `SMS/LMS/MMS` charge lookup)
+    - `SolapiProvider` (single balance model mapped to `BalanceResult`)
+  - Standardized analytics runtime logging to `@k-msg/core` logger (`console.*` removal in runtime paths).
+  - Removed `apps/admin-dashboard` and `apps/message-service` from the monorepo.
+  
+  Note: This includes behavior/interface removals that can be considered breaking, but this release is intentionally marked as `minor` per current release policy request. — Thanks @imjlk!
+
+### Patch changes
+
+- [e03af15](https://github.com/k-otp/k-msg/commit/e03af158dbbc50b9dd9c6196afe56885df1a2848) Remove remaining Node runtime dependencies from analytics/messaging/runtime paths and standardize runtime-neutral environment variable access.
+  
+  - Replaced Node `events` usage with package-local runtime-neutral `EventEmitter` implementations.
+  - Replaced `NodeJS.Timeout` annotations with `ReturnType<typeof setTimeout/setInterval>`.
+  - Replaced direct `process.env` reads in core/provider defaults with global-compatible env resolution:
+    `globalThis.__K_MSG_ENV__` -> `globalThis.__ENV__` -> `globalThis.process?.env`.
+  - Removed `@types/node` from package-level devDependencies where no longer needed. — Thanks @imjlk!
+- Updated dependencies: core@0.17.0, messaging@0.17.0
+
 ## 0.16.0 — 2026-02-17
 
 ### Patch changes

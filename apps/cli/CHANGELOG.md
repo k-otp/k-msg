@@ -1,5 +1,13 @@
 # @k-msg/cli
 
+## 0.5.7 — 2026-02-17
+
+### Patch changes
+
+- [7c44cca](https://github.com/k-otp/k-msg/commit/7c44ccaa7eee30d2ecf494c30a388b4a9371fbeb) Avoid double-wrapping SOLAPI dependency load errors in the CLI provider registry.
+  The CLI now preserves already-guided dependency errors and keeps the install guidance message single and clear. — Thanks @imjlk!
+- Updated dependencies: core@0.17.0, provider@0.17.0, k-msg@0.17.0
+
 ## 0.5.6 — 2026-02-17
 
 ### Patch changes
