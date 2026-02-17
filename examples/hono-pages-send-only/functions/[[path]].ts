@@ -35,7 +35,10 @@ function getKMsg(env: Bindings): Promise<KMsg> {
           }),
         ],
       }),
-    );
+    ).catch((error) => {
+      kmsgPromise = undefined;
+      throw error;
+    });
   }
   return kmsgPromise;
 }

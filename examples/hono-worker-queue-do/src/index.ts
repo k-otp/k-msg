@@ -17,13 +17,13 @@ type EnqueueOptions = {
 };
 
 type EnqueueResponse = {
-  queueName: string;
+  queueId: string;
   jobId: string;
   processAt: string;
 };
 
 type DrainResponse = {
-  queueName: string;
+  queueId: string;
   drained: number;
 };
 
@@ -39,7 +39,7 @@ type Env = {
 type QueueStorageLike = {
   get<T>(key: string): Promise<T | undefined>;
   put<T>(key: string, value: T): Promise<void>;
-  delete(key: string): Promise<void>;
+  delete(key: string): Promise<boolean | undefined>;
   list<T>(options?: {
     prefix?: string;
     cursor?: string;
@@ -93,7 +93,7 @@ export class KMsgQueueDO extends DurableObject<Env> {
     await this.scheduleAlarm(job.processAt.getTime());
 
     return {
-      queueName: this.name,
+      queueId: this.queueId,
       jobId: job.id,
       processAt: job.processAt.toISOString(),
     };
@@ -146,14 +146,14 @@ export class KMsgQueueDO extends DurableObject<Env> {
       await this.scheduleAlarm(Date.now() + 100);
     }
 
-    return { queueName: this.name, drained };
+    return { queueId: this.queueId, drained };
   }
 
   async alarm(): Promise<void> {
     await this.drain(50);
   }
 
-  private get name(): string {
+  private get queueId(): string {
     return this.ctx.id.toString();
   }
 
@@ -192,6 +192,7 @@ app.post("/queue/send", async (c) => {
   }>();
 
   const queueName = resolveQueueName(c.env, body.queueName);
+  const queueId = c.env.KMSG_QUEUE.idFromName(queueName).toString();
   const queue = c.env.KMSG_QUEUE.getByName(queueName);
 
   const created = await queue.enqueueSend(
@@ -207,26 +208,29 @@ app.post("/queue/send", async (c) => {
     },
   );
 
-  return c.json({ ok: true, data: created });
+  return c.json({ ok: true, data: { queueName, ...created, queueId } });
 });
 
 app.post("/queue/drain", async (c) => {
   const body = await c.req.json<{ queueName?: string; maxJobs?: number }>();
   const queueName = resolveQueueName(c.env, body.queueName);
+  const queueId = c.env.KMSG_QUEUE.idFromName(queueName).toString();
   const queue = c.env.KMSG_QUEUE.getByName(queueName);
   const result = await queue.drain(body.maxJobs ?? 20);
-  return c.json({ ok: true, data: result });
+  return c.json({ ok: true, data: { queueName, ...result, queueId } });
 });
 
 app.get("/queue/size", async (c) => {
   const queueName = resolveQueueName(c.env, c.req.query("queueName"));
+  const queueId = c.env.KMSG_QUEUE.idFromName(queueName).toString();
   const queue = c.env.KMSG_QUEUE.getByName(queueName);
   const size = await queue.size();
-  return c.json({ ok: true, data: { queueName, size } });
+  return c.json({ ok: true, data: { queueName, queueId, size } });
 });
 
 app.get("/queue/jobs/:jobId", async (c) => {
   const queueName = resolveQueueName(c.env, c.req.query("queueName"));
+  const queueId = c.env.KMSG_QUEUE.idFromName(queueName).toString();
   const queue = c.env.KMSG_QUEUE.getByName(queueName);
   const job = await queue.getJob(c.req.param("jobId"));
 
@@ -234,7 +238,7 @@ app.get("/queue/jobs/:jobId", async (c) => {
     return c.json({ ok: false, message: "Job not found" }, 404);
   }
 
-  return c.json({ ok: true, data: { queueName, job } });
+  return c.json({ ok: true, data: { queueName, queueId, job } });
 });
 
 export default {

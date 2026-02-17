@@ -7,8 +7,8 @@
     "start": "node src/index.mjs"
   },
   "dependencies": {
-    "@k-msg/provider": "^0.14.0",
+    "@k-msg/provider": "latest",
     "express": "^4.21.2",
-    "k-msg": "^0.14.0"
+    "k-msg": "latest"
   }
 }

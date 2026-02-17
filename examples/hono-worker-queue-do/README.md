@@ -11,6 +11,9 @@ This template does not require `nodejs_compat`.
 - `POST /queue/send` enqueues send jobs into a DO-backed queue
 - Queue processing runs in the DO via `alarm()` and can be manually triggered with `POST /queue/drain`
 - `KMsg` send execution is isolated in the DO (single coordination point per queue name)
+- Queue responses expose both:
+  - `queueName`: requested external queue name
+  - `queueId`: internal Durable Object identifier
 
 ## Setup
 
@@ -77,4 +80,18 @@ Check specific job:
 
 ```bash
 curl "http://127.0.0.1:8787/queue/jobs/<JOB_ID>"
+```
+
+Sample enqueue response:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "queueName": "default",
+    "queueId": "f3f3f13f3f13f3f13f3f13f3f13f3f13",
+    "jobId": "kmsg_jobs_...",
+    "processAt": "2026-02-17T00:00:00.000Z"
+  }
+}
 ```
