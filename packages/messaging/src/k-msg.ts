@@ -67,6 +67,12 @@ export interface KMsgConfig {
   };
 }
 
+interface ResolvedInput {
+  index: number;
+  normalized: SendOptions & { messageId: string };
+  provider: Provider;
+}
+
 export class KMsg {
   private readonly providers: Provider[];
   private readonly providersById: Map<string, Provider>;
@@ -165,16 +171,36 @@ export class KMsg {
     input: SendInput,
   ): Promise<Result<SendResult, KMsgError>> {
     const normalized = this.normalizeInput(input);
-    const messageId = normalized.messageId;
     const context: HookContext = {
-      messageId,
+      messageId: normalized.messageId,
       options: normalized,
       timestamp: Date.now(),
     };
+
+    if (this.hooks.onBeforeSend) {
+      await this.hooks.onBeforeSend(context);
+    }
+
+    const providerResult = this.selectProvider(normalized);
+    if (providerResult.isFailure) {
+      if (this.hooks.onError) {
+        await this.hooks.onError(context, providerResult.error);
+      }
+      return fail(providerResult.error);
+    }
+
+    return this.sendWithProvider(providerResult.value, normalized, context);
+  }
+
+  private async sendWithProvider(
+    provider: Provider,
+    normalized: SendOptions & { messageId: string },
+    context: HookContext,
+  ): Promise<Result<SendResult, KMsgError>> {
+    const messageId = normalized.messageId;
     const strategy = this.persistence?.strategy || "none";
     const repo = this.persistence?.repo;
     let persistedRecordId: string | undefined;
-    let selectedProviderId: string | undefined;
     let logPersistTriggered = false;
 
     const triggerLogPersistence = () => {
@@ -186,20 +212,6 @@ export class KMsg {
     };
 
     try {
-      if (this.hooks.onBeforeSend) {
-        await this.hooks.onBeforeSend(context);
-      }
-
-      const providerResult = this.selectProvider(normalized);
-      if (providerResult.isFailure) {
-        if (this.hooks.onError) {
-          await this.hooks.onError(context, providerResult.error);
-        }
-        return fail(providerResult.error);
-      }
-
-      const provider = providerResult.value;
-      selectedProviderId = provider.id;
       const onboardingError = this.validateSendOnboarding(provider, normalized);
       if (onboardingError) {
         if (this.hooks.onError) {
@@ -311,27 +323,18 @@ export class KMsg {
 
       return fail(error);
     } catch (error) {
-      const kMsgError = this.toKMsgError(
-        error,
-        selectedProviderId ? { providerId: selectedProviderId } : undefined,
-      );
+      const kMsgError = this.toKMsgError(error, { providerId: provider.id });
 
       if (strategy === "full" && repo && persistedRecordId) {
         const updateResult = await repo.update(
           persistedRecordId,
-          this.toFailedPersistenceOutcome(
-            normalized,
-            selectedProviderId,
-            kMsgError,
-          ),
+          this.toFailedPersistenceOutcome(normalized, provider.id, kMsgError),
         );
         if (updateResult.isFailure) {
-          const updateError = this.toKMsgError(
-            updateResult.error,
-            selectedProviderId
-              ? { providerId: selectedProviderId, persistedRecordId }
-              : { persistedRecordId },
-          );
+          const updateError = this.toKMsgError(updateResult.error, {
+            providerId: provider.id,
+            persistedRecordId,
+          });
 
           if (this.hooks.onError) {
             await this.hooks.onError(context, updateError);
@@ -375,19 +378,81 @@ export class KMsg {
   }
 
   private async handleBatch(inputs: SendInput[]): Promise<BatchSendResult> {
-    const chunkSize = this.resolveBatchChunkSize(inputs);
-    const results: Array<Result<SendResult, KMsgError>> = [];
+    const resolved = this.resolveProviders(inputs);
+    const groupedByProvider = this.groupInputsByProvider(resolved);
+    const results: Array<Result<SendResult, KMsgError> | undefined> = new Array(
+      inputs.length,
+    );
+    const resolvedIndexes = new Set(resolved.map((item) => item.index));
 
-    for (const chunk of this.chunkInputs(inputs, chunkSize)) {
-      const chunkResults = await Promise.all(
-        chunk.map((currentInput) => this.sendSingle(currentInput)),
-      );
-      results.push(...chunkResults);
-    }
+    await Promise.all(
+      inputs.map(async (input, index) => {
+        if (resolvedIndexes.has(index)) {
+          return;
+        }
+        results[index] = await this.sendSingle(input);
+      }),
+    );
+
+    await Promise.all(
+      Array.from(groupedByProvider.entries()).map(
+        async ([, providerInputs]) => {
+          if (providerInputs.length === 0) {
+            return;
+          }
+
+          const provider = providerInputs[0].provider;
+          const chunkSize = this.resolveProviderChunkSize(provider);
+
+          for (const chunk of this.chunkInputs(providerInputs, chunkSize)) {
+            const chunkResults = await Promise.all(
+              chunk.map((item) => this.sendResolved(item)),
+            );
+
+            chunkResults.forEach(({ index, result }) => {
+              results[index] = result;
+            });
+          }
+        },
+      ),
+    );
 
     return {
       total: inputs.length,
-      results,
+      results: results.map(
+        (result, index) =>
+          result ??
+          fail(
+            new KMsgError(
+              KMsgErrorCode.UNKNOWN_ERROR,
+              `Batch result missing for input index ${index}`,
+            ),
+          ),
+      ),
+    };
+  }
+
+  private async sendResolved(item: ResolvedInput): Promise<{
+    index: number;
+    result: Result<SendResult, KMsgError>;
+  }> {
+    const context: HookContext = {
+      messageId: item.normalized.messageId,
+      options: item.normalized,
+      timestamp: Date.now(),
+    };
+
+    if (this.hooks.onBeforeSend) {
+      await this.hooks.onBeforeSend(context);
+    }
+
+    return {
+      index: item.index,
+      result: await this.sendWithProvider(
+        item.provider,
+        item.normalized,
+        context,
+      ),
     };
   }
 
@@ -411,9 +476,9 @@ export class KMsg {
     );
   }
 
-  private resolveBatchChunkSize(inputs: SendInput[]): number {
+  private resolveProviderChunkSize(provider: Provider): number {
     const DEFAULT_CHUNK_SIZE = 50;
-    const providerLimit = this.detectProviderBatchLimit(inputs);
+    const providerLimit = this.readProviderBatchLimit(provider);
 
     if (providerLimit === undefined) {
       return DEFAULT_CHUNK_SIZE;
@@ -422,28 +487,43 @@ export class KMsg {
     return Math.max(1, Math.min(DEFAULT_CHUNK_SIZE, providerLimit));
   }
 
-  private detectProviderBatchLimit(inputs: SendInput[]): number | undefined {
-    let smallestLimit: number | undefined;
+  private resolveProviders(inputs: SendInput[]): ResolvedInput[] {
+    const resolved: ResolvedInput[] = [];
 
-    for (const input of inputs) {
+    for (const [index, input] of inputs.entries()) {
       const normalized = this.normalizeInput(input);
       const providerResult = this.selectProvider(normalized);
       if (providerResult.isFailure) {
         continue;
       }
 
-      const detectedLimit = this.readProviderBatchLimit(providerResult.value);
-      if (detectedLimit === undefined) {
+      resolved.push({
+        index,
+        normalized,
+        provider: providerResult.value,
+      });
+    }
+
+    return resolved;
+  }
+
+  private groupInputsByProvider(
+    resolved: ResolvedInput[],
+  ): Map<string, ResolvedInput[]> {
+    const grouped = new Map<string, ResolvedInput[]>();
+
+    for (const item of resolved) {
+      const key = item.provider.id;
+      const items = grouped.get(key);
+      if (items) {
+        items.push(item);
         continue;
       }
 
-      smallestLimit =
-        smallestLimit === undefined
-          ? detectedLimit
-          : Math.min(smallestLimit, detectedLimit);
+      grouped.set(key, [item]);
     }
 
-    return smallestLimit;
+    return grouped;
   }
 
   private readProviderBatchLimit(provider: Provider): number | undefined {
@@ -754,12 +834,14 @@ export class KMsg {
       options.type === "RCS_LMS" ||
       options.type === "RCS_MMS"
     ) {
-      const variables = this.coerceVariables((options as any).variables);
-      if (variables && typeof (options as any).text === "string") {
-        return {
-          ...(options as any),
-          text: this.interpolateText((options as any).text, variables),
-        } as SendOptions;
+      if ("variables" in options && "text" in options) {
+        const variables = this.coerceVariables(options.variables);
+        if (variables && typeof options.text === "string") {
+          return {
+            ...options,
+            text: this.interpolateText(options.text, variables),
+          };
+        }
       }
     }
     return options;
