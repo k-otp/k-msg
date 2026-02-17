@@ -2,9 +2,11 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
+  type MessageRepository,
   type MessageType,
   type MessageVariables,
   ok,
+  type PersistenceStrategy,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -13,6 +15,7 @@ import {
   type SendResult,
 } from "@k-msg/core";
 import type { HookContext, KMsgHooks } from "./hooks";
+import type { BatchSendResult } from "./types/message.types";
 
 function interpolateTemplate(
   text: string,
@@ -58,6 +61,10 @@ export interface KMsgConfig {
   routing?: KMsgRoutingConfig;
   defaults?: KMsgDefaultsConfig;
   hooks?: KMsgHooks;
+  persistence?: {
+    strategy: PersistenceStrategy;
+    repo: MessageRepository;
+  };
 }
 
 export class KMsg {
@@ -67,6 +74,10 @@ export class KMsg {
   private readonly routing: KMsgRoutingConfig;
   private readonly defaults: KMsgDefaultsConfig;
   private readonly rrIndexByKey: Map<string, number>;
+  private readonly persistence?: {
+    strategy: PersistenceStrategy;
+    repo: MessageRepository;
+  };
 
   constructor(config: KMsgConfig) {
     if (!config || typeof config !== "object") {
@@ -92,6 +103,7 @@ export class KMsg {
     this.routing = config.routing || {};
     this.defaults = config.defaults || {};
     this.rrIndexByKey = new Map();
+    this.persistence = config.persistence;
   }
 
   async healthCheck(): Promise<{
@@ -129,13 +141,48 @@ export class KMsg {
     };
   }
 
-  async send(input: SendInput): Promise<Result<SendResult, KMsgError>> {
+  async send(input: SendInput): Promise<Result<SendResult, KMsgError>>;
+  async send(input: SendInput[]): Promise<BatchSendResult>;
+  async send(
+    input: SendInput | SendInput[],
+  ): Promise<Result<SendResult, KMsgError> | BatchSendResult> {
+    if (Array.isArray(input)) {
+      return this.handleBatch(input);
+    }
+
+    return this.sendSingle(input);
+  }
+
+  async sendOrThrow(input: SendInput): Promise<SendResult> {
+    const result = await this.sendSingle(input);
+    if (result.isFailure) {
+      throw result.error;
+    }
+    return result.value;
+  }
+
+  private async sendSingle(
+    input: SendInput,
+  ): Promise<Result<SendResult, KMsgError>> {
     const normalized = this.normalizeInput(input);
     const messageId = normalized.messageId;
     const context: HookContext = {
       messageId,
       options: normalized,
       timestamp: Date.now(),
+    };
+    const strategy = this.persistence?.strategy || "none";
+    const repo = this.persistence?.repo;
+    let persistedRecordId: string | undefined;
+    let selectedProviderId: string | undefined;
+    let logPersistTriggered = false;
+
+    const triggerLogPersistence = () => {
+      if (strategy !== "log" || !repo || logPersistTriggered) {
+        return;
+      }
+      logPersistTriggered = true;
+      this.persistLogSave(repo, normalized);
     };
 
     try {
@@ -152,6 +199,7 @@ export class KMsg {
       }
 
       const provider = providerResult.value;
+      selectedProviderId = provider.id;
       const onboardingError = this.validateSendOnboarding(provider, normalized);
       if (onboardingError) {
         if (this.hooks.onError) {
@@ -159,6 +207,48 @@ export class KMsg {
         }
         return fail(onboardingError);
       }
+
+      if (strategy === "queue" && repo) {
+        const saveResult = await repo.save(normalized, { strategy });
+        if (saveResult.isFailure) {
+          const saveError = this.toKMsgError(saveResult.error, {
+            providerId: provider.id,
+          });
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, saveError);
+          }
+          return fail(saveError);
+        }
+
+        const value: SendResult = {
+          messageId,
+          providerId: provider.id,
+          status: "PENDING",
+          type: normalized.type,
+          to: normalized.to,
+        };
+
+        if (this.hooks.onSuccess) {
+          await this.hooks.onSuccess(context, value);
+        }
+
+        return ok(value);
+      }
+
+      if (strategy === "full" && repo) {
+        const saveResult = await repo.save(normalized, { strategy });
+        if (saveResult.isFailure) {
+          const saveError = this.toKMsgError(saveResult.error, {
+            providerId: provider.id,
+          });
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, saveError);
+          }
+          return fail(saveError);
+        }
+        persistedRecordId = saveResult.value;
+      }
+
       const result = await provider.send(normalized);
 
       if (result.isSuccess) {
@@ -169,6 +259,23 @@ export class KMsg {
           type: normalized.type,
           to: normalized.to,
         };
+
+        if (strategy === "full" && repo && persistedRecordId) {
+          const updateResult = await repo.update(persistedRecordId, value);
+          if (updateResult.isFailure) {
+            const updateError = this.toKMsgError(updateResult.error, {
+              providerId: provider.id,
+              persistedRecordId,
+            });
+            if (this.hooks.onError) {
+              await this.hooks.onError(context, updateError);
+            }
+            return fail(updateError);
+          }
+        } else {
+          triggerLogPersistence();
+        }
+
         if (this.hooks.onSuccess) {
           await this.hooks.onSuccess(context, value);
         }
@@ -179,13 +286,62 @@ export class KMsg {
         providerId: provider.id,
       });
 
+      if (strategy === "full" && repo && persistedRecordId) {
+        const updateResult = await repo.update(
+          persistedRecordId,
+          this.toFailedPersistenceOutcome(normalized, provider.id, error),
+        );
+        if (updateResult.isFailure) {
+          const updateError = this.toKMsgError(updateResult.error, {
+            providerId: provider.id,
+            persistedRecordId,
+          });
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, updateError);
+          }
+          return fail(updateError);
+        }
+      } else {
+        triggerLogPersistence();
+      }
+
       if (this.hooks.onError) {
         await this.hooks.onError(context, error);
       }
 
       return fail(error);
     } catch (error) {
-      const kMsgError = this.toKMsgError(error);
+      const kMsgError = this.toKMsgError(
+        error,
+        selectedProviderId ? { providerId: selectedProviderId } : undefined,
+      );
+
+      if (strategy === "full" && repo && persistedRecordId) {
+        const updateResult = await repo.update(
+          persistedRecordId,
+          this.toFailedPersistenceOutcome(
+            normalized,
+            selectedProviderId,
+            kMsgError,
+          ),
+        );
+        if (updateResult.isFailure) {
+          const updateError = this.toKMsgError(
+            updateResult.error,
+            selectedProviderId
+              ? { providerId: selectedProviderId, persistedRecordId }
+              : { persistedRecordId },
+          );
+
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, updateError);
+          }
+
+          return fail(updateError);
+        }
+      } else {
+        triggerLogPersistence();
+      }
 
       if (this.hooks.onError) {
         await this.hooks.onError(context, kMsgError);
@@ -195,72 +351,44 @@ export class KMsg {
     }
   }
 
-  async sendOrThrow(input: SendInput): Promise<SendResult> {
-    const result = await this.send(input);
-    if (result.isFailure) {
-      throw result.error;
-    }
-    return result.value;
+  private persistLogSave(repo: MessageRepository, input: SendInput): void {
+    void repo.save(input, { strategy: "log" }).catch(() => undefined);
   }
 
-  async sendMany(
-    inputs: SendInput[],
-    options?: { concurrency?: number; stopOnFailure?: boolean },
-  ): Promise<Array<Result<SendResult, KMsgError>>> {
-    if (!Array.isArray(inputs)) {
-      throw new Error("sendMany requires an array");
-    }
-
-    const concurrency =
-      typeof options?.concurrency === "number" && options.concurrency > 0
-        ? Math.floor(options.concurrency)
-        : 10;
-    const stopOnFailure = options?.stopOnFailure === true;
-
-    const results: Array<Result<SendResult, KMsgError>> = new Array(
-      inputs.length,
-    );
-
-    let idx = 0;
-    let aborted = false;
-
-    const worker = async () => {
-      while (true) {
-        if (aborted) return;
-        const current = idx++;
-        if (current >= inputs.length) return;
-
-        const currentInput = inputs[current];
-        if (!currentInput) return;
-
-        const result = await this.send(currentInput);
-        results[current] = result;
-
-        if (stopOnFailure && result.isFailure) {
-          aborted = true;
-          return;
-        }
-      }
+  private toFailedPersistenceOutcome(
+    options: SendOptions & { messageId: string },
+    providerId: string | undefined,
+    error: KMsgError,
+  ): Partial<SendResult> {
+    return {
+      messageId: options.messageId,
+      ...(providerId ? { providerId } : {}),
+      status: "FAILED",
+      type: options.type,
+      to: options.to,
+      raw: {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+      },
     };
+  }
 
-    const workers = new Array(Math.min(concurrency, inputs.length))
-      .fill(null)
-      .map(() => worker());
-    await Promise.all(workers);
+  private async handleBatch(inputs: SendInput[]): Promise<BatchSendResult> {
+    const chunkSize = this.resolveBatchChunkSize(inputs);
+    const results: Array<Result<SendResult, KMsgError>> = [];
 
-    // Fill any remaining slots when aborted early.
-    for (let i = 0; i < results.length; i += 1) {
-      if (results[i] === undefined) {
-        results[i] = fail(
-          new KMsgError(
-            KMsgErrorCode.MESSAGE_SEND_FAILED,
-            "Aborted by stopOnFailure",
-          ),
-        );
-      }
+    for (const chunk of this.chunkInputs(inputs, chunkSize)) {
+      const chunkResults = await Promise.all(
+        chunk.map((currentInput) => this.sendSingle(currentInput)),
+      );
+      results.push(...chunkResults);
     }
 
-    return results;
+    return {
+      total: inputs.length,
+      results,
+    };
   }
 
   private toKMsgError(
@@ -268,9 +396,10 @@ export class KMsg {
     details?: Record<string, unknown>,
   ): KMsgError {
     if (error instanceof KMsgError) {
+      const knownError = error;
       if (!details) return error;
-      return new KMsgError(error.code, error.message, {
-        ...(error.details || {}),
+      return new KMsgError(knownError.code, knownError.message, {
+        ...(knownError.details || {}),
         ...details,
       });
     }
@@ -280,6 +409,98 @@ export class KMsg {
       error instanceof Error ? error.message : String(error),
       details,
     );
+  }
+
+  private resolveBatchChunkSize(inputs: SendInput[]): number {
+    const DEFAULT_CHUNK_SIZE = 50;
+    const providerLimit = this.detectProviderBatchLimit(inputs);
+
+    if (providerLimit === undefined) {
+      return DEFAULT_CHUNK_SIZE;
+    }
+
+    return Math.max(1, Math.min(DEFAULT_CHUNK_SIZE, providerLimit));
+  }
+
+  private detectProviderBatchLimit(inputs: SendInput[]): number | undefined {
+    let smallestLimit: number | undefined;
+
+    for (const input of inputs) {
+      const normalized = this.normalizeInput(input);
+      const providerResult = this.selectProvider(normalized);
+      if (providerResult.isFailure) {
+        continue;
+      }
+
+      const detectedLimit = this.readProviderBatchLimit(providerResult.value);
+      if (detectedLimit === undefined) {
+        continue;
+      }
+
+      smallestLimit =
+        smallestLimit === undefined
+          ? detectedLimit
+          : Math.min(smallestLimit, detectedLimit);
+    }
+
+    return smallestLimit;
+  }
+
+  private readProviderBatchLimit(provider: Provider): number | undefined {
+    const runtimeProvider = provider as Provider & {
+      maxBatchSize?: unknown;
+      batchLimit?: unknown;
+      capabilities?: {
+        maxBatchSize?: unknown;
+        batchLimit?: unknown;
+      };
+      limits?: {
+        maxBatchSize?: unknown;
+        send?: {
+          maxBatchSize?: unknown;
+          batchLimit?: unknown;
+        };
+        batch?: {
+          max?: unknown;
+          size?: unknown;
+        };
+      };
+    };
+
+    const candidates: unknown[] = [
+      runtimeProvider.maxBatchSize,
+      runtimeProvider.batchLimit,
+      runtimeProvider.capabilities?.maxBatchSize,
+      runtimeProvider.capabilities?.batchLimit,
+      runtimeProvider.limits?.maxBatchSize,
+      runtimeProvider.limits?.send?.maxBatchSize,
+      runtimeProvider.limits?.send?.batchLimit,
+      runtimeProvider.limits?.batch?.max,
+      runtimeProvider.limits?.batch?.size,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate !== "number" || !Number.isFinite(candidate)) {
+        continue;
+      }
+
+      const normalized = Math.floor(candidate);
+      if (normalized > 0) {
+        return normalized;
+      }
+    }
+
+    return undefined;
+  }
+
+  private chunkInputs<T>(inputs: T[], chunkSize: number): T[][] {
+    if (inputs.length === 0) return [];
+
+    const chunks: T[][] = [];
+    for (let i = 0; i < inputs.length; i += chunkSize) {
+      chunks.push(inputs.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 
   private selectProvider(options: SendOptions): Result<Provider, KMsgError> {

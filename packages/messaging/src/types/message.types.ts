@@ -1,5 +1,10 @@
-import type { RetryOptions } from "@k-msg/core";
+import type { KMsgError, Result, RetryOptions, SendResult } from "@k-msg/core";
 import { z } from "zod";
+
+export interface BatchSendResult {
+  total: number;
+  results: Array<Result<SendResult, KMsgError>>;
+}
 
 export interface MessageRequest {
   templateCode: string; // 템플릿 코드
