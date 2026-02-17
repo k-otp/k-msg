@@ -111,6 +111,12 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 - `@k-msg/template`: 템플릿 치환 유틸
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: 선택 구성요소
 
+## 의존성 운영 정책
+
+- 본체 패키지/앱(`packages/*`, `apps/*`)은 안정성을 우선합니다.
+- 예제 프로젝트(`examples/*`)는 별도 주기로 업그레이드합니다.
+- 점검은 `bun run deps:outdated:core` / `bun run deps:outdated:examples`로 분리해 수행합니다.
+
 ## 릴리즈 운영
 
 changeset/릴리즈 자동화 운영 정책은 아래 문서에 정리되어 있습니다:
