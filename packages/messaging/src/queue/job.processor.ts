@@ -6,10 +6,9 @@ import {
   CircuitBreaker,
   type Provider,
   RateLimiter,
-  RetryHandler,
   type SendOptions,
 } from "@k-msg/core";
-import { EventEmitter } from "events";
+import { EventEmitter } from "../shared/event-emitter";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -56,7 +55,7 @@ export class JobProcessor extends EventEmitter {
   private queue: JobQueue<any>;
   private processing = new Set<string>();
   private isRunning = false;
-  private pollTimer?: NodeJS.Timeout;
+  private pollTimer?: ReturnType<typeof setTimeout>;
   private metrics: JobProcessorMetrics;
   private rateLimiter?: RateLimiter;
   private circuitBreaker?: CircuitBreaker;

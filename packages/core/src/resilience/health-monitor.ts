@@ -8,7 +8,7 @@ export class HealthMonitor {
   private healthStatus: Map<string, boolean> = new Map();
   private lastCheck: Map<string, number> = new Map();
   private checkInterval: number;
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: ReturnType<typeof setInterval>;
 
   constructor(
     private services: Map<string, () => Promise<boolean>>,

@@ -3,7 +3,7 @@
  * 실시간 이벤트 수집 및 메트릭 변환
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "../shared/event-emitter";
 import type { MetricData } from "../types/analytics.types";
 import { MetricType } from "../types/analytics.types";
 
