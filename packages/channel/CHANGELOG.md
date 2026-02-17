@@ -1,5 +1,12 @@
 # @k-msg/channel
 
+## 0.17.0 — 2026-02-17
+
+### Patch changes
+
+- [bd3629c](https://github.com/k-otp/k-msg/commit/bd3629c464322350ba6f7cb6699de5f83e659cb3) Remove runtime dependence on Node's `events` module in `@k-msg/channel` so it can run in Edge environments without `nodejs_compat`.
+  Also drops `@types/node` from the package's dev dependencies and documents Edge runtime compatibility in package README files. — Thanks @imjlk!
+
 ## 0.16.0 — 2026-02-17
 
 ### Minor changes
