@@ -100,3 +100,9 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 ## Provider README Template
 
 When adding a new provider, start from `packages/provider/PROVIDER_README_TEMPLATE.md` and include official vendor doc links.
+
+## Provider Implementation Structure
+
+For provider code organization conventions (facade + domain modules + shared utility rules), see:
+
+- `packages/provider/src/PROVIDER_STRUCTURE.md`
