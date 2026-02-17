@@ -30,14 +30,14 @@
     }
   },
   "scripts": {
-    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external '@k-msg/*'",
     "build:cjs": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external '@k-msg/*'",
     "build:types": "tsc",
     "dev": "bun --watch src/index.ts",
     "test": "bun test",
     "test:unit": "bun test --testPathPattern='.*\\.test\\.(ts|js)$' --testTimeout=5000",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },

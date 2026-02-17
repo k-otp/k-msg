@@ -5,11 +5,64 @@ import type {
   TemplateProvider,
 } from "@k-msg/core";
 import { AligoProvider, IWINVProvider, MockProvider } from "@k-msg/provider";
-import { SolapiProvider } from "@k-msg/provider/solapi";
 import type { KMsgCliConfig } from "../config/schema";
 
 export type ProviderWithCapabilities = Provider &
   Partial<TemplateProvider & TemplateInspectionProvider & KakaoChannelProvider>;
+
+type SolapiProviderConstructor = new (
+  config: Record<string, unknown>,
+) => ProviderWithCapabilities;
+
+export type ProviderLoaders = {
+  loadSolapiProvider: () => Promise<SolapiProviderConstructor>;
+};
+
+function buildSolapiDependencyError(cause: unknown): Error {
+  const detail = cause instanceof Error ? cause.message : String(cause);
+  return new Error(
+    [
+      "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.",
+      "Install it in the runtime app: `bun add solapi` or `npm i solapi`.",
+      `Original error: ${detail}`,
+    ].join("\n"),
+  );
+}
+
+const defaultProviderLoaders: ProviderLoaders = {
+  async loadSolapiProvider() {
+    try {
+      const module = await import("@k-msg/provider/solapi");
+      return module.SolapiProvider as SolapiProviderConstructor;
+    } catch (error) {
+      throw buildSolapiDependencyError(error);
+    }
+  },
+};
+
+function hasTemplateCapabilities(
+  provider: ProviderWithCapabilities,
+): provider is ProviderWithCapabilities & TemplateProvider {
+  return (
+    typeof provider.createTemplate === "function" &&
+    typeof provider.updateTemplate === "function" &&
+    typeof provider.deleteTemplate === "function" &&
+    typeof provider.getTemplate === "function" &&
+    typeof provider.listTemplates === "function"
+  );
+}
+
+function hasTemplateInspectionCapability(
+  provider: ProviderWithCapabilities,
+): provider is ProviderWithCapabilities & TemplateInspectionProvider {
+  return typeof provider.requestTemplateInspection === "function";
+}
+
+function hasKakaoChannelCapabilities(
+  provider: ProviderWithCapabilities,
+): provider is ProviderWithCapabilities & KakaoChannelProvider {
+  return typeof provider.listKakaoChannels === "function";
+}
 
 function wrapProviderId(
   provider: ProviderWithCapabilities,
@@ -31,88 +84,77 @@ function wrapProviderId(
       : {}),
   };
 
-  const any = provider as unknown as Record<string, unknown>;
-  if (typeof any.createTemplate === "function") {
-    (wrapped as unknown as TemplateProvider).createTemplate = (
-      any.createTemplate as any
-    ).bind(provider);
-  }
-  if (typeof any.updateTemplate === "function") {
-    (wrapped as unknown as TemplateProvider).updateTemplate = (
-      any.updateTemplate as any
-    ).bind(provider);
-  }
-  if (typeof any.deleteTemplate === "function") {
-    (wrapped as unknown as TemplateProvider).deleteTemplate = (
-      any.deleteTemplate as any
-    ).bind(provider);
-  }
-  if (typeof any.getTemplate === "function") {
-    (wrapped as unknown as TemplateProvider).getTemplate = (
-      any.getTemplate as any
-    ).bind(provider);
-  }
-  if (typeof any.listTemplates === "function") {
-    (wrapped as unknown as TemplateProvider).listTemplates = (
-      any.listTemplates as any
-    ).bind(provider);
-  }
-  if (typeof any.requestTemplateInspection === "function") {
-    (
-      wrapped as unknown as TemplateInspectionProvider
-    ).requestTemplateInspection = (any.requestTemplateInspection as any).bind(
-      provider,
-    );
+  if (hasTemplateCapabilities(provider)) {
+    wrapped.createTemplate = provider.createTemplate.bind(provider);
+    wrapped.updateTemplate = provider.updateTemplate.bind(provider);
+    wrapped.deleteTemplate = provider.deleteTemplate.bind(provider);
+    wrapped.getTemplate = provider.getTemplate.bind(provider);
+    wrapped.listTemplates = provider.listTemplates.bind(provider);
   }
 
-  if (typeof any.listKakaoChannels === "function") {
-    (wrapped as unknown as KakaoChannelProvider).listKakaoChannels = (
-      any.listKakaoChannels as any
-    ).bind(provider);
+  if (hasTemplateInspectionCapability(provider)) {
+    wrapped.requestTemplateInspection =
+      provider.requestTemplateInspection.bind(provider);
   }
-  if (typeof any.listKakaoChannelCategories === "function") {
-    (wrapped as unknown as KakaoChannelProvider).listKakaoChannelCategories = (
-      any.listKakaoChannelCategories as any
-    ).bind(provider);
-  }
-  if (typeof any.requestKakaoChannelAuth === "function") {
-    (wrapped as unknown as KakaoChannelProvider).requestKakaoChannelAuth = (
-      any.requestKakaoChannelAuth as any
-    ).bind(provider);
-  }
-  if (typeof any.addKakaoChannel === "function") {
-    (wrapped as unknown as KakaoChannelProvider).addKakaoChannel = (
-      any.addKakaoChannel as any
-    ).bind(provider);
+
+  if (hasKakaoChannelCapabilities(provider)) {
+    wrapped.listKakaoChannels = provider.listKakaoChannels.bind(provider);
+    if (provider.listKakaoChannelCategories) {
+      wrapped.listKakaoChannelCategories =
+        provider.listKakaoChannelCategories.bind(provider);
+    }
+    if (provider.requestKakaoChannelAuth) {
+      wrapped.requestKakaoChannelAuth =
+        provider.requestKakaoChannelAuth.bind(provider);
+    }
+    if (provider.addKakaoChannel) {
+      wrapped.addKakaoChannel = provider.addKakaoChannel.bind(provider);
+    }
   }
 
   return wrapped;
 }
 
-export function createProviders(
+export async function createProviders(
   config: KMsgCliConfig,
-): ProviderWithCapabilities[] {
+): Promise<ProviderWithCapabilities[]> {
+  return createProvidersWithLoaders(config, defaultProviderLoaders);
+}
+
+export async function createProvidersWithLoaders(
+  config: KMsgCliConfig,
+  loaders: ProviderLoaders,
+): Promise<ProviderWithCapabilities[]> {
   const providers: ProviderWithCapabilities[] = [];
 
   for (const entry of config.providers) {
-    const cfg = entry.config as Record<string, unknown>;
+    const cfg = entry.config;
     let provider: ProviderWithCapabilities;
 
     switch (entry.type) {
       case "solapi": {
-        provider = new SolapiProvider(cfg as any) as ProviderWithCapabilities;
+        try {
+          const SolapiProvider = await loaders.loadSolapiProvider();
+          provider = new SolapiProvider(cfg);
+        } catch (error) {
+          throw buildSolapiDependencyError(error);
+        }
         break;
       }
       case "iwinv": {
-        provider = new IWINVProvider(cfg as any) as ProviderWithCapabilities;
+        provider = new IWINVProvider(
+          cfg as ConstructorParameters<typeof IWINVProvider>[0],
+        );
         break;
       }
       case "aligo": {
-        provider = new AligoProvider(cfg as any) as ProviderWithCapabilities;
+        provider = new AligoProvider(
+          cfg as ConstructorParameters<typeof AligoProvider>[0],
+        );
         break;
       }
       case "mock": {
-        provider = new MockProvider() as ProviderWithCapabilities;
+        provider = new MockProvider();
         break;
       }
       default: {

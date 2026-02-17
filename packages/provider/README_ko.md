@@ -32,6 +32,7 @@ bun add solapi
 import 경로:
 
 - `@k-msg/provider`: 런타임 중립 export (`IWINVProvider`, `AligoProvider`, 온보딩 헬퍼, mock)
+- `@k-msg/provider/aligo`: Aligo provider export
 - `@k-msg/provider/solapi`: SOLAPI provider export
 
 ## Provider 온보딩 매트릭스

@@ -18,19 +18,18 @@
     "access": "public"
   },
   "scripts": {
-    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test'",
     "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
   },
   "dependencies": {
-    "zod": "catalog:",
-    "@k-msg/messaging": "workspace:*"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
