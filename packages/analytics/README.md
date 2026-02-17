@@ -74,6 +74,7 @@ await analytics.init();
 
 - `@k-msg/analytics` does not create its own database. It reads from the `kmsg_delivery_tracking` table written by `DeliveryTrackingService`.
 - For production usage, prefer a durable store (`SqliteDeliveryTrackingStore` or `BunSqlDeliveryTrackingStore`).
+- Runtime diagnostics in analytics modules use `@k-msg/core` logger (no direct `console.*` in runtime paths).
 
 ## License
 

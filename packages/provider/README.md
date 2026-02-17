@@ -28,6 +28,7 @@ All providers implement the `Provider` interface from `@k-msg/core`:
 
 - `supportedTypes` declares supported message `type`s
 - `send(options: SendOptions)` returns `Result<SendResult, KMsgError>` (never throws)
+- some providers also implement optional capability `getBalance(query?)`
 
 Import paths:
 

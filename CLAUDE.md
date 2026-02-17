@@ -27,8 +27,7 @@ k-msg-platform/
 │   ├── webhook/                       # Event-driven notifications
 │   └── k-msg/                         # Unified package (re-exports all)
 └── apps/                              # Application layer
-    ├── cli/                           # Command-line interface
-    └── admin-dashboard/               # Web management interface
+    └── cli/                           # Command-line interface
 ```
 
 ### Package Dependencies & Data Flow

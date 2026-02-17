@@ -768,6 +768,106 @@ describe("IWINVProvider", () => {
     }
   });
 
+  test("getBalance defaults to ALIMTALK and uses AUTH header", async () => {
+    let calledUrl = "";
+    let calledAuth = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledAuth = new Headers(init?.headers).get("AUTH") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          code: 200,
+          message: "OK",
+          charge: 12000,
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      debug: false,
+    });
+
+    const result = await provider.getBalance();
+
+    expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/charge/");
+    expect(calledAuth).toBe(toBase64Utf8("api-key"));
+    expect(calledBody).toEqual({});
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.channel).toBe("ALIMTALK");
+      expect(result.value.amount).toBe(12000);
+      expect(result.value.currency).toBe("KRW");
+    }
+  });
+
+  test("getBalance(SMS) uses sms charge endpoint and secret header", async () => {
+    let calledUrl = "";
+    let calledSecret = "";
+    let calledBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledSecret = new Headers(init?.headers).get("secret") || "";
+      calledBody = JSON.parse((init?.body as string) || "{}") as Record<
+        string,
+        unknown
+      >;
+
+      return new Response(
+        JSON.stringify({
+          code: 0,
+          message: "OK",
+          charge: 3456,
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      debug: false,
+    });
+
+    const result = await provider.getBalance({ channel: "SMS" });
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/charge/");
+    expect(calledSecret).toBe(toBase64Utf8("sms-api-key&sms-auth-key"));
+    expect(calledBody).toEqual({ version: "1.0" });
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.channel).toBe("SMS");
+      expect(result.value.amount).toBe(3456);
+    }
+  });
+
+  test("getBalance(SMS) fails when smsApiKey/smsAuthKey are missing", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      debug: false,
+    });
+
+    const result = await provider.getBalance({ channel: "SMS" });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toContain(
+        "smsApiKey and smsAuthKey are required",
+      );
+    }
+  });
+
   test("Template list uses AUTH header and maps status", async () => {
     let calledUrl = "";
     let calledAuth = "";
