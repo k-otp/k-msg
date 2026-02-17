@@ -111,6 +111,13 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 - `@k-msg/template`: 템플릿 치환 유틸
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: 선택 구성요소
 
+## 릴리즈 운영
+
+changeset/릴리즈 자동화 운영 정책은 아래 문서에 정리되어 있습니다:
+
+- [`./.sampo/README.md`](./.sampo/README.md)
+- [`./.sampo/README_ko.md`](./.sampo/README_ko.md)
+
 ## 브레이킹 변경사항
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` 공개 API 제거
