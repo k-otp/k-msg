@@ -34,8 +34,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/bun": "catalog:",
-    "@types/node": "catalog:"
+    "@types/bun": "catalog:"
   },
   "keywords": [
     "alimtalk",

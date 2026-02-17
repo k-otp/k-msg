@@ -2,7 +2,7 @@
  * Template Registry - Manages templates across providers and categories
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "../shared/event-emitter";
 import { TemplateValidator } from "../parser/validator";
 import type {
   AlimTalkTemplate,
@@ -83,7 +83,7 @@ export class TemplateRegistry extends EventEmitter {
   private templatesByCategory = new Map<TemplateCategory, Set<string>>();
   private templateHistories = new Map<string, TemplateHistory>();
   private usageStats = new Map<string, TemplateUsageStats>();
-  private backupTimer?: NodeJS.Timeout;
+  private backupTimer?: ReturnType<typeof setInterval>;
 
   private defaultOptions: TemplateRegistryOptions = {
     enableVersioning: true,
