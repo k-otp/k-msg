@@ -1,5 +1,27 @@
 # @k-msg/webhook
 
+## 0.17.0 — 2026-02-17
+
+### Minor changes
+
+- [74549ef](https://github.com/k-otp/k-msg/commit/74549ef4ea2e9072829fb3ca7bf6aa145e91af90) Reorganize low-usage core APIs and expand real internal usage paths.
+  
+  - Removed `@k-msg/core` low-usage APIs: `config`, `health`, `types/history`, and high-level resilience helpers (`ErrorRecovery`, `GracefulDegradation`, `HealthMonitor`).
+  - Added optional provider capability `BalanceProvider#getBalance(query?)` and implemented it in:
+    - `IWINVProvider` (`ALIMTALK` default + `SMS/LMS/MMS` charge lookup)
+    - `SolapiProvider` (single balance model mapped to `BalanceResult`)
+  - Standardized analytics runtime logging to `@k-msg/core` logger (`console.*` removal in runtime paths).
+  - Removed `apps/admin-dashboard` and `apps/message-service` from the monorepo.
+  
+  Note: This includes behavior/interface removals that can be considered breaking, but this release is intentionally marked as `minor` per current release policy request. — Thanks @imjlk!
+
+### Patch changes
+
+- [408608b](https://github.com/k-otp/k-msg/commit/408608bca6cb859f94e25ef02b1abe7c6009d3d5) Remove runtime dependence on Node built-ins in `@k-msg/webhook` so it can run in Edge environments without `nodejs_compat`.
+  `events`, `node:crypto`, `fs/path`, `NodeJS.Timeout`, and direct `process.env` usage are replaced with runtime-neutral implementations.
+  File persistence is now adapter-based via `fileAdapter`, and README docs include a Node compatibility adapter example. — Thanks @imjlk!
+- Updated dependencies: core@0.17.0
+
 ## 0.16.0 — 2026-02-17
 
 ### Patch changes
