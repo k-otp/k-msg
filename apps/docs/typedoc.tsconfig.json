@@ -7,7 +7,20 @@
     "allowImportingTsExtensions": true,
     "types": ["node"],
     "paths": {
-      "@k-msg/*": ["../../packages/*/src"],
+      "@k-msg/analytics": ["../../packages/analytics/src/index.ts"],
+      "@k-msg/analytics/*": ["../../packages/analytics/src/*"],
+      "@k-msg/channel": ["../../packages/channel/src/index.ts"],
+      "@k-msg/channel/*": ["../../packages/channel/src/*"],
+      "@k-msg/core": ["../../packages/core/src/index.ts"],
+      "@k-msg/core/*": ["../../packages/core/src/*"],
+      "@k-msg/messaging": ["../../packages/messaging/src/index.ts"],
+      "@k-msg/messaging/*": ["../../packages/messaging/src/*"],
+      "@k-msg/provider": ["../../packages/provider/src/index.ts"],
+      "@k-msg/provider/*": ["../../packages/provider/src/*"],
+      "@k-msg/template": ["../../packages/template/src/index.ts"],
+      "@k-msg/template/*": ["../../packages/template/src/*"],
+      "@k-msg/webhook": ["../../packages/webhook/src/index.ts"],
+      "@k-msg/webhook/*": ["../../packages/webhook/src/*"],
       "k-msg": ["../../packages/k-msg/src/index.ts"],
       "k-msg/*": ["../../packages/k-msg/src/*"]
     }
