@@ -544,6 +544,47 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       advanced.toHaveSucceeded();
       expect(advanced.stdout).toContain("OK");
+
+      const dryRunSingle = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"dry-run-single"}',
+          "--dry-run",
+          "true",
+        ]),
+      );
+      dryRunSingle.toHaveSucceeded();
+      expect(dryRunSingle.stdout).toContain("DRY RUN");
+      expect(dryRunSingle.stdout).toContain("Preview: single");
+
+      const dryRunBatchJson = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '[{"to":"01012345678","text":"dry-run-1"},{"to":"01099998888","text":"dry-run-2"}]',
+          "--dry-run",
+          "true",
+          "--json",
+          "true",
+        ]),
+      );
+      dryRunBatchJson.toHaveSucceeded();
+      const dryRunBatchParsed = JSON.parse(dryRunBatchJson.stdout) as Record<
+        string,
+        unknown
+      >;
+      expect(dryRunBatchParsed.ok).toBe(true);
+      expect(dryRunBatchParsed.dryRun).toBe(true);
+      const dryRunSummary = dryRunBatchParsed.summary as Record<
+        string,
+        unknown
+      >;
+      expect(dryRunSummary.total).toBe(2);
     },
     TEST_TIMEOUT,
   );
