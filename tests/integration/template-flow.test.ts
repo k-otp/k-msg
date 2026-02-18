@@ -63,7 +63,7 @@ describe("Template and Messaging Flow Integration", () => {
       expect(sendResult.value.status).toBe("SENT");
       expect(sendResult.value.providerId).toBe("mock");
       const sendValue = sendResult.value as unknown as Record<string, unknown>;
-      expect(sendValue["provider"]).toBeUndefined();
+      expect(sendValue.provider).toBeUndefined();
     }
 
     const deleteResult = await templateService.delete(createdCode);

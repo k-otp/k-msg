@@ -751,7 +751,13 @@ describe("k-msg CLI (bunli) E2E", () => {
       firstInit.toHaveSucceeded();
 
       const forcePresence = expectCommand(
-        await runCli(["config", "init", "--config", configPathForForce, "--force"]),
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          configPathForForce,
+          "--force",
+        ]),
       );
       forcePresence.toHaveSucceeded();
 

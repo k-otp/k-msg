@@ -1,8 +1,8 @@
 import {
-  providerConfigFieldSpecs,
   type ProviderConfigFieldMap,
   type ProviderConfigFieldSpec,
   type ProviderTypeWithConfig,
+  providerConfigFieldSpecs,
 } from "@k-msg/provider";
 import { z } from "zod";
 
@@ -10,11 +10,9 @@ const providerTypeValues = Object.keys(
   providerConfigFieldSpecs,
 ) as ProviderTypeWithConfig[];
 
-const envReferenceSchema = z
-  .string()
-  .regex(/^env:[A-Za-z_][A-Za-z0-9_]*$/, {
-    message: "Use env:NAME format for environment variable substitution",
-  });
+const envReferenceSchema = z.string().regex(/^env:[A-Za-z_][A-Za-z0-9_]*$/, {
+  message: "Use env:NAME format for environment variable substitution",
+});
 
 const numberLikeStringSchema = z
   .string()
@@ -48,25 +46,32 @@ function buildProviderConfigFieldSchema(
       case "string":
         return z.string().min(1);
       case "number":
-        return z.union([z.number(), numberLikeStringSchema, envReferenceSchema]);
+        return z.union([
+          z.number(),
+          numberLikeStringSchema,
+          envReferenceSchema,
+        ]);
       case "boolean":
-        return z.union([z.boolean(), strictBooleanStringSchema, envReferenceSchema]);
+        return z.union([
+          z.boolean(),
+          strictBooleanStringSchema,
+          envReferenceSchema,
+        ]);
       case "stringRecord":
         return z.record(z.string(), z.string());
     }
   })();
 
   const withDescription =
-    typeof fieldSpec.description === "string" && fieldSpec.description.length > 0
+    typeof fieldSpec.description === "string" &&
+    fieldSpec.description.length > 0
       ? baseSchema.describe(fieldSpec.description)
       : baseSchema;
 
   return fieldSpec.required ? withDescription : withDescription.optional();
 }
 
-function buildProviderConfigSchema(
-  fieldMap: ProviderConfigFieldMap,
-) {
+function buildProviderConfigSchema(fieldMap: ProviderConfigFieldMap) {
   const shape: Record<string, z.ZodTypeAny> = {};
 
   for (const [key, fieldSpec] of Object.entries(fieldMap)) {
