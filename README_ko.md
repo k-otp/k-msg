@@ -58,7 +58,7 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
 });
 ```
@@ -71,7 +71,7 @@ await kmsg.send({
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
   failover: {
     enabled: true,
@@ -128,4 +128,4 @@ changeset/릴리즈 자동화 운영 정책은 아래 문서에 정리되어 있
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` 공개 API 제거
 - 메시지 구분 필드는 `type`로 통일(기존 `channel` 제거)
-- `templateId` → `templateCode`로 통일
+- `templateId` → `templateId`로 통일

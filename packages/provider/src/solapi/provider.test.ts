@@ -130,7 +130,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
     const result = await provider.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
       kakao: { profileId: "pf_1" },
     });
@@ -160,7 +160,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
     const result = await provider.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
       failover: {
         enabled: true,
@@ -322,7 +322,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
     const result = await provider.send({
       type: "NSA",
       to: "01012345678",
-      templateCode: "NSA_TPL_1",
+      templateId: "NSA_TPL_1",
       variables: { name: "tester", code: 1234 },
       naver: {
         talkId: "talk_1",

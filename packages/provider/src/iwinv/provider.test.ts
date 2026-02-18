@@ -48,7 +48,7 @@ describe("IWINVProvider", () => {
     const result = await provider.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
     });
 
@@ -155,7 +155,7 @@ describe("IWINVProvider", () => {
       type: "ALIMTALK",
       to: "01012345678",
       from: "01000000000",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
     });
 
@@ -197,7 +197,7 @@ describe("IWINVProvider", () => {
       type: "ALIMTALK",
       to: "01012345678",
       from: "01000000000",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
       failover: {
         enabled: true,
@@ -229,7 +229,7 @@ describe("IWINVProvider", () => {
       type: "ALIMTALK",
       to: "01012345678",
       from: "01000000000",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
     });
 
@@ -268,7 +268,7 @@ describe("IWINVProvider", () => {
       type: "ALIMTALK",
       to: "01012345678",
       from: "01000000000",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: 1234 },
       providerOptions: { templateParam: ["A", "B", "C"] },
     });
@@ -921,7 +921,7 @@ describe("IWINVProvider", () => {
     }
   });
 
-  test("Template create uses add endpoint and returns templateCode", async () => {
+  test("Template create uses add endpoint and returns templateId", async () => {
     let calledUrl = "";
     let calledAuth = "";
     let calledBody: Record<string, unknown> = {};

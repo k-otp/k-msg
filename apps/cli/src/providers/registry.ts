@@ -48,7 +48,7 @@ function isSolapiDependencyError(error: unknown): error is Error {
 const defaultProviderLoaders: ProviderLoaders = {
   async loadSolapiProvider() {
     const module = await import("@k-msg/provider/solapi");
-    return module.SolapiProvider as SolapiProviderConstructor;
+    return module.SolapiProvider as unknown as SolapiProviderConstructor;
   },
 };
 
@@ -169,13 +169,13 @@ export async function createProvidersWithLoaders(
       }
       case "iwinv": {
         provider = new IWINVProvider(
-          cfg as ConstructorParameters<typeof IWINVProvider>[0],
+          cfg as unknown as ConstructorParameters<typeof IWINVProvider>[0],
         );
         break;
       }
       case "aligo": {
         provider = new AligoProvider(
-          cfg as ConstructorParameters<typeof AligoProvider>[0],
+          cfg as unknown as ConstructorParameters<typeof AligoProvider>[0],
         );
         break;
       }

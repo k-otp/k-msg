@@ -142,8 +142,8 @@ k-msg config provider add iwinv
 
 ```bash
 k-msg providers doctor
-k-msg alimtalk preflight --provider iwinv --template-code TPL_001 --channel main
-k-msg alimtalk send --provider iwinv --template-code TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
+k-msg alimtalk preflight --provider iwinv --template-id TPL_001 --channel main
+k-msg alimtalk send --provider iwinv --template-id TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
 ```
 
 참고:
@@ -166,7 +166,7 @@ k-msg sms send --to 01012345678 --text "hello"
 ```bash
 k-msg alimtalk send \
   --to 01012345678 \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --vars '{"name":"Jane"}' \
   --channel main \
   --plus-id @my_channel
@@ -177,7 +177,7 @@ Failover 옵션:
 ```bash
 k-msg alimtalk send \
   --to 01012345678 \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --vars '{"name":"Jane"}' \
   --failover true \
   --fallback-channel sms \
@@ -193,7 +193,7 @@ CLI는 텍스트 모드에서 `WARNING ...` 라인을 출력하고 `--json` 출�
 ```bash
 k-msg alimtalk preflight \
   --provider iwinv \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --channel main \
   --sender-key your_sender_key \
   --plus-id @my_channel
@@ -227,6 +227,18 @@ k-msg send --input '[{"to":"01011112222","text":"hello 1"},{"to":"01033334444","
 - `k-msg providers doctor`: provider/account/capability 준비 상태 점검
 - `k-msg send --dry-run`: 요청 payload 미리보기/검증 (실제 전송 없음)
 
+Boolean 플래그 규칙 (`--json`, `--verbose`, `--dry-run`, `--stdin`, `--failover`, `--force` 공통):
+
+- `--flag` -> `true`
+- `--flag true` -> `true`
+- `--flag false` -> `false`
+- `--no-flag` -> `false`
+- 잘못된 boolean 값(예: `--dry-run maybe`)은 종료 코드 `2`로 실패합니다
+
+같은 값이 여러 소스에 있을 때 우선순위:
+
+- `CLI flag > environment variable > config file > built-in default`
+
 ## Kakao Channel (Aligo capability)
 
 ```bash
@@ -247,13 +259,13 @@ k-msg kakao channel add \
 
 ```bash
 k-msg kakao template list
-k-msg kakao template get --template-code TPL_001
+k-msg kakao template get --template-id TPL_001
 k-msg kakao template create --name "Welcome" --content "Hello #{name}" --channel main
-k-msg kakao template update --template-code TPL_001 --name "Updated"
-k-msg kakao template delete --template-code TPL_001
+k-msg kakao template update --template-id TPL_001 --name "Updated"
+k-msg kakao template delete --template-id TPL_001
 
 # 검수 요청은 provider별 지원 여부가 다릅니다 (Aligo 지원)
-k-msg kakao template request --template-code TPL_001 --channel main
+k-msg kakao template request --template-id TPL_001 --channel main
 ```
 
 ## 출력 / 종료 코드
@@ -263,6 +275,7 @@ k-msg kakao template request --template-code TPL_001 --channel main
   (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX_CI` /
   `CODEX_SHELL` / `CODEX_THREAD_ID`, `MCP_SERVER_NAME` / `MCP_SESSION_ID` /
   `MCP_TOOL_NAME`)
+- AI 환경에서도 `--json false`(또는 `--no-json`)를 주면 텍스트 출력으로 강제할 수 있습니다
 - 종료 코드:
   - `0`: 성공
   - `2`: 입력/설정 오류

@@ -1,7 +1,7 @@
 import { createInterface } from "node:readline/promises";
 import { defineCommand, option } from "@bunli/core";
 import { z } from "zod";
-import { optConfig, optJson } from "../cli/options";
+import { optConfig, optJson, strictBooleanFlagSchema } from "../cli/options";
 import { shouldUseJsonOutput } from "../cli/utils";
 import { CONFIG_SCHEMA_LATEST_URL } from "../config/constants";
 import { loadKMsgConfig, resolveConfigPathForWrite } from "../config/load";
@@ -438,7 +438,13 @@ function ensureSchemaField(config: KMsgCliConfig): void {
   }
 }
 
-function ensureRoutingExists(config: KMsgCliConfig): void {
+function ensureRoutingExists(
+  config: KMsgCliConfig,
+): asserts config is KMsgCliConfig & {
+  routing: NonNullable<KMsgCliConfig["routing"]> & {
+    byType: NonNullable<NonNullable<KMsgCliConfig["routing"]>["byType"]>;
+  };
+} {
   if (!config.routing) {
     config.routing = {
       strategy: "first",
@@ -461,7 +467,6 @@ function setRoutingByType(
   ensureRoutingExists(config);
   const deduped = Array.from(new Set(ids));
   if (deduped.length === 0) return;
-  if (!config.routing?.byType) return;
   config.routing.byType[type] = deduped;
 }
 
@@ -471,7 +476,7 @@ function addProviderToRouting(
 ): void {
   ensureRoutingExists(config);
   for (const messageType of providerSupportedTypes[provider.type]) {
-    const current = routeAsList(config.routing.byType?.[messageType]);
+    const current = routeAsList(config.routing.byType[messageType]);
     if (!current.includes(provider.id)) {
       current.push(provider.id);
     }
@@ -568,11 +573,7 @@ function applySharedConfigDefaults(config: KMsgCliConfig): void {
   ensureIwinvManualCheck(config);
   ensureRoutingExists(config);
 
-  if (
-    config.routing &&
-    !config.routing.defaultProviderId &&
-    config.providers.length > 0
-  ) {
+  if (!config.routing.defaultProviderId && config.providers.length > 0) {
     config.routing.defaultProviderId = config.providers[0]?.id;
   }
 }
@@ -774,8 +775,9 @@ const initCmd = defineCommand({
   description: "Initialize k-msg config",
   options: {
     config: optConfig,
-    force: option(z.coerce.boolean().default(false), {
-      description: "Overwrite if the file already exists",
+    force: option(strictBooleanFlagSchema, {
+      description:
+        "Overwrite if the file already exists (boolean: --force, --force true|false, --no-force; default: false)",
       short: "f",
     }),
     template: option(z.enum(["interactive", "full"]).default("interactive"), {
@@ -869,9 +871,7 @@ const providerAddCmd = defineCommand({
     });
     if (shouldSetDefault && config.providers.length > 0) {
       ensureRoutingExists(config);
-      if (config.routing) {
-        config.routing.defaultProviderId = provider.id;
-      }
+      config.routing.defaultProviderId = provider.id;
     }
 
     applySharedConfigDefaults(config);

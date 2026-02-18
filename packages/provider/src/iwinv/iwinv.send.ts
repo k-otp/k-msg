@@ -44,12 +44,13 @@ export async function sendAlimTalk(params: {
   options: Extract<SendOptions, { type: "ALIMTALK" }>;
 }): Promise<Result<SendResult, KMsgError>> {
   const { providerId, config, options } = params;
+  const templateId = options.templateId;
 
-  if (!options.templateCode || options.templateCode.length === 0) {
+  if (!templateId || templateId.length === 0) {
     return fail(
       new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
-        "templateCode is required for ALIMTALK",
+        "templateId is required for ALIMTALK",
         { providerId },
       ),
     );
@@ -173,7 +174,7 @@ export async function sendAlimTalk(params: {
         : undefined;
 
   const payload: Record<string, unknown> = {
-    templateCode: options.templateCode,
+    templateCode: templateId,
     reserve,
     ...(sendDate ? { sendDate } : {}),
     list: [

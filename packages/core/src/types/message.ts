@@ -130,7 +130,7 @@ export interface NaverSendOptions {
   /**
    * Override the template identifier for NSA (provider-specific).
    */
-  templateCode?: string;
+  templateId?: string;
   disableSms?: boolean;
   variables?: MessageVariables;
   buttons?: unknown[];
@@ -160,7 +160,7 @@ export interface RcsSendOptions {
   /**
    * Override template identifier for RCS_*TPL types.
    */
-  templateCode?: string;
+  templateId?: string;
   copyAllowed?: boolean;
   variables?: MessageVariables;
   mmsType?: "M3" | "S3" | "M4" | "S4" | "M5" | "S5" | "M6" | "S6";
@@ -200,7 +200,7 @@ export interface SmsSendOptions extends CommonSendOptions {
 
 export interface AlimTalkSendOptions extends CommonSendOptions {
   type: "ALIMTALK";
-  templateCode: string;
+  templateId: string;
   variables: MessageVariables;
   kakao?: KakaoSendOptions;
   failover?: AlimTalkFailoverOptions;
@@ -218,7 +218,7 @@ export interface FriendTalkSendOptions extends CommonSendOptions {
 
 export interface NsaSendOptions extends CommonSendOptions {
   type: "NSA";
-  templateCode: string;
+  templateId: string;
   variables: MessageVariables;
   naver?: NaverSendOptions;
 }
@@ -247,7 +247,7 @@ export interface RcsTextSendOptions extends CommonSendOptions {
 
 export interface RcsTemplateSendOptions extends CommonSendOptions {
   type: "RCS_TPL" | "RCS_ITPL" | "RCS_LTPL";
-  templateCode: string;
+  templateId: string;
   variables: MessageVariables;
   rcs?: RcsSendOptions;
 }
