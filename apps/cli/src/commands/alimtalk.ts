@@ -80,7 +80,7 @@ const sendCmd = defineCommand({
     to: option(z.string().min(1), { description: "Recipient phone number" }),
     from: option(z.string().optional(), { description: "Sender number" }),
     "template-id": option(z.string().min(1), {
-      description: "Template code",
+      description: "Template ID",
     }),
     vars: option(
       z
@@ -225,7 +225,7 @@ const preflightCmd = defineCommand({
       description: "Kakao channel plusId override",
     }),
     "template-id": option(z.string().min(1), {
-      description: "Template code to validate",
+      description: "Template ID to validate",
     }),
   },
   handler: async ({ flags, context }) => {
