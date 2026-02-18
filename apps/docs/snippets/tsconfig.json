@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "paths": {
+      "@k-msg/*": ["../../../packages/*/src"],
+      "k-msg": ["../../../packages/k-msg/src/index.ts"],
+      "k-msg/*": ["../../../packages/k-msg/src/*"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}

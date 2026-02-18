@@ -1,5 +1,7 @@
 # @k-msg/messaging
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 High-level messaging facade for `k-msg`.
 
 This package provides `KMsg`, which normalizes user input, routes to a provider, and returns a `Result`.

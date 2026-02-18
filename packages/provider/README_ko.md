@@ -1,5 +1,7 @@
 # @k-msg/provider
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 `k-msg`용 provider 구현 패키지입니다. (`SendOptions + Result` 기반)
 
 ## 설치

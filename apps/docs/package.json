@@ -1,0 +1,25 @@
+{
+  "name": "@k-msg/docs",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "snippets:typecheck": "tsc -p ./snippets/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.37.6",
+    "astro": "^5.14.0",
+    "starlight-typedoc": "^0.21.5",
+    "starlight-versions": "^0.6.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "typedoc": "^0.28.12",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typescript": "catalog:"
+  }
+}
