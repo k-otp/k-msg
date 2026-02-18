@@ -27,12 +27,16 @@
             <p>Total sitemap files: <xsl:value-of select="count(s:sitemapindex/s:sitemap)" /></p>
             <table>
               <thead>
-                <tr><th>Sitemap</th></tr>
+                <tr>
+                  <th>Sitemap</th>
+                  <th>Last Modified</th>
+                </tr>
               </thead>
               <tbody>
                 <xsl:for-each select="s:sitemapindex/s:sitemap">
                   <tr>
                     <td><a href="{s:loc}"><xsl:value-of select="s:loc" /></a></td>
+                    <td><xsl:value-of select="s:lastmod" /></td>
                   </tr>
                 </xsl:for-each>
               </tbody>
@@ -44,12 +48,20 @@
             <p>Total URLs: <xsl:value-of select="count(s:urlset/s:url)" /></p>
             <table>
               <thead>
-                <tr><th>URL</th></tr>
+                <tr>
+                  <th>URL</th>
+                  <th>Last Modified</th>
+                  <th>Change Frequency</th>
+                  <th>Priority</th>
+                </tr>
               </thead>
               <tbody>
                 <xsl:for-each select="s:urlset/s:url">
                   <tr>
                     <td><a href="{s:loc}"><xsl:value-of select="s:loc" /></a></td>
+                    <td><xsl:value-of select="s:lastmod" /></td>
+                    <td><xsl:value-of select="s:changefreq" /></td>
+                    <td><xsl:value-of select="s:priority" /></td>
                   </tr>
                 </xsl:for-each>
               </tbody>
