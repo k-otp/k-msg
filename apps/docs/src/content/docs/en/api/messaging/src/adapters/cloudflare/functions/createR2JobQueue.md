@@ -5,7 +5,7 @@ prev: false
 title: "createR2JobQueue"
 ---
 
-> **createR2JobQueue**\<`T`\>(`bucket`, `options?`): [`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+> **createR2JobQueue**\<`T`\>(`bucket`, `options?`): [`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L100)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:100](https://gi
 
 ### bucket
 
-[`CloudflareR2BucketLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
+[`CloudflareR2BucketLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
 
 ### options?
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:100](https://gi
 
 ## Returns
 
-[`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+[`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>

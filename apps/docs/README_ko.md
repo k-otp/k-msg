@@ -4,7 +4,7 @@
 
 - Framework: Astro + Starlight
 - 기본 언어: `ko` (한국어), 보조 언어: `en`
-- 루트 경로: `/ -> /ko/`
+- 루트 경로: `/` (한국어 루트 로케일), 영어 경로: `/en/`
 - 배포 산출물: `apps/docs/dist`
 
 ## 1. 빠른 시작
@@ -20,16 +20,18 @@
 
 수동 작성 대상:
 
-- `apps/docs/src/content/docs/ko/cli.mdx`
+- `apps/docs/src/content/docs/cli.mdx`
 - `apps/docs/src/content/docs/en/cli.mdx`
-- `apps/docs/src/content/docs/ko/snippets.mdx`
+- `apps/docs/src/content/docs/snippets.mdx`
 - `apps/docs/src/content/docs/en/snippets.mdx`
 - `apps/docs/snippets/**` (코드 예제 원본)
 
 자동 생성 대상:
 
-- `apps/docs/src/content/docs/{ko,en}/guides/**`
-- `apps/docs/src/content/docs/{ko,en}/api/**`
+- `apps/docs/src/content/docs/guides/**` (한국어 루트 로케일)
+- `apps/docs/src/content/docs/en/guides/**`
+- `apps/docs/src/content/docs/api/**` (루트 로케일 API 원본)
+- `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
 - `apps/docs/typedoc.entrypoints.json`
@@ -58,7 +60,7 @@
 
 4. `scripts/docs/generate-guides.ts`
 - 루트/패키지/예제 `README*.md` 기반 가이드 생성
-- 출력: `apps/docs/src/content/docs/{ko,en}/guides/**`, `index.md`
+- 출력: `apps/docs/src/content/docs/guides/**`, `apps/docs/src/content/docs/en/guides/**`, `index.md`
 
 모든 생성기는 `--check` 모드를 지원합니다.
 
@@ -74,7 +76,7 @@
 
 1. `starlight-typedoc`가 `typedoc.entrypoints.json`으로 API 문서 생성
 2. 원본 생성 경로: `src/content/docs/api/**`
-3. 플러그인이 `en/api`, `ko/api`로 동기화
+3. 플러그인이 `en/api`로 동기화
 4. `gitRevision: "main"` 고정으로 링크 드리프트 감소
 
 ## 5. 작업 절차 (기여자 기준)
@@ -127,3 +129,5 @@
 참고:
 
 - `astro build` 완료 시 `sitemap-index.xml`이 `apps/docs/dist`에 생성됩니다.
+- `apps/docs/astro.config.mjs`에서 sitemap `lastmod`, `changefreq`, `priority`를 커스터마이징합니다.
+- `apps/docs/public/robots.txt`가 canonical sitemap URL을 공지합니다.
