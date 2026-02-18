@@ -101,6 +101,11 @@ export const kMsgCliConfigSchema = z
     providers: z.array(providerEntrySchema).default([]),
     routing: routingSchema,
     defaults: defaultsSchema,
+    persistence: z
+      .object({
+        strategy: z.enum(["none", "log", "queue", "full"]).optional(),
+      })
+      .optional(),
     aliases: aliasesSchema,
     onboarding: onboardingSchema,
   })
