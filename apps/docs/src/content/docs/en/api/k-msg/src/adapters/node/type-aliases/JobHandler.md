@@ -7,7 +7,7 @@ title: "JobHandler"
 
 > **JobHandler**\<`T`\> = (`job`) => `Promise`\<`any`\>
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:24
+Defined in: [packages/messaging/src/queue/job.processor.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L40)
 
 ## Type Parameters
 

@@ -5,11 +5,11 @@ prev: false
 title: "SqliteDeliveryTrackingStore"
 ---
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:6
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L55)
 
 ## Implements
 
-- `DeliveryTrackingStore`
+- [`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
 ## Constructors
 
@@ -17,13 +17,13 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:6
 
 > **new SqliteDeliveryTrackingStore**(`options?`): `SqliteDeliveryTrackingStore`
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:9
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L59)
 
 #### Parameters
 
 ##### options?
 
-`SqliteDeliveryTrackingStoreOptions`
+`SqliteDeliveryTrackingStoreOptions` = `{}`
 
 #### Returns
 
@@ -35,7 +35,7 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:9
 
 > **close**(): `void`
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:18
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:397](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L397)
 
 #### Returns
 
@@ -43,33 +43,33 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Implementation of
 
-`DeliveryTrackingStore.close`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`close`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#close)
 
 ***
 
 ### countBy()
 
-> **countBy**(`filter`, `groupBy`): `Promise`\<`DeliveryTrackingCountByRow`[]\>
+> **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:16
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L339)
 
 #### Parameters
 
 ##### filter
 
-`DeliveryTrackingRecordFilter`
+[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 ##### groupBy
 
-readonly `DeliveryTrackingCountByField`[]
+readonly [`DeliveryTrackingCountByField`](/api/messaging/src/tracking/type-aliases/deliverytrackingcountbyfield/)[]
 
 #### Returns
 
-`Promise`\<`DeliveryTrackingCountByRow`[]\>
+`Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
 #### Implementation of
 
-`DeliveryTrackingStore.countBy`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`countBy`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#countby)
 
 ***
 
@@ -77,13 +77,13 @@ readonly `DeliveryTrackingCountByField`[]
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:15
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:328](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L328)
 
 #### Parameters
 
 ##### filter
 
-`DeliveryTrackingRecordFilter`
+[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 #### Returns
 
@@ -91,15 +91,15 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Implementation of
 
-`DeliveryTrackingStore.countRecords`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`countRecords`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#countrecords)
 
 ***
 
 ### get()
 
-> **get**(`messageId`): `Promise`\<`TrackingRecord` \| `undefined`\>
+> **get**(`messageId`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:12
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:201](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L201)
 
 #### Parameters
 
@@ -109,11 +109,11 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Returns
 
-`Promise`\<`TrackingRecord` \| `undefined`\>
+`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
 #### Implementation of
 
-`DeliveryTrackingStore.get`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`get`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#get)
 
 ***
 
@@ -121,7 +121,7 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:10
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L63)
 
 #### Returns
 
@@ -129,15 +129,15 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Implementation of
 
-`DeliveryTrackingStore.init`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`init`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#init)
 
 ***
 
 ### listDue()
 
-> **listDue**(`now`, `limit`): `Promise`\<`TrackingRecord`[]\>
+> **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:13
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L234)
 
 #### Parameters
 
@@ -151,33 +151,33 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Returns
 
-`Promise`\<`TrackingRecord`[]\>
+`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 #### Implementation of
 
-`DeliveryTrackingStore.listDue`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`listDue`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#listdue)
 
 ***
 
 ### listRecords()
 
-> **listRecords**(`options`): `Promise`\<`TrackingRecord`[]\>
+> **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:14
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:274](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L274)
 
 #### Parameters
 
 ##### options
 
-`DeliveryTrackingListOptions`
+[`DeliveryTrackingListOptions`](/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
 
 #### Returns
 
-`Promise`\<`TrackingRecord`[]\>
+`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 #### Implementation of
 
-`DeliveryTrackingStore.listRecords`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`listRecords`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#listrecords)
 
 ***
 
@@ -185,7 +185,7 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:17
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:381](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L381)
 
 #### Parameters
 
@@ -195,7 +195,7 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 ##### patch
 
-`Partial`\<`TrackingRecord`\>
+`Partial`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)\>
 
 #### Returns
 
@@ -203,7 +203,7 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Implementation of
 
-`DeliveryTrackingStore.patch`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patch`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patch)
 
 ***
 
@@ -211,13 +211,13 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 > **upsert**(`record`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:11
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L128)
 
 #### Parameters
 
 ##### record
 
-`TrackingRecord`
+[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
 
 #### Returns
 
@@ -225,4 +225,4 @@ Defined in: packages/messaging/dist/delivery-tracking/stores/sqlite.store.d.ts:1
 
 #### Implementation of
 
-`DeliveryTrackingStore.upsert`
+[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`upsert`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/#upsert)

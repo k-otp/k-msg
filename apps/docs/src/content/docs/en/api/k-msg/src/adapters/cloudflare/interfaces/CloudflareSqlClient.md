@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareSqlClient"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:6
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:6
 
 > **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:7
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L9)
 
 ## Methods
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:7
 
 > `optional` **close**(): `void` \| `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:10
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L15)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:10
 
 > **query**\<`T`\>(`sql`, `params?`): `Promise`\<[`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:8
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L10)
 
 #### Type Parameters
 
@@ -61,7 +61,7 @@ readonly `unknown`[]
 
 > `optional` **transaction**\<`T`\>(`fn`): `Promise`\<`T`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:9
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L14)
 
 #### Type Parameters
 

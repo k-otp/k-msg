@@ -7,7 +7,15 @@ const docsRoot = path.join(repoRoot, "apps/docs/src/content/docs");
 const sourceVersion = process.env.KMSG_DOCS_SOURCE ?? "latest";
 const targetVersion = process.env.KMSG_DOCS_TARGET ?? "v0";
 
-const locales = ["ko", "en"];
+const locales = ["ko", "en"] as const;
+
+function localeDir(locale: (typeof locales)[number]): string {
+  return locale === "ko" ? "" : "en";
+}
+
+function localePrefix(locale: (typeof locales)[number]): string {
+  return locale === "ko" ? "" : "/en";
+}
 
 async function collectDocsFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -28,12 +36,12 @@ async function collectDocsFiles(dir: string): Promise<string[]> {
 }
 
 async function rewriteSnapshotContent(
-  locale: string,
+  locale: (typeof locales)[number],
   targetDir: string,
 ): Promise<void> {
   const files = await collectDocsFiles(targetDir);
-  const fromPrefix = `/${locale}/${sourceVersion}/`;
-  const toPrefix = `/${locale}/${targetVersion}/`;
+  const fromPrefix = `${localePrefix(locale)}/${sourceVersion}/`;
+  const toPrefix = `${localePrefix(locale)}/${targetVersion}/`;
 
   for (const file of files) {
     const current = await readFile(file, "utf8");
@@ -61,9 +69,11 @@ async function rewriteSnapshotContent(
   }
 }
 
-async function copyLocaleVersion(locale: string): Promise<void> {
-  const src = path.join(docsRoot, locale, sourceVersion);
-  const dest = path.join(docsRoot, locale, targetVersion);
+async function copyLocaleVersion(
+  locale: (typeof locales)[number],
+): Promise<void> {
+  const src = path.join(docsRoot, localeDir(locale), sourceVersion);
+  const dest = path.join(docsRoot, localeDir(locale), targetVersion);
 
   await rm(dest, { recursive: true, force: true });
   await mkdir(path.dirname(dest), { recursive: true });
@@ -71,7 +81,7 @@ async function copyLocaleVersion(locale: string): Promise<void> {
   await rewriteSnapshotContent(locale, dest);
 
   console.log(
-    `snapshot: ${locale}/${sourceVersion} -> ${locale}/${targetVersion}`,
+    `snapshot: ${localePrefix(locale) || "/"}${sourceVersion} -> ${localePrefix(locale) || "/"}${targetVersion}`,
   );
 }
 

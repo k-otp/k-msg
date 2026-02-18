@@ -5,7 +5,7 @@ prev: false
 title: "JobQueue"
 ---
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:24
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L26)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:24
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:38
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L56)
 
 #### Returns
 
@@ -31,7 +31,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:38
 
 > **complete**(`jobId`, `result?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:32
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L40)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:32
 
 > **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:31
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L38)
 
 #### Returns
 
@@ -65,7 +65,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:31
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:25
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L27)
 
 #### Parameters
 
@@ -105,7 +105,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:25
 
 > **fail**(`jobId`, `error`, `shouldRetry?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:33
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L42)
 
 #### Parameters
 
@@ -131,7 +131,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:33
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:36
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L52)
 
 #### Parameters
 
@@ -149,7 +149,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:36
 
 > **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:34
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L48)
 
 #### Returns
 
@@ -161,7 +161,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:34
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:37
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L54)
 
 #### Parameters
 
@@ -179,7 +179,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:37
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:35
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L50)
 
 #### Returns
 

@@ -5,7 +5,7 @@ prev: false
 title: "createDurableObjectJobQueue"
 ---
 
-> **createDurableObjectJobQueue**\<`T`\>(`storage`, `options?`): [`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+> **createDurableObjectJobQueue**\<`T`\>(`storage`, `options?`): [`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L120)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:120](https://gi
 
 ### storage
 
-[`CloudflareDurableObjectStorageLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
+[`CloudflareDurableObjectStorageLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
 
 ### options?
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:120](https://gi
 
 ## Returns
 
-[`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+[`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>

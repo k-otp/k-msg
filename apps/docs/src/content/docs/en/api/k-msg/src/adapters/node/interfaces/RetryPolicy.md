@@ -5,7 +5,7 @@ prev: false
 title: "RetryPolicy"
 ---
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:6
+Defined in: [packages/messaging/src/queue/retry.handler.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L18)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:6
 
 > **backoffMultiplier**: `number`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:8
+Defined in: [packages/messaging/src/queue/retry.handler.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L20)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:8
 
 > **initialDelay**: `number`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:9
+Defined in: [packages/messaging/src/queue/retry.handler.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L21)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:9
 
 > **jitter**: `boolean`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:11
+Defined in: [packages/messaging/src/queue/retry.handler.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L23)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:11
 
 > **maxAttempts**: `number`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:7
+Defined in: [packages/messaging/src/queue/retry.handler.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L19)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:7
 
 > **maxDelay**: `number`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:10
+Defined in: [packages/messaging/src/queue/retry.handler.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L22)
 
 ***
 
@@ -53,12 +53,12 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:10
 
 > **retryableErrorCodes**: `string`[]
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:13
+Defined in: [packages/messaging/src/queue/retry.handler.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L25)
 
 ***
 
 ### retryableStatuses
 
-> **retryableStatuses**: `MessageStatus`[]
+> **retryableStatuses**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)[]
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:12
+Defined in: [packages/messaging/src/queue/retry.handler.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L24)

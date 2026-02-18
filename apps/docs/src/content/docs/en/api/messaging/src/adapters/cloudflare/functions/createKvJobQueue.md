@@ -5,7 +5,7 @@ prev: false
 title: "createKvJobQueue"
 ---
 
-> **createKvJobQueue**\<`T`\>(`namespace`, `options?`): [`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+> **createKvJobQueue**\<`T`\>(`namespace`, `options?`): [`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L80)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:80](https://git
 
 ### namespace
 
-[`CloudflareKvNamespaceLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflarekvnamespacelike/)
+[`CloudflareKvNamespaceLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarekvnamespacelike/)
 
 ### options?
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:80](https://git
 
 ## Returns
 
-[`CloudflareObjectJobQueue`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
+[`CloudflareObjectJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>

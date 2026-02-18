@@ -7,7 +7,7 @@ title: "runCloudflareSqlTransaction"
 
 > **runCloudflareSqlTransaction**\<`T`\>(`client`, `fn`): `Promise`\<`T`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:37
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L46)
 
 ## Type Parameters
 
