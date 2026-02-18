@@ -177,7 +177,7 @@ describe("AligoProvider (send)", () => {
     const result = await provider.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { name: "Jane" },
       failover: {
         enabled: true,

@@ -7,7 +7,7 @@ export interface BatchSendResult {
 }
 
 export interface MessageRequest {
-  templateCode: string; // 템플릿 코드
+  templateId: string; // 템플릿 식별자
   recipients: Recipient[]; // 수신자 목록
   variables: VariableMap; // 공통 변수
   scheduling?: SchedulingOptions; // 예약 발송
@@ -61,7 +61,7 @@ export interface MessageResult {
   metadata: {
     createdAt: Date;
     provider: string;
-    templateCode: string;
+    templateId: string;
   };
 }
 
@@ -124,7 +124,7 @@ export interface BulkMessageRequest {
    * Default: "ALIMTALK"
    */
   type?: BulkMessageType;
-  templateCode: string;
+  templateId: string;
   recipients: BulkRecipient[];
   commonVariables?: VariableMap;
   options?: BulkSendingOptions;
@@ -259,7 +259,7 @@ export const SendingOptionsSchema = z.object({
 });
 
 export const MessageRequestSchema = z.object({
-  templateCode: z.string().min(1),
+  templateId: z.string().min(1),
   recipients: z.array(RecipientSchema).min(1).max(10000),
   variables: VariableMapSchema,
   scheduling: SchedulingOptionsSchema.optional(),
@@ -292,7 +292,7 @@ export const MessageResultSchema = z.object({
   metadata: z.object({
     createdAt: z.date(),
     provider: z.string(),
-    templateCode: z.string(),
+    templateId: z.string(),
   }),
 });
 

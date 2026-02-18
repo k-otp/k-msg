@@ -232,7 +232,7 @@ export async function buildSolapiSendOneMessage(params: {
 
     base.kakaoOptions = {
       pfId,
-      templateId: alimtalkOptions.templateCode,
+      templateId: alimtalkOptions.templateId,
       variables: stringifyVariables(alimtalkOptions.variables),
       disableSms,
       adFlag: alimtalkOptions.kakao?.adFlag,
@@ -363,10 +363,10 @@ export async function buildSolapiSendOneMessage(params: {
     }
 
     const templateId =
-      typeof nsaOptions.naver?.templateCode === "string" &&
-      nsaOptions.naver.templateCode.length > 0
-        ? nsaOptions.naver.templateCode
-        : nsaOptions.templateCode;
+      typeof nsaOptions.naver?.templateId === "string" &&
+      nsaOptions.naver.templateId.length > 0
+        ? nsaOptions.naver.templateId
+        : nsaOptions.templateId;
 
     const variables = {
       ...stringifyVariables(nsaOptions.variables),
@@ -516,10 +516,10 @@ export async function buildSolapiSendOneMessage(params: {
       { type: "RCS_TPL" | "RCS_ITPL" | "RCS_LTPL" }
     >;
     rcsPayload.templateId =
-      typeof templateOptions.rcs?.templateCode === "string" &&
-      templateOptions.rcs.templateCode.length > 0
-        ? templateOptions.rcs.templateCode
-        : templateOptions.templateCode;
+      typeof templateOptions.rcs?.templateId === "string" &&
+      templateOptions.rcs.templateId.length > 0
+        ? templateOptions.rcs.templateId
+        : templateOptions.templateId;
   }
 
   let text: string | undefined;

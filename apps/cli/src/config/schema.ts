@@ -178,7 +178,7 @@ export const aliasesSchema = z
         z
           .object({
             providerId: z.string().min(1),
-            templateCode: z.string().min(1),
+            templateId: z.string().min(1),
             kakaoChannel: z.string().min(1).optional(),
           })
           .passthrough(),

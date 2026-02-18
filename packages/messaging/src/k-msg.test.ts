@@ -172,7 +172,7 @@ describe("KMsg", () => {
     const result = await kmsg.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: "1234" },
     });
 
@@ -220,7 +220,7 @@ describe("KMsg", () => {
     const result = await kmsg.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: "1234" },
     });
 

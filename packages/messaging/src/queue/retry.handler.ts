@@ -31,7 +31,7 @@ export interface RetryAttempt {
   attemptNumber: number;
   scheduledAt: Date;
   provider: string;
-  templateCode: string;
+  templateId: string;
   variables: Record<string, unknown>;
   metadata: Record<string, unknown>;
 }
@@ -267,9 +267,9 @@ export class MessageRetryHandler extends EventEmitter {
 
     try {
       const originalMetadata = item.originalDeliveryReport.metadata;
-      const templateCode =
-        typeof originalMetadata.templateCode === "string"
-          ? originalMetadata.templateCode
+      const templateId =
+        typeof originalMetadata.templateId === "string"
+          ? originalMetadata.templateId
           : "";
       const variablesRaw = originalMetadata.variables;
       const variables = isObjectRecord(variablesRaw) ? variablesRaw : {};
@@ -282,7 +282,7 @@ export class MessageRetryHandler extends EventEmitter {
         scheduledAt: new Date(),
         provider:
           item.originalDeliveryReport.attempts[0]?.provider || "unknown",
-        templateCode,
+        templateId,
         variables,
         metadata: originalMetadata,
       };

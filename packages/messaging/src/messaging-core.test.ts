@@ -276,7 +276,7 @@ describe("MessageJobProcessor", () => {
     );
 
     const messageRequest: MessageRequest = {
-      templateCode: "test_template",
+      templateId: "test_template",
       recipients: [
         { phoneNumber: "01012345678" },
         { phoneNumber: "01087654321" },
@@ -308,7 +308,7 @@ describe("MessageJobProcessor", () => {
     );
 
     const messageRequest: MessageRequest = {
-      templateCode: "scheduled_template",
+      templateId: "scheduled_template",
       recipients: [{ phoneNumber: "01012345678" }],
       variables: { name: "Test User" },
     };
@@ -358,7 +358,7 @@ describe("MessageRetryHandler", () => {
           provider: "test-provider",
         },
       ],
-      metadata: { templateCode: "test_template" },
+      metadata: { templateId: "test_template" },
     };
 
     const added = await retryHandler.addForRetry(deliveryReport);
@@ -401,7 +401,7 @@ describe("MessageRetryHandler", () => {
           provider: "test-provider",
         },
       ],
-      metadata: { templateCode: "test_template" },
+      metadata: { templateId: "test_template" },
     };
 
     const added = await retryHandler.addForRetry(deliveryReport);
@@ -668,7 +668,7 @@ describe("Integration Tests", () => {
 
     // Message request with variables
     const messageRequest: MessageRequest = {
-      templateCode: "welcome_template",
+      templateId: "welcome_template",
       recipients: [
         { phoneNumber: "01012345678", variables: { name: "홍길동" } },
         { phoneNumber: "01087654321", variables: { name: "김철수" } },

@@ -478,9 +478,9 @@ export async function runAlimTalkPreflight(input: {
   provider: ProviderWithCapabilities;
   senderKey?: string;
   plusId?: string;
-  templateCode: string;
+  templateId: string;
 }): Promise<AlimTalkPreflightResult> {
-  const { runtime, provider, senderKey, plusId, templateCode } = input;
+  const { runtime, provider, senderKey, plusId, templateId } = input;
   const spec =
     typeof provider.getOnboardingSpec === "function"
       ? provider.getOnboardingSpec()
@@ -582,7 +582,7 @@ export async function runAlimTalkPreflight(input: {
   if (typeof getTemplate === "function") {
     const probe = await getTemplate.call(
       provider,
-      templateCode,
+      templateId,
       templateContext,
     );
     checks.push(
@@ -593,7 +593,7 @@ export async function runAlimTalkPreflight(input: {
             kind: "api_probe",
             severity: "blocker",
             status: "pass",
-            message: `Template '${templateCode}' is accessible`,
+            message: `Template '${templateId}' is accessible`,
           }
         : {
             id: "template_exists_probe",
