@@ -65,7 +65,7 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
 });
 ```
@@ -274,7 +274,7 @@ kmsg = new KMsg({
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
   failover: {
     enabled: true,

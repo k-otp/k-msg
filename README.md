@@ -58,7 +58,7 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
 });
 ```
@@ -71,7 +71,7 @@ Use standardized failover options on ALIMTALK:
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
   failover: {
     enabled: true,
@@ -127,4 +127,4 @@ Release automation and changeset policy are documented in:
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` public APIs were removed.
 - Message discriminant is `type` (old `channel` naming was removed).
-- `templateId` was renamed to `templateCode`.
+- `templateId` was renamed to `templateId`.
