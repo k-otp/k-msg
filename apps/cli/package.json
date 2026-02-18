@@ -26,7 +26,7 @@
     "build:native": "bunli build --targets native",
     "build:js": "bun run generate && bun build src/k-msg.ts --outdir=dist --format=esm --target=bun",
     "dev": "bun run generate && bun --watch src/k-msg.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "bun run generate && tsc --noEmit -p tsconfig.json",
     "test": "bun run generate && bun test",
     "schema:generate": "bun run scripts/generate-config-schema.ts",
     "schema:check": "bun run scripts/generate-config-schema.ts --check",
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@k-msg/core": "workspace:*",
+    "@k-msg/messaging": "workspace:*",
     "@k-msg/provider": "workspace:*",
     "@bunli/core": "^0.5.4",
     "@bunli/plugin-ai-detect": "^0.5.2",

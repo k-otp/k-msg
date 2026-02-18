@@ -7,7 +7,7 @@ import {
   type SendInput,
   type SendResult,
 } from "@k-msg/core";
-import { KMsg } from "k-msg";
+import { KMsg } from "@k-msg/messaging";
 import { loadKMsgConfig, resolveKMsgConfigEnv } from "./config/load";
 import type { KMsgCliConfig } from "./config/schema";
 import {
