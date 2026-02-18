@@ -4,8 +4,9 @@ import { cli as generatedCli } from "../../.bunli/commands.gen";
 import pkg from "../../package.json";
 
 function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
+  const envRecord = env as Record<string, string | undefined>;
   return keys.some((key) => {
-    const value = env[key];
+    const value = envRecord[key];
     return typeof value === "string" && value.trim().length > 0;
   });
 }

@@ -142,8 +142,8 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 
 ```bash
 k-msg providers doctor
-k-msg alimtalk preflight --provider iwinv --template-code TPL_001 --channel main
-k-msg alimtalk send --provider iwinv --template-code TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
+k-msg alimtalk preflight --provider iwinv --template-id TPL_001 --channel main
+k-msg alimtalk send --provider iwinv --template-id TPL_001 --to 01012345678 --vars '{"name":"Jane"}'
 ```
 
 Notes:
@@ -166,7 +166,7 @@ Terminology: the CLI uses **Kakao Channel** and **senderKey** (never â€œprofileâ
 ```bash
 k-msg alimtalk send \
   --to 01012345678 \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --vars '{"name":"Jane"}' \
   --channel main \
   --plus-id @my_channel
@@ -177,7 +177,7 @@ Failover options:
 ```bash
 k-msg alimtalk send \
   --to 01012345678 \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --vars '{"name":"Jane"}' \
   --failover true \
   --fallback-channel sms \
@@ -192,7 +192,7 @@ When providers return send warnings (for example failover partial/unsupported), 
 ```bash
 k-msg alimtalk preflight \
   --provider iwinv \
-  --template-code TPL_001 \
+  --template-id TPL_001 \
   --channel main \
   --sender-key your_sender_key \
   --plus-id @my_channel
@@ -226,6 +226,18 @@ k-msg send --input '[{"to":"01011112222","text":"hello 1"},{"to":"01033334444","
 - `k-msg providers doctor`: provider/account/capability readiness checks
 - `k-msg send --dry-run`: request payload preview/validation (no provider send)
 
+Boolean flag semantics (applies to `--json`, `--verbose`, `--dry-run`, `--stdin`, `--failover`, `--force`):
+
+- `--flag` -> `true`
+- `--flag true` -> `true`
+- `--flag false` -> `false`
+- `--no-flag` -> `false`
+- Invalid boolean values (for example `--dry-run maybe`) fail with exit code `2`
+
+Resolution precedence for overlapping values is:
+
+- `CLI flag > environment variable > config file > built-in default`
+
 ## Kakao Channel (Aligo capability)
 
 ```bash
@@ -246,13 +258,13 @@ Channel scope (Aligo): use `--channel <alias>` or `--sender-key <value>`.
 
 ```bash
 k-msg kakao template list
-k-msg kakao template get --template-code TPL_001
+k-msg kakao template get --template-id TPL_001
 k-msg kakao template create --name "Welcome" --content "Hello #{name}" --channel main
-k-msg kakao template update --template-code TPL_001 --name "Updated"
-k-msg kakao template delete --template-code TPL_001
+k-msg kakao template update --template-id TPL_001 --name "Updated"
+k-msg kakao template delete --template-id TPL_001
 
 # inspection request is provider-dependent (supported by Aligo)
-k-msg kakao template request --template-code TPL_001 --channel main
+k-msg kakao template request --template-id TPL_001 --channel main
 ```
 
 ## Output / Exit Codes
@@ -262,6 +274,7 @@ k-msg kakao template request --template-code TPL_001 --channel main
   when an agent is detected (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX_CI` /
   `CODEX_SHELL` / `CODEX_THREAD_ID`, `MCP_SERVER_NAME` / `MCP_SESSION_ID` /
   `MCP_TOOL_NAME`)
+- Force text output in AI environments with `--json false` (or `--no-json`)
 - exit code:
   - `0`: success
   - `2`: input/config error

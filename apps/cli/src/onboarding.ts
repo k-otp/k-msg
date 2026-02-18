@@ -59,13 +59,16 @@ function getManualCheckState(
     ({
       done: false,
     } as const);
+  const stateRecord = state as Record<string, unknown>;
   return {
-    done: state.done === true,
-    ...(typeof state.checkedAt === "string"
-      ? { checkedAt: state.checkedAt }
+    done: stateRecord.done === true,
+    ...(typeof stateRecord.checkedAt === "string"
+      ? { checkedAt: stateRecord.checkedAt }
       : {}),
-    ...(typeof state.note === "string" ? { note: state.note } : {}),
-    ...(typeof state.evidence === "string" ? { evidence: state.evidence } : {}),
+    ...(typeof stateRecord.note === "string" ? { note: stateRecord.note } : {}),
+    ...(typeof stateRecord.evidence === "string"
+      ? { evidence: stateRecord.evidence }
+      : {}),
   };
 }
 
@@ -98,7 +101,8 @@ function getPathValue(root: Record<string, unknown>, path: string): unknown {
 
 function hasCallable(provider: Provider, methodName: string): boolean {
   return (
-    typeof (provider as Record<string, unknown>)[methodName] === "function"
+    typeof (provider as unknown as Record<string, unknown>)[methodName] ===
+    "function"
   );
 }
 
@@ -472,9 +476,9 @@ export async function runAlimTalkPreflight(input: {
   provider: ProviderWithCapabilities;
   senderKey?: string;
   plusId?: string;
-  templateCode: string;
+  templateId: string;
 }): Promise<AlimTalkPreflightResult> {
-  const { runtime, provider, senderKey, plusId, templateCode } = input;
+  const { runtime, provider, senderKey, plusId, templateId } = input;
   const spec =
     typeof provider.getOnboardingSpec === "function"
       ? provider.getOnboardingSpec()
@@ -574,11 +578,7 @@ export async function runAlimTalkPreflight(input: {
 
   const getTemplate = (provider as unknown as TemplateProvider).getTemplate;
   if (typeof getTemplate === "function") {
-    const probe = await getTemplate.call(
-      provider,
-      templateCode,
-      templateContext,
-    );
+    const probe = await getTemplate.call(provider, templateId, templateContext);
     checks.push(
       probe.isSuccess
         ? {
@@ -587,7 +587,7 @@ export async function runAlimTalkPreflight(input: {
             kind: "api_probe",
             severity: "blocker",
             status: "pass",
-            message: `Template '${templateCode}' is accessible`,
+            message: `Template '${templateId}' is accessible`,
           }
         : {
             id: "template_exists_probe",

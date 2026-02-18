@@ -47,6 +47,9 @@ export function shouldUseJsonOutput(
   if (explicitJsonFlag === true) {
     return true;
   }
+  if (explicitJsonFlag === false) {
+    return false;
+  }
   return context?.env?.isAIAgent === true || context?.store?.isAIAgent === true;
 }
 
@@ -105,7 +108,7 @@ function getErrorHint(error: unknown): string | undefined {
       case KMsgErrorCode.INVALID_REQUEST:
         return "check your input JSON shape/required fields, then run `k-msg providers doctor`";
       case KMsgErrorCode.TEMPLATE_NOT_FOUND:
-        return "run `k-msg alimtalk preflight --provider <id> --template-code <code> --channel <alias>`";
+        return "run `k-msg alimtalk preflight --provider <id> --template-id <code> --channel <alias>`";
       default:
         return undefined;
     }

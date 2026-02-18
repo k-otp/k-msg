@@ -12,7 +12,13 @@ export {
   initializeAligo,
 } from "./aligo/provider";
 export type { AligoConfig } from "./aligo/types/aligo";
-
+export {
+  type ProviderConfigFieldMap,
+  type ProviderConfigFieldSpec,
+  type ProviderConfigFieldType,
+  type ProviderTypeWithConfig,
+  providerConfigFieldSpecs,
+} from "./config-fields";
 export {
   createDefaultIWINVProvider,
   createIWINVProvider,
