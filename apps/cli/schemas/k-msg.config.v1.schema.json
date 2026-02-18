@@ -465,7 +465,7 @@
                 "type": "string",
                 "minLength": 1
               },
-              "templateCode": {
+              "templateId": {
                 "type": "string",
                 "minLength": 1
               },
@@ -474,7 +474,7 @@
                 "minLength": 1
               }
             },
-            "required": ["providerId", "templateCode"],
+            "required": ["providerId", "templateId"],
             "additionalProperties": {}
           }
         }
