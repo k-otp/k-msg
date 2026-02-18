@@ -1,9 +1,8 @@
 import { IWINVProvider } from "@k-msg/provider";
 import { Hono } from "hono";
-import { KMsg } from "k-msg";
+import { KMsg, type SendInput } from "k-msg";
 
-type AdvancedSendInput = Parameters<KMsg["send"]>[0];
-type AdvancedSendBody = Record<string, unknown> | Record<string, unknown>[];
+type SendPayload = SendInput | SendInput[];
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -17,7 +16,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isAdvancedSendInput(value: unknown): value is AdvancedSendBody {
+function isSendPayload(value: unknown): value is SendPayload {
   if (isRecord(value)) {
     return true;
   }
@@ -48,7 +47,7 @@ app.get("/", (c) =>
 
 app.post("/send", async (c) => {
   const body = await c.req.json<unknown>();
-  if (!isAdvancedSendInput(body)) {
+  if (!isSendPayload(body)) {
     return c.json(
       {
         ok: false,
@@ -60,11 +59,11 @@ app.post("/send", async (c) => {
   }
 
   if (Array.isArray(body)) {
-    const result = await kmsg.send(body as unknown as AdvancedSendInput);
+    const result = await kmsg.send(body);
     return c.json({ ok: true, data: result });
   }
 
-  const result = await kmsg.send(body as unknown as AdvancedSendInput);
+  const result = await kmsg.send(body);
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);
   }
