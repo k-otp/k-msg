@@ -5,7 +5,7 @@ prev: false
 title: "Job"
 ---
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:8
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L9)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:8
 
 > **attempts**: `number`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:14
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L15)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:14
 
 > `optional` **completedAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:19
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L20)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:19
 
 > **createdAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:17
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L18)
 
 ***
 
@@ -43,7 +43,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:17
 
 > **data**: `T`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:11
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L12)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:11
 
 > **delay**: `number`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:16
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L17)
 
 ***
 
@@ -59,7 +59,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:16
 
 > `optional` **error**: `string`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:21
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L22)
 
 ***
 
@@ -67,7 +67,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:21
 
 > `optional` **failedAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:20
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L21)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:20
 
 > **id**: `string`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:9
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L10)
 
 ***
 
@@ -83,7 +83,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:9
 
 > **maxAttempts**: `number`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:15
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L16)
 
 ***
 
@@ -91,7 +91,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:15
 
 > **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:22
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L23)
 
 ***
 
@@ -99,7 +99,7 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:22
 
 > **priority**: `number`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:13
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L14)
 
 ***
 
@@ -107,15 +107,15 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:13
 
 > **processAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:18
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L19)
 
 ***
 
 ### status
 
-> **status**: `JobStatus`
+> **status**: [`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:12
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L13)
 
 ***
 
@@ -123,4 +123,4 @@ Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:12
 
 > **type**: `string`
 
-Defined in: packages/messaging/dist/queue/job-queue.interface.d.ts:10
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L11)

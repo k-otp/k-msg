@@ -11,6 +11,7 @@
     "snippets:typecheck": "tsc -p ./snippets/tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
     "@astrojs/starlight": "^0.37.6",
     "astro": "^5.14.0",
     "starlight-typedoc": "^0.21.5",

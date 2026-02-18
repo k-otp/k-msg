@@ -111,6 +111,11 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (current === next) {
+    console.log(`unchanged: ${outputPath}`);
+    return;
+  }
+
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, next, "utf8");
   console.log(`generated: ${outputPath}`);

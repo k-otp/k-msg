@@ -5,7 +5,7 @@ prev: false
 title: "JobProcessorMetrics"
 ---
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:25
+Defined in: [packages/messaging/src/queue/job.processor.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L42)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:25
 
 > **activeJobs**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:30
+Defined in: [packages/messaging/src/queue/job.processor.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L47)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:30
 
 > **averageProcessingTime**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:32
+Defined in: [packages/messaging/src/queue/job.processor.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L49)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:32
 
 > **failed**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:28
+Defined in: [packages/messaging/src/queue/job.processor.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L45)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:28
 
 > `optional` **lastProcessedAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:33
+Defined in: [packages/messaging/src/queue/job.processor.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L50)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:33
 
 > **processed**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:26
+Defined in: [packages/messaging/src/queue/job.processor.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L43)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:26
 
 > **queueSize**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:31
+Defined in: [packages/messaging/src/queue/job.processor.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L48)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:31
 
 > **retried**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:29
+Defined in: [packages/messaging/src/queue/job.processor.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L46)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: packages/messaging/dist/queue/job.processor.d.ts:29
 
 > **succeeded**: `number`
 
-Defined in: packages/messaging/dist/queue/job.processor.d.ts:27
+Defined in: [packages/messaging/src/queue/job.processor.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L44)

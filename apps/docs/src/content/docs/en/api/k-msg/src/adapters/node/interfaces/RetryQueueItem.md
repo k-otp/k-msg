@@ -5,7 +5,7 @@ prev: false
 title: "RetryQueueItem"
 ---
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:25
+Defined in: [packages/messaging/src/queue/retry.handler.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L39)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:25
 
 > **attempts**: [`RetryAttempt`](/api/k-msg/src/adapters/node/interfaces/retryattempt/)[]
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:30
+Defined in: [packages/messaging/src/queue/retry.handler.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L44)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:30
 
 > **createdAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:33
+Defined in: [packages/messaging/src/queue/retry.handler.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L47)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:33
 
 > **id**: `string`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:26
+Defined in: [packages/messaging/src/queue/retry.handler.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L40)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:26
 
 > **messageId**: `string`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:27
+Defined in: [packages/messaging/src/queue/retry.handler.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L41)
 
 ***
 
@@ -45,15 +45,15 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:27
 
 > **nextRetryAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:31
+Defined in: [packages/messaging/src/queue/retry.handler.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L45)
 
 ***
 
 ### originalDeliveryReport
 
-> **originalDeliveryReport**: `DeliveryReport`
+> **originalDeliveryReport**: [`DeliveryReport`](/api/messaging/src/interfaces/deliveryreport/)
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:29
+Defined in: [packages/messaging/src/queue/retry.handler.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L43)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:29
 
 > **phoneNumber**: `string`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:28
+Defined in: [packages/messaging/src/queue/retry.handler.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L42)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:28
 
 > **status**: `"pending"` \| `"processing"` \| `"exhausted"` \| `"cancelled"`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:32
+Defined in: [packages/messaging/src/queue/retry.handler.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L46)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: packages/messaging/dist/queue/retry.handler.d.ts:32
 
 > **updatedAt**: `Date`
 
-Defined in: packages/messaging/dist/queue/retry.handler.d.ts:34
+Defined in: [packages/messaging/src/queue/retry.handler.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L48)

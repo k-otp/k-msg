@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 type Locale = "en" | "ko";
@@ -27,11 +27,17 @@ const checkMode = process.argv.includes("--check");
 const githubBlobBase = "https://github.com/k-otp/k-msg/blob/main";
 
 function docsFsRoot(locale: Locale): string {
-  return path.join(docsRoot, locale);
+  if (locale === "ko") {
+    return docsRoot;
+  }
+  return path.join(docsRoot, "en");
 }
 
 function docsUrlRoot(locale: Locale): string {
-  return `/${locale}`;
+  if (locale === "ko") {
+    return "";
+  }
+  return "/en";
 }
 
 function toPosix(value: string): string {
@@ -207,10 +213,10 @@ title: k-msg 문서
 description: k-msg 문서
 ---
 
-- 개요: [/ko/guides/overview/](/ko/guides/overview/)
+- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
 - API 문서: [/api/readme/](/api/readme/)
-- CLI 문서: [/ko/cli/](/ko/cli/)
-- 코드 스니펫: [/ko/snippets/](/ko/snippets/)
+- CLI 문서: [${urlRoot}/cli/](${urlRoot}/cli/)
+- 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)
 
 ## 패키지 가이드
 
@@ -358,12 +364,23 @@ async function writeOrCheck(file: OutputFile): Promise<void> {
     return;
   }
 
+  if (current === file.content) {
+    console.log(`unchanged: ${file.path}`);
+    return;
+  }
+
   await mkdir(path.dirname(file.path), { recursive: true });
   await writeFile(file.path, file.content, "utf8");
   console.log(`generated: ${file.path}`);
 }
 
+async function removeLegacyKoLocaleDir(): Promise<void> {
+  if (checkMode) return;
+  await rm(path.join(docsRoot, "ko"), { recursive: true, force: true });
+}
+
 async function main(): Promise<void> {
+  await removeLegacyKoLocaleDir();
   const outputs = await collectOutputs();
   for (const file of outputs) {
     await writeOrCheck(file);

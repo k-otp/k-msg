@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareKvNamespaceLike"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:7
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L8)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:7
 
 > **delete**(`key`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:10
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L11)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:10
 
 > **get**(`key`, `type?`): `Promise`\<`string` \| `null`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:8
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L9)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:8
 
 > **list**(`options?`): `Promise`\<\{ `cursor?`: `string`; `keys`: `object`[]; `list_complete`: `boolean`; \}\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:11
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L12)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:11
 
 > **put**(`key`, `value`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:9
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L10)
 
 #### Parameters
 

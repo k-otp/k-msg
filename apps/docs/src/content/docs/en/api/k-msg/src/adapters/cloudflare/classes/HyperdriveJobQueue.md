@@ -5,7 +5,7 @@ prev: false
 title: "HyperdriveJobQueue"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:3
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L38)
 
 ## Type Parameters
 
@@ -23,7 +23,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **new HyperdriveJobQueue**\<`T`\>(`client`, `tableName?`): `HyperdriveJobQueue`\<`T`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:7
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L41)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 ##### tableName?
 
-`string`
+`string` = `"kmsg_jobs"`
 
 #### Returns
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:22
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:326](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L326)
 
 #### Returns
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:23
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:331](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L331)
 
 #### Returns
 
@@ -73,7 +73,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **complete**(`jobId`, `_result?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:16
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L216)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:15
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L154)
 
 #### Returns
 
@@ -115,7 +115,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:9
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L80)
 
 #### Parameters
 
@@ -159,7 +159,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **fail**(`jobId`, `error`, `shouldRetry?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:17
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:227](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L227)
 
 #### Parameters
 
@@ -189,7 +189,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:20
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:296](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L296)
 
 #### Parameters
 
@@ -211,7 +211,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:8
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L46)
 
 #### Returns
 
@@ -223,7 +223,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:18
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:265](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L265)
 
 #### Returns
 
@@ -239,7 +239,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:21
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L310)
 
 #### Parameters
 
@@ -261,7 +261,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.t
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/hyperdrive-job-queue.d.ts:19
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:282](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L282)
 
 #### Returns
 
