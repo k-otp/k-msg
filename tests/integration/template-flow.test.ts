@@ -44,7 +44,7 @@ describe("Template and Messaging Flow Integration", () => {
       type: "ALIMTALK",
       from: "0212345678",
       to: "01012345678",
-      templateCode: createdCode,
+      templateId: createdCode,
       variables: {
         name: "John Doe",
         code: "123456",
@@ -53,7 +53,7 @@ describe("Template and Messaging Flow Integration", () => {
     const sendOptionKeys = Object.keys(
       sendOptions as unknown as Record<string, unknown>,
     );
-    expect(sendOptionKeys).toContain("templateCode");
+    expect(sendOptionKeys).toContain("templateId");
     expect(sendOptionKeys).not.toContain("provider");
 
     const sendResult = await kmsg.send(sendOptions);

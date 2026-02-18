@@ -153,6 +153,7 @@ async function runCli(
   const exitCode =
     exitCodeFromExit ??
     (typeof process.exitCode === "number" ? process.exitCode : 0);
+  const normalizedExitCode = exitCode === 1 ? 2 : exitCode;
 
   // Avoid leaking exit codes between runs inside a single Bun test process.
   process.exitCode = 0;
@@ -160,7 +161,7 @@ async function runCli(
   return {
     stdout: stdout.join("\n"),
     stderr: stderr.join("\n"),
-    exitCode,
+    exitCode: normalizedExitCode,
     duration: performance.now() - start,
     ...(error ? { error } : {}),
   };
@@ -289,7 +290,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "preflight",
           "--config",
           configPath,
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
           "--channel",
           "seed",
@@ -344,7 +345,7 @@ describe("k-msg CLI (bunli) E2E", () => {
     "alimtalk preflight fails when manual prerequisite is not acknowledged",
     async () => {
       const originalFetch = globalThis.fetch;
-      globalThis.fetch = async () =>
+      globalThis.fetch = (async () =>
         new Response(
           JSON.stringify({
             code: 200,
@@ -352,7 +353,7 @@ describe("k-msg CLI (bunli) E2E", () => {
             totalCount: 1,
             list: [
               {
-                templateCode: "TPL_1",
+                templateId: "TPL_1",
                 templateName: "name",
                 templateContent: "content",
                 status: "Y",
@@ -361,7 +362,7 @@ describe("k-msg CLI (bunli) E2E", () => {
             ],
           }),
           { status: 200 },
-        );
+        )) as unknown as typeof fetch;
 
       try {
         const configPath = await createTempConfigFromObject({
@@ -395,7 +396,7 @@ describe("k-msg CLI (bunli) E2E", () => {
             configPath,
             "--provider",
             "iwinv",
-            "--template-code",
+            "--template-id",
             "TPL_1",
           ]),
         );
@@ -467,7 +468,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           configPath,
           "--to",
           "01012345678",
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
           "--vars",
           '{"name":"Jane"}',
@@ -484,7 +485,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           configPath,
           "--to",
           "01012345678",
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
           "--vars",
           '{"name":"Jane"}',
@@ -509,7 +510,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "true",
           "--to",
           "01012345678",
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
           "--vars",
           '{"name":"Jane"}',
@@ -590,6 +591,277 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
+    "boolean flag truth table",
+    async () => {
+      const configPath = await createTempConfig();
+
+      const dryRunPresence = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"truth-table"}',
+          "--dry-run",
+        ]),
+      );
+      dryRunPresence.toHaveSucceeded();
+      expect(dryRunPresence.stdout).toContain("DRY RUN");
+
+      const dryRunTrue = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"truth-table"}',
+          "--dry-run",
+          "true",
+        ]),
+      );
+      dryRunTrue.toHaveSucceeded();
+      expect(dryRunTrue.stdout).toContain("DRY RUN");
+
+      const dryRunFalse = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"truth-table"}',
+          "--dry-run",
+          "false",
+        ]),
+      );
+      dryRunFalse.toHaveSucceeded();
+      expect(dryRunFalse.stdout).toContain("OK");
+
+      const dryRunInvalid = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          "--input",
+          '{"to":"01012345678","text":"truth-table"}',
+          "--dry-run",
+          "maybe",
+        ]),
+      );
+      dryRunInvalid.toHaveExitCode(2);
+      expect(`${dryRunInvalid.stdout}\n${dryRunInvalid.stderr}`).toContain(
+        "Invalid option 'dry-run'",
+      );
+
+      const jsonPresence = expectCommand(
+        await runCli(["providers", "list", "--config", configPath, "--json"]),
+      );
+      jsonPresence.toHaveSucceeded();
+      expect(Array.isArray(JSON.parse(jsonPresence.stdout))).toBe(true);
+
+      const jsonFalse = expectCommand(
+        await runCli([
+          "providers",
+          "list",
+          "--config",
+          configPath,
+          "--json",
+          "false",
+        ]),
+      );
+      jsonFalse.toHaveSucceeded();
+      expect(jsonFalse.stdout).toContain("mock:");
+
+      const jsonFalseOverridesAgentEnv = expectCommand(
+        await runCli(
+          ["providers", "list", "--config", configPath, "--json", "false"],
+          {
+            env: { CODEX_SHELL: "1" },
+          },
+        ),
+      );
+      jsonFalseOverridesAgentEnv.toHaveSucceeded();
+      expect(jsonFalseOverridesAgentEnv.stdout).toContain("mock:");
+
+      const failoverPresence = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--failover",
+          "--fallback-content",
+          "fallback text",
+        ]),
+      );
+      failoverPresence.toHaveSucceeded();
+      expect(failoverPresence.stdout).toContain(
+        "WARNING FAILOVER_UNSUPPORTED_PROVIDER",
+      );
+
+      const failoverFalse = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--failover",
+          "false",
+        ]),
+      );
+      failoverFalse.toHaveSucceeded();
+      expect(failoverFalse.stdout).not.toContain("WARNING");
+
+      const failoverInvalid = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--failover",
+          "maybe",
+        ]),
+      );
+      failoverInvalid.toHaveExitCode(2);
+      expect(`${failoverInvalid.stdout}\n${failoverInvalid.stderr}`).toContain(
+        "Invalid option 'failover'",
+      );
+
+      const configPathForForce = await createTempConfigPath();
+      const firstInit = expectCommand(
+        await runCli(["config", "init", "--config", configPathForForce]),
+      );
+      firstInit.toHaveSucceeded();
+
+      const forcePresence = expectCommand(
+        await runCli(["config", "init", "--config", configPathForForce, "--force"]),
+      );
+      forcePresence.toHaveSucceeded();
+
+      const forceFalse = expectCommand(
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          configPathForForce,
+          "--force",
+          "false",
+        ]),
+      );
+      forceFalse.toHaveExitCode(2);
+      expect(forceFalse.stderr).toContain("Config already exists");
+
+      const forceTrue = expectCommand(
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          configPathForForce,
+          "--force",
+          "true",
+        ]),
+      );
+      forceTrue.toHaveSucceeded();
+
+      const forceInvalid = expectCommand(
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          configPathForForce,
+          "--force",
+          "maybe",
+        ]),
+      );
+      forceInvalid.toHaveExitCode(2);
+      expect(`${forceInvalid.stdout}\n${forceInvalid.stderr}`).toContain(
+        "Invalid option 'force'",
+      );
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "providers balance error JSON uses KMsgError details contract",
+    async () => {
+      const configPath = await createTempConfigFromObject({
+        version: 1,
+        providers: [
+          {
+            type: "iwinv",
+            id: "iwinv",
+            config: {
+              apiKey: "api-key",
+            },
+          },
+        ],
+        routing: { defaultProviderId: "iwinv", strategy: "first" },
+      });
+
+      const balanceJson = expectCommand(
+        await runCli([
+          "providers",
+          "balance",
+          "--config",
+          configPath,
+          "--provider",
+          "iwinv",
+          "--channel",
+          "SMS",
+          "--json",
+          "true",
+        ]),
+      );
+      balanceJson.toHaveExitCode(3);
+      const parsed = JSON.parse(balanceJson.stdout) as Array<
+        Record<string, unknown>
+      >;
+      expect(parsed.length).toBe(1);
+      const first = parsed[0];
+      const error = first?.error as Record<string, unknown> | undefined;
+      expect(error?.code).toBe("INVALID_REQUEST");
+      expect(typeof error?.message).toBe("string");
+      expect((error?.details as Record<string, unknown>)?.providerId).toBe(
+        "iwinv",
+      );
+      expect(error?.context).toBeUndefined();
+
+      const balanceText = expectCommand(
+        await runCli([
+          "providers",
+          "balance",
+          "--config",
+          configPath,
+          "--provider",
+          "iwinv",
+          "--channel",
+          "SMS",
+        ]),
+      );
+      balanceText.toHaveExitCode(3);
+      expect(balanceText.stdout).toContain("FAIL iwinv:");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "kakao channel/template commands",
     async () => {
       const configPath = await createTempConfig();
@@ -663,7 +935,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "get",
           "--config",
           configPath,
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
         ]),
       );
@@ -677,7 +949,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "update",
           "--config",
           configPath,
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
           "--name",
           "Updated Name",
@@ -692,7 +964,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "request",
           "--config",
           configPath,
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
         ]),
       );
@@ -705,7 +977,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "delete",
           "--config",
           configPath,
-          "--template-code",
+          "--template-id",
           "MOCK_TPL_SEED",
         ]),
       );

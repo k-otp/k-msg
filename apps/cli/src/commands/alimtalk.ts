@@ -1,7 +1,12 @@
 import { defineCommand, option } from "@bunli/core";
 import type { MessageVariables, SendInput } from "@k-msg/core";
 import { z } from "zod";
-import { optConfig, optJson, optProvider } from "../cli/options";
+import {
+  optConfig,
+  optJson,
+  optProvider,
+  strictBooleanFlagSchema,
+} from "../cli/options";
 import {
   CapabilityNotSupportedError,
   exitCodeForError,
@@ -74,7 +79,7 @@ const sendCmd = defineCommand({
     provider: optProvider,
     to: option(z.string().min(1), { description: "Recipient phone number" }),
     from: option(z.string().optional(), { description: "Sender number" }),
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code",
     }),
     vars: option(
@@ -109,9 +114,9 @@ const sendCmd = defineCommand({
     "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
-    failover: option(z.coerce.boolean().default(false), {
+    failover: option(strictBooleanFlagSchema, {
       description:
-        "Enable SMS/LMS failover when recipient is not a KakaoTalk user",
+        "Enable SMS/LMS failover when recipient is not a KakaoTalk user (boolean: --failover, --failover true|false, --no-failover; default: false)",
     }),
     "fallback-channel": option(z.enum(["sms", "lms"]).optional(), {
       description: "Fallback channel (sms|lms)",
@@ -155,7 +160,7 @@ const sendCmd = defineCommand({
         type: "ALIMTALK",
         to: flags.to,
         from: flags.from,
-        templateCode: flags["template-code"],
+        templateId: flags["template-id"],
         variables: rawVars as MessageVariables,
         ...(Object.keys(kakao).length > 0 ? { kakao } : {}),
         ...(flags.provider ? { providerId: flags.provider } : {}),
@@ -219,7 +224,7 @@ const preflightCmd = defineCommand({
     "plus-id": option(z.string().optional(), {
       description: "Kakao channel plusId override",
     }),
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code to validate",
     }),
   },
@@ -242,7 +247,7 @@ const preflightCmd = defineCommand({
         provider,
         senderKey,
         plusId,
-        templateCode: flags["template-code"],
+        templateId: flags["template-id"],
       });
 
       if (asJson) {

@@ -418,7 +418,7 @@ export class MessageJobProcessor extends JobProcessor {
             (messageRequest.options as any)?.from ||
             (messageRequest.options as any)?.senderNumber ||
             "",
-          templateCode: messageRequest.templateCode,
+          templateId: messageRequest.templateId,
           variables: {
             ...messageRequest.variables,
             ...recipient.variables,
@@ -471,7 +471,7 @@ export class MessageJobProcessor extends JobProcessor {
       metadata: {
         createdAt: new Date(),
         provider: this.provider.id,
-        templateCode: messageRequest.templateCode,
+        templateId: messageRequest.templateId,
       },
     };
 

@@ -2,7 +2,12 @@ import path from "node:path";
 import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "@k-msg/core";
 import { z } from "zod";
-import { optConfig, optJson, optProvider } from "../cli/options";
+import {
+  optConfig,
+  optJson,
+  optProvider,
+  strictBooleanFlagSchema,
+} from "../cli/options";
 import {
   exitCodeForError,
   printError,
@@ -46,8 +51,9 @@ export default defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    "dry-run": option(z.coerce.boolean().default(false), {
-      description: "Validate raw JSON and preview only (no provider send)",
+    "dry-run": option(strictBooleanFlagSchema, {
+      description:
+        "Validate raw JSON and preview only (no provider send) (boolean: --dry-run, --dry-run true|false, --no-dry-run; default: false)",
     }),
     input: option(sendInputJsonSchema.optional(), {
       description: "Raw SendInput JSON object/array string",
@@ -64,8 +70,9 @@ export default defineCommand({
         description: "Path to raw SendInput JSON object/array file",
       },
     ),
-    stdin: option(z.coerce.boolean().default(false), {
-      description: "Read raw SendInput JSON object/array from stdin",
+    stdin: option(strictBooleanFlagSchema, {
+      description:
+        "Read raw SendInput JSON object/array from stdin (boolean: --stdin, --stdin true|false, --no-stdin; default: false)",
     }),
   },
   handler: async ({ flags, context }) => {

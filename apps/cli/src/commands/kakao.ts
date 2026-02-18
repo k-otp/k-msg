@@ -445,7 +445,7 @@ const templateGetCmd = defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code",
     }),
     channel: option(z.string().optional(), {
@@ -476,7 +476,7 @@ const templateGetCmd = defineCommand({
 
       const result = await (
         provider as unknown as TemplateProvider
-      ).getTemplate.call(provider, flags["template-code"], ctx);
+      ).getTemplate.call(provider, flags["template-id"], ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -574,7 +574,7 @@ const templateCreateCmd = defineCommand({
         raw.config.aliases.templates = raw.config.aliases.templates || {};
         raw.config.aliases.templates[flags.save] = {
           providerId: provider.id,
-          templateCode: result.value.code,
+          templateId: result.value.code,
           ...(flags.channel ? { kakaoChannel: flags.channel } : {}),
         };
         await saveKMsgConfig(raw.path, raw.config);
@@ -587,7 +587,7 @@ const templateCreateCmd = defineCommand({
         return;
       }
 
-      console.log(`OK templateCode=${result.value.code}`);
+      console.log(`OK templateId=${result.value.code}`);
       if (flags.save) console.log(`saved=${flags.save}`);
     } catch (error) {
       printError(error, asJson);
@@ -603,7 +603,7 @@ const templateUpdateCmd = defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code",
     }),
     name: option(z.string().optional(), { description: "New template name" }),
@@ -655,7 +655,7 @@ const templateUpdateCmd = defineCommand({
 
       const result = await (
         provider as unknown as TemplateProvider
-      ).updateTemplate.call(provider, flags["template-code"], patch, ctx);
+      ).updateTemplate.call(provider, flags["template-id"], patch, ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -669,7 +669,7 @@ const templateUpdateCmd = defineCommand({
         return;
       }
 
-      console.log(`OK templateCode=${result.value.code}`);
+      console.log(`OK templateId=${result.value.code}`);
     } catch (error) {
       printError(error, asJson);
       process.exitCode = exitCodeForError(error);
@@ -684,7 +684,7 @@ const templateDeleteCmd = defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code",
     }),
     channel: option(z.string().optional(), {
@@ -715,7 +715,7 @@ const templateDeleteCmd = defineCommand({
 
       const result = await (
         provider as unknown as TemplateProvider
-      ).deleteTemplate.call(provider, flags["template-code"], ctx);
+      ).deleteTemplate.call(provider, flags["template-id"], ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -741,7 +741,7 @@ const templateRequestCmd = defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    "template-code": option(z.string().min(1), {
+    "template-id": option(z.string().min(1), {
       description: "Template code",
     }),
     channel: option(z.string().optional(), {
@@ -772,7 +772,7 @@ const templateRequestCmd = defineCommand({
 
       const result = await (
         provider as unknown as TemplateInspectionProvider
-      ).requestTemplateInspection.call(provider, flags["template-code"], ctx);
+      ).requestTemplateInspection.call(provider, flags["template-id"], ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);

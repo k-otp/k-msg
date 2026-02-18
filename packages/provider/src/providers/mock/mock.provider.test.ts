@@ -8,7 +8,7 @@ describe("MockProvider", () => {
     const result = await provider.send({
       type: "ALIMTALK",
       to: "01012345678",
-      templateCode: "TPL_1",
+      templateId: "TPL_1",
       variables: { code: "1234" },
       failover: { enabled: true, fallbackContent: "fallback" },
     });

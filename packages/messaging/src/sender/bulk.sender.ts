@@ -167,7 +167,7 @@ export class BulkMessageSender {
           type: "NSA",
           to: recipient.phoneNumber,
           ...(from ? { from } : {}),
-          templateCode: request.templateCode,
+          templateId: request.templateId,
           variables,
         };
       }
@@ -177,7 +177,7 @@ export class BulkMessageSender {
           type,
           to: recipient.phoneNumber,
           ...(from ? { from } : {}),
-          templateCode: request.templateCode,
+          templateId: request.templateId,
           variables,
         };
       }
@@ -186,7 +186,7 @@ export class BulkMessageSender {
         type: "ALIMTALK",
         to: recipient.phoneNumber,
         ...(from ? { from } : {}),
-        templateCode: request.templateCode,
+        templateId: request.templateId,
         variables,
         ...(request.options?.failover
           ? { failover: request.options.failover }

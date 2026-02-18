@@ -146,6 +146,16 @@ async function sendAlimTalk(
   }
 
   const variables = options.variables as Record<string, unknown>;
+  const templateId = options.templateId;
+  if (!templateId || templateId.length === 0) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "templateId is required for ALIMTALK",
+        { providerId: ctx.providerId },
+      ),
+    );
+  }
   const templateContent =
     typeof options.providerOptions?.templateContent === "string"
       ? options.providerOptions.templateContent
@@ -155,7 +165,7 @@ async function sendAlimTalk(
     apikey: ctx.config.apiKey,
     userid: ctx.config.userId,
     senderkey: senderKey,
-    tpl_code: options.templateCode,
+    tpl_code: templateId,
     sender,
     receiver_1: options.to,
     subject_1: "알림톡",

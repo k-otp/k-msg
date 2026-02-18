@@ -221,7 +221,7 @@ describe("DeliveryTrackingService API failover", () => {
             type: "ALIMTALK",
             to: "01012345678",
             from: "01000000000",
-            templateCode: "TPL_1",
+            templateId: "TPL_1",
             variables: { code: "1234" },
             failover: {
               enabled: true,
@@ -299,7 +299,7 @@ describe("DeliveryTrackingService API failover", () => {
         options: {
           type: "ALIMTALK",
           to: "01012345678",
-          templateCode: "TPL_1",
+          templateId: "TPL_1",
           variables: { code: "1234" },
           failover: {
             enabled: true,
@@ -361,7 +361,7 @@ describe("DeliveryTrackingService API failover", () => {
         options: {
           type: "ALIMTALK",
           to: "01012345678",
-          templateCode: "TPL_1",
+          templateId: "TPL_1",
           variables: { code: "1234" },
           failover: { enabled: true },
         },
@@ -431,7 +431,7 @@ describe("DeliveryTrackingService API failover", () => {
         options: {
           type: "ALIMTALK",
           to: "01012345678",
-          templateCode: "TPL_1",
+          templateId: "TPL_1",
           variables: { code: "1234" },
           failover: { enabled: true, fallbackContent: "fallback body" },
         },
@@ -484,7 +484,7 @@ describe("DeliveryTrackingService API failover", () => {
         options: {
           type: "ALIMTALK",
           to: "01012345678",
-          templateCode: "TPL_1",
+          templateId: "TPL_1",
           variables: { code: "1234" },
           failover: {
             enabled: true,
