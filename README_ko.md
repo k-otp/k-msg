@@ -128,4 +128,4 @@ changeset/릴리즈 자동화 운영 정책은 아래 문서에 정리되어 있
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` 공개 API 제거
 - 메시지 구분 필드는 `type`로 통일(기존 `channel` 제거)
-- `templateId` → `templateId`로 통일
+- `templateCode` → `templateId`로 통일

@@ -32,4 +32,8 @@ export {
   listProviderOnboardingSpecs,
   providerOnboardingSpecs,
 } from "./onboarding/specs";
+export {
+  type ProviderCliMetadata,
+  providerCliMetadata,
+} from "./provider-cli-metadata";
 export { MockProvider } from "./providers/mock/mock.provider";
