@@ -123,6 +123,50 @@ k-msg config provider add iwinv
 Any string value like `"env:NAME"` is replaced with the `NAME` environment variable at runtime.
 If the env var is missing/empty, commands that need runtime providers will fail with exit code `2`.
 
+### Provider send value guide
+
+When you are unsure which values must be prepared before send, use this checklist:
+
+1. Configure provider credentials with `env:` references.
+2. Run `k-msg providers doctor` to verify account/config readiness.
+3. For AlimTalk, run `k-msg alimtalk preflight` with the provider/template/channel you will use.
+4. Send only after preflight passes.
+
+Credential examples:
+
+```bash
+# Aligo
+export ALIGO_API_KEY="..."
+export ALIGO_USER_ID="..."
+export ALIGO_SENDER_KEY="..."   # Kakao senderKey
+export ALIGO_SENDER="029302266" # SMS/LMS sender
+
+# IWINV
+export IWINV_API_KEY="..."          # AlimTalk key
+export IWINV_SMS_API_KEY="..."      # SMS/LMS/MMS key
+export IWINV_SMS_AUTH_KEY="..."     # SMS/LMS/MMS secret
+export IWINV_SMS_COMPANY_ID="..."   # status/balance context
+export IWINV_SENDER_NUMBER="029302266"
+
+# SOLAPI
+export SOLAPI_API_KEY="..."
+export SOLAPI_API_SECRET="..."
+export SOLAPI_DEFAULT_FROM="029302266"
+export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
+```
+
+Required values by provider/channel:
+
+| Provider | Channel | Required config keys | Required send-time values | Notes |
+| --- | --- | --- | --- | --- |
+| `aligo` | `SMS/LMS/MMS` | `apiKey`, `userId` | `to`, `text`, sender (`--from` or `aligo.config.sender`) | MMS also needs image input |
+| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), sender (`--from` or `aligo.config.sender`) | `preflight` validates channel/template access |
+| `iwinv` | `SMS/LMS/MMS` | `apiKey`, `smsApiKey`, `smsAuthKey` | `to`, `text`, sender (`--from` or `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS requires image binary input |
+| `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | If failover/reSend is enabled, sender callback is required (`--from` or sender number in config) |
+| `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, sender (`--from` or `solapi.config.defaultFrom`) | MMS also needs image input |
+| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/channel alias or `solapi.config.kakaoPfId`) | For preflight policy checks, set `plusId` via `--plus-id` or channel/default alias |
+| `mock` | all | none | minimal message fields (`to`, `text` or `template-id`/`vars`) | Local test provider |
+
 ## Commands
 
 - `k-msg config init|show|validate`

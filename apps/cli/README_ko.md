@@ -123,6 +123,50 @@ k-msg config provider add iwinv
 `"env:NAME"` 형태 문자열은 런타임에 `NAME` 환경 변수 값으로 치환됩니다.
 환경 변수가 없거나 비어 있으면, 런타임 provider가 필요한 명령은 종료 코드 `2`로 실패합니다.
 
+### 프로바이더 발송 값 준비 가이드
+
+발송 전에 어떤 값을 준비해야 하는지 헷갈릴 때는 아래 순서로 확인하세요.
+
+1. provider credential을 `env:` 참조로 설정합니다.
+2. `k-msg providers doctor`로 계정/설정 준비 상태를 점검합니다.
+3. AlimTalk는 실제 발송 전에 `k-msg alimtalk preflight`를 실행합니다.
+4. preflight 통과 후 `send`를 실행합니다.
+
+환경 변수 예시:
+
+```bash
+# Aligo
+export ALIGO_API_KEY="..."
+export ALIGO_USER_ID="..."
+export ALIGO_SENDER_KEY="..."   # Kakao senderKey
+export ALIGO_SENDER="029302266" # SMS/LMS 발신번호
+
+# IWINV
+export IWINV_API_KEY="..."          # AlimTalk 키
+export IWINV_SMS_API_KEY="..."      # SMS/LMS/MMS 키
+export IWINV_SMS_AUTH_KEY="..."     # SMS/LMS/MMS 시크릿
+export IWINV_SMS_COMPANY_ID="..."   # status/balance 맥락
+export IWINV_SENDER_NUMBER="029302266"
+
+# SOLAPI
+export SOLAPI_API_KEY="..."
+export SOLAPI_API_SECRET="..."
+export SOLAPI_DEFAULT_FROM="029302266"
+export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
+```
+
+프로바이더/채널별 필수값:
+
+| Provider | 채널 | 필수 config 키 | 발송 시 필수값 | 참고 |
+| --- | --- | --- | --- | --- |
+| `aligo` | `SMS/LMS/MMS` | `apiKey`, `userId` | `to`, `text`, 발신번호 (`--from` 또는 `aligo.config.sender`) | MMS는 이미지 입력도 필요 |
+| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), 발신번호 (`--from` 또는 `aligo.config.sender`) | `preflight`에서 채널/템플릿 접근성 확인 |
+| `iwinv` | `SMS/LMS/MMS` | `apiKey`, `smsApiKey`, `smsAuthKey` | `to`, `text`, 발신번호 (`--from` 또는 `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS는 바이너리 이미지 입력 필요 |
+| `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | failover/reSend 활성화 시 callback 발신번호 필요 (`--from` 또는 config sender) |
+| `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, 발신번호 (`--from` 또는 `solapi.config.defaultFrom`) | MMS는 이미지 입력도 필요 |
+| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/채널 alias 또는 `solapi.config.kakaoPfId`) | preflight 정책 점검용 `plusId`는 `--plus-id` 또는 channel/default alias로 지정 |
+| `mock` | 전체 | 없음 | 최소 메시지 필드 (`to`, `text` 또는 `template-id`/`vars`) | 로컬 테스트용 provider |
+
 ## 명령어
 
 - `k-msg config init|show|validate`
