@@ -64,6 +64,12 @@
 
 모든 생성기는 `--check` 모드를 지원합니다.
 
+`bun run docs:build`에는 아래 단계도 포함됩니다.
+
+- `scripts/docs/ensure-git-history.ts` (문서 생성 전 실행)
+- CI/Pages shallow clone 환경에서 sitemap `lastmod` 정확도를 위해 git history 보강 시도
+- 기본 정책은 fail-open(경고 후 계속)이며, `DOCS_REQUIRE_GIT_HISTORY=1`을 설정하면 strict 모드로 실패 처리
+
 ## 4. API 문서 생성 방식
 
 설정 파일:
@@ -115,6 +121,7 @@
 검증 명령:
 
 - `bun run docs:check`
+- `bun run docs:check:sitemap-lastmod` (`docs:check`에 포함)
 - 실패 시 PR merge 차단
 
 ## 7. Cloudflare Pages 운영값
@@ -131,3 +138,14 @@
 - `astro build` 완료 시 `sitemap-index.xml`이 `apps/docs/dist`에 생성됩니다.
 - `apps/docs/astro.config.mjs`에서 sitemap `lastmod`, `changefreq`, `priority`를 커스터마이징합니다.
 - `apps/docs/public/robots.txt`가 canonical sitemap URL을 공지합니다.
+
+## 8. 트러블슈팅
+
+`/api/` sitemap 항목의 `lastmod`가 모두 동일하게 보일 때:
+
+1. 빌드 로그에서 `scripts/docs/ensure-git-history.ts` 로그를 확인합니다.
+2. 아래 로그 중 하나가 보이는지 확인합니다.
+- `ok: git history prepared via: ...`
+- `ok: repository already has full history`
+3. 경고 로그만 보이면 shallow 상태로 빌드되었을 가능성이 높고 `lastmod` 정밀도가 떨어질 수 있습니다.
+4. CI/Pages에서 strict 강제를 원하면 `DOCS_REQUIRE_GIT_HISTORY=1`을 설정합니다.

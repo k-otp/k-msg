@@ -1,22 +1,24 @@
-import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap";
-import starlight from "@astrojs/starlight";
 import { execFile } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import sitemap from "@astrojs/sitemap";
+import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
-import typedocEntryPoints from "./typedoc.entrypoints.json";
 import syncTypeDocLocales from "./plugins/sync-typedoc-locales.mjs";
+import typedocEntryPoints from "./typedoc.entrypoints.json";
 
 const docsContentRoot = fileURLToPath(
   new URL("./src/content/docs", import.meta.url),
 );
 const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 const execFileAsync = promisify(execFile);
+const GIT_LASTMOD_CONCURRENCY = 16;
 let docsSlugIndexPromise;
-const lastmodCache = new Map();
+let docsSourceCandidatesPromise;
+let sitemapLastmodIndexPromise;
 const gitLastmodCache = new Map();
 
 function toPosix(input) {
@@ -72,6 +74,28 @@ async function buildDocsSlugIndex() {
   return index;
 }
 
+async function buildDocsSourceCandidatesIndex() {
+  if (!docsSlugIndexPromise) {
+    docsSlugIndexPromise = buildDocsSlugIndex();
+  }
+
+  const slugIndex = await docsSlugIndexPromise;
+  const entries = [...slugIndex.entries()];
+
+  const resolved = await Promise.all(
+    entries.map(async ([slug, sourcePath]) => {
+      try {
+        const markdown = await readFile(sourcePath, "utf8");
+        return [slug, extractSourceCandidates(markdown, sourcePath)];
+      } catch {
+        return [slug, [normalizeRepoPath(path.relative(repoRoot, sourcePath))]];
+      }
+    }),
+  );
+
+  return new Map(resolved);
+}
+
 function pathSitemapMeta(pathname) {
   if (pathname === "/" || pathname === "/en/") {
     return { changefreq: "daily", priority: 1.0 };
@@ -112,6 +136,43 @@ function extractGeneratedSourcePath(markdown) {
   return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
+function extractSourceCandidates(markdown, sourcePath) {
+  const definedInPaths = extractDefinedInPaths(markdown).map(normalizeRepoPath);
+  const generatedSourcePath = extractGeneratedSourcePath(markdown);
+  const sourceCandidates = new Set(definedInPaths);
+
+  if (generatedSourcePath) {
+    sourceCandidates.add(normalizeRepoPath(generatedSourcePath));
+  }
+
+  if (sourceCandidates.size === 0) {
+    sourceCandidates.add(
+      normalizeRepoPath(path.relative(repoRoot, sourcePath)),
+    );
+  }
+
+  return [...sourceCandidates];
+}
+
+async function mapLimit(items, limit, mapper) {
+  if (items.length === 0) return [];
+
+  const results = new Array(items.length);
+  let index = 0;
+  const workerCount = Math.min(limit, items.length);
+
+  const workers = Array.from({ length: workerCount }, async () => {
+    while (index < items.length) {
+      const currentIndex = index;
+      index += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
 async function resolveGitLastmod(repoRelativePath) {
   const normalized = normalizeRepoPath(repoRelativePath);
   if (!normalized) return undefined;
@@ -139,52 +200,63 @@ async function resolveGitLastmod(repoRelativePath) {
   return task;
 }
 
-async function resolveLastmod(urlString) {
-  if (!docsSlugIndexPromise) {
-    docsSlugIndexPromise = buildDocsSlugIndex();
+async function buildSitemapLastmodIndex() {
+  if (!docsSourceCandidatesPromise) {
+    docsSourceCandidatesPromise = buildDocsSourceCandidatesIndex();
   }
 
-  const slugIndex = await docsSlugIndexPromise;
-  const pathname = new URL(urlString).pathname;
-  const slug = normalizeSlug(pathname);
-  const sourcePath = slugIndex.get(slug);
-  if (!sourcePath) return undefined;
+  const sourceCandidatesIndex = await docsSourceCandidatesPromise;
+  const sourceCandidates = new Set();
 
-  const cached = lastmodCache.get(sourcePath);
-  if (cached) return cached;
-
-  try {
-    const markdown = await readFile(sourcePath, "utf8");
-    const definedInPaths =
-      extractDefinedInPaths(markdown).map(normalizeRepoPath);
-    const generatedSourcePath = extractGeneratedSourcePath(markdown);
-    const sourceCandidates = new Set(definedInPaths);
-
-    if (generatedSourcePath) {
-      sourceCandidates.add(normalizeRepoPath(generatedSourcePath));
+  for (const candidates of sourceCandidatesIndex.values()) {
+    for (const candidate of candidates) {
+      sourceCandidates.add(candidate);
     }
+  }
 
-    if (sourceCandidates.size === 0) {
-      sourceCandidates.add(
-        normalizeRepoPath(path.relative(repoRoot, sourcePath)),
-      );
+  const sourceLastmods = new Map();
+  const sourceCandidateList = [...sourceCandidates];
+
+  const resolvedSourceLastmods = await mapLimit(
+    sourceCandidateList,
+    GIT_LASTMOD_CONCURRENCY,
+    async (candidate) => [candidate, await resolveGitLastmod(candidate)],
+  );
+
+  for (const [candidate, lastmod] of resolvedSourceLastmods) {
+    if (lastmod) {
+      sourceLastmods.set(candidate, lastmod);
     }
+  }
 
+  const lastmodIndex = new Map();
+
+  for (const [slug, candidates] of sourceCandidatesIndex.entries()) {
     let latest;
-    for (const candidate of sourceCandidates) {
-      const gitLastmod = await resolveGitLastmod(candidate);
+    for (const candidate of candidates) {
+      const gitLastmod = sourceLastmods.get(candidate);
       if (gitLastmod && (!latest || gitLastmod > latest)) {
         latest = gitLastmod;
       }
     }
 
-    if (!latest) return undefined;
-
-    lastmodCache.set(sourcePath, latest);
-    return latest;
-  } catch {
-    return undefined;
+    if (latest) {
+      lastmodIndex.set(slug, latest);
+    }
   }
+
+  return lastmodIndex;
+}
+
+async function resolveLastmod(urlString) {
+  if (!sitemapLastmodIndexPromise) {
+    sitemapLastmodIndexPromise = buildSitemapLastmodIndex();
+  }
+
+  const lastmodIndex = await sitemapLastmodIndexPromise;
+  const pathname = new URL(urlString).pathname;
+  const slug = normalizeSlug(pathname);
+  return lastmodIndex.get(slug);
 }
 
 export default defineConfig({

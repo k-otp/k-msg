@@ -10,17 +10,54 @@ async function runGit(args: string[]): Promise<string> {
   return stdout.trim();
 }
 
-async function tryGit(args: string[]): Promise<boolean> {
+function formatError(error: unknown): string {
+  if (!error || typeof error !== "object") {
+    return String(error ?? "unknown error");
+  }
+
+  const maybeError = error as {
+    message?: string;
+    stderr?: string | Buffer;
+    stdout?: string | Buffer;
+  };
+
+  const stderr =
+    typeof maybeError.stderr === "string"
+      ? maybeError.stderr
+      : maybeError.stderr?.toString("utf8");
+  const stdout =
+    typeof maybeError.stdout === "string"
+      ? maybeError.stdout
+      : maybeError.stdout?.toString("utf8");
+
+  return (
+    stderr?.trim() || stdout?.trim() || maybeError.message || "unknown error"
+  );
+}
+
+async function tryGit(
+  args: string[],
+): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await runGit(args);
-    return true;
-  } catch {
-    return false;
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: formatError(error) };
   }
 }
 
 function shouldRunInCurrentEnv(): boolean {
-  return process.env.CI === "true" || process.env.FORCE_DOCS_UNSHALLOW === "1";
+  return (
+    process.env.CI === "true" ||
+    process.env.CI === "1" ||
+    process.env.GITHUB_ACTIONS === "true" ||
+    typeof process.env.CF_PAGES !== "undefined" ||
+    process.env.FORCE_DOCS_UNSHALLOW === "1"
+  );
+}
+
+function strictModeEnabled(): boolean {
+  return process.env.DOCS_REQUIRE_GIT_HISTORY === "1";
 }
 
 async function main(): Promise<void> {
@@ -43,21 +80,34 @@ async function main(): Promise<void> {
   // Pages/CI shallow clones collapse per-file git history, which makes sitemap
   // lastmod converge to the same timestamp. Deepen history before docs build.
   const attempts: string[][] = [
-    ["fetch", "--unshallow", "origin", branch],
+    ["fetch", "--no-tags", "--unshallow", "origin", branch],
     ["fetch", "--deepen=200", "origin", branch],
     ["fetch", "--depth=2000", "origin", branch],
   ];
 
   for (const args of attempts) {
-    if (await tryGit(args)) {
+    console.log(`info: trying git ${args.join(" ")}`);
+    const result = await tryGit(args);
+    if (result.ok) {
       console.log(`ok: git history prepared via: git ${args.join(" ")}`);
       return;
     }
+
+    console.warn(
+      `warn: git ${args.join(" ")} failed: ${result.error.split("\n")[0]}`,
+    );
   }
 
-  throw new Error(
-    "failed to deepen git history in shallow repository; cannot derive stable per-file sitemap lastmod",
-  );
+  const fallbackMessage =
+    "warn: continuing with shallow history; sitemap lastmod may be less precise";
+
+  if (strictModeEnabled()) {
+    throw new Error(
+      `failed to deepen git history in shallow repository. ${fallbackMessage} (strict mode enabled by DOCS_REQUIRE_GIT_HISTORY=1)`,
+    );
+  }
+
+  console.warn(fallbackMessage);
 }
 
 await main();

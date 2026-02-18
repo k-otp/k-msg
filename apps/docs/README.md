@@ -66,6 +66,12 @@ Rules:
 
 All generators support `--check`.
 
+`bun run docs:build` also runs:
+
+- `scripts/docs/ensure-git-history.ts` (before docs generation)
+- In CI/Pages shallow clones, it attempts to deepen git history for accurate sitemap `lastmod`
+- Default policy is fail-open (warn and continue). Set `DOCS_REQUIRE_GIT_HISTORY=1` for strict mode.
+
 ## 4. API Docs Generation
 
 Config files:
@@ -117,6 +123,7 @@ Path filters:
 Verification command:
 
 - `bun run docs:check`
+- `bun run docs:check:sitemap-lastmod` (included in `docs:check`)
 - Failing checks block PR merge
 
 ## 7. Cloudflare Pages
@@ -133,3 +140,14 @@ Note:
 - `astro build` generates `sitemap-index.xml` in `apps/docs/dist`.
 - Sitemap metadata is customized with `lastmod`, `changefreq`, and `priority` in `apps/docs/astro.config.mjs`.
 - `apps/docs/public/robots.txt` advertises the canonical sitemap URL.
+
+## 8. Troubleshooting
+
+If sitemap `/api/` pages show the same `lastmod` value:
+
+1. Check build logs for `scripts/docs/ensure-git-history.ts`
+2. Confirm one of these appears:
+- `ok: git history prepared via: ...`
+- `ok: repository already has full history`
+3. If only warning logs appear, the build likely stayed shallow; `lastmod` precision may degrade
+4. To enforce strict behavior in CI/Pages, set `DOCS_REQUIRE_GIT_HISTORY=1`
