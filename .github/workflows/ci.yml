@@ -82,23 +82,5 @@ jobs:
           # lint only files changed in this ref (incremental adoption).
           bun x @biomejs/biome check --files-ignore-unknown=true "${files[@]}"
 
-      - name: Typecheck
-        run: bun run typecheck:all
-
-      - name: Build messaging package (subpath exports)
-        run: bun run --cwd packages/messaging build
-
-      - name: Unit tests
-        run: bun run test:unit
-
-      - name: Build packages
-        run: bun run build:all
-
-      - name: Integration tests
-        run: bun run test:integration
-
-      - name: CLI tests
-        run: bun --cwd apps/cli test
-
-      - name: CLI build
-        run: bun run --cwd apps/cli build
+      - name: Canonical checks
+        run: bun run check:ci
