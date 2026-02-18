@@ -1,5 +1,12 @@
 # @k-msg/webhook
 
+## 0.18.2 — 2026-02-18
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+- Updated dependencies: core@0.18.2
+
 ## 0.18.1 — 2026-02-18
 
 ### Patch changes
