@@ -1,5 +1,7 @@
 # @k-msg/provider
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Provider implementations for `k-msg` (SendOptions + Result based).
 
 ## Installation

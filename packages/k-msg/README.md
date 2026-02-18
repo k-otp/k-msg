@@ -1,5 +1,7 @@
 # k-msg
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Unified package that re-exports the main public API:
 
 - `KMsg` from `@k-msg/messaging`

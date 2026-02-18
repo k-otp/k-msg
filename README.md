@@ -1,5 +1,7 @@
 # k-msg
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Korean multi-channel messaging toolkit with pluggable providers.
 
 Unified end-user API:

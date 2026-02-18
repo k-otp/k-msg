@@ -1,0 +1,1189 @@
+## CLI Config Schema
+
+Generated from `apps/cli/schemas/*.json`.
+
+## k-msg.config.schema.json
+
+- id: `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json`
+- title: k-msg CLI config
+- description: Schema for k-msg.config.json used by @k-msg/cli (version 1)
+
+### Top-level fields
+
+| field | type | required | description |
+| --- | --- | --- | --- |
+| `$schema` | `string` | no |  |
+| `aliases` | `object` | no |  |
+| `defaults` | `object` | no |  |
+| `onboarding` | `object` | no |  |
+| `persistence` | `object` | no |  |
+| `providers` | `array` | yes |  |
+| `routing` | `object` | no |  |
+| `version` | `number` | yes |  |
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "version": {
+      "default": 1,
+      "type": "number",
+      "const": 1
+    },
+    "providers": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "mock"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {},
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "aligo"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Aligo API key"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Aligo user id"
+                  },
+                  "senderKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Kakao sender key"
+                  },
+                  "sender": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default SMS/LMS sender number"
+                  },
+                  "testMode": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable Aligo test mode"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  },
+                  "smsBaseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override SMS API base URL"
+                  },
+                  "alimtalkBaseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override AlimTalk API base URL"
+                  },
+                  "friendtalkEndpoint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override FriendTalk endpoint path"
+                  }
+                },
+                "required": [
+                  "apiKey",
+                  "userId"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "iwinv"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV AlimTalk API key (AUTH header)"
+                  },
+                  "smsApiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS API key"
+                  },
+                  "smsAuthKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS auth key"
+                  },
+                  "smsCompanyId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS company id"
+                  },
+                  "senderNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default sender number"
+                  },
+                  "smsSenderNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SMS/LMS sender number override"
+                  },
+                  "sendEndpoint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override IWINV send endpoint path"
+                  },
+                  "xForwardedFor": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "X-Forwarded-For header override"
+                  },
+                  "extraHeaders": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Additional HTTP headers"
+                  },
+                  "ipRetryCount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[+-]?(?:\\d+\\.?\\d*|\\d*\\.?\\d+)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "IP-restriction retry count"
+                  },
+                  "ipRetryDelayMs": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[+-]?(?:\\d+\\.?\\d*|\\d*\\.?\\d+)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "IP-restriction retry delay in ms"
+                  },
+                  "ipAlertWebhookUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Webhook URL for IP restriction alerts"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  }
+                },
+                "required": [
+                  "apiKey"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "solapi"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI API key"
+                  },
+                  "apiSecret": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI API secret"
+                  },
+                  "defaultFrom": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default sender number"
+                  },
+                  "kakaoPfId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Kakao PF ID"
+                  },
+                  "rcsBrandId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default RCS brand id"
+                  },
+                  "naverTalkId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Naver Talk id"
+                  },
+                  "appId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI app id"
+                  },
+                  "defaultCountry": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default country code"
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override SOLAPI API base URL"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  }
+                },
+                "required": [
+                  "apiKey",
+                  "apiSecret"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      }
+    },
+    "routing": {
+      "type": "object",
+      "properties": {
+        "defaultProviderId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "first",
+            "round_robin"
+          ]
+        },
+        "byType": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": {}
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "sms": {
+          "type": "object",
+          "properties": {
+            "autoLmsBytes": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": false
+        },
+        "kakao": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "senderKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plusId": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": {}
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "none",
+            "log",
+            "queue",
+            "full"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "kakaoChannels": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "providerId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "plusId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "senderKey": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "providerId"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "templates": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "providerId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "templateId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kakaoChannel": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "providerId",
+              "templateId"
+            ],
+            "additionalProperties": {}
+          }
+        }
+      },
+      "additionalProperties": {}
+    },
+    "onboarding": {
+      "type": "object",
+      "properties": {
+        "manualChecks": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "done": {
+                  "type": "boolean"
+                },
+                "checkedAt": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "done"
+              ],
+              "additionalProperties": {}
+            }
+          }
+        }
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "version",
+    "providers"
+  ],
+  "additionalProperties": {},
+  "$id": "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json",
+  "title": "k-msg CLI config",
+  "description": "Schema for k-msg.config.json used by @k-msg/cli (version 1)"
+}
+```
+
+## k-msg.config.v1.schema.json
+
+- id: `https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.v1.schema.json`
+- title: k-msg CLI config
+- description: Schema for k-msg.config.json used by @k-msg/cli (version 1)
+
+### Top-level fields
+
+| field | type | required | description |
+| --- | --- | --- | --- |
+| `$schema` | `string` | no |  |
+| `aliases` | `object` | no |  |
+| `defaults` | `object` | no |  |
+| `onboarding` | `object` | no |  |
+| `persistence` | `object` | no |  |
+| `providers` | `array` | yes |  |
+| `routing` | `object` | no |  |
+| `version` | `number` | yes |  |
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "version": {
+      "default": 1,
+      "type": "number",
+      "const": 1
+    },
+    "providers": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "mock"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {},
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "aligo"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Aligo API key"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Aligo user id"
+                  },
+                  "senderKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Kakao sender key"
+                  },
+                  "sender": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default SMS/LMS sender number"
+                  },
+                  "testMode": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable Aligo test mode"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  },
+                  "smsBaseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override SMS API base URL"
+                  },
+                  "alimtalkBaseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override AlimTalk API base URL"
+                  },
+                  "friendtalkEndpoint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override FriendTalk endpoint path"
+                  }
+                },
+                "required": [
+                  "apiKey",
+                  "userId"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "iwinv"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV AlimTalk API key (AUTH header)"
+                  },
+                  "smsApiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS API key"
+                  },
+                  "smsAuthKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS auth key"
+                  },
+                  "smsCompanyId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV SMS company id"
+                  },
+                  "senderNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default sender number"
+                  },
+                  "smsSenderNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SMS/LMS sender number override"
+                  },
+                  "sendEndpoint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override IWINV send endpoint path"
+                  },
+                  "xForwardedFor": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "X-Forwarded-For header override"
+                  },
+                  "extraHeaders": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Additional HTTP headers"
+                  },
+                  "ipRetryCount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[+-]?(?:\\d+\\.?\\d*|\\d*\\.?\\d+)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "IP-restriction retry count"
+                  },
+                  "ipRetryDelayMs": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[+-]?(?:\\d+\\.?\\d*|\\d*\\.?\\d+)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "IP-restriction retry delay in ms"
+                  },
+                  "ipAlertWebhookUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Webhook URL for IP restriction alerts"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  }
+                },
+                "required": [
+                  "apiKey"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "solapi"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI API key"
+                  },
+                  "apiSecret": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI API secret"
+                  },
+                  "defaultFrom": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default sender number"
+                  },
+                  "kakaoPfId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Kakao PF ID"
+                  },
+                  "rcsBrandId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default RCS brand id"
+                  },
+                  "naverTalkId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default Naver Talk id"
+                  },
+                  "appId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "SOLAPI app id"
+                  },
+                  "defaultCountry": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default country code"
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Override SOLAPI API base URL"
+                  },
+                  "debug": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(true|false)$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^env:[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ],
+                    "description": "Enable debug logging"
+                  }
+                },
+                "required": [
+                  "apiKey",
+                  "apiSecret"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "config"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      }
+    },
+    "routing": {
+      "type": "object",
+      "properties": {
+        "defaultProviderId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "first",
+            "round_robin"
+          ]
+        },
+        "byType": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": {}
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "sms": {
+          "type": "object",
+          "properties": {
+            "autoLmsBytes": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": false
+        },
+        "kakao": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "senderKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plusId": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": {}
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "none",
+            "log",
+            "queue",
+            "full"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "kakaoChannels": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "providerId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "plusId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "senderKey": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "providerId"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "templates": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "providerId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "templateId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kakaoChannel": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "providerId",
+              "templateId"
+            ],
+            "additionalProperties": {}
+          }
+        }
+      },
+      "additionalProperties": {}
+    },
+    "onboarding": {
+      "type": "object",
+      "properties": {
+        "manualChecks": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "done": {
+                  "type": "boolean"
+                },
+                "checkedAt": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "done"
+              ],
+              "additionalProperties": {}
+            }
+          }
+        }
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "version",
+    "providers"
+  ],
+  "additionalProperties": {},
+  "$id": "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.v1.schema.json",
+  "title": "k-msg CLI config",
+  "description": "Schema for k-msg.config.json used by @k-msg/cli (version 1)"
+}
+```

@@ -142,6 +142,7 @@
 - [ ] Documentation updated where necessary
 - [ ] API changes documented
 - [ ] Examples updated if needed
+- [ ] docs:check passed locally (`bun run docs:check`) when changing `packages/*`, `apps/cli/*`, `examples/*`, `apps/docs/*`, or `scripts/docs/*`
 
 #### Dependencies
 

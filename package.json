@@ -59,7 +59,12 @@
     "release": "./scripts/release.sh",
     "release:patch": "bun run version:patch && bun install && bun run build:all && bun run publish:all",
     "release:minor": "bun run version:minor && bun install && bun run build:all && bun run publish:all",
-    "release:major": "bun run version:major && bun install && bun run build:all && bun run publish:all"
+    "release:major": "bun run version:major && bun install && bun run build:all && bun run publish:all",
+    "docs:dev": "bun run docs:generate && bun run --cwd apps/docs dev",
+    "docs:generate": "bun run scripts/docs/run-generate.ts",
+    "docs:build": "bun run docs:generate && bun run --cwd apps/docs build",
+    "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/run-generate.ts --check && bun run --cwd apps/docs snippets:typecheck && bun run --cwd apps/docs check && bun run --cwd apps/docs build",
+    "docs:version:snapshot": "bun run scripts/docs/version-snapshot.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
