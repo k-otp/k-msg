@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/messaging",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "packageManager": "bun@1.3.8",
   "description": "AlimTalk messaging core for sending, queuing, and tracking messages",
   "type": "module",
