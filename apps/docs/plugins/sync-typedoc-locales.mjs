@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 export default function syncTypeDocLocales(options = {}) {
   const source = options.source ?? "api";
-  const locales = options.locales ?? ["en", "ko"];
+  const locales = options.locales ?? ["en"];
 
   return {
     name: "sync-typedoc-locales",

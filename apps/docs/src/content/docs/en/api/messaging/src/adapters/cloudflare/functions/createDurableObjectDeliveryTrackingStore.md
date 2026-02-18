@@ -5,7 +5,7 @@ prev: false
 title: "createDurableObjectDeliveryTrackingStore"
 ---
 
-> **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+> **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L110)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:110](https://gi
 
 ### storage
 
-[`CloudflareDurableObjectStorageLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
+[`CloudflareDurableObjectStorageLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
 
 ### options?
 
@@ -23,4 +23,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:110](https://gi
 
 ## Returns
 
-[`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+[`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)

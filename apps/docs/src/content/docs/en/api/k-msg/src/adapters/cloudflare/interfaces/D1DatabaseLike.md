@@ -5,7 +5,7 @@ prev: false
 title: "D1DatabaseLike"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:28
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L28)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:28
 
 > **prepare**(`query`): [`D1PreparedStatementLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:29
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L29)
 
 #### Parameters
 

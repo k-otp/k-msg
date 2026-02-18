@@ -5,7 +5,7 @@ prev: false
 title: "createR2DeliveryTrackingStore"
 ---
 
-> **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+> **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L90)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:90](https://git
 
 ### bucket
 
-[`CloudflareR2BucketLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
+[`CloudflareR2BucketLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
 
 ### options?
 
@@ -23,4 +23,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:90](https://git
 
 ## Returns
 
-[`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+[`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)

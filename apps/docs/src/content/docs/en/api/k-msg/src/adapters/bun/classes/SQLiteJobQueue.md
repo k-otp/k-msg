@@ -5,7 +5,7 @@ prev: false
 title: "SQLiteJobQueue"
 ---
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:5
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L8)
 
 ## Type Parameters
 
@@ -23,13 +23,13 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:5
 
 > **new SQLiteJobQueue**\<`T`\>(`options?`): `SQLiteJobQueue`\<`T`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:7
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L11)
 
 #### Parameters
 
 ##### options?
 
-`SQLiteJobQueueOptions`
+`SQLiteJobQueueOptions` = `{}`
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:7
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:25
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:282](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L282)
 
 #### Returns
 
@@ -57,7 +57,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:25
 
 > **close**(): `void`
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:26
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:286](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L286)
 
 #### Returns
 
@@ -69,7 +69,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:26
 
 > **complete**(`jobId`, `_result?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:19
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L167)
 
 #### Parameters
 
@@ -95,7 +95,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:19
 
 > **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:18
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L141)
 
 #### Returns
 
@@ -111,7 +111,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:18
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:12
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L88)
 
 #### Parameters
 
@@ -155,7 +155,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:12
 
 > **fail**(`jobId`, `error`, `shouldRetry?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:20
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L179)
 
 #### Parameters
 
@@ -185,7 +185,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:20
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:23
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:251](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L251)
 
 #### Parameters
 
@@ -207,7 +207,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:23
 
 > **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:21
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L218)
 
 #### Returns
 
@@ -223,7 +223,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:21
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:24
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:268](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L268)
 
 #### Parameters
 
@@ -245,7 +245,7 @@ Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:24
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: packages/messaging/dist/queue/sqlite-job-queue.d.ts:22
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:239](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L239)
 
 #### Returns
 

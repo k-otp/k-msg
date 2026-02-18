@@ -7,7 +7,7 @@ title: "createKvObjectStorage"
 
 > **createKvObjectStorage**(`namespace`): [`CloudflareObjectStorage`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:52
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L53)
 
 ## Parameters
 

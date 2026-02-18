@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareDurableObjectStorageLike"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:42
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L42)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:42
 
 > **delete**(`key`): `Promise`\<`boolean` \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:45
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L45)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:45
 
 > **get**\<`T`\>(`key`): `Promise`\<`T` \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:43
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L43)
 
 #### Type Parameters
 
@@ -55,7 +55,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:43
 
 > **list**\<`T`\>(`options?`): `Promise`\<`Map`\<`string`, `T`\>\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:46
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L46)
 
 #### Type Parameters
 
@@ -89,7 +89,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:46
 
 > **put**\<`T`\>(`key`, `value`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-storage.d.ts:44
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L44)
 
 #### Type Parameters
 

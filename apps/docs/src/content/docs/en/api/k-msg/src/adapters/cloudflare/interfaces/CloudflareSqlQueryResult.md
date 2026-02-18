@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareSqlQueryResult"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:2
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L3)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:2
 
 > `optional` **rowCount**: `number`
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:4
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L5)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:4
 
 > **rows**: `T`[]
 
-Defined in: packages/messaging/dist/adapters/cloudflare/sql-client.d.ts:3
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L4)

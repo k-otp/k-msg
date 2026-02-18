@@ -5,7 +5,7 @@ prev: false
 title: "createD1DeliveryTrackingStore"
 ---
 
-> **createD1DeliveryTrackingStore**(`database`, `options?`): [`HyperdriveDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)
+> **createD1DeliveryTrackingStore**(`database`, `options?`): [`HyperdriveDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L50)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:50](https://git
 
 ### database
 
-[`D1DatabaseLike`](/api/messaging/src/adapters/cloudflare/interfaces/d1databaselike/)
+[`D1DatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1databaselike/)
 
 ### options?
 
@@ -23,4 +23,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:50](https://git
 
 ## Returns
 
-[`HyperdriveDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)
+[`HyperdriveDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)

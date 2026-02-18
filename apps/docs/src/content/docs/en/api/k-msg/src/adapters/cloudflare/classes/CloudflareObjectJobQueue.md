@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJobQueue"
 ---
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:3
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L22)
 
 ## Type Parameters
 
@@ -23,7 +23,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:3
 
 > **new CloudflareObjectJobQueue**\<`T`\>(`storage`, `keyPrefix?`): `CloudflareObjectJobQueue`\<`T`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:6
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L23)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:6
 
 ##### keyPrefix?
 
-`string`
+`string` = `"kmsg/jobs"`
 
 #### Returns
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:6
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:20
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L180)
 
 #### Returns
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:20
 
 > **complete**(`jobId`, `_result?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:14
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L87)
 
 #### Parameters
 
@@ -87,7 +87,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:14
 
 > **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:13
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L60)
 
 #### Returns
 
@@ -103,7 +103,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:13
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:7
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L28)
 
 #### Parameters
 
@@ -147,7 +147,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:7
 
 > **fail**(`jobId`, `error`, `shouldRetry?`): `Promise`\<`void`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:15
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L103)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:15
 
 ##### shouldRetry?
 
-`boolean`
+`boolean` = `false`
 
 #### Returns
 
@@ -177,7 +177,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:15
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:18
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L167)
 
 #### Parameters
 
@@ -199,7 +199,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:18
 
 > **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:16
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L142)
 
 #### Returns
 
@@ -215,7 +215,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:16
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:19
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L173)
 
 #### Parameters
 
@@ -237,7 +237,7 @@ Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:19
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: packages/messaging/dist/adapters/cloudflare/object-job-queue.d.ts:17
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L157)
 
 #### Returns
 

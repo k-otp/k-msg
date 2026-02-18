@@ -6,7 +6,7 @@ This is the contributor and operations runbook for the `k-msg` docs site (`https
 
 - Framework: Astro + Starlight
 - Default locale: `ko` (Korean), secondary locale: `en`
-- Root route: `/ -> /ko/`
+- Root route: `/` (Korean root locale), English route: `/en/`
 - Build output: `apps/docs/dist`
 
 ## 1. Quick Start
@@ -22,16 +22,18 @@ Run from repository root:
 
 Manually maintained files:
 
-- `apps/docs/src/content/docs/ko/cli.mdx`
+- `apps/docs/src/content/docs/cli.mdx`
 - `apps/docs/src/content/docs/en/cli.mdx`
-- `apps/docs/src/content/docs/ko/snippets.mdx`
+- `apps/docs/src/content/docs/snippets.mdx`
 - `apps/docs/src/content/docs/en/snippets.mdx`
 - `apps/docs/snippets/**` (code example source)
 
 Generated files:
 
-- `apps/docs/src/content/docs/{ko,en}/guides/**`
-- `apps/docs/src/content/docs/{ko,en}/api/**`
+- `apps/docs/src/content/docs/guides/**` (Korean root locale)
+- `apps/docs/src/content/docs/en/guides/**`
+- `apps/docs/src/content/docs/api/**` (root locale API source)
+- `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
 - `apps/docs/typedoc.entrypoints.json`
@@ -60,7 +62,7 @@ Rules:
 
 4. `scripts/docs/generate-guides.ts`
 - Generates guide pages from repo/package/example `README*.md`
-- Output: `apps/docs/src/content/docs/{ko,en}/guides/**`, `index.md`
+- Output: `apps/docs/src/content/docs/guides/**`, `apps/docs/src/content/docs/en/guides/**`, `index.md`
 
 All generators support `--check`.
 
@@ -76,7 +78,7 @@ Flow:
 
 1. `starlight-typedoc` generates API docs from `typedoc.entrypoints.json`
 2. Source output path: `src/content/docs/api/**`
-3. Locale sync plugin copies output to `en/api` and `ko/api`
+3. Locale sync plugin copies output to `en/api`
 4. `gitRevision: "main"` reduces source-link drift
 
 ## 5. Contributor Workflow
@@ -129,3 +131,5 @@ Verification command:
 Note:
 
 - `astro build` generates `sitemap-index.xml` in `apps/docs/dist`.
+- Sitemap metadata is customized with `lastmod`, `changefreq`, and `priority` in `apps/docs/astro.config.mjs`.
+- `apps/docs/public/robots.txt` advertises the canonical sitemap URL.

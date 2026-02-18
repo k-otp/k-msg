@@ -5,7 +5,7 @@ prev: false
 title: "createKvDeliveryTrackingStore"
 ---
 
-> **createKvDeliveryTrackingStore**(`namespace`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+> **createKvDeliveryTrackingStore**(`namespace`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L70)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:70](https://git
 
 ### namespace
 
-[`CloudflareKvNamespaceLike`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflarekvnamespacelike/)
+[`CloudflareKvNamespaceLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarekvnamespacelike/)
 
 ### options?
 
@@ -23,4 +23,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:70](https://git
 
 ## Returns
 
-[`CloudflareObjectDeliveryTrackingStore`](/api/messaging/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+[`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
