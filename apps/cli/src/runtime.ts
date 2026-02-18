@@ -1,3 +1,12 @@
+import {
+  type KMsgError,
+  type MessageRepository,
+  ok,
+  type PersistenceStrategy,
+  type Result,
+  type SendInput,
+  type SendResult,
+} from "@k-msg/core";
 import { KMsg } from "k-msg";
 import { loadKMsgConfig, resolveKMsgConfigEnv } from "./config/load";
 import type { KMsgCliConfig } from "./config/schema";
@@ -5,6 +14,66 @@ import {
   createProviders,
   type ProviderWithCapabilities,
 } from "./providers/registry";
+
+class InMemoryMessageRepository implements MessageRepository {
+  private readonly messages = new Map<string, SendResult>();
+  private nextId = 1;
+
+  async save(
+    input: SendInput,
+    _options?: { strategy?: PersistenceStrategy },
+  ): Promise<Result<string, KMsgError>> {
+    const id =
+      typeof input.messageId === "string" && input.messageId.length > 0
+        ? input.messageId
+        : `cli-msg-${this.nextId++}`;
+
+    this.messages.set(id, this.createPendingResult(id, input));
+
+    return ok(id);
+  }
+
+  async update(
+    messageId: string,
+    result: Partial<SendResult>,
+  ): Promise<Result<void, KMsgError>> {
+    const current = this.messages.get(messageId);
+    if (!current) return ok(undefined);
+
+    const merged = {
+      ...current,
+      ...result,
+      messageId,
+    };
+
+    this.messages.set(messageId, {
+      ...merged,
+      providerId: merged.providerId ?? current.providerId,
+      status: merged.status ?? current.status,
+      type: merged.type ?? current.type,
+      to: merged.to ?? current.to,
+    });
+
+    return ok(undefined);
+  }
+
+  async find(messageId: string): Promise<Result<SendResult | null, KMsgError>> {
+    return ok(this.messages.get(messageId) ?? null);
+  }
+
+  private createPendingResult(messageId: string, input: SendInput): SendResult {
+    const type: SendResult["type"] =
+      "type" in input && input.type ? input.type : "SMS";
+
+    return {
+      messageId,
+      providerId: input.providerId ?? "unknown",
+      status: "PENDING",
+      type,
+      to: input.to,
+    };
+  }
+}
 
 export type Runtime = {
   configPath: string;
@@ -90,9 +159,17 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
       }
     : undefined;
 
+  const persistence = resolved.persistence
+    ? {
+        strategy: resolved.persistence.strategy ?? "none",
+        repo: new InMemoryMessageRepository(),
+      }
+    : undefined;
+
   const kmsg = new KMsg({
     providers,
     routing,
+    ...(persistence ? { persistence } : {}),
     defaults: {
       sms: {
         autoLmsBytes: resolved.defaults?.sms?.autoLmsBytes,

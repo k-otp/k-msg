@@ -27,7 +27,12 @@ const sendInputJsonSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.record(z.string(), z.unknown()));
+  .pipe(
+    z.union([
+      z.record(z.string(), z.unknown()),
+      z.array(z.record(z.string(), z.unknown())),
+    ]),
+  );
 
 async function readStdinText(): Promise<string> {
   // Bun exposes stdin as a BunFile.
@@ -72,7 +77,7 @@ export default defineCommand({
         throw new Error("Use exactly one of --input, --file, or --stdin");
       }
 
-      let inputRecord: Record<string, unknown>;
+      let inputRecord: Record<string, unknown> | Array<Record<string, unknown>>;
 
       if (flags.input !== undefined) {
         inputRecord = flags.input;
@@ -85,6 +90,48 @@ export default defineCommand({
         inputRecord = sendInputJsonSchema.parse(await file.text());
       } else {
         inputRecord = sendInputJsonSchema.parse(await readStdinText());
+      }
+
+      if (Array.isArray(inputRecord)) {
+        const input = (flags.provider
+          ? inputRecord.map((item) => ({ ...item, providerId: flags.provider }))
+          : inputRecord) as unknown as SendInput[];
+
+        const batch = await runtime.kmsg.send(input);
+
+        if (asJson) {
+          console.log(
+            JSON.stringify(
+              {
+                ok: true,
+                batch: {
+                  total: batch.total,
+                  results: batch.results,
+                },
+              },
+              null,
+              2,
+            ),
+          );
+          return;
+        }
+
+        const success = batch.results.filter((item) => item.isSuccess).length;
+        const fail = batch.results.length - success;
+        console.log(
+          `Batch Sent: Total ${batch.total}, Success ${success}, Fail ${fail}`,
+        );
+
+        if (fail > 0) {
+          batch.results.forEach((item, index) => {
+            if (item.isFailure) {
+              console.log(
+                `FAIL [${index}] ${item.error.code}: ${item.error.message}`,
+              );
+            }
+          });
+        }
+        return;
       }
 
       const input = (flags.provider
