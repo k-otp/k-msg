@@ -5,7 +5,7 @@ prev: false
 title: "MessageRepository"
 ---
 
-Defined in: [packages/core/src/persistence/repository.ts:7](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/persistence/repository.ts#L7)
+Defined in: [packages/core/src/persistence/repository.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L7)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/persistence/repository.ts:7](https://github.com/k
 
 > **find**(`messageId`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/persistence/repository.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/persistence/repository.ts#L18)
+Defined in: [packages/core/src/persistence/repository.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L18)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/persistence/repository.ts:18](https://github.com/
 
 > **save**(`input`, `options?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`string`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/persistence/repository.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/persistence/repository.ts#L8)
+Defined in: [packages/core/src/persistence/repository.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L8)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/persistence/repository.ts:8](https://github.com/k
 
 > **update**(`messageId`, `result`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/persistence/repository.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/persistence/repository.ts#L13)
+Defined in: [packages/core/src/persistence/repository.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L13)
 
 #### Parameters
 

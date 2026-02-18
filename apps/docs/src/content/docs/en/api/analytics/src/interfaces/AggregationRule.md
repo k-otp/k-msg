@@ -5,7 +5,7 @@ prev: false
 title: "AggregationRule"
 ---
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L9)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L9)
 
 Analytics Engine
 메시지 전송 통계 및 분석 기능 제공
@@ -16,7 +16,7 @@ Analytics Engine
 
 > **aggregationType**: `"max"` \| `"count"` \| `"sum"` \| `"avg"` \| `"min"` \| `"rate"` \| `"percentile"`
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L11)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L11)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:11](https:/
 
 > `optional` **conditions**: `object`[]
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L20)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L20)
 
 #### field
 
@@ -44,7 +44,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:20](https:/
 
 > **dimensions**: `string`[]
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L19)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L19)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:19](https:/
 
 > **metricType**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L10)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L10)
 
 ***
 
@@ -60,4 +60,4 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:10](https:/
 
 > `optional` **percentile**: `number`
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L25)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L25)

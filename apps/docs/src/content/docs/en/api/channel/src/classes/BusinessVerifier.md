@@ -5,7 +5,7 @@ prev: false
 title: "BusinessVerifier"
 ---
 
-Defined in: [packages/channel/src/verification/business.verify.ts:91](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L91)
+Defined in: [packages/channel/src/verification/business.verify.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L91)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:91](https://gi
 
 > **new BusinessVerifier**(`options?`): `BusinessVerifier`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:107](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L107)
+Defined in: [packages/channel/src/verification/business.verify.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L107)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:107](https://g
 
 > **addDocument**(`requestId`, `document`): `Promise`\<[`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/)\>
 
-Defined in: [packages/channel/src/verification/business.verify.ts:237](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L237)
+Defined in: [packages/channel/src/verification/business.verify.ts:237](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L237)
 
 Update verification request with additional documents
 
@@ -63,7 +63,7 @@ Update verification request with additional documents
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L16)
+Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -89,7 +89,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com
 
 > **approveVerification**(`requestId`, `reviewerId`, `notes?`): `Promise`\<[`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/)\>
 
-Defined in: [packages/channel/src/verification/business.verify.ts:172](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L172)
+Defined in: [packages/channel/src/verification/business.verify.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L172)
 
 Manually approve verification
 
@@ -117,7 +117,7 @@ Manually approve verification
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L44)
+Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -143,7 +143,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com
 
 > **eventNames**(): `string`[]
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L71)
+Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L71)
 
 #### Returns
 
@@ -159,7 +159,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com
 
 > **getVerificationByChannelId**(`channelId`): [`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/) \| `null`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:160](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L160)
+Defined in: [packages/channel/src/verification/business.verify.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L160)
 
 Get verification request by channel ID
 
@@ -179,7 +179,7 @@ Get verification request by channel ID
 
 > **getVerificationRequest**(`requestId`): [`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/) \| `null`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:153](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L153)
+Defined in: [packages/channel/src/verification/business.verify.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L153)
 
 Get verification request by ID
 
@@ -199,7 +199,7 @@ Get verification request by ID
 
 > **getVerificationStats**(): `object`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:305](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L305)
+Defined in: [packages/channel/src/verification/business.verify.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L305)
 
 Get verification statistics
 
@@ -229,7 +229,7 @@ Get verification statistics
 
 > **listenerCount**(`eventName`): `number`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L67)
+Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L67)
 
 #### Parameters
 
@@ -251,7 +251,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com
 
 > **listVerificationRequests**(`filters?`): [`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/)[]
 
-Defined in: [packages/channel/src/verification/business.verify.ts:272](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L272)
+Defined in: [packages/channel/src/verification/business.verify.ts:272](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L272)
 
 List verification requests with filters
 
@@ -285,7 +285,7 @@ List verification requests with filters
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L20)
+Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -311,7 +311,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L9)
+Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -337,7 +337,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L35)
+Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -363,7 +363,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com
 
 > **rejectVerification**(`requestId`, `reviewerId`, `reason`): `Promise`\<[`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/)\>
 
-Defined in: [packages/channel/src/verification/business.verify.ts:203](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L203)
+Defined in: [packages/channel/src/verification/business.verify.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L203)
 
 Manually reject verification
 
@@ -391,7 +391,7 @@ Manually reject verification
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L57)
+Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -413,7 +413,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L31)
+Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -439,7 +439,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com
 
 > **submitVerification**(`channelId`, `businessInfo`, `documents`): `Promise`\<[`VerificationRequest`](/api/channel/src/interfaces/verificationrequest/)\>
 
-Defined in: [packages/channel/src/verification/business.verify.ts:116](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L116)
+Defined in: [packages/channel/src/verification/business.verify.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L116)
 
 Submit business verification request
 

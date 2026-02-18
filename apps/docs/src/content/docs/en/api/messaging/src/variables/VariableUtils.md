@@ -7,7 +7,7 @@ title: "VariableUtils"
 
 > `const` **VariableUtils**: `object`
 
-Defined in: [packages/messaging/src/personalization/variable.replacer.ts:746](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/personalization/variable.replacer.ts#L746)
+Defined in: [packages/messaging/src/personalization/variable.replacer.ts:746](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/personalization/variable.replacer.ts#L746)
 
 Utility functions
 

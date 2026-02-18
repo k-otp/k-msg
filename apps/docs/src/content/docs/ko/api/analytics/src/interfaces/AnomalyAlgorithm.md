@@ -5,7 +5,7 @@ prev: false
 title: "AnomalyAlgorithm"
 ---
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:22](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L22)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L22)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:22](https://git
 
 > **config**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L26)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L26)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:26](https://git
 
 > **enabled**: `boolean`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L25)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L25)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:25](https://git
 
 > **name**: `string`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L23)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L23)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:23](https://git
 
 > **type**: `"statistical"` \| `"ml"` \| `"rule-based"`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L24)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L24)

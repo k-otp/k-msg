@@ -5,7 +5,7 @@ prev: false
 title: "ExportConfig"
 ---
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L13)
+Defined in: [packages/analytics/src/reports/export.manager.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L13)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:13](https://github
 
 > **compressionEnabled**: `boolean`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L16)
+Defined in: [packages/analytics/src/reports/export.manager.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L16)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:16](https://github
 
 > **formats**: [`ExportFormat`](/api/analytics/src/interfaces/exportformat/)[]
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L14)
+Defined in: [packages/analytics/src/reports/export.manager.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L14)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:14](https://github
 
 > **maxFileSize**: `number`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L15)
+Defined in: [packages/analytics/src/reports/export.manager.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L15)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:15](https://github
 
 > `optional` **scheduling**: `object`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L21)
+Defined in: [packages/analytics/src/reports/export.manager.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L21)
 
 #### cron
 
@@ -57,7 +57,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:21](https://github
 
 > `optional` **watermark**: `object`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/export.manager.ts#L17)
+Defined in: [packages/analytics/src/reports/export.manager.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L17)
 
 #### position
 

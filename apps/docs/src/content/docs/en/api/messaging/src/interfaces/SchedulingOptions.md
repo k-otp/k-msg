@@ -5,7 +5,7 @@ prev: false
 title: "SchedulingOptions"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L27)
+Defined in: [packages/messaging/src/types/message.types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L27)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:27](https://github.co
 
 > `optional` **retryCount**: `number`
 
-Defined in: [packages/messaging/src/types/message.types.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L30)
+Defined in: [packages/messaging/src/types/message.types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L30)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:30](https://github.co
 
 > **scheduledAt**: `Date`
 
-Defined in: [packages/messaging/src/types/message.types.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L28)
+Defined in: [packages/messaging/src/types/message.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L28)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:28](https://github.co
 
 > `optional` **timezone**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L29)
+Defined in: [packages/messaging/src/types/message.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L29)

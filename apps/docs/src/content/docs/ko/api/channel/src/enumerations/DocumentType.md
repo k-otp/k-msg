@@ -5,7 +5,7 @@ prev: false
 title: "DocumentType"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:125](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L125)
+Defined in: [packages/channel/src/types/channel.types.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L125)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:125](https://github.com
 
 > **AUTHORIZATION\_LETTER**: `"AUTHORIZATION_LETTER"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:129](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L129)
+Defined in: [packages/channel/src/types/channel.types.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L129)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:129](https://github.com
 
 > **BUSINESS\_LICENSE**: `"BUSINESS_LICENSE"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:127](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L127)
+Defined in: [packages/channel/src/types/channel.types.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L127)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:127](https://github.com
 
 > **BUSINESS\_REGISTRATION**: `"BUSINESS_REGISTRATION"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:126](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L126)
+Defined in: [packages/channel/src/types/channel.types.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L126)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:126](https://github.com
 
 > **ID\_CARD**: `"ID_CARD"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:128](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L128)
+Defined in: [packages/channel/src/types/channel.types.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L128)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:128](https://github.com
 
 > **OTHER**: `"OTHER"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:130](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L130)
+Defined in: [packages/channel/src/types/channel.types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L130)

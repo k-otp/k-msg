@@ -5,7 +5,7 @@ prev: false
 title: "MetricsCollector"
 ---
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L8)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L8)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:8](https://git
 
 > **new MetricsCollector**(`config`): `MetricsCollector`
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L15)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L15)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:15](https://gi
 
 > **cleanup**(): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:190](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L190)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L190)
 
 메트릭 정리 (보존 기간 초과)
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:190](https://g
 
 > **collect**(`metric`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L23)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L23)
 
 메트릭 수집
 
@@ -65,7 +65,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:23](https://gi
 
 > **collectBatch**(`metrics`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L39)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L39)
 
 여러 메트릭 일괄 수집
 
@@ -85,7 +85,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:39](https://gi
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:165](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L165)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L165)
 
 메트릭 버퍼 플러시
 
@@ -99,7 +99,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:165](https://g
 
 > **getMetricStats**(`type`, `timeRange`): `Promise`\<\{ `avg`: `number`; `count`: `number`; `max`: `number`; `min`: `number`; `sum`: `number`; \}\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L69)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L69)
 
 메트릭 통계 조회
 
@@ -129,7 +129,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://gi
 
 > **getRecentMetrics**(`types`, `durationMs`): `Promise`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L48)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L48)
 
 최근 메트릭 조회
 
@@ -153,7 +153,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://gi
 
 > **incrementCounter**(`type`, `dimensions`, `value?`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:105](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L105)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L105)
 
 메트릭 카운터 증가
 
@@ -181,7 +181,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:105](https://g
 
 > **recordHistogram**(`type`, `dimensions`, `value`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:143](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L143)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L143)
 
 메트릭 히스토그램 기록
 
@@ -209,7 +209,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:143](https://g
 
 > **setGauge**(`type`, `dimensions`, `value`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/metrics.collector.ts:124](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/metrics.collector.ts#L124)
+Defined in: [packages/analytics/src/services/metrics.collector.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L124)
 
 메트릭 게이지 값 설정
 

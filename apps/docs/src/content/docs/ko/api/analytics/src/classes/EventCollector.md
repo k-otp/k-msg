@@ -5,7 +5,7 @@ prev: false
 title: "EventCollector"
 ---
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L39)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L39)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:39](https://gi
 
 > **new EventCollector**(`config?`): `EventCollector`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L55)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L55)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:55](https://gi
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L16)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.c
 
 > **collectEvent**(`event`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:66](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L66)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L66)
 
 이벤트 수집
 
@@ -85,7 +85,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:66](https://gi
 
 > **collectEvents**(`events`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:102](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L102)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L102)
 
 배치 이벤트 수집
 
@@ -105,7 +105,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:102](https://g
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L44)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -131,7 +131,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.c
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:192](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L192)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L192)
 
 버퍼 강제 플러시
 
@@ -145,7 +145,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:192](https://g
 
 > **getCollectedMetrics**(`since?`): [`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:130](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L130)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L130)
 
 수집된 메트릭 조회
 
@@ -165,7 +165,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:130](https://g
 
 > **getEventStats**(): `object`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:164](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L164)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L164)
 
 이벤트 통계
 
@@ -199,7 +199,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:164](https://g
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L20)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -225,7 +225,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.c
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L9)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -251,7 +251,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.co
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L35)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -277,7 +277,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.c
 
 > **registerProcessor**(`name`, `processor`): `void`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:111](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L111)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L111)
 
 커스텀 이벤트 프로세서 등록
 
@@ -301,7 +301,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:111](https://g
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L57)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -323,7 +323,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L31)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -349,7 +349,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.c
 
 > **streamMetrics**(): `AsyncGenerator`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:141](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L141)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L141)
 
 실시간 메트릭 스트림
 
@@ -363,7 +363,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:141](https://g
 
 > **unregisterProcessor**(`name`): `boolean`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:119](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L119)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L119)
 
 이벤트 프로세서 제거
 

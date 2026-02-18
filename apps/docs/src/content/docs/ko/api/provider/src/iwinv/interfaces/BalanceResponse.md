@@ -5,7 +5,7 @@ prev: false
 title: "BalanceResponse"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:153](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L153)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L153)
 
 IWINV API TypeScript 타입 정의
 IWINV 알림톡 REST API 규격서 기반
@@ -20,7 +20,7 @@ IWINV 알림톡 REST API 규격서 기반
 
 > **charge**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:154](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L154)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L154)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:154](https://github.com/
 
 > **code**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L13)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L13)
 
 #### Inherited from
 
@@ -40,7 +40,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k
 
 > **message**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L14)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L14)
 
 #### Inherited from
 

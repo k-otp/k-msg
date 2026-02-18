@@ -5,7 +5,7 @@ prev: false
 title: "D1PreparedStatementLike"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L18)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L18)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:18](https:
 
 > **all**\<`T`\>(): `Promise`\<\{ `meta?`: \{ `changes?`: `number`; \}; `results?`: `T`[]; `success?`: `boolean`; \}\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L20)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L20)
 
 #### Type Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:20](https:
 
 > **bind**(...`values`): `D1PreparedStatementLike`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L19)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L19)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:19](https:
 
 > `optional` **run**(): `Promise`\<\{ `meta?`: \{ `changes?`: `number`; \}; `success?`: `boolean`; \}\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L25)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L25)
 
 #### Returns
 

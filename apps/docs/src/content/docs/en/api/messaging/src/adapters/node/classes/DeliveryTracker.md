@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTracker"
 ---
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L76)
+Defined in: [packages/messaging/src/delivery/tracker.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L76)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/delivery/tracker.ts:76](https://github.com/k
 
 > **new DeliveryTracker**(`options`): `DeliveryTracker`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:98](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L98)
+Defined in: [packages/messaging/src/delivery/tracker.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L98)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/delivery/tracker.ts:98](https://github.com/k
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L16)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 > **cleanup**(): `number`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:443](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L443)
+Defined in: [packages/messaging/src/delivery/tracker.ts:443](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L443)
 
 Clean up expired tracking records
 
@@ -79,7 +79,7 @@ Clean up expired tracking records
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L44)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -105,7 +105,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 > **getDeliveryReport**(`messageId`): [`DeliveryReport`](/api/messaging/src/interfaces/deliveryreport/) \| `undefined`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:347](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L347)
+Defined in: [packages/messaging/src/delivery/tracker.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L347)
 
 Get delivery report for a message
 
@@ -125,7 +125,7 @@ Get delivery report for a message
 
 > **getMessagesByStatus**(`status`): `TrackingRecord`[]
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:361](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L361)
+Defined in: [packages/messaging/src/delivery/tracker.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L361)
 
 Get messages by status
 
@@ -145,7 +145,7 @@ Get messages by status
 
 > **getStats**(): `DeliveryStats`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:371](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L371)
+Defined in: [packages/messaging/src/delivery/tracker.ts:371](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L371)
 
 Get delivery statistics
 
@@ -159,7 +159,7 @@ Get delivery statistics
 
 > **getStatsForPeriod**(`startDate`, `endDate`): `DeliveryStats`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:378](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L378)
+Defined in: [packages/messaging/src/delivery/tracker.ts:378](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L378)
 
 Get delivery statistics for a specific time range
 
@@ -183,7 +183,7 @@ Get delivery statistics for a specific time range
 
 > **getTrackingRecord**(`messageId`): `TrackingRecord` \| `undefined`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:354](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L354)
+Defined in: [packages/messaging/src/delivery/tracker.ts:354](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L354)
 
 Get tracking record for a message
 
@@ -203,7 +203,7 @@ Get tracking record for a message
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L20)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -229,7 +229,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.c
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L9)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -255,7 +255,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.co
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L35)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -281,7 +281,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L57)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -303,7 +303,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L31)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -329,7 +329,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 > **start**(): `void`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:123](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L123)
+Defined in: [packages/messaging/src/delivery/tracker.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L123)
 
 Start delivery tracking
 
@@ -343,7 +343,7 @@ Start delivery tracking
 
 > **stop**(): `void`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:136](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L136)
+Defined in: [packages/messaging/src/delivery/tracker.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L136)
 
 Stop delivery tracking
 
@@ -357,7 +357,7 @@ Stop delivery tracking
 
 > **stopTracking**(`messageId`): `boolean`
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:470](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L470)
+Defined in: [packages/messaging/src/delivery/tracker.ts:470](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L470)
 
 Stop tracking a specific message
 
@@ -377,7 +377,7 @@ Stop tracking a specific message
 
 > **trackMessage**(`messageId`, `phoneNumber`, `templateId`, `provider`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:150](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L150)
+Defined in: [packages/messaging/src/delivery/tracker.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L150)
 
 Start tracking a message
 
@@ -423,7 +423,7 @@ Start tracking a message
 
 > **updateStatus**(`messageId`, `status`, `details?`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/delivery/tracker.ts:234](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery/tracker.ts#L234)
+Defined in: [packages/messaging/src/delivery/tracker.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L234)
 
 Update message status
 

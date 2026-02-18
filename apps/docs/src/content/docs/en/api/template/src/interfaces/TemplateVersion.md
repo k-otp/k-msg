@@ -5,7 +5,7 @@ prev: false
 title: "TemplateVersion"
 ---
 
-Defined in: [packages/template/src/registry/template.registry.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L40)
+Defined in: [packages/template/src/registry/template.registry.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L40)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:40](https://git
 
 > **changes**: `string`[]
 
-Defined in: [packages/template/src/registry/template.registry.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L43)
+Defined in: [packages/template/src/registry/template.registry.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L43)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:43](https://git
 
 > **createdAt**: `Date`
 
-Defined in: [packages/template/src/registry/template.registry.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L44)
+Defined in: [packages/template/src/registry/template.registry.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L44)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:44](https://git
 
 > `optional` **createdBy**: `string`
 
-Defined in: [packages/template/src/registry/template.registry.ts:45](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L45)
+Defined in: [packages/template/src/registry/template.registry.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L45)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:45](https://git
 
 > **template**: [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
 
-Defined in: [packages/template/src/registry/template.registry.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L42)
+Defined in: [packages/template/src/registry/template.registry.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L42)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/template/src/registry/template.registry.ts:42](https://git
 
 > **version**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:41](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L41)
+Defined in: [packages/template/src/registry/template.registry.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L41)

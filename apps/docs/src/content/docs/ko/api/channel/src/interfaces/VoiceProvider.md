@@ -5,7 +5,7 @@ prev: false
 title: "VoiceProvider"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:95](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L95)
+Defined in: [packages/channel/src/verification/number.verify.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L95)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:95](https://gith
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:96](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L96)
+Defined in: [packages/channel/src/verification/number.verify.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L96)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:96](https://gith
 
 > **name**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:97](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L97)
+Defined in: [packages/channel/src/verification/number.verify.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L97)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:97](https://gith
 
 > **makeCall**(`phoneNumber`, `message`, `options?`): `Promise`\<`VoiceResult`\>
 
-Defined in: [packages/channel/src/verification/number.verify.ts:98](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L98)
+Defined in: [packages/channel/src/verification/number.verify.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L98)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:98](https://gith
 
 > `optional` **makeMissedCall**(`phoneNumber`, `options?`): `Promise`\<`MissedCallResult`\>
 
-Defined in: [packages/channel/src/verification/number.verify.ts:103](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L103)
+Defined in: [packages/channel/src/verification/number.verify.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L103)
 
 #### Parameters
 

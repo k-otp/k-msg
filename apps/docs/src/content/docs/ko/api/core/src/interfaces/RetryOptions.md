@@ -5,7 +5,7 @@ prev: false
 title: "RetryOptions"
 ---
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:7](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L7)
+Defined in: [packages/core/src/resilience/retry-handler.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L7)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:7](https://github.com
 
 > `optional` **backoffMultiplier**: `number`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L11)
+Defined in: [packages/core/src/resilience/retry-handler.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L11)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:11](https://github.co
 
 > `optional` **initialDelay**: `number`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L9)
+Defined in: [packages/core/src/resilience/retry-handler.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L9)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:9](https://github.com
 
 > `optional` **jitter**: `boolean`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L12)
+Defined in: [packages/core/src/resilience/retry-handler.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L12)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:12](https://github.co
 
 > `optional` **maxAttempts**: `number`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L8)
+Defined in: [packages/core/src/resilience/retry-handler.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L8)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:8](https://github.com
 
 > `optional` **maxDelay**: `number`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L10)
+Defined in: [packages/core/src/resilience/retry-handler.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L10)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:10](https://github.co
 
 > `optional` **onRetry**: (`error`, `attempt`) => `void`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L14)
+Defined in: [packages/core/src/resilience/retry-handler.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L14)
 
 #### Parameters
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:14](https://github.co
 
 > `optional` **retryCondition**: (`error`, `attempt`) => `boolean`
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L13)
+Defined in: [packages/core/src/resilience/retry-handler.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L13)
 
 #### Parameters
 

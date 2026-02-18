@@ -5,7 +5,7 @@ prev: false
 title: "TemplateValidator"
 ---
 
-Defined in: [packages/template/src/parser/validator.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/parser/validator.ts#L14)
+Defined in: [packages/template/src/parser/validator.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L14)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/template/src/parser/validator.ts:14](https://github.com/k-
 
 > `static` **quickValidate**(`template`): [`ValidationResult`](/api/template/src/interfaces/validationresult/)
 
-Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/parser/validator.ts#L206)
+Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L206)
 
 빠른 검증 - 기본적인 필수 필드만 검사
 
@@ -43,7 +43,7 @@ Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k
 
 > `static` **validate**(`template`): [`ValidationResult`](/api/template/src/interfaces/validationresult/)
 
-Defined in: [packages/template/src/parser/validator.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/parser/validator.ts#L18)
+Defined in: [packages/template/src/parser/validator.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L18)
 
 알림톡 템플릿의 전체적인 유효성을 검증합니다
 

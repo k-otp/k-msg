@@ -5,7 +5,7 @@ prev: false
 title: "VerificationAttempt"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:33](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L33)
+Defined in: [packages/channel/src/verification/number.verify.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L33)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:33](https://gith
 
 > **attemptedAt**: `Date`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L40)
+Defined in: [packages/channel/src/verification/number.verify.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L40)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:40](https://gith
 
 > **attemptNumber**: `number`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L39)
+Defined in: [packages/channel/src/verification/number.verify.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L39)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:39](https://gith
 
 > `optional` **failureReason**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L43)
+Defined in: [packages/channel/src/verification/number.verify.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L43)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:43](https://gith
 
 > **method**: [`VerificationMethod`](/api/channel/src/enumerations/verificationmethod/)
 
-Defined in: [packages/channel/src/verification/number.verify.ts:41](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L41)
+Defined in: [packages/channel/src/verification/number.verify.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L41)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:41](https://gith
 
 > `optional` **purpose**: `"send"` \| `"verify"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L38)
+Defined in: [packages/channel/src/verification/number.verify.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L38)
 
 Distinguish provider/send attempts from user verification attempts.
 This prevents send failures from consuming user attempt limits.
@@ -56,7 +56,7 @@ This prevents send failures from consuming user attempt limits.
 
 > `optional` **responseTime**: `number`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L44)
+Defined in: [packages/channel/src/verification/number.verify.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L44)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [packages/channel/src/verification/number.verify.ts:44](https://gith
 
 > **status**: `"failed"` \| `"sent"` \| `"delivered"` \| `"verified"` \| `"expired"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L42)
+Defined in: [packages/channel/src/verification/number.verify.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L42)

@@ -5,7 +5,7 @@ prev: false
 title: "IWINVSmsChargeResponse"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:165](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L165)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L165)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:165](https://github.com/
 
 > **charge**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:168](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L168)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L168)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:168](https://github.com/
 
 > **code**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:166](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L166)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L166)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:166](https://github.com/
 
 > **message**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:167](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L167)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L167)

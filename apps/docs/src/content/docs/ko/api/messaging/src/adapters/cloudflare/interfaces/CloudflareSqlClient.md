@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareSqlClient"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L8)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:8](https:/
 
 > **dialect**: [`SqlDialect`](/api/messaging/src/adapters/cloudflare/type-aliases/sqldialect/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L9)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L9)
 
 ## Methods
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:9](https:/
 
 > `optional` **close**(): `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L15)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L15)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:15](https:
 
 > **query**\<`T`\>(`sql`, `params?`): `Promise`\<[`CloudflareSqlQueryResult`](/api/messaging/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L10)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L10)
 
 #### Type Parameters
 
@@ -61,7 +61,7 @@ readonly `unknown`[]
 
 > `optional` **transaction**\<`T`\>(`fn`): `Promise`\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/adapters/cloudflare/sql-client.ts#L14)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L14)
 
 #### Type Parameters
 

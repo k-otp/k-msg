@@ -5,7 +5,7 @@ prev: false
 title: "IWINVProvider"
 ---
 
-Defined in: [packages/provider/src/iwinv/provider.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L54)
+Defined in: [packages/provider/src/iwinv/provider.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L54)
 
 ## Implements
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:54](https://github.com/k-ot
 
 > **new IWINVProvider**(`config`): `IWINVProvider`
 
-Defined in: [packages/provider/src/iwinv/provider.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L71)
+Defined in: [packages/provider/src/iwinv/provider.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L71)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:71](https://github.com/k-ot
 
 > `readonly` **id**: `"iwinv"` = `"iwinv"`
 
-Defined in: [packages/provider/src/iwinv/provider.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L57)
+Defined in: [packages/provider/src/iwinv/provider.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L57)
 
 #### Implementation of
 
@@ -49,7 +49,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:57](https://github.com/k-ot
 
 > `readonly` **name**: `"IWINV Messaging Provider"` = `"IWINV Messaging Provider"`
 
-Defined in: [packages/provider/src/iwinv/provider.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L58)
+Defined in: [packages/provider/src/iwinv/provider.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L58)
 
 #### Implementation of
 
@@ -61,7 +61,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:58](https://github.com/k-ot
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/iwinv/provider.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L59)
+Defined in: [packages/provider/src/iwinv/provider.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L59)
 
 #### Implementation of
 
@@ -73,7 +73,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:59](https://github.com/k-ot
 
 > **createTemplate**(`input`, `_ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:391](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L391)
+Defined in: [packages/provider/src/iwinv/provider.ts:391](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L391)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:391](https://github.com/k-o
 
 > **deleteTemplate**(`code`, `_ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:416](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L416)
+Defined in: [packages/provider/src/iwinv/provider.ts:416](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L416)
 
 #### Parameters
 
@@ -125,7 +125,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:416](https://github.com/k-o
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:189](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L189)
+Defined in: [packages/provider/src/iwinv/provider.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L189)
 
 #### Parameters
 
@@ -147,7 +147,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:189](https://github.com/k-o
 
 > **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:160](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L160)
+Defined in: [packages/provider/src/iwinv/provider.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L160)
 
 #### Parameters
 
@@ -169,7 +169,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:160](https://github.com/k-o
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/iwinv/provider.ts:63](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L63)
+Defined in: [packages/provider/src/iwinv/provider.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L63)
 
 #### Returns
 
@@ -185,7 +185,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:63](https://github.com/k-ot
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:427](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L427)
+Defined in: [packages/provider/src/iwinv/provider.ts:427](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L427)
 
 #### Parameters
 
@@ -211,7 +211,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:427](https://github.com/k-o
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:92](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L92)
+Defined in: [packages/provider/src/iwinv/provider.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L92)
 
 #### Returns
 
@@ -227,7 +227,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:92](https://github.com/k-ot
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L439)
+Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L439)
 
 #### Parameters
 
@@ -263,7 +263,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-o
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L127)
+Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L127)
 
 #### Parameters
 
@@ -285,7 +285,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-o
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:402](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L402)
+Defined in: [packages/provider/src/iwinv/provider.ts:402](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L402)
 
 #### Parameters
 

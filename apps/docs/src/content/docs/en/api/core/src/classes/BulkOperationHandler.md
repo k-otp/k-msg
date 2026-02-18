@@ -5,7 +5,7 @@ prev: false
 title: "BulkOperationHandler"
 ---
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L15)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L15)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:15](https://github.c
 
 > `static` **execute**\<`T`, `R`\>(`items`, `operation`, `options?`): `Promise`\<\{ `failed`: `object`[]; `successful`: `object`[]; `summary`: \{ `duration`: `number`; `failed`: `number`; `successful`: `number`; `total`: `number`; \}; \}\>
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L16)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L16)
 
 #### Type Parameters
 

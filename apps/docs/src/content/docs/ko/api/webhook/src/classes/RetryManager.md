@@ -5,7 +5,7 @@ prev: false
 title: "RetryManager"
 ---
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L23)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L23)
 
 Webhook 재시도 관리자
 지수 백오프와 지터를 사용한 스마트 재시도 로직
@@ -16,7 +16,7 @@ Webhook 재시도 관리자
 
 > **new RetryManager**(`webhookConfig`): `RetryManager`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L26)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L26)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:26](https://github.com/
 
 > **calculateNextRetry**(`attemptNumber`): `Date`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L39)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L39)
 
 다음 재시도 시간 계산
 
@@ -54,7 +54,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:39](https://github.com/
 
 > **calculateRetryStats**(`attempts`): `object`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:121](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L121)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L121)
 
 재시도 통계 계산
 
@@ -94,7 +94,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:121](https://github.com
 
 > **getBackoffDelay**(`attemptNumber`): `number`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:183](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L183)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L183)
 
 백오프 지연 시간 계산 (테스트용)
 
@@ -114,7 +114,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:183](https://github.com
 
 > **getConfig**(): `RetryConfig`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:176](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L176)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L176)
 
 현재 재시도 설정 반환
 
@@ -128,7 +128,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:176](https://github.com
 
 > **shouldRetry**(`attemptNumber`, `error?`): `boolean`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L64)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L64)
 
 재시도 가능 여부 확인
 
@@ -152,7 +152,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:64](https://github.com/
 
 > **shouldRetryStatus**(`statusCode`): `boolean`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L101)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L101)
 
 HTTP 상태 코드별 재시도 정책
 
@@ -172,7 +172,7 @@ HTTP 상태 코드별 재시도 정책
 
 > **updateConfig**(`config`): `void`
 
-Defined in: [packages/webhook/src/retry/retry.manager.ts:169](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/retry/retry.manager.ts#L169)
+Defined in: [packages/webhook/src/retry/retry.manager.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/retry/retry.manager.ts#L169)
 
 재시도 설정 업데이트
 

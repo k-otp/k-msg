@@ -5,7 +5,7 @@ prev: false
 title: "ProviderOnboardingSpec"
 ---
 
-Defined in: [packages/core/src/types/onboarding.ts:52](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L52)
+Defined in: [packages/core/src/types/onboarding.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L52)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/onboarding.ts:52](https://github.com/k-otp/
 
 > **channelOnboarding**: [`ProviderChannelOnboardingMode`](/api/core/src/type-aliases/providerchannelonboardingmode/)
 
-Defined in: [packages/core/src/types/onboarding.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L55)
+Defined in: [packages/core/src/types/onboarding.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L55)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/onboarding.ts:55](https://github.com/k-otp/
 
 > **checks**: [`ProviderOnboardingCheckSpec`](/api/core/src/interfaces/provideronboardingcheckspec/)[]
 
-Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L60)
+Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L60)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/
 
 > `optional` **liveTestSupport**: [`ProviderLiveTestSupport`](/api/core/src/type-aliases/providerlivetestsupport/)
 
-Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L59)
+Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L59)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/
 
 > `optional` **notes**: `string`[]
 
-Defined in: [packages/core/src/types/onboarding.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L61)
+Defined in: [packages/core/src/types/onboarding.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L61)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/types/onboarding.ts:61](https://github.com/k-otp/
 
 > **plusIdInference**: [`ProviderPlusIdInferenceSupport`](/api/core/src/type-aliases/providerplusidinferencesupport/)
 
-Defined in: [packages/core/src/types/onboarding.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L58)
+Defined in: [packages/core/src/types/onboarding.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L58)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/types/onboarding.ts:58](https://github.com/k-otp/
 
 > **plusIdPolicy**: [`ProviderPlusIdPolicy`](/api/core/src/type-aliases/providerplusidpolicy/)
 
-Defined in: [packages/core/src/types/onboarding.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L57)
+Defined in: [packages/core/src/types/onboarding.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L57)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/types/onboarding.ts:57](https://github.com/k-otp/
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/onboarding.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L53)
+Defined in: [packages/core/src/types/onboarding.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L53)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/types/onboarding.ts:53](https://github.com/k-otp/
 
 > `optional` **providerName**: `string`
 
-Defined in: [packages/core/src/types/onboarding.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L54)
+Defined in: [packages/core/src/types/onboarding.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L54)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/core/src/types/onboarding.ts:54](https://github.com/k-otp/
 
 > **templateLifecycleApi**: [`ProviderTemplateLifecycleAvailability`](/api/core/src/type-aliases/providertemplatelifecycleavailability/)
 
-Defined in: [packages/core/src/types/onboarding.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/onboarding.ts#L56)
+Defined in: [packages/core/src/types/onboarding.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L56)

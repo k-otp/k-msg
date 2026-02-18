@@ -5,7 +5,7 @@ prev: false
 title: "ChannelCRUDOptions"
 ---
 
-Defined in: [packages/channel/src/management/crud.ts:37](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L37)
+Defined in: [packages/channel/src/management/crud.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L37)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/management/crud.ts:37](https://github.com/k-ot
 
 > **autoCleanup**: `boolean`
 
-Defined in: [packages/channel/src/management/crud.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L43)
+Defined in: [packages/channel/src/management/crud.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L43)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/management/crud.ts:43](https://github.com/k-ot
 
 > **cleanupInterval**: `number`
 
-Defined in: [packages/channel/src/management/crud.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L44)
+Defined in: [packages/channel/src/management/crud.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L44)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/management/crud.ts:44](https://github.com/k-ot
 
 > **defaultPageSize**: `number`
 
-Defined in: [packages/channel/src/management/crud.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L40)
+Defined in: [packages/channel/src/management/crud.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L40)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/management/crud.ts:40](https://github.com/k-ot
 
 > **enableAuditLog**: `boolean`
 
-Defined in: [packages/channel/src/management/crud.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L38)
+Defined in: [packages/channel/src/management/crud.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L38)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/management/crud.ts:38](https://github.com/k-ot
 
 > **enableEventEmission**: `boolean`
 
-Defined in: [packages/channel/src/management/crud.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L39)
+Defined in: [packages/channel/src/management/crud.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L39)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/channel/src/management/crud.ts:39](https://github.com/k-ot
 
 > **enableSoftDelete**: `boolean`
 
-Defined in: [packages/channel/src/management/crud.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L42)
+Defined in: [packages/channel/src/management/crud.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L42)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/channel/src/management/crud.ts:42](https://github.com/k-ot
 
 > **maxPageSize**: `number`
 
-Defined in: [packages/channel/src/management/crud.ts:41](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L41)
+Defined in: [packages/channel/src/management/crud.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L41)

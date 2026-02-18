@@ -5,7 +5,7 @@ prev: false
 title: "AutoVerificationResult"
 ---
 
-Defined in: [packages/channel/src/verification/business.verify.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L54)
+Defined in: [packages/channel/src/verification/business.verify.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L54)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:54](https://gi
 
 > **checkType**: `"business_registry"` \| `"document_validation"` \| `"address_verification"` \| `"phone_verification"`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L55)
+Defined in: [packages/channel/src/verification/business.verify.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L55)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:55](https://gi
 
 > **details**: `string`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:62](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L62)
+Defined in: [packages/channel/src/verification/business.verify.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L62)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:62](https://gi
 
 > `optional` **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/channel/src/verification/business.verify.ts:63](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L63)
+Defined in: [packages/channel/src/verification/business.verify.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L63)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:63](https://gi
 
 > **score**: `number`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L61)
+Defined in: [packages/channel/src/verification/business.verify.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L61)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/verification/business.verify.ts:61](https://gi
 
 > **status**: `"warning"` \| `"failed"` \| `"passed"`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L60)
+Defined in: [packages/channel/src/verification/business.verify.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L60)

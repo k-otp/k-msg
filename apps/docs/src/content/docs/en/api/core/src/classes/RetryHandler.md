@@ -5,7 +5,7 @@ prev: false
 title: "RetryHandler"
 ---
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L20)
+Defined in: [packages/core/src/resilience/retry-handler.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L20)
 
 Exponential backoff retry mechanism
 
@@ -25,7 +25,7 @@ Exponential backoff retry mechanism
 
 > `static` **createRetryableFunction**\<`T`, `R`\>(`func`, `options?`): (...`args`) => `Promise`\<`R`\>
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:69](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L69)
+Defined in: [packages/core/src/resilience/retry-handler.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L69)
 
 #### Type Parameters
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:69](https://github.co
 
 > `static` **execute**\<`T`\>(`operation`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/resilience/retry-handler.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/retry-handler.ts#L30)
+Defined in: [packages/core/src/resilience/retry-handler.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L30)
 
 #### Type Parameters
 

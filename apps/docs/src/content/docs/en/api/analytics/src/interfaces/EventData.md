@@ -5,7 +5,7 @@ prev: false
 title: "EventData"
 ---
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L10)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L10)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:10](https://gi
 
 > `optional` **context**: `object`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L16)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L16)
 
 #### ipAddress?
 
@@ -41,7 +41,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:16](https://gi
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L11)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L11)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:11](https://gi
 
 > **payload**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L15)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L15)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:15](https://gi
 
 > **source**: `string`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L14)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L14)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:14](https://gi
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L13)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L13)
 
 ***
 
@@ -73,4 +73,4 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:13](https://gi
 
 > **type**: `string`
 
-Defined in: [packages/analytics/src/collectors/event.collector.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/event.collector.ts#L12)
+Defined in: [packages/analytics/src/collectors/event.collector.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L12)

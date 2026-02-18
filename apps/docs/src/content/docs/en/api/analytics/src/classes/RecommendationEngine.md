@@ -5,7 +5,7 @@ prev: false
 title: "RecommendationEngine"
 ---
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:85](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L85)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L85)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:85](https:
 
 > **new RecommendationEngine**(`config?`): `RecommendationEngine`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:123](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L123)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L123)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:123](https
 
 > **dismissRecommendation**(`recommendationId`, `reason?`): `boolean`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:194](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L194)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L194)
 
 추천 무시
 
@@ -55,7 +55,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:194](https
 
 > **generateRecommendations**(`metrics`): `Promise`\<[`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]\>
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:131](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L131)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L131)
 
 메트릭 기반 추천 생성
 
@@ -75,7 +75,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:131](https
 
 > **getRecommendationsByCategory**(`category`): [`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:173](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L173)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L173)
 
 특정 카테고리 추천 조회
 
@@ -95,7 +95,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:173](https
 
 > **getRecommendationStats**(): `object`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:206](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L206)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L206)
 
 추천 통계
 
@@ -125,7 +125,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:206](https
 
 > **markRecommendationAsImplemented**(`recommendationId`): `boolean`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:182](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L182)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L182)
 
 추천 실행 상태 업데이트
 

@@ -5,7 +5,7 @@ prev: false
 title: "Template"
 ---
 
-Defined in: [packages/core/src/provider.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L16)
+Defined in: [packages/core/src/provider.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L16)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:16](https://github.com/k-otp/k-msg/bl
 
 > `optional` **buttons**: `unknown`[]
 
-Defined in: [packages/core/src/provider.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L23)
+Defined in: [packages/core/src/provider.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L23)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/provider.ts:23](https://github.com/k-otp/k-msg/bl
 
 > `optional` **category**: `string`
 
-Defined in: [packages/core/src/provider.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L21)
+Defined in: [packages/core/src/provider.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L21)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/provider.ts:21](https://github.com/k-otp/k-msg/bl
 
 > **code**: `string`
 
-Defined in: [packages/core/src/provider.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L18)
+Defined in: [packages/core/src/provider.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L18)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/provider.ts:18](https://github.com/k-otp/k-msg/bl
 
 > **content**: `string`
 
-Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L20)
+Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L20)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/bl
 
 > **createdAt**: `Date`
 
-Defined in: [packages/core/src/provider.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L25)
+Defined in: [packages/core/src/provider.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L25)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/provider.ts:25](https://github.com/k-otp/k-msg/bl
 
 > **id**: `string`
 
-Defined in: [packages/core/src/provider.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L17)
+Defined in: [packages/core/src/provider.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L17)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/provider.ts:17](https://github.com/k-otp/k-msg/bl
 
 > **name**: `string`
 
-Defined in: [packages/core/src/provider.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L19)
+Defined in: [packages/core/src/provider.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L19)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/provider.ts:19](https://github.com/k-otp/k-msg/bl
 
 > **status**: `"PENDING"` \| `"APPROVED"` \| `"REJECTED"` \| `"INSPECTION"`
 
-Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L22)
+Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L22)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/bl
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L26)
+Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L26)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/bl
 
 > `optional` **variables**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L24)
+Defined in: [packages/core/src/provider.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L24)

@@ -5,7 +5,7 @@ prev: false
 title: "AnomalyDetector"
 ---
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L47)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L47)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:47](https://git
 
 > **new AnomalyDetector**(`config?`): `AnomalyDetector`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:83](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L83)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L83)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:83](https://git
 
 > **detectBatchAnomalies**(`metrics`, `timeWindow?`): `Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L121)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L121)
 
 배치 이상 탐지
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://gi
 
 > **detectRealTimeAnomalies**(`metric`): `Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L90)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L90)
 
 실시간 이상 탐지
 
@@ -81,7 +81,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://git
 
 > **detectTrendChanges**(`metrics`, `windowSize?`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L179)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L179)
 
 트렌드 변화 탐지
 
@@ -105,7 +105,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://gi
 
 > **updateBaselines**(`metrics`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:248](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L248)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L248)
 
 베이스라인 업데이트
 

@@ -5,7 +5,7 @@ prev: false
 title: "SendingOptions"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:33](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L33)
+Defined in: [packages/messaging/src/types/message.types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L33)
 
 ## Extended by
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:33](https://github.co
 
 > `optional` **deduplication**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L42)
+Defined in: [packages/messaging/src/types/message.types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L42)
 
 #### enabled
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:42](https://github.co
 
 > `optional` **failover**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:36](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L36)
+Defined in: [packages/messaging/src/types/message.types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L36)
 
 #### enabled
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:36](https://github.co
 
 > `optional` **priority**: `"high"` \| `"normal"` \| `"low"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L34)
+Defined in: [packages/messaging/src/types/message.types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L34)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:34](https://github.co
 
 > `optional` **tracking**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L46)
+Defined in: [packages/messaging/src/types/message.types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L46)
 
 #### enabled
 
@@ -81,4 +81,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:46](https://github.co
 
 > `optional` **ttl**: `number`
 
-Defined in: [packages/messaging/src/types/message.types.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/types/message.types.ts#L35)
+Defined in: [packages/messaging/src/types/message.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L35)

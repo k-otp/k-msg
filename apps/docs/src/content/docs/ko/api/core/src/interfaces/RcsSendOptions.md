@@ -5,7 +5,7 @@ prev: false
 title: "RcsSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L158)
+Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L158)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-
 
 > `optional` **additionalBody**: `object`
 
-Defined in: [packages/core/src/types/message.ts:170](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L170)
+Defined in: [packages/core/src/types/message.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L170)
 
 #### Index Signature
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/types/message.ts:170](https://github.com/k-otp/k-
 
 > `optional` **brandId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L159)
+Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L159)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-
 
 > `optional` **buttons**: `unknown`[]
 
-Defined in: [packages/core/src/types/message.ts:169](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L169)
+Defined in: [packages/core/src/types/message.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L169)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/types/message.ts:169](https://github.com/k-otp/k-
 
 > `optional` **commercialType**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:167](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L167)
+Defined in: [packages/core/src/types/message.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L167)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/types/message.ts:167](https://github.com/k-otp/k-
 
 > `optional` **copyAllowed**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:164](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L164)
+Defined in: [packages/core/src/types/message.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L164)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/types/message.ts:164](https://github.com/k-otp/k-
 
 > `optional` **disableSms**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:168](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L168)
+Defined in: [packages/core/src/types/message.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L168)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/core/src/types/message.ts:168](https://github.com/k-otp/k-
 
 > `optional` **mmsType**: `"M3"` \| `"S3"` \| `"M4"` \| `"S4"` \| `"M5"` \| `"S5"` \| `"M6"` \| `"S6"`
 
-Defined in: [packages/core/src/types/message.ts:166](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L166)
+Defined in: [packages/core/src/types/message.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L166)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/core/src/types/message.ts:166](https://github.com/k-otp/k-
 
 > `optional` **templateId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:163](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L163)
+Defined in: [packages/core/src/types/message.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L163)
 
 Override template identifier for RCS_*TPL types.
 
@@ -103,4 +103,4 @@ Override template identifier for RCS_*TPL types.
 
 > `optional` **variables**: [`MessageVariables`](/api/core/src/type-aliases/messagevariables/)
 
-Defined in: [packages/core/src/types/message.ts:165](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L165)
+Defined in: [packages/core/src/types/message.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L165)

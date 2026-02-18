@@ -5,7 +5,7 @@ prev: false
 title: "AuditLogEntry"
 ---
 
-Defined in: [packages/channel/src/management/crud.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L47)
+Defined in: [packages/channel/src/management/crud.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L47)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/management/crud.ts:47](https://github.com/k-ot
 
 > **action**: `"create"` \| `"read"` \| `"update"` \| `"delete"` \| `"verify"` \| `"suspend"` \| `"activate"`
 
-Defined in: [packages/channel/src/management/crud.ts:51](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L51)
+Defined in: [packages/channel/src/management/crud.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L51)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/management/crud.ts:51](https://github.com/k-ot
 
 > `optional` **changes**: `object`
 
-Defined in: [packages/channel/src/management/crud.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L61)
+Defined in: [packages/channel/src/management/crud.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L61)
 
 #### after
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/management/crud.ts:61](https://github.com/k-ot
 
 > **entityId**: `string`
 
-Defined in: [packages/channel/src/management/crud.ts:50](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L50)
+Defined in: [packages/channel/src/management/crud.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L50)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/management/crud.ts:50](https://github.com/k-ot
 
 > **entityType**: `"senderNumber"` \| `"channel"`
 
-Defined in: [packages/channel/src/management/crud.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L49)
+Defined in: [packages/channel/src/management/crud.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L49)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/channel/src/management/crud.ts:49](https://github.com/k-ot
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/management/crud.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L48)
+Defined in: [packages/channel/src/management/crud.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L48)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/channel/src/management/crud.ts:48](https://github.com/k-ot
 
 > `optional` **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/channel/src/management/crud.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L65)
+Defined in: [packages/channel/src/management/crud.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L65)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/channel/src/management/crud.ts:65](https://github.com/k-ot
 
 > **timestamp**: `Date`
 
-Defined in: [packages/channel/src/management/crud.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L60)
+Defined in: [packages/channel/src/management/crud.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L60)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/channel/src/management/crud.ts:60](https://github.com/k-ot
 
 > `optional` **userId**: `string`
 
-Defined in: [packages/channel/src/management/crud.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/crud.ts#L59)
+Defined in: [packages/channel/src/management/crud.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/crud.ts#L59)

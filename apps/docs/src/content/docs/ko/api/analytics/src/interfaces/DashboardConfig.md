@@ -5,7 +5,7 @@ prev: false
 title: "DashboardConfig"
 ---
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L15)
+Defined in: [packages/analytics/src/reports/dashboard.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L15)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:15](https://github.com/
 
 > **filters**: `DashboardFilter`[]
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:22](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L22)
+Defined in: [packages/analytics/src/reports/dashboard.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L22)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:22](https://github.com/
 
 > **refreshInterval**: `number`
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L16)
+Defined in: [packages/analytics/src/reports/dashboard.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L16)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:16](https://github.com/
 
 > **timeRange**: `object`
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L17)
+Defined in: [packages/analytics/src/reports/dashboard.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L17)
 
 #### default
 
@@ -45,4 +45,4 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:17](https://github.com/
 
 > **widgets**: [`DashboardWidget`](/api/analytics/src/interfaces/dashboardwidget/)[]
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L21)
+Defined in: [packages/analytics/src/reports/dashboard.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L21)

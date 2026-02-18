@@ -5,7 +5,7 @@ prev: false
 title: "ChannelVerificationResult"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:264](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L264)
+Defined in: [packages/channel/src/types/channel.types.ts:264](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L264)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:264](https://github.com
 
 > `optional` **error**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:268](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L268)
+Defined in: [packages/channel/src/types/channel.types.ts:268](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L268)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:268](https://github.com
 
 > **status**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:266](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L266)
+Defined in: [packages/channel/src/types/channel.types.ts:266](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L266)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:266](https://github.com
 
 > **success**: `boolean`
 
-Defined in: [packages/channel/src/types/channel.types.ts:265](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L265)
+Defined in: [packages/channel/src/types/channel.types.ts:265](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L265)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:265](https://github.com
 
 > `optional` **verificationCode**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:267](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L267)
+Defined in: [packages/channel/src/types/channel.types.ts:267](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L267)

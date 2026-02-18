@@ -5,7 +5,7 @@ prev: false
 title: "TemplateRegistry"
 ---
 
-Defined in: [packages/template/src/registry/template.registry.ts:79](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L79)
+Defined in: [packages/template/src/registry/template.registry.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L79)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:79](https://git
 
 > **new TemplateRegistry**(`options?`): `TemplateRegistry`
 
-Defined in: [packages/template/src/registry/template.registry.ts:99](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L99)
+Defined in: [packages/template/src/registry/template.registry.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L99)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:99](https://git
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L16)
+Defined in: [packages/template/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:16](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [packages/template/src/registry/template.registry.ts:596](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L596)
+Defined in: [packages/template/src/registry/template.registry.ts:596](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L596)
 
 Clear all templates (use with caution!)
 
@@ -79,7 +79,7 @@ Clear all templates (use with caution!)
 
 > **delete**(`templateId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/template/src/registry/template.registry.ts:362](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L362)
+Defined in: [packages/template/src/registry/template.registry.ts:362](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L362)
 
 Delete template
 
@@ -99,7 +99,7 @@ Delete template
 
 > **destroy**(): `void`
 
-Defined in: [packages/template/src/registry/template.registry.ts:610](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L610)
+Defined in: [packages/template/src/registry/template.registry.ts:610](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L610)
 
 Stop the registry and cleanup
 
@@ -113,7 +113,7 @@ Stop the registry and cleanup
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L44)
+Defined in: [packages/template/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:44](https://github.co
 
 > **export**(`filters?`): `string`
 
-Defined in: [packages/template/src/registry/template.registry.ts:537](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L537)
+Defined in: [packages/template/src/registry/template.registry.ts:537](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L537)
 
 Export templates to JSON
 
@@ -159,7 +159,7 @@ Export templates to JSON
 
 > **get**(`templateId`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
-Defined in: [packages/template/src/registry/template.registry.ts:208](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L208)
+Defined in: [packages/template/src/registry/template.registry.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L208)
 
 Get template by ID
 
@@ -179,7 +179,7 @@ Get template by ID
 
 > **getByCategory**(`category`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
 
-Defined in: [packages/template/src/registry/template.registry.ts:350](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L350)
+Defined in: [packages/template/src/registry/template.registry.ts:350](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L350)
 
 Get templates by category
 
@@ -199,7 +199,7 @@ Get templates by category
 
 > **getByCode**(`code`, `provider`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
-Defined in: [packages/template/src/registry/template.registry.ts:215](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L215)
+Defined in: [packages/template/src/registry/template.registry.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L215)
 
 Get template by code and provider
 
@@ -223,7 +223,7 @@ Get template by code and provider
 
 > **getByProvider**(`provider`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
 
-Defined in: [packages/template/src/registry/template.registry.ts:338](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L338)
+Defined in: [packages/template/src/registry/template.registry.ts:338](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L338)
 
 Get templates by provider
 
@@ -243,7 +243,7 @@ Get templates by provider
 
 > **getHistory**(`templateId`): [`TemplateHistory`](/api/template/src/interfaces/templatehistory/) \| `null`
 
-Defined in: [packages/template/src/registry/template.registry.ts:399](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L399)
+Defined in: [packages/template/src/registry/template.registry.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L399)
 
 Get template version history
 
@@ -263,7 +263,7 @@ Get template version history
 
 > **getStats**(): `object`
 
-Defined in: [packages/template/src/registry/template.registry.ts:508](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L508)
+Defined in: [packages/template/src/registry/template.registry.ts:508](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L508)
 
 Get registry statistics
 
@@ -293,7 +293,7 @@ Get registry statistics
 
 > **getUsageStats**(`templateId`): [`TemplateUsageStats`](/api/template/src/interfaces/templateusagestats/) \| `null`
 
-Defined in: [packages/template/src/registry/template.registry.ts:441](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L441)
+Defined in: [packages/template/src/registry/template.registry.ts:441](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L441)
 
 Get template usage statistics
 
@@ -313,7 +313,7 @@ Get template usage statistics
 
 > **getVersion**(`templateId`, `version`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
-Defined in: [packages/template/src/registry/template.registry.ts:406](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L406)
+Defined in: [packages/template/src/registry/template.registry.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L406)
 
 Get specific template version
 
@@ -337,7 +337,7 @@ Get specific template version
 
 > **import**(`jsonData`, `options?`): `Promise`\<\{ `errors`: `string`[]; `imported`: `number`; `skipped`: `number`; \}\>
 
-Defined in: [packages/template/src/registry/template.registry.ts:553](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L553)
+Defined in: [packages/template/src/registry/template.registry.ts:553](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L553)
 
 Import templates from JSON
 
@@ -363,7 +363,7 @@ Import templates from JSON
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L20)
+Defined in: [packages/template/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -389,7 +389,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:20](https://github.co
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L9)
+Defined in: [packages/template/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -415,7 +415,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:9](https://github.com
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L35)
+Defined in: [packages/template/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -441,7 +441,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:35](https://github.co
 
 > **register**(`template`): `Promise`\<`void`\>
 
-Defined in: [packages/template/src/registry/template.registry.ts:111](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L111)
+Defined in: [packages/template/src/registry/template.registry.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L111)
 
 Register a new template
 
@@ -461,7 +461,7 @@ Register a new template
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L57)
+Defined in: [packages/template/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -483,7 +483,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:57](https://github.co
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/template/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/shared/event-emitter.ts#L31)
+Defined in: [packages/template/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/template/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -509,7 +509,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:31](https://github.co
 
 > **restoreVersion**(`templateId`, `version`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/registry/template.registry.ts:417](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L417)
+Defined in: [packages/template/src/registry/template.registry.ts:417](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L417)
 
 Restore template to a specific version
 
@@ -533,7 +533,7 @@ Restore template to a specific version
 
 > **search**(`filters?`, `options?`): [`TemplateSearchResult`](/api/template/src/interfaces/templatesearchresult/)
 
-Defined in: [packages/template/src/registry/template.registry.ts:222](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L222)
+Defined in: [packages/template/src/registry/template.registry.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L222)
 
 Search templates with filters and pagination
 
@@ -557,7 +557,7 @@ Search templates with filters and pagination
 
 > **update**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/registry/template.registry.ts:153](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L153)
+Defined in: [packages/template/src/registry/template.registry.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L153)
 
 Update an existing template
 
@@ -581,7 +581,7 @@ Update an existing template
 
 > **updateUsageStats**(`templateId`, `stats`): `void`
 
-Defined in: [packages/template/src/registry/template.registry.ts:448](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L448)
+Defined in: [packages/template/src/registry/template.registry.ts:448](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L448)
 
 Update template usage statistics
 

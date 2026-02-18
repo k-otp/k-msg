@@ -5,7 +5,7 @@ prev: false
 title: "TemplateVariable"
 ---
 
-Defined in: [packages/template/src/types/template.types.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L29)
+Defined in: [packages/template/src/types/template.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L29)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/types/template.types.ts:29](https://github.co
 
 > `optional` **description**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L35)
+Defined in: [packages/template/src/types/template.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L35)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/types/template.types.ts:35](https://github.co
 
 > `optional` **example**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:36](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L36)
+Defined in: [packages/template/src/types/template.types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L36)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/types/template.types.ts:36](https://github.co
 
 > `optional` **format**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L34)
+Defined in: [packages/template/src/types/template.types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L34)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/template/src/types/template.types.ts:34](https://github.co
 
 > `optional` **maxLength**: `number`
 
-Defined in: [packages/template/src/types/template.types.ts:33](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L33)
+Defined in: [packages/template/src/types/template.types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L33)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/template/src/types/template.types.ts:33](https://github.co
 
 > **name**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L30)
+Defined in: [packages/template/src/types/template.types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L30)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/template/src/types/template.types.ts:30](https://github.co
 
 > **required**: `boolean`
 
-Defined in: [packages/template/src/types/template.types.ts:32](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L32)
+Defined in: [packages/template/src/types/template.types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L32)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/template/src/types/template.types.ts:32](https://github.co
 
 > **type**: `"string"` \| `"number"` \| `"date"` \| `"custom"`
 
-Defined in: [packages/template/src/types/template.types.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L31)
+Defined in: [packages/template/src/types/template.types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L31)

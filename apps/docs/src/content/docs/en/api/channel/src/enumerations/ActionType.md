@@ -5,7 +5,7 @@ prev: false
 title: "ActionType"
 ---
 
-Defined in: [packages/channel/src/management/permissions.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L47)
+Defined in: [packages/channel/src/management/permissions.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L47)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/management/permissions.ts:47](https://github.c
 
 > **ACTIVATE**: `"activate"`
 
-Defined in: [packages/channel/src/management/permissions.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L54)
+Defined in: [packages/channel/src/management/permissions.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L54)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/management/permissions.ts:54](https://github.c
 
 > **CREATE**: `"create"`
 
-Defined in: [packages/channel/src/management/permissions.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L48)
+Defined in: [packages/channel/src/management/permissions.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L48)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/management/permissions.ts:48](https://github.c
 
 > **DELETE**: `"delete"`
 
-Defined in: [packages/channel/src/management/permissions.ts:51](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L51)
+Defined in: [packages/channel/src/management/permissions.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L51)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/management/permissions.ts:51](https://github.c
 
 > **MANAGE**: `"manage"`
 
-Defined in: [packages/channel/src/management/permissions.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L56)
+Defined in: [packages/channel/src/management/permissions.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L56)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/management/permissions.ts:56](https://github.c
 
 > **READ**: `"read"`
 
-Defined in: [packages/channel/src/management/permissions.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L49)
+Defined in: [packages/channel/src/management/permissions.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L49)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/channel/src/management/permissions.ts:49](https://github.c
 
 > **SEND**: `"send"`
 
-Defined in: [packages/channel/src/management/permissions.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L55)
+Defined in: [packages/channel/src/management/permissions.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L55)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/channel/src/management/permissions.ts:55](https://github.c
 
 > **SUSPEND**: `"suspend"`
 
-Defined in: [packages/channel/src/management/permissions.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L53)
+Defined in: [packages/channel/src/management/permissions.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L53)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/channel/src/management/permissions.ts:53](https://github.c
 
 > **UPDATE**: `"update"`
 
-Defined in: [packages/channel/src/management/permissions.ts:50](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L50)
+Defined in: [packages/channel/src/management/permissions.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L50)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/channel/src/management/permissions.ts:50](https://github.c
 
 > **VERIFY**: `"verify"`
 
-Defined in: [packages/channel/src/management/permissions.ts:52](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L52)
+Defined in: [packages/channel/src/management/permissions.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L52)

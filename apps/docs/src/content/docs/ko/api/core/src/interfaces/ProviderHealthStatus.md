@@ -5,7 +5,7 @@ prev: false
 title: "ProviderHealthStatus"
 ---
 
-Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L97)
+Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L97)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/bl
 
 > `optional` **data**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/provider.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L101)
+Defined in: [packages/core/src/provider.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L101)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/provider.ts:101](https://github.com/k-otp/k-msg/b
 
 > **healthy**: `boolean`
 
-Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L98)
+Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L98)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/bl
 
 > **issues**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:99](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L99)
+Defined in: [packages/core/src/provider.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L99)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/provider.ts:99](https://github.com/k-otp/k-msg/bl
 
 > `optional` **latencyMs**: `number`
 
-Defined in: [packages/core/src/provider.ts:100](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L100)
+Defined in: [packages/core/src/provider.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L100)

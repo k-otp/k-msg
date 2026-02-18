@@ -5,7 +5,7 @@ prev: false
 title: "RateLimiter"
 ---
 
-Defined in: [packages/core/src/resilience/rate-limiter.ts:5](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/rate-limiter.ts#L5)
+Defined in: [packages/core/src/resilience/rate-limiter.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/rate-limiter.ts#L5)
 
 Rate limiter for API calls
 
@@ -15,7 +15,7 @@ Rate limiter for API calls
 
 > **new RateLimiter**(`maxRequests`, `windowMs`): `RateLimiter`
 
-Defined in: [packages/core/src/resilience/rate-limiter.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/rate-limiter.ts#L8)
+Defined in: [packages/core/src/resilience/rate-limiter.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/rate-limiter.ts#L8)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/resilience/rate-limiter.ts:8](https://github.com/
 
 > **acquire**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/resilience/rate-limiter.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/rate-limiter.ts#L13)
+Defined in: [packages/core/src/resilience/rate-limiter.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/rate-limiter.ts#L13)
 
 #### Returns
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/resilience/rate-limiter.ts:13](https://github.com
 
 > **canMakeRequest**(): `boolean`
 
-Defined in: [packages/core/src/resilience/rate-limiter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/rate-limiter.ts#L31)
+Defined in: [packages/core/src/resilience/rate-limiter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/rate-limiter.ts#L31)
 
 #### Returns
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/resilience/rate-limiter.ts:31](https://github.com
 
 > **getRemainingRequests**(): `number`
 
-Defined in: [packages/core/src/resilience/rate-limiter.ts:37](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/rate-limiter.ts#L37)
+Defined in: [packages/core/src/resilience/rate-limiter.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/rate-limiter.ts#L37)
 
 #### Returns
 

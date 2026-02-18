@@ -5,7 +5,7 @@ prev: false
 title: "PermissionCheck"
 ---
 
-Defined in: [packages/channel/src/management/permissions.ts:86](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L86)
+Defined in: [packages/channel/src/management/permissions.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L86)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/management/permissions.ts:86](https://github.c
 
 > **action**: [`ActionType`](/api/channel/src/enumerations/actiontype/)
 
-Defined in: [packages/channel/src/management/permissions.ts:89](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L89)
+Defined in: [packages/channel/src/management/permissions.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L89)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/management/permissions.ts:89](https://github.c
 
 > `optional` **context**: [`AccessContext`](/api/channel/src/interfaces/accesscontext/)
 
-Defined in: [packages/channel/src/management/permissions.ts:91](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L91)
+Defined in: [packages/channel/src/management/permissions.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L91)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/management/permissions.ts:91](https://github.c
 
 > **resource**: [`ResourceType`](/api/channel/src/enumerations/resourcetype/)
 
-Defined in: [packages/channel/src/management/permissions.ts:88](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L88)
+Defined in: [packages/channel/src/management/permissions.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L88)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/management/permissions.ts:88](https://github.c
 
 > `optional` **resourceId**: `string`
 
-Defined in: [packages/channel/src/management/permissions.ts:90](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L90)
+Defined in: [packages/channel/src/management/permissions.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L90)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/management/permissions.ts:90](https://github.c
 
 > **userId**: `string`
 
-Defined in: [packages/channel/src/management/permissions.ts:87](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L87)
+Defined in: [packages/channel/src/management/permissions.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L87)

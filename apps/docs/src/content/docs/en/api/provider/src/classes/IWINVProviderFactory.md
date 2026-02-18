@@ -5,7 +5,7 @@ prev: false
 title: "IWINVProviderFactory"
 ---
 
-Defined in: [packages/provider/src/iwinv/provider.ts:478](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L478)
+Defined in: [packages/provider/src/iwinv/provider.ts:478](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L478)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:478](https://github.com/k-o
 
 > `static` **create**(`config`): [`IWINVProvider`](/api/provider/src/classes/iwinvprovider/)
 
-Defined in: [packages/provider/src/iwinv/provider.ts:479](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L479)
+Defined in: [packages/provider/src/iwinv/provider.ts:479](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L479)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:479](https://github.com/k-o
 
 > `static` **createDefault**(): [`IWINVProvider`](/api/provider/src/classes/iwinvprovider/)
 
-Defined in: [packages/provider/src/iwinv/provider.ts:483](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/provider.ts#L483)
+Defined in: [packages/provider/src/iwinv/provider.ts:483](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L483)
 
 #### Returns
 

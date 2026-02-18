@@ -5,7 +5,7 @@ prev: false
 title: "ModifyTemplateRequest"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:86](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L86)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L86)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:86](https://github.com/k
 
 > `optional` **buttons**: [`CreateTemplateButton`](/api/provider/src/iwinv/interfaces/createtemplatebutton/)[]
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:90](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L90)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L90)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:90](https://github.com/k
 
 > **templateCode**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:87](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L87)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L87)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:87](https://github.com/k
 
 > **templateContent**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:89](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L89)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L89)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:89](https://github.com/k
 
 > **templateName**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:88](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L88)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L88)

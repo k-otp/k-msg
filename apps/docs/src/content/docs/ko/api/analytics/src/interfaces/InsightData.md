@@ -5,7 +5,7 @@ prev: false
 title: "InsightData"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L68)
+Defined in: [packages/analytics/src/types/analytics.types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L68)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:68](https://github.
 
 > **actionable**: `boolean`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:79](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L79)
+Defined in: [packages/analytics/src/types/analytics.types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L79)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:79](https://github.
 
 > **confidence**: `number`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:78](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L78)
+Defined in: [packages/analytics/src/types/analytics.types.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L78)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:78](https://github.
 
 > **description**: `string`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:72](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L72)
+Defined in: [packages/analytics/src/types/analytics.types.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L72)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:72](https://github.
 
 > **detectedAt**: `Date`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:81](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L81)
+Defined in: [packages/analytics/src/types/analytics.types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L81)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:81](https://github.
 
 > **dimensions**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:75](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L75)
+Defined in: [packages/analytics/src/types/analytics.types.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L75)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:75](https://github.
 
 > `optional` **expectedValue**: `number`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:77](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L77)
+Defined in: [packages/analytics/src/types/analytics.types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L77)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:77](https://github.
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:69](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L69)
+Defined in: [packages/analytics/src/types/analytics.types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L69)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:69](https://github.
 
 > **metric**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L74)
+Defined in: [packages/analytics/src/types/analytics.types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L74)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:74](https://github.
 
 > `optional` **recommendations**: `string`[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:80](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L80)
+Defined in: [packages/analytics/src/types/analytics.types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L80)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:80](https://github.
 
 > **severity**: `"high"` \| `"low"` \| `"medium"` \| `"critical"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:73](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L73)
+Defined in: [packages/analytics/src/types/analytics.types.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L73)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:73](https://github.
 
 > **title**: `string`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L71)
+Defined in: [packages/analytics/src/types/analytics.types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L71)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:71](https://github.
 
 > **type**: `"anomaly"` \| `"trend"` \| `"recommendation"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:70](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L70)
+Defined in: [packages/analytics/src/types/analytics.types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L70)
 
 ***
 
@@ -109,4 +109,4 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:70](https://github.
 
 > **value**: `number`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L76)
+Defined in: [packages/analytics/src/types/analytics.types.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L76)

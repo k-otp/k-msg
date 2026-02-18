@@ -5,7 +5,7 @@ prev: false
 title: "LogContext"
 ---
 
-Defined in: [packages/core/src/logger.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L8)
+Defined in: [packages/core/src/logger.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L8)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/logger.ts:8](https://github.com/k-otp/k-msg/blob/
 
 > `optional` **component**: `string`
 
-Defined in: [packages/core/src/logger.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L9)
+Defined in: [packages/core/src/logger.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L9)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/logger.ts:9](https://github.com/k-otp/k-msg/blob/
 
 > `optional` **operation**: `string`
 
-Defined in: [packages/core/src/logger.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L10)
+Defined in: [packages/core/src/logger.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L10)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/core/src/logger.ts:10](https://github.com/k-otp/k-msg/blob
 
 > `optional` **requestId**: `string`
 
-Defined in: [packages/core/src/logger.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L13)
+Defined in: [packages/core/src/logger.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L13)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/logger.ts:13](https://github.com/k-otp/k-msg/blob
 
 > `optional` **sessionId**: `string`
 
-Defined in: [packages/core/src/logger.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L12)
+Defined in: [packages/core/src/logger.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L12)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/logger.ts:12](https://github.com/k-otp/k-msg/blob
 
 > `optional` **traceId**: `string`
 
-Defined in: [packages/core/src/logger.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L14)
+Defined in: [packages/core/src/logger.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L14)
 
 ***
 
@@ -57,4 +57,4 @@ Defined in: [packages/core/src/logger.ts:14](https://github.com/k-otp/k-msg/blob
 
 > `optional` **userId**: `string`
 
-Defined in: [packages/core/src/logger.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L11)
+Defined in: [packages/core/src/logger.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L11)

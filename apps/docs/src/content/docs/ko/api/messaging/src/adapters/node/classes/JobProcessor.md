@@ -5,7 +5,7 @@ prev: false
 title: "JobProcessor"
 ---
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L53)
+Defined in: [packages/messaging/src/queue/job.processor.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L53)
 
 ## Extends
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:53](https://github.co
 
 > **new JobProcessor**(`options`, `jobQueue?`): `JobProcessor`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:63](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L63)
+Defined in: [packages/messaging/src/queue/job.processor.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L63)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:63](https://github.co
 
 > **add**\<`T`\>(`jobType`, `data`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:107](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L107)
+Defined in: [packages/messaging/src/queue/job.processor.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L107)
 
 Add a job to the queue
 
@@ -95,7 +95,7 @@ Add a job to the queue
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L16)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -121,7 +121,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 > **cleanup**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:191](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L191)
+Defined in: [packages/messaging/src/queue/job.processor.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L191)
 
 Remove completed jobs from queue
 
@@ -135,7 +135,7 @@ Remove completed jobs from queue
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L44)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/messaging/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:202](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L202)
+Defined in: [packages/messaging/src/queue/job.processor.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L202)
 
 Get specific job by ID
 
@@ -181,7 +181,7 @@ Get specific job by ID
 
 > **getMetrics**(): [`JobProcessorMetrics`](/api/messaging/src/adapters/node/interfaces/jobprocessormetrics/)
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:165](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L165)
+Defined in: [packages/messaging/src/queue/job.processor.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L165)
 
 Get current metrics
 
@@ -195,7 +195,7 @@ Get current metrics
 
 > **getQueueStatus**(): `Promise`\<\{ `failed`: `number`; `pending`: `number`; `processing`: `number`; `totalProcessed`: `number`; \}\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:172](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L172)
+Defined in: [packages/messaging/src/queue/job.processor.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L172)
 
 Get queue status
 
@@ -209,7 +209,7 @@ Get queue status
 
 > **handle**\<`T`\>(`jobType`, `handler`): `void`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:100](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L100)
+Defined in: [packages/messaging/src/queue/job.processor.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L100)
 
 Register a job handler
 
@@ -239,7 +239,7 @@ Register a job handler
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L20)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -265,7 +265,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.c
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L9)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -291,7 +291,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.co
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L35)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -317,7 +317,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L57)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -339,7 +339,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeJob**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:209](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L209)
+Defined in: [packages/messaging/src/queue/job.processor.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L209)
 
 Remove job from queue
 
@@ -359,7 +359,7 @@ Remove job from queue
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L31)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -385,7 +385,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 > **start**(): `void`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:133](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L133)
+Defined in: [packages/messaging/src/queue/job.processor.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L133)
 
 Start processing jobs
 
@@ -399,7 +399,7 @@ Start processing jobs
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:146](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/job.processor.ts#L146)
+Defined in: [packages/messaging/src/queue/job.processor.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L146)
 
 Stop processing jobs
 

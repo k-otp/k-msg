@@ -5,7 +5,7 @@ prev: false
 title: "AligoProvider"
 ---
 
-Defined in: [packages/provider/src/aligo/provider.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L39)
+Defined in: [packages/provider/src/aligo/provider.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L39)
 
 Aligo Provider package entrypoint
 
@@ -22,7 +22,7 @@ Aligo Provider package entrypoint
 
 > **new AligoProvider**(`config`): `AligoProvider`
 
-Defined in: [packages/provider/src/aligo/provider.ts:67](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L67)
+Defined in: [packages/provider/src/aligo/provider.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L67)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:67](https://github.com/k-ot
 
 > `readonly` **id**: `"aligo"` = `"aligo"`
 
-Defined in: [packages/provider/src/aligo/provider.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L46)
+Defined in: [packages/provider/src/aligo/provider.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L46)
 
 #### Implementation of
 
@@ -52,7 +52,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:46](https://github.com/k-ot
 
 > `readonly` **name**: `"Aligo Smart SMS"` = `"Aligo Smart SMS"`
 
-Defined in: [packages/provider/src/aligo/provider.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L47)
+Defined in: [packages/provider/src/aligo/provider.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L47)
 
 #### Implementation of
 
@@ -64,7 +64,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:47](https://github.com/k-ot
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/aligo/provider.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L48)
+Defined in: [packages/provider/src/aligo/provider.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L48)
 
 #### Implementation of
 
@@ -76,7 +76,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:48](https://github.com/k-ot
 
 > **addKakaoChannel**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:156](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L156)
+Defined in: [packages/provider/src/aligo/provider.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L156)
 
 #### Parameters
 
@@ -112,7 +112,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:156](https://github.com/k-o
 
 > **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:165](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L165)
+Defined in: [packages/provider/src/aligo/provider.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L165)
 
 #### Parameters
 
@@ -138,7 +138,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:165](https://github.com/k-o
 
 > **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:180](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L180)
+Defined in: [packages/provider/src/aligo/provider.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L180)
 
 #### Parameters
 
@@ -164,7 +164,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:180](https://github.com/k-o
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/aligo/provider.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L59)
+Defined in: [packages/provider/src/aligo/provider.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L59)
 
 #### Returns
 
@@ -180,7 +180,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:59](https://github.com/k-ot
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:187](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L187)
+Defined in: [packages/provider/src/aligo/provider.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L187)
 
 #### Parameters
 
@@ -206,7 +206,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:187](https://github.com/k-o
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:91](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L91)
+Defined in: [packages/provider/src/aligo/provider.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L91)
 
 #### Returns
 
@@ -222,7 +222,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:91](https://github.com/k-ot
 
 > **listKakaoChannelCategories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:143](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L143)
+Defined in: [packages/provider/src/aligo/provider.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L143)
 
 #### Returns
 
@@ -238,7 +238,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:143](https://github.com/k-o
 
 > **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:136](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L136)
+Defined in: [packages/provider/src/aligo/provider.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L136)
 
 #### Parameters
 
@@ -266,7 +266,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:136](https://github.com/k-o
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:194](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L194)
+Defined in: [packages/provider/src/aligo/provider.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L194)
 
 #### Parameters
 
@@ -302,7 +302,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:194](https://github.com/k-o
 
 > **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:149](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L149)
+Defined in: [packages/provider/src/aligo/provider.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L149)
 
 #### Parameters
 
@@ -330,7 +330,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:149](https://github.com/k-o
 
 > **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:201](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L201)
+Defined in: [packages/provider/src/aligo/provider.ts:201](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L201)
 
 #### Parameters
 
@@ -356,7 +356,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:201](https://github.com/k-o
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:130](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L130)
+Defined in: [packages/provider/src/aligo/provider.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L130)
 
 #### Parameters
 
@@ -378,7 +378,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:130](https://github.com/k-o
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.ts:172](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/provider.ts#L172)
+Defined in: [packages/provider/src/aligo/provider.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L172)
 
 #### Parameters
 

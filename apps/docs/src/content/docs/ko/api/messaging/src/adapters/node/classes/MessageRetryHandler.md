@@ -5,7 +5,7 @@ prev: false
 title: "MessageRetryHandler"
 ---
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L71)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L71)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:71](https://github.co
 
 > **new MessageRetryHandler**(`options`): `MessageRetryHandler`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:93](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L93)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L93)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:93](https://github.co
 
 > **addForRetry**(`deliveryReport`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:143](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L143)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L143)
 
 Add a failed delivery for retry
 
@@ -59,7 +59,7 @@ Add a failed delivery for retry
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L16)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 > **cancelRetry**(`messageId`): `boolean`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:188](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L188)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L188)
 
 Cancel retry for a specific message
 
@@ -105,7 +105,7 @@ Cancel retry for a specific message
 
 > **cleanup**(): `number`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:224](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L224)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:224](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L224)
 
 Clean up completed/exhausted retry items
 
@@ -119,7 +119,7 @@ Clean up completed/exhausted retry items
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L44)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -145,7 +145,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 > **getMetrics**(): [`RetryHandlerMetrics`](/api/messaging/src/adapters/node/interfaces/retryhandlermetrics/)
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:217](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L217)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:217](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L217)
 
 Get metrics
 
@@ -159,7 +159,7 @@ Get metrics
 
 > **getRetryQueue**(): [`RetryQueueItem`](/api/messaging/src/adapters/node/interfaces/retryqueueitem/)[]
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:210](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L210)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L210)
 
 Get all retry queue items
 
@@ -173,7 +173,7 @@ Get all retry queue items
 
 > **getRetryStatus**(`messageId`): [`RetryQueueItem`](/api/messaging/src/adapters/node/interfaces/retryqueueitem/) \| `undefined`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:203](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L203)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L203)
 
 Get retry status for a message
 
@@ -193,7 +193,7 @@ Get retry status for a message
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L20)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -219,7 +219,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.c
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L9)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -245,7 +245,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.co
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L35)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -271,7 +271,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L57)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -293,7 +293,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/shared/event-emitter.ts#L31)
+Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -319,7 +319,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 > **start**(): `void`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:111](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L111)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L111)
 
 Start the retry handler
 
@@ -333,7 +333,7 @@ Start the retry handler
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:124](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/queue/retry.handler.ts#L124)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L124)
 
 Stop the retry handler
 

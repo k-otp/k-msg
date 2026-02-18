@@ -5,7 +5,7 @@ prev: false
 title: "BatchDispatcher"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L15)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L15)
 
 Webhook System
 실시간 메시지 이벤트 알림 시스템
@@ -20,7 +20,7 @@ Webhook System
 
 > **new BatchDispatcher**(`config?`): `BatchDispatcher`
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L29)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L29)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:29](https://git
 
 > **addJob**(`job`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L38)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L38)
 
 배치 작업 추가
 
@@ -62,7 +62,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:38](https://git
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L16)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -88,7 +88,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L44)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -114,7 +114,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 > **getBatchStats**(): `object`
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:145](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L145)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L145)
 
 배치 통계 조회
 
@@ -144,7 +144,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:145](https://gi
 
 > **getPendingJobCount**(`endpointId`): `number`
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:168](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L168)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L168)
 
 특정 엔드포인트의 대기 중인 작업 수 조회
 
@@ -164,7 +164,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:168](https://gi
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L20)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -190,7 +190,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L9)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -216,7 +216,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L35)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -242,7 +242,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 > **processAllBatches**(): `Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/)[]\>
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:128](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L128)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L128)
 
 모든 대기 중인 배치 처리
 
@@ -256,7 +256,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:128](https://gi
 
 > **processBatchForEndpoint**(`endpointId`): `Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/) \| `null`\>
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:69](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L69)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L69)
 
 특정 엔드포인트의 배치 처리
 
@@ -276,7 +276,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:69](https://git
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L57)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -298,7 +298,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L31)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -324,7 +324,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:339](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/batch.dispatcher.ts#L339)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L339)
 
 배치 처리기 정지
 

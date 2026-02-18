@@ -5,7 +5,7 @@ prev: false
 title: "SenderNumber"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L34)
+Defined in: [packages/channel/src/types/channel.types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L34)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:34](https://github.com/
 
 > **category**: [`SenderNumberCategory`](/api/channel/src/enumerations/sendernumbercategory/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:45](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L45)
+Defined in: [packages/channel/src/types/channel.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L45)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:45](https://github.com/
 
 > `optional` **channelId**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L40)
+Defined in: [packages/channel/src/types/channel.types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L40)
 
 Optional association to a Channel.
 Some managers (e.g. KakaoSenderNumberManager) are channel-scoped.
@@ -32,7 +32,7 @@ Some managers (e.g. KakaoSenderNumberManager) are channel-scoped.
 
 > **createdAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:52](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L52)
+Defined in: [packages/channel/src/types/channel.types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L52)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:52](https://github.com/
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L35)
+Defined in: [packages/channel/src/types/channel.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L35)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:35](https://github.com/
 
 > **metadata**: `object`
 
-Defined in: [packages/channel/src/types/channel.types.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L46)
+Defined in: [packages/channel/src/types/channel.types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L46)
 
 #### businessName?
 
@@ -72,7 +72,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:46](https://github.com/
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:41](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L41)
+Defined in: [packages/channel/src/types/channel.types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L41)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:41](https://github.com/
 
 > **status**: [`SenderNumberStatus`](/api/channel/src/enumerations/sendernumberstatus/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L42)
+Defined in: [packages/channel/src/types/channel.types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L42)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:42](https://github.com/
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L53)
+Defined in: [packages/channel/src/types/channel.types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L53)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:53](https://github.com/
 
 > `optional` **verificationCode**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L43)
+Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L43)
 
 ***
 
@@ -104,4 +104,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/
 
 > `optional` **verifiedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L44)
+Defined in: [packages/channel/src/types/channel.types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L44)

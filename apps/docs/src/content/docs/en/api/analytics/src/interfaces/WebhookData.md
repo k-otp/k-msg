@@ -5,7 +5,7 @@ prev: false
 title: "WebhookData"
 ---
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L9)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L9)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://g
 
 > **body**: `any`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L14)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L14)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:14](https://
 
 > **headers**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L13)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L13)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:13](https://
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L10)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L10)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 > `optional` **signature**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L15)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L15)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:15](https://
 
 > **source**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L11)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L11)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:11](https://
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L12)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L12)

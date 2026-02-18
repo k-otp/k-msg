@@ -5,7 +5,7 @@ prev: false
 title: "AnalyticsConfig"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:3](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L3)
+Defined in: [packages/analytics/src/types/analytics.types.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L3)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:3](https://github.c
 
 > **aggregationIntervals**: (`"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`)[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:6](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L6)
+Defined in: [packages/analytics/src/types/analytics.types.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L6)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:6](https://github.c
 
 > **enabledMetrics**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:7](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L7)
+Defined in: [packages/analytics/src/types/analytics.types.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L7)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:7](https://github.c
 
 > **enableRealTimeTracking**: `boolean`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:4](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L4)
+Defined in: [packages/analytics/src/types/analytics.types.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L4)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:4](https://github.c
 
 > **retentionDays**: `number`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:5](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L5)
+Defined in: [packages/analytics/src/types/analytics.types.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L5)

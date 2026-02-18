@@ -5,7 +5,7 @@ prev: false
 title: "Recommendation"
 ---
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L55)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L55)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:55](https:
 
 > **actions**: `RecommendationAction`[]
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:62](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L62)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L62)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:62](https:
 
 > **category**: `string`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L57)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L57)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:57](https:
 
 > **confidence**: `number`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:63](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L63)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L63)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:63](https:
 
 > **createdAt**: `Date`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:66](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L66)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L66)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:66](https:
 
 > **description**: `string`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L60)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L60)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:60](https:
 
 > **effort**: `"high"` \| `"low"` \| `"medium"`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L65)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L65)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:65](https:
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L56)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L56)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:56](https:
 
 > **impact**: `"high"` \| `"low"` \| `"medium"`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L64)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L64)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:64](https:
 
 > **metadata**: `object`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L68)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L68)
 
 #### estimatedROI?
 
@@ -105,7 +105,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:68](https:
 
 > **priority**: `number`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L58)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L58)
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:58](https:
 
 > **rationale**: `string`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L61)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L61)
 
 ***
 
@@ -121,7 +121,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:61](https:
 
 > **title**: `string`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L59)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L59)
 
 ***
 
@@ -129,4 +129,4 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:59](https:
 
 > `optional` **validUntil**: `Date`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:67](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L67)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L67)

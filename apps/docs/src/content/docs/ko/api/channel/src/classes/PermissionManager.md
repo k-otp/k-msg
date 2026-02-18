@@ -5,7 +5,7 @@ prev: false
 title: "PermissionManager"
 ---
 
-Defined in: [packages/channel/src/management/permissions.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L101)
+Defined in: [packages/channel/src/management/permissions.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L101)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/channel/src/management/permissions.ts:101](https://github.
 
 > **new PermissionManager**(): `PermissionManager`
 
-Defined in: [packages/channel/src/management/permissions.ts:110](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L110)
+Defined in: [packages/channel/src/management/permissions.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L110)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: [packages/channel/src/management/permissions.ts:110](https://github.
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L16)
+Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:16](https://github.com
 
 > **assignRoleToUser**(`userId`, `roleId`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:261](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L261)
+Defined in: [packages/channel/src/management/permissions.ts:261](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L261)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: [packages/channel/src/management/permissions.ts:261](https://github.
 
 > **checkPermission**(`check`): `Promise`\<[`PermissionResult`](/api/channel/src/interfaces/permissionresult/)\>
 
-Defined in: [packages/channel/src/management/permissions.ts:313](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L313)
+Defined in: [packages/channel/src/management/permissions.ts:313](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L313)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: [packages/channel/src/management/permissions.ts:313](https://github.
 
 > **createRole**(`roleData`): `Promise`\<[`Role`](/api/channel/src/interfaces/role/)\>
 
-Defined in: [packages/channel/src/management/permissions.ts:187](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L187)
+Defined in: [packages/channel/src/management/permissions.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L187)
 
 #### Parameters
 
@@ -117,7 +117,7 @@ Defined in: [packages/channel/src/management/permissions.ts:187](https://github.
 
 > **createUser**(`userData`): `Promise`\<[`User`](/api/channel/src/interfaces/user/)\>
 
-Defined in: [packages/channel/src/management/permissions.ts:116](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L116)
+Defined in: [packages/channel/src/management/permissions.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L116)
 
 #### Parameters
 
@@ -135,7 +135,7 @@ Defined in: [packages/channel/src/management/permissions.ts:116](https://github.
 
 > **deleteRole**(`roleId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:235](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L235)
+Defined in: [packages/channel/src/management/permissions.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L235)
 
 #### Parameters
 
@@ -153,7 +153,7 @@ Defined in: [packages/channel/src/management/permissions.ts:235](https://github.
 
 > **deleteUser**(`userId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:172](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L172)
+Defined in: [packages/channel/src/management/permissions.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L172)
 
 #### Parameters
 
@@ -171,7 +171,7 @@ Defined in: [packages/channel/src/management/permissions.ts:172](https://github.
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L44)
+Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -197,7 +197,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:44](https://github.com
 
 > **eventNames**(): `string`[]
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L71)
+Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L71)
 
 #### Returns
 
@@ -213,7 +213,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:71](https://github.com
 
 > **getRole**(`roleId`): `Promise`\<[`Role`](/api/channel/src/interfaces/role/) \| `null`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:205](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L205)
+Defined in: [packages/channel/src/management/permissions.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L205)
 
 #### Parameters
 
@@ -231,7 +231,7 @@ Defined in: [packages/channel/src/management/permissions.ts:205](https://github.
 
 > **getUser**(`userId`): `Promise`\<[`User`](/api/channel/src/interfaces/user/) \| `null`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:138](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L138)
+Defined in: [packages/channel/src/management/permissions.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L138)
 
 #### Parameters
 
@@ -249,7 +249,7 @@ Defined in: [packages/channel/src/management/permissions.ts:138](https://github.
 
 > **getUserPermissions**(`userId`): `Promise`\<[`Permission`](/api/channel/src/interfaces/permission/)[]\>
 
-Defined in: [packages/channel/src/management/permissions.ts:368](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L368)
+Defined in: [packages/channel/src/management/permissions.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L368)
 
 #### Parameters
 
@@ -267,7 +267,7 @@ Defined in: [packages/channel/src/management/permissions.ts:368](https://github.
 
 > **getUserRoles**(`userId`): `Promise`\<[`Role`](/api/channel/src/interfaces/role/)[]\>
 
-Defined in: [packages/channel/src/management/permissions.ts:389](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L389)
+Defined in: [packages/channel/src/management/permissions.ts:389](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L389)
 
 #### Parameters
 
@@ -285,7 +285,7 @@ Defined in: [packages/channel/src/management/permissions.ts:389](https://github.
 
 > **hasPermission**(`userId`, `resource`, `action`, `resourceId?`, `context?`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:329](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L329)
+Defined in: [packages/channel/src/management/permissions.ts:329](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L329)
 
 #### Parameters
 
@@ -319,7 +319,7 @@ Defined in: [packages/channel/src/management/permissions.ts:329](https://github.
 
 > **listenerCount**(`eventName`): `number`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L67)
+Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L67)
 
 #### Parameters
 
@@ -341,7 +341,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:67](https://github.com
 
 > **listRoles**(): [`Role`](/api/channel/src/interfaces/role/)[]
 
-Defined in: [packages/channel/src/management/permissions.ts:408](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L408)
+Defined in: [packages/channel/src/management/permissions.ts:408](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L408)
 
 #### Returns
 
@@ -353,7 +353,7 @@ Defined in: [packages/channel/src/management/permissions.ts:408](https://github.
 
 > **listUsers**(`filters?`): [`User`](/api/channel/src/interfaces/user/)[]
 
-Defined in: [packages/channel/src/management/permissions.ts:394](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L394)
+Defined in: [packages/channel/src/management/permissions.ts:394](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L394)
 
 #### Parameters
 
@@ -377,7 +377,7 @@ Defined in: [packages/channel/src/management/permissions.ts:394](https://github.
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L20)
+Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -403,7 +403,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:20](https://github.com
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L9)
+Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -429,7 +429,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:9](https://github.com/
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L35)
+Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -455,7 +455,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:35](https://github.com
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L57)
+Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -477,7 +477,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/shared/event-emitter.ts#L31)
+Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -503,7 +503,7 @@ Defined in: [packages/channel/src/shared/event-emitter.ts:31](https://github.com
 
 > **removeRoleFromUser**(`userId`, `roleId`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:289](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L289)
+Defined in: [packages/channel/src/management/permissions.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L289)
 
 #### Parameters
 
@@ -525,7 +525,7 @@ Defined in: [packages/channel/src/management/permissions.ts:289](https://github.
 
 > **requirePermission**(`userId`, `resource`, `action`, `resourceId?`, `context?`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/management/permissions.ts:347](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L347)
+Defined in: [packages/channel/src/management/permissions.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L347)
 
 #### Parameters
 
@@ -559,7 +559,7 @@ Defined in: [packages/channel/src/management/permissions.ts:347](https://github.
 
 > **updateRole**(`roleId`, `updates`): `Promise`\<[`Role`](/api/channel/src/interfaces/role/)\>
 
-Defined in: [packages/channel/src/management/permissions.ts:209](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L209)
+Defined in: [packages/channel/src/management/permissions.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L209)
 
 #### Parameters
 
@@ -581,7 +581,7 @@ Defined in: [packages/channel/src/management/permissions.ts:209](https://github.
 
 > **updateUser**(`userId`, `updates`): `Promise`\<[`User`](/api/channel/src/interfaces/user/)\>
 
-Defined in: [packages/channel/src/management/permissions.ts:142](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/management/permissions.ts#L142)
+Defined in: [packages/channel/src/management/permissions.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/management/permissions.ts#L142)
 
 #### Parameters
 
