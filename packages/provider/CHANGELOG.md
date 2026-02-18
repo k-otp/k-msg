@@ -1,5 +1,12 @@
 # @k-msg/provider
 
+## 0.18.1 — 2026-02-18
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+- Updated dependencies: core@0.18.1
+
 ## 0.18.0 — 2026-02-17
 
 ### Patch changes
