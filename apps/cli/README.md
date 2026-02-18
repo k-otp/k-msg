@@ -130,7 +130,7 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
-- `k-msg send --input <json> | --file <path> | --stdin`
+- `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
@@ -202,9 +202,29 @@ k-msg alimtalk preflight \
 
 ### Advanced JSON send
 
+`k-msg send` is an advanced command for raw `SendInput` JSON (object or array).
+For common workflows, prefer `k-msg sms send` and `k-msg alimtalk send`.
+
 ```bash
 k-msg send --input '{"to":"01012345678","text":"hello"}'
 ```
+
+Single preview without sending:
+
+```bash
+k-msg send --input '{"to":"01012345678","text":"hello"}' --dry-run
+```
+
+Batch preview without sending:
+
+```bash
+k-msg send --input '[{"to":"01011112222","text":"hello 1"},{"to":"01033334444","text":"hello 2"}]' --dry-run
+```
+
+`providers doctor` and `send --dry-run` have different roles:
+
+- `k-msg providers doctor`: provider/account/capability readiness checks
+- `k-msg send --dry-run`: request payload preview/validation (no provider send)
 
 ## Kakao Channel (Aligo capability)
 
