@@ -1,9 +1,11 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
-import { readdir, stat } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
 import typedocEntryPoints from "./typedoc.entrypoints.json";
 import syncTypeDocLocales from "./plugins/sync-typedoc-locales.mjs";
@@ -11,8 +13,11 @@ import syncTypeDocLocales from "./plugins/sync-typedoc-locales.mjs";
 const docsContentRoot = fileURLToPath(
   new URL("./src/content/docs", import.meta.url),
 );
+const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
+const execFileAsync = promisify(execFile);
 let docsSlugIndexPromise;
-const mtimeCache = new Map();
+const lastmodCache = new Map();
+const gitLastmodCache = new Map();
 
 function toPosix(input) {
   return input.replaceAll(path.sep, "/");
@@ -83,6 +88,57 @@ function pathSitemapMeta(pathname) {
   return { changefreq: "weekly", priority: 0.7 };
 }
 
+function normalizeRepoPath(value) {
+  return toPosix(value).replace(/^\/+|^\.\//g, "");
+}
+
+function extractDefinedInPaths(markdown) {
+  const matches = markdown.matchAll(
+    /Defined in:\s*\[[^\]]+\]\(https:\/\/github\.com\/k-otp\/k-msg\/blob\/main\/([^#)]+)(?:#[^)]+)?\)/g,
+  );
+
+  const paths = new Set();
+  for (const match of matches) {
+    if (match[1]) {
+      paths.add(decodeURIComponent(match[1]));
+    }
+  }
+
+  return [...paths];
+}
+
+function extractGeneratedSourcePath(markdown) {
+  const match = markdown.match(/Generated from `([^`]+)`/);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
+async function resolveGitLastmod(repoRelativePath) {
+  const normalized = normalizeRepoPath(repoRelativePath);
+  if (!normalized) return undefined;
+
+  const cached = gitLastmodCache.get(normalized);
+  if (cached) return cached;
+
+  const task = (async () => {
+    try {
+      const { stdout } = await execFileAsync(
+        "git",
+        ["log", "-1", "--format=%cI", "--", normalized],
+        { cwd: repoRoot },
+      );
+
+      const value = stdout.trim();
+      if (!value) return undefined;
+      return value;
+    } catch {
+      return undefined;
+    }
+  })();
+
+  gitLastmodCache.set(normalized, task);
+  return task;
+}
+
 async function resolveLastmod(urlString) {
   if (!docsSlugIndexPromise) {
     docsSlugIndexPromise = buildDocsSlugIndex();
@@ -94,14 +150,38 @@ async function resolveLastmod(urlString) {
   const sourcePath = slugIndex.get(slug);
   if (!sourcePath) return undefined;
 
-  const cached = mtimeCache.get(sourcePath);
+  const cached = lastmodCache.get(sourcePath);
   if (cached) return cached;
 
   try {
-    const fileStat = await stat(sourcePath);
-    const lastmod = fileStat.mtime.toISOString();
-    mtimeCache.set(sourcePath, lastmod);
-    return lastmod;
+    const markdown = await readFile(sourcePath, "utf8");
+    const definedInPaths =
+      extractDefinedInPaths(markdown).map(normalizeRepoPath);
+    const generatedSourcePath = extractGeneratedSourcePath(markdown);
+    const sourceCandidates = new Set(definedInPaths);
+
+    if (generatedSourcePath) {
+      sourceCandidates.add(normalizeRepoPath(generatedSourcePath));
+    }
+
+    if (sourceCandidates.size === 0) {
+      sourceCandidates.add(
+        normalizeRepoPath(path.relative(repoRoot, sourcePath)),
+      );
+    }
+
+    let latest;
+    for (const candidate of sourceCandidates) {
+      const gitLastmod = await resolveGitLastmod(candidate);
+      if (gitLastmod && (!latest || gitLastmod > latest)) {
+        latest = gitLastmod;
+      }
+    }
+
+    if (!latest) return undefined;
+
+    lastmodCache.set(sourcePath, latest);
+    return latest;
   } catch {
     return undefined;
   }
