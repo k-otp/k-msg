@@ -17,6 +17,7 @@ type PagesContext = {
 };
 
 type AdvancedSendInput = Parameters<KMsg["send"]>[0];
+type AdvancedSendBody = Record<string, unknown> | Record<string, unknown>[];
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -47,9 +48,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-async function sendWithKMsg(c: { env: Bindings }, input: AdvancedSendInput) {
+function isAdvancedSendInput(value: unknown): value is AdvancedSendBody {
+  if (isRecord(value)) {
+    return true;
+  }
+
+  return Array.isArray(value) && value.every((item) => isRecord(item));
+}
+
+async function sendWithKMsg(c: { env: Bindings }, input: AdvancedSendBody) {
   const kmsg = await getKMsg(c.env);
-  return await kmsg.send(input);
+  return await kmsg.send(input as unknown as AdvancedSendInput);
 }
 
 app.get("/", (c) =>
@@ -62,14 +71,23 @@ app.get("/", (c) =>
 
 app.post("/send", async (c) => {
   const body = await c.req.json<unknown>();
-  if (!isRecord(body)) {
+  if (!isAdvancedSendInput(body)) {
     return c.json(
-      { ok: false, message: "request body must be a JSON object" },
+      {
+        ok: false,
+        message:
+          "request body must be a JSON object or an array of JSON objects",
+      },
       400,
     );
   }
 
-  const result = await sendWithKMsg(c, body as AdvancedSendInput);
+  if (Array.isArray(body)) {
+    const result = await sendWithKMsg(c, body);
+    return c.json({ ok: true, data: result });
+  }
+
+  const result = await sendWithKMsg(c, body);
 
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);

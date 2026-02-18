@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { KMsg } from "k-msg";
 
 type AdvancedSendInput = Parameters<KMsg["send"]>[0];
+type AdvancedSendBody = Record<string, unknown> | Record<string, unknown>[];
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -14,6 +15,14 @@ function getRequiredEnv(name: string): string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isAdvancedSendInput(value: unknown): value is AdvancedSendBody {
+  if (isRecord(value)) {
+    return true;
+  }
+
+  return Array.isArray(value) && value.every((item) => isRecord(item));
 }
 
 const kmsg = new KMsg({
@@ -39,14 +48,23 @@ app.get("/", (c) =>
 
 app.post("/send", async (c) => {
   const body = await c.req.json<unknown>();
-  if (!isRecord(body)) {
+  if (!isAdvancedSendInput(body)) {
     return c.json(
-      { ok: false, message: "request body must be a JSON object" },
+      {
+        ok: false,
+        message:
+          "request body must be a JSON object or an array of JSON objects",
+      },
       400,
     );
   }
 
-  const result = await kmsg.send(body as AdvancedSendInput);
+  if (Array.isArray(body)) {
+    const result = await kmsg.send(body as unknown as AdvancedSendInput);
+    return c.json({ ok: true, data: result });
+  }
+
+  const result = await kmsg.send(body as unknown as AdvancedSendInput);
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);
   }
