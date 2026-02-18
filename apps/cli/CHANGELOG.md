@@ -1,5 +1,16 @@
 # @k-msg/cli
 
+## 0.6.0 — 2026-02-18
+
+### Minor changes
+
+- [a63307e](https://github.com/k-otp/k-msg/commit/a63307eb4a925343b74297b8437f72caba587dff) Improve CLI send usability by clarifying raw-JSON advanced usage, adding `k-msg send --dry-run` preview mode (without provider send), and enhancing batch/error output guidance. — Thanks @imjlk!
+- [48f2797](https://github.com/k-otp/k-msg/commit/48f27975b5734c760f5ec99701623865f28d8c8c) Feat: support batch sending via `k-msg send --input '[...]'` and persistence configuration (`strategy`, `repo`) in `k-msg.config.json`. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.18.1, provider@0.18.1, k-msg@0.18.1
+
 ## 0.5.8 — 2026-02-17
 
 ### Patch changes

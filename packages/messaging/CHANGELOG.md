@@ -1,5 +1,12 @@
 # @k-msg/messaging
 
+## 0.18.1 — 2026-02-18
+
+### Patch changes
+
+- [f5a1e75](https://github.com/k-otp/k-msg/commit/f5a1e758537e0bab130db3b07591d72010edebd1) Optimization: refactor `KMsg.send(batch)` to use smart batching (provider-specific chunk limits) and remove unsafe type casts in interpolation logic. — Thanks @imjlk!
+- Updated dependencies: core@0.18.1
+
 ## 0.18.0 — 2026-02-17
 
 ### Minor changes
