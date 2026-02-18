@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "paths": {
+      "@k-msg/*": ["../../packages/*/src"],
+      "k-msg": ["../../packages/k-msg/src/index.ts"],
+      "k-msg/*": ["../../packages/k-msg/src/*"]
+    }
+  },
+  "include": [
+    "../../packages/core/src/**/*.ts",
+    "../../packages/provider/src/**/*.ts",
+    "../../packages/messaging/src/**/*.ts",
+    "../../packages/template/src/**/*.ts",
+    "../../packages/analytics/src/**/*.ts",
+    "../../packages/channel/src/**/*.ts",
+    "../../packages/webhook/src/**/*.ts",
+    "../../packages/k-msg/src/**/*.ts"
+  ],
+  "exclude": [
+    "../../packages/**/*.test.ts",
+    "../../packages/**/*.integration.ts",
+    "../../packages/**/*.e2e.ts",
+    "../../packages/**/*.spec.ts",
+    "../../examples/**/*",
+    "../../apps/**/*",
+    "../../tests/**/*"
+  ]
+}

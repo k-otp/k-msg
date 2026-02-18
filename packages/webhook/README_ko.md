@@ -1,5 +1,7 @@
 # @k-msg/webhook
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 HTTP 엔드포인트로 실시간 메시지 이벤트를 전달하기 위한 웹훅(Webhook) 전송 도구입니다.
 
 이 패키지는 아래 기능을 제공합니다.

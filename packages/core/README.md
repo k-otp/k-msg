@@ -1,5 +1,7 @@
 # @k-msg/core
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Core types and utilities for the `k-msg` ecosystem.
 
 This package intentionally stays low-level:

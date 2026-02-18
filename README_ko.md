@@ -1,5 +1,7 @@
 # k-msg
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 한국형 멀티채널 메시징 툴킷(프로바이더 주입 + 단일 `send()` UX).
 
 최상위 사용 방식은 아래로 통일됩니다:

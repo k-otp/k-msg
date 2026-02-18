@@ -1,5 +1,7 @@
 # @k-msg/channel
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Channel and sender number management for the K-Message platform.
 
 ## Installation

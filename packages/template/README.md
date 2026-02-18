@@ -1,5 +1,7 @@
 # @k-msg/template
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Template management and validation system for the K-Message platform.
 
 ## Installation

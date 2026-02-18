@@ -1,5 +1,7 @@
 # @k-msg/analytics
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Analytics and reporting for `k-msg`, built on top of delivery-tracking records.
 
 ## Installation

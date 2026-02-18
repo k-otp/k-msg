@@ -1,0 +1,13 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@snippets/*": ["./snippets/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "astro.config.mjs"
+  ]
+}
