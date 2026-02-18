@@ -26,4 +26,11 @@ export {
   listProviderOnboardingSpecs,
   providerOnboardingSpecs,
 } from "./onboarding/specs";
+export {
+  providerConfigFieldSpecs,
+  type ProviderConfigFieldMap,
+  type ProviderConfigFieldSpec,
+  type ProviderConfigFieldType,
+  type ProviderTypeWithConfig,
+} from "./config-fields";
 export { MockProvider } from "./providers/mock/mock.provider";
