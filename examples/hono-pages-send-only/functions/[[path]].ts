@@ -1,6 +1,6 @@
 import { IWINVProvider } from "@k-msg/provider/iwinv";
 import { Hono } from "hono";
-import { KMsg } from "k-msg";
+import { KMsg, type SendInput } from "k-msg";
 
 type Bindings = {
   IWINV_API_KEY: string;
@@ -16,8 +16,7 @@ type PagesContext = {
   passThroughOnException: ExecutionContext["passThroughOnException"];
 };
 
-type AdvancedSendInput = Parameters<KMsg["send"]>[0];
-type AdvancedSendBody = Record<string, unknown> | Record<string, unknown>[];
+type SendPayload = SendInput | SendInput[];
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -48,17 +47,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isAdvancedSendInput(value: unknown): value is AdvancedSendBody {
+function isSendPayload(value: unknown): value is SendPayload {
   if (isRecord(value)) {
     return true;
   }
 
   return Array.isArray(value) && value.every((item) => isRecord(item));
-}
-
-async function sendWithKMsg(c: { env: Bindings }, input: AdvancedSendBody) {
-  const kmsg = await getKMsg(c.env);
-  return await kmsg.send(input as unknown as AdvancedSendInput);
 }
 
 app.get("/", (c) =>
@@ -71,7 +65,7 @@ app.get("/", (c) =>
 
 app.post("/send", async (c) => {
   const body = await c.req.json<unknown>();
-  if (!isAdvancedSendInput(body)) {
+  if (!isSendPayload(body)) {
     return c.json(
       {
         ok: false,
@@ -82,12 +76,13 @@ app.post("/send", async (c) => {
     );
   }
 
+  const kmsg = await getKMsg(c.env);
   if (Array.isArray(body)) {
-    const result = await sendWithKMsg(c, body);
+    const result = await kmsg.send(body);
     return c.json({ ok: true, data: result });
   }
 
-  const result = await sendWithKMsg(c, body);
+  const result = await kmsg.send(body);
 
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);
@@ -103,7 +98,8 @@ app.post("/send/sms", async (c) => {
     from?: string;
   }>();
 
-  const result = await sendWithKMsg(c, { to, text, from });
+  const kmsg = await getKMsg(c.env);
+  const result = await kmsg.send({ to, text, from });
 
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);
