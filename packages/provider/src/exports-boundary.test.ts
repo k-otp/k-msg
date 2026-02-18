@@ -7,6 +7,8 @@ describe("provider export boundaries", () => {
     expect("SolapiProvider" in root).toBe(false);
     expect(typeof root.AligoProvider).toBe("function");
     expect(typeof root.IWINVProvider).toBe("function");
+    expect(typeof root.providerCliMetadata).toBe("object");
+    expect(root.providerCliMetadata.solapi.label).toBe("SOLAPI");
   });
 
   test("solapi subpath exports solapi symbols", async () => {

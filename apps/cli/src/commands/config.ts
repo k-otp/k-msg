@@ -1,5 +1,12 @@
 import { createInterface } from "node:readline/promises";
 import { defineCommand, option } from "@bunli/core";
+import type { MessageType } from "@k-msg/core";
+import {
+  type ProviderConfigFieldSpec,
+  type ProviderTypeWithConfig,
+  providerCliMetadata,
+  providerConfigFieldSpecs,
+} from "@k-msg/provider";
 import { z } from "zod";
 import { optConfig, optJson, strictBooleanFlagSchema } from "../cli/options";
 import { shouldUseJsonOutput } from "../cli/utils";
@@ -8,63 +15,14 @@ import { loadKMsgConfig, resolveConfigPathForWrite } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import { type KMsgCliConfig, providerTypeSchema } from "../config/schema";
 
-const MESSAGE_TYPES = ["ALIMTALK", "SMS", "LMS", "MMS"] as const;
-type MessageType = (typeof MESSAGE_TYPES)[number];
-
 type ProviderEntry = KMsgCliConfig["providers"][number];
-type ProviderType = z.infer<typeof providerTypeSchema>;
-
-interface ProviderFieldSpec {
-  key: string;
-  defaultValue?: string;
-  required?: boolean;
-}
+type ProviderType = ProviderTypeWithConfig;
+const providerTypes = Object.keys(providerCliMetadata) as ProviderType[];
 
 interface PlaintextCredentialLocation {
   providerId: string;
   keyPath: string;
 }
-
-const providerFieldSpecs: Record<ProviderType, ProviderFieldSpec[]> = {
-  mock: [],
-  aligo: [
-    { key: "apiKey", defaultValue: "env:ALIGO_API_KEY", required: true },
-    { key: "userId", defaultValue: "env:ALIGO_USER_ID", required: true },
-    { key: "sender", defaultValue: "env:ALIGO_SENDER" },
-    { key: "senderKey", defaultValue: "env:ALIGO_SENDER_KEY" },
-  ],
-  iwinv: [
-    { key: "apiKey", defaultValue: "env:IWINV_API_KEY", required: true },
-    { key: "smsApiKey", defaultValue: "env:IWINV_SMS_API_KEY" },
-    { key: "smsAuthKey", defaultValue: "env:IWINV_SMS_AUTH_KEY" },
-    { key: "smsCompanyId", defaultValue: "env:IWINV_SMS_COMPANY_ID" },
-    { key: "senderNumber", defaultValue: "env:IWINV_SENDER_NUMBER" },
-  ],
-  solapi: [
-    { key: "apiKey", defaultValue: "env:SOLAPI_API_KEY", required: true },
-    {
-      key: "apiSecret",
-      defaultValue: "env:SOLAPI_API_SECRET",
-      required: true,
-    },
-    { key: "defaultFrom", defaultValue: "env:SOLAPI_DEFAULT_FROM" },
-    { key: "kakaoPfId", defaultValue: "env:SOLAPI_KAKAO_PF_ID" },
-  ],
-};
-
-const providerTypeLabels: Record<ProviderType, string> = {
-  mock: "Mock (local test)",
-  aligo: "Aligo",
-  iwinv: "IWINV",
-  solapi: "SOLAPI",
-};
-
-const providerSupportedTypes: Record<ProviderType, readonly MessageType[]> = {
-  mock: ["ALIMTALK", "SMS", "LMS", "MMS"],
-  aligo: ["ALIMTALK", "SMS", "LMS", "MMS"],
-  iwinv: ["ALIMTALK", "SMS", "LMS", "MMS"],
-  solapi: ["ALIMTALK", "SMS", "LMS", "MMS"],
-};
 
 type SelectOption<T> = {
   label: string;
@@ -321,7 +279,7 @@ function parseProviderType(
 ): ProviderType | undefined {
   if (typeof input !== "string") return undefined;
   const parsed = providerTypeSchema.safeParse(input.trim().toLowerCase());
-  return parsed.success ? parsed.data : undefined;
+  return parsed.success ? (parsed.data as ProviderType) : undefined;
 }
 
 function createConfigSkeleton(): KMsgCliConfig {
@@ -332,53 +290,118 @@ function createConfigSkeleton(): KMsgCliConfig {
   };
 }
 
+function providerFieldEntries(
+  type: ProviderType,
+): Array<[string, ProviderConfigFieldSpec]> {
+  return Object.entries(providerConfigFieldSpecs[type]) as Array<
+    [string, ProviderConfigFieldSpec]
+  >;
+}
+
+function buildProviderConfigWithDefaults(
+  type: ProviderType,
+): Record<string, string> {
+  const config: Record<string, string> = {};
+  for (const [key, fieldSpec] of providerFieldEntries(type)) {
+    if (typeof fieldSpec.defaultValue === "string") {
+      config[key] = fieldSpec.defaultValue;
+    }
+  }
+  return config;
+}
+
+function supportsRoutingSeedType(
+  type: ProviderType,
+  messageType: MessageType,
+): boolean {
+  return providerCliMetadata[type].routingSeedTypes.includes(messageType);
+}
+
+function collectRoutingSeedTypes(providers: ProviderEntry[]): MessageType[] {
+  const types = new Set<MessageType>();
+  for (const provider of providers) {
+    for (const messageType of providerCliMetadata[provider.type]
+      .routingSeedTypes) {
+      types.add(messageType);
+    }
+  }
+  return [...types];
+}
+
+function buildFullTemplateRoutingByType(
+  providers: ProviderEntry[],
+): Record<string, string[]> {
+  const byType: Record<string, string[]> = {};
+  const allMessageTypes = collectRoutingSeedTypes(providers);
+
+  for (const messageType of allMessageTypes) {
+    const ids = providers
+      .filter((provider) => supportsRoutingSeedType(provider.type, messageType))
+      .map((provider) => provider.id);
+    if (ids.length > 0) {
+      byType[messageType] = ids;
+    }
+  }
+
+  return byType;
+}
+
+function resolveDefaultProviderId(
+  providers: ProviderEntry[],
+): string | undefined {
+  return (
+    providers.find((provider) => provider.type === "mock")?.id ??
+    providers[0]?.id
+  );
+}
+
+function resolvePrimaryKakaoProviderId(
+  providers: ProviderEntry[],
+): string | undefined {
+  const preferred = providers.find(
+    (provider) =>
+      provider.type !== "mock" &&
+      supportsRoutingSeedType(provider.type, "ALIMTALK") &&
+      providerCliMetadata[provider.type].defaultKakaoSenderKey !== undefined,
+  );
+  if (preferred) return preferred.id;
+
+  const fallbackWithSenderKey = providers.find(
+    (provider) =>
+      supportsRoutingSeedType(provider.type, "ALIMTALK") &&
+      providerCliMetadata[provider.type].defaultKakaoSenderKey !== undefined,
+  );
+  if (fallbackWithSenderKey) return fallbackWithSenderKey.id;
+
+  return providers.find((provider) =>
+    supportsRoutingSeedType(provider.type, "ALIMTALK"),
+  )?.id;
+}
+
 function createFullTemplateConfig(): KMsgCliConfig {
+  const providers: ProviderEntry[] = providerTypes.map((type) => ({
+    type,
+    id: type,
+    config: buildProviderConfigWithDefaults(type),
+  }));
+
+  const defaultProviderId = resolveDefaultProviderId(providers);
+  const primaryKakaoProviderId = resolvePrimaryKakaoProviderId(providers);
+  const primaryKakaoProviderType = providers.find(
+    (provider) => provider.id === primaryKakaoProviderId,
+  )?.type;
+  const primaryKakaoSenderKey =
+    primaryKakaoProviderType &&
+    providerCliMetadata[primaryKakaoProviderType].defaultKakaoSenderKey;
+
   return {
     $schema: CONFIG_SCHEMA_LATEST_URL,
     version: 1,
-    providers: [
-      { type: "mock", id: "mock", config: {} },
-      {
-        type: "aligo",
-        id: "aligo",
-        config: {
-          apiKey: "env:ALIGO_API_KEY",
-          userId: "env:ALIGO_USER_ID",
-          senderKey: "env:ALIGO_SENDER_KEY",
-          sender: "env:ALIGO_SENDER",
-        },
-      },
-      {
-        type: "iwinv",
-        id: "iwinv",
-        config: {
-          apiKey: "env:IWINV_API_KEY",
-          smsApiKey: "env:IWINV_SMS_API_KEY",
-          smsAuthKey: "env:IWINV_SMS_AUTH_KEY",
-          smsCompanyId: "env:IWINV_SMS_COMPANY_ID",
-          senderNumber: "env:IWINV_SENDER_NUMBER",
-        },
-      },
-      {
-        type: "solapi",
-        id: "solapi",
-        config: {
-          apiKey: "env:SOLAPI_API_KEY",
-          apiSecret: "env:SOLAPI_API_SECRET",
-          defaultFrom: "env:SOLAPI_DEFAULT_FROM",
-          kakaoPfId: "env:SOLAPI_KAKAO_PF_ID",
-        },
-      },
-    ],
+    providers,
     routing: {
-      defaultProviderId: "mock",
+      ...(defaultProviderId ? { defaultProviderId } : {}),
       strategy: "first",
-      byType: {
-        ALIMTALK: ["aligo", "iwinv", "solapi"],
-        SMS: ["aligo", "iwinv", "solapi"],
-        LMS: ["aligo", "iwinv", "solapi"],
-        MMS: ["aligo", "iwinv", "solapi"],
-      },
+      byType: buildFullTemplateRoutingByType(providers),
     },
     defaults: {
       sms: { autoLmsBytes: 90 },
@@ -387,9 +410,11 @@ function createFullTemplateConfig(): KMsgCliConfig {
     aliases: {
       kakaoChannels: {
         main: {
-          providerId: "aligo",
+          providerId: primaryKakaoProviderId ?? defaultProviderId ?? "mock",
           plusId: "@your_channel",
-          senderKey: "env:ALIGO_SENDER_KEY",
+          ...(primaryKakaoSenderKey
+            ? { senderKey: primaryKakaoSenderKey }
+            : {}),
           name: "Main Channel",
         },
       },
@@ -420,16 +445,7 @@ function routeAsList(value: unknown): string[] {
 function getSenderKeyHintByProviderType(
   type: ProviderType,
 ): string | undefined {
-  switch (type) {
-    case "aligo":
-      return "env:ALIGO_SENDER_KEY";
-    case "solapi":
-      return "env:SOLAPI_KAKAO_PF_ID";
-    case "iwinv":
-      return undefined;
-    case "mock":
-      return "env:MOCK_SENDER_KEY";
-  }
+  return providerCliMetadata[type].defaultKakaoSenderKey;
 }
 
 function ensureSchemaField(config: KMsgCliConfig): void {
@@ -475,7 +491,8 @@ function addProviderToRouting(
   provider: ProviderEntry,
 ): void {
   ensureRoutingExists(config);
-  for (const messageType of providerSupportedTypes[provider.type]) {
+  for (const messageType of providerCliMetadata[provider.type]
+    .routingSeedTypes) {
     const current = routeAsList(config.routing.byType[messageType]);
     if (!current.includes(provider.id)) {
       current.push(provider.id);
@@ -487,11 +504,9 @@ function addProviderToRouting(
 function syncRoutingForAllProviders(config: KMsgCliConfig): void {
   ensureRoutingExists(config);
 
-  for (const messageType of MESSAGE_TYPES) {
+  for (const messageType of collectRoutingSeedTypes(config.providers)) {
     const ids = config.providers
-      .filter((provider) =>
-        providerSupportedTypes[provider.type].includes(messageType),
-      )
+      .filter((provider) => supportsRoutingSeedType(provider.type, messageType))
       .map((provider) => provider.id);
     if (ids.length > 0) {
       setRoutingByType(config, messageType, ids);
@@ -534,7 +549,7 @@ function ensureRuntimeDefaults(config: KMsgCliConfig): void {
 
 function ensureKakaoAliasDefaults(config: KMsgCliConfig): void {
   const primaryAlimTalkProvider = config.providers.find((provider) =>
-    providerSupportedTypes[provider.type].includes("ALIMTALK"),
+    supportsRoutingSeedType(provider.type, "ALIMTALK"),
   );
 
   if (!primaryAlimTalkProvider) return;
@@ -684,8 +699,8 @@ async function promptProviderType(input: {
   }
 
   return promptSelectWithArrows<ProviderType>("Select provider type", {
-    options: providerTypeSchema.options.map((type) => ({
-      label: providerTypeLabels[type],
+    options: providerTypes.map((type) => ({
+      label: providerCliMetadata[type].label,
       value: type,
     })),
     default: "iwinv",
@@ -707,24 +722,21 @@ async function promptProviderEntry(input: {
     allowReplace: input.allowReplace,
   });
 
-  const fieldSpecs = providerFieldSpecs[type];
   const config: Record<string, unknown> = {};
 
-  for (const field of fieldSpecs) {
+  for (const [key, fieldSpec] of providerFieldEntries(type)) {
     const raw = await askText({
-      message: `${type}.config.${field.key}`,
-      defaultValue: field.defaultValue,
-      validate: field.required
+      message: `${type}.config.${key}`,
+      defaultValue: fieldSpec.defaultValue,
+      validate: fieldSpec.required
         ? (value) =>
-            value.trim().length > 0
-              ? true
-              : `${field.key} is required for ${type}`
+            value.trim().length > 0 ? true : `${key} is required for ${type}`
         : undefined,
     });
 
     const value = raw.trim();
     if (value.length > 0) {
-      config[field.key] = value;
+      config[key] = value;
     }
   }
 

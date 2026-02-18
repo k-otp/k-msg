@@ -127,4 +127,4 @@ Release automation and changeset policy are documented in:
 
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` public APIs were removed.
 - Message discriminant is `type` (old `channel` naming was removed).
-- `templateId` was renamed to `templateId`.
+- `templateCode` was renamed to `templateId`.

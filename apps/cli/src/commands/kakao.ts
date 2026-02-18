@@ -446,7 +446,7 @@ const templateGetCmd = defineCommand({
     json: optJson,
     provider: optProvider,
     "template-id": option(z.string().min(1), {
-      description: "Template code",
+      description: "Template ID",
     }),
     channel: option(z.string().optional(), {
       description: "Kakao channel alias (from config)",
@@ -604,7 +604,7 @@ const templateUpdateCmd = defineCommand({
     json: optJson,
     provider: optProvider,
     "template-id": option(z.string().min(1), {
-      description: "Template code",
+      description: "Template ID",
     }),
     name: option(z.string().optional(), { description: "New template name" }),
     content: option(z.string().optional(), {
@@ -685,7 +685,7 @@ const templateDeleteCmd = defineCommand({
     json: optJson,
     provider: optProvider,
     "template-id": option(z.string().min(1), {
-      description: "Template code",
+      description: "Template ID",
     }),
     channel: option(z.string().optional(), {
       description: "Kakao channel alias (from config)",
@@ -742,7 +742,7 @@ const templateRequestCmd = defineCommand({
     json: optJson,
     provider: optProvider,
     "template-id": option(z.string().min(1), {
-      description: "Template code",
+      description: "Template ID",
     }),
     channel: option(z.string().optional(), {
       description: "Kakao channel alias (from config)",
