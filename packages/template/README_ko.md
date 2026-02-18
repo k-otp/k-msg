@@ -1,5 +1,7 @@
 # @k-msg/template
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 K-Message 플랫폼의 템플릿 관리 및 검증 패키지입니다.
 
 ## 설치

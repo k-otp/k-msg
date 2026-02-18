@@ -1,5 +1,7 @@
 # @k-msg/channel
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 K-Message 플랫폼의 채널 및 발신번호 관리 패키지입니다.
 
 ## 설치

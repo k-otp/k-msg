@@ -1,5 +1,7 @@
 # k-msg
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 주요 공개 API를 재수출(re-export)하는 통합 패키지입니다:
 
 - `@k-msg/messaging`의 `KMsg`

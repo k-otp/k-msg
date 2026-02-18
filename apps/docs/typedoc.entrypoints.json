@@ -1,0 +1,22 @@
+[
+  "../../packages/analytics/src/index.ts",
+  "../../packages/channel/src/index.ts",
+  "../../packages/core/src/index.ts",
+  "../../packages/k-msg/src/adapters/bun/index.ts",
+  "../../packages/k-msg/src/adapters/cloudflare/index.ts",
+  "../../packages/k-msg/src/adapters/node/index.ts",
+  "../../packages/k-msg/src/index.ts",
+  "../../packages/messaging/src/adapters/bun/index.ts",
+  "../../packages/messaging/src/adapters/cloudflare/index.ts",
+  "../../packages/messaging/src/adapters/node/index.ts",
+  "../../packages/messaging/src/index.ts",
+  "../../packages/messaging/src/queue/index.ts",
+  "../../packages/messaging/src/sender/index.ts",
+  "../../packages/messaging/src/tracking/index.ts",
+  "../../packages/provider/src/aligo/index.ts",
+  "../../packages/provider/src/index.ts",
+  "../../packages/provider/src/iwinv/index.ts",
+  "../../packages/provider/src/solapi/index.ts",
+  "../../packages/template/src/index.ts",
+  "../../packages/webhook/src/index.ts"
+]

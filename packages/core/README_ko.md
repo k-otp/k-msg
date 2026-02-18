@@ -1,5 +1,7 @@
 # @k-msg/core
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 `k-msg` 생태계를 위한 핵심 타입/유틸리티 패키지입니다.
 
 이 패키지는 의도적으로 로우레벨로 유지됩니다:

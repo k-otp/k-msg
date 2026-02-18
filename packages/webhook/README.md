@@ -1,5 +1,7 @@
 # @k-msg/webhook
 
+> Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
+
 Webhook delivery helpers for emitting real-time message events to HTTP endpoints.
 
 This package provides:

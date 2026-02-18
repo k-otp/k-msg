@@ -1,5 +1,7 @@
 # @k-msg/analytics
 
+> 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
+
 `k-msg`용 분석/리포팅 패키지이며, delivery-tracking 레코드를 기반으로 동작합니다.
 
 ## 설치
