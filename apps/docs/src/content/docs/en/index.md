@@ -1,0 +1,29 @@
+---
+title: k-msg Docs
+description: k-msg docs
+---
+
+- Overview: [/en/guides/overview/](/en/guides/overview/)
+- API docs: [/api/readme/](/api/readme/)
+- CLI docs: [/en/cli/](/en/cli/)
+- Code snippets: [/en/snippets/](/en/snippets/)
+
+## Package Guides
+
+- [@k-msg/analytics](/en/guides/packages/analytics/)
+- [@k-msg/channel](/en/guides/packages/channel/)
+- [@k-msg/core](/en/guides/packages/core/)
+- [@k-msg/messaging](/en/guides/packages/messaging/)
+- [@k-msg/provider](/en/guides/packages/provider/)
+- [@k-msg/template](/en/guides/packages/template/)
+- [@k-msg/webhook](/en/guides/packages/webhook/)
+- [k-msg](/en/guides/packages/k-msg/)
+
+## Example Guides
+
+- [express-node-send-only](/en/guides/examples/express-node-send-only/)
+- [hono-bun-send-only](/en/guides/examples/hono-bun-send-only/)
+- [hono-pages-send-only](/en/guides/examples/hono-pages-send-only/)
+- [hono-pages-tracking-hyperdrive](/en/guides/examples/hono-pages-tracking-hyperdrive/)
+- [hono-worker-queue-do](/en/guides/examples/hono-worker-queue-do/)
+- [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/)
