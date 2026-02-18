@@ -143,25 +143,32 @@ describe("config path resolution", () => {
   });
 
   test("does not fail when optional provider sender env vars are missing", () => {
-    const resolved = resolveKMsgConfigEnv({
-      version: 1,
-      providers: [
-        {
-          type: "iwinv",
-          id: "iwinv",
-          config: {
-            apiKey: "test-api-key",
-            senderNumber: "env:IWINV_SENDER_NUMBER",
-          },
-        },
-      ],
-    });
+    const previousSender = Bun.env.IWINV_SENDER_NUMBER;
+    Bun.env.IWINV_SENDER_NUMBER = undefined;
 
-    const providerConfig = resolved.providers[0]?.config as
-      | Record<string, unknown>
-      | undefined;
-    expect(providerConfig?.senderNumber).toBeUndefined();
-    expect(providerConfig?.apiKey).toBe("test-api-key");
+    try {
+      const resolved = resolveKMsgConfigEnv({
+        version: 1,
+        providers: [
+          {
+            type: "iwinv",
+            id: "iwinv",
+            config: {
+              apiKey: "test-api-key",
+              senderNumber: "env:IWINV_SENDER_NUMBER",
+            },
+          },
+        ],
+      });
+
+      const providerConfig = resolved.providers[0]?.config as
+        | Record<string, unknown>
+        | undefined;
+      expect(providerConfig?.senderNumber).toBeUndefined();
+      expect(providerConfig?.apiKey).toBe("test-api-key");
+    } finally {
+      Bun.env.IWINV_SENDER_NUMBER = previousSender;
+    }
   });
 
   test("does not fail when optional kakao alias senderKey env var is missing", () => {

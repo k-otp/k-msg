@@ -261,7 +261,9 @@ const balanceCmd = defineCommand({
             error: {
               code: result.error.code,
               message: result.error.message,
-              context: result.error.context,
+              ...(result.error.details !== undefined
+                ? { details: result.error.details }
+                : {}),
             },
           };
         }),
@@ -277,9 +279,9 @@ const balanceCmd = defineCommand({
           }
 
           if ("error" in item) {
-            console.log(
-              `FAIL ${item.id}: ${item.error.code} - ${item.error.message}`,
-            );
+            const code = item.error?.code ?? "UNKNOWN_ERROR";
+            const message = item.error?.message ?? "Unknown provider error";
+            console.log(`FAIL ${item.id}: ${code} - ${message}`);
             continue;
           }
 
@@ -289,12 +291,7 @@ const balanceCmd = defineCommand({
         }
       }
 
-      if (
-        results.some(
-          (item) =>
-            !item.supported || ("error" in item && item.error !== undefined),
-        )
-      ) {
+      if (results.some((item) => !item.supported || "error" in item)) {
         process.exitCode = 3;
       }
     } catch (error) {

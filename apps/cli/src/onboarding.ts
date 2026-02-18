@@ -59,13 +59,18 @@ function getManualCheckState(
     ({
       done: false,
     } as const);
+  const stateRecord = state as Record<string, unknown>;
   return {
-    done: state.done === true,
-    ...(typeof state.checkedAt === "string"
-      ? { checkedAt: state.checkedAt }
+    done: stateRecord.done === true,
+    ...(typeof stateRecord.checkedAt === "string"
+      ? { checkedAt: stateRecord.checkedAt }
       : {}),
-    ...(typeof state.note === "string" ? { note: state.note } : {}),
-    ...(typeof state.evidence === "string" ? { evidence: state.evidence } : {}),
+    ...(typeof stateRecord.note === "string"
+      ? { note: stateRecord.note }
+      : {}),
+    ...(typeof stateRecord.evidence === "string"
+      ? { evidence: stateRecord.evidence }
+      : {}),
   };
 }
 
@@ -98,7 +103,8 @@ function getPathValue(root: Record<string, unknown>, path: string): unknown {
 
 function hasCallable(provider: Provider, methodName: string): boolean {
   return (
-    typeof (provider as Record<string, unknown>)[methodName] === "function"
+    typeof (provider as unknown as Record<string, unknown>)[methodName] ===
+    "function"
   );
 }
 
