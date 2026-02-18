@@ -65,9 +65,7 @@ function getManualCheckState(
     ...(typeof stateRecord.checkedAt === "string"
       ? { checkedAt: stateRecord.checkedAt }
       : {}),
-    ...(typeof stateRecord.note === "string"
-      ? { note: stateRecord.note }
-      : {}),
+    ...(typeof stateRecord.note === "string" ? { note: stateRecord.note } : {}),
     ...(typeof stateRecord.evidence === "string"
       ? { evidence: stateRecord.evidence }
       : {}),
@@ -580,11 +578,7 @@ export async function runAlimTalkPreflight(input: {
 
   const getTemplate = (provider as unknown as TemplateProvider).getTemplate;
   if (typeof getTemplate === "function") {
-    const probe = await getTemplate.call(
-      provider,
-      templateId,
-      templateContext,
-    );
+    const probe = await getTemplate.call(provider, templateId, templateContext);
     checks.push(
       probe.isSuccess
         ? {

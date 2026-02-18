@@ -12,7 +12,13 @@ export {
   initializeAligo,
 } from "./aligo/provider";
 export type { AligoConfig } from "./aligo/types/aligo";
-
+export {
+  type ProviderConfigFieldMap,
+  type ProviderConfigFieldSpec,
+  type ProviderConfigFieldType,
+  type ProviderTypeWithConfig,
+  providerConfigFieldSpecs,
+} from "./config-fields";
 export {
   createDefaultIWINVProvider,
   createIWINVProvider,
@@ -26,11 +32,4 @@ export {
   listProviderOnboardingSpecs,
   providerOnboardingSpecs,
 } from "./onboarding/specs";
-export {
-  providerConfigFieldSpecs,
-  type ProviderConfigFieldMap,
-  type ProviderConfigFieldSpec,
-  type ProviderConfigFieldType,
-  type ProviderTypeWithConfig,
-} from "./config-fields";
 export { MockProvider } from "./providers/mock/mock.provider";
