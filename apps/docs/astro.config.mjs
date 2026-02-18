@@ -33,6 +33,7 @@ export default defineConfig({
             excludePrivate: true,
             excludeProtected: true,
             excludeInternal: true,
+            gitRevision: "main",
             readme: "none",
           },
         }),
