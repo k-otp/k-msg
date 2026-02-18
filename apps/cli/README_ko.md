@@ -130,7 +130,7 @@ k-msg config provider add iwinv
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
-- `k-msg send --input <json> | --file <path> | --stdin`
+- `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
@@ -203,9 +203,29 @@ k-msg alimtalk preflight \
 
 ### 고급 JSON 전송
 
+`k-msg send`는 Raw `SendInput` JSON(객체/배열) 전용 고급 명령입니다.
+일반 발송 흐름은 `k-msg sms send`, `k-msg alimtalk send` 사용을 권장합니다.
+
 ```bash
 k-msg send --input '{"to":"01012345678","text":"hello"}'
 ```
+
+실제 발송 없이 단건 미리보기:
+
+```bash
+k-msg send --input '{"to":"01012345678","text":"hello"}' --dry-run
+```
+
+실제 발송 없이 배치 미리보기:
+
+```bash
+k-msg send --input '[{"to":"01011112222","text":"hello 1"},{"to":"01033334444","text":"hello 2"}]' --dry-run
+```
+
+`providers doctor`와 `send --dry-run`의 역할은 다릅니다:
+
+- `k-msg providers doctor`: provider/account/capability 준비 상태 점검
+- `k-msg send --dry-run`: 요청 payload 미리보기/검증 (실제 전송 없음)
 
 ## Kakao Channel (Aligo capability)
 
