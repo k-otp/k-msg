@@ -64,8 +64,9 @@
     "docs:prepare:git-history": "bun run scripts/docs/ensure-git-history.ts",
     "docs:generate": "bun run scripts/docs/run-generate.ts",
     "docs:postbuild:sitemap": "bun run scripts/docs/postprocess-sitemap.ts",
+    "docs:check:sitemap-lastmod": "bun run scripts/docs/check-sitemap-lastmod.ts",
     "docs:build": "bun run docs:prepare:git-history && bun run docs:generate && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap",
-    "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/run-generate.ts --check && bun run --cwd apps/docs snippets:typecheck && bun run --cwd apps/docs check && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap",
+    "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/run-generate.ts --check && bun run --cwd apps/docs snippets:typecheck && bun run --cwd apps/docs check && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap && bun run docs:check:sitemap-lastmod",
     "docs:version:snapshot": "bun run scripts/docs/version-snapshot.ts"
   },
   "peerDependencies": {
