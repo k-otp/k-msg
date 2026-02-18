@@ -1,10 +1,12 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
+const cliDir = path.join(repoRoot, "apps/cli");
 const checkMode = process.argv.includes("--check");
 const outputPath = path.join(repoRoot, "apps/docs/src/generated/cli/help.md");
 const cliEntry = path.join(repoRoot, "apps/cli/src/k-msg.ts");
+const generatedCommandsPath = path.join(cliDir, ".bunli/commands.gen.ts");
 
 const targets: string[][] = [
   ["--help"],
@@ -15,6 +17,31 @@ const targets: string[][] = [
   ["send", "--help"],
   ["sms", "--help"],
 ];
+
+async function ensureGeneratedCommands(): Promise<void> {
+  try {
+    await access(generatedCommandsPath);
+    return;
+  } catch {
+    // fall through and generate commands
+  }
+
+  const proc = Bun.spawn(["bun", "run", "generate"], {
+    cwd: cliDir,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  const [exitCode, stdout, stderr] = await Promise.all([
+    proc.exited,
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ]);
+
+  if (exitCode !== 0) {
+    throw new Error(`Failed to generate Bunli commands: ${stderr || stdout}`);
+  }
+}
 
 async function runCommand(args: string[]): Promise<string> {
   const cmd = ["bun", cliEntry, ...args];
@@ -31,13 +58,17 @@ async function runCommand(args: string[]): Promise<string> {
   ]);
 
   if (exitCode !== 0) {
-    throw new Error(`CLI help command failed (${cmd.join(" ")}): ${stderr || stdout}`);
+    throw new Error(
+      `CLI help command failed (${cmd.join(" ")}): ${stderr || stdout}`,
+    );
   }
 
   return stdout.trimEnd();
 }
 
 async function renderHelpMarkdown(): Promise<string> {
+  await ensureGeneratedCommands();
+
   const sections: string[] = [
     "## CLI Help",
     "",
@@ -46,7 +77,8 @@ async function renderHelpMarkdown(): Promise<string> {
   ];
 
   for (const args of targets) {
-    const title = args[0] === "--help" ? "k-msg --help" : `k-msg ${args[0]} --help`;
+    const title =
+      args[0] === "--help" ? "k-msg --help" : `k-msg ${args[0]} --help`;
     const output = await runCommand(args);
 
     sections.push(`## ${title}`);
