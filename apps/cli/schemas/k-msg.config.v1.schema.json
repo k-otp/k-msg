@@ -109,6 +109,16 @@
       },
       "additionalProperties": {}
     },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["none", "log", "queue", "full"]
+        }
+      },
+      "additionalProperties": false
+    },
     "aliases": {
       "type": "object",
       "properties": {
