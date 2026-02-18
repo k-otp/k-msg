@@ -51,23 +51,28 @@ export function shouldUseJsonOutput(
 }
 
 export function printError(error: unknown, asJson: boolean): void {
+  const hint = getErrorHint(error);
+
   if (asJson) {
+    const errorPayload =
+      error instanceof CapabilityNotSupportedError
+        ? {
+            name: error.name,
+            code: "CAPABILITY_NOT_SUPPORTED",
+            message: error.message,
+          }
+        : error instanceof KMsgError
+          ? error.toJSON()
+          : error instanceof Error
+            ? { name: error.name, message: error.message }
+            : { message: String(error) };
+
     console.log(
       JSON.stringify(
         {
           ok: false,
-          error:
-            error instanceof CapabilityNotSupportedError
-              ? {
-                  name: error.name,
-                  code: "CAPABILITY_NOT_SUPPORTED",
-                  message: error.message,
-                }
-              : error instanceof KMsgError
-                ? error.toJSON()
-                : error instanceof Error
-                  ? { name: error.name, message: error.message }
-                  : { message: String(error) },
+          error: errorPayload,
+          ...(hint ? { hint } : {}),
         },
         null,
         2,
@@ -78,14 +83,35 @@ export function printError(error: unknown, asJson: boolean): void {
 
   if (error instanceof CapabilityNotSupportedError) {
     console.error(`CAPABILITY_NOT_SUPPORTED: ${error.message}`);
+    if (hint) console.error(`Try: ${hint}`);
     return;
   }
 
   if (error instanceof KMsgError) {
     console.error(`${error.code}: ${error.message}`);
+    if (hint) console.error(`Try: ${hint}`);
     return;
   }
   console.error(error instanceof Error ? error.message : String(error));
+}
+
+function getErrorHint(error: unknown): string | undefined {
+  if (error instanceof CapabilityNotSupportedError) {
+    return "run `k-msg providers list` to check available capabilities, then `k-msg providers doctor` for diagnostics";
+  }
+
+  if (error instanceof KMsgError) {
+    switch (error.code) {
+      case KMsgErrorCode.INVALID_REQUEST:
+        return "check your input JSON shape/required fields, then run `k-msg providers doctor`";
+      case KMsgErrorCode.TEMPLATE_NOT_FOUND:
+        return "run `k-msg alimtalk preflight --provider <id> --template-code <code> --channel <alias>`";
+      default:
+        return undefined;
+    }
+  }
+
+  return undefined;
 }
 
 export function printWarnings(warnings: SendWarning[] | undefined): void {
