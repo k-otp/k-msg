@@ -1,5 +1,13 @@
 # @k-msg/cli
 
+## 0.6.1 — 2026-02-18
+
+### Patch changes
+
+- [19e519f](https://github.com/k-otp/k-msg/commit/19e519f0edcb4f3a00d07f090046f30ac5c5e87b) Harden CLI/core reliability by making option parsing deterministic (`--flag`/`--no-flag` with strict boolean validation), aligning provider error payloads to `details`, and migrating the send contract field to `templateId` (without compatibility aliases) with matching docs/tests and canonical CI parity checks. — Thanks @imjlk!
+- [aafac43](https://github.com/k-otp/k-msg/commit/aafac43c09c7b95a0a50af610662c91cbc4e6c76) Remove duplicated CLI provider config metadata by sourcing labels, routing seed types, and recommended defaults from `@k-msg/provider`. Also update template option wording to `Template ID` and fix root breaking-change notes to `templateCode -> templateId`. — Thanks @imjlk!
+- Updated dependencies: core@0.18.2, messaging@0.18.2, provider@0.18.2, k-msg@0.18.2
+
 ## 0.6.0 — 2026-02-18
 
 ### Minor changes
