@@ -28,6 +28,15 @@ IWINV_SMS_SENDER_NUMBER=01000000000
 INTERNAL_CRON_TOKEN=local-cron-token
 ```
 
+`INTERNAL_CRON_TOKEN` is required for `POST /internal/tracking/run-once`.
+If it is missing or empty, the endpoint returns `500` (misconfigured).
+
+For deployment, set it as a secret:
+
+```bash
+wrangler secret put INTERNAL_CRON_TOKEN
+```
+
 ## Hyperdrive binding
 
 Update `wrangler.jsonc`:
@@ -69,14 +78,17 @@ bun run dev
 
 ## Routes
 
-- `POST /send` (advanced: raw `SendInput`)
+- `POST /send` (advanced: raw `SendInput` single/batch)
 - `POST /send/sms`
 - `GET /tracking/:messageId`
 - `POST /internal/tracking/run-once`
 
+For batch requests to `POST /send`, the route always returns `200`.
+Check per-item success/failure in `data.results`.
+
 ## Sample requests
 
-Advanced send:
+Advanced send (single):
 
 ```bash
 curl -X POST http://127.0.0.1:8788/send \
@@ -88,6 +100,29 @@ curl -X POST http://127.0.0.1:8788/send \
     "from":"01000000000",
     "providerId":"iwinv"
   }'
+```
+
+Advanced send (batch):
+
+```bash
+curl -X POST http://127.0.0.1:8788/send \
+  -H "content-type: application/json" \
+  -d '[
+    {
+      "type":"SMS",
+      "to":"01012345678",
+      "text":"hello from advanced send route #1",
+      "from":"01000000000",
+      "providerId":"iwinv"
+    },
+    {
+      "type":"SMS",
+      "to":"01012345679",
+      "text":"hello from advanced send route #2",
+      "from":"01000000000",
+      "providerId":"iwinv"
+    }
+  ]'
 ```
 
 SMS shortcut send:

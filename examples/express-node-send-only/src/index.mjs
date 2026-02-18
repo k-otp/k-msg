@@ -14,6 +14,14 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isAdvancedSendInput(value) {
+  if (isRecord(value)) {
+    return true;
+  }
+
+  return Array.isArray(value) && value.every((item) => isRecord(item));
+}
+
 const kmsg = new KMsg({
   providers: [
     new IWINVProvider({
@@ -37,10 +45,16 @@ app.get("/", (_req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-  if (!isRecord(req.body)) {
-    return res
-      .status(400)
-      .json({ ok: false, message: "request body must be a JSON object" });
+  if (!isAdvancedSendInput(req.body)) {
+    return res.status(400).json({
+      ok: false,
+      message: "request body must be a JSON object or an array of JSON objects",
+    });
+  }
+
+  if (Array.isArray(req.body)) {
+    const result = await kmsg.send(req.body);
+    return res.json({ ok: true, data: result });
   }
 
   const result = await kmsg.send(req.body);

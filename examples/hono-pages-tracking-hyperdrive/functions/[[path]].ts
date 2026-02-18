@@ -28,6 +28,7 @@ type MessagingApp = {
 };
 
 type AdvancedSendInput = Parameters<KMsg["send"]>[0];
+type AdvancedSendBody = Record<string, unknown> | Record<string, unknown>[];
 
 let appPromise: Promise<MessagingApp> | undefined;
 
@@ -43,6 +44,14 @@ function getMessagingApp(env: Bindings): Promise<MessagingApp> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isAdvancedSendInput(value: unknown): value is AdvancedSendBody {
+  if (isRecord(value)) {
+    return true;
+  }
+
+  return Array.isArray(value) && value.every((item) => isRecord(item));
 }
 
 async function buildMessagingApp(env: Bindings): Promise<MessagingApp> {
@@ -113,15 +122,24 @@ app.get("/", (c) =>
 
 app.post("/send", async (c) => {
   const body = await c.req.json<unknown>();
-  if (!isRecord(body)) {
+  if (!isAdvancedSendInput(body)) {
     return c.json(
-      { ok: false, message: "request body must be a JSON object" },
+      {
+        ok: false,
+        message:
+          "request body must be a JSON object or an array of JSON objects",
+      },
       400,
     );
   }
 
   const svc = await getMessagingApp(c.env);
-  const result = await svc.send(body as AdvancedSendInput);
+  if (Array.isArray(body)) {
+    const result = await svc.send(body as unknown as AdvancedSendInput);
+    return c.json({ ok: true, data: result });
+  }
+
+  const result = await svc.send(body as unknown as AdvancedSendInput);
 
   if (result.isFailure) {
     return c.json({ ok: false, error: result.error.toJSON() }, 400);
@@ -158,7 +176,12 @@ app.get("/tracking/:messageId", async (c) => {
 });
 
 app.post("/internal/tracking/run-once", async (c) => {
-  if (c.req.header("x-cron-token") !== c.env.INTERNAL_CRON_TOKEN) {
+  const requiredToken = c.env.INTERNAL_CRON_TOKEN?.trim();
+  if (!requiredToken) {
+    return c.text("server misconfigured: INTERNAL_CRON_TOKEN is required", 500);
+  }
+
+  if (c.req.header("x-cron-token") !== requiredToken) {
     return c.text("unauthorized", 401);
   }
 

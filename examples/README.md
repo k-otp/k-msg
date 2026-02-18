@@ -6,22 +6,22 @@ This directory contains runnable templates for common integration setups.
 
 - `hono-pages-send-only`
   - Hono + Cloudflare Pages Functions
-  - Advanced send route (`POST /send`) + SMS shortcut (`POST /send/sms`)
+  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
   - Uses `k-msg` (`KMsg`) + `@k-msg/provider/iwinv`
 
 - `express-node-send-only`
   - Express + Node.js
-  - Advanced send route (`POST /send`) + SMS shortcut (`POST /send/sms`)
+  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
   - Uses `k-msg` (`KMsg`) + `@k-msg/provider`
 
 - `hono-bun-send-only`
   - Hono + Bun (`Bun.serve`)
-  - Advanced send route (`POST /send`) + SMS shortcut (`POST /send/sms`)
+  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
   - Uses `k-msg` (`KMsg`) + `@k-msg/provider`
 
 - `hono-pages-tracking-hyperdrive`
   - Hono + Cloudflare Pages Functions
-  - Advanced send route (`POST /send`) + tracking (Hyperdrive/Postgres)
+  - Advanced send route (`POST /send`, single/batch) + tracking (Hyperdrive/Postgres)
   - Requires `nodejs_compat` (current `postgres` driver dependency)
   - Uses `k-msg/adapters/cloudflare` SQL adapter + `@k-msg/messaging/tracking`
 
@@ -42,3 +42,4 @@ This directory contains runnable templates for common integration setups.
 - These templates are intentionally minimal and focused on wiring.
 - Copy one template into your own app and adjust provider/bindings/secrets.
 - `k-msg` and `@k-msg/*` dependencies in examples use the npm `latest` tag.
+- In templates with advanced `POST /send`, array input is supported and batch responses return `200` with per-item outcomes in `data.results`.
