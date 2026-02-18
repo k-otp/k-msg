@@ -90,7 +90,7 @@ if (sms.isFailure) throw sms.error;
 const alimtalk = await provider.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "YOUR_TEMPLATE_CODE",
+  templateId: "YOUR_TEMPLATE_CODE",
   variables: { name: "Jane" },
 });
 if (alimtalk.isFailure) throw alimtalk.error;
