@@ -1,5 +1,5 @@
-import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
+import { KMsg } from "k-msg";
 
 const kmsg = new KMsg({
   providers: [

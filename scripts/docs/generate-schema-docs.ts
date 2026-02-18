@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
@@ -45,11 +45,15 @@ function renderSchemaBlock(fileName: string, schema: JsonSchema): string {
   lines.push("| field | type | required | description |");
   lines.push("| --- | --- | --- | --- |");
 
-  const entries = Object.entries(schema.properties ?? {}).sort((a, b) => a[0].localeCompare(b[0]));
+  const entries = Object.entries(schema.properties ?? {}).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
   for (const [fieldName, fieldSchema] of entries) {
     const requiredLabel = required.has(fieldName) ? "yes" : "no";
     const description = (fieldSchema.description ?? "").replaceAll("|", "\\|");
-    lines.push(`| \`${fieldName}\` | \`${typeLabel(fieldSchema)}\` | ${requiredLabel} | ${description} |`);
+    lines.push(
+      `| \`${fieldName}\` | \`${typeLabel(fieldSchema)}\` | ${requiredLabel} | ${description} |`,
+    );
   }
 
   lines.push("");
@@ -62,7 +66,9 @@ function renderSchemaBlock(fileName: string, schema: JsonSchema): string {
 }
 
 async function renderSchemaMarkdown(): Promise<string> {
-  const files = (await readdir(schemaDir)).filter((name) => name.endsWith(".json")).sort();
+  const files = (await readdir(schemaDir))
+    .filter((name) => name.endsWith(".json"))
+    .sort();
 
   const sections: string[] = [
     "## CLI Config Schema",

@@ -27,7 +27,10 @@ async function collectDocsFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-async function rewriteSnapshotContent(locale: string, targetDir: string): Promise<void> {
+async function rewriteSnapshotContent(
+  locale: string,
+  targetDir: string,
+): Promise<void> {
   const files = await collectDocsFiles(targetDir);
   const fromPrefix = `/${locale}/${sourceVersion}/`;
   const toPrefix = `/${locale}/${targetVersion}/`;
@@ -38,11 +41,17 @@ async function rewriteSnapshotContent(locale: string, targetDir: string): Promis
 
     if (file === path.join(targetDir, "index.md")) {
       if (locale === "en") {
-        next = next.replace(/^title:\s*.+$/m, 'title: k-msg Docs (v0)');
-        next = next.replace(/^description:\s*.+$/m, 'description: k-msg v0 LTS docs');
+        next = next.replace(/^title:\s*.+$/m, "title: k-msg Docs (v0)");
+        next = next.replace(
+          /^description:\s*.+$/m,
+          "description: k-msg v0 LTS docs",
+        );
       } else {
-        next = next.replace(/^title:\s*.+$/m, 'title: k-msg 문서 (v0)');
-        next = next.replace(/^description:\s*.+$/m, 'description: k-msg v0 LTS 문서');
+        next = next.replace(/^title:\s*.+$/m, "title: k-msg 문서 (v0)");
+        next = next.replace(
+          /^description:\s*.+$/m,
+          "description: k-msg v0 LTS 문서",
+        );
       }
     }
 
@@ -61,7 +70,9 @@ async function copyLocaleVersion(locale: string): Promise<void> {
   await cp(src, dest, { recursive: true, force: true });
   await rewriteSnapshotContent(locale, dest);
 
-  console.log(`snapshot: ${locale}/${sourceVersion} -> ${locale}/${targetVersion}`);
+  console.log(
+    `snapshot: ${locale}/${sourceVersion} -> ${locale}/${targetVersion}`,
+  );
 }
 
 await Promise.all(locales.map((locale) => copyLocaleVersion(locale)));

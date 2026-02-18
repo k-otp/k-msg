@@ -6,8 +6,5 @@
       "@snippets/*": ["./snippets/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "astro.config.mjs"
-  ]
+  "include": ["src/**/*", "astro.config.mjs"]
 }

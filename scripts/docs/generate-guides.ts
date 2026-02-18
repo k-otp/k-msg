@@ -53,7 +53,10 @@ function stripCanonicalBanner(markdown: string): string {
     .replace(/^>\s*공식 문서:\s*.+\n+/m, "");
 }
 
-function rewriteRelativeLinks(markdown: string, sourceRelativePath: string): string {
+function rewriteRelativeLinks(
+  markdown: string,
+  sourceRelativePath: string,
+): string {
   const sourceDir = path.posix.dirname(toPosix(sourceRelativePath));
 
   return markdown.replace(/\]\(([^)]+)\)/g, (match, rawHref: string) => {
@@ -71,7 +74,9 @@ function rewriteRelativeLinks(markdown: string, sourceRelativePath: string): str
     }
 
     const cleanHref = href.split(" ")[0] ?? href;
-    const normalized = path.posix.normalize(path.posix.join(sourceDir, cleanHref));
+    const normalized = path.posix.normalize(
+      path.posix.join(sourceDir, cleanHref),
+    );
     const absolute = `${githubBlobBase}/${normalized}`;
 
     return match.replace(href, absolute);
@@ -184,10 +189,16 @@ function buildIndexPage(params: {
   const isKo = params.locale === "ko";
   const urlRoot = docsUrlRoot(params.locale);
   const packageLinks = params.packageDocs
-    .map((pkg) => `- [${pkg.packageName}](${urlRoot}/guides/packages/${pkg.dirName}/)`)
+    .map(
+      (pkg) =>
+        `- [${pkg.packageName}](${urlRoot}/guides/packages/${pkg.dirName}/)`,
+    )
     .join("\n");
   const exampleLinks = params.exampleDocs
-    .map((example) => `- [${example.dirName}](${urlRoot}/guides/examples/${example.dirName}/)`)
+    .map(
+      (example) =>
+        `- [${example.dirName}](${urlRoot}/guides/examples/${example.dirName}/)`,
+    )
     .join("\n");
 
   const content = isKo
@@ -234,9 +245,19 @@ ${exampleLinks}
   };
 }
 
-function buildGuideIndex(locale: Locale, section: "packages" | "examples"): OutputFile {
+function buildGuideIndex(
+  locale: Locale,
+  section: "packages" | "examples",
+): OutputFile {
   const isKo = locale === "ko";
-  const title = section === "packages" ? (isKo ? "패키지 가이드" : "Package Guides") : isKo ? "예제 가이드" : "Example Guides";
+  const title =
+    section === "packages"
+      ? isKo
+        ? "패키지 가이드"
+        : "Package Guides"
+      : isKo
+        ? "예제 가이드"
+        : "Example Guides";
 
   const content = `---\ntitle: ${title}\n---\n\n${isKo ? "자동 생성 문서 목록입니다." : "Auto-generated documentation index."}\n`;
 

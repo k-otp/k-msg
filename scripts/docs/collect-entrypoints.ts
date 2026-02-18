@@ -33,7 +33,11 @@ function toTypeScriptSource(candidate: string): string {
   if (srcLike.endsWith(".d.ts")) {
     return srcLike.replace(/\.d\.ts$/, ".ts");
   }
-  if (srcLike.endsWith(".mjs") || srcLike.endsWith(".cjs") || srcLike.endsWith(".js")) {
+  if (
+    srcLike.endsWith(".mjs") ||
+    srcLike.endsWith(".cjs") ||
+    srcLike.endsWith(".js")
+  ) {
     return srcLike.replace(/\.(mjs|cjs|js)$/, ".ts");
   }
 
@@ -86,9 +90,13 @@ async function collectEntryPoints(): Promise<string[]> {
 
       const tsPath = toTypeScriptSource(selectedPath);
       const absoluteTsPath = path.join(repoRoot, pkg.dir, tsPath);
-      const relativeToDocs = path.relative(docsDir, absoluteTsPath).replaceAll(path.sep, "/");
+      const relativeToDocs = path
+        .relative(docsDir, absoluteTsPath)
+        .replaceAll(path.sep, "/");
 
-      entries.add(relativeToDocs.startsWith(".") ? relativeToDocs : `./${relativeToDocs}`);
+      entries.add(
+        relativeToDocs.startsWith(".") ? relativeToDocs : `./${relativeToDocs}`,
+      );
     }
   }
 
@@ -96,7 +104,7 @@ async function collectEntryPoints(): Promise<string[]> {
 }
 
 async function main(): Promise<void> {
-  const next = JSON.stringify(await collectEntryPoints(), null, 2) + "\n";
+  const next = `${JSON.stringify(await collectEntryPoints(), null, 2)}\n`;
 
   let current = "";
   try {
