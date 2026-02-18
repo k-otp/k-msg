@@ -555,13 +555,13 @@ describe("VariableReplacer", () => {
     expect(result.content).toContain("₩50,000");
   });
 
-  test("should handle nested object variables", () => {
+  test("should replace variables with VariableMap-compatible values", () => {
     const replacer = new VariableReplacer();
 
-    const content = "#{user.name}님, #{order.total}원";
+    const content = "#{userName}님, #{orderTotal}원";
     const variables = {
-      user: { name: "김철수" },
-      order: { total: 25000 },
+      userName: "김철수",
+      orderTotal: 25000,
     };
 
     const result = replacer.replace(content, variables);

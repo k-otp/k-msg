@@ -25,7 +25,11 @@ import {
 } from "../runtime";
 
 function hasFunction(provider: ProviderWithCapabilities, key: string): boolean {
-  return typeof (provider as Record<string, unknown>)[key] === "function";
+  if (!(key in provider)) {
+    return false;
+  }
+  const value = provider[key as keyof ProviderWithCapabilities] as unknown;
+  return typeof value === "function";
 }
 
 function requireProviderById(
