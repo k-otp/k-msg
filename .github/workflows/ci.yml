@@ -15,6 +15,7 @@ env:
 jobs:
   docs-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,6 +63,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
