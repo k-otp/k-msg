@@ -11,7 +11,7 @@ import syncTypeDocLocales from "./plugins/sync-typedoc-locales.mjs";
 const docsContentRoot = fileURLToPath(
   new URL("./src/content/docs", import.meta.url),
 );
-const docsSlugIndexPromise = buildDocsSlugIndex();
+let docsSlugIndexPromise;
 const mtimeCache = new Map();
 
 function toPosix(input) {
@@ -32,7 +32,16 @@ function fileToSlug(filePath) {
 }
 
 async function walkMarkdownFiles(dirPath, output) {
-  const entries = await readdir(dirPath, { withFileTypes: true });
+  let entries;
+  try {
+    entries = await readdir(dirPath, { withFileTypes: true });
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
@@ -75,6 +84,10 @@ function pathSitemapMeta(pathname) {
 }
 
 async function resolveLastmod(urlString) {
+  if (!docsSlugIndexPromise) {
+    docsSlugIndexPromise = buildDocsSlugIndex();
+  }
+
   const slugIndex = await docsSlugIndexPromise;
   const pathname = new URL(urlString).pathname;
   const slug = normalizeSlug(pathname);
