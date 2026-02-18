@@ -5,7 +5,7 @@ prev: false
 title: "MetricData"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L23)
+Defined in: [packages/analytics/src/types/analytics.types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L23)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:23](https://github.
 
 > **dimensions**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L28)
+Defined in: [packages/analytics/src/types/analytics.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L28)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:28](https://github.
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L24)
+Defined in: [packages/analytics/src/types/analytics.types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L24)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:24](https://github.
 
 > `optional` **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L29)
+Defined in: [packages/analytics/src/types/analytics.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L29)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:29](https://github.
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L26)
+Defined in: [packages/analytics/src/types/analytics.types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L26)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:26](https://github.
 
 > **type**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L25)
+Defined in: [packages/analytics/src/types/analytics.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L25)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:25](https://github.
 
 > **value**: `number`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L27)
+Defined in: [packages/analytics/src/types/analytics.types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L27)

@@ -5,7 +5,7 @@ prev: false
 title: "ReportGenerator"
 ---
 
-Defined in: [packages/analytics/src/services/report.generator.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L9)
+Defined in: [packages/analytics/src/services/report.generator.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L9)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:9](https://gith
 
 > **new ReportGenerator**(`config`): `ReportGenerator`
 
-Defined in: [packages/analytics/src/services/report.generator.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L12)
+Defined in: [packages/analytics/src/services/report.generator.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L12)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:12](https://git
 
 > **exportToCSV**(`report`): `Promise`\<`string`\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:167](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L167)
+Defined in: [packages/analytics/src/services/report.generator.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L167)
 
 보고서를 CSV 형식으로 내보내기
 
@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:167](https://gi
 
 > **exportToJSON**(`report`): `Promise`\<`string`\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:186](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L186)
+Defined in: [packages/analytics/src/services/report.generator.ts:186](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L186)
 
 보고서를 JSON 형식으로 내보내기
 
@@ -71,7 +71,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:186](https://gi
 
 > **generateCustomReport**(`name`, `dateRange`, `filters`, `metricTypes`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:142](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L142)
+Defined in: [packages/analytics/src/services/report.generator.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L142)
 
 커스텀 보고서 생성
 
@@ -109,7 +109,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:142](https://gi
 
 > **generateDailySummary**(`date`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L19)
+Defined in: [packages/analytics/src/services/report.generator.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L19)
 
 일일 요약 보고서 생성
 
@@ -129,7 +129,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:19](https://git
 
 > **generateMonthlyReport**(`year`, `month`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L74)
+Defined in: [packages/analytics/src/services/report.generator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L74)
 
 월간 보고서 생성
 
@@ -153,7 +153,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:74](https://git
 
 > **generateProviderReport**(`providerId`, `dateRange`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:104](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L104)
+Defined in: [packages/analytics/src/services/report.generator.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L104)
 
 프로바이더별 성능 보고서
 
@@ -183,7 +183,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:104](https://gi
 
 > **generateTemplateUsageReport**(`dateRange`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:123](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L123)
+Defined in: [packages/analytics/src/services/report.generator.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L123)
 
 템플릿 사용량 보고서
 
@@ -209,7 +209,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:123](https://gi
 
 > **generateWeeklyReport**(`weekStartDate`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
 
-Defined in: [packages/analytics/src/services/report.generator.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/report.generator.ts#L48)
+Defined in: [packages/analytics/src/services/report.generator.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L48)
 
 주간 보고서 생성
 

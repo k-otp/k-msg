@@ -5,7 +5,7 @@ prev: false
 title: "SenderNumberCategory"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L64)
+Defined in: [packages/channel/src/types/channel.types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L64)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:64](https://github.com/
 
 > **BUSINESS**: `"BUSINESS"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L65)
+Defined in: [packages/channel/src/types/channel.types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L65)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:65](https://github.com/
 
 > **GOVERNMENT**: `"GOVERNMENT"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:67](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L67)
+Defined in: [packages/channel/src/types/channel.types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L67)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:67](https://github.com/
 
 > **NON\_PROFIT**: `"NON_PROFIT"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L68)
+Defined in: [packages/channel/src/types/channel.types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L68)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:68](https://github.com/
 
 > **PERSONAL**: `"PERSONAL"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:66](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L66)
+Defined in: [packages/channel/src/types/channel.types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L66)

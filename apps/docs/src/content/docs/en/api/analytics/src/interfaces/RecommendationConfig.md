@@ -5,7 +5,7 @@ prev: false
 title: "RecommendationConfig"
 ---
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L10)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L10)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:10](https:
 
 > **categories**: `RecommendationCategory`[]
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L15)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L15)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:15](https:
 
 > **confidenceThreshold**: `number`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L13)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L13)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:13](https:
 
 > **enableMachineLearning**: `boolean`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L12)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L12)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:12](https:
 
 > **maxRecommendations**: `number`
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L14)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L14)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:14](https:
 
 > **rules**: [`RecommendationRule`](/api/analytics/src/interfaces/recommendationrule/)[]
 
-Defined in: [packages/analytics/src/insights/recommendation.engine.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/recommendation.engine.ts#L11)
+Defined in: [packages/analytics/src/insights/recommendation.engine.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L11)

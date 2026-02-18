@@ -5,7 +5,7 @@ prev: false
 title: "Provider"
 ---
 
-Defined in: [packages/core/src/provider.ts:108](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L108)
+Defined in: [packages/core/src/provider.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L108)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:108](https://github.com/k-otp/k-msg/b
 
 > `readonly` **id**: `string`
 
-Defined in: [packages/core/src/provider.ts:109](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L109)
+Defined in: [packages/core/src/provider.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L109)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/provider.ts:109](https://github.com/k-otp/k-msg/b
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/core/src/provider.ts:110](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L110)
+Defined in: [packages/core/src/provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L110)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/provider.ts:110](https://github.com/k-otp/k-msg/b
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/core/src/provider.ts:111](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L111)
+Defined in: [packages/core/src/provider.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L111)
 
 ## Methods
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/provider.ts:111](https://github.com/k-otp/k-msg/b
 
 > `optional` **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:115](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L115)
+Defined in: [packages/core/src/provider.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L115)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/provider.ts:115](https://github.com/k-otp/k-msg/b
 
 > `optional` **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/core/src/provider.ts:118](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L118)
+Defined in: [packages/core/src/provider.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L118)
 
 #### Returns
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/provider.ts:118](https://github.com/k-otp/k-msg/b
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/core/src/provider.ts:113](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L113)
+Defined in: [packages/core/src/provider.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L113)
 
 #### Returns
 
@@ -79,7 +79,7 @@ Defined in: [packages/core/src/provider.ts:113](https://github.com/k-otp/k-msg/b
 
 > **send**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:114](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L114)
+Defined in: [packages/core/src/provider.ts:114](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L114)
 
 #### Parameters
 

@@ -5,7 +5,7 @@ prev: false
 title: "MetricType"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L10)
+Defined in: [packages/analytics/src/types/analytics.types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L10)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:10](https://github.
 
 > **CHANNEL\_USAGE**: `"channel_usage"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L17)
+Defined in: [packages/analytics/src/types/analytics.types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L17)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:17](https://github.
 
 > **CLICK\_RATE**: `"click_rate"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L20)
+Defined in: [packages/analytics/src/types/analytics.types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L20)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:20](https://github.
 
 > **DELIVERY\_RATE**: `"delivery_rate"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L19)
+Defined in: [packages/analytics/src/types/analytics.types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L19)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:19](https://github.
 
 > **ERROR\_RATE**: `"error_rate"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L18)
+Defined in: [packages/analytics/src/types/analytics.types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L18)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:18](https://github.
 
 > **MESSAGE\_CLICKED**: `"message_clicked"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L14)
+Defined in: [packages/analytics/src/types/analytics.types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L14)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:14](https://github.
 
 > **MESSAGE\_DELIVERED**: `"message_delivered"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L12)
+Defined in: [packages/analytics/src/types/analytics.types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L12)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:12](https://github.
 
 > **MESSAGE\_FAILED**: `"message_failed"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L13)
+Defined in: [packages/analytics/src/types/analytics.types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L13)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:13](https://github.
 
 > **MESSAGE\_SENT**: `"message_sent"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L11)
+Defined in: [packages/analytics/src/types/analytics.types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L11)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:11](https://github.
 
 > **PROVIDER\_PERFORMANCE**: `"provider_performance"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L16)
+Defined in: [packages/analytics/src/types/analytics.types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L16)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:16](https://github.
 
 > **TEMPLATE\_USAGE**: `"template_usage"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L15)
+Defined in: [packages/analytics/src/types/analytics.types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L15)

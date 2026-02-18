@@ -5,7 +5,7 @@ prev: false
 title: "BalanceProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:104](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L104)
+Defined in: [packages/core/src/provider.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L104)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:104](https://github.com/k-otp/k-msg/b
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:105](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L105)
+Defined in: [packages/core/src/provider.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L105)
 
 #### Parameters
 

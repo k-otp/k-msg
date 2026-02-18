@@ -5,7 +5,7 @@ prev: false
 title: "MockTemplateService"
 ---
 
-Defined in: [packages/template/src/services/template.service.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L10)
+Defined in: [packages/template/src/services/template.service.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L10)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/template/src/services/template.service.ts:10](https://gith
 
 > **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/services/template.service.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L13)
+Defined in: [packages/template/src/services/template.service.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L13)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: [packages/template/src/services/template.service.ts:13](https://gith
 
 > **deleteTemplate**(`templateId`): `Promise`\<`void`\>
 
-Defined in: [packages/template/src/services/template.service.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L71)
+Defined in: [packages/template/src/services/template.service.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L71)
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: [packages/template/src/services/template.service.ts:71](https://gith
 
 > **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
 
-Defined in: [packages/template/src/services/template.service.ts:45](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L45)
+Defined in: [packages/template/src/services/template.service.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L45)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Defined in: [packages/template/src/services/template.service.ts:45](https://gith
 
 > **renderTemplate**(`templateId`, `variables`): `Promise`\<`string`\>
 
-Defined in: [packages/template/src/services/template.service.ts:75](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L75)
+Defined in: [packages/template/src/services/template.service.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L75)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: [packages/template/src/services/template.service.ts:75](https://gith
 
 > **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/services/template.service.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/services/template.service.ts#L49)
+Defined in: [packages/template/src/services/template.service.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L49)
 
 #### Parameters
 

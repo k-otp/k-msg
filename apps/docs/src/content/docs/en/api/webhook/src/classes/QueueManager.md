@@ -5,7 +5,7 @@ prev: false
 title: "QueueManager"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L14)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L14)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:14](https://github
 
 > **new QueueManager**(`config?`): `QueueManager`
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L31)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L31)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:31](https://github
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L16)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com
 
 > **cleanupExpiredJobs**(): `Promise`\<`number`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:252](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L252)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:252](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L252)
 
 만료된 작업 정리
 
@@ -79,7 +79,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:252](https://githu
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:226](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L226)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:226](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L226)
 
 큐 비우기
 
@@ -93,7 +93,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:226](https://githu
 
 > **dequeue**(): `Promise`\<[`DispatchJob`](/api/webhook/src/interfaces/dispatchjob/) \| `null`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L101)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L101)
 
 우선순위에 따라 작업 추출
 
@@ -107,7 +107,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:101](https://githu
 
 > **dequeueFromPriority**(`priority`): `Promise`\<[`DispatchJob`](/api/webhook/src/interfaces/dispatchjob/) \| `null`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:131](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L131)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L131)
 
 특정 우선순위 큐에서 작업 추출
 
@@ -127,7 +127,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:131](https://githu
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L44)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -153,7 +153,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 > **enqueue**(`job`): `Promise`\<`boolean`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L53)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L53)
 
 작업을 큐에 추가
 
@@ -173,7 +173,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:53](https://github
 
 > **getStats**(): `object`
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:205](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L205)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L205)
 
 큐 통계 조회
 
@@ -211,7 +211,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:205](https://githu
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L20)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -237,7 +237,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L9)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -263,7 +263,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L35)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -289,7 +289,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 > **peek**(): [`DispatchJob`](/api/webhook/src/interfaces/dispatchjob/) \| `null`
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:154](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L154)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L154)
 
 작업 상태 확인
 
@@ -303,7 +303,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:154](https://githu
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L57)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -325,7 +325,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeJob**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:166](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L166)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L166)
 
 특정 작업 제거
 
@@ -345,7 +345,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:166](https://githu
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L31)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -371,7 +371,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:429](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/queue.manager.ts#L429)
+Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:429](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L429)
 
 큐 관리자 종료
 

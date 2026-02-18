@@ -5,7 +5,7 @@ prev: false
 title: "ChannelStatus"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L25)
+Defined in: [packages/channel/src/types/channel.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L25)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:25](https://github.com/
 
 > **ACTIVE**: `"ACTIVE"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L28)
+Defined in: [packages/channel/src/types/channel.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L28)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:28](https://github.com/
 
 > **BLOCKED**: `"BLOCKED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L30)
+Defined in: [packages/channel/src/types/channel.types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L30)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:30](https://github.com/
 
 > **DELETED**: `"DELETED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L31)
+Defined in: [packages/channel/src/types/channel.types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L31)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:31](https://github.com/
 
 > **PENDING**: `"PENDING"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L26)
+Defined in: [packages/channel/src/types/channel.types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L26)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:26](https://github.com/
 
 > **SUSPENDED**: `"SUSPENDED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L29)
+Defined in: [packages/channel/src/types/channel.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L29)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:29](https://github.com/
 
 > **VERIFYING**: `"VERIFYING"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/types/channel.types.ts#L27)
+Defined in: [packages/channel/src/types/channel.types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L27)

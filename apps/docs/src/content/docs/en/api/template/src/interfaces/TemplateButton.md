@@ -5,7 +5,7 @@ prev: false
 title: "TemplateButton"
 ---
 
-Defined in: [packages/template/src/types/template.types.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L39)
+Defined in: [packages/template/src/types/template.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L39)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/types/template.types.ts:39](https://github.co
 
 > `optional` **linkAndroid**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:45](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L45)
+Defined in: [packages/template/src/types/template.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L45)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/types/template.types.ts:45](https://github.co
 
 > `optional` **linkIos**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L44)
+Defined in: [packages/template/src/types/template.types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L44)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/types/template.types.ts:44](https://github.co
 
 > `optional` **linkMobile**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:42](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L42)
+Defined in: [packages/template/src/types/template.types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L42)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/template/src/types/template.types.ts:42](https://github.co
 
 > `optional` **linkPc**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L43)
+Defined in: [packages/template/src/types/template.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L43)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/template/src/types/template.types.ts:43](https://github.co
 
 > **name**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:41](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L41)
+Defined in: [packages/template/src/types/template.types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L41)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/template/src/types/template.types.ts:41](https://github.co
 
 > `optional` **schemeAndroid**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L47)
+Defined in: [packages/template/src/types/template.types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L47)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/template/src/types/template.types.ts:47](https://github.co
 
 > `optional` **schemeIos**: `string`
 
-Defined in: [packages/template/src/types/template.types.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L46)
+Defined in: [packages/template/src/types/template.types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L46)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: [packages/template/src/types/template.types.ts:46](https://github.co
 
 > **type**: `"WL"` \| `"AL"` \| `"BK"` \| `"MD"` \| `"DS"`
 
-Defined in: [packages/template/src/types/template.types.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/types/template.types.ts#L40)
+Defined in: [packages/template/src/types/template.types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L40)

@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingAnalyticsService"
 ---
 
-Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/delivery-tracking.analytics.ts#L64)
+Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/delivery-tracking.analytics.ts#L64)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:64](
 
 > **new DeliveryTrackingAnalyticsService**(`config`): `DeliveryTrackingAnalyticsService`
 
-Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/delivery-tracking.analytics.ts#L68)
+Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/delivery-tracking.analytics.ts#L68)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:68](
 
 > **getSummary**(`query`, `options?`): `Promise`\<`DeliveryTrackingAnalyticsSummary`\>
 
-Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/delivery-tracking.analytics.ts#L76)
+Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/delivery-tracking.analytics.ts#L76)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:76](
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:72](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/delivery-tracking.analytics.ts#L72)
+Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/delivery-tracking.analytics.ts#L72)
 
 #### Returns
 

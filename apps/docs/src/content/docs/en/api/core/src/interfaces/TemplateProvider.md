@@ -5,7 +5,7 @@ prev: false
 title: "TemplateProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L46)
+Defined in: [packages/core/src/provider.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L46)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:46](https://github.com/k-otp/k-msg/bl
 
 > **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L47)
+Defined in: [packages/core/src/provider.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L47)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/provider.ts:47](https://github.com/k-otp/k-msg/bl
 
 > **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L56)
+Defined in: [packages/core/src/provider.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L56)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/provider.ts:56](https://github.com/k-otp/k-msg/bl
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L60)
+Defined in: [packages/core/src/provider.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L60)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ Defined in: [packages/core/src/provider.ts:60](https://github.com/k-otp/k-msg/bl
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L64)
+Defined in: [packages/core/src/provider.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L64)
 
 #### Parameters
 
@@ -111,7 +111,7 @@ Defined in: [packages/core/src/provider.ts:64](https://github.com/k-otp/k-msg/bl
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:51](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L51)
+Defined in: [packages/core/src/provider.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L51)
 
 #### Parameters
 

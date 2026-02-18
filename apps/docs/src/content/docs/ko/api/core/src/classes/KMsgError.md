@@ -5,7 +5,7 @@ prev: false
 title: "KMsgError"
 ---
 
-Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/errors.ts#L15)
+Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob
 
 > **new KMsgError**(`code`, `message`, `details?`): `KMsgError`
 
-Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/errors.ts#L19)
+Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ The cause of the error.
 
 > `readonly` **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/errors.ts#L16)
+Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob
 
 > `readonly` `optional` **details**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/errors.ts#L17)
+Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)
 
 ***
 
@@ -135,7 +135,7 @@ not capture any frames.
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/errors.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/errors.ts#L34)
+Defined in: [packages/core/src/errors.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L34)
 
 #### Returns
 

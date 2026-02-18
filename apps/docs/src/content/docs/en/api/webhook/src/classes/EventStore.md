@@ -5,7 +5,7 @@ prev: false
 title: "EventStore"
 ---
 
-Defined in: [packages/webhook/src/registry/event.store.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L20)
+Defined in: [packages/webhook/src/registry/event.store.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L20)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:20](https://github.com
 
 > **new EventStore**(`config?`): `EventStore`
 
-Defined in: [packages/webhook/src/registry/event.store.ts:36](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L36)
+Defined in: [packages/webhook/src/registry/event.store.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L36)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:36](https://github.com
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L16)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com
 
 > **cleanupDuplicateEvents**(): `Promise`\<`number`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:331](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L331)
+Defined in: [packages/webhook/src/registry/event.store.ts:331](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L331)
 
 중복 이벤트 정리
 
@@ -79,7 +79,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:331](https://github.co
 
 > **cleanupOldEvents**(): `Promise`\<`number`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:296](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L296)
+Defined in: [packages/webhook/src/registry/event.store.ts:296](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L296)
 
 오래된 이벤트 정리
 
@@ -93,7 +93,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:296](https://github.co
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L44)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -119,7 +119,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 > **getEvent**(`eventId`): `Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\> \| `null`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:84](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L84)
+Defined in: [packages/webhook/src/registry/event.store.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L84)
 
 이벤트 조회
 
@@ -139,7 +139,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:84](https://github.com
 
 > **getEventsByType**(`eventType`, `limit?`): `Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L215)
+Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L215)
 
 이벤트 타입별 조회
 
@@ -163,7 +163,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.co
 
 > **getEventStats**(`timeRange?`): `Promise`\<\{ `eventsByChannel`: `Record`\<`string`, `number`\>; `eventsByProvider`: `Record`\<`string`, `number`\>; `eventsByType`: `Record`\<[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/), `number`\>; `eventsPerHour`: `Record`\<`string`, `number`\>; `totalEvents`: `number`; \}\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:233](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L233)
+Defined in: [packages/webhook/src/registry/event.store.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L233)
 
 이벤트 통계 조회
 
@@ -189,7 +189,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:233](https://github.co
 
 > **getStorageStats**(): `object`
 
-Defined in: [packages/webhook/src/registry/event.store.ts:378](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L378)
+Defined in: [packages/webhook/src/registry/event.store.ts:378](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L378)
 
 저장소 통계 조회
 
@@ -231,7 +231,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:378](https://github.co
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L20)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -257,7 +257,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:20](https://github.com
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L9)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -283,7 +283,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:9](https://github.com/
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L35)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -309,7 +309,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L57)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -331,7 +331,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/event-emitter.ts#L31)
+Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -357,7 +357,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **saveEvent**(`event`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L53)
+Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L53)
 
 이벤트 저장
 
@@ -377,7 +377,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com
 
 > **searchEvents**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L91)
+Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L91)
 
 필터 조건에 맞는 이벤트 검색
 
@@ -401,7 +401,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:727](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/event.store.ts#L727)
+Defined in: [packages/webhook/src/registry/event.store.ts:727](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L727)
 
 이벤트 저장소 종료
 

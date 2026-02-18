@@ -5,7 +5,7 @@ prev: false
 title: "CreateTemplateButton"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:53](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L53)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L53)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:53](https://github.com/k
 
 > `optional` **linkAnd**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L59)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L59)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:59](https://github.com/k
 
 > `optional` **linkIos**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L58)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L58)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:58](https://github.com/k
 
 > `optional` **linkMo**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L56)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L56)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:56](https://github.com/k
 
 > `optional` **linkPc**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L57)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L57)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:57](https://github.com/k
 
 > **name**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L55)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L55)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:55](https://github.com/k
 
 > **type**: `"WL"` \| `"AL"` \| `"DB"` \| `"BK"` \| `"MD"`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L54)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L54)

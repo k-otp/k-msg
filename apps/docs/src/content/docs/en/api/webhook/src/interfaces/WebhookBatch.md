@@ -5,7 +5,7 @@ prev: false
 title: "WebhookBatch"
 ---
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:141](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L141)
+Defined in: [packages/webhook/src/types/webhook.types.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L141)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:141](https://github.com
 
 > **createdAt**: `Date`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:145](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L145)
+Defined in: [packages/webhook/src/types/webhook.types.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L145)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:145](https://github.com
 
 > **endpointId**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:143](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L143)
+Defined in: [packages/webhook/src/types/webhook.types.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L143)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:143](https://github.com
 
 > **events**: [`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:144](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L144)
+Defined in: [packages/webhook/src/types/webhook.types.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L144)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:144](https://github.com
 
 > **id**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:142](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L142)
+Defined in: [packages/webhook/src/types/webhook.types.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L142)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:142](https://github.com
 
 > **scheduledAt**: `Date`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:146](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L146)
+Defined in: [packages/webhook/src/types/webhook.types.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L146)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:146](https://github.com
 
 > **status**: `"failed"` \| `"pending"` \| `"processing"` \| `"completed"`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:147](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/types/webhook.types.ts#L147)
+Defined in: [packages/webhook/src/types/webhook.types.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L147)

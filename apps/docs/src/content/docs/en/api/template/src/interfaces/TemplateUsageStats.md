@@ -5,7 +5,7 @@ prev: false
 title: "TemplateUsageStats"
 ---
 
-Defined in: [packages/template/src/registry/template.registry.ts:54](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L54)
+Defined in: [packages/template/src/registry/template.registry.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L54)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:54](https://git
 
 > **deliveryRate**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L59)
+Defined in: [packages/template/src/registry/template.registry.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L59)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:59](https://git
 
 > **failureRate**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L60)
+Defined in: [packages/template/src/registry/template.registry.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L60)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:60](https://git
 
 > `optional` **lastUsed**: `Date`
 
-Defined in: [packages/template/src/registry/template.registry.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L61)
+Defined in: [packages/template/src/registry/template.registry.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L61)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:61](https://git
 
 > **templateId**: `string`
 
-Defined in: [packages/template/src/registry/template.registry.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L55)
+Defined in: [packages/template/src/registry/template.registry.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L55)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:55](https://git
 
 > **totalDelivered**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L57)
+Defined in: [packages/template/src/registry/template.registry.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L57)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:57](https://git
 
 > **totalFailed**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L58)
+Defined in: [packages/template/src/registry/template.registry.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L58)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:58](https://git
 
 > **totalSent**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L56)
+Defined in: [packages/template/src/registry/template.registry.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L56)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:56](https://git
 
 > **usageByDay**: `object`[]
 
-Defined in: [packages/template/src/registry/template.registry.ts:62](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L62)
+Defined in: [packages/template/src/registry/template.registry.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L62)
 
 #### date
 

@@ -7,7 +7,7 @@ title: "TemplateContext"
 
 > **TemplateContext** = `object`
 
-Defined in: [packages/core/src/provider.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L39)
+Defined in: [packages/core/src/provider.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L39)
 
 ## Properties
 
@@ -15,6 +15,6 @@ Defined in: [packages/core/src/provider.ts:39](https://github.com/k-otp/k-msg/bl
 
 > `optional` **kakaoChannelSenderKey**: `string`
 
-Defined in: [packages/core/src/provider.ts:43](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L43)
+Defined in: [packages/core/src/provider.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L43)
 
 Provider-specific Kakao channel key (e.g. Aligo senderKey).

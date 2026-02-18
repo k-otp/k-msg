@@ -5,7 +5,7 @@ prev: false
 title: "WebhookCollector"
 ---
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:32](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L32)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L32)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:32](https://
 
 > **new WebhookCollector**(`config?`): `WebhookCollector`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L47)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L47)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L16)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:16](https://github.c
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L44)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.c
 
 > **getProcessedWebhooks**(`since?`): [`WebhookData`](/api/analytics/src/interfaces/webhookdata/)[]
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:111](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L111)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L111)
 
 처리된 웹훅 조회
 
@@ -111,7 +111,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:111](https:/
 
 > **getWebhookStats**(): `object`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:122](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L122)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L122)
 
 웹훅 통계
 
@@ -141,7 +141,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:122](https:/
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L20)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -167,7 +167,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:20](https://github.c
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L9)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -193,7 +193,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:9](https://github.co
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L35)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -219,7 +219,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.c
 
 > **receiveWebhook**(`webhook`): `Promise`\<[`EventData`](/api/analytics/src/interfaces/eventdata/)[]\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L57)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L57)
 
 웹훅 수신 처리
 
@@ -239,7 +239,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:57](https://
 
 > **registerTransformer**(`name`, `transformer`): `void`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:92](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L92)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L92)
 
 웹훅 변환기 등록
 
@@ -263,7 +263,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:92](https://
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L57)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -285,7 +285,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/shared/event-emitter.ts#L31)
+Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -311,7 +311,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.c
 
 > **unregisterTransformer**(`name`): `boolean`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:100](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/collectors/webhook.collector.ts#L100)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L100)
 
 웹훅 변환기 제거
 

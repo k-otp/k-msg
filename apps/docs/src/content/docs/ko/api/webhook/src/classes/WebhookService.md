@@ -5,7 +5,7 @@ prev: false
 title: "WebhookService"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L14)
+Defined in: [packages/webhook/src/services/webhook.service.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L14)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:14](https://github
 
 > **new WebhookService**(`config`, `httpClient?`): `WebhookService`
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L21)
+Defined in: [packages/webhook/src/services/webhook.service.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L21)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:21](https://github
 
 > **deleteEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:87](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L87)
+Defined in: [packages/webhook/src/services/webhook.service.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L87)
 
 웹훅 엔드포인트 삭제
 
@@ -55,7 +55,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:87](https://github
 
 > **emit**(`event`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:108](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L108)
+Defined in: [packages/webhook/src/services/webhook.service.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L108)
 
 이벤트 발생 (비동기 처리)
 
@@ -75,7 +75,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:108](https://githu
 
 > **emitSync**(`event`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:129](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L129)
+Defined in: [packages/webhook/src/services/webhook.service.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L129)
 
 이벤트 발생 (동기 처리)
 
@@ -95,7 +95,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:129](https://githu
 
 > **getDeliveries**(`endpointId?`, `eventType?`, `status?`, `limit?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:324](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L324)
+Defined in: [packages/webhook/src/services/webhook.service.ts:324](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L324)
 
 웹훅 전달 내역 조회
 
@@ -127,7 +127,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:324](https://githu
 
 > **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:94](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L94)
+Defined in: [packages/webhook/src/services/webhook.service.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L94)
 
 웹훅 엔드포인트 조회
 
@@ -147,7 +147,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:94](https://github
 
 > **getStats**(`endpointId`, `timeRange`): `Promise`\<[`WebhookStats`](/api/webhook/src/interfaces/webhookstats/)\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:199](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L199)
+Defined in: [packages/webhook/src/services/webhook.service.ts:199](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L199)
 
 웹훅 통계 조회
 
@@ -177,7 +177,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:199](https://githu
 
 > **listEndpoints**(): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L101)
+Defined in: [packages/webhook/src/services/webhook.service.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L101)
 
 모든 웹훅 엔드포인트 조회
 
@@ -191,7 +191,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:101](https://githu
 
 > **pauseEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:310](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L310)
+Defined in: [packages/webhook/src/services/webhook.service.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L310)
 
 웹훅 일시 중단
 
@@ -211,7 +211,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:310](https://githu
 
 > **registerEndpoint**(`endpoint`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:32](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L32)
+Defined in: [packages/webhook/src/services/webhook.service.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L32)
 
 웹훅 엔드포인트 등록
 
@@ -231,7 +231,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:32](https://github
 
 > **resumeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:317](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L317)
+Defined in: [packages/webhook/src/services/webhook.service.ts:317](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L317)
 
 웹훅 재개
 
@@ -251,7 +251,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:317](https://githu
 
 > **retryFailed**(`endpointId?`, `eventType?`): `Promise`\<`number`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:256](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L256)
+Defined in: [packages/webhook/src/services/webhook.service.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L256)
 
 실패한 웹훅 재시도
 
@@ -275,7 +275,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:256](https://githu
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:504](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L504)
+Defined in: [packages/webhook/src/services/webhook.service.ts:504](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L504)
 
 서비스 종료 시 정리
 
@@ -289,7 +289,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:504](https://githu
 
 > **testEndpoint**(`endpointId`): `Promise`\<[`WebhookTestResult`](/api/webhook/src/interfaces/webhooktestresult/)\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:147](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L147)
+Defined in: [packages/webhook/src/services/webhook.service.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L147)
 
 웹훅 엔드포인트 테스트
 
@@ -309,7 +309,7 @@ Defined in: [packages/webhook/src/services/webhook.service.ts:147](https://githu
 
 > **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
 
-Defined in: [packages/webhook/src/services/webhook.service.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/services/webhook.service.ts#L60)
+Defined in: [packages/webhook/src/services/webhook.service.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.service.ts#L60)
 
 웹훅 엔드포인트 수정
 

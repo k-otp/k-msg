@@ -5,7 +5,7 @@ prev: false
 title: "AligoConfig"
 ---
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:1](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L1)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L1)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:1](https://github.com/k-
 
 > `optional` **alimtalkBaseUrl**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L9)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L9)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:9](https://github.com/k-
 
 > **apiKey**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:2](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L2)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:2](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L2)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:2](https://github.com/k-
 
 > `optional` **debug**: `boolean`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:7](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L7)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L7)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:7](https://github.com/k-
 
 > `optional` **friendtalkEndpoint**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L10)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L10)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:10](https://github.com/k
 
 > `optional` **sender**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:5](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L5)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L5)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:5](https://github.com/k-
 
 > `optional` **senderKey**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:4](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L4)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L4)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:4](https://github.com/k-
 
 > `optional` **smsBaseUrl**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L8)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L8)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:8](https://github.com/k-
 
 > `optional` **testMode**: `boolean`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:6](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L6)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L6)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:6](https://github.com/k-
 
 > **userId**: `string`
 
-Defined in: [packages/provider/src/aligo/types/aligo.ts:3](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/aligo/types/aligo.ts#L3)
+Defined in: [packages/provider/src/aligo/types/aligo.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L3)

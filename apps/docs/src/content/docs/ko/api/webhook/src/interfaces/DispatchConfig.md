@@ -5,7 +5,7 @@ prev: false
 title: "DispatchConfig"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L8)
+Defined in: [packages/webhook/src/dispatcher/types.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:8](https://github.com/k-ot
 
 > **circuitBreakerThreshold**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L12)
+Defined in: [packages/webhook/src/dispatcher/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L12)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:12](https://github.com/k-o
 
 > **circuitBreakerTimeoutMs**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L13)
+Defined in: [packages/webhook/src/dispatcher/types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L13)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:13](https://github.com/k-o
 
 > **defaultRetries**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L11)
+Defined in: [packages/webhook/src/dispatcher/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L11)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:11](https://github.com/k-o
 
 > **maxConcurrentRequests**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L9)
+Defined in: [packages/webhook/src/dispatcher/types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L9)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:9](https://github.com/k-ot
 
 > **requestTimeoutMs**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/dispatcher/types.ts#L10)
+Defined in: [packages/webhook/src/dispatcher/types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L10)

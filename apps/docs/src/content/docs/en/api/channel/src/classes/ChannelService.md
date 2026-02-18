@@ -5,7 +5,7 @@ prev: false
 title: "ChannelService"
 ---
 
-Defined in: [packages/channel/src/services/channel.service.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L17)
+Defined in: [packages/channel/src/services/channel.service.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L17)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:17](https://github
 
 > **addSenderNumber**(`channelId`, `phoneNumber`, `name?`): `Promise`\<`ServiceSenderNumber`\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:79](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L79)
+Defined in: [packages/channel/src/services/channel.service.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L79)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:79](https://github
 
 > **createChannel**(`channel`): `Promise`\<[`ChannelConfig`](/api/channel/src/interfaces/channelconfig/)\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L21)
+Defined in: [packages/channel/src/services/channel.service.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L21)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:21](https://github
 
 > **deleteChannel**(`channelId`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L68)
+Defined in: [packages/channel/src/services/channel.service.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L68)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:68](https://github
 
 > **getChannel**(`channelId`): `Promise`\<[`ChannelConfig`](/api/channel/src/interfaces/channelconfig/) \| `null`\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L35)
+Defined in: [packages/channel/src/services/channel.service.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L35)
 
 #### Parameters
 
@@ -103,7 +103,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:35](https://github
 
 > **getSenderNumbers**(`channelId?`): `Promise`\<`ServiceSenderNumber`[]\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:127](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L127)
+Defined in: [packages/channel/src/services/channel.service.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L127)
 
 #### Parameters
 
@@ -121,7 +121,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:127](https://githu
 
 > **listChannels**(`providerId?`): `Promise`\<[`ChannelConfig`](/api/channel/src/interfaces/channelconfig/)[]\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L39)
+Defined in: [packages/channel/src/services/channel.service.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L39)
 
 #### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:39](https://github
 
 > **updateChannel**(`channelId`, `updates`): `Promise`\<[`ChannelConfig`](/api/channel/src/interfaces/channelconfig/)\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L49)
+Defined in: [packages/channel/src/services/channel.service.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L49)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: [packages/channel/src/services/channel.service.ts:49](https://github
 
 > **verifySenderNumber**(`phoneNumber`): `Promise`\<[`ChannelVerificationResult`](/api/channel/src/interfaces/channelverificationresult/)\>
 
-Defined in: [packages/channel/src/services/channel.service.ts:100](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/services/channel.service.ts#L100)
+Defined in: [packages/channel/src/services/channel.service.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/services/channel.service.ts#L100)
 
 #### Parameters
 

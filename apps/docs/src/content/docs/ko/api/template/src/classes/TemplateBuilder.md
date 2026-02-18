@@ -5,7 +5,7 @@ prev: false
 title: "TemplateBuilder"
 ---
 
-Defined in: [packages/template/src/builder/template.builder.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L15)
+Defined in: [packages/template/src/builder/template.builder.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L15)
 
 Template Engine
 템플릿 파싱, 변수 치환, 검증 기능 제공
@@ -26,7 +26,7 @@ Template Engine
 
 > **appLinkButton**(`name`, `options`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:172](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L172)
+Defined in: [packages/template/src/builder/template.builder.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L172)
 
 Add an app link button
 
@@ -64,7 +64,7 @@ Add an app link button
 
 > **botKeywordButton**(`name`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:204](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L204)
+Defined in: [packages/template/src/builder/template.builder.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L204)
 
 Add a bot keyword button
 
@@ -84,7 +84,7 @@ Add a bot keyword button
 
 > **build**(): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
 
-Defined in: [packages/template/src/builder/template.builder.ts:374](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L374)
+Defined in: [packages/template/src/builder/template.builder.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L374)
 
 Build the final template
 
@@ -98,7 +98,7 @@ Build the final template
 
 > **button**(`button`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:224](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L224)
+Defined in: [packages/template/src/builder/template.builder.ts:224](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L224)
 
 Add a custom button
 
@@ -118,7 +118,7 @@ Add a custom button
 
 > **category**(`category`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:68](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L68)
+Defined in: [packages/template/src/builder/template.builder.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L68)
 
 Set template category
 
@@ -138,7 +138,7 @@ Set template category
 
 > **clearButtons**(): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:240](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L240)
+Defined in: [packages/template/src/builder/template.builder.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L240)
 
 Clear all buttons
 
@@ -152,7 +152,7 @@ Clear all buttons
 
 > **clone**(): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:347](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L347)
+Defined in: [packages/template/src/builder/template.builder.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L347)
 
 Clone the current builder
 
@@ -166,7 +166,7 @@ Clone the current builder
 
 > **code**(`code`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L38)
+Defined in: [packages/template/src/builder/template.builder.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L38)
 
 Set template code (provider specific)
 
@@ -186,7 +186,7 @@ Set template code (provider specific)
 
 > **content**(`content`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:46](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L46)
+Defined in: [packages/template/src/builder/template.builder.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L46)
 
 Set template content with variables
 
@@ -206,7 +206,7 @@ Set template content with variables
 
 > **deliveryButton**(`name`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:194](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L194)
+Defined in: [packages/template/src/builder/template.builder.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L194)
 
 Add a delivery tracking button
 
@@ -226,7 +226,7 @@ Add a delivery tracking button
 
 > **messageDeliveryButton**(`name`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:214](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L214)
+Defined in: [packages/template/src/builder/template.builder.ts:214](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L214)
 
 Add a message delivery button
 
@@ -246,7 +246,7 @@ Add a message delivery button
 
 > **metadata**(`metadata`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:248](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L248)
+Defined in: [packages/template/src/builder/template.builder.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L248)
 
 Set template metadata
 
@@ -266,7 +266,7 @@ Set template metadata
 
 > **name**(`name`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L30)
+Defined in: [packages/template/src/builder/template.builder.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L30)
 
 Set template name
 
@@ -286,7 +286,7 @@ Set template name
 
 > **preview**(`sampleVariables?`): `string`
 
-Defined in: [packages/template/src/builder/template.builder.ts:291](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L291)
+Defined in: [packages/template/src/builder/template.builder.ts:291](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L291)
 
 Preview the template with sample variables
 
@@ -306,7 +306,7 @@ Preview the template with sample variables
 
 > **provider**(`provider`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L76)
+Defined in: [packages/template/src/builder/template.builder.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L76)
 
 Set template provider
 
@@ -326,7 +326,7 @@ Set template provider
 
 > **reset**(): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:357](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L357)
+Defined in: [packages/template/src/builder/template.builder.ts:357](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L357)
 
 Reset the builder to start fresh
 
@@ -340,7 +340,7 @@ Reset the builder to start fresh
 
 > **status**(`status`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:84](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L84)
+Defined in: [packages/template/src/builder/template.builder.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L84)
 
 Set template status
 
@@ -360,7 +360,7 @@ Set template status
 
 > **validate**(): `object`
 
-Defined in: [packages/template/src/builder/template.builder.ts:266](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L266)
+Defined in: [packages/template/src/builder/template.builder.ts:266](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L266)
 
 Validate the current template
 
@@ -386,7 +386,7 @@ Validate the current template
 
 > **variable**(`name`, `type?`, `required?`, `options?`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:92](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L92)
+Defined in: [packages/template/src/builder/template.builder.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L92)
 
 Add a variable definition
 
@@ -432,7 +432,7 @@ Add a variable definition
 
 > **variables**(`variables`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:126](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L126)
+Defined in: [packages/template/src/builder/template.builder.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L126)
 
 Add multiple variables at once
 
@@ -452,7 +452,7 @@ Add multiple variables at once
 
 > **webLinkButton**(`name`, `mobileUrl?`, `pcUrl?`): `TemplateBuilder`
 
-Defined in: [packages/template/src/builder/template.builder.ts:156](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L156)
+Defined in: [packages/template/src/builder/template.builder.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L156)
 
 Add a web link button
 

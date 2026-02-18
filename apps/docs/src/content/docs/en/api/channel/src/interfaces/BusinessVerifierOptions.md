@@ -5,7 +5,7 @@ prev: false
 title: "BusinessVerifierOptions"
 ---
 
-Defined in: [packages/channel/src/verification/business.verify.ts:77](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L77)
+Defined in: [packages/channel/src/verification/business.verify.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L77)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:77](https://gi
 
 > **autoApprovalThreshold**: `number`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:80](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L80)
+Defined in: [packages/channel/src/verification/business.verify.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L80)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:80](https://gi
 
 > **documentRetentionDays**: `number`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:82](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L82)
+Defined in: [packages/channel/src/verification/business.verify.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L82)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:82](https://gi
 
 > **enableAutoVerification**: `boolean`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:78](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L78)
+Defined in: [packages/channel/src/verification/business.verify.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L78)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:78](https://gi
 
 > **enableExternalAPIs**: `boolean`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:83](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L83)
+Defined in: [packages/channel/src/verification/business.verify.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L83)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:83](https://gi
 
 > `optional` **externalAPIConfig**: `object`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:84](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L84)
+Defined in: [packages/channel/src/verification/business.verify.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L84)
 
 #### addressVerificationAPI?
 
@@ -65,7 +65,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:84](https://gi
 
 > **requiredDocuments**: [`DocumentType`](/api/channel/src/enumerations/documenttype/)[]
 
-Defined in: [packages/channel/src/verification/business.verify.ts:79](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L79)
+Defined in: [packages/channel/src/verification/business.verify.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L79)
 
 ***
 
@@ -73,4 +73,4 @@ Defined in: [packages/channel/src/verification/business.verify.ts:79](https://gi
 
 > **requireManualReview**: `boolean`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:81](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L81)
+Defined in: [packages/channel/src/verification/business.verify.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L81)

@@ -5,7 +5,7 @@ prev: false
 title: "TimeSeriesAggregator"
 ---
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L24)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L24)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:24](ht
 
 > **new TimeSeriesAggregator**(`timezone?`): `TimeSeriesAggregator`
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L27)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L27)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:27](ht
 
 > **aggregate**(`metrics`, `interval`, `options?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L34)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L34)
 
 시계열 데이터를 지정된 간격으로 집계
 
@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](ht
 
 > **aggregateRolling**(`metrics`, `windowSize`, `step?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L74)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L74)
 
 롤링 윈도우 집계
 
@@ -87,7 +87,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](ht
 
 > **decomposeSeasonality**(`metrics`, `seasonLength?`): `Promise`\<\{ `residual`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `seasonal`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `trend`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; \}\>
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L121)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L121)
 
 계절성 분해 (간단한 이동평균 기반)
 
@@ -111,7 +111,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](h
 
 > **downsample**(`metrics`, `targetInterval`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/time-series.aggregator.ts#L156)
+Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L156)
 
 다운샘플링 (고해상도 → 저해상도)
 

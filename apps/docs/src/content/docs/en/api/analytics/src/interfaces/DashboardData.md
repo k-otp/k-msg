@@ -5,7 +5,7 @@ prev: false
 title: "DashboardData"
 ---
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L56)
+Defined in: [packages/analytics/src/reports/dashboard.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L56)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:56](https://github.com/
 
 > **filters**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:62](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L62)
+Defined in: [packages/analytics/src/reports/dashboard.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L62)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:62](https://github.com/
 
 > **insights**: [`InsightData`](/api/analytics/src/interfaces/insightdata/)[]
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L61)
+Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L61)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/
 
 > **kpis**: [`KPIData`](/api/analytics/src/interfaces/kpidata/)[]
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L59)
+Defined in: [packages/analytics/src/reports/dashboard.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L59)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:59](https://github.com/
 
 > **timeRange**: `object`
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L58)
+Defined in: [packages/analytics/src/reports/dashboard.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L58)
 
 #### end
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:58](https://github.com/
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L57)
+Defined in: [packages/analytics/src/reports/dashboard.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L57)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:57](https://github.com/
 
 > **widgets**: [`WidgetData`](/api/analytics/src/interfaces/widgetdata/)[]
 
-Defined in: [packages/analytics/src/reports/dashboard.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/reports/dashboard.ts#L60)
+Defined in: [packages/analytics/src/reports/dashboard.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L60)

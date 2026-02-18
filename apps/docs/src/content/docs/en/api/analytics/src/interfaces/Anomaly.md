@@ -5,7 +5,7 @@ prev: false
 title: "Anomaly"
 ---
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L29)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L29)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:29](https://git
 
 > **algorithm**: `string`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L38)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L38)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:38](https://git
 
 > **confidence**: `number`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:37](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L37)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L37)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:37](https://git
 
 > `optional` **context**: `object`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L40)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L40)
 
 #### historicalComparison
 
@@ -49,7 +49,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:40](https://git
 
 > **deviation**: `number`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L35)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L35)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:35](https://git
 
 > **dimensions**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L39)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L39)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:39](https://git
 
 > **expectedValue**: `number`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L34)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L34)
 
 ***
 
@@ -73,7 +73,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:34](https://git
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L30)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L30)
 
 ***
 
@@ -81,7 +81,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:30](https://git
 
 > **metricType**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:31](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L31)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L31)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:31](https://git
 
 > **severity**: `"high"` \| `"low"` \| `"medium"` \| `"critical"`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:36](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L36)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L36)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:36](https://git
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:32](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L32)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L32)
 
 ***
 
@@ -105,4 +105,4 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:32](https://git
 
 > **value**: `number`
 
-Defined in: [packages/analytics/src/insights/anomaly.detector.ts:33](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/insights/anomaly.detector.ts#L33)
+Defined in: [packages/analytics/src/insights/anomaly.detector.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L33)

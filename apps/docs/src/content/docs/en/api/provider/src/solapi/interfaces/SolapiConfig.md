@@ -5,7 +5,7 @@ prev: false
 title: "SolapiConfig"
 ---
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:1](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L1)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L1)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/solapi/types/solapi.ts:1](https://github.com/
 
 > **apiKey**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:5](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L5)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L5)
 
 SOLAPI API Key
 
@@ -23,7 +23,7 @@ SOLAPI API Key
 
 > **apiSecret**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L10)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L10)
 
 SOLAPI API Secret
 
@@ -33,7 +33,7 @@ SOLAPI API Secret
 
 > `optional` **appId**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:35](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L35)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L35)
 
 Optional appId for Solapi send APIs.
 
@@ -43,7 +43,7 @@ Optional appId for Solapi send APIs.
 
 > `optional` **baseUrl**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:45](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L45)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L45)
 
 Base URL for SOLAPI API.
 
@@ -53,7 +53,7 @@ Base URL for SOLAPI API.
 
 > `optional` **debug**: `boolean`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L47)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L47)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/provider/src/solapi/types/solapi.ts:47](https://github.com
 
 > `optional` **defaultCountry**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L40)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L40)
 
 Default country code (e.g. "82"). Optional.
 
@@ -71,7 +71,7 @@ Default country code (e.g. "82"). Optional.
 
 > `optional` **defaultFrom**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L15)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L15)
 
 Default sender number (SMS/LMS/MMS/RCS).
 
@@ -81,7 +81,7 @@ Default sender number (SMS/LMS/MMS/RCS).
 
 > `optional` **kakaoPfId**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L20)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L20)
 
 Default Kakao PF ID (for ALIMTALK/FRIENDTALK).
 
@@ -91,7 +91,7 @@ Default Kakao PF ID (for ALIMTALK/FRIENDTALK).
 
 > `optional` **naverTalkId**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:30](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L30)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L30)
 
 Default Naver Talk ID (for NSA).
 
@@ -101,6 +101,6 @@ Default Naver Talk ID (for NSA).
 
 > `optional` **rcsBrandId**: `string`
 
-Defined in: [packages/provider/src/solapi/types/solapi.ts:25](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/types/solapi.ts#L25)
+Defined in: [packages/provider/src/solapi/types/solapi.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/types/solapi.ts#L25)
 
 Default RCS Brand ID.

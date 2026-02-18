@@ -5,7 +5,7 @@ prev: false
 title: "BusinessInfo"
 ---
 
-Defined in: [packages/channel/src/verification/business.verify.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L15)
+Defined in: [packages/channel/src/verification/business.verify.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L15)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:15](https://gi
 
 > **address**: `object`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L21)
+Defined in: [packages/channel/src/verification/business.verify.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L21)
 
 #### city
 
@@ -41,7 +41,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:21](https://gi
 
 > **businessName**: `string`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L16)
+Defined in: [packages/channel/src/verification/business.verify.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L16)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:16](https://gi
 
 > **businessRegistrationNumber**: `string`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L17)
+Defined in: [packages/channel/src/verification/business.verify.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L17)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:17](https://gi
 
 > **businessType**: `"corporation"` \| `"individual"` \| `"partnership"` \| `"other"`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L18)
+Defined in: [packages/channel/src/verification/business.verify.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L18)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:18](https://gi
 
 > **contactInfo**: `object`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L28)
+Defined in: [packages/channel/src/verification/business.verify.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L28)
 
 #### email
 
@@ -85,7 +85,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:28](https://gi
 
 > **establishedDate**: `Date`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L20)
+Defined in: [packages/channel/src/verification/business.verify.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L20)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:20](https://gi
 
 > **industry**: `string`
 
-Defined in: [packages/channel/src/verification/business.verify.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L19)
+Defined in: [packages/channel/src/verification/business.verify.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L19)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:19](https://gi
 
 > **representatives**: `object`[]
 
-Defined in: [packages/channel/src/verification/business.verify.ts:33](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/business.verify.ts#L33)
+Defined in: [packages/channel/src/verification/business.verify.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/business.verify.ts#L33)
 
 #### email
 

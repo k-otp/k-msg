@@ -5,7 +5,7 @@ prev: false
 title: "TemplateRegistryOptions"
 ---
 
-Defined in: [packages/template/src/registry/template.registry.ts:70](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L70)
+Defined in: [packages/template/src/registry/template.registry.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L70)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:70](https://git
 
 > **backupInterval**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:75](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L75)
+Defined in: [packages/template/src/registry/template.registry.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L75)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:75](https://git
 
 > **enableAutoBackup**: `boolean`
 
-Defined in: [packages/template/src/registry/template.registry.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L74)
+Defined in: [packages/template/src/registry/template.registry.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L74)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:74](https://git
 
 > **enableUsageTracking**: `boolean`
 
-Defined in: [packages/template/src/registry/template.registry.ts:73](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L73)
+Defined in: [packages/template/src/registry/template.registry.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L73)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:73](https://git
 
 > **enableValidationOnRegister**: `boolean`
 
-Defined in: [packages/template/src/registry/template.registry.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L76)
+Defined in: [packages/template/src/registry/template.registry.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L76)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:76](https://git
 
 > **enableVersioning**: `boolean`
 
-Defined in: [packages/template/src/registry/template.registry.ts:71](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L71)
+Defined in: [packages/template/src/registry/template.registry.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L71)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/template/src/registry/template.registry.ts:71](https://git
 
 > **maxVersionsPerTemplate**: `number`
 
-Defined in: [packages/template/src/registry/template.registry.ts:72](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/registry/template.registry.ts#L72)
+Defined in: [packages/template/src/registry/template.registry.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L72)

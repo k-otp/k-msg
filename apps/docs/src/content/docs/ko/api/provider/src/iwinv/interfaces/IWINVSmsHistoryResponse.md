@@ -5,7 +5,7 @@ prev: false
 title: "IWINVSmsHistoryResponse"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:194](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L194)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L194)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:194](https://github.com/
 
 > **list**: [`IWINVSmsHistoryItem`](/api/provider/src/iwinv/interfaces/iwinvsmshistoryitem/)[]
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:198](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L198)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:198](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L198)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:198](https://github.com/
 
 > **message**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:196](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L196)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:196](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L196)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:196](https://github.com/
 
 > **resultCode**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:195](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L195)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:195](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L195)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:195](https://github.com/
 
 > **totalCount**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:197](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L197)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:197](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L197)

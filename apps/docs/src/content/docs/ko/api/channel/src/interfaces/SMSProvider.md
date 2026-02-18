@@ -5,7 +5,7 @@ prev: false
 title: "SMSProvider"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:84](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L84)
+Defined in: [packages/channel/src/verification/number.verify.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L84)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:84](https://gith
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:85](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L85)
+Defined in: [packages/channel/src/verification/number.verify.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L85)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:85](https://gith
 
 > **name**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:86](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L86)
+Defined in: [packages/channel/src/verification/number.verify.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L86)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:86](https://gith
 
 > `optional` **getDeliveryStatus**(`messageId`): `Promise`\<`DeliveryStatus`\>
 
-Defined in: [packages/channel/src/verification/number.verify.ts:92](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L92)
+Defined in: [packages/channel/src/verification/number.verify.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L92)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:92](https://gith
 
 > **sendSMS**(`phoneNumber`, `message`, `options?`): `Promise`\<`SMSResult`\>
 
-Defined in: [packages/channel/src/verification/number.verify.ts:87](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L87)
+Defined in: [packages/channel/src/verification/number.verify.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L87)
 
 #### Parameters
 

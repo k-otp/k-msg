@@ -5,7 +5,7 @@ prev: false
 title: "AnalyticsResult"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L98)
+Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L98)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.
 
 > **data**: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L100)
+Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L100)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github
 
 > `optional` **insights**: [`InsightData`](/api/analytics/src/interfaces/insightdata/)[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L106)
+Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L106)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github
 
 > **query**: [`AnalyticsQuery`](/api/analytics/src/interfaces/analyticsquery/)
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L99)
+Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L99)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.
 
 > **summary**: `object`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:101](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/types/analytics.types.ts#L101)
+Defined in: [packages/analytics/src/types/analytics.types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L101)
 
 #### dateRange
 

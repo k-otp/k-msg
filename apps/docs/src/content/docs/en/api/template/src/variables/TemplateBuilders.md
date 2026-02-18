@@ -7,7 +7,7 @@ title: "TemplateBuilders"
 
 > `const` **TemplateBuilders**: `object`
 
-Defined in: [packages/template/src/builder/template.builder.ts:419](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/template/src/builder/template.builder.ts#L419)
+Defined in: [packages/template/src/builder/template.builder.ts:419](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L419)
 
 Static factory methods for common template types
 

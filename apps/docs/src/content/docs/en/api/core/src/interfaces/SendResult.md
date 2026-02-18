@@ -5,7 +5,7 @@ prev: false
 title: "SendResult"
 ---
 
-Defined in: [packages/core/src/types/message.ts:284](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L284)
+Defined in: [packages/core/src/types/message.ts:284](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L284)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:284](https://github.com/k-otp/k-
 
 > **messageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:288](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L288)
+Defined in: [packages/core/src/types/message.ts:288](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L288)
 
 Correlation id (equals the request `messageId`).
 
@@ -23,7 +23,7 @@ Correlation id (equals the request `messageId`).
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:289](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L289)
+Defined in: [packages/core/src/types/message.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L289)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/types/message.ts:289](https://github.com/k-otp/k-
 
 > `optional` **providerMessageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:290](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L290)
+Defined in: [packages/core/src/types/message.ts:290](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L290)
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: [packages/core/src/types/message.ts:290](https://github.com/k-otp/k-
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/core/src/types/message.ts:295](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L295)
+Defined in: [packages/core/src/types/message.ts:295](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L295)
 
 ***
 
@@ -47,7 +47,7 @@ Defined in: [packages/core/src/types/message.ts:295](https://github.com/k-otp/k-
 
 > **status**: [`MessageStatus`](/api/core/src/type-aliases/messagestatus/)
 
-Defined in: [packages/core/src/types/message.ts:291](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L291)
+Defined in: [packages/core/src/types/message.ts:291](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L291)
 
 ***
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/types/message.ts:291](https://github.com/k-otp/k-
 
 > **to**: `string`
 
-Defined in: [packages/core/src/types/message.ts:293](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L293)
+Defined in: [packages/core/src/types/message.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L293)
 
 ***
 
@@ -63,7 +63,7 @@ Defined in: [packages/core/src/types/message.ts:293](https://github.com/k-otp/k-
 
 > **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
 
-Defined in: [packages/core/src/types/message.ts:292](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L292)
+Defined in: [packages/core/src/types/message.ts:292](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L292)
 
 ***
 
@@ -71,4 +71,4 @@ Defined in: [packages/core/src/types/message.ts:292](https://github.com/k-otp/k-
 
 > `optional` **warnings**: [`SendWarning`](/api/core/src/interfaces/sendwarning/)[]
 
-Defined in: [packages/core/src/types/message.ts:294](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L294)
+Defined in: [packages/core/src/types/message.ts:294](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L294)

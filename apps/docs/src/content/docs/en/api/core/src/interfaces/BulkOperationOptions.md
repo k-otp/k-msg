@@ -5,7 +5,7 @@ prev: false
 title: "BulkOperationOptions"
 ---
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L8)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:8](https://github.co
 
 > **concurrency**: `number`
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L9)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L9)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:9](https://github.co
 
 > **failFast**: `boolean`
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L11)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L11)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:11](https://github.c
 
 > `optional` **onProgress**: (`completed`, `total`, `failed`) => `void`
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L12)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L12)
 
 #### Parameters
 
@@ -55,4 +55,4 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:12](https://github.c
 
 > **retryOptions**: [`RetryOptions`](/api/core/src/interfaces/retryoptions/)
 
-Defined in: [packages/core/src/resilience/bulk-operation.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/resilience/bulk-operation.ts#L10)
+Defined in: [packages/core/src/resilience/bulk-operation.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L10)

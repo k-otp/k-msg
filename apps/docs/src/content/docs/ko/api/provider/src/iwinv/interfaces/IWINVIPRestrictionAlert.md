@@ -5,7 +5,7 @@ prev: false
 title: "IWINVIPRestrictionAlert"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:240](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L240)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L240)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:240](https://github.com/
 
 > **attempt**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:248](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L248)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L248)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:248](https://github.com/
 
 > **channel**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:242](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L242)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:242](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L242)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:242](https://github.com/
 
 > **code**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:246](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L246)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:246](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L246)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:246](https://github.com/
 
 > **endpoint**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:243](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L243)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:243](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L243)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:243](https://github.com/
 
 > **maxAttempts**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:249](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L249)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:249](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L249)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:249](https://github.com/
 
 > **message**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:247](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L247)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:247](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L247)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:247](https://github.com/
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:244](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L244)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L244)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:244](https://github.com/
 
 > **provider**: `"iwinv"`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:241](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L241)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:241](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L241)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:241](https://github.com/
 
 > `optional` **templateCode**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:245](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L245)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L245)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:245](https://github.com/
 
 > **timestamp**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:250](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L250)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:250](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L250)

@@ -5,7 +5,7 @@ prev: false
 title: "InsightEngine"
 ---
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L10)
+Defined in: [packages/analytics/src/services/insight.engine.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L10)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:10](https://githu
 
 > **new InsightEngine**(`config`): `InsightEngine`
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L18)
+Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L18)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://githu
 
 > **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L65)
+Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L65)
 
 시계열 이상 탐지
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://githu
 
 > **detectRealTimeAnomalies**(`metric`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L26)
+Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L26)
 
 실시간 이상 탐지
 
@@ -81,7 +81,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://githu
 
 > **generateInsights**(`query`, `data`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L98)
+Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L98)
 
 인사이트 생성
 
@@ -105,7 +105,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://githu
 
 > **predictTrends**(`metricType`, `forecastDays`): `Promise`\<`object`[]\>
 
-Defined in: [packages/analytics/src/services/insight.engine.ts:131](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/services/insight.engine.ts#L131)
+Defined in: [packages/analytics/src/services/insight.engine.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L131)
 
 트렌드 예측
 

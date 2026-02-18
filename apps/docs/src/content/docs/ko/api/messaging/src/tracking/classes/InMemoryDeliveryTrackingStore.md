@@ -5,7 +5,7 @@ prev: false
 title: "InMemoryDeliveryTrackingStore"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:96](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L96)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L96)
 
 ## Implements
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:96]
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:167](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L167)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L167)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ readonly [`DeliveryTrackingCountByField`](/api/messaging/src/tracking/type-alias
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:159](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L159)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L159)
 
 #### Parameters
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:159
 
 > **get**(`messageId`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:107](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L107)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L107)
 
 #### Parameters
 
@@ -97,7 +97,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:107
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:99](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L99)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L99)
 
 #### Returns
 
@@ -113,7 +113,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:99]
 
 > **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:112](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L112)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L112)
 
 #### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:112
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:129](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L129)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L129)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:129
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:202](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L202)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L202)
 
 #### Parameters
 
@@ -187,7 +187,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:202
 
 > **upsert**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:103](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L103)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L103)
 
 #### Parameters
 

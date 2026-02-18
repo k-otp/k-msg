@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelCategories"
 ---
 
-Defined in: [packages/core/src/types/kakao-channel.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L26)
+Defined in: [packages/core/src/types/kakao-channel.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L26)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:26](https://github.com/k-o
 
 > **first**: [`KakaoCategoryEntry`](/api/core/src/interfaces/kakaocategoryentry/)[]
 
-Defined in: [packages/core/src/types/kakao-channel.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L27)
+Defined in: [packages/core/src/types/kakao-channel.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L27)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:27](https://github.com/k-o
 
 > **second**: [`KakaoCategoryEntry`](/api/core/src/interfaces/kakaocategoryentry/)[]
 
-Defined in: [packages/core/src/types/kakao-channel.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L28)
+Defined in: [packages/core/src/types/kakao-channel.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L28)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/types/kakao-channel.ts:28](https://github.com/k-o
 
 > **third**: [`KakaoCategoryEntry`](/api/core/src/interfaces/kakaocategoryentry/)[]
 
-Defined in: [packages/core/src/types/kakao-channel.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L29)
+Defined in: [packages/core/src/types/kakao-channel.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L29)

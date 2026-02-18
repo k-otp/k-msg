@@ -5,7 +5,7 @@ prev: false
 title: "SolapiProvider"
 ---
 
-Defined in: [packages/provider/src/solapi/provider.ts:26](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L26)
+Defined in: [packages/provider/src/solapi/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L26)
 
 SOLAPI Provider package entrypoint
 
@@ -20,7 +20,7 @@ SOLAPI Provider package entrypoint
 
 > **new SolapiProvider**(`config`, `client?`): `SolapiProvider`
 
-Defined in: [packages/provider/src/solapi/provider.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L57)
+Defined in: [packages/provider/src/solapi/provider.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L57)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:57](https://github.com/k-o
 
 > `readonly` **id**: `"solapi"` = `"solapi"`
 
-Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L27)
+Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L27)
 
 #### Implementation of
 
@@ -54,7 +54,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-o
 
 > `readonly` **name**: `"SOLAPI Messaging Provider"` = `"SOLAPI Messaging Provider"`
 
-Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L28)
+Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L28)
 
 #### Implementation of
 
@@ -66,7 +66,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-o
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L29)
+Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L29)
 
 #### Implementation of
 
@@ -78,7 +78,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-o
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:136](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L136)
+Defined in: [packages/provider/src/solapi/provider.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L136)
 
 #### Parameters
 
@@ -100,7 +100,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:136](https://github.com/k-
 
 > **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:126](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L126)
+Defined in: [packages/provider/src/solapi/provider.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L126)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:126](https://github.com/k-
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/solapi/provider.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L49)
+Defined in: [packages/provider/src/solapi/provider.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L49)
 
 #### Returns
 
@@ -138,7 +138,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:49](https://github.com/k-o
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:80](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L80)
+Defined in: [packages/provider/src/solapi/provider.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L80)
 
 #### Returns
 
@@ -154,7 +154,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:80](https://github.com/k-o
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:110](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L110)
+Defined in: [packages/provider/src/solapi/provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L110)
 
 #### Parameters
 

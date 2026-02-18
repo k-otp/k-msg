@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L77)
+Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L77)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/bl
 
 > `optional` **addKakaoChannel**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L89)
+Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L89)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/bl
 
 > `optional` **listKakaoChannelCategories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L82)
+Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L82)
 
 #### Returns
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/bl
 
 > **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:78](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L78)
+Defined in: [packages/core/src/provider.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L78)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: [packages/core/src/provider.ts:78](https://github.com/k-otp/k-msg/bl
 
 > `optional` **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:85](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/provider.ts#L85)
+Defined in: [packages/core/src/provider.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L85)
 
 #### Parameters
 

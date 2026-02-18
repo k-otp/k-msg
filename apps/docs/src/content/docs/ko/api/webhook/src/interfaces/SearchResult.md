@@ -5,7 +5,7 @@ prev: false
 title: "SearchResult"
 ---
 
-Defined in: [packages/webhook/src/registry/types.ts:72](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L72)
+Defined in: [packages/webhook/src/registry/types.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L72)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/registry/types.ts:72](https://github.com/k-otp
 
 > **hasNext**: `boolean`
 
-Defined in: [packages/webhook/src/registry/types.ts:77](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L77)
+Defined in: [packages/webhook/src/registry/types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L77)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/registry/types.ts:77](https://github.com/k-otp
 
 > **hasPrevious**: `boolean`
 
-Defined in: [packages/webhook/src/registry/types.ts:78](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L78)
+Defined in: [packages/webhook/src/registry/types.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L78)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/registry/types.ts:78](https://github.com/k-otp
 
 > **items**: `T`[]
 
-Defined in: [packages/webhook/src/registry/types.ts:73](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L73)
+Defined in: [packages/webhook/src/registry/types.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L73)
 
 ***
 
@@ -43,7 +43,7 @@ Defined in: [packages/webhook/src/registry/types.ts:73](https://github.com/k-otp
 
 > **page**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:75](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L75)
+Defined in: [packages/webhook/src/registry/types.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L75)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/webhook/src/registry/types.ts:75](https://github.com/k-otp
 
 > **totalCount**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L74)
+Defined in: [packages/webhook/src/registry/types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L74)
 
 ***
 
@@ -59,4 +59,4 @@ Defined in: [packages/webhook/src/registry/types.ts:74](https://github.com/k-otp
 
 > **totalPages**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/registry/types.ts#L76)
+Defined in: [packages/webhook/src/registry/types.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L76)

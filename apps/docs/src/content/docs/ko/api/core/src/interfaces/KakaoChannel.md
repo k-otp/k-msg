@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannel"
 ---
 
-Defined in: [packages/core/src/types/kakao-channel.ts:1](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L1)
+Defined in: [packages/core/src/types/kakao-channel.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L1)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:1](https://github.com/k-ot
 
 > `optional` **createdAt**: `Date`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L15)
+Defined in: [packages/core/src/types/kakao-channel.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L15)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:15](https://github.com/k-o
 
 > `optional` **name**: `string`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L13)
+Defined in: [packages/core/src/types/kakao-channel.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L13)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:13](https://github.com/k-o
 
 > `optional` **plusId**: `string`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L12)
+Defined in: [packages/core/src/types/kakao-channel.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L12)
 
 Kakao channel id including "@", when available (e.g. "@mybrand").
 
@@ -39,7 +39,7 @@ Kakao channel id including "@", when available (e.g. "@mybrand").
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:2](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L2)
+Defined in: [packages/core/src/types/kakao-channel.ts:2](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L2)
 
 ***
 
@@ -47,7 +47,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:2](https://github.com/k-ot
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L17)
+Defined in: [packages/core/src/types/kakao-channel.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L17)
 
 ***
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:17](https://github.com/k-o
 
 > **senderKey**: `string`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:8](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L8)
+Defined in: [packages/core/src/types/kakao-channel.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L8)
 
 Provider-specific Kakao channel key.
 - Aligo: senderKey
@@ -67,7 +67,7 @@ Provider-specific Kakao channel key.
 
 > `optional` **status**: `string`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L14)
+Defined in: [packages/core/src/types/kakao-channel.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L14)
 
 ***
 
@@ -75,4 +75,4 @@ Defined in: [packages/core/src/types/kakao-channel.ts:14](https://github.com/k-o
 
 > `optional` **updatedAt**: `Date`
 
-Defined in: [packages/core/src/types/kakao-channel.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/kakao-channel.ts#L16)
+Defined in: [packages/core/src/types/kakao-channel.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L16)

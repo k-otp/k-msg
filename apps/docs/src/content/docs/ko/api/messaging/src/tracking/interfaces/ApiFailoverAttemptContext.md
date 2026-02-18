@@ -5,7 +5,7 @@ prev: false
 title: "ApiFailoverAttemptContext"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:55](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L55)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L55)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:55](https://githu
 
 > **fallbackMessageId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L59)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L59)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:59](https://githu
 
 > **fallbackType**: `"SMS"` \| `"LMS"`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L60)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L60)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:60](https://githu
 
 > **originalMessageId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:56](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L56)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L56)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:56](https://githu
 
 > **originalProviderId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:57](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L57)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L57)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:57](https://githu
 
 > **originalProviderMessageId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L58)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L58)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://githu
 
 > **record**: [`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/delivery-tracking/types.ts#L61)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L61)

@@ -5,7 +5,7 @@ prev: false
 title: "FileStorageAdapter"
 ---
 
-Defined in: [packages/webhook/src/shared/file-storage.ts:1](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/file-storage.ts#L1)
+Defined in: [packages/webhook/src/shared/file-storage.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/file-storage.ts#L1)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/shared/file-storage.ts:1](https://github.com/k
 
 > **appendFile**(`filePath`, `data`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/shared/file-storage.ts:2](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/file-storage.ts#L2)
+Defined in: [packages/webhook/src/shared/file-storage.ts:2](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/file-storage.ts#L2)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/shared/file-storage.ts:2](https://github.com/k
 
 > **ensureDirForFile**(`filePath`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/shared/file-storage.ts:5](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/file-storage.ts#L5)
+Defined in: [packages/webhook/src/shared/file-storage.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/file-storage.ts#L5)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [packages/webhook/src/shared/file-storage.ts:5](https://github.com/k
 
 > **readFile**(`filePath`): `Promise`\<`string`\>
 
-Defined in: [packages/webhook/src/shared/file-storage.ts:3](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/file-storage.ts#L3)
+Defined in: [packages/webhook/src/shared/file-storage.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/file-storage.ts#L3)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: [packages/webhook/src/shared/file-storage.ts:3](https://github.com/k
 
 > **writeFile**(`filePath`, `data`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/shared/file-storage.ts:4](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/webhook/src/shared/file-storage.ts#L4)
+Defined in: [packages/webhook/src/shared/file-storage.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/shared/file-storage.ts#L4)
 
 #### Parameters
 

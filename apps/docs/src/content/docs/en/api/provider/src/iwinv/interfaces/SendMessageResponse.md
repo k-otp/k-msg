@@ -5,7 +5,7 @@ prev: false
 title: "SendMessageResponse"
 ---
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:38](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L38)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L38)
 
 IWINV API TypeScript 타입 정의
 IWINV 알림톡 REST API 규격서 기반
@@ -20,7 +20,7 @@ IWINV 알림톡 REST API 규격서 기반
 
 > **code**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L13)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L13)
 
 #### Inherited from
 
@@ -32,7 +32,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k
 
 > **fail**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:40](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L40)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L40)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:40](https://github.com/k
 
 > **message**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L14)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L14)
 
 #### Inherited from
 
@@ -52,4 +52,4 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k
 
 > **success**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/iwinv/types/iwinv.ts#L39)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L39)

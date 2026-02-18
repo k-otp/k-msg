@@ -7,7 +7,7 @@ title: "MessageBinaryInput"
 
 > **MessageBinaryInput** = \{ `contentType?`: `string`; `filename?`: `string`; `ref`: `string`; \} \| \{ `bytes`: `Uint8Array`; `contentType?`: `string`; `filename?`: `string`; \} \| \{ `blob`: `Blob`; `contentType?`: `string`; `filename?`: `string`; \}
 
-Defined in: [packages/core/src/types/message.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/message.ts#L34)
+Defined in: [packages/core/src/types/message.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L34)
 
 ## Type Declaration
 

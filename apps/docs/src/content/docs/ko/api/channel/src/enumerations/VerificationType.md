@@ -5,7 +5,7 @@ prev: false
 title: "VerificationType"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L47)
+Defined in: [packages/channel/src/verification/number.verify.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L47)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:47](https://gith
 
 > **HYBRID**: `"hybrid"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:50](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L50)
+Defined in: [packages/channel/src/verification/number.verify.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L50)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:50](https://gith
 
 > **SMS**: `"sms"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:48](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L48)
+Defined in: [packages/channel/src/verification/number.verify.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L48)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/channel/src/verification/number.verify.ts:48](https://gith
 
 > **VOICE\_CALL**: `"voice_call"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:49](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L49)
+Defined in: [packages/channel/src/verification/number.verify.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L49)

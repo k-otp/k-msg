@@ -5,7 +5,7 @@ prev: false
 title: "SolapiProviderFactory"
 ---
 
-Defined in: [packages/provider/src/solapi/provider.ts:208](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L208)
+Defined in: [packages/provider/src/solapi/provider.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L208)
 
 SOLAPI Provider package entrypoint
 
@@ -25,7 +25,7 @@ SOLAPI Provider package entrypoint
 
 > `static` **create**(`config`): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
 
-Defined in: [packages/provider/src/solapi/provider.ts:209](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L209)
+Defined in: [packages/provider/src/solapi/provider.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L209)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/solapi/provider.ts:209](https://github.com/k-
 
 > `static` **createDefault**(): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
 
-Defined in: [packages/provider/src/solapi/provider.ts:213](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/provider/src/solapi/provider.ts#L213)
+Defined in: [packages/provider/src/solapi/provider.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L213)
 
 #### Returns
 

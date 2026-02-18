@@ -5,7 +5,7 @@ prev: false
 title: "PhoneVerificationStatus"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:59](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L59)
+Defined in: [packages/channel/src/verification/number.verify.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L59)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:59](https://gith
 
 > **BLOCKED**: `"blocked"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L65)
+Defined in: [packages/channel/src/verification/number.verify.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L65)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:65](https://gith
 
 > **CODE\_SENT**: `"code_sent"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:61](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L61)
+Defined in: [packages/channel/src/verification/number.verify.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L61)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:61](https://gith
 
 > **EXPIRED**: `"expired"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:64](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L64)
+Defined in: [packages/channel/src/verification/number.verify.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L64)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:64](https://gith
 
 > **FAILED**: `"failed"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:63](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L63)
+Defined in: [packages/channel/src/verification/number.verify.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L63)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:63](https://gith
 
 > **PENDING**: `"pending"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:60](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L60)
+Defined in: [packages/channel/src/verification/number.verify.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L60)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/channel/src/verification/number.verify.ts:60](https://gith
 
 > **VERIFIED**: `"verified"`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:62](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L62)
+Defined in: [packages/channel/src/verification/number.verify.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L62)

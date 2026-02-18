@@ -5,7 +5,7 @@ prev: false
 title: "LogEntry"
 ---
 
-Defined in: [packages/core/src/logger.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L18)
+Defined in: [packages/core/src/logger.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L18)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/logger.ts:18](https://github.com/k-otp/k-msg/blob
 
 > **context**: [`LogContext`](/api/core/src/interfaces/logcontext/)
 
-Defined in: [packages/core/src/logger.ts:22](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L22)
+Defined in: [packages/core/src/logger.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L22)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/logger.ts:22](https://github.com/k-otp/k-msg/blob
 
 > `optional` **duration**: `number`
 
-Defined in: [packages/core/src/logger.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L24)
+Defined in: [packages/core/src/logger.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L24)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/logger.ts:24](https://github.com/k-otp/k-msg/blob
 
 > `optional` **error**: `Error`
 
-Defined in: [packages/core/src/logger.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L23)
+Defined in: [packages/core/src/logger.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L23)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/logger.ts:23](https://github.com/k-otp/k-msg/blob
 
 > **level**: [`LogLevel`](/api/core/src/enumerations/loglevel/)
 
-Defined in: [packages/core/src/logger.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L19)
+Defined in: [packages/core/src/logger.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L19)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/logger.ts:19](https://github.com/k-otp/k-msg/blob
 
 > **message**: `string`
 
-Defined in: [packages/core/src/logger.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L20)
+Defined in: [packages/core/src/logger.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L20)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/core/src/logger.ts:20](https://github.com/k-otp/k-msg/blob
 
 > **timestamp**: `Date`
 
-Defined in: [packages/core/src/logger.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/logger.ts#L21)
+Defined in: [packages/core/src/logger.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L21)

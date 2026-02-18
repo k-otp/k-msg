@@ -5,7 +5,7 @@ prev: false
 title: "PhoneVerificationRequest"
 ---
 
-Defined in: [packages/channel/src/verification/number.verify.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L13)
+Defined in: [packages/channel/src/verification/number.verify.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L13)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:13](https://gith
 
 > **attempts**: [`VerificationAttempt`](/api/channel/src/interfaces/verificationattempt/)[]
 
-Defined in: [packages/channel/src/verification/number.verify.ts:20](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L20)
+Defined in: [packages/channel/src/verification/number.verify.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L20)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:20](https://gith
 
 > `optional` **completedAt**: `Date`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:23](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L23)
+Defined in: [packages/channel/src/verification/number.verify.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L23)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:23](https://gith
 
 > **createdAt**: `Date`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:22](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L22)
+Defined in: [packages/channel/src/verification/number.verify.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L22)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:22](https://gith
 
 > **expiresAt**: `Date`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:21](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L21)
+Defined in: [packages/channel/src/verification/number.verify.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L21)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:21](https://gith
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L14)
+Defined in: [packages/channel/src/verification/number.verify.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L14)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:14](https://gith
 
 > **metadata**: `object`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:24](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L24)
+Defined in: [packages/channel/src/verification/number.verify.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L24)
 
 #### callProvider?
 
@@ -81,7 +81,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:24](https://gith
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:16](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L16)
+Defined in: [packages/channel/src/verification/number.verify.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L16)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:16](https://gith
 
 > **senderNumberId**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:15](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L15)
+Defined in: [packages/channel/src/verification/number.verify.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L15)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:15](https://gith
 
 > **status**: [`PhoneVerificationStatus`](/api/channel/src/enumerations/phoneverificationstatus/)
 
-Defined in: [packages/channel/src/verification/number.verify.ts:19](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L19)
+Defined in: [packages/channel/src/verification/number.verify.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L19)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: [packages/channel/src/verification/number.verify.ts:19](https://gith
 
 > **verificationCode**: `string`
 
-Defined in: [packages/channel/src/verification/number.verify.ts:18](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L18)
+Defined in: [packages/channel/src/verification/number.verify.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L18)
 
 ***
 
@@ -113,4 +113,4 @@ Defined in: [packages/channel/src/verification/number.verify.ts:18](https://gith
 
 > **verificationType**: [`VerificationType`](/api/channel/src/enumerations/verificationtype/)
 
-Defined in: [packages/channel/src/verification/number.verify.ts:17](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/channel/src/verification/number.verify.ts#L17)
+Defined in: [packages/channel/src/verification/number.verify.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/verification/number.verify.ts#L17)

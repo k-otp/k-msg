@@ -5,7 +5,7 @@ prev: false
 title: "MetricAggregator"
 ---
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:34](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L34)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L34)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:34](https:/
 
 > **new MetricAggregator**(`config`): `MetricAggregator`
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:39](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L39)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L39)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:39](https:/
 
 > **addMetric**(`metric`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:47](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L47)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L47)
 
 메트릭 추가 및 실시간 집계
 
@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:47](https:/
 
 > **addMetrics**(`metrics`): `Promise`\<`void`\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L65)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L65)
 
 배치 메트릭 처리
 
@@ -71,7 +71,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https:/
 
 > **aggregateByRules**(`metrics`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L74)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L74)
 
 규칙 기반 집계 실행
 
@@ -91,7 +91,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https:/
 
 > **aggregateCustom**(`metrics`, `groupBy`, `aggregationType`, `filters?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L94)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L94)
 
 커스텀 집계 (동적 규칙)
 
@@ -123,7 +123,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https:/
 
 > **aggregateSlidingWindow**(`metrics`, `windowSizeMs`, `stepMs`, `aggregationType`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L210)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L210)
 
 슬라이딩 윈도우 집계
 
@@ -155,7 +155,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https:
 
 > **calculatePercentiles**(`metrics`, `percentiles`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L173)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L173)
 
 백분위수 계산
 
@@ -183,7 +183,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https:
 
 > **calculateRates**(`numeratorMetrics`, `denominatorMetrics`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L127)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L127)
 
 비율 계산 (예: 전환율, 오류율)
 
@@ -211,7 +211,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https:
 
 > **normalizeMetrics**(`metrics`, `method`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
-Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:252](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/analytics/src/aggregators/metric.aggregator.ts#L252)
+Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:252](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L252)
 
 메트릭 정규화
 

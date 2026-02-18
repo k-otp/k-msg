@@ -5,7 +5,7 @@ prev: false
 title: "BalanceResult"
 ---
 
-Defined in: [packages/core/src/types/balance.ts:9](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L9)
+Defined in: [packages/core/src/types/balance.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L9)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/balance.ts:9](https://github.com/k-otp/k-ms
 
 > **amount**: `number`
 
-Defined in: [packages/core/src/types/balance.ts:12](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L12)
+Defined in: [packages/core/src/types/balance.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L12)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/balance.ts:12](https://github.com/k-otp/k-m
 
 > `optional` **channel**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
 
-Defined in: [packages/core/src/types/balance.ts:11](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L11)
+Defined in: [packages/core/src/types/balance.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L11)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/balance.ts:11](https://github.com/k-otp/k-m
 
 > `optional` **currency**: `string`
 
-Defined in: [packages/core/src/types/balance.ts:13](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L13)
+Defined in: [packages/core/src/types/balance.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L13)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/types/balance.ts:13](https://github.com/k-otp/k-m
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/balance.ts:10](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L10)
+Defined in: [packages/core/src/types/balance.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L10)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/core/src/types/balance.ts:10](https://github.com/k-otp/k-m
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/core/src/types/balance.ts:14](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/core/src/types/balance.ts#L14)
+Defined in: [packages/core/src/types/balance.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L14)

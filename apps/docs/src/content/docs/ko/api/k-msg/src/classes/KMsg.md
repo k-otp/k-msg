@@ -5,7 +5,7 @@ prev: false
 title: "KMsg"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:76](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L76)
+Defined in: [packages/messaging/src/k-msg.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L76)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/k-msg.ts:76](https://github.com/k-otp/k-msg/
 
 > **new KMsg**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:88](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L88)
+Defined in: [packages/messaging/src/k-msg.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L88)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/k-msg.ts:88](https://github.com/k-otp/k-msg/
 
 > **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
-Defined in: [packages/messaging/src/k-msg.ts:115](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L115)
+Defined in: [packages/messaging/src/k-msg.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L115)
 
 #### Returns
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/k-msg.ts:115](https://github.com/k-otp/k-msg
 
 > **send**(`input`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/messaging/src/k-msg.ts:150](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L150)
+Defined in: [packages/messaging/src/k-msg.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L150)
 
 ##### Parameters
 
@@ -61,7 +61,7 @@ Defined in: [packages/messaging/src/k-msg.ts:150](https://github.com/k-otp/k-msg
 
 > **send**(`input`): `Promise`\<[`BatchSendResult`](/api/messaging/src/interfaces/batchsendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:151](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L151)
+Defined in: [packages/messaging/src/k-msg.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L151)
 
 ##### Parameters
 
@@ -79,7 +79,7 @@ Defined in: [packages/messaging/src/k-msg.ts:151](https://github.com/k-otp/k-msg
 
 > **sendOrThrow**(`input`): `Promise`\<[`SendResult`](/api/core/src/interfaces/sendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:162](https://github.com/k-otp/k-msg/blob/6a36eef039aac25baeffb88785f2ebe5e4151ab2/packages/messaging/src/k-msg.ts#L162)
+Defined in: [packages/messaging/src/k-msg.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L162)
 
 #### Parameters
 
