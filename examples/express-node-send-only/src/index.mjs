@@ -14,7 +14,7 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isAdvancedSendInput(value) {
+function isSendPayload(value) {
   if (isRecord(value)) {
     return true;
   }
@@ -45,7 +45,7 @@ app.get("/", (_req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-  if (!isAdvancedSendInput(req.body)) {
+  if (!isSendPayload(req.body)) {
     return res.status(400).json({
       ok: false,
       message: "request body must be a JSON object or an array of JSON objects",
