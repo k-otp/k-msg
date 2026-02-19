@@ -1,13 +1,13 @@
 import { access, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { defineCommand, option } from "@bunli/core";
+import { z } from "zod";
 import {
   buildCloudflareSqlSchemaSql,
   type CloudflareSqlSchemaTarget,
   renderDrizzleSchemaSource,
   type SqlDialect,
-} from "k-msg/adapters/cloudflare";
-import { z } from "zod";
+} from "../../../../packages/messaging/src/adapters/cloudflare/index";
 import { strictBooleanFlagSchema } from "../cli/options";
 
 const dialectSchema = z.enum(["postgres", "mysql", "sqlite"]);
