@@ -1,5 +1,13 @@
 # @k-msg/cli
 
+## 0.6.2 — 2026-02-19
+
+### Patch changes
+
+- [7797dc8](https://github.com/k-otp/k-msg/commit/7797dc8dacc4024a2b825fe46c6f266e271e822d) - Fix provider balance CLI exit code semantics: return exit code 3 only for provider errors and 4 when capability is unsupported.
+  - Update CLI/README docs to use the correct `providers list --config ...` usage and clarify capability-not-supported exit code.
+  - Add GitHub repository button to docs home pages (KO/EN). — Thanks @imjlk!
+
 ## 0.6.1 — 2026-02-18
 
 ### Patch changes
