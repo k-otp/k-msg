@@ -94,8 +94,10 @@ Default config path:
 Override:
 
 ```bash
-k-msg --config /path/to/k-msg.config.json providers list
+k-msg providers list --config /path/to/k-msg.config.json
 ```
+
+Note: `--config` is a subcommand option in the current CLI (for example: `providers`, `sms`, `alimtalk`).
 
 Example file: `apps/cli/k-msg.config.example.json`
 
@@ -323,7 +325,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
   - `0`: success
   - `2`: input/config error
   - `3`: provider/network error
-  - `4`: capability not supported
+  - `4`: unsupported capability (for example, provider does not support `balance`)
 
 ## Manual Check Config Example
 
