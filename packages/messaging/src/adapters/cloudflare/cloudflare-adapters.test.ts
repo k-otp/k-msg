@@ -12,7 +12,11 @@ import {
   createR2JobQueue,
 } from "./index";
 import type { CloudflareSqlClient } from "./sql-client";
-import { createD1SqlClient, runCloudflareSqlTransaction } from "./sql-client";
+import {
+  createD1SqlClient,
+  createDrizzleSqlClient,
+  runCloudflareSqlTransaction,
+} from "./sql-client";
 
 type CapturedQuery = { sql: string; params: readonly unknown[] };
 
@@ -105,13 +109,57 @@ describe("Cloudflare SQL adapters", () => {
     await pgStore.upsert(record);
     await myStore.upsert(record);
 
-    const pgSql = postgres.queries[0]?.sql ?? "";
-    const mySql = mysql.queries[0]?.sql ?? "";
+    const pgSql =
+      postgres.queries.find((query) => query.sql.includes("INSERT INTO"))
+        ?.sql ?? "";
+    const mySql =
+      mysql.queries.find((query) => query.sql.includes("INSERT INTO"))?.sql ??
+      "";
 
     expect(pgSql).toContain("ON CONFLICT");
     expect(pgSql).toContain("$1");
     expect(mySql).toContain("ON DUPLICATE KEY UPDATE");
     expect(mySql).toContain("?");
+  });
+
+  test("createDrizzleSqlClient normalizes execute results and wraps transactions", async () => {
+    const calls: unknown[] = [];
+    const txCalls: unknown[] = [];
+
+    const txDb = {
+      async execute(query: unknown) {
+        txCalls.push(query);
+        return [{ id: "tx" }];
+      },
+    };
+
+    const db = {
+      async execute(query: unknown) {
+        calls.push(query);
+        return { rows: [{ id: "root" }], rowCount: 7 };
+      },
+      async transaction<T>(fn: (tx: unknown) => Promise<T>): Promise<T> {
+        return fn(txDb);
+      },
+    };
+
+    const client = createDrizzleSqlClient({
+      dialect: "postgres",
+      db,
+    });
+
+    const first = await client.query<{ id: string }>("SELECT 1");
+    expect(first.rows[0]?.id).toBe("root");
+    expect(first.rowCount).toBe(7);
+
+    const second = await runCloudflareSqlTransaction(client, async (tx) => {
+      const result = await tx.query<{ id: string }>("SELECT 2", [2]);
+      return result.rows[0]?.id;
+    });
+
+    expect(second).toBe("tx");
+    expect(calls[0]).toBe("SELECT 1");
+    expect(txCalls[0]).toEqual({ sql: "SELECT 2", params: [2] });
   });
 
   test("runCloudflareSqlTransaction works with and without transaction function", async () => {
@@ -154,6 +202,49 @@ describe("Cloudflare SQL adapters", () => {
     const size = await queue.size();
 
     expect(typeof size).toBe("number");
+  });
+
+  test("HyperdriveDeliveryTrackingStore retries init after init failure", async () => {
+    let shouldFail = true;
+    const client: CloudflareSqlClient = {
+      dialect: "sqlite",
+      async query(sql) {
+        if (shouldFail && sql.includes("CREATE TABLE")) {
+          shouldFail = false;
+          throw new Error("failed to create table");
+        }
+        return { rows: [] };
+      },
+    };
+
+    const store = new HyperdriveDeliveryTrackingStore(client);
+
+    await expect(store.init()).rejects.toThrow("failed to create table");
+    const result = await store.get("m1");
+    expect(result).toBeUndefined();
+  });
+
+  test("HyperdriveJobQueue retries init after init failure", async () => {
+    let shouldFail = true;
+    const client: CloudflareSqlClient = {
+      dialect: "sqlite",
+      async query(sql) {
+        if (shouldFail && sql.includes("CREATE TABLE")) {
+          shouldFail = false;
+          throw new Error("failed to create table");
+        }
+        if (/SELECT COUNT\(1\)/i.test(sql)) {
+          return { rows: [{ count: 0 }] };
+        }
+        return { rows: [] };
+      },
+    };
+
+    const queue = new HyperdriveJobQueue<{ hello: string }>(client);
+
+    await expect(queue.init()).rejects.toThrow("failed to create table");
+    const size = await queue.size();
+    expect(size).toBe(0);
   });
 });
 

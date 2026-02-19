@@ -11,6 +11,7 @@ k-msg CLI (prebuilt binaries via GitHub Releases)
 Commands:
   alimtalk   AlimTalk utilities
   config     Configuration helpers
+  db         Database schema utilities
   kakao      Kakao channel/template management
   providers  Provider utilities
   send       Advanced send using raw SendInput JSON object/array

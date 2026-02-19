@@ -177,8 +177,44 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
+- `k-msg db schema print|generate`
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
+
+## DB 스키마 제네레이터
+
+`@k-msg/messaging/adapters/cloudflare`의 스키마 유틸을 그대로 사용해
+SQL DDL / Drizzle 스키마 소스를 생성합니다.
+
+```bash
+# drizzle+sql 모두 stdout 출력
+k-msg db schema print --dialect postgres
+
+# queue 스키마만 SQL로 출력
+k-msg db schema print --dialect postgres --target queue --format sql
+
+# 현재 디렉터리에 두 파일 생성
+k-msg db schema generate --dialect postgres
+
+# SQL만 커스텀 경로로 생성
+k-msg db schema generate \
+  --dialect mysql \
+  --target tracking \
+  --format sql \
+  --out-dir ./db \
+  --sql-file tracking.sql
+```
+
+옵션:
+
+- `--dialect <postgres|mysql|sqlite>`: 필수
+- `--target <tracking|queue|both>`: 기본값 `both`
+- `--format <drizzle|sql|both>`: 기본값 `both`
+- `generate` 전용:
+  - `--out-dir <path>` 기본 현재 디렉터리
+  - `--drizzle-file <name>` 기본 `kmsg.schema.ts`
+  - `--sql-file <name>` 기본 `kmsg.schema.sql`
+  - `--force` 기본 `false` (없으면 기존 파일 존재 시 실패)
 
 ## 권장 AlimTalk 운영 흐름
 

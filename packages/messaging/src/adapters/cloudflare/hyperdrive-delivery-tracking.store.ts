@@ -10,6 +10,7 @@ import {
   type TrackingRecord,
 } from "../../delivery-tracking/types";
 import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
+import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 const TERMINAL_STATUSES = [
   "DELIVERED",
@@ -68,7 +69,7 @@ function toNumberValue(value: unknown, fallback = 0): number {
 }
 
 export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
-  private initialized = false;
+  private initPromise: Promise<void> | undefined;
 
   constructor(
     private readonly client: CloudflareSqlClient,
@@ -76,54 +77,24 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   ) {}
 
   async init(): Promise<void> {
-    if (this.initialized) return;
-    this.initialized = true;
+    if (this.initPromise) {
+      return this.initPromise;
+    }
 
-    const table = this.tableRef();
-    const q = (column: string) => this.quoteIdentifier(column);
+    this.initPromise = initializeCloudflareSqlSchema(this.client, {
+      target: "tracking",
+      trackingTableName: this.tableName,
+    }).catch((error) => {
+      this.initPromise = undefined;
+      throw error;
+    });
 
-    const idType = this.client.dialect === "mysql" ? "VARCHAR(255)" : "TEXT";
-    const shortType = this.client.dialect === "mysql" ? "VARCHAR(64)" : "TEXT";
-    const jsonType = this.client.dialect === "postgres" ? "JSONB" : "TEXT";
-
-    await this.client.query(`
-      CREATE TABLE IF NOT EXISTS ${table} (
-        ${q("message_id")} ${idType} PRIMARY KEY,
-        ${q("provider_id")} ${idType} NOT NULL,
-        ${q("provider_message_id")} ${idType} NOT NULL,
-        ${q("type")} ${shortType} NOT NULL,
-        ${q("to")} ${shortType} NOT NULL,
-        ${q("from")} ${shortType},
-        ${q("status")} ${shortType} NOT NULL,
-        ${q("provider_status_code")} ${shortType},
-        ${q("provider_status_message")} ${shortType},
-        ${q("sent_at")} BIGINT,
-        ${q("delivered_at")} BIGINT,
-        ${q("failed_at")} BIGINT,
-        ${q("requested_at")} BIGINT NOT NULL,
-        ${q("scheduled_at")} BIGINT,
-        ${q("status_updated_at")} BIGINT NOT NULL,
-        ${q("attempt_count")} INTEGER NOT NULL DEFAULT 0,
-        ${q("last_checked_at")} BIGINT,
-        ${q("next_check_at")} BIGINT NOT NULL,
-        ${q("last_error")} ${jsonType},
-        ${q("raw")} ${jsonType},
-        ${q("metadata")} ${jsonType}
-      )
-    `);
-
-    await this.createIndex("idx_kmsg_delivery_due", [
-      "status",
-      "next_check_at",
-    ]);
-    await this.createIndex("idx_kmsg_delivery_provider_msg", [
-      "provider_id",
-      "provider_message_id",
-    ]);
-    await this.createIndex("idx_kmsg_delivery_requested_at", ["requested_at"]);
+    return this.initPromise;
   }
 
   async upsert(record: TrackingRecord): Promise<void> {
+    await this.init();
+
     const columns = [
       "message_id",
       "provider_id",
@@ -208,6 +179,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async get(messageId: string): Promise<TrackingRecord | undefined> {
+    await this.init();
+
     const messageIdPlaceholder = this.placeholder(1);
     const { rows } = await this.client.query<TrackingRow>(
       `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier("message_id")} = ${messageIdPlaceholder} LIMIT 1`,
@@ -218,6 +191,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(limit)
       ? Math.max(0, Math.floor(limit))
       : 0;
@@ -238,6 +213,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(options.limit)
       ? Math.max(0, Math.floor(options.limit))
       : 0;
@@ -266,6 +243,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    await this.init();
+
     const where = this.buildWhere(filter);
     const { rows } = await this.client.query<{ count?: number | string }>(
       `SELECT COUNT(1) as count FROM ${this.tableRef()} ${where.sql}`,
@@ -280,6 +259,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     filter: DeliveryTrackingRecordFilter,
     groupBy: readonly DeliveryTrackingCountByField[],
   ): Promise<DeliveryTrackingCountByRow[]> {
+    await this.init();
+
     const fields = Array.from(groupBy).filter(Boolean);
     if (fields.length === 0) return [];
 
@@ -320,6 +301,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     messageId: string,
     patch: Partial<TrackingRecord>,
   ): Promise<void> {
+    await this.init();
+
     const updates: Array<{ column: string; value: unknown }> = [];
 
     if (patch.providerId !== undefined) {
@@ -595,24 +578,6 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       sql: clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "",
       params,
     };
-  }
-
-  private async createIndex(
-    name: string,
-    columns: readonly string[],
-  ): Promise<void> {
-    const cols = columns
-      .map((column) => this.quoteIdentifier(column))
-      .join(", ");
-    const sql =
-      this.client.dialect === "mysql"
-        ? `CREATE INDEX ${this.quoteIdentifier(name)} ON ${this.tableRef()} (${cols})`
-        : `CREATE INDEX IF NOT EXISTS ${this.quoteIdentifier(name)} ON ${this.tableRef()} (${cols})`;
-    try {
-      await this.client.query(sql);
-    } catch {
-      // noop
-    }
   }
 }
 

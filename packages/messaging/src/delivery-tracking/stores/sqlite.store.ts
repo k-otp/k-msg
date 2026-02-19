@@ -1,4 +1,5 @@
 import Database from "bun:sqlite";
+import { initializeCloudflareSqlSchema } from "../../adapters/cloudflare/sql-schema";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
@@ -54,78 +55,60 @@ type SqliteBindingValue = string | number;
 
 export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   private readonly db: Database;
-  private initialized = false;
+  private initPromise: Promise<void> | undefined;
 
   constructor(options: SqliteDeliveryTrackingStoreOptions = {}) {
     this.db = new Database(options.dbPath ?? "./kmsg.sqlite");
   }
 
   async init(): Promise<void> {
-    if (this.initialized) return;
-    this.initialized = true;
+    if (this.initPromise) {
+      return this.initPromise;
+    }
 
-    this.db.exec("PRAGMA journal_mode = WAL;");
+    this.initPromise = (async () => {
+      this.db.exec("PRAGMA journal_mode = WAL;");
 
-    // NOTE: Column names like "from" are reserved keywords in SQLite.
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS kmsg_delivery_tracking (
-        message_id TEXT PRIMARY KEY,
-        provider_id TEXT NOT NULL,
-        provider_message_id TEXT NOT NULL,
-        type TEXT NOT NULL,
-        "to" TEXT NOT NULL,
-        "from" TEXT,
-        status TEXT NOT NULL,
-        provider_status_code TEXT,
-        provider_status_message TEXT,
-        sent_at INTEGER,
-        delivered_at INTEGER,
-        failed_at INTEGER,
-        requested_at INTEGER NOT NULL,
-        scheduled_at INTEGER,
-        status_updated_at INTEGER NOT NULL,
-        attempt_count INTEGER NOT NULL DEFAULT 0,
-        last_checked_at INTEGER,
-        next_check_at INTEGER NOT NULL,
-        last_error TEXT,
-        raw TEXT,
-        metadata TEXT
+      await initializeCloudflareSqlSchema(
+        {
+          dialect: "sqlite",
+          query: async (sql) => {
+            this.db.exec(sql);
+            return { rows: [] };
+          },
+        },
+        {
+          target: "tracking",
+          trackingTableName: "kmsg_delivery_tracking",
+        },
       );
 
-      CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_due
-        ON kmsg_delivery_tracking(status, next_check_at);
-
-      CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_provider_msg
-        ON kmsg_delivery_tracking(provider_id, provider_message_id);
-    `);
-
-    // Best-effort schema migration for existing DBs.
-    const alterStmts = [
-      "ALTER TABLE kmsg_delivery_tracking ADD COLUMN provider_status_code TEXT;",
-      "ALTER TABLE kmsg_delivery_tracking ADD COLUMN provider_status_message TEXT;",
-      "ALTER TABLE kmsg_delivery_tracking ADD COLUMN sent_at INTEGER;",
-      "ALTER TABLE kmsg_delivery_tracking ADD COLUMN delivered_at INTEGER;",
-      "ALTER TABLE kmsg_delivery_tracking ADD COLUMN failed_at INTEGER;",
-    ];
-    for (const stmt of alterStmts) {
-      try {
-        this.db.exec(stmt);
-      } catch {
-        // ignore
+      // Best-effort schema migration for existing DBs.
+      const alterStmts = [
+        "ALTER TABLE kmsg_delivery_tracking ADD COLUMN provider_status_code TEXT;",
+        "ALTER TABLE kmsg_delivery_tracking ADD COLUMN provider_status_message TEXT;",
+        "ALTER TABLE kmsg_delivery_tracking ADD COLUMN sent_at INTEGER;",
+        "ALTER TABLE kmsg_delivery_tracking ADD COLUMN delivered_at INTEGER;",
+        "ALTER TABLE kmsg_delivery_tracking ADD COLUMN failed_at INTEGER;",
+      ];
+      for (const stmt of alterStmts) {
+        try {
+          this.db.exec(stmt);
+        } catch {
+          // ignore
+        }
       }
-    }
+    })().catch((error) => {
+      this.initPromise = undefined;
+      throw error;
+    });
 
-    // Helpful for analytics queries.
-    try {
-      this.db.exec(
-        "CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_requested_at ON kmsg_delivery_tracking(requested_at);",
-      );
-    } catch {
-      // ignore
-    }
+    return this.initPromise;
   }
 
   async upsert(record: TrackingRecord): Promise<void> {
+    await this.init();
+
     const stmt = this.db.prepare(`
       INSERT INTO kmsg_delivery_tracking (
         message_id,
@@ -199,6 +182,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async get(messageId: string): Promise<TrackingRecord | undefined> {
+    await this.init();
+
     const stmt = this.db.prepare(`
 	      SELECT
 	        message_id,
@@ -232,6 +217,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(limit)
       ? Math.max(0, Math.floor(limit))
       : 0;
@@ -274,6 +261,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(options.limit)
       ? Math.max(0, Math.floor(options.limit))
       : 0;
@@ -326,6 +315,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    await this.init();
+
     const { whereSql, params } = this.buildWhere(filter);
     const stmt = this.db.prepare(`
       SELECT COUNT(1) as count
@@ -340,6 +331,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     filter: DeliveryTrackingRecordFilter,
     groupBy: readonly DeliveryTrackingCountByField[],
   ): Promise<DeliveryTrackingCountByRow[]> {
+    await this.init();
+
     const fields = Array.from(groupBy).filter(Boolean);
     if (fields.length === 0) return [];
 
@@ -382,6 +375,8 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     messageId: string,
     patch: Partial<TrackingRecord>,
   ): Promise<void> {
+    await this.init();
+
     const existing = await this.get(messageId);
     if (!existing) return;
 

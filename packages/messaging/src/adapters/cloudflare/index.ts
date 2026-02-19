@@ -1,3 +1,7 @@
+import {
+  type RenderDrizzleSchemaSourceOptions,
+  renderDrizzleSchemaSource,
+} from "./drizzle-schema";
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
 import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import { CloudflareObjectDeliveryTrackingStore } from "./object-delivery-tracking.store";
@@ -14,13 +18,27 @@ import {
 import {
   type CloudflareSqlClient,
   type CloudflareSqlQueryResult,
+  type CreateDrizzleSqlClientOptions,
   createCloudflareSqlClient,
   createD1SqlClient,
+  createDrizzleSqlClient,
   type D1DatabaseLike,
   type D1PreparedStatementLike,
+  type DrizzleSqlDatabaseLike,
   runCloudflareSqlTransaction,
   type SqlDialect,
 } from "./sql-client";
+import {
+  type BuildCloudflareSqlSchemaSqlOptions,
+  type BuildDeliveryTrackingSchemaSqlOptions,
+  type BuildJobQueueSchemaSqlOptions,
+  buildCloudflareSqlSchemaSql,
+  buildDeliveryTrackingSchemaSql,
+  buildJobQueueSchemaSql,
+  type CloudflareSqlSchemaTarget,
+  type InitializeCloudflareSqlSchemaOptions,
+  initializeCloudflareSqlSchema,
+} from "./sql-schema";
 
 export {
   HyperdriveDeliveryTrackingStore,
@@ -28,24 +46,48 @@ export {
   CloudflareObjectDeliveryTrackingStore,
   CloudflareObjectJobQueue,
   createD1SqlClient,
+  createDrizzleSqlClient,
   createCloudflareSqlClient,
   runCloudflareSqlTransaction,
   createKvObjectStorage,
   createR2ObjectStorage,
   createDurableObjectStorage,
+  buildDeliveryTrackingSchemaSql,
+  buildJobQueueSchemaSql,
+  buildCloudflareSqlSchemaSql,
+  initializeCloudflareSqlSchema,
+  renderDrizzleSchemaSource,
 };
 
 export type {
   CloudflareSqlClient,
   CloudflareSqlQueryResult,
   SqlDialect,
+  CreateDrizzleSqlClientOptions,
+  DrizzleSqlDatabaseLike,
   D1DatabaseLike,
   D1PreparedStatementLike,
   CloudflareObjectStorage,
   CloudflareKvNamespaceLike,
   CloudflareR2BucketLike,
   CloudflareDurableObjectStorageLike,
+  BuildDeliveryTrackingSchemaSqlOptions,
+  BuildJobQueueSchemaSqlOptions,
+  BuildCloudflareSqlSchemaSqlOptions,
+  InitializeCloudflareSqlSchemaOptions,
+  CloudflareSqlSchemaTarget,
+  RenderDrizzleSchemaSourceOptions,
 };
+
+export interface CreateDrizzleDeliveryTrackingStoreOptions
+  extends CreateDrizzleSqlClientOptions {
+  tableName?: string;
+}
+
+export interface CreateDrizzleJobQueueOptions
+  extends CreateDrizzleSqlClientOptions {
+  tableName?: string;
+}
 
 export function createD1DeliveryTrackingStore(
   database: D1DatabaseLike,
@@ -65,6 +107,20 @@ export function createD1JobQueue<T>(
     createD1SqlClient(database),
     options.tableName,
   );
+}
+
+export function createDrizzleDeliveryTrackingStore(
+  options: CreateDrizzleDeliveryTrackingStoreOptions,
+): HyperdriveDeliveryTrackingStore {
+  const client = createDrizzleSqlClient(options);
+  return new HyperdriveDeliveryTrackingStore(client, options.tableName);
+}
+
+export function createDrizzleJobQueue<T>(
+  options: CreateDrizzleJobQueueOptions,
+): HyperdriveJobQueue<T> {
+  const client = createDrizzleSqlClient(options);
+  return new HyperdriveJobQueue<T>(client, options.tableName);
 }
 
 export function createKvDeliveryTrackingStore(

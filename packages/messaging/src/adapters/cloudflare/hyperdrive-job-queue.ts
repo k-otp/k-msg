@@ -2,6 +2,7 @@ import type { Job, JobQueue } from "../../queue/job-queue.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
 import type { CloudflareSqlClient } from "./sql-client";
 import { runCloudflareSqlTransaction } from "./sql-client";
+import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type JobRow = Record<string, unknown>;
 
@@ -36,7 +37,7 @@ function toNumber(value: unknown, fallback = 0): number {
 }
 
 export class HyperdriveJobQueue<T> implements JobQueue<T> {
-  private initialized = false;
+  private initPromise: Promise<void> | undefined;
 
   constructor(
     private readonly client: CloudflareSqlClient,
@@ -44,48 +45,25 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
   ) {}
 
   async init(): Promise<void> {
-    if (this.initialized) return;
-    this.initialized = true;
+    if (this.initPromise) {
+      return this.initPromise;
+    }
 
-    const q = (column: string) => this.quoteIdentifier(column);
+    this.initPromise = initializeCloudflareSqlSchema(this.client, {
+      target: "queue",
+      queueTableName: this.tableName,
+    }).catch((error) => {
+      this.initPromise = undefined;
+      throw error;
+    });
 
-    await this.client.query(`
-      CREATE TABLE IF NOT EXISTS ${this.tableRef()} (
-        ${q("id")} ${this.client.dialect === "mysql" ? "VARCHAR(255)" : "TEXT"} PRIMARY KEY,
-        ${q("type")} ${this.client.dialect === "mysql" ? "VARCHAR(128)" : "TEXT"} NOT NULL,
-        ${q("data")} ${this.client.dialect === "postgres" ? "JSONB" : "TEXT"} NOT NULL,
-        ${q("status")} ${this.client.dialect === "mysql" ? "VARCHAR(32)" : "TEXT"} NOT NULL DEFAULT 'pending',
-        ${q("priority")} INTEGER NOT NULL DEFAULT 0,
-        ${q("attempts")} INTEGER NOT NULL DEFAULT 0,
-        ${q("max_attempts")} INTEGER NOT NULL DEFAULT 3,
-        ${q("delay")} INTEGER NOT NULL DEFAULT 0,
-        ${q("created_at")} BIGINT NOT NULL,
-        ${q("process_at")} BIGINT NOT NULL,
-        ${q("completed_at")} BIGINT,
-        ${q("failed_at")} BIGINT,
-        ${q("error")} TEXT,
-        ${q("metadata")} ${this.client.dialect === "postgres" ? "JSONB" : "TEXT"}
-      )
-    `);
-
-    await this.createIndex("idx_kmsg_jobs_dequeue", [
-      "status",
-      "priority",
-      "process_at",
-      "created_at",
-    ]);
-    await this.createIndex("idx_kmsg_jobs_id", ["id"]);
+    return this.initPromise;
   }
 
   async enqueue(
     type: string,
     data: T,
-    options: {
-      priority?: number;
-      delay?: number;
-      maxAttempts?: number;
-      metadata?: Record<string, any>;
-    } = {},
+    options: Parameters<JobQueue<T>["enqueue"]>[2] = {},
   ): Promise<Job<T>> {
     await this.init();
 
@@ -213,7 +191,10 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     });
   }
 
-  async complete(jobId: string, _result?: any): Promise<void> {
+  async complete(
+    jobId: string,
+    _result?: Parameters<JobQueue<T>["complete"]>[1],
+  ): Promise<void> {
     await this.init();
     await this.client.query(
       `UPDATE ${this.tableRef()}
@@ -351,7 +332,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
         typeof row.error === "string" && row.error.length > 0
           ? row.error
           : undefined,
-      metadata: safeJsonParse<Record<string, any>>(row.metadata, {}),
+      metadata: safeJsonParse<Job<T>["metadata"]>(row.metadata, {}),
     };
   }
 
@@ -380,24 +361,5 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       result.push(this.placeholder(startIndex + index));
     }
     return result;
-  }
-
-  private async createIndex(
-    name: string,
-    columns: readonly string[],
-  ): Promise<void> {
-    const cols = columns
-      .map((column) => this.quoteIdentifier(column))
-      .join(", ");
-    const sql =
-      this.client.dialect === "mysql"
-        ? `CREATE INDEX ${this.quoteIdentifier(name)} ON ${this.tableRef()} (${cols})`
-        : `CREATE INDEX IF NOT EXISTS ${this.quoteIdentifier(name)} ON ${this.tableRef()} (${cols})`;
-
-    try {
-      await this.client.query(sql);
-    } catch {
-      // noop
-    }
   }
 }

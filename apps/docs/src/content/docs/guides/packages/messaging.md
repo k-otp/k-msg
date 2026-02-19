@@ -22,6 +22,8 @@ bun add @k-msg/messaging @k-msg/core
   - `DeliveryTracker`, `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
 - `@k-msg/messaging/adapters/cloudflare`
   - Hyperdrive/Postgres/MySQL/D1 SQL 어댑터
+  - Drizzle 래핑 SQL client/store 팩토리
+  - SQL/Drizzle 스키마 생성 유틸
   - KV/R2/DO 기반 object storage 어댑터
 
 ## 마이그레이션 (Breaking)
@@ -145,4 +147,50 @@ Queue 인덱스:
 
 - `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
 - `idx_kmsg_jobs_id(id)`
+
+### Cloudflare 스키마 유틸 API
+
+```ts
+import {
+  buildCloudflareSqlSchemaSql,
+  buildDeliveryTrackingSchemaSql,
+  buildJobQueueSchemaSql,
+  initializeCloudflareSqlSchema,
+  renderDrizzleSchemaSource,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+// SQL DDL 문자열 생성
+const ddl = buildCloudflareSqlSchemaSql({
+  dialect: "postgres",
+  target: "both",
+});
+
+// 런타임 스키마 초기화 (duplicate/exists 계열만 무시)
+await initializeCloudflareSqlSchema(client, { target: "both" });
+
+// Drizzle 스키마 TypeScript 소스 생성
+const drizzleSource = renderDrizzleSchemaSource({
+  dialect: "postgres",
+  target: "both",
+});
+```
+
+### Drizzle 어댑터 팩토리
+
+```ts
+import {
+  createDrizzleDeliveryTrackingStore,
+  createDrizzleJobQueue,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+const trackingStore = createDrizzleDeliveryTrackingStore({
+  dialect: "postgres",
+  db, // execute()/transaction()를 제공하는 drizzle db
+});
+
+const queue = createDrizzleJobQueue({
+  dialect: "postgres",
+  db,
+});
+```
 

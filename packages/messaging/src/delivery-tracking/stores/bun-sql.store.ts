@@ -1,4 +1,5 @@
 import type { SQL } from "bun";
+import { initializeCloudflareSqlSchema } from "../../adapters/cloudflare/sql-schema";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
@@ -49,6 +50,7 @@ function toArray<T>(value: T | T[] | undefined): T[] | undefined {
 export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   private readonly sql: SQL;
   private readonly ownsClient: boolean;
+  private initPromise: Promise<void> | undefined;
 
   constructor(options: { sql?: SQL; options?: SQL.Options } = {}) {
     if (options.sql) {
@@ -63,78 +65,60 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async init(): Promise<void> {
-    const adapter = this.sql.options?.adapter;
-    const isMySql = adapter === "mysql" || adapter === "mariadb";
-    const q = isMySql ? "`" : '"';
-    const idType = isMySql ? "VARCHAR(255)" : "TEXT";
-    const shortType = isMySql ? "VARCHAR(64)" : "TEXT";
-    const phoneType = isMySql ? "VARCHAR(32)" : "TEXT";
-
-    await this.sql.unsafe(`
-      CREATE TABLE IF NOT EXISTS ${q}kmsg_delivery_tracking${q} (
-        ${q}message_id${q} ${idType} PRIMARY KEY,
-        ${q}provider_id${q} ${idType} NOT NULL,
-        ${q}provider_message_id${q} ${idType} NOT NULL,
-        ${q}type${q} ${shortType} NOT NULL,
-        ${q}to${q} ${phoneType} NOT NULL,
-        ${q}from${q} ${phoneType},
-        ${q}status${q} ${shortType} NOT NULL,
-        ${q}provider_status_code${q} ${shortType},
-        ${q}provider_status_message${q} ${shortType},
-        ${q}sent_at${q} BIGINT,
-        ${q}delivered_at${q} BIGINT,
-        ${q}failed_at${q} BIGINT,
-        ${q}requested_at${q} BIGINT NOT NULL,
-        ${q}scheduled_at${q} BIGINT,
-        ${q}status_updated_at${q} BIGINT NOT NULL,
-        ${q}attempt_count${q} INTEGER NOT NULL DEFAULT 0,
-        ${q}last_checked_at${q} BIGINT,
-        ${q}next_check_at${q} BIGINT NOT NULL,
-        ${q}last_error${q} TEXT,
-        ${q}raw${q} TEXT,
-        ${q}metadata${q} TEXT
-      );
-    `);
-
-    const dueIndex = isMySql
-      ? `CREATE INDEX idx_kmsg_delivery_due ON ${q}kmsg_delivery_tracking${q} (${q}status${q}, ${q}next_check_at${q});`
-      : `CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_due ON ${q}kmsg_delivery_tracking${q} (${q}status${q}, ${q}next_check_at${q});`;
-    const providerMsgIndex = isMySql
-      ? `CREATE INDEX idx_kmsg_delivery_provider_msg ON ${q}kmsg_delivery_tracking${q} (${q}provider_id${q}, ${q}provider_message_id${q});`
-      : `CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_provider_msg ON ${q}kmsg_delivery_tracking${q} (${q}provider_id${q}, ${q}provider_message_id${q});`;
-
-    // Best-effort indexes (MySQL doesn't support IF NOT EXISTS).
-    try {
-      await this.sql.unsafe(dueIndex);
-    } catch {}
-    try {
-      await this.sql.unsafe(providerMsgIndex);
-    } catch {}
-
-    // Helpful for analytics queries.
-    const requestedAtIndex = isMySql
-      ? `CREATE INDEX idx_kmsg_delivery_requested_at ON ${q}kmsg_delivery_tracking${q} (${q}requested_at${q});`
-      : `CREATE INDEX IF NOT EXISTS idx_kmsg_delivery_requested_at ON ${q}kmsg_delivery_tracking${q} (${q}requested_at${q});`;
-    try {
-      await this.sql.unsafe(requestedAtIndex);
-    } catch {}
-
-    // Best-effort migrations for existing DBs.
-    const alterStatements = [
-      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_code${q} ${shortType};`,
-      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_message${q} ${shortType};`,
-      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}sent_at${q} BIGINT;`,
-      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}delivered_at${q} BIGINT;`,
-      `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}failed_at${q} BIGINT;`,
-    ];
-    for (const stmt of alterStatements) {
-      try {
-        await this.sql.unsafe(stmt);
-      } catch {}
+    if (this.initPromise) {
+      return this.initPromise;
     }
+
+    this.initPromise = (async () => {
+      const dialect = this.inferDialect();
+      const q = dialect === "mysql" ? "`" : '"';
+      const shortType = dialect === "mysql" ? "VARCHAR(64)" : "TEXT";
+
+      await initializeCloudflareSqlSchema(
+        {
+          dialect,
+          query: async <T = Record<string, unknown>>(
+            statement: string,
+            _params: readonly unknown[] = [],
+          ) => {
+            const result = await this.sql.unsafe(statement);
+            return {
+              rows: Array.isArray(result) ? (result as T[]) : [],
+            };
+          },
+        },
+        {
+          target: "tracking",
+          trackingTableName: "kmsg_delivery_tracking",
+        },
+      );
+
+      // Best-effort migrations for existing DBs.
+      const alterStatements = [
+        `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_code${q} ${shortType};`,
+        `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}provider_status_message${q} ${shortType};`,
+        `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}sent_at${q} BIGINT;`,
+        `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}delivered_at${q} BIGINT;`,
+        `ALTER TABLE ${q}kmsg_delivery_tracking${q} ADD COLUMN ${q}failed_at${q} BIGINT;`,
+      ];
+      for (const stmt of alterStatements) {
+        try {
+          await this.sql.unsafe(stmt);
+        } catch {
+          // ignore
+        }
+      }
+    })().catch((error) => {
+      this.initPromise = undefined;
+      throw error;
+    });
+
+    return this.initPromise;
   }
 
   async upsert(record: TrackingRecord): Promise<void> {
+    await this.init();
+
     const sql = this.sql;
     const adapter = sql.options?.adapter;
     const isMySql = adapter === "mysql" || adapter === "mariadb";
@@ -334,6 +318,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async get(messageId: string): Promise<TrackingRecord | undefined> {
+    await this.init();
+
     const sql = this.sql;
     const table = sql("kmsg_delivery_tracking");
     const c = { message_id: sql("message_id") };
@@ -350,6 +336,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(limit)
       ? Math.max(0, Math.floor(limit))
       : 0;
@@ -379,6 +367,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {
+    await this.init();
+
     const safeLimit = Number.isFinite(options.limit)
       ? Math.max(0, Math.floor(options.limit))
       : 0;
@@ -438,6 +428,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    await this.init();
+
     const { whereSql, args } = this.buildWhere(filter);
     const q = this.getQuote();
     const table = `${q}kmsg_delivery_tracking${q}`;
@@ -459,6 +451,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     filter: DeliveryTrackingRecordFilter,
     groupBy: readonly DeliveryTrackingCountByField[],
   ): Promise<DeliveryTrackingCountByRow[]> {
+    await this.init();
+
     const fields = Array.from(groupBy).filter(Boolean);
     if (fields.length === 0) return [];
 
@@ -506,6 +500,8 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     messageId: string,
     patch: Partial<TrackingRecord>,
   ): Promise<void> {
+    await this.init();
+
     const existing = await this.get(messageId);
     if (!existing) return;
 
@@ -555,6 +551,13 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
   private getQuote(): string {
     const adapter = this.sql.options?.adapter;
     return adapter === "mysql" || adapter === "mariadb" ? "`" : '"';
+  }
+
+  private inferDialect(): "postgres" | "mysql" | "sqlite" {
+    const adapter = this.sql.options?.adapter;
+    if (adapter === "mysql" || adapter === "mariadb") return "mysql";
+    if (adapter === "postgres") return "postgres";
+    return "sqlite";
   }
 
   private buildWhere(filter: DeliveryTrackingRecordFilter): {

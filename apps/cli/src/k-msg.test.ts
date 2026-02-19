@@ -175,11 +175,174 @@ describe("k-msg CLI (bunli) E2E", () => {
       help.toHaveExitCode(0);
       expect(help.stdout.toLowerCase()).toContain("k-msg");
       expect(help.stdout).toContain("config");
+      expect(help.stdout).toContain("db");
       expect(help.stdout).toContain("providers");
 
       const ver = expectCommand(await runCli(["--version"]));
       ver.toHaveExitCode(0);
       expect(ver.stdout).toContain("k-msg v");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "db schema print validates required dialect",
+    async () => {
+      const printed = expectCommand(await runCli(["db", "schema", "print"]));
+      printed.toHaveExitCode(2);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "db schema print supports format/target combinations",
+    async () => {
+      const sqlOnly = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "print",
+          "--dialect",
+          "postgres",
+          "--target",
+          "tracking",
+          "--format",
+          "sql",
+        ]),
+      );
+      sqlOnly.toHaveSucceeded();
+      expect(sqlOnly.stdout).toContain("kmsg_delivery_tracking");
+      expect(sqlOnly.stdout).not.toContain("kmsg_jobs");
+
+      const drizzleOnly = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "print",
+          "--dialect",
+          "mysql",
+          "--target",
+          "queue",
+          "--format",
+          "drizzle",
+        ]),
+      );
+      drizzleOnly.toHaveSucceeded();
+      expect(drizzleOnly.stdout).toContain("drizzle-orm/mysql-core");
+      expect(drizzleOnly.stdout).toContain("jobQueueTable");
+      expect(drizzleOnly.stdout).not.toContain("deliveryTrackingTable");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "db schema generate writes files and enforces --force policy",
+    async () => {
+      const outDir = await createTempCwd();
+
+      const first = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "sqlite",
+          "--out-dir",
+          outDir,
+        ]),
+      );
+      first.toHaveSucceeded();
+
+      const drizzlePath = path.join(outDir, "kmsg.schema.ts");
+      const sqlPath = path.join(outDir, "kmsg.schema.sql");
+      expect(await Bun.file(drizzlePath).exists()).toBe(true);
+      expect(await Bun.file(sqlPath).exists()).toBe(true);
+
+      const second = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "sqlite",
+          "--out-dir",
+          outDir,
+        ]),
+      );
+      second.toHaveExitCode(2);
+      expect(second.stderr).toContain("already exists");
+
+      const third = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "sqlite",
+          "--out-dir",
+          outDir,
+          "--force",
+          "true",
+        ]),
+      );
+      third.toHaveSucceeded();
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "db schema generate supports tracking/queue target selection",
+    async () => {
+      const trackingDir = await createTempCwd();
+      const queueDir = await createTempCwd();
+
+      const trackingGenerated = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "postgres",
+          "--target",
+          "tracking",
+          "--format",
+          "sql",
+          "--out-dir",
+          trackingDir,
+          "--sql-file",
+          "tracking.sql",
+        ]),
+      );
+      trackingGenerated.toHaveSucceeded();
+
+      const queueGenerated = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "postgres",
+          "--target",
+          "queue",
+          "--format",
+          "sql",
+          "--out-dir",
+          queueDir,
+          "--sql-file",
+          "queue.sql",
+        ]),
+      );
+      queueGenerated.toHaveSucceeded();
+
+      const trackingSql = await Bun.file(
+        path.join(trackingDir, "tracking.sql"),
+      ).text();
+      expect(trackingSql).toContain("kmsg_delivery_tracking");
+      expect(trackingSql).not.toContain("kmsg_jobs");
+
+      const queueSql = await Bun.file(path.join(queueDir, "queue.sql")).text();
+      expect(queueSql).toContain("kmsg_jobs");
+      expect(queueSql).not.toContain("kmsg_delivery_tracking");
     },
     TEST_TIMEOUT,
   );

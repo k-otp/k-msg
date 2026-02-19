@@ -177,8 +177,44 @@ Required values by provider/channel:
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
+- `k-msg db schema print|generate`
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
+
+## DB schema generator
+
+Generate canonical SQL DDL and/or Drizzle schema source from the same
+`@k-msg/messaging/adapters/cloudflare` schema utilities.
+
+```bash
+# Print both drizzle+sql to stdout
+k-msg db schema print --dialect postgres
+
+# Print only SQL for queue schema
+k-msg db schema print --dialect postgres --target queue --format sql
+
+# Generate both files in cwd
+k-msg db schema generate --dialect postgres
+
+# Generate SQL only to a custom path
+k-msg db schema generate \
+  --dialect mysql \
+  --target tracking \
+  --format sql \
+  --out-dir ./db \
+  --sql-file tracking.sql
+```
+
+Flags:
+
+- `--dialect <postgres|mysql|sqlite>`: required
+- `--target <tracking|queue|both>`: default `both`
+- `--format <drizzle|sql|both>`: default `both`
+- `generate` only:
+  - `--out-dir <path>` default current directory
+  - `--drizzle-file <name>` default `kmsg.schema.ts`
+  - `--sql-file <name>` default `kmsg.schema.sql`
+  - `--force` default `false` (without it, generation fails if file exists)
 
 ## Recommended AlimTalk flow
 
