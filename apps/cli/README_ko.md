@@ -94,8 +94,10 @@ bun --cwd apps/cli src/k-msg.ts --help
 덮어쓰기:
 
 ```bash
-k-msg --config /path/to/k-msg.config.json providers list
+k-msg providers list --config /path/to/k-msg.config.json
 ```
+
+참고: 현재 CLI에서는 `--config`가 상위 명령 옵션이 아니라 하위 명령 옵션(예: `providers`, `sms`, `alimtalk`)입니다.
 
 예시 파일: `apps/cli/k-msg.config.example.json`
 
@@ -324,7 +326,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
   - `0`: 성공
   - `2`: 입력/설정 오류
   - `3`: provider/network 오류
-  - `4`: capability 미지원
+  - `4`: 지원되지 않는 기능(capability) (예: provider의 `balance` 미지원)
 
 ## Manual 체크 설정 예시
 
