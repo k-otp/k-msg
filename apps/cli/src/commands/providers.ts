@@ -291,8 +291,13 @@ const balanceCmd = defineCommand({
         }
       }
 
-      if (results.some((item) => !item.supported || "error" in item)) {
+      const hasBalanceError = results.some((item) => "error" in item);
+      const hasUnsupportedBalance = results.some((item) => !item.supported);
+
+      if (hasBalanceError) {
         process.exitCode = 3;
+      } else if (hasUnsupportedBalance) {
+        process.exitCode = 4;
       }
     } catch (error) {
       printError(error, asJson);
