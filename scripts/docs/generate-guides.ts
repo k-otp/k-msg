@@ -207,46 +207,42 @@ function buildIndexPage(params: {
     )
     .join("\n");
 
-  const content = isKo
-    ? `---
-title: k-msg 문서
-description: k-msg 문서
----
-
-- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
+  const title = isKo ? "k-msg 문서" : "k-msg Docs";
+  const description = isKo ? "k-msg 문서" : "k-msg docs";
+  const navItems = isKo
+    ? `- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
 - API 문서: [/api/readme/](/api/readme/)
 - CLI 문서: [${urlRoot}/cli/](${urlRoot}/cli/)
-- 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)
-
-## 패키지 가이드
-
-${packageLinks}
-
-## 예제 가이드
-
-${exampleLinks}
-`
-    : `---
-title: k-msg Docs
-description: k-msg docs
----
-
-- Overview: [/en/guides/overview/](/en/guides/overview/)
+- 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)`
+    : `- Overview: [/en/guides/overview/](/en/guides/overview/)
 - API docs: [/api/readme/](/api/readme/)
 - CLI docs: [/en/cli/](/en/cli/)
-- Code snippets: [/en/snippets/](/en/snippets/)
+- Code snippets: [/en/snippets/](/en/snippets/)`;
+  const packageHeading = isKo ? "## 패키지 가이드" : "## Package Guides";
+  const exampleHeading = isKo ? "## 예제 가이드" : "## Example Guides";
+  const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
+  const content = `---
+title: ${title}
+description: ${description}
+---
 
-## Package Guides
+import { LinkButton } from "@astrojs/starlight/components";
+
+<LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</LinkButton>
+
+${navItems}
+
+${packageHeading}
 
 ${packageLinks}
 
-## Example Guides
+${exampleHeading}
 
 ${exampleLinks}
 `;
 
   return {
-    path: path.join(docsFsRoot(params.locale), "index.md"),
+    path: path.join(docsFsRoot(params.locale), "index.mdx"),
     content,
   };
 }
