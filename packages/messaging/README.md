@@ -24,6 +24,8 @@ bun add @k-msg/messaging @k-msg/core
   - `DeliveryTracker`, `JobProcessor`, `MessageJobProcessor`, `MessageRetryHandler`
 - Cloudflare runtime adapters: `@k-msg/messaging/adapters/cloudflare`
   - SQL adapters for Hyperdrive/Postgres/MySQL and D1 (driver-injected)
+  - Drizzle-wrapped SQL client/store factories
+  - SQL/Drizzle schema generators
   - Object-storage adapters for KV/R2/DO-backed tracking/queue
 
 ## Migration (Breaking)
@@ -233,6 +235,52 @@ Queue indexes:
 
 - `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
 - `idx_kmsg_jobs_id(id)`
+
+### Schema Utility API (Cloudflare Adapter)
+
+```ts
+import {
+  buildCloudflareSqlSchemaSql,
+  buildDeliveryTrackingSchemaSql,
+  buildJobQueueSchemaSql,
+  initializeCloudflareSqlSchema,
+  renderDrizzleSchemaSource,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+// SQL DDL string
+const ddl = buildCloudflareSqlSchemaSql({
+  dialect: "postgres",
+  target: "both",
+});
+
+// Idempotent runtime initializer (duplicate/exists errors are ignored only for that case)
+await initializeCloudflareSqlSchema(client, { target: "both" });
+
+// Drizzle schema source (TypeScript string)
+const drizzleSource = renderDrizzleSchemaSource({
+  dialect: "postgres",
+  target: "both",
+});
+```
+
+### Drizzle Adapter Factories
+
+```ts
+import {
+  createDrizzleDeliveryTrackingStore,
+  createDrizzleJobQueue,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+const trackingStore = createDrizzleDeliveryTrackingStore({
+  dialect: "postgres",
+  db, // drizzle db with execute()/transaction()
+});
+
+const queue = createDrizzleJobQueue({
+  dialect: "postgres",
+  db,
+});
+```
 
 ## Tracking-based API failover
 
