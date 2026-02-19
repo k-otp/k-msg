@@ -68,5 +68,14 @@ describe("messaging export boundaries", () => {
     expect(typeof cloudflareAdapter.createKvDeliveryTrackingStore).toBe(
       "function",
     );
+    expect(typeof cloudflareAdapter.createDrizzleSqlClient).toBe("function");
+    expect(typeof cloudflareAdapter.createDrizzleDeliveryTrackingStore).toBe(
+      "function",
+    );
+    expect(typeof cloudflareAdapter.createDrizzleJobQueue).toBe("function");
+    expect(typeof cloudflareAdapter.buildCloudflareSqlSchemaSql).toBe(
+      "function",
+    );
+    expect(typeof cloudflareAdapter.renderDrizzleSchemaSource).toBe("function");
   });
 });

@@ -70,7 +70,16 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/bun": "catalog:"
+    "@types/bun": "catalog:",
+    "drizzle-orm": "^0.44.0"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.44.0"
+  },
+  "peerDependenciesMeta": {
+    "drizzle-orm": {
+      "optional": true
+    }
   },
   "files": [
     "dist",
