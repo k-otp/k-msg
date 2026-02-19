@@ -5,7 +5,7 @@ Generated from `apps/cli/src/k-msg.ts`.
 ## k-msg --help
 
 ```text
-k-msg v0.6.1
+k-msg v0.6.2
 k-msg CLI (prebuilt binaries via GitHub Releases)
 
 Commands:
