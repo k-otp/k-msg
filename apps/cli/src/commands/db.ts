@@ -6,7 +6,7 @@ import {
   type CloudflareSqlSchemaTarget,
   renderDrizzleSchemaSource,
   type SqlDialect,
-} from "@k-msg/messaging/adapters/cloudflare";
+} from "k-msg/adapters/cloudflare";
 import { z } from "zod";
 import { strictBooleanFlagSchema } from "../cli/options";
 
