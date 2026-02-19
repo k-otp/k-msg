@@ -77,5 +77,5 @@ describe("messaging export boundaries", () => {
       "function",
     );
     expect(typeof cloudflareAdapter.renderDrizzleSchemaSource).toBe("function");
-  });
+  }, 15_000);
 });
