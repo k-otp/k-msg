@@ -1,5 +1,17 @@
 # @k-msg/messaging
 
+## 0.19.0 — 2026-02-19
+
+### Minor changes
+
+- [6a1562f](https://github.com/k-otp/k-msg/commit/6a1562f9e276b16e9125c94e71513b34888a976e) Add Cloudflare SQL schema generation APIs and Drizzle adapter helpers to `@k-msg/messaging`, including reusable SQL/Drizzle schema renderers and improved retry-safe lazy initialization for SQL-backed tracking stores and job queues.
+  
+  Add `k-msg db schema print` and `k-msg db schema generate` commands to `@k-msg/cli`, using `@k-msg/messaging/adapters/cloudflare` as the single source of truth for generated SQL and Drizzle schema output. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.19.0
+
 ## 0.18.2 — 2026-02-18
 
 ### Patch changes
