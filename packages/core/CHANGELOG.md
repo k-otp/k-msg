@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.19.1 — 2026-02-21
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+
 ## 0.19.0 — 2026-02-19
 
 ### Minor changes
