@@ -193,3 +193,14 @@ const queue = createDrizzleJobQueue({
   db,
 });
 ```
+
+### Drizzle 지원 버전
+
+| `@k-msg/messaging` | 지원 `drizzle-orm` |
+| --- | --- |
+| `0.19.x` | `^0.44.0 || ^0.45.0` |
+
+이 라인의 호환성은 CI에서 아래 버전으로 검증합니다:
+
+- `drizzle-orm@0.44.7` (최소 검증 타깃)
+- `drizzle-orm@0.45.1` (최대 검증 타깃)
