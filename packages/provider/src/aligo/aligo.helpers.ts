@@ -5,7 +5,11 @@ import {
   type Template,
   type TemplateContext,
 } from "@k-msg/core";
-import { ButtonParser, interpolate, type TemplateButton } from "@k-msg/template";
+import {
+  ButtonParser,
+  interpolate,
+  type TemplateButton,
+} from "@k-msg/template";
 import type { AligoConfig } from "./types/aligo";
 
 export function resolveImageRef(options: {
@@ -96,7 +100,9 @@ export function resolveKakaoSenderKey(
   return senderKey;
 }
 
-export function toAligoTplButton(buttons: TemplateButton[] | undefined): string | undefined {
+export function toAligoTplButton(
+  buttons: TemplateButton[] | undefined,
+): string | undefined {
   if (!Array.isArray(buttons) || buttons.length === 0) return undefined;
 
   const serializedButtons = JSON.parse(

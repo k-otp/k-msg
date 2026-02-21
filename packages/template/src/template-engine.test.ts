@@ -266,8 +266,8 @@ describe("TemplateBuilder", () => {
       .build();
 
     expect(template.buttons).toHaveLength(1);
-    expect(template.buttons![0].type).toBe("WL");
-    expect(template.buttons![0].name).toBe("웹사이트 방문");
+    expect(template.buttons?.[0].type).toBe("WL");
+    expect(template.buttons?.[0].name).toBe("웹사이트 방문");
   });
 
   test("should preview template with sample variables", () => {
@@ -561,11 +561,11 @@ describe("TemplateRegistry", () => {
 
     const stats = registry.getUsageStats("usage-test");
     expect(stats).toBeDefined();
-    expect(stats!.totalSent).toBe(10);
-    expect(stats!.totalDelivered).toBe(8);
-    expect(stats!.totalFailed).toBe(2);
-    expect(stats!.deliveryRate).toBe(80);
-    expect(stats!.failureRate).toBe(20);
+    expect(stats?.totalSent).toBe(10);
+    expect(stats?.totalDelivered).toBe(8);
+    expect(stats?.totalFailed).toBe(2);
+    expect(stats?.deliveryRate).toBe(80);
+    expect(stats?.failureRate).toBe(20);
   });
 
   test("should maintain version history", async () => {
@@ -594,15 +594,15 @@ describe("TemplateRegistry", () => {
 
     const history = registry.getHistory("version-test");
     expect(history).toBeDefined();
-    expect(history!.versions).toHaveLength(2);
-    expect(history!.currentVersion).toBe(2);
+    expect(history?.versions).toHaveLength(2);
+    expect(history?.currentVersion).toBe(2);
 
     // Get specific version
     const version1 = registry.getVersion("version-test", 1);
-    expect(version1!.content).toBe("원본 내용");
+    expect(version1?.content).toBe("원본 내용");
 
     const version2 = registry.getVersion("version-test", 2);
-    expect(version2!.content).toBe("수정된 내용");
+    expect(version2?.content).toBe("수정된 내용");
   });
 
   test("should export and import templates", async () => {
@@ -639,7 +639,7 @@ describe("TemplateRegistry", () => {
 
     const imported = newRegistry.get("export-test");
     expect(imported).toBeDefined();
-    expect(imported!.name).toBe("내보내기 테스트");
+    expect(imported?.name).toBe("내보내기 테스트");
   });
 
   test("should get registry statistics", async () => {
@@ -735,8 +735,8 @@ describe("Integration Tests", () => {
 
     // Check usage stats
     const usageStats = registry.getUsageStats(template.id);
-    expect(usageStats!.deliveryRate).toBe(98);
-    expect(usageStats!.failureRate).toBe(2);
+    expect(usageStats?.deliveryRate).toBe(98);
+    expect(usageStats?.failureRate).toBe(2);
 
     // Preview template
     const builder = new TemplateBuilder()

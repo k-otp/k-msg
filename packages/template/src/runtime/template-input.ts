@@ -1,10 +1,4 @@
-import {
-  fail,
-  KMsgError,
-  KMsgErrorCode,
-  ok,
-  type Result,
-} from "@k-msg/core";
+import { fail, KMsgError, KMsgErrorCode, ok, type Result } from "@k-msg/core";
 import { ButtonParser } from "../parser/button.parser";
 import type { TemplateButton } from "../types/template.types";
 
@@ -182,7 +176,9 @@ export function parseTemplateButtons(
   const validation = ButtonParser.validateButtons(parsedButtons);
   if (!validation.isValid) {
     return fail(
-      invalidRequest(`Invalid template buttons: ${validation.errors.join(", ")}`),
+      invalidRequest(
+        `Invalid template buttons: ${validation.errors.join(", ")}`,
+      ),
     );
   }
 
@@ -207,7 +203,9 @@ export function validateTemplatePayload(
     payload.name.trim().length === 0
   ) {
     return fail(
-      invalidRequest(requireName ? "name is required" : "name must be a non-empty string"),
+      invalidRequest(
+        requireName ? "name is required" : "name must be a non-empty string",
+      ),
     );
   } else {
     normalized.name = payload.name.trim();

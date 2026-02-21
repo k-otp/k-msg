@@ -89,9 +89,11 @@ export async function createTemplate(
     return ok({
       id: code,
       code,
-      name: String(data.templtName ?? (payloadValidation.value.name ?? input.name)),
+      name: String(
+        data.templtName ?? payloadValidation.value.name ?? input.name,
+      ),
       content: String(
-        data.templtContent ?? (payloadValidation.value.content ?? input.content),
+        data.templtContent ?? payloadValidation.value.content ?? input.content,
       ),
       category: input.category,
       status: mapAligoTemplateStatus(data),

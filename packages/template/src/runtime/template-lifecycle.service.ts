@@ -21,9 +21,8 @@ function resolveTemplateInspectionProvider(
   const candidate = provider as Partial<TemplateInspectionProvider>;
   if (typeof candidate.requestTemplateInspection === "function") {
     return {
-      requestTemplateInspection: candidate.requestTemplateInspection.bind(
-        provider,
-      ),
+      requestTemplateInspection:
+        candidate.requestTemplateInspection.bind(provider),
     };
   }
 

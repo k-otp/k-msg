@@ -6,7 +6,10 @@ import { TemplateLifecycleService } from "@k-msg/template";
 
 describe("Template and Messaging Flow Integration", () => {
   const mockProvider = new MockProvider();
-  const templateService = new TemplateLifecycleService(mockProvider, mockProvider);
+  const templateService = new TemplateLifecycleService(
+    mockProvider,
+    mockProvider,
+  );
   const kmsg = new KMsg({ providers: [mockProvider] });
 
   const templateData = {

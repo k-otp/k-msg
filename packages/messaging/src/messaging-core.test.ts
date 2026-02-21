@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+import { TemplatePersonalizer, TemplateVariableUtils } from "@k-msg/template";
 import {
   DeliveryTracker,
   JobProcessor,
@@ -10,17 +11,12 @@ import {
   MessageRetryHandler,
 } from "./adapters/node/index";
 import {
-  TemplatePersonalizer,
-  TemplateVariableUtils,
-} from "@k-msg/template";
-import {
   type Job,
   type JobQueue,
   JobStatus,
 } from "./queue/job-queue.interface";
 import {
   type DeliveryReport,
-  MessageEventType,
   type MessageRequest,
   MessageStatus,
 } from "./types/message.types";
@@ -204,7 +200,7 @@ describe("JobProcessor", () => {
 
     processor.start();
 
-    const jobId = await processor.add("test-job", { message: "hello" });
+    const _jobId = await processor.add("test-job", { message: "hello" });
 
     // Wait for processing
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -228,7 +224,7 @@ describe("JobProcessor", () => {
     );
 
     let attempts = 0;
-    processor.handle("failing-job", async (job) => {
+    processor.handle("failing-job", async (_job) => {
       attempts++;
       if (attempts < 2) {
         throw new Error("Temporary failure");
@@ -680,7 +676,7 @@ describe("Integration Tests", () => {
     tracker.start();
 
     // Queue message
-    const jobId = await processor.queueMessage(messageRequest);
+    const _jobId = await processor.queueMessage(messageRequest);
 
     // Track messages
     await tracker.trackMessage(

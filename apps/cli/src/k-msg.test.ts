@@ -1172,7 +1172,7 @@ describe("k-msg CLI (bunli) E2E", () => {
           "--content",
           "내용",
           "--buttons",
-          "{\"type\":\"WL\"}",
+          '{"type":"WL"}',
         ]),
       );
       invalidButtons.toHaveExitCode(2);

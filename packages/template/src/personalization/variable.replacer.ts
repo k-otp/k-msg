@@ -533,12 +533,12 @@ export class TemplatePersonalizer {
             return this.formatDate(new Date(value), format);
           }
           if (formatter.startsWith("number:")) {
-            const digits = parseInt(formatter.substring(7));
+            const digits = parseInt(formatter.substring(7), 10);
             return Number(value).toFixed(digits);
           }
           return String(value);
       }
-    } catch (error) {
+    } catch (_error) {
       // Return original value if formatting fails
       return String(value);
     }
@@ -582,7 +582,7 @@ export class TemplatePersonalizer {
   }
 
   private hasVariables(content: string): boolean {
-    return this.options.variablePattern!.test(content);
+    return this.options.variablePattern?.test(content) ?? false;
   }
 
   private extractConditionals(content: string): ConditionalBlock[] {
@@ -694,7 +694,7 @@ export class TemplatePersonalizer {
       // Simple truthiness check
       const value = this.getVariableValue(normalizedCondition, variables);
       return Boolean(value);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

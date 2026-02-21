@@ -17,7 +17,9 @@ describe("TemplatePersonalizer", () => {
       },
     );
 
-    expect(result.content).toBe("안녕하세요, 홍길동님! 인증코드는 123456입니다.");
+    expect(result.content).toBe(
+      "안녕하세요, 홍길동님! 인증코드는 123456입니다.",
+    );
     expect(result.missingVariables).toHaveLength(0);
     expect(result.errors).toHaveLength(0);
   });

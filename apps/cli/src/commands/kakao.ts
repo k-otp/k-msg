@@ -692,7 +692,11 @@ const templateUpdateCmd = defineCommand({
         patch.buttons = parsedButtons.value;
       }
 
-      const result = await templateService.update(flags["template-id"], patch, ctx);
+      const result = await templateService.update(
+        flags["template-id"],
+        patch,
+        ctx,
+      );
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
