@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelResolverConfig"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:112
+Defined in: [packages/channel/src/runtime/types.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L112)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: packages/channel/src/runtime/types.ts:112
 
 > `optional` **aliases**: `object`
 
-Defined in: packages/channel/src/runtime/types.ts:126
+Defined in: [packages/channel/src/runtime/types.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L126)
 
 #### Index Signature
 
@@ -33,7 +33,7 @@ Defined in: packages/channel/src/runtime/types.ts:126
 
 > `optional` **defaults**: `object`
 
-Defined in: packages/channel/src/runtime/types.ts:117
+Defined in: [packages/channel/src/runtime/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L117)
 
 #### Index Signature
 
@@ -65,7 +65,7 @@ Defined in: packages/channel/src/runtime/types.ts:117
 
 > `optional` **providers**: [`KakaoProviderConfigEntry`](/api/channel/src/interfaces/kakaoproviderconfigentry/)[]
 
-Defined in: packages/channel/src/runtime/types.ts:130
+Defined in: [packages/channel/src/runtime/types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L130)
 
 ***
 
@@ -73,7 +73,7 @@ Defined in: packages/channel/src/runtime/types.ts:130
 
 > `optional` **routing**: `object`
 
-Defined in: packages/channel/src/runtime/types.ts:113
+Defined in: [packages/channel/src/runtime/types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L113)
 
 #### Index Signature
 

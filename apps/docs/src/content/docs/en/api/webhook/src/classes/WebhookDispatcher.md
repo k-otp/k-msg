@@ -5,7 +5,7 @@ prev: false
 title: "WebhookDispatcher"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L54)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L52)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:54](https://git
 
 > **new WebhookDispatcher**(`config`, `httpClient?`): `WebhookDispatcher`
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L60)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L58)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:60](https://git
 
 > **dispatch**(`event`, `endpoint`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L67)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L65)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:67](https://git
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:280](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L280)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:278](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L278)
 
 #### Returns
 

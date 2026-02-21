@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelManager"
 ---
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:9
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L9)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:9
 
 > **checkChannelHealth**(`channelId`): `Promise`\<\{ `isHealthy`: `boolean`; `issues`: `string`[]; `recommendations`: `string`[]; \}\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:223
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L223)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:223
 
 > **completeVerification**(`channelId`, `approved`, `rejectionReason?`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:103
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L103)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:103
 
 > **createChannel**(`request`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:12
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L12)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:12
 
 > **deleteChannel**(`channelId`): `Promise`\<`boolean`\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:155
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L155)
 
 #### Parameters
 
@@ -103,7 +103,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:155
 
 > **getChannel**(`channelId`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:128
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L128)
 
 #### Parameters
 
@@ -121,7 +121,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:128
 
 > **listChannels**(`filters?`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)[]\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:168
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L168)
 
 #### Parameters
 
@@ -149,7 +149,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:168
 
 > **reactivateChannel**(`channelId`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:209
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L209)
 
 #### Parameters
 
@@ -167,7 +167,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:209
 
 > **suspendChannel**(`channelId`, `reason`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:196
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:196](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L196)
 
 #### Parameters
 
@@ -189,7 +189,7 @@ Defined in: packages/channel/src/toolkit/kakao/channel.ts:196
 
 > **updateChannel**(`channelId`, `updates`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
 
-Defined in: packages/channel/src/toolkit/kakao/channel.ts:132
+Defined in: [packages/channel/src/toolkit/kakao/channel.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L132)
 
 #### Parameters
 

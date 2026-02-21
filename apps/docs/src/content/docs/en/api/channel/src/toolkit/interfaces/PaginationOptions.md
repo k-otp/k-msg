@@ -5,7 +5,7 @@ prev: false
 title: "PaginationOptions"
 ---
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:20
+Defined in: [packages/channel/src/toolkit/management/crud.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L20)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:20
 
 > **limit**: `number`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:22
+Defined in: [packages/channel/src/toolkit/management/crud.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L22)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:22
 
 > **page**: `number`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:21
+Defined in: [packages/channel/src/toolkit/management/crud.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L21)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:21
 
 > `optional` **sortBy**: `string`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:23
+Defined in: [packages/channel/src/toolkit/management/crud.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L23)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:23
 
 > `optional` **sortOrder**: `"asc"` \| `"desc"`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:24
+Defined in: [packages/channel/src/toolkit/management/crud.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L24)

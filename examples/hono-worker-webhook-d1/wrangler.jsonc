@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hono-worker-webhook-d1-example",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-21",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kmsg_webhook_example",
+      "database_id": "replace-with-your-d1-database-id"
+    }
+  ]
+}

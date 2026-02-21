@@ -5,7 +5,7 @@ prev: false
 title: "VerificationRequest"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:41
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L41)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:41
 
 > `optional` **autoVerificationResults**: [`AutoVerificationResult`](/api/channel/src/toolkit/interfaces/autoverificationresult/)[]
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:51
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L51)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:51
 
 > **businessInfo**: [`BusinessInfo`](/api/channel/src/toolkit/interfaces/businessinfo/)
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:44
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L44)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:44
 
 > **channelId**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:43
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L43)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:43
 
 > **documents**: [`VerificationDocument`](/api/channel/src/toolkit/interfaces/verificationdocument/)[]
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:45
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L45)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:45
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:42
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L42)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:42
 
 > `optional` **reviewedAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:48
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L48)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:48
 
 > `optional` **reviewedBy**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:49
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L49)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:49
 
 > `optional` **reviewNotes**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:50
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L50)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:50
 
 > **status**: [`VerificationStatus`](/api/channel/src/toolkit/enumerations/verificationstatus/)
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:46
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L46)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:46
 
 > **submittedAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:47
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L47)
