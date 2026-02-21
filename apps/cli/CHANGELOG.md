@@ -1,5 +1,76 @@
 # @k-msg/cli
 
+## 0.8.0 — 2026-02-21
+
+### Minor changes
+
+- [46c54c0](https://github.com/k-otp/k-msg/commit/46c54c059f004c34b0acf497a0d06343ff2b7d83) Refactor Kakao channel handling around `@k-msg/channel` runtime services and redesign CLI channel commands.
+  
+  ## `@k-msg/channel` (minor)
+  
+  - split exports into runtime-first root API and toolkit-only subpath (`@k-msg/channel/toolkit`)
+  - add runtime services:
+    - `KakaoChannelCapabilityService`
+    - `KakaoChannelBindingResolver`
+    - `KakaoChannelLifecycleService`
+  - add runtime channel binding/capability types:
+    - `KakaoChannelCapabilityMode`
+    - `KakaoChannelBinding`
+    - `ResolvedKakaoChannelBinding`
+    - `KakaoChannelListItem`
+  - add provider adapter flow for mode-specific handling (`aligo`, `iwinv`, `solapi`, `mock`)
+  
+  ## `@k-msg/cli` (minor)
+  
+  - replace legacy `kakao channel` direct provider flow with channel runtime services
+  - add `kakao channel binding` command group:
+    - `list`, `resolve`, `set`, `delete`
+  - add `kakao channel api` command group:
+    - `categories`, `list`, `auth`, `add`
+  - remove legacy `kakao channel categories|list|auth|add` behavior and return guided migration errors
+  - unify senderKey/plusId resolution with channel binding resolver (including provider config hints such as `solapi.kakaoPfId`) — Thanks @imjlk!
+- [adb3997](https://github.com/k-otp/k-msg/commit/adb3997754705ad24f7865e73e4bdff0f5a69360) Refactor template handling around `@k-msg/template` as the single runtime source of truth.
+  
+  ## `@k-msg/template` (minor)
+  
+  - introduce runtime-first API surface:
+    - `TemplateLifecycleService`
+    - `TemplatePersonalizer`, `defaultTemplatePersonalizer`, `TemplateVariableUtils`
+    - `validateTemplatePayload`, `parseTemplateButtons`
+  - split builder/registry/testing helpers to a dedicated subpath: `@k-msg/template/toolkit`
+  - remove legacy root exports that overlapped service semantics (`TemplateService`, `MockTemplateService`, root-level builder/registry exports)
+  - move personalization implementation from messaging into template package
+  
+  ## `@k-msg/messaging` (minor)
+  
+  - remove root personalization exports:
+    - `VariableReplacer`
+    - `VariableUtils`
+    - `defaultVariableReplacer`
+  - migration path: import the renamed equivalents from `@k-msg/template`
+    - `TemplatePersonalizer`
+    - `TemplateVariableUtils`
+    - `defaultTemplatePersonalizer`
+  
+  ## `@k-msg/cli` (minor)
+  
+  - route `kakao template *` commands through `TemplateLifecycleService` instead of direct provider template method calls
+  - apply template runtime validation (`validateTemplatePayload`, `parseTemplateButtons`) before provider requests for create/update flows
+  
+  ## `@k-msg/provider` (patch)
+  
+  - remove duplicate template interpolation path in Aligo send by reusing template runtime interpolation
+  - apply shared template payload/button validation to Aligo and IWINV template create/update flows
+  - normalize Aligo template button serialization through the shared template button parser/serializer — Thanks @imjlk!
+
+### Patch changes
+
+- [ce4bba0](https://github.com/k-otp/k-msg/commit/ce4bba07974365c681e29e6da2e007c968c84c74) Harden CLI installer and launcher path sync behavior to reduce unsafe overwrites across mixed install methods.
+  
+  - `install.sh` now skips replacing active symlink/script launchers (for example package-manager shims) and falls back to `~/.local/bin` unless `K_MSG_CLI_INSTALL_DIR` is explicitly set.
+  - The npm/bun launcher sync logic now targets only active command entries and only replaces native executables, avoiding broad PATH scanning and accidental script replacement. — Thanks @imjlk!
+- Updated dependencies: channel@0.20.0, core@0.20.0, messaging@0.20.0, provider@0.20.0, template@0.20.0, k-msg@0.20.0
+
 ## 0.7.1 — 2026-02-21
 
 ### Patch changes
