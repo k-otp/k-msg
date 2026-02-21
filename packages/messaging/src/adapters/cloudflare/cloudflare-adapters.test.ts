@@ -20,6 +20,29 @@ import {
 
 type CapturedQuery = { sql: string; params: readonly unknown[] };
 
+function readRenderedDrizzleQuery(
+  query: unknown,
+): { sql: string; params: unknown[] } | undefined {
+  if (typeof query !== "object" || query === null) return undefined;
+  const getSQL = (query as { getSQL?: () => unknown }).getSQL;
+  if (typeof getSQL !== "function") return undefined;
+
+  const sqlQuery = getSQL();
+  if (typeof sqlQuery !== "object" || sqlQuery === null) return undefined;
+  const toQuery = (sqlQuery as { toQuery?: (config: unknown) => unknown })
+    .toQuery;
+  if (typeof toQuery !== "function") return undefined;
+
+  const rendered = toQuery({});
+  if (typeof rendered !== "object" || rendered === null) return undefined;
+
+  const sql = (rendered as { sql?: unknown }).sql;
+  const params = (rendered as { params?: unknown }).params;
+  if (typeof sql !== "string" || !Array.isArray(params)) return undefined;
+
+  return { sql, params: [...params] };
+}
+
 function createCapturingSqlClient(dialect: CloudflareSqlClient["dialect"]): {
   client: CloudflareSqlClient;
   queries: CapturedQuery[];
@@ -159,7 +182,10 @@ describe("Cloudflare SQL adapters", () => {
 
     expect(second).toBe("tx");
     expect(calls[0]).toBe("SELECT 1");
-    expect(txCalls[0]).toEqual({ sql: "SELECT 2", params: [2] });
+    expect(readRenderedDrizzleQuery(txCalls[0])).toEqual({
+      sql: "SELECT 2",
+      params: [2],
+    });
   });
 
   test("runCloudflareSqlTransaction works with and without transaction function", async () => {
