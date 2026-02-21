@@ -1,0 +1,104 @@
+name: Drizzle Peer Compat PR
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: drizzle-peer-compat-pr
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  BUN_VERSION: "1.3.8"
+
+jobs:
+  update-drizzle-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve latest drizzle-orm
+        id: latest
+        run: |
+          set -euo pipefail
+          LATEST="$(npm view drizzle-orm version)"
+          echo "latest=${LATEST}" >>"$GITHUB_OUTPUT"
+          echo "latest=${LATEST}"
+
+      - name: Update peer compatibility files
+        run: bun run scripts/automation/update-drizzle-peer-compat.ts "${{ steps.latest.outputs.latest }}"
+
+      - name: Detect changes
+        id: changes
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "changed=false" >>"$GITHUB_OUTPUT"
+            echo "No drizzle compatibility updates required."
+            exit 0
+          fi
+          echo "changed=true" >>"$GITHUB_OUTPUT"
+          git status --short
+
+      - name: Refresh lockfile
+        if: steps.changes.outputs.changed == 'true'
+        run: bun install
+
+      - name: Validate messaging compatibility checks
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          bun run --cwd packages/core build:types
+          bun run --cwd packages/messaging typecheck
+          bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: codex/auto-drizzle-peer-compat
+          base: main
+          delete-branch: true
+          commit-message: "chore(messaging): update drizzle peer compatibility"
+          title: "chore(messaging): update drizzle peer compatibility (${{ steps.latest.outputs.latest }})"
+          body: |
+            Automated update for Drizzle peer compatibility in `@k-msg/messaging`.
+
+            Changes included:
+            - expand `peerDependencies.drizzle-orm` to include the latest minor line
+            - set messaging dev baseline to `${{ steps.latest.outputs.latest }}`
+            - refresh CI `drizzle-compat` matrix
+            - update README support table/matrix entries
+            - add/update Sampo changeset
+
+            Validation executed in this workflow:
+            - `bun run --cwd packages/core build:types`
+            - `bun run --cwd packages/messaging typecheck`
+            - `bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts`
+          labels: |
+            dependencies
+            automation
+          add-paths: |
+            .github/workflows/ci.yml
+            .sampo/changesets/auto-drizzle-peer-compat.md
+            bun.lock
+            packages/messaging/package.json
+            packages/messaging/README.md
+            packages/messaging/README_ko.md
