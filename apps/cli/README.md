@@ -33,8 +33,12 @@ curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
 Installer environment variables:
 
 - `K_MSG_CLI_VERSION`: override target version (default: latest Pages script version)
-- `K_MSG_CLI_INSTALL_DIR`: target directory (default: `~/.local/bin`)
+- `K_MSG_CLI_INSTALL_DIR`: target directory override (default: auto-detect active `k-msg` directory when writable, otherwise `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: override release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+
+Path conflict note:
+
+- The installer now prefers updating the currently active `k-msg` path when possible, and also refreshes that path if it differs from the selected install dir. This reduces stale-version issues when users previously installed via `bun`/`npm`/older `curl` flows.
 
 ### GitHub Releases (manual)
 
