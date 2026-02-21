@@ -2,7 +2,7 @@
 
 > 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
 
-K-Message 플랫폼의 채널 및 발신번호 관리 패키지입니다.
+`k-msg`의 Kakao 채널 처리를 위한 런타임 중심 패키지입니다.
 
 ## 설치
 
@@ -12,72 +12,63 @@ npm install @k-msg/channel @k-msg/core
 bun add @k-msg/channel @k-msg/core
 ```
 
-## 주요 기능
+## 런타임 API (`@k-msg/channel`)
 
-- **채널 관리**: 채널 라이프사이클 전체 관리
-- **발신번호 등록**: 발신번호 등록 및 검증 자동화
-- **사업자 검증**: 알림톡 채널용 사업자 정보 검증
-- **권한 관리**: 채널 대상 역할 기반 접근 제어
-- **상태 모니터링**: 채널 상태 실시간 모니터링
+루트 export는 런타임 전용입니다.
 
-## 런타임 호환성
+- `KakaoChannelCapabilityService`
+- `KakaoChannelBindingResolver`
+- `KakaoChannelLifecycleService`
+- 런타임 타입 (`KakaoChannelCapabilityMode`, `KakaoChannelBinding`, `ResolvedKakaoChannelBinding`, `KakaoChannelListItem` 등)
 
-- 런타임에서 Node 내장 모듈에 의존하지 않아 Edge 환경에서 `nodejs_compat` 없이 동작합니다.
+### capability 모드
 
-## 기본 사용법
+- `api`: provider가 채널 온보딩 API(`list/auth/add/categories`)를 제공
+- `manual`: 수동 온보딩 모델(채널 온보딩 API 호출 불가)
+- `none`: 채널 온보딩 API 자체를 제공하지 않음
 
-```typescript
-import { ChannelService } from '@k-msg/channel';
+### 예시: 바인딩 해석
 
-const channelService = new ChannelService();
+```ts
+import { KakaoChannelBindingResolver } from "@k-msg/channel";
 
-// 새 알림톡 채널 생성
-const channel = await channelService.createChannel({
-  name: 'My Business Channel',
-  provider: 'iwinv',
-  businessInfo: {
-    name: 'My Company Ltd.',
-    registrationNumber: '123-45-67890',
-    category: 'E-COMMERCE',
-    contactEmail: 'contact@mycompany.com',
-    contactPhone: '02-1234-5678'
-  }
+const resolver = new KakaoChannelBindingResolver(config);
+
+const resolved = resolver.resolve({
+  providerId: "solapi-main",
+  channelAlias: "main",
 });
 
-// 발신번호 등록
-const senderNumber = await channelService.addSenderNumber(channel.id, {
-  phoneNumber: '15881234',
-  purpose: 'MARKETING'
-});
+// 우선순위: explicit > alias > defaults > provider config
+console.log(resolved.senderKey, resolved.plusId);
 ```
 
-## 채널 검증
+### 예시: provider lifecycle 호출
 
-```typescript
-// 사업자 정보 검증
-const verification = await channelService.verifyBusiness(channel.id, {
-  documents: [
-    { type: 'BUSINESS_LICENSE', url: 'https://docs.example.com/license.pdf' },
-    { type: 'REPRESENTATIVE_ID', url: 'https://docs.example.com/id.pdf' }
-  ]
-});
+```ts
+import { KakaoChannelLifecycleService } from "@k-msg/channel";
 
-// 검증 상태 확인
-const status = await channelService.getVerificationStatus(channel.id);
-console.log('Verification status:', status);
+const service = new KakaoChannelLifecycleService(provider);
+
+const channels = await service.list();
+if (channels.isSuccess) {
+  console.log(channels.value); // source="api" 포함 KakaoChannelListItem[]
+}
 ```
 
-## 발신번호 관리
+## Toolkit API (`@k-msg/channel/toolkit`)
 
-```typescript
-// 채널의 모든 발신번호 조회
-const senderNumbers = await channelService.getSenderNumbers(channel.id);
+기존 in-memory/관리 도구는 toolkit 서브패스로 분리되었습니다.
 
-// SMS 인증으로 발신번호 검증
-await channelService.verifySenderNumber(senderNumber.id, '123456');
+- `KakaoChannelManager`
+- `KakaoSenderNumberManager`
+- `ChannelCRUD`
+- `PermissionManager`
+- `ChannelService`
+- 검증 유틸 및 레거시 channel 타입
 
-// 발신번호 상태 확인
-const numberStatus = await channelService.getSenderNumberStatus(senderNumber.id);
+```ts
+import { KakaoChannelManager } from "@k-msg/channel/toolkit";
 ```
 
 ## 라이선스

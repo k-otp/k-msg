@@ -1031,14 +1031,65 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
-    "kakao channel/template commands",
+    "kakao channel binding/api + template commands",
     async () => {
       const configPath = await createTempConfig();
+
+      const bindingList = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "binding",
+          "list",
+          "--config",
+          configPath,
+        ]),
+      );
+      bindingList.toHaveSucceeded();
+      expect(bindingList.stdout).toContain("mock-sender-seed");
+      expect(bindingList.stdout).toContain("source=config");
+
+      const bindingResolve = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "binding",
+          "resolve",
+          "--config",
+          configPath,
+          "--channel",
+          "seed",
+        ]),
+      );
+      bindingResolve.toHaveSucceeded();
+      expect(bindingResolve.stdout).toContain("senderKey=mock-sender-seed");
+
+      const bindingSet = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "binding",
+          "set",
+          "--config",
+          configPath,
+          "--alias",
+          "ops",
+          "--provider",
+          "mock",
+          "--sender-key",
+          "mock-sender-ops",
+          "--plus-id",
+          "@ops",
+        ]),
+      );
+      bindingSet.toHaveSucceeded();
+      expect(bindingSet.stdout).toContain("OK alias=ops");
 
       const categories = expectCommand(
         await runCli([
           "kakao",
           "channel",
+          "api",
           "categories",
           "--config",
           configPath,
@@ -1048,7 +1099,14 @@ describe("k-msg CLI (bunli) E2E", () => {
       expect(categories.stdout).toContain("first");
 
       const list = expectCommand(
-        await runCli(["kakao", "channel", "list", "--config", configPath]),
+        await runCli([
+          "kakao",
+          "channel",
+          "api",
+          "list",
+          "--config",
+          configPath,
+        ]),
       );
       list.toHaveSucceeded();
       expect(list.stdout).toContain("mock-sender-seed");
@@ -1057,6 +1115,7 @@ describe("k-msg CLI (bunli) E2E", () => {
         await runCli([
           "kakao",
           "channel",
+          "api",
           "auth",
           "--config",
           configPath,
@@ -1073,6 +1132,7 @@ describe("k-msg CLI (bunli) E2E", () => {
         await runCli([
           "kakao",
           "channel",
+          "api",
           "add",
           "--config",
           configPath,
@@ -1090,6 +1150,28 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       add.toHaveSucceeded();
       expect(add.stdout).toContain("saved=test");
+
+      const removedList = expectCommand(
+        await runCli(["kakao", "channel", "list", "--config", configPath]),
+      );
+      removedList.toHaveExitCode(2);
+      expect(removedList.stderr).toContain("was removed");
+      expect(removedList.stderr).toContain("binding list");
+
+      const bindingDelete = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "binding",
+          "delete",
+          "--config",
+          configPath,
+          "--alias",
+          "ops",
+        ]),
+      );
+      bindingDelete.toHaveSucceeded();
+      expect(bindingDelete.stdout).toContain("OK alias=ops");
 
       const tplList = expectCommand(
         await runCli(["kakao", "template", "list", "--config", configPath]),
@@ -1194,6 +1276,76 @@ describe("k-msg CLI (bunli) E2E", () => {
       invalidContent.toHaveExitCode(2);
       expect(invalidContent.stderr).toContain(
         "content must be a non-empty string",
+      );
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "kakao channel api reports unsupported providers (manual/none)",
+    async () => {
+      const iwinvConfigPath = await createTempConfigFromObject({
+        version: 1,
+        providers: [
+          {
+            type: "iwinv",
+            id: "iwinv-main",
+            config: {
+              apiKey: "api-key",
+            },
+          },
+        ],
+        routing: { defaultProviderId: "iwinv-main", strategy: "first" },
+      });
+
+      const iwinvApi = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "api",
+          "list",
+          "--config",
+          iwinvConfigPath,
+          "--provider",
+          "iwinv-main",
+        ]),
+      );
+      iwinvApi.toHaveExitCode(2);
+      expect(iwinvApi.stderr).toContain(
+        "manual Kakao channel onboarding",
+      );
+
+      const solapiConfigPath = await createTempConfigFromObject({
+        version: 1,
+        providers: [
+          {
+            type: "solapi",
+            id: "solapi-main",
+            config: {
+              apiKey: "solapi-key",
+              apiSecret: "solapi-secret",
+              kakaoPfId: "pf-main",
+            },
+          },
+        ],
+        routing: { defaultProviderId: "solapi-main", strategy: "first" },
+      });
+
+      const solapiApi = expectCommand(
+        await runCli([
+          "kakao",
+          "channel",
+          "api",
+          "list",
+          "--config",
+          solapiConfigPath,
+          "--provider",
+          "solapi-main",
+        ]),
+      );
+      solapiApi.toHaveExitCode(2);
+      expect(solapiApi.stderr).toContain(
+        "does not expose Kakao channel onboarding API",
       );
     },
     TEST_TIMEOUT,

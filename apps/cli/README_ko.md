@@ -187,7 +187,8 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
 - `k-msg db schema print|generate`
-- `k-msg kakao channel categories|list|auth|add`
+- `k-msg kakao channel binding list|resolve|set|delete`
+- `k-msg kakao channel api categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
 템플릿 명령 내부 동작:
@@ -335,19 +336,29 @@ Boolean 플래그 규칙 (`--json`, `--verbose`, `--dry-run`, `--stdin`, `--fail
 
 - `CLI flag > environment variable > config file > built-in default`
 
-## Kakao Channel (Aligo capability)
+## Kakao Channel
 
 ```bash
-k-msg kakao channel categories
-k-msg kakao channel list
-k-msg kakao channel auth --plus-id @my_channel --phone 01012345678
-k-msg kakao channel add \
+# config/provider-hint 기반 바인딩 관리 (api/manual/none provider 공통)
+k-msg kakao channel binding list
+k-msg kakao channel binding resolve --channel main
+k-msg kakao channel binding set --alias main --provider aligo-main --sender-key SENDER_KEY --plus-id @my_channel
+k-msg kakao channel binding delete --alias old-channel
+
+# provider API 작업 (api 모드 provider만 가능, 예: aligo/mock)
+k-msg kakao channel api categories --provider aligo-main
+k-msg kakao channel api list --provider aligo-main
+k-msg kakao channel api auth --provider aligo-main --plus-id @my_channel --phone 01012345678
+k-msg kakao channel api add \
+  --provider aligo-main \
   --plus-id @my_channel \
   --auth-num 123456 \
   --phone 01012345678 \
   --category-code 001001001 \
   --save main
 ```
+
+레거시 안내: `k-msg kakao channel categories|list|auth|add`는 제거되었고, CLI는 `binding` / `api` 명령으로 안내합니다.
 
 ## Kakao Template (IWINV/Aligo)
 

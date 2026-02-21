@@ -137,6 +137,7 @@ const sendCmd = defineCommand({
       const fallbackChannel = flags["fallback-channel"];
       const fallbackContent = flags["fallback-content"];
       const fallbackTitle = flags["fallback-title"];
+      const resolvedProvider = pickAlimTalkProvider(runtime, flags.provider);
       const failoverEnabled =
         flags.failover ||
         fallbackChannel !== undefined ||
@@ -144,10 +145,12 @@ const sendCmd = defineCommand({
         fallbackTitle !== undefined;
 
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
+        providerId: resolvedProvider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
       const plusId = resolveKakaoChannelPlusId(runtime.config, {
+        providerId: resolvedProvider.id,
         channelAlias: flags.channel,
         plusId: flags["plus-id"],
       });
@@ -234,10 +237,12 @@ const preflightCmd = defineCommand({
       const runtime = await loadRuntime(flags.config);
       const provider = pickAlimTalkProvider(runtime, flags.provider);
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
       const plusId = resolveKakaoChannelPlusId(runtime.config, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         plusId: flags["plus-id"],
       });
