@@ -51,6 +51,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:55](https://github.com/k
 
 ### type
 
-> **type**: `"WL"` \| `"AL"` \| `"DB"` \| `"BK"` \| `"MD"`
+> **type**: `"WL"` \| `"AL"` \| `"BK"` \| `"MD"` \| `"DB"`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L54)

@@ -26,4 +26,5 @@ title: "k-msg-workspace"
 - [provider/src/iwinv](/api/provider/src/iwinv/readme/)
 - [provider/src/solapi](/api/provider/src/solapi/readme/)
 - [template/src](/api/template/src/readme/)
+- [template/src/toolkit](/api/template/src/toolkit/readme/)
 - [webhook/src](/api/webhook/src/readme/)

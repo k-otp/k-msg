@@ -41,7 +41,7 @@ Defined in: [packages/channel/src/verification/business.verify.ts:70](https://gi
 
 #### type
 
-> **type**: `"content"` \| `"format"` \| `"quality"` \| `"authenticity"`
+> **type**: `"format"` \| `"content"` \| `"quality"` \| `"authenticity"`
 
 ***
 

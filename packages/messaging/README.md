@@ -40,6 +40,7 @@ bun add @k-msg/messaging @k-msg/core
 | `createDeliveryTrackingHooks` / `DeliveryTrackingService` / `InMemoryDeliveryTrackingStore` | `@k-msg/messaging/tracking` |
 | `BulkMessageSender` | `@k-msg/messaging/sender` |
 | `Job` / `JobQueue` / `JobStatus` | `@k-msg/messaging/queue` |
+| `VariableReplacer` / `VariableUtils` / `defaultVariableReplacer` | `@k-msg/template` (`TemplatePersonalizer` / `TemplateVariableUtils` / `defaultTemplatePersonalizer`) |
 
 `JobProcessor` and `MessageJobProcessor` now require explicit `jobQueue` injection.
 

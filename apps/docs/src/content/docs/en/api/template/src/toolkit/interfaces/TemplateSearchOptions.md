@@ -27,7 +27,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:26](https://git
 
 ### sortBy?
 
-> `optional` **sortBy**: `"code"` \| `"name"` \| `"createdAt"` \| `"updatedAt"` \| `"usage"`
+> `optional` **sortBy**: `"name"` \| `"code"` \| `"createdAt"` \| `"updatedAt"` \| `"usage"`
 
 Defined in: [packages/template/src/registry/template.registry.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L28)
 

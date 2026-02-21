@@ -7,9 +7,6 @@ title: "TemplateBuilder"
 
 Defined in: [packages/template/src/builder/template.builder.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L15)
 
-Template Engine
-템플릿 파싱, 변수 치환, 검증 기능 제공
-
 ## Constructors
 
 ### Constructor

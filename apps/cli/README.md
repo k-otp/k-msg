@@ -190,6 +190,11 @@ Required values by provider/channel:
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
+Template command internals:
+
+- `kakao template *` commands route through `TemplateLifecycleService` from `@k-msg/template`.
+- `create/update` validate `name/content/buttons` using `validateTemplatePayload` + `parseTemplateButtons` before provider API calls.
+
 ## DB schema generator
 
 Generate canonical SQL DDL and/or Drizzle schema source from the same

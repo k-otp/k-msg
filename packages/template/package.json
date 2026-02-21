@@ -12,6 +12,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./toolkit": {
+      "types": "./dist/toolkit/index.d.ts",
+      "import": "./dist/toolkit/index.mjs",
+      "require": "./dist/toolkit/index.js"
     }
   },
   "publishConfig": {
@@ -19,8 +24,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test'",
-    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test'",
+    "build:esm": "bun build ./src/index.ts ./src/toolkit/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
+    "build:cjs": "bun build ./src/index.ts ./src/toolkit/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",

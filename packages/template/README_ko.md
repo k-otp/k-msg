@@ -2,7 +2,7 @@
 
 > 공식 문서: [k-msg.and.guide](https://k-msg.and.guide)
 
-K-Message 플랫폼의 템플릿 관리 및 검증 패키지입니다.
+K-Message 템플릿 런타임 생명주기/검증/개인화 로직의 단일 패키지입니다.
 
 ## 설치
 
@@ -12,69 +12,80 @@ npm install @k-msg/template @k-msg/core
 bun add @k-msg/template @k-msg/core
 ```
 
-## 주요 기능
+## Runtime API (`@k-msg/template`)
 
-- **Template Engine**: 템플릿 종합 관리 시스템
-- **Variable Parsing**: 템플릿 변수 자동 추출 및 검증
-- **Template Validation**: 템플릿 내용/구조 내장 검증
-- **Template Registry**: 템플릿 중앙 저장/조회
-- **Template Builder**: 템플릿 동적 생성/수정
+기본 export는 런타임 중심 API만 제공합니다.
 
-## 런타임 호환성
+- `TemplateLifecycleService`
+- `TemplatePersonalizer`, `defaultTemplatePersonalizer`, `TemplateVariableUtils`
+- `interpolate`
+- `validateTemplatePayload`, `parseTemplateButtons`
+- 저수준 parser (`ButtonParser`, `VariableParser`, `TemplateValidator`)
 
-- 런타임에서 Node 내장 모듈에 의존하지 않아 Edge 환경에서 `nodejs_compat` 없이 동작합니다.
-
-## 기본 사용법
+### Lifecycle Service
 
 ```typescript
-import { interpolate } from '@k-msg/template';
+import { TemplateLifecycleService } from "@k-msg/template";
+import type { TemplateProvider } from "@k-msg/core";
 
-const text = interpolate('[MyApp] Your verification code is #{code}.', {
-  code: '123456',
+const provider: TemplateProvider = /* provider 구현 */;
+const templates = new TemplateLifecycleService(provider);
+
+await templates.create({
+  name: "OTP Verification",
+  content: "[MyApp] Code: #{code}",
 });
-
-console.log(text); // "[MyApp] Your verification code is 123456."
 ```
 
-## Template Registry
+### 런타임 검증
 
 ```typescript
-import { TemplateRegistry } from '@k-msg/template';
+import { parseTemplateButtons, validateTemplatePayload } from "@k-msg/template";
+
+const buttons = parseTemplateButtons('[{"type":"WL","name":"열기","url_mobile":"https://example.com"}]');
+if (buttons.isFailure) throw buttons.error;
+
+const payload = validateTemplatePayload(
+  {
+    name: "알림",
+    content: "안녕하세요 #{name}",
+    buttons: buttons.value,
+  },
+  { requireName: true, requireContent: true },
+);
+
+if (payload.isFailure) throw payload.error;
+```
+
+### 개인화
+
+```typescript
+import { TemplateVariableUtils } from "@k-msg/template";
+
+const rendered = TemplateVariableUtils.replace("안녕하세요 #{name}", {
+  name: "홍길동",
+});
+// "안녕하세요 홍길동"
+```
+
+## Toolkit API (`@k-msg/template/toolkit`)
+
+빌더/레지스트리/테스트용 스토어는 서브패스로 분리됩니다.
+
+- `TemplateBuilder`, `TemplateBuilders`
+- `TemplateRegistry`
+- `InMemoryTemplateStore`
+
+```typescript
+import { TemplateBuilders, TemplateRegistry } from "@k-msg/template/toolkit";
 
 const registry = new TemplateRegistry();
+const template = TemplateBuilders.authentication("OTP", "mock")
+  .code("OTP_001")
+  .content("Code: #{code}")
+  .build();
 
-// 템플릿 등록
-await registry.register({
-  id: 'otp-basic',
-  name: 'Basic OTP Template',
-  content: '[#{service}] Verification code: #{code}',
-  category: 'AUTHENTICATION'
-});
-
-// 템플릿 검색
-const templates = await registry.search({
-  category: 'AUTHENTICATION',
-  status: 'ACTIVE'
-});
-```
-
-## Provider-backed TemplateService (선택)
-
-`TemplateService`는 `@k-msg/core`의 `TemplateProvider` 인터페이스를 감싸는 작은 helper입니다.
-
-```typescript
-import { TemplateService } from '@k-msg/template';
-import type { TemplateProvider } from '@k-msg/core';
-
-const provider: TemplateProvider = /* your implementation */;
-const templateService = new TemplateService(provider);
-
-await templateService.create({
-  code: 'OTP_001',
-  name: 'OTP Verification',
-  content: '[MyApp] Your verification code is #{code}.',
-  category: 'AUTHENTICATION'
-});
+await registry.register(template);
 ```
 
 ## 라이선스

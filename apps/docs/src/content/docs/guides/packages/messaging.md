@@ -34,12 +34,14 @@ bun add @k-msg/messaging @k-msg/core
   - `createDeliveryTrackingHooks`, `DeliveryTrackingService`, `InMemoryDeliveryTrackingStore`
   - `BulkMessageSender`
   - `Job`, `JobQueue`, `JobStatus`
+  - `VariableReplacer`, `VariableUtils`, `defaultVariableReplacer`
 - 대체 경로:
   - Bun 관련: `@k-msg/messaging/adapters/bun`
   - Node 관련: `@k-msg/messaging/adapters/node`
   - Tracking 관련: `@k-msg/messaging/tracking`
   - Sender 관련: `@k-msg/messaging/sender`
   - Queue 관련: `@k-msg/messaging/queue`
+  - 템플릿 개인화 관련: `@k-msg/template` (`TemplatePersonalizer`, `TemplateVariableUtils`, `defaultTemplatePersonalizer`)
 - `JobProcessor`/`MessageJobProcessor`는 이제 `jobQueue`를 반드시 주입해야 합니다.
 
 ## 기본 사용

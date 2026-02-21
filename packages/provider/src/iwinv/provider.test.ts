@@ -968,6 +968,31 @@ describe("IWINVProvider", () => {
     }
   });
 
+  test("Template create validates buttons before provider request", async () => {
+    const provider = new IWINVProvider({
+      apiKey: "api-key",
+      debug: false,
+    });
+
+    const result = await provider.createTemplate({
+      name: "템플릿명",
+      content: "템플릿 내용",
+      buttons: [
+        {
+          type: "WL",
+          name: "",
+          linkMobile: "https://example.com",
+        },
+      ],
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toBe("buttons[0].name is required");
+    }
+  });
+
   test("Template get fails with TEMPLATE_NOT_FOUND when list is empty", async () => {
     globalThis.fetch = async () =>
       new Response(

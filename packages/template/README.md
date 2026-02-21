@@ -2,7 +2,7 @@
 
 > Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
 
-Template management and validation system for the K-Message platform.
+Single source of truth for K-Message template runtime lifecycle, payload validation, and personalization.
 
 ## Installation
 
@@ -12,70 +12,80 @@ npm install @k-msg/template @k-msg/core
 bun add @k-msg/template @k-msg/core
 ```
 
-## Features
+## Runtime API (`@k-msg/template`)
 
-- **Template Engine**: Comprehensive template management system
-- **Variable Parsing**: Automatic template variable extraction and validation
-- **Template Validation**: Built-in validation for template content and structure
-- **Template Registry**: Centralized template storage and retrieval
-- **Template Builder**: Dynamic template creation and modification
+Main exports focus on runtime-safe template workflows:
 
-## Runtime Compatibility
+- `TemplateLifecycleService`
+- `TemplatePersonalizer`, `defaultTemplatePersonalizer`, `TemplateVariableUtils`
+- `interpolate`
+- `validateTemplatePayload`, `parseTemplateButtons`
+- low-level parsers (`ButtonParser`, `VariableParser`, `TemplateValidator`)
 
-- Works in Edge runtimes without `nodejs_compat` (no runtime dependency on Node built-ins).
-
-## Basic Usage
+### Lifecycle Service
 
 ```typescript
-import { interpolate } from '@k-msg/template';
+import { TemplateLifecycleService } from "@k-msg/template";
+import type { TemplateProvider } from "@k-msg/core";
 
-const text = interpolate('[MyApp] Your verification code is #{code}.', {
-  code: '123456',
+const provider: TemplateProvider = /* your provider */;
+const templates = new TemplateLifecycleService(provider);
+
+await templates.create({
+  name: "OTP Verification",
+  content: "[MyApp] Code: #{code}",
 });
-
-console.log(text); // "[MyApp] Your verification code is 123456."
 ```
 
-## Template Registry
+### Runtime Validation
 
 ```typescript
-import { TemplateRegistry } from '@k-msg/template';
+import { parseTemplateButtons, validateTemplatePayload } from "@k-msg/template";
+
+const buttons = parseTemplateButtons('[{"type":"WL","name":"Open","url_mobile":"https://example.com"}]');
+if (buttons.isFailure) throw buttons.error;
+
+const payload = validateTemplatePayload(
+  {
+    name: "Notice",
+    content: "Hello #{name}",
+    buttons: buttons.value,
+  },
+  { requireName: true, requireContent: true },
+);
+
+if (payload.isFailure) throw payload.error;
+```
+
+### Personalization
+
+```typescript
+import { TemplateVariableUtils } from "@k-msg/template";
+
+const rendered = TemplateVariableUtils.replace("Hello #{name}", {
+  name: "Jane",
+});
+// "Hello Jane"
+```
+
+## Toolkit API (`@k-msg/template/toolkit`)
+
+Builder/registry/testing helpers are exposed separately:
+
+- `TemplateBuilder`, `TemplateBuilders`
+- `TemplateRegistry`
+- `InMemoryTemplateStore`
+
+```typescript
+import { TemplateRegistry, TemplateBuilders } from "@k-msg/template/toolkit";
 
 const registry = new TemplateRegistry();
+const template = TemplateBuilders.authentication("OTP", "mock")
+  .code("OTP_001")
+  .content("Code: #{code}")
+  .build();
 
-// Register a template
-await registry.register({
-  id: 'otp-basic',
-  name: 'Basic OTP Template',
-  content: '[#{service}] Verification code: #{code}',
-  category: 'AUTHENTICATION'
-});
-
-// Search templates
-const templates = await registry.search({
-  category: 'AUTHENTICATION',
-  status: 'ACTIVE'
-});
-```
-
-## Provider-backed TemplateService (Optional)
-
-`TemplateService` is a small helper around the `TemplateProvider` interface from
-`@k-msg/core`.
-
-```typescript
-import { TemplateService } from '@k-msg/template';
-import type { TemplateProvider } from '@k-msg/core';
-
-const provider: TemplateProvider = /* your implementation */;
-const templateService = new TemplateService(provider);
-
-await templateService.create({
-  code: 'OTP_001',
-  name: 'OTP Verification',
-  content: '[MyApp] Your verification code is #{code}.',
-  category: 'AUTHENTICATION'
-});
+await registry.register(template);
 ```
 
 ## License

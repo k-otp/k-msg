@@ -27,6 +27,7 @@
         "@k-msg/core": "workspace:*",
         "@k-msg/messaging": "workspace:*",
         "@k-msg/provider": "workspace:*",
+        "@k-msg/template": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "bunli": "^0.5.3",
@@ -112,6 +113,7 @@
       "version": "0.19.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
+        "@k-msg/template": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -131,6 +133,7 @@
       "version": "0.19.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
+        "@k-msg/template": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "catalog:",

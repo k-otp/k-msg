@@ -1154,4 +1154,48 @@ describe("k-msg CLI (bunli) E2E", () => {
     },
     TEST_TIMEOUT,
   );
+
+  test(
+    "kakao template create/update validates content and buttons before provider call",
+    async () => {
+      const configPath = await createTempConfig();
+
+      const invalidButtons = expectCommand(
+        await runCli([
+          "kakao",
+          "template",
+          "create",
+          "--config",
+          configPath,
+          "--name",
+          "템플릿",
+          "--content",
+          "내용",
+          "--buttons",
+          '{"type":"WL"}',
+        ]),
+      );
+      invalidButtons.toHaveExitCode(2);
+      expect(invalidButtons.stderr).toContain("buttons must be a JSON array");
+
+      const invalidContent = expectCommand(
+        await runCli([
+          "kakao",
+          "template",
+          "update",
+          "--config",
+          configPath,
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--content",
+          "",
+        ]),
+      );
+      invalidContent.toHaveExitCode(2);
+      expect(invalidContent.stderr).toContain(
+        "content must be a non-empty string",
+      );
+    },
+    TEST_TIMEOUT,
+  );
 });

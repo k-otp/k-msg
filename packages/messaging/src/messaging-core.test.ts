@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+import { TemplatePersonalizer, TemplateVariableUtils } from "@k-msg/template";
 import {
   DeliveryTracker,
   JobProcessor,
@@ -10,18 +11,12 @@ import {
   MessageRetryHandler,
 } from "./adapters/node/index";
 import {
-  defaultVariableReplacer,
-  VariableReplacer,
-  VariableUtils,
-} from "./index";
-import {
   type Job,
   type JobQueue,
   JobStatus,
 } from "./queue/job-queue.interface";
 import {
   type DeliveryReport,
-  MessageEventType,
   type MessageRequest,
   MessageStatus,
 } from "./types/message.types";
@@ -205,7 +200,7 @@ describe("JobProcessor", () => {
 
     processor.start();
 
-    const jobId = await processor.add("test-job", { message: "hello" });
+    const _jobId = await processor.add("test-job", { message: "hello" });
 
     // Wait for processing
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -229,7 +224,7 @@ describe("JobProcessor", () => {
     );
 
     let attempts = 0;
-    processor.handle("failing-job", async (job) => {
+    processor.handle("failing-job", async (_job) => {
       attempts++;
       if (attempts < 2) {
         throw new Error("Temporary failure");
@@ -513,9 +508,9 @@ describe("DeliveryTracker", () => {
   });
 });
 
-describe("VariableReplacer", () => {
+describe("TemplatePersonalizer", () => {
   test("should replace simple variables", () => {
-    const replacer = new VariableReplacer();
+    const replacer = new TemplatePersonalizer();
 
     const content = "안녕하세요, #{name}님! 인증코드는 #{code}입니다.";
     const variables = { name: "홍길동", code: "123456" };
@@ -531,7 +526,7 @@ describe("VariableReplacer", () => {
   });
 
   test("should handle missing variables", () => {
-    const replacer = new VariableReplacer({ allowUndefined: false });
+    const replacer = new TemplatePersonalizer({ allowUndefined: false });
 
     const content = "안녕하세요, #{name}님! 인증코드는 #{code}입니다.";
     const variables = { name: "홍길동" }; // Missing 'code'
@@ -544,7 +539,7 @@ describe("VariableReplacer", () => {
   });
 
   test("should format values", () => {
-    const replacer = new VariableReplacer({ enableFormatting: true });
+    const replacer = new TemplatePersonalizer({ enableFormatting: true });
 
     const content = "#{name|upper}, 금액: #{amount|currency}";
     const variables = { name: "john doe", amount: 50000 };
@@ -556,7 +551,7 @@ describe("VariableReplacer", () => {
   });
 
   test("should replace variables with VariableMap-compatible values", () => {
-    const replacer = new VariableReplacer();
+    const replacer = new TemplatePersonalizer();
 
     const content = "#{userName}님, #{orderTotal}원";
     const variables = {
@@ -570,7 +565,7 @@ describe("VariableReplacer", () => {
   });
 
   test("should extract variables from content", () => {
-    const replacer = new VariableReplacer();
+    const replacer = new TemplatePersonalizer();
 
     const content = "#{name}님께서 #{product}를 #{quantity}개 주문하셨습니다.";
     const variables = replacer.extractVariables(content);
@@ -579,7 +574,7 @@ describe("VariableReplacer", () => {
   });
 
   test("should validate content", () => {
-    const replacer = new VariableReplacer();
+    const replacer = new TemplatePersonalizer();
 
     const content = "#{name}님, #{code}";
     const validVariables = { name: "홍길동", code: "123456" };
@@ -596,18 +591,18 @@ describe("VariableReplacer", () => {
   });
 });
 
-describe("VariableUtils", () => {
+describe("TemplateVariableUtils", () => {
   test("should provide utility functions", () => {
     const content = "#{name}님, 인증코드: #{code}";
     const variables = { name: "홍길동", code: "123456" };
 
-    const extractedVars = VariableUtils.extractVariables(content);
+    const extractedVars = TemplateVariableUtils.extractVariables(content);
     expect(extractedVars).toEqual(["name", "code"]);
 
-    const replaced = VariableUtils.replace(content, variables);
+    const replaced = TemplateVariableUtils.replace(content, variables);
     expect(replaced).toBe("홍길동님, 인증코드: 123456");
 
-    const isValid = VariableUtils.validate(content, variables);
+    const isValid = TemplateVariableUtils.validate(content, variables);
     expect(isValid).toBe(true);
   });
 
@@ -624,7 +619,7 @@ describe("VariableUtils", () => {
       },
     ];
 
-    const personalized = VariableUtils.personalize(content, recipients);
+    const personalized = TemplateVariableUtils.personalize(content, recipients);
 
     expect(personalized.length).toBe(2);
     expect(personalized[0].content).toBe("안녕하세요, 홍길동님! 코드: 111111");
@@ -681,7 +676,7 @@ describe("Integration Tests", () => {
     tracker.start();
 
     // Queue message
-    const jobId = await processor.queueMessage(messageRequest);
+    const _jobId = await processor.queueMessage(messageRequest);
 
     // Track messages
     await tracker.trackMessage(
@@ -713,7 +708,7 @@ describe("Integration Tests", () => {
     // Personalize content
     const template =
       "안녕하세요, #{name}님! #{service}에 오신 것을 환영합니다.";
-    const personalized = VariableUtils.personalize(template, [
+    const personalized = TemplateVariableUtils.personalize(template, [
       {
         phoneNumber: "01012345678",
         variables: { name: "홍길동", service: "K-Message" },

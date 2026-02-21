@@ -67,6 +67,6 @@ Defined in: [packages/template/src/types/template.types.ts:46](https://github.co
 
 ### type
 
-> **type**: `"WL"` \| `"AL"` \| `"BK"` \| `"MD"` \| `"DS"`
+> **type**: `"WL"` \| `"AL"` \| `"DS"` \| `"BK"` \| `"MD"`
 
 Defined in: [packages/template/src/types/template.types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L40)
