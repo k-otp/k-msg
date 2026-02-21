@@ -1,13 +1,13 @@
 ---
-npm/@k-msg/template: major
-npm/@k-msg/messaging: major
-npm/@k-msg/cli: major
+npm/@k-msg/template: minor
+npm/@k-msg/messaging: minor
+npm/@k-msg/cli: minor
 npm/@k-msg/provider: patch
 ---
 
 Refactor template handling around `@k-msg/template` as the single runtime source of truth.
 
-## `@k-msg/template` (major)
+## `@k-msg/template` (minor)
 
 - introduce runtime-first API surface:
   - `TemplateLifecycleService`
@@ -17,7 +17,7 @@ Refactor template handling around `@k-msg/template` as the single runtime source
 - remove legacy root exports that overlapped service semantics (`TemplateService`, `MockTemplateService`, root-level builder/registry exports)
 - move personalization implementation from messaging into template package
 
-## `@k-msg/messaging` (major)
+## `@k-msg/messaging` (minor)
 
 - remove root personalization exports:
   - `VariableReplacer`
@@ -28,7 +28,7 @@ Refactor template handling around `@k-msg/template` as the single runtime source
   - `TemplateVariableUtils`
   - `defaultTemplatePersonalizer`
 
-## `@k-msg/cli` (major)
+## `@k-msg/cli` (minor)
 
 - route `kakao template *` commands through `TemplateLifecycleService` instead of direct provider template method calls
 - apply template runtime validation (`validateTemplatePayload`, `parseTemplateButtons`) before provider requests for create/update flows
