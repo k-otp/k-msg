@@ -43,6 +43,7 @@ curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
 PATH 충돌 관련 참고:
 
 - 설치 스크립트는 가능하면 현재 PATH에서 활성화된 `k-msg` 경로를 우선 업데이트하고, 설치 경로와 활성 경로가 다를 때도 활성 경로를 함께 갱신합니다. 이전 bun/npm/curl 설치본이 남아 버전이 뒤섞이는 문제를 줄이기 위한 동작입니다.
+- 안전을 위해 심볼릭 링크/스크립트 런처(예: 패키지 매니저 shim)는 자동 덮어쓰지 않습니다. 이 경우 `K_MSG_CLI_INSTALL_DIR`를 지정하지 않으면 `~/.local/bin`으로 설치됩니다.
 
 ### GitHub Releases (수동 설치)
 

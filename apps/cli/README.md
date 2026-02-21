@@ -43,6 +43,7 @@ Installer environment variables:
 Path conflict note:
 
 - The installer now prefers updating the currently active `k-msg` path when possible, and also refreshes that path if it differs from the selected install dir. This reduces stale-version issues when users previously installed via `bun`/`npm`/older `curl` flows.
+- For safety, the installer does not overwrite active symlink/script launchers (for example package-manager shims). In that case it installs to `~/.local/bin` unless `K_MSG_CLI_INSTALL_DIR` is set.
 
 ### GitHub Releases (manual)
 
