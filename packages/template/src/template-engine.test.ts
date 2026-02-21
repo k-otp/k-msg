@@ -6,17 +6,19 @@ import { describe, expect, test } from "bun:test";
 import {
   type AlimTalkTemplate,
   ButtonParser,
-  TemplateBuilder,
-  TemplateBuilders,
   type TemplateButton,
   TemplateCategory,
-  TemplateRegistry,
-  MockTemplateService as TemplateService,
   TemplateStatus,
   TemplateValidator,
   type TemplateVariable,
   VariableParser,
 } from "./index";
+import {
+  InMemoryTemplateStore,
+  TemplateBuilder,
+  TemplateBuilders,
+  TemplateRegistry,
+} from "./toolkit";
 
 describe("VariableParser", () => {
   test("should extract variables from template content", () => {
@@ -264,8 +266,8 @@ describe("TemplateBuilder", () => {
       .build();
 
     expect(template.buttons).toHaveLength(1);
-    expect(template.buttons![0].type).toBe("WL");
-    expect(template.buttons![0].name).toBe("웹사이트 방문");
+    expect(template.buttons?.[0].type).toBe("WL");
+    expect(template.buttons?.[0].name).toBe("웹사이트 방문");
   });
 
   test("should preview template with sample variables", () => {
@@ -351,9 +353,9 @@ describe("TemplateBuilders factory", () => {
   });
 });
 
-describe("TemplateService", () => {
+describe("InMemoryTemplateStore", () => {
   test("should create and retrieve template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
     const templateData = {
       code: "TEST_001",
@@ -365,18 +367,18 @@ describe("TemplateService", () => {
       provider: "test-provider",
     };
 
-    const created = await service.createTemplate(templateData);
+    const created = await store.createTemplate(templateData);
     expect(created.id).toBeDefined();
     expect(created.name).toBe(templateData.name);
 
-    const retrieved = await service.getTemplate(created.id);
+    const retrieved = await store.getTemplate(created.id);
     expect(retrieved).toEqual(created);
   });
 
   test("should update template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_002",
       name: "원본 템플릿",
       content: "원본 내용",
@@ -388,7 +390,7 @@ describe("TemplateService", () => {
     // Add a small delay to ensure different timestamps
     await new Promise((resolve) => setTimeout(resolve, 1));
 
-    const updated = await service.updateTemplate(created.id, {
+    const updated = await store.updateTemplate(created.id, {
       name: "수정된 템플릿",
       content: "수정된 내용",
     });
@@ -401,9 +403,9 @@ describe("TemplateService", () => {
   });
 
   test("should delete template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_003",
       name: "삭제될 템플릿",
       content: "내용",
@@ -412,16 +414,16 @@ describe("TemplateService", () => {
       provider: "test-provider",
     });
 
-    await service.deleteTemplate(created.id);
+    await store.deleteTemplate(created.id);
 
-    const retrieved = await service.getTemplate(created.id);
+    const retrieved = await store.getTemplate(created.id);
     expect(retrieved).toBeNull();
   });
 
   test("should render template with variables", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_004",
       name: "렌더링 템플릿",
       content: "안녕하세요, #{name}님! 코드: #{code}",
@@ -430,7 +432,7 @@ describe("TemplateService", () => {
       provider: "test-provider",
     });
 
-    const rendered = await service.renderTemplate(created.id, {
+    const rendered = await store.renderTemplate(created.id, {
       name: "홍길동",
       code: "123456",
     });
@@ -559,11 +561,11 @@ describe("TemplateRegistry", () => {
 
     const stats = registry.getUsageStats("usage-test");
     expect(stats).toBeDefined();
-    expect(stats!.totalSent).toBe(10);
-    expect(stats!.totalDelivered).toBe(8);
-    expect(stats!.totalFailed).toBe(2);
-    expect(stats!.deliveryRate).toBe(80);
-    expect(stats!.failureRate).toBe(20);
+    expect(stats?.totalSent).toBe(10);
+    expect(stats?.totalDelivered).toBe(8);
+    expect(stats?.totalFailed).toBe(2);
+    expect(stats?.deliveryRate).toBe(80);
+    expect(stats?.failureRate).toBe(20);
   });
 
   test("should maintain version history", async () => {
@@ -592,15 +594,15 @@ describe("TemplateRegistry", () => {
 
     const history = registry.getHistory("version-test");
     expect(history).toBeDefined();
-    expect(history!.versions).toHaveLength(2);
-    expect(history!.currentVersion).toBe(2);
+    expect(history?.versions).toHaveLength(2);
+    expect(history?.currentVersion).toBe(2);
 
     // Get specific version
     const version1 = registry.getVersion("version-test", 1);
-    expect(version1!.content).toBe("원본 내용");
+    expect(version1?.content).toBe("원본 내용");
 
     const version2 = registry.getVersion("version-test", 2);
-    expect(version2!.content).toBe("수정된 내용");
+    expect(version2?.content).toBe("수정된 내용");
   });
 
   test("should export and import templates", async () => {
@@ -637,7 +639,7 @@ describe("TemplateRegistry", () => {
 
     const imported = newRegistry.get("export-test");
     expect(imported).toBeDefined();
-    expect(imported!.name).toBe("내보내기 테스트");
+    expect(imported?.name).toBe("내보내기 테스트");
   });
 
   test("should get registry statistics", async () => {
@@ -692,12 +694,11 @@ describe("TemplateRegistry", () => {
 
 describe("Integration Tests", () => {
   test("should work together in complete workflow", async () => {
-    // Create registry and service
+    // Create registry
     const registry = new TemplateRegistry({
       enableVersioning: true,
       enableUsageTracking: true,
     });
-    const service = new TemplateService();
 
     // Build template using fluent API
     const template = TemplateBuilders.authentication("OTP 인증", "iwinv")
@@ -734,8 +735,8 @@ describe("Integration Tests", () => {
 
     // Check usage stats
     const usageStats = registry.getUsageStats(template.id);
-    expect(usageStats!.deliveryRate).toBe(98);
-    expect(usageStats!.failureRate).toBe(2);
+    expect(usageStats?.deliveryRate).toBe(98);
+    expect(usageStats?.failureRate).toBe(2);
 
     // Preview template
     const builder = new TemplateBuilder()

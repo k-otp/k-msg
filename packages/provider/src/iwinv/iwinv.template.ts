@@ -9,6 +9,7 @@ import {
   type TemplateCreateInput,
   type TemplateUpdateInput,
 } from "@k-msg/core";
+import { validateTemplatePayload } from "@k-msg/template";
 import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
 import { isObjectRecord } from "../shared/type-guards";
 import {
@@ -33,6 +34,13 @@ async function readIwinvTemplateResponse(
   });
 }
 
+function withProviderContext(error: KMsgError, providerId: string): KMsgError {
+  return new KMsgError(error.code, error.message, {
+    providerId,
+    ...(error.details ?? {}),
+  });
+}
+
 export async function createTemplate(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
@@ -51,26 +59,21 @@ export async function createTemplate(params: {
       ),
     );
   }
-  if (!input.name || input.name.trim().length === 0) {
-    return fail(
-      new KMsgError(KMsgErrorCode.INVALID_REQUEST, "name is required", {
-        providerId,
-      }),
-    );
-  }
-  if (!input.content || input.content.trim().length === 0) {
-    return fail(
-      new KMsgError(KMsgErrorCode.INVALID_REQUEST, "content is required", {
-        providerId,
-      }),
-    );
+  const payloadValidation = validateTemplatePayload(input, {
+    requireName: true,
+    requireContent: true,
+  });
+  if (payloadValidation.isFailure) {
+    return fail(withProviderContext(payloadValidation.error, providerId));
   }
 
   const url = `${config.baseUrl}/api/template/add/`;
   const payload: Record<string, unknown> = {
-    templateName: input.name,
-    templateContent: input.content,
-    ...(input.buttons ? { buttons: input.buttons } : {}),
+    templateName: payloadValidation.value.name ?? input.name,
+    templateContent: payloadValidation.value.content ?? input.content,
+    ...(payloadValidation.value.buttons
+      ? { buttons: payloadValidation.value.buttons }
+      : {}),
   };
 
   try {
@@ -116,11 +119,11 @@ export async function createTemplate(params: {
     return ok({
       id: templateCode,
       code: templateCode,
-      name: input.name,
-      content: input.content,
+      name: payloadValidation.value.name ?? input.name,
+      content: payloadValidation.value.content ?? input.content,
       category: input.category,
       status: "INSPECTION",
-      buttons: input.buttons,
+      buttons: payloadValidation.value.buttons,
       variables: input.variables,
       createdAt: now,
       updatedAt: now,
@@ -172,13 +175,29 @@ export async function updateTemplate(params: {
       : existing.content;
   const nextButtons =
     patch.buttons !== undefined ? patch.buttons : existing.buttons;
+  const payloadValidation = validateTemplatePayload(
+    {
+      name: nextName,
+      content: nextContent,
+      buttons: nextButtons,
+    },
+    {
+      requireName: true,
+      requireContent: true,
+    },
+  );
+  if (payloadValidation.isFailure) {
+    return fail(withProviderContext(payloadValidation.error, providerId));
+  }
 
   const url = `${config.baseUrl}/api/template/modify/`;
   const payload: Record<string, unknown> = {
     templateCode,
-    templateName: nextName,
-    templateContent: nextContent,
-    ...(nextButtons ? { buttons: nextButtons } : {}),
+    templateName: payloadValidation.value.name ?? nextName,
+    templateContent: payloadValidation.value.content ?? nextContent,
+    ...(payloadValidation.value.buttons
+      ? { buttons: payloadValidation.value.buttons }
+      : {}),
   };
 
   try {
@@ -214,11 +233,13 @@ export async function updateTemplate(params: {
 
     return ok({
       ...existing,
-      name: nextName,
-      content: nextContent,
+      name: payloadValidation.value.name ?? nextName,
+      content: payloadValidation.value.content ?? nextContent,
       ...(patch.category !== undefined ? { category: patch.category } : {}),
       ...(patch.variables !== undefined ? { variables: patch.variables } : {}),
-      ...(patch.buttons !== undefined ? { buttons: patch.buttons } : {}),
+      ...(patch.buttons !== undefined
+        ? { buttons: payloadValidation.value.buttons }
+        : {}),
       updatedAt: new Date(),
     });
   } catch (error) {

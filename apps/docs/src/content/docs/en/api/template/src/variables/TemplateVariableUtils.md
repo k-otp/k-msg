@@ -2,12 +2,12 @@
 editUrl: false
 next: false
 prev: false
-title: "VariableUtils"
+title: "TemplateVariableUtils"
 ---
 
-> `const` **VariableUtils**: `object`
+> `const` **TemplateVariableUtils**: `object`
 
-Defined in: [packages/messaging/src/personalization/variable.replacer.ts:746](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/personalization/variable.replacer.ts#L746)
+Defined in: packages/template/src/personalization/variable.replacer.ts:746
 
 Utility functions
 
@@ -63,7 +63,7 @@ Replace variables in content
 
 ##### variables
 
-[`VariableMap`](/api/messaging/src/interfaces/variablemap/)
+[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 
@@ -83,7 +83,7 @@ Validate content has all required variables
 
 ##### variables
 
-[`VariableMap`](/api/messaging/src/interfaces/variablemap/)
+[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 

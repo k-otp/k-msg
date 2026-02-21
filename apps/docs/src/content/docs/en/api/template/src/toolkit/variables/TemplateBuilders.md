@@ -15,7 +15,7 @@ Static factory methods for common template types
 
 ### authentication()
 
-> **authentication**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+> **authentication**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 Create an authentication template builder
 
@@ -31,11 +31,11 @@ Create an authentication template builder
 
 #### Returns
 
-[`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+[`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 ### notification()
 
-> **notification**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+> **notification**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 Create a notification template builder
 
@@ -51,11 +51,11 @@ Create a notification template builder
 
 #### Returns
 
-[`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+[`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 ### payment()
 
-> **payment**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+> **payment**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 Create a payment template builder
 
@@ -71,11 +71,11 @@ Create a payment template builder
 
 #### Returns
 
-[`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+[`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 ### promotion()
 
-> **promotion**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+> **promotion**(`name`, `provider`): [`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)
 
 Create a promotion template builder
 
@@ -91,4 +91,4 @@ Create a promotion template builder
 
 #### Returns
 
-[`TemplateBuilder`](/api/template/src/classes/templatebuilder/)
+[`TemplateBuilder`](/api/template/src/toolkit/classes/templatebuilder/)

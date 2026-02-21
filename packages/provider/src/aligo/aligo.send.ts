@@ -11,7 +11,7 @@ import { mapAligoError } from "./aligo.error";
 import {
   formatAligoDate,
   getAligoEndpoint,
-  interpolateMessage,
+  resolveAligoTemplateMessage,
   resolveImageRef,
 } from "./aligo.helpers";
 import { requestAligo } from "./aligo.http";
@@ -169,7 +169,7 @@ async function sendAlimTalk(
     sender,
     receiver_1: options.to,
     subject_1: "알림톡",
-    message_1: interpolateMessage(variables, templateContent),
+    message_1: resolveAligoTemplateMessage(variables, templateContent),
     testMode: ctx.config.testMode ? "Y" : "N",
   };
 

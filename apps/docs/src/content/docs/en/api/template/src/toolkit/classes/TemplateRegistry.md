@@ -23,7 +23,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:99](https://git
 
 ##### options?
 
-`Partial`\<[`TemplateRegistryOptions`](/api/template/src/interfaces/templateregistryoptions/)\> = `{}`
+`Partial`\<[`TemplateRegistryOptions`](/api/template/src/toolkit/interfaces/templateregistryoptions/)\> = `{}`
 
 #### Returns
 
@@ -147,7 +147,7 @@ Export templates to JSON
 
 ##### filters?
 
-[`TemplateSearchFilters`](/api/template/src/interfaces/templatesearchfilters/)
+[`TemplateSearchFilters`](/api/template/src/toolkit/interfaces/templatesearchfilters/)
 
 #### Returns
 
@@ -241,7 +241,7 @@ Get templates by provider
 
 ### getHistory()
 
-> **getHistory**(`templateId`): [`TemplateHistory`](/api/template/src/interfaces/templatehistory/) \| `null`
+> **getHistory**(`templateId`): [`TemplateHistory`](/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L399)
 
@@ -255,7 +255,7 @@ Get template version history
 
 #### Returns
 
-[`TemplateHistory`](/api/template/src/interfaces/templatehistory/) \| `null`
+[`TemplateHistory`](/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
 
 ***
 
@@ -291,7 +291,7 @@ Get registry statistics
 
 ### getUsageStats()
 
-> **getUsageStats**(`templateId`): [`TemplateUsageStats`](/api/template/src/interfaces/templateusagestats/) \| `null`
+> **getUsageStats**(`templateId`): [`TemplateUsageStats`](/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:441](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L441)
 
@@ -305,7 +305,7 @@ Get template usage statistics
 
 #### Returns
 
-[`TemplateUsageStats`](/api/template/src/interfaces/templateusagestats/) \| `null`
+[`TemplateUsageStats`](/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
 
 ***
 
@@ -531,7 +531,7 @@ Restore template to a specific version
 
 ### search()
 
-> **search**(`filters?`, `options?`): [`TemplateSearchResult`](/api/template/src/interfaces/templatesearchresult/)
+> **search**(`filters?`, `options?`): [`TemplateSearchResult`](/api/template/src/toolkit/interfaces/templatesearchresult/)
 
 Defined in: [packages/template/src/registry/template.registry.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L222)
 
@@ -541,15 +541,15 @@ Search templates with filters and pagination
 
 ##### filters?
 
-[`TemplateSearchFilters`](/api/template/src/interfaces/templatesearchfilters/) = `{}`
+[`TemplateSearchFilters`](/api/template/src/toolkit/interfaces/templatesearchfilters/) = `{}`
 
 ##### options?
 
-[`TemplateSearchOptions`](/api/template/src/interfaces/templatesearchoptions/) = `{}`
+[`TemplateSearchOptions`](/api/template/src/toolkit/interfaces/templatesearchoptions/) = `{}`
 
 #### Returns
 
-[`TemplateSearchResult`](/api/template/src/interfaces/templatesearchresult/)
+[`TemplateSearchResult`](/api/template/src/toolkit/interfaces/templatesearchresult/)
 
 ***
 

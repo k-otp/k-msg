@@ -190,6 +190,11 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 - `k-msg kakao channel categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
+템플릿 명령 내부 동작:
+
+- `kakao template *` 명령은 `@k-msg/template`의 `TemplateLifecycleService`를 통해 처리됩니다.
+- `create/update`는 provider API 호출 전에 `validateTemplatePayload` + `parseTemplateButtons`로 `name/content/buttons`를 검증합니다.
+
 ## DB 스키마 제네레이터
 
 `@k-msg/messaging/adapters/cloudflare`의 스키마 유틸을 그대로 사용해

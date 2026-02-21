@@ -50,7 +50,8 @@
     "publish": "bun publish --access public"
   },
   "dependencies": {
-    "@k-msg/core": "workspace:*"
+    "@k-msg/core": "workspace:*",
+    "@k-msg/template": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

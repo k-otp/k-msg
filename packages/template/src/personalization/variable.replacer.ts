@@ -2,9 +2,9 @@
  * Variable replacement and personalization system
  */
 
-import type { VariableMap } from "../types/message.types";
+export type TemplateVariableMap = Record<string, unknown>;
 
-export interface VariableReplacementOptions {
+export interface TemplatePersonalizerOptions {
   variablePattern: RegExp;
   allowUndefined: boolean;
   undefinedReplacement: string;
@@ -15,7 +15,7 @@ export interface VariableReplacementOptions {
   maxRecursionDepth: number;
 }
 
-export interface VariableInfo {
+export interface TemplateVariableInfo {
   name: string;
   value: any;
   formatted: string;
@@ -32,7 +32,7 @@ export interface VariableInfo {
 
 export interface ReplacementResult {
   content: string;
-  variables: VariableInfo[];
+  variables: TemplateVariableInfo[];
   missingVariables: string[];
   errors: ReplacementError[];
   metadata: {
@@ -66,8 +66,8 @@ export interface LoopBlock {
   content: string;
 }
 
-export class VariableReplacer {
-  private defaultOptions: VariableReplacementOptions = {
+export class TemplatePersonalizer {
+  private defaultOptions: TemplatePersonalizerOptions = {
     variablePattern: /#\{([^}]+)\}/g,
     allowUndefined: false,
     undefinedReplacement: "",
@@ -78,14 +78,14 @@ export class VariableReplacer {
     maxRecursionDepth: 10,
   };
 
-  constructor(private options: Partial<VariableReplacementOptions> = {}) {
+  constructor(private options: Partial<TemplatePersonalizerOptions> = {}) {
     this.options = { ...this.defaultOptions, ...options };
   }
 
   /**
    * Replace variables in content
    */
-  replace(content: string, variables: VariableMap): ReplacementResult {
+  replace(content: string, variables: TemplateVariableMap): ReplacementResult {
     const startTime = Date.now();
     const originalLength = content.length;
 
@@ -206,7 +206,7 @@ export class VariableReplacer {
    */
   validate(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
   ): {
     isValid: boolean;
     missingVariables: string[];
@@ -245,7 +245,7 @@ export class VariableReplacer {
    */
   preview(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
   ): {
     originalContent: string;
     previewContent: string;
@@ -299,7 +299,7 @@ export class VariableReplacer {
 
   private replaceSimpleVariables(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
     result: ReplacementResult,
   ): string {
     const pattern = new RegExp(this.options.variablePattern!, "g");
@@ -351,7 +351,7 @@ export class VariableReplacer {
 
   private replaceRecursive(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
     result: ReplacementResult,
     depth: number,
   ): string {
@@ -374,7 +374,7 @@ export class VariableReplacer {
 
   private processConditionals(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
     result: ReplacementResult,
   ): string {
     const conditionals = this.extractConditionals(content);
@@ -409,7 +409,7 @@ export class VariableReplacer {
 
   private processLoops(
     content: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
     result: ReplacementResult,
   ): string {
     const loops = this.extractLoops(content);
@@ -465,7 +465,7 @@ export class VariableReplacer {
     return parts[0].trim();
   }
 
-  private getVariableValue(name: string, variables: VariableMap): any {
+  private getVariableValue(name: string, variables: TemplateVariableMap): any {
     // Support dot notation for nested objects
     const parts = name.split(".");
     let value: any = variables;
@@ -533,12 +533,12 @@ export class VariableReplacer {
             return this.formatDate(new Date(value), format);
           }
           if (formatter.startsWith("number:")) {
-            const digits = parseInt(formatter.substring(7));
+            const digits = parseInt(formatter.substring(7), 10);
             return Number(value).toFixed(digits);
           }
           return String(value);
       }
-    } catch (error) {
+    } catch (_error) {
       // Return original value if formatting fails
       return String(value);
     }
@@ -582,7 +582,7 @@ export class VariableReplacer {
   }
 
   private hasVariables(content: string): boolean {
-    return this.options.variablePattern!.test(content);
+    return this.options.variablePattern?.test(content) ?? false;
   }
 
   private extractConditionals(content: string): ConditionalBlock[] {
@@ -651,7 +651,7 @@ export class VariableReplacer {
 
   private evaluateCondition(
     condition: string,
-    variables: VariableMap,
+    variables: TemplateVariableMap,
   ): boolean {
     try {
       // Simple condition evaluation (extend as needed)
@@ -694,7 +694,7 @@ export class VariableReplacer {
       // Simple truthiness check
       const value = this.getVariableValue(normalizedCondition, variables);
       return Boolean(value);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -729,7 +729,7 @@ export class VariableReplacer {
 /**
  * Default instance with Korean-optimized settings
  */
-export const defaultVariableReplacer = new VariableReplacer({
+export const defaultTemplatePersonalizer = new TemplatePersonalizer({
   variablePattern: /#\{([^}]+)\}/g,
   allowUndefined: false,
   undefinedReplacement: "",
@@ -743,26 +743,26 @@ export const defaultVariableReplacer = new VariableReplacer({
 /**
  * Utility functions
  */
-export const VariableUtils = {
+export const TemplateVariableUtils = {
   /**
    * Extract all variables from content
    */
   extractVariables: (content: string): string[] => {
-    return defaultVariableReplacer.extractVariables(content);
+    return defaultTemplatePersonalizer.extractVariables(content);
   },
 
   /**
    * Replace variables in content
    */
-  replace: (content: string, variables: VariableMap): string => {
-    return defaultVariableReplacer.replace(content, variables).content;
+  replace: (content: string, variables: TemplateVariableMap): string => {
+    return defaultTemplatePersonalizer.replace(content, variables).content;
   },
 
   /**
    * Validate content has all required variables
    */
-  validate: (content: string, variables: VariableMap): boolean => {
-    return defaultVariableReplacer.validate(content, variables).isValid;
+  validate: (content: string, variables: TemplateVariableMap): boolean => {
+    return defaultTemplatePersonalizer.validate(content, variables).isValid;
   },
 
   /**
@@ -770,10 +770,10 @@ export const VariableUtils = {
    */
   personalize: (
     content: string,
-    recipients: Array<{ phoneNumber: string; variables: VariableMap }>,
+    recipients: Array<{ phoneNumber: string; variables: TemplateVariableMap }>,
   ): Array<{ phoneNumber: string; content: string; errors?: string[] }> => {
     return recipients.map((recipient) => {
-      const result = defaultVariableReplacer.replace(
+      const result = defaultTemplatePersonalizer.replace(
         content,
         recipient.variables,
       );
