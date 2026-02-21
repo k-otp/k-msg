@@ -7,7 +7,7 @@ title: "ValidateTemplatePayloadOptions"
 
 > **ValidateTemplatePayloadOptions** = `object`
 
-Defined in: packages/template/src/runtime/template-input.ts:19
+Defined in: [packages/template/src/runtime/template-input.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L13)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: packages/template/src/runtime/template-input.ts:19
 
 > `optional` **requireContent**: `boolean`
 
-Defined in: packages/template/src/runtime/template-input.ts:21
+Defined in: [packages/template/src/runtime/template-input.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L15)
 
 ***
 
@@ -23,4 +23,4 @@ Defined in: packages/template/src/runtime/template-input.ts:21
 
 > `optional` **requireName**: `boolean`
 
-Defined in: packages/template/src/runtime/template-input.ts:20
+Defined in: [packages/template/src/runtime/template-input.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L14)

@@ -7,7 +7,7 @@ title: "NormalizedTemplatePayload"
 
 > **NormalizedTemplatePayload** = `object`
 
-Defined in: packages/template/src/runtime/template-input.ts:24
+Defined in: [packages/template/src/runtime/template-input.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L18)
 
 ## Properties
 
@@ -15,7 +15,7 @@ Defined in: packages/template/src/runtime/template-input.ts:24
 
 > `optional` **buttons**: [`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
 
-Defined in: packages/template/src/runtime/template-input.ts:27
+Defined in: [packages/template/src/runtime/template-input.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L21)
 
 ***
 
@@ -23,7 +23,7 @@ Defined in: packages/template/src/runtime/template-input.ts:27
 
 > `optional` **content**: `string`
 
-Defined in: packages/template/src/runtime/template-input.ts:26
+Defined in: [packages/template/src/runtime/template-input.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L20)
 
 ***
 
@@ -31,4 +31,4 @@ Defined in: packages/template/src/runtime/template-input.ts:26
 
 > `optional` **name**: `string`
 
-Defined in: packages/template/src/runtime/template-input.ts:25
+Defined in: [packages/template/src/runtime/template-input.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L19)

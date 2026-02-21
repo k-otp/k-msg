@@ -5,7 +5,7 @@ prev: false
 title: "TemplateLifecycleService"
 ---
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:33
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L32)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:33
 
 > **new TemplateLifecycleService**(`provider`, `inspectionProvider?`): `TemplateLifecycleService`
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:36
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L35)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:36
 
 > **create**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:46
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L45)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:46
 
 > **delete**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:106
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L105)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:106
 
 > **get**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:122
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L121)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:122
 
 > **list**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:138
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L137)
 
 #### Parameters
 
@@ -133,7 +133,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:138
 
 > **requestInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:145
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L144)
 
 #### Parameters
 
@@ -155,7 +155,7 @@ Defined in: packages/template/src/runtime/template-lifecycle.service.ts:145
 
 > **update**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/template/src/runtime/template-lifecycle.service.ts:70
+Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L69)
 
 #### Parameters
 

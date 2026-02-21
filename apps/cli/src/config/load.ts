@@ -13,7 +13,10 @@ const OPTIONAL_ENV_PATHS = new Set([
   "defaults.kakao.plusId",
 ]);
 const OPTIONAL_PROVIDER_CONFIG_ENV_KEYS = new Set([
+  "kakaoPfId",
+  "profileId",
   "sender",
+  "senderKey",
   "senderNumber",
   "smsSenderNumber",
 ]);

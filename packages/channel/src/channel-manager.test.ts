@@ -24,7 +24,7 @@ import {
   VerificationMethod,
   VerificationStatus,
   VerificationType,
-} from "./index";
+} from "./toolkit";
 
 describe("KakaoChannelManager", () => {
   test("should create Kakao AlimTalk channel", async () => {

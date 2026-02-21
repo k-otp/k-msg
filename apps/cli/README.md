@@ -187,7 +187,8 @@ Required values by provider/channel:
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
 - `k-msg db schema print|generate`
-- `k-msg kakao channel categories|list|auth|add`
+- `k-msg kakao channel binding list|resolve|set|delete`
+- `k-msg kakao channel api categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
 
 Template command internals:
@@ -334,19 +335,29 @@ Resolution precedence for overlapping values is:
 
 - `CLI flag > environment variable > config file > built-in default`
 
-## Kakao Channel (Aligo capability)
+## Kakao Channel
 
 ```bash
-k-msg kakao channel categories
-k-msg kakao channel list
-k-msg kakao channel auth --plus-id @my_channel --phone 01012345678
-k-msg kakao channel add \
+# config/provider-hint binding management (works for api/manual/none providers)
+k-msg kakao channel binding list
+k-msg kakao channel binding resolve --channel main
+k-msg kakao channel binding set --alias main --provider aligo-main --sender-key SENDER_KEY --plus-id @my_channel
+k-msg kakao channel binding delete --alias old-channel
+
+# provider API operations (api-mode providers only, e.g. aligo/mock)
+k-msg kakao channel api categories --provider aligo-main
+k-msg kakao channel api list --provider aligo-main
+k-msg kakao channel api auth --provider aligo-main --plus-id @my_channel --phone 01012345678
+k-msg kakao channel api add \
+  --provider aligo-main \
   --plus-id @my_channel \
   --auth-num 123456 \
   --phone 01012345678 \
   --category-code 001001001 \
   --save main
 ```
+
+Legacy notice: `k-msg kakao channel categories|list|auth|add` were removed. The CLI now prints guidance to the new `binding` / `api` command groups.
 
 ## Kakao Template (IWINV/Aligo)
 

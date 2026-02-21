@@ -5,7 +5,7 @@ prev: false
 title: "TemplatePersonalizerOptions"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:7
+Defined in: [packages/template/src/personalization/variable.replacer.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L7)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:7
 
 > **allowUndefined**: `boolean`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:9
+Defined in: [packages/template/src/personalization/variable.replacer.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L9)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:9
 
 > **caseSensitive**: `boolean`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:11
+Defined in: [packages/template/src/personalization/variable.replacer.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L11)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:11
 
 > **enableConditionals**: `boolean`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:13
+Defined in: [packages/template/src/personalization/variable.replacer.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L13)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:13
 
 > **enableFormatting**: `boolean`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:12
+Defined in: [packages/template/src/personalization/variable.replacer.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L12)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:12
 
 > **enableLoops**: `boolean`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:14
+Defined in: [packages/template/src/personalization/variable.replacer.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L14)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:14
 
 > **maxRecursionDepth**: `number`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:15
+Defined in: [packages/template/src/personalization/variable.replacer.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L15)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:15
 
 > **undefinedReplacement**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:10
+Defined in: [packages/template/src/personalization/variable.replacer.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L10)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:10
 
 > **variablePattern**: `RegExp`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:8
+Defined in: [packages/template/src/personalization/variable.replacer.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L8)

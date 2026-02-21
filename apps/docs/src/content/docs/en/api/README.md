@@ -9,6 +9,7 @@ title: "k-msg-workspace"
 
 - [analytics/src](/api/analytics/src/readme/)
 - [channel/src](/api/channel/src/readme/)
+- [channel/src/toolkit](/api/channel/src/toolkit/readme/)
 - [core/src](/api/core/src/readme/)
 - [k-msg/src](/api/k-msg/src/readme/)
 - [k-msg/src/adapters/bun](/api/k-msg/src/adapters/bun/readme/)

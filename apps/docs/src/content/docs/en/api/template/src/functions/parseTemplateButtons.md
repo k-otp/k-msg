@@ -7,7 +7,7 @@ title: "parseTemplateButtons"
 
 > **parseTemplateButtons**(`value`): [`Result`](/api/core/src/type-aliases/result/)\<[`TemplateButton`](/api/template/src/interfaces/templatebutton/)[] \| `undefined`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
 
-Defined in: packages/template/src/runtime/template-input.ts:152
+Defined in: [packages/template/src/runtime/template-input.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L146)
 
 ## Parameters
 
