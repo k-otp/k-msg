@@ -5,7 +5,7 @@ prev: false
 title: "AuditLogEntry"
 ---
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:47
+Defined in: [packages/channel/src/toolkit/management/crud.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L47)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:47
 
 > **action**: `"create"` \| `"read"` \| `"update"` \| `"delete"` \| `"verify"` \| `"suspend"` \| `"activate"`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:51
+Defined in: [packages/channel/src/toolkit/management/crud.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L51)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:51
 
 > `optional` **changes**: `object`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:61
+Defined in: [packages/channel/src/toolkit/management/crud.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L61)
 
 #### after
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:61
 
 > **entityId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:50
+Defined in: [packages/channel/src/toolkit/management/crud.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L50)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:50
 
 > **entityType**: `"senderNumber"` \| `"channel"`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:49
+Defined in: [packages/channel/src/toolkit/management/crud.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L49)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:49
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:48
+Defined in: [packages/channel/src/toolkit/management/crud.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L48)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:48
 
 > `optional` **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:65
+Defined in: [packages/channel/src/toolkit/management/crud.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L65)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:65
 
 > **timestamp**: `Date`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:60
+Defined in: [packages/channel/src/toolkit/management/crud.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L60)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: packages/channel/src/toolkit/management/crud.ts:60
 
 > `optional` **userId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/crud.ts:59
+Defined in: [packages/channel/src/toolkit/management/crud.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L59)

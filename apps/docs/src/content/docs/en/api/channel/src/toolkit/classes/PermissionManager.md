@@ -5,7 +5,7 @@ prev: false
 title: "PermissionManager"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:101
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L101)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:101
 
 > **new PermissionManager**(): `PermissionManager`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:110
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L110)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:110
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:16
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:16
 
 > **assignRoleToUser**(`userId`, `roleId`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:261
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:261](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L261)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:261
 
 > **checkPermission**(`check`): `Promise`\<[`PermissionResult`](/api/channel/src/toolkit/interfaces/permissionresult/)\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:313
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:313](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L313)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:313
 
 > **createRole**(`roleData`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:187
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L187)
 
 #### Parameters
 
@@ -117,7 +117,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:187
 
 > **createUser**(`userData`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:116
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L116)
 
 #### Parameters
 
@@ -135,7 +135,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:116
 
 > **deleteRole**(`roleId`): `Promise`\<`boolean`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:235
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L235)
 
 #### Parameters
 
@@ -153,7 +153,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:235
 
 > **deleteUser**(`userId`): `Promise`\<`boolean`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:172
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L172)
 
 #### Parameters
 
@@ -171,7 +171,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:172
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:44
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -197,7 +197,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:44
 
 > **eventNames**(): `string`[]
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:71
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L71)
 
 #### Returns
 
@@ -213,7 +213,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:71
 
 > **getRole**(`roleId`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/) \| `null`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:205
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L205)
 
 #### Parameters
 
@@ -231,7 +231,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:205
 
 > **getUser**(`userId`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/) \| `null`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:138
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L138)
 
 #### Parameters
 
@@ -249,7 +249,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:138
 
 > **getUserPermissions**(`userId`): `Promise`\<[`Permission`](/api/channel/src/toolkit/interfaces/permission/)[]\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:368
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L368)
 
 #### Parameters
 
@@ -267,7 +267,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:368
 
 > **getUserRoles**(`userId`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)[]\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:389
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:389](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L389)
 
 #### Parameters
 
@@ -285,7 +285,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:389
 
 > **hasPermission**(`userId`, `resource`, `action`, `resourceId?`, `context?`): `Promise`\<`boolean`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:329
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:329](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L329)
 
 #### Parameters
 
@@ -319,7 +319,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:329
 
 > **listenerCount**(`eventName`): `number`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:67
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L67)
 
 #### Parameters
 
@@ -341,7 +341,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:67
 
 > **listRoles**(): [`Role`](/api/channel/src/toolkit/interfaces/role/)[]
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:408
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:408](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L408)
 
 #### Returns
 
@@ -353,7 +353,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:408
 
 > **listUsers**(`filters?`): [`User`](/api/channel/src/toolkit/interfaces/user/)[]
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:394
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:394](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L394)
 
 #### Parameters
 
@@ -377,7 +377,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:394
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:20
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -403,7 +403,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:20
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:9
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -429,7 +429,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:9
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:35
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -455,7 +455,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:35
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:57
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -477,7 +477,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:57
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:31
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -503,7 +503,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:31
 
 > **removeRoleFromUser**(`userId`, `roleId`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:289
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L289)
 
 #### Parameters
 
@@ -525,7 +525,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:289
 
 > **requirePermission**(`userId`, `resource`, `action`, `resourceId?`, `context?`): `Promise`\<`void`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:347
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L347)
 
 #### Parameters
 
@@ -559,7 +559,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:347
 
 > **updateRole**(`roleId`, `updates`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:209
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L209)
 
 #### Parameters
 
@@ -581,7 +581,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:209
 
 > **updateUser**(`userId`, `updates`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:142
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L142)
 
 #### Parameters
 

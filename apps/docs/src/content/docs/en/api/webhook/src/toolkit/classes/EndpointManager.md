@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:33](https://githu
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -367,7 +367,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 ### searchEndpoints()
 
-> **searchEndpoints**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
+> **searchEndpoints**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L168)
 
@@ -377,15 +377,15 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:168](https://gith
 
 ##### filter?
 
-[`EndpointFilter`](/api/webhook/src/interfaces/endpointfilter/) = `{}`
+[`EndpointFilter`](/api/webhook/src/toolkit/interfaces/endpointfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
+`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
 
 ***
 

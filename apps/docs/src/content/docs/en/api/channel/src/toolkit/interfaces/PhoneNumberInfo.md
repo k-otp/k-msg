@@ -5,7 +5,7 @@ prev: false
 title: "PhoneNumberInfo"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:138
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L133)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:138
 
 > `optional` **carrier**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:142
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L137)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:142
 
 > **countryCode**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:140
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L135)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:140
 
 > **isPossible**: `boolean`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:145
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L140)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:145
 
 > **isValid**: `boolean`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:144
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L139)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:144
 
 > `optional` **lineType**: `"unknown"` \| `"mobile"` \| `"landline"` \| `"voip"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:143
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L138)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:143
 
 > **nationalNumber**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:141
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L136)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:141
 
 > **phoneNumber**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:139
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L134)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:139
 
 > `optional` **region**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:146
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L141)

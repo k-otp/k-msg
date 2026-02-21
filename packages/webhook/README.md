@@ -2,17 +2,13 @@
 
 > Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
 
-Webhook delivery helpers for emitting real-time message events to HTTP endpoints.
+Runtime-first webhook package for message events.
 
-This package provides:
-- `WebhookService`: a convenience facade (in-memory endpoint registry + batching)
-- `WebhookDispatcher`: HTTP delivery with retries/backoff
-- `SecurityManager`: HMAC signature generation/verification
-- Zod schemas: `WebhookEventSchema`, `WebhookEndpointSchema`, `WebhookDeliverySchema`
+This package now follows a DX-first flow:
 
-Note:
-- The default `WebhookService` storage is in-memory. For persistence/advanced workflows, see the exported building blocks such as `EndpointManager` and `DeliveryStore`.
-- This package is runtime-neutral (Edge/Web/Node). Node built-ins are not required by default.
+1. Start in 5 minutes with in-memory persistence
+2. Move to production by swapping persistence to D1
+3. Extend to SQLite/Drizzle(Postgres) with the same store contract
 
 ## Install
 
@@ -22,50 +18,56 @@ npm install @k-msg/webhook
 bun add @k-msg/webhook
 ```
 
-## Quickstart (WebhookService)
+## Runtime API (root)
+
+`@k-msg/webhook` root exports runtime-only APIs:
+
+- `WebhookRuntimeService`
+- `createInMemoryWebhookPersistence`
+- `addEndpoints`, `probeEndpoint`
+- `validateEndpointUrl`
+
+Advanced building blocks are now exposed from subpaths:
+
+- `@k-msg/webhook/toolkit`
+- `@k-msg/webhook/adapters/cloudflare`
+
+## Quickstart (in-memory)
 
 ```ts
-import { readRuntimeEnv } from "@k-msg/core";
 import {
   WebhookEventType,
-  WebhookService,
+  WebhookRuntimeService,
+  createInMemoryWebhookPersistence,
   type WebhookConfig,
 } from "@k-msg/webhook";
 
 const config: WebhookConfig = {
   maxRetries: 3,
-  retryDelayMs: 1000,
-  // Optional: maxDelayMs, backoffMultiplier, jitter
+  retryDelayMs: 1_000,
   timeoutMs: 30_000,
-  enableSecurity: true,
-  // Optional: used when an endpoint does not provide its own secret
-  secretKey: readRuntimeEnv("WEBHOOK_SECRET"),
-  // Optional: algorithm, signatureHeader, signaturePrefix
+  enableSecurity: false,
   enabledEvents: [
     WebhookEventType.MESSAGE_SENT,
-    WebhookEventType.MESSAGE_DELIVERED,
     WebhookEventType.MESSAGE_FAILED,
+    WebhookEventType.SYSTEM_MAINTENANCE,
   ],
   batchSize: 10,
   batchTimeoutMs: 5_000,
 };
 
-const service = new WebhookService(config);
+const runtime = new WebhookRuntimeService({
+  delivery: config,
+  persistence: createInMemoryWebhookPersistence(),
+});
 
-const endpoint = await service.registerEndpoint({
+await runtime.addEndpoint({
   url: "https://example.com/webhooks/k-msg",
   active: true,
   events: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
-  // Optional: endpoint-specific secret (preferred over config.secretKey)
-  secret: readRuntimeEnv("WEBHOOK_SECRET"),
-  // Optional: per-endpoint retry overrides
-  retryConfig: { maxRetries: 5, retryDelayMs: 1000, backoffMultiplier: 2 },
-  // Optional: metadata-based filters
-  filters: { providerId: ["iwinv", "solapi"] },
 });
 
-// Asynchronous emit (batched)
-await service.emit({
+await runtime.emitSync({
   id: crypto.randomUUID(),
   type: WebhookEventType.MESSAGE_SENT,
   timestamp: new Date(),
@@ -74,132 +76,119 @@ await service.emit({
   version: "1.0",
 });
 
-// Synchronous emit (returns delivery attempts)
-const deliveries = await service.emitSync({
-  id: crypto.randomUUID(),
-  type: WebhookEventType.MESSAGE_FAILED,
-  timestamp: new Date(),
-  data: { messageId: "msg_456", status: "failed" },
-  metadata: { providerId: "solapi", messageId: "msg_456" },
-  version: "1.0",
-});
-
-// Inspect recent deliveries (in-memory)
-const recent = await service.getDeliveries(endpoint.id);
-console.log(deliveries.length, recent.length);
-
-await service.shutdown();
+await runtime.shutdown();
 ```
 
-### Endpoint Registration Behavior
-
-`registerEndpoint()` validates the URL and sends a test webhook once (a `system.maintenance` event via `testEndpoint()`).
-
-## Security (HMAC Signatures)
-
-When security is enabled and a secret is available (`endpoint.secret` or `config.secretKey`), outgoing requests include:
-- `X-Webhook-Timestamp`: unix epoch seconds (string)
-- `X-Webhook-Signature`: HMAC signature (default: `sha256=<hex>`)
-
-Signature input is:
-
-```
-${timestamp}.${rawBody}
-```
-
-To verify a webhook, you must use the exact raw request body string.
-
-### Hono Example
+## D1 quickstart (same runtime API)
 
 ```ts
-import { Hono } from "hono";
-import { readRuntimeEnv } from "@k-msg/core";
-import { SecurityManager } from "@k-msg/webhook";
+import {
+  WebhookEventType,
+  WebhookRuntimeService,
+  type WebhookConfig,
+} from "@k-msg/webhook";
+import { createD1WebhookPersistence } from "@k-msg/webhook/adapters/cloudflare";
 
-const app = new Hono();
-
-const security = new SecurityManager({
-  algorithm: "sha256",
-  signatureHeader: "X-Webhook-Signature",
-  signaturePrefix: "sha256=",
-});
-
-app.post("/webhooks/k-msg", async (c) => {
-  const payload = await c.req.text();
-
-  const signature = c.req.header("X-Webhook-Signature") ?? "";
-  const timestamp = c.req.header("X-Webhook-Timestamp") ?? "";
-  const secret = readRuntimeEnv("WEBHOOK_SECRET") ?? "";
-
-  if (!security.verifyTimestamp(timestamp, 300)) {
-    return c.json({ error: "Request too old" }, 401);
-  }
-  if (!security.verifySignatureWithTimestamp(payload, timestamp, signature, secret)) {
-    return c.json({ error: "Invalid signature" }, 401);
-  }
-
-  const event = JSON.parse(payload);
-  return c.json({ ok: true, type: event.type });
-});
-```
-
-## Retries and Delivery Status
-
-`WebhookDispatcher` retries failed deliveries with exponential backoff.
-
-Delivery status:
-- `success`: received a 2xx response
-- `failed`: non-retryable failure (typically non-retryable 4xx)
-- `exhausted`: retryable failure, but retries were used up
-
-## Filtering
-
-Endpoints can filter deliveries based on event metadata:
-
-```ts
-await service.registerEndpoint({
-  url: "https://example.com/webhooks/k-msg",
-  active: true,
-  events: [WebhookEventType.MESSAGE_SENT],
-  filters: {
-    providerId: ["iwinv"],
-    channelId: ["marketing"],
-    templateId: ["welcome-template"],
-  },
-});
-```
-
-## File Storage Adapter (for `type: "file"`)
-
-`EndpointManager`, `EventStore`, `DeliveryStore`, and `QueueManager` no longer import Node `fs/path` directly.
-When using file persistence, provide `fileAdapter`.
-
-```ts
-import { DeliveryStore, type FileStorageAdapter } from "@k-msg/webhook";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
-
-const nodeFileAdapter: FileStorageAdapter = {
-  appendFile: (filePath, data) => fs.appendFile(filePath, data, "utf8"),
-  readFile: (filePath) => fs.readFile(filePath, "utf8"),
-  writeFile: (filePath, data) => fs.writeFile(filePath, data, "utf8"),
-  ensureDirForFile: (filePath) =>
-    fs.mkdir(path.dirname(filePath), { recursive: true }),
+type Env = {
+  DB: D1Database;
 };
 
-const store = new DeliveryStore({
-  type: "file",
-  filePath: "./data/deliveries.log",
-  fileAdapter: nodeFileAdapter,
+const config: WebhookConfig = {
+  maxRetries: 3,
+  retryDelayMs: 1_000,
+  timeoutMs: 30_000,
+  enableSecurity: false,
+  enabledEvents: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
+  batchSize: 10,
+  batchTimeoutMs: 5_000,
+};
+
+function createRuntime(env: Env): WebhookRuntimeService {
+  return new WebhookRuntimeService({
+    delivery: config,
+    persistence: createD1WebhookPersistence(env.DB),
+    security: {
+      allowPrivateHosts: true,
+    },
+  });
+}
+```
+
+`createD1WebhookPersistence()` initializes schema automatically by default.
+
+## Schema helpers (Cloudflare)
+
+```ts
+import {
+  buildWebhookSchemaSql,
+  initializeWebhookSchema,
+} from "@k-msg/webhook/adapters/cloudflare";
+
+const statements = buildWebhookSchemaSql();
+// run statements in your migration system, or:
+await initializeWebhookSchema(env.DB);
+```
+
+## SQLite / Drizzle(Postgres) snippets
+
+`WebhookRuntimeService` accepts custom stores via `endpointStore` + `deliveryStore`.
+Implement the same interfaces to plug any backend:
+
+```ts
+import type {
+  WebhookDeliveryStore,
+  WebhookEndpointStore,
+} from "@k-msg/webhook";
+
+class SqliteEndpointStore implements WebhookEndpointStore {
+  async add() {}
+  async update() {}
+  async remove() {}
+  async get() {
+    return null;
+  }
+  async list() {
+    return [];
+  }
+}
+
+class SqliteDeliveryStore implements WebhookDeliveryStore {
+  async add() {}
+  async list() {
+    return [];
+  }
+}
+```
+
+Then wire it without changing runtime logic:
+
+```ts
+const runtime = new WebhookRuntimeService({
+  delivery: config,
+  endpointStore: new SqliteEndpointStore(),
+  deliveryStore: new SqliteDeliveryStore(),
 });
 ```
 
-## Zod Schemas
+## Security defaults
 
-This package exports Zod schemas for validation:
-- `WebhookEventSchema` (timestamp is coerced from string/number to `Date`)
-- `WebhookEndpointSchema`
-- `WebhookDeliverySchema`
+- Private hosts are blocked by default
+- `http://localhost` style URLs require explicit allowance (runtime security options)
+
+## Migration notes (breaking)
+
+| Old usage | New usage |
+| --- | --- |
+| `WebhookService` (root) | `WebhookRuntimeService` (root) |
+| `registerEndpoint()` auto test call | `addEndpoint()` only; test with `probeEndpoint()` |
+| Advanced classes from root | import from `@k-msg/webhook/toolkit` |
+| Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
+
+## Toolkit subpath
+
+```ts
+import { LoadBalancer, QueueManager } from "@k-msg/webhook/toolkit";
+```
 
 ## License
 

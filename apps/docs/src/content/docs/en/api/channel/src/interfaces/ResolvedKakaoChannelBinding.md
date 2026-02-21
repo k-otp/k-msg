@@ -5,7 +5,7 @@ prev: false
 title: "ResolvedKakaoChannelBinding"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:30
+Defined in: [packages/channel/src/runtime/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L30)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: packages/channel/src/runtime/types.ts:30
 
 > `optional` **alias**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:23
+Defined in: [packages/channel/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L23)
 
 #### Inherited from
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/runtime/types.ts:23
 
 > `optional` **name**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:27
+Defined in: [packages/channel/src/runtime/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L27)
 
 #### Inherited from
 
@@ -41,7 +41,7 @@ Defined in: packages/channel/src/runtime/types.ts:27
 
 > `optional` **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:26
+Defined in: [packages/channel/src/runtime/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L26)
 
 #### Inherited from
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/runtime/types.ts:26
 
 > `optional` **plusIdSource**: [`KakaoChannelBindingSource`](/api/channel/src/type-aliases/kakaochannelbindingsource/)
 
-Defined in: packages/channel/src/runtime/types.ts:34
+Defined in: [packages/channel/src/runtime/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L34)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/runtime/types.ts:34
 
 > `optional` **providerId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:24
+Defined in: [packages/channel/src/runtime/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L24)
 
 #### Inherited from
 
@@ -73,7 +73,7 @@ Defined in: packages/channel/src/runtime/types.ts:24
 
 > **providerIdSource**: [`KakaoChannelBindingSource`](/api/channel/src/type-aliases/kakaochannelbindingsource/)
 
-Defined in: packages/channel/src/runtime/types.ts:32
+Defined in: [packages/channel/src/runtime/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L32)
 
 ***
 
@@ -81,7 +81,7 @@ Defined in: packages/channel/src/runtime/types.ts:32
 
 > `optional` **providerType**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:31
+Defined in: [packages/channel/src/runtime/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L31)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: packages/channel/src/runtime/types.ts:31
 
 > `optional` **senderKey**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:25
+Defined in: [packages/channel/src/runtime/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L25)
 
 #### Inherited from
 
@@ -101,4 +101,4 @@ Defined in: packages/channel/src/runtime/types.ts:25
 
 > `optional` **senderKeySource**: [`KakaoChannelBindingSource`](/api/channel/src/type-aliases/kakaochannelbindingsource/)
 
-Defined in: packages/channel/src/runtime/types.ts:33
+Defined in: [packages/channel/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L33)

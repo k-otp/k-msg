@@ -5,7 +5,7 @@ prev: false
 title: "User"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:8
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:8
 
 > **createdAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:14
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L14)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:14
 
 > **email**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:10
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L10)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:10
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:9
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L9)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:9
 
 > **isActive**: `boolean`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:13
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L13)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:13
 
 > **name**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:11
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L11)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:11
 
 > **roles**: [`Role`](/api/channel/src/toolkit/interfaces/role/)[]
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:12
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L12)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:12
 
 > **updatedAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:15
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L15)

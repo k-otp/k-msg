@@ -7,8 +7,7 @@ title: "BatchDispatcher"
 
 Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L15)
 
-Webhook System
-실시간 메시지 이벤트 알림 시스템
+Toolkit APIs (advanced building blocks)
 
 ## Extends
 
@@ -26,7 +25,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:29](https://git
 
 ##### config?
 
-`Partial`\<[`BatchConfig`](/api/webhook/src/interfaces/batchconfig/)\> = `{}`
+`Partial`\<[`BatchConfig`](/api/webhook/src/toolkit/interfaces/batchconfig/)\> = `{}`
 
 #### Returns
 
@@ -50,7 +49,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:38](https://git
 
 ##### job
 
-[`DispatchJob`](/api/webhook/src/interfaces/dispatchjob/)
+[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/)
 
 #### Returns
 

@@ -5,7 +5,7 @@ prev: false
 title: "VoiceProvider"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:95
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L90)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:95
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:96
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L91)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:96
 
 > **name**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:97
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L92)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:97
 
 > **makeCall**(`phoneNumber`, `message`, `options?`): `Promise`\<`VoiceResult`\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:98
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L93)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:98
 
 ##### options?
 
-`any`
+`unknown`
 
 #### Returns
 
@@ -55,7 +55,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:98
 
 > `optional` **makeMissedCall**(`phoneNumber`, `options?`): `Promise`\<`MissedCallResult`\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:103
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L98)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:103
 
 ##### options?
 
-`any`
+`unknown`
 
 #### Returns
 

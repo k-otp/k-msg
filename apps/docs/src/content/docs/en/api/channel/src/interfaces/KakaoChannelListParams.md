@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelListParams"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:42
+Defined in: [packages/channel/src/runtime/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L42)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/runtime/types.ts:42
 
 > `optional` **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:43
+Defined in: [packages/channel/src/runtime/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L43)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: packages/channel/src/runtime/types.ts:43
 
 > `optional` **senderKey**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:44
+Defined in: [packages/channel/src/runtime/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L44)

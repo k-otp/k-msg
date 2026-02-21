@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelAuthParams"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:47
+Defined in: [packages/channel/src/runtime/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L47)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/runtime/types.ts:47
 
 > **phoneNumber**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:49
+Defined in: [packages/channel/src/runtime/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L49)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: packages/channel/src/runtime/types.ts:49
 
 > **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:48
+Defined in: [packages/channel/src/runtime/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L48)

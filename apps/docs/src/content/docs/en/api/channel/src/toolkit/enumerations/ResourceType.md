@@ -5,7 +5,7 @@ prev: false
 title: "ResourceType"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:36
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L36)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:36
 
 > **ANALYTICS**: `"analytics"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:44
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L44)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:44
 
 > **AUDIT\_LOG**: `"auditLog"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:43
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L43)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:43
 
 > **CHANNEL**: `"channel"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:37
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L37)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:37
 
 > **MESSAGE**: `"message"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:40
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L40)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:40
 
 > **ROLE**: `"role"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:42
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L42)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:42
 
 > **SENDER\_NUMBER**: `"senderNumber"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:38
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L38)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:38
 
 > **TEMPLATE**: `"template"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:39
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L39)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:39
 
 > **USER**: `"user"`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:41
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L41)

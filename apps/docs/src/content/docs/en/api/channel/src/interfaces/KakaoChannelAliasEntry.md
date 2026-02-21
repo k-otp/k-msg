@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelAliasEntry"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:97
+Defined in: [packages/channel/src/runtime/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L97)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: packages/channel/src/runtime/types.ts:97
 
 > `optional` **name**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:101
+Defined in: [packages/channel/src/runtime/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L101)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: packages/channel/src/runtime/types.ts:101
 
 > `optional` **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:100
+Defined in: [packages/channel/src/runtime/types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L100)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: packages/channel/src/runtime/types.ts:100
 
 > **providerId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:98
+Defined in: [packages/channel/src/runtime/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L98)
 
 ***
 
@@ -41,4 +41,4 @@ Defined in: packages/channel/src/runtime/types.ts:98
 
 > `optional` **senderKey**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:99
+Defined in: [packages/channel/src/runtime/types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L99)

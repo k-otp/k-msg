@@ -43,7 +43,7 @@ Defined in: [packages/webhook/src/registry/types.ts:62](https://github.com/k-otp
 
 ### fileAdapter?
 
-> `optional` **fileAdapter**: [`FileStorageAdapter`](/api/webhook/src/interfaces/filestorageadapter/)
+> `optional` **fileAdapter**: [`FileStorageAdapter`](/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
 Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L48)
 
