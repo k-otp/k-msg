@@ -17,6 +17,33 @@ require_cmd() {
   fi
 }
 
+is_symlink_path() {
+  local file_path
+  file_path="$1"
+  [[ -L "$file_path" ]]
+}
+
+is_script_file() {
+  local file_path
+  file_path="$1"
+  if [[ ! -f "$file_path" ]]; then
+    return 1
+  fi
+
+  local sig
+  sig="$(LC_ALL=C head -c 2 "$file_path" 2>/dev/null || true)"
+  [[ "$sig" == "#!" ]]
+}
+
+is_safe_existing_binary_path() {
+  local file_path
+  file_path="$1"
+  [[ -f "$file_path" ]] || return 1
+  is_symlink_path "$file_path" && return 1
+  is_script_file "$file_path" && return 1
+  return 0
+}
+
 resolve_active_command_path() {
   local resolved
   resolved="$(command -v "$CLI_NAME" 2>/dev/null || true)"
@@ -39,13 +66,13 @@ resolve_install_dir() {
     return
   fi
 
-  # If k-msg already exists on PATH and we can write to that directory, update it in place.
-  # This avoids version confusion when users previously installed via npm/bun/curl.
+  # If k-msg already exists on PATH and is a writable native binary, update it in place.
+  # Skip symlink/script launchers managed by package managers.
   local active_path active_dir
   active_path="$(resolve_active_command_path || true)"
   if [[ -n "$active_path" ]]; then
     active_dir="$(dirname "$active_path")"
-    if is_dir_writable_for_install "$active_dir"; then
+    if is_dir_writable_for_install "$active_dir" && is_safe_existing_binary_path "$active_path"; then
       echo "$active_dir"
       return
     fi
@@ -165,10 +192,10 @@ main() {
     ln -sf "$install_path" "${install_dir}/${CLI_ALIAS}"
   fi
 
-  # If a different active k-msg path existed and is writable, update it too so
+  # If a different active native binary existed and is writable, update it too so
   # shells still pointing there immediately get the new version.
   if [[ "$install_dir_explicit" != "true" && -n "$active_before" && "$active_before" != "$install_path" ]]; then
-    if is_dir_writable_for_install "$(dirname "$active_before")"; then
+    if is_dir_writable_for_install "$(dirname "$active_before")" && is_safe_existing_binary_path "$active_before"; then
       install_binary "$bin_path" "$active_before"
     fi
   fi
@@ -190,6 +217,13 @@ main() {
     echo
     echo "Warning: active ${CLI_NAME} path is not the newly installed path."
     echo "Check PATH order or remove older installations above '${install_dir}'."
+  fi
+  if [[ -n "$active_before" ]] && ! is_safe_existing_binary_path "$active_before"; then
+    if is_symlink_path "$active_before"; then
+      echo "Note: skipped replacing active symlink launcher: ${active_before}"
+    elif is_script_file "$active_before"; then
+      echo "Note: skipped replacing active script launcher: ${active_before}"
+    fi
   fi
   echo "Run:"
   echo "  ${CLI_NAME} --help"

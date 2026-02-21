@@ -172,27 +172,85 @@ function readCommandVersion(commandPath) {
   return parseVersionFromOutput(output);
 }
 
-function listCommandCandidates(commandNames) {
-  const out = [];
-  const seen = new Set();
+function resolveActiveCommand(commandName) {
   const pathValue = process.env.PATH || "";
   const dirs = pathValue.split(path.delimiter).filter(Boolean);
   const suffixes =
     process.platform === "win32" ? [".exe", ".cmd", ".bat", ""] : [""];
 
   for (const dir of dirs) {
-    for (const name of commandNames) {
-      for (const suffix of suffixes) {
-        const candidate = path.join(dir, `${name}${suffix}`);
-        if (!fs.existsSync(candidate)) continue;
-        if (seen.has(candidate)) continue;
-        seen.add(candidate);
-        out.push(candidate);
+    for (const suffix of suffixes) {
+      const candidate = path.join(dir, `${commandName}${suffix}`);
+      if (fs.existsSync(candidate)) {
+        return candidate;
       }
     }
   }
 
+  return null;
+}
+
+function listActiveCommandCandidates() {
+  const seen = new Set();
+  const out = [];
+  for (const name of ["k-msg", "kmsg"]) {
+    const resolved = resolveActiveCommand(name);
+    if (!resolved || seen.has(resolved)) continue;
+    seen.add(resolved);
+    out.push(resolved);
+  }
   return out;
+}
+
+function isLikelyNativeExecutable(filePath) {
+  let fd;
+  try {
+    fd = fs.openSync(filePath, "r");
+    const buffer = Buffer.alloc(4);
+    const read = fs.readSync(fd, buffer, 0, 4, 0);
+    if (read < 2) return false;
+
+    // ELF
+    if (
+      read >= 4 &&
+      buffer[0] === 0x7f &&
+      buffer[1] === 0x45 &&
+      buffer[2] === 0x4c &&
+      buffer[3] === 0x46
+    ) {
+      return true;
+    }
+
+    // Mach-O (32/64, little/big endian)
+    if (read >= 4) {
+      const magic = buffer.readUInt32BE(0);
+      if (
+        magic === 0xfeedface ||
+        magic === 0xfeedfacf ||
+        magic === 0xcefaedfe ||
+        magic === 0xcffaedfe
+      ) {
+        return true;
+      }
+    }
+
+    // PE/COFF (Windows)
+    if (buffer[0] === 0x4d && buffer[1] === 0x5a) {
+      return true;
+    }
+  } catch {
+    return false;
+  } finally {
+    if (typeof fd === "number") {
+      try {
+        fs.closeSync(fd);
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  return false;
 }
 
 function replaceBinary({ sourcePath, targetPath }) {
@@ -217,7 +275,7 @@ function syncLegacyCommandPaths({ binaryPath, version }) {
   const binaryReal = safeRealpath(binaryPath);
   const updated = [];
 
-  for (const candidate of listCommandCandidates(["k-msg", "kmsg"])) {
+  for (const candidate of listActiveCommandCandidates()) {
     let stat;
     try {
       stat = fs.lstatSync(candidate);
@@ -227,6 +285,7 @@ function syncLegacyCommandPaths({ binaryPath, version }) {
 
     if (!stat.isFile() || stat.isSymbolicLink()) continue;
     if (!isWritableFile(candidate)) continue;
+    if (!isLikelyNativeExecutable(candidate)) continue;
 
     const candidateReal = safeRealpath(candidate);
     if (candidateReal && selfScript && candidateReal === selfScript) continue;
@@ -370,12 +429,10 @@ async function ensureBinary() {
 
 async function main() {
   const resolved = await ensureBinary();
-  if (resolved.freshlyInstalled) {
-    syncLegacyCommandPaths({
-      binaryPath: resolved.binaryPath,
-      version: resolved.version,
-    });
-  }
+  syncLegacyCommandPaths({
+    binaryPath: resolved.binaryPath,
+    version: resolved.version,
+  });
   const bin = resolved.binaryPath;
   const result = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
   if (result.error) {
