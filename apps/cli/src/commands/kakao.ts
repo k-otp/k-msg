@@ -6,12 +6,16 @@ import type {
   TemplateProvider,
   TemplateUpdateInput,
 } from "@k-msg/core";
+import {
+  parseTemplateButtons,
+  TemplateLifecycleService,
+  validateTemplatePayload,
+} from "@k-msg/template";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
   exitCodeForError,
-  parseJson,
   printError,
   shouldUseJsonOutput,
 } from "../cli/utils";
@@ -107,6 +111,17 @@ function resolveTemplateProviderHint(
     runtime.config.defaults?.kakao?.channel,
   );
   return fallback;
+}
+
+function createTemplateLifecycleService(
+  provider: ProviderWithCapabilities,
+): TemplateLifecycleService {
+  return new TemplateLifecycleService(
+    provider as unknown as TemplateProvider,
+    hasFunction(provider, "requestTemplateInspection")
+      ? (provider as unknown as TemplateInspectionProvider)
+      : undefined,
+  );
 }
 
 const channelCategoriesCmd = defineCommand({
@@ -398,16 +413,14 @@ const templateListCmd = defineCommand({
         (p) => hasFunction(p, "listTemplates"),
         "kakao template list",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
 
-      const result = await (
-        provider as unknown as TemplateProvider
-      ).listTemplates.call(
-        provider,
+      const result = await templateService.list(
         flags.status ? { status: flags.status } : undefined,
         ctx,
       );
@@ -468,15 +481,14 @@ const templateGetCmd = defineCommand({
         (p) => hasFunction(p, "getTemplate"),
         "kakao template get",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
 
-      const result = await (
-        provider as unknown as TemplateProvider
-      ).getTemplate.call(provider, flags["template-id"], ctx);
+      const result = await templateService.get(flags["template-id"], ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -534,31 +546,40 @@ const templateCreateCmd = defineCommand({
         (p) => hasFunction(p, "createTemplate"),
         "kakao template create",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
 
-      const buttons =
-        typeof flags.buttons === "string" && flags.buttons.trim().length > 0
-          ? (() => {
-              const parsed = parseJson(flags.buttons, "buttons");
-              if (!Array.isArray(parsed)) {
-                throw new Error("buttons must be a JSON array");
-              }
-              return parsed as unknown[];
-            })()
-          : undefined;
+      const parsedButtons = parseTemplateButtons(flags.buttons);
+      if (parsedButtons.isFailure) {
+        throw parsedButtons.error;
+      }
 
-      const result = await (
-        provider as unknown as TemplateProvider
-      ).createTemplate.call(
-        provider,
+      const payloadValidation = validateTemplatePayload(
         {
           name: flags.name,
           content: flags.content,
-          ...(buttons ? { buttons } : {}),
+          buttons: parsedButtons.value,
+        },
+        {
+          requireName: true,
+          requireContent: true,
+        },
+      );
+      if (payloadValidation.isFailure) {
+        throw payloadValidation.error;
+      }
+
+      const result = await templateService.create(
+        {
+          name: payloadValidation.value.name ?? flags.name,
+          content: payloadValidation.value.content ?? flags.content,
+          ...(payloadValidation.value.buttons
+            ? { buttons: payloadValidation.value.buttons }
+            : {}),
         },
         ctx,
       );
@@ -633,6 +654,7 @@ const templateUpdateCmd = defineCommand({
         (p) => hasFunction(p, "updateTemplate"),
         "kakao template update",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
@@ -640,22 +662,37 @@ const templateUpdateCmd = defineCommand({
       });
 
       const patch: TemplateUpdateInput = {};
-      if (typeof flags.name === "string") patch.name = flags.name;
-      if (typeof flags.content === "string") patch.content = flags.content;
-      if (
-        typeof flags.buttons === "string" &&
-        flags.buttons.trim().length > 0
-      ) {
-        const parsed = parseJson(flags.buttons, "buttons");
-        if (!Array.isArray(parsed)) {
-          throw new Error("buttons must be a JSON array");
-        }
-        patch.buttons = parsed as unknown[];
+      const parsedButtons = parseTemplateButtons(flags.buttons);
+      if (parsedButtons.isFailure) {
+        throw parsedButtons.error;
       }
 
-      const result = await (
-        provider as unknown as TemplateProvider
-      ).updateTemplate.call(provider, flags["template-id"], patch, ctx);
+      const payloadValidation = validateTemplatePayload(
+        {
+          name: flags.name,
+          content: flags.content,
+          buttons: parsedButtons.value,
+        },
+        {
+          requireName: false,
+          requireContent: false,
+        },
+      );
+      if (payloadValidation.isFailure) {
+        throw payloadValidation.error;
+      }
+
+      if (payloadValidation.value.name !== undefined) {
+        patch.name = payloadValidation.value.name;
+      }
+      if (payloadValidation.value.content !== undefined) {
+        patch.content = payloadValidation.value.content;
+      }
+      if (parsedButtons.value !== undefined) {
+        patch.buttons = parsedButtons.value;
+      }
+
+      const result = await templateService.update(flags["template-id"], patch, ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -707,15 +744,14 @@ const templateDeleteCmd = defineCommand({
         (p) => hasFunction(p, "deleteTemplate"),
         "kakao template delete",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
 
-      const result = await (
-        provider as unknown as TemplateProvider
-      ).deleteTemplate.call(provider, flags["template-id"], ctx);
+      const result = await templateService.delete(flags["template-id"], ctx);
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -764,15 +800,17 @@ const templateRequestCmd = defineCommand({
         (p) => hasFunction(p, "requestTemplateInspection"),
         "kakao template inspection request",
       );
+      const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
 
-      const result = await (
-        provider as unknown as TemplateInspectionProvider
-      ).requestTemplateInspection.call(provider, flags["template-id"], ctx);
+      const result = await templateService.requestInspection(
+        flags["template-id"],
+        ctx,
+      );
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);

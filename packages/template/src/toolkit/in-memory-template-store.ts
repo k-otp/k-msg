@@ -1,13 +1,8 @@
 import { TemplateValidator } from "../parser/validator";
 import { VariableParser } from "../parser/variable.parser";
-import type {
-  AlimTalkTemplate,
-  TemplateCategory,
-  TemplateStatus,
-  TemplateVariable,
-} from "../types/template.types";
+import type { AlimTalkTemplate } from "../types/template.types";
 
-export class TemplateService {
+export class InMemoryTemplateStore {
   private templates: Map<string, AlimTalkTemplate> = new Map();
 
   async createTemplate(
@@ -30,7 +25,6 @@ export class TemplateService {
       },
     };
 
-    // 템플릿 유효성 검사
     const validation = TemplateValidator.validate(newTemplate);
     if (!validation.isValid) {
       throw new Error(
@@ -74,14 +68,13 @@ export class TemplateService {
 
   async renderTemplate(
     templateId: string,
-    variables: Record<string, any>,
+    variables: Record<string, string | number | Date>,
   ): Promise<string> {
     const template = this.templates.get(templateId);
     if (!template) {
       throw new Error(`Template ${templateId} not found`);
     }
 
-    // 변수 검증
     const validation = VariableParser.validateVariables(
       template.variables || [],
       variables,
@@ -96,6 +89,6 @@ export class TemplateService {
   }
 
   private generateTemplateId(): string {
-    return `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `tpl_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 }

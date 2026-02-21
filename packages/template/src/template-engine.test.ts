@@ -6,17 +6,19 @@ import { describe, expect, test } from "bun:test";
 import {
   type AlimTalkTemplate,
   ButtonParser,
-  TemplateBuilder,
-  TemplateBuilders,
   type TemplateButton,
   TemplateCategory,
-  TemplateRegistry,
-  MockTemplateService as TemplateService,
   TemplateStatus,
   TemplateValidator,
   type TemplateVariable,
   VariableParser,
 } from "./index";
+import {
+  InMemoryTemplateStore,
+  TemplateBuilder,
+  TemplateBuilders,
+  TemplateRegistry,
+} from "./toolkit";
 
 describe("VariableParser", () => {
   test("should extract variables from template content", () => {
@@ -351,9 +353,9 @@ describe("TemplateBuilders factory", () => {
   });
 });
 
-describe("TemplateService", () => {
+describe("InMemoryTemplateStore", () => {
   test("should create and retrieve template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
     const templateData = {
       code: "TEST_001",
@@ -365,18 +367,18 @@ describe("TemplateService", () => {
       provider: "test-provider",
     };
 
-    const created = await service.createTemplate(templateData);
+    const created = await store.createTemplate(templateData);
     expect(created.id).toBeDefined();
     expect(created.name).toBe(templateData.name);
 
-    const retrieved = await service.getTemplate(created.id);
+    const retrieved = await store.getTemplate(created.id);
     expect(retrieved).toEqual(created);
   });
 
   test("should update template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_002",
       name: "원본 템플릿",
       content: "원본 내용",
@@ -388,7 +390,7 @@ describe("TemplateService", () => {
     // Add a small delay to ensure different timestamps
     await new Promise((resolve) => setTimeout(resolve, 1));
 
-    const updated = await service.updateTemplate(created.id, {
+    const updated = await store.updateTemplate(created.id, {
       name: "수정된 템플릿",
       content: "수정된 내용",
     });
@@ -401,9 +403,9 @@ describe("TemplateService", () => {
   });
 
   test("should delete template", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_003",
       name: "삭제될 템플릿",
       content: "내용",
@@ -412,16 +414,16 @@ describe("TemplateService", () => {
       provider: "test-provider",
     });
 
-    await service.deleteTemplate(created.id);
+    await store.deleteTemplate(created.id);
 
-    const retrieved = await service.getTemplate(created.id);
+    const retrieved = await store.getTemplate(created.id);
     expect(retrieved).toBeNull();
   });
 
   test("should render template with variables", async () => {
-    const service = new TemplateService();
+    const store = new InMemoryTemplateStore();
 
-    const created = await service.createTemplate({
+    const created = await store.createTemplate({
       code: "TEST_004",
       name: "렌더링 템플릿",
       content: "안녕하세요, #{name}님! 코드: #{code}",
@@ -430,7 +432,7 @@ describe("TemplateService", () => {
       provider: "test-provider",
     });
 
-    const rendered = await service.renderTemplate(created.id, {
+    const rendered = await store.renderTemplate(created.id, {
       name: "홍길동",
       code: "123456",
     });
@@ -692,12 +694,11 @@ describe("TemplateRegistry", () => {
 
 describe("Integration Tests", () => {
   test("should work together in complete workflow", async () => {
-    // Create registry and service
+    // Create registry
     const registry = new TemplateRegistry({
       enableVersioning: true,
       enableUsageTracking: true,
     });
-    const service = new TemplateService();
 
     // Build template using fluent API
     const template = TemplateBuilders.authentication("OTP 인증", "iwinv")

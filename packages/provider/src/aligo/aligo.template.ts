@@ -9,6 +9,7 @@ import {
   type TemplateCreateInput,
   type TemplateUpdateInput,
 } from "@k-msg/core";
+import { validateTemplatePayload } from "@k-msg/template";
 import { isObjectRecord } from "../shared/type-guards";
 import { mapAligoKakaoError } from "./aligo.error";
 import {
@@ -20,6 +21,13 @@ import {
 import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 
+function withProviderContext(error: KMsgError, providerId: string): KMsgError {
+  return new KMsgError(error.code, error.message, {
+    providerId,
+    ...(error.details ?? {}),
+  });
+}
+
 export async function createTemplate(
   ctx: AligoRuntimeContext,
   input: TemplateCreateInput,
@@ -27,31 +35,23 @@ export async function createTemplate(
 ): Promise<Result<Template, KMsgError>> {
   try {
     const senderKey = resolveKakaoSenderKey(ctx, templateCtx);
-
-    if (!input.name || input.name.trim().length === 0) {
-      return fail(
-        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "name is required", {
-          providerId: ctx.providerId,
-        }),
-      );
-    }
-    if (!input.content || input.content.trim().length === 0) {
-      return fail(
-        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "content is required", {
-          providerId: ctx.providerId,
-        }),
-      );
+    const payloadValidation = validateTemplatePayload(input, {
+      requireName: true,
+      requireContent: true,
+    });
+    if (payloadValidation.isFailure) {
+      return fail(withProviderContext(payloadValidation.error, ctx.providerId));
     }
 
     const body: Record<string, unknown> = {
       apikey: ctx.config.apiKey,
       userid: ctx.config.userId,
       senderkey: senderKey,
-      tpl_name: input.name,
-      tpl_content: input.content,
+      tpl_name: payloadValidation.value.name ?? input.name,
+      tpl_content: payloadValidation.value.content ?? input.content,
     };
 
-    const tplButton = toAligoTplButton(input.buttons);
+    const tplButton = toAligoTplButton(payloadValidation.value.buttons);
     if (tplButton) body.tpl_button = tplButton;
 
     const response = await requestAligo({
@@ -89,11 +89,15 @@ export async function createTemplate(
     return ok({
       id: code,
       code,
-      name: String(data.templtName ?? input.name),
-      content: String(data.templtContent ?? input.content),
+      name: String(data.templtName ?? (payloadValidation.value.name ?? input.name)),
+      content: String(
+        data.templtContent ?? (payloadValidation.value.content ?? input.content),
+      ),
       category: input.category,
       status: mapAligoTemplateStatus(data),
-      buttons: Array.isArray(data.buttons) ? data.buttons : input.buttons,
+      buttons: Array.isArray(data.buttons)
+        ? data.buttons
+        : payloadValidation.value.buttons,
       variables: input.variables,
       createdAt,
       updatedAt,
@@ -203,19 +207,31 @@ export async function updateTemplate(
       typeof patch.content === "string" && patch.content.trim().length > 0
         ? patch.content
         : existing.content;
-    const nextButtons =
-      patch.buttons !== undefined ? patch.buttons : existing.buttons;
+    const payloadValidation = validateTemplatePayload(
+      {
+        name: nextName,
+        content: nextContent,
+        buttons: patch.buttons !== undefined ? patch.buttons : existing.buttons,
+      },
+      {
+        requireName: true,
+        requireContent: true,
+      },
+    );
+    if (payloadValidation.isFailure) {
+      return fail(withProviderContext(payloadValidation.error, ctx.providerId));
+    }
 
     const body: Record<string, unknown> = {
       apikey: ctx.config.apiKey,
       userid: ctx.config.userId,
       senderkey: senderKey,
       tpl_code: templateCode,
-      tpl_name: nextName,
-      tpl_content: nextContent,
+      tpl_name: payloadValidation.value.name ?? nextName,
+      tpl_content: payloadValidation.value.content ?? nextContent,
     };
 
-    const tplButton = toAligoTplButton(nextButtons);
+    const tplButton = toAligoTplButton(payloadValidation.value.buttons);
     if (tplButton) body.tpl_button = tplButton;
 
     const response = await requestAligo({
@@ -239,11 +255,13 @@ export async function updateTemplate(
 
     return ok({
       ...existing,
-      name: nextName,
-      content: nextContent,
+      name: payloadValidation.value.name ?? nextName,
+      content: payloadValidation.value.content ?? nextContent,
       ...(patch.category !== undefined ? { category: patch.category } : {}),
       ...(patch.variables !== undefined ? { variables: patch.variables } : {}),
-      ...(patch.buttons !== undefined ? { buttons: patch.buttons } : {}),
+      ...(patch.buttons !== undefined
+        ? { buttons: payloadValidation.value.buttons }
+        : {}),
       updatedAt: new Date(),
     });
   } catch (error) {

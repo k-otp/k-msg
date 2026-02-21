@@ -5,6 +5,7 @@ import {
   type Template,
   type TemplateContext,
 } from "@k-msg/core";
+import { ButtonParser, interpolate, type TemplateButton } from "@k-msg/template";
 import type { AligoConfig } from "./types/aligo";
 
 export function resolveImageRef(options: {
@@ -95,19 +96,13 @@ export function resolveKakaoSenderKey(
   return senderKey;
 }
 
-export function toAligoTplButton(value: unknown): string | undefined {
-  if (value === null || value === undefined) return undefined;
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-  if (Array.isArray(value)) {
-    return JSON.stringify({ button: value });
-  }
-  if (typeof value === "object") {
-    return JSON.stringify(value);
-  }
-  return undefined;
+export function toAligoTplButton(buttons: TemplateButton[] | undefined): string | undefined {
+  if (!Array.isArray(buttons) || buttons.length === 0) return undefined;
+
+  const serializedButtons = JSON.parse(
+    ButtonParser.serializeButtons(buttons),
+  ) as unknown[];
+  return JSON.stringify({ button: serializedButtons });
 }
 
 export function mapAligoTemplateStatus(
@@ -151,7 +146,7 @@ export function parseAligoDateTime(value: unknown): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
-export function interpolateMessage(
+export function resolveAligoTemplateMessage(
   variables: Record<string, unknown> | undefined,
   templateContent?: string,
 ): string {
@@ -160,9 +155,5 @@ export function interpolateMessage(
   if (fullText !== undefined && fullText !== null) return String(fullText);
   if (!templateContent) return Object.values(variables).map(String).join("\n");
 
-  let result = templateContent;
-  for (const [key, value] of Object.entries(variables)) {
-    result = result.replace(new RegExp(`#{${key}}`, "g"), String(value));
-  }
-  return result;
+  return interpolate(templateContent, variables);
 }

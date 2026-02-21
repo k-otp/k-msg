@@ -18,5 +18,6 @@
   "../../packages/provider/src/iwinv/index.ts",
   "../../packages/provider/src/solapi/index.ts",
   "../../packages/template/src/index.ts",
+  "../../packages/template/src/toolkit/index.ts",
   "../../packages/webhook/src/index.ts"
 ]

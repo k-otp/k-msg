@@ -36,6 +36,7 @@
     "@k-msg/core": "workspace:*",
     "@k-msg/messaging": "workspace:*",
     "@k-msg/provider": "workspace:*",
+    "@k-msg/template": "workspace:*",
     "@bunli/core": "^0.5.4",
     "@bunli/plugin-ai-detect": "^0.5.2",
     "@bunli/test": "^0.3.2",

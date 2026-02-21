@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import type { SendOptions } from "../../packages/core/src/types";
-import { KMsg } from "../../packages/messaging/src/k-msg";
-import { MockProvider } from "../../packages/provider/src";
-import { TemplateService } from "../../packages/template/src/service";
+import type { SendOptions } from "@k-msg/core";
+import { KMsg } from "@k-msg/messaging";
+import { MockProvider } from "@k-msg/provider";
+import { TemplateLifecycleService } from "@k-msg/template";
 
 describe("Template and Messaging Flow Integration", () => {
   const mockProvider = new MockProvider();
-  const templateService = new TemplateService(mockProvider);
+  const templateService = new TemplateLifecycleService(mockProvider, mockProvider);
   const kmsg = new KMsg({ providers: [mockProvider] });
 
   const templateData = {

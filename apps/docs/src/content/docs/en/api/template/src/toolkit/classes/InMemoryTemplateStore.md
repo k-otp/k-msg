@@ -2,20 +2,20 @@
 editUrl: false
 next: false
 prev: false
-title: "MockTemplateService"
+title: "InMemoryTemplateStore"
 ---
 
-Defined in: [packages/template/src/services/template.service.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L10)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:5
 
 ## Constructors
 
 ### Constructor
 
-> **new MockTemplateService**(): `TemplateService`
+> **new InMemoryTemplateStore**(): `InMemoryTemplateStore`
 
 #### Returns
 
-`TemplateService`
+`InMemoryTemplateStore`
 
 ## Methods
 
@@ -23,7 +23,7 @@ Defined in: [packages/template/src/services/template.service.ts:10](https://gith
 
 > **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/services/template.service.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L13)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:8
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: [packages/template/src/services/template.service.ts:13](https://gith
 
 > **deleteTemplate**(`templateId`): `Promise`\<`void`\>
 
-Defined in: [packages/template/src/services/template.service.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L71)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:65
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: [packages/template/src/services/template.service.ts:71](https://gith
 
 > **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
 
-Defined in: [packages/template/src/services/template.service.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L45)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:39
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Defined in: [packages/template/src/services/template.service.ts:45](https://gith
 
 > **renderTemplate**(`templateId`, `variables`): `Promise`\<`string`\>
 
-Defined in: [packages/template/src/services/template.service.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L75)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:69
 
 #### Parameters
 
@@ -87,7 +87,7 @@ Defined in: [packages/template/src/services/template.service.ts:75](https://gith
 
 ##### variables
 
-`Record`\<`string`, `any`\>
+`Record`\<`string`, `string` \| `number` \| `Date`\>
 
 #### Returns
 
@@ -99,7 +99,7 @@ Defined in: [packages/template/src/services/template.service.ts:75](https://gith
 
 > **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: [packages/template/src/services/template.service.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/template/src/services/template.service.ts#L49)
+Defined in: packages/template/src/toolkit/in-memory-template-store.ts:43
 
 #### Parameters
 

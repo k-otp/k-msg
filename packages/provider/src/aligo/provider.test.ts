@@ -73,6 +73,32 @@ describe("AligoProvider (Kakao APIs)", () => {
     }
   });
 
+  test("createTemplate validates buttons before provider request", async () => {
+    const provider = new AligoProvider({
+      apiKey: "api-key",
+      userId: "user",
+      senderKey: "SENDERKEY",
+    });
+
+    const result = await provider.createTemplate({
+      name: "name",
+      content: "content",
+      buttons: [
+        {
+          type: "WL",
+          name: "",
+          linkMobile: "https://example.com",
+        },
+      ],
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.message).toBe("buttons[0].name is required");
+    }
+  });
+
   test("createTemplate calls /akv10/template/add/ and returns templtCode", async () => {
     let calledUrl = "";
     let calledBody: Record<string, string> = {};

@@ -27,6 +27,6 @@ Defined in: [packages/template/src/registry/template.registry.ts:49](https://git
 
 ### versions
 
-> **versions**: [`TemplateVersion`](/api/template/src/interfaces/templateversion/)[]
+> **versions**: [`TemplateVersion`](/api/template/src/toolkit/interfaces/templateversion/)[]
 
 Defined in: [packages/template/src/registry/template.registry.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L50)
