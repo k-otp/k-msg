@@ -56,7 +56,9 @@ function formatPeerRange(majorMinors: string[]): string {
 function parseMatrixVersions(ciContent: string): string[] {
   const match = /(drizzle:\s*\[)([^\]]*)(\])/.exec(ciContent);
   if (!match) {
-    throw new Error("Unable to find drizzle matrix in .github/workflows/ci.yml");
+    throw new Error(
+      "Unable to find drizzle matrix in .github/workflows/ci.yml",
+    );
   }
   return [...match[2].matchAll(/"([^"]+)"/g)]
     .map((item) => item[1])
@@ -65,13 +67,13 @@ function parseMatrixVersions(ciContent: string): string[] {
 
 function updateCiMatrix(ciContent: string, versions: string[]): string {
   const matrixText = versions.map((v) => `"${v}"`).join(", ");
-  return ciContent.replace(
-    /(drizzle:\s*\[)([^\]]*)(\])/,
-    `$1${matrixText}$3`,
-  );
+  return ciContent.replace(/(drizzle:\s*\[)([^\]]*)(\])/, `$1${matrixText}$3`);
 }
 
-function replaceDrizzleReadmeMatrix(content: string, versions: string[]): string {
+function replaceDrizzleReadmeMatrix(
+  content: string,
+  versions: string[],
+): string {
   const start = "<!-- drizzle-compat-matrix:start -->";
   const end = "<!-- drizzle-compat-matrix:end -->";
   const startIndex = content.indexOf(start);
@@ -102,7 +104,10 @@ function replaceReadmeSupportRow(
   return content.replace(rowPattern, row);
 }
 
-async function writeIfChanged(filePath: string, next: string): Promise<boolean> {
+async function writeIfChanged(
+  filePath: string,
+  next: string,
+): Promise<boolean> {
   let prev = "";
   try {
     prev = await readFile(filePath, "utf8");
@@ -118,7 +123,9 @@ async function writeIfChanged(filePath: string, next: string): Promise<boolean> 
 async function main(): Promise<void> {
   const latestArg = process.argv[2];
   if (!latestArg) {
-    throw new Error("Usage: bun run scripts/automation/update-drizzle-peer-compat.ts <latest-version>");
+    throw new Error(
+      "Usage: bun run scripts/automation/update-drizzle-peer-compat.ts <latest-version>",
+    );
   }
 
   const latest = latestArg.trim();
@@ -143,7 +150,9 @@ async function main(): Promise<void> {
 
   const currentPeerRange = messagingPkg.peerDependencies?.["drizzle-orm"];
   if (typeof currentPeerRange !== "string" || currentPeerRange.length === 0) {
-    throw new Error("packages/messaging/package.json is missing peerDependencies.drizzle-orm");
+    throw new Error(
+      "packages/messaging/package.json is missing peerDependencies.drizzle-orm",
+    );
   }
 
   const majorMinors = parsePeerMajorMinors(currentPeerRange);
@@ -213,9 +222,16 @@ Automated Drizzle compatibility update for \`@k-msg/messaging\`.
 `;
   const changesetChanged = await writeIfChanged(changesetPath, changeset);
 
-  const changed = pkgChanged || ciChanged || readmeEnChanged || readmeKoChanged || changesetChanged;
+  const changed =
+    pkgChanged ||
+    ciChanged ||
+    readmeEnChanged ||
+    readmeKoChanged ||
+    changesetChanged;
   if (changed) {
-    console.log(`Updated Drizzle compatibility to include ${latestPair} (${latest}).`);
+    console.log(
+      `Updated Drizzle compatibility to include ${latestPair} (${latest}).`,
+    );
     return;
   }
 

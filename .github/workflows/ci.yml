@@ -158,6 +158,9 @@ jobs:
       - name: Pin drizzle-orm matrix version
         run: bun add --cwd packages/messaging --dev --exact --no-save drizzle-orm@${{ matrix.drizzle }}
 
+      - name: Build core types for workspace references
+        run: bun run --cwd packages/core build:types
+
       - name: Messaging typecheck
         run: bun run --cwd packages/messaging typecheck
 

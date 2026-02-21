@@ -65,6 +65,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
+          bun run --cwd packages/core build:types
           bun run --cwd packages/messaging typecheck
           bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts
 
@@ -88,6 +89,7 @@ jobs:
             - add/update Sampo changeset
 
             Validation executed in this workflow:
+            - `bun run --cwd packages/core build:types`
             - `bun run --cwd packages/messaging typecheck`
             - `bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts`
           labels: |
