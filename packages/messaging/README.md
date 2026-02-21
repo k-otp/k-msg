@@ -288,10 +288,12 @@ const queue = createDrizzleJobQueue({
 | --- | --- |
 | `0.19.x` | `^0.44.0 || ^0.45.0` |
 
-Compatibility for this line is validated in CI against:
+Compatibility for this line is validated in CI against the `drizzle-compat` matrix:
 
-- `drizzle-orm@0.44.7` (minimum verification target)
-- `drizzle-orm@0.45.1` (maximum verification target)
+<!-- drizzle-compat-matrix:start -->
+- `drizzle-orm@0.44.7`
+- `drizzle-orm@0.45.1`
+<!-- drizzle-compat-matrix:end -->
 
 ## Tracking-based API failover
 
