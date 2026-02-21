@@ -133,3 +133,36 @@ jobs:
 
       - name: Canonical checks
         run: bun run check:ci
+
+  drizzle-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    strategy:
+      fail-fast: false
+      matrix:
+        drizzle: ["0.44.7", "0.45.1"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Pin drizzle-orm matrix version
+        run: bun add --cwd packages/messaging --dev --exact --no-save drizzle-orm@${{ matrix.drizzle }}
+
+      - name: Messaging typecheck
+        run: bun run --cwd packages/messaging typecheck
+
+      - name: Drizzle adapter tests
+        run: bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts
+
+      - name: Drizzle schema render snapshot tests
+        run: bun --cwd packages/messaging test src/adapters/cloudflare/sql-schema.test.ts
