@@ -18,6 +18,10 @@ Note: the npm package downloads a native binary from GitHub Releases on first ru
 using `checksums.txt`, then extracts and caches it under your OS cache directory
 (`K_MSG_CLI_CACHE_DIR` to override).
 
+When a new native binary is installed, the launcher also performs best-effort sync
+for writable legacy `k-msg` binaries found on PATH (for example, older curl-based
+installs). Set `K_MSG_CLI_SYNC_PATHS=0` to disable this behavior.
+
 Env overrides:
 
 - `K_MSG_CLI_BASE_URL`: override GitHub release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)

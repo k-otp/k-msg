@@ -139,6 +139,117 @@ function parseChecksums(text) {
   return out;
 }
 
+function safeRealpath(filePath) {
+  try {
+    return fs.realpathSync(filePath);
+  } catch {
+    return null;
+  }
+}
+
+function isWritableFile(filePath) {
+  try {
+    fs.accessSync(filePath, fs.constants.W_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function parseVersionFromOutput(output) {
+  const m = /\bk-msg v([0-9]+\.[0-9]+\.[0-9]+)\b/.exec(output);
+  return m ? m[1] : null;
+}
+
+function readCommandVersion(commandPath) {
+  const result = spawnSync(commandPath, ["--version"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 3000,
+  });
+  if (result.error || result.status !== 0) return null;
+  const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+  return parseVersionFromOutput(output);
+}
+
+function listCommandCandidates(commandNames) {
+  const out = [];
+  const seen = new Set();
+  const pathValue = process.env.PATH || "";
+  const dirs = pathValue.split(path.delimiter).filter(Boolean);
+  const suffixes =
+    process.platform === "win32" ? [".exe", ".cmd", ".bat", ""] : [""];
+
+  for (const dir of dirs) {
+    for (const name of commandNames) {
+      for (const suffix of suffixes) {
+        const candidate = path.join(dir, `${name}${suffix}`);
+        if (!fs.existsSync(candidate)) continue;
+        if (seen.has(candidate)) continue;
+        seen.add(candidate);
+        out.push(candidate);
+      }
+    }
+  }
+
+  return out;
+}
+
+function replaceBinary({ sourcePath, targetPath }) {
+  const tmpPath = `${targetPath}.kmsg-sync-${process.pid}.tmp`;
+  fs.copyFileSync(sourcePath, tmpPath);
+  if (process.platform !== "win32") {
+    fs.chmodSync(tmpPath, 0o755);
+  }
+  fs.renameSync(tmpPath, targetPath);
+}
+
+function syncLegacyCommandPaths({ binaryPath, version }) {
+  const syncOptOut = process.env.K_MSG_CLI_SYNC_PATHS;
+  if (
+    typeof syncOptOut === "string" &&
+    ["0", "false", "off"].includes(syncOptOut.trim().toLowerCase())
+  ) {
+    return;
+  }
+
+  const selfScript = safeRealpath(process.argv[1] || "");
+  const binaryReal = safeRealpath(binaryPath);
+  const updated = [];
+
+  for (const candidate of listCommandCandidates(["k-msg", "kmsg"])) {
+    let stat;
+    try {
+      stat = fs.lstatSync(candidate);
+    } catch {
+      continue;
+    }
+
+    if (!stat.isFile() || stat.isSymbolicLink()) continue;
+    if (!isWritableFile(candidate)) continue;
+
+    const candidateReal = safeRealpath(candidate);
+    if (candidateReal && selfScript && candidateReal === selfScript) continue;
+    if (candidateReal && binaryReal && candidateReal === binaryReal) continue;
+
+    const currentVersion = readCommandVersion(candidate);
+    if (!currentVersion || currentVersion === version) continue;
+
+    try {
+      replaceBinary({ sourcePath: binaryPath, targetPath: candidate });
+      updated.push({ path: candidate, from: currentVersion });
+    } catch {
+      // Best-effort sync: ignore per-path failures.
+    }
+  }
+
+  for (const item of updated) {
+    console.error(
+      `[k-msg] Synced existing install: ${item.path} (${item.from} -> ${version})`,
+    );
+  }
+}
+
 function tarReadString(header, start, len) {
   const slice = header.subarray(start, start + len);
   const zero = slice.indexOf(0);
@@ -194,7 +305,9 @@ async function ensureBinary() {
   const cacheDir = path.join(cacheBaseDir(), "k-msg", "cli", version, target);
   const dest = path.join(cacheDir, `k-msg${ext}`);
 
-  if (fs.existsSync(dest)) return dest;
+  if (fs.existsSync(dest)) {
+    return { binaryPath: dest, version, freshlyInstalled: false };
+  }
 
   const local = process.env.K_MSG_CLI_LOCAL_BINARY;
   if (typeof local === "string" && local.trim().length > 0) {
@@ -203,7 +316,7 @@ async function ensureBinary() {
     if (process.platform !== "win32") {
       fs.chmodSync(dest, 0o755);
     }
-    return dest;
+    return { binaryPath: dest, version, freshlyInstalled: true };
   }
 
   const baseUrl =
@@ -247,7 +360,7 @@ async function ensureBinary() {
       fs.chmodSync(dest, 0o755);
     }
     fs.rmSync(archiveTmp, { force: true });
-    return dest;
+    return { binaryPath: dest, version, freshlyInstalled: true };
   } catch (err) {
     fs.rmSync(archiveTmp, { force: true });
     fs.rmSync(binTmp, { force: true });
@@ -256,7 +369,14 @@ async function ensureBinary() {
 }
 
 async function main() {
-  const bin = await ensureBinary();
+  const resolved = await ensureBinary();
+  if (resolved.freshlyInstalled) {
+    syncLegacyCommandPaths({
+      binaryPath: resolved.binaryPath,
+      version: resolved.version,
+    });
+  }
+  const bin = resolved.binaryPath;
   const result = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
   if (result.error) {
     console.error(result.error);
