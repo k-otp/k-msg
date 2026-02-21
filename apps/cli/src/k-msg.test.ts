@@ -1311,9 +1311,7 @@ describe("k-msg CLI (bunli) E2E", () => {
         ]),
       );
       iwinvApi.toHaveExitCode(2);
-      expect(iwinvApi.stderr).toContain(
-        "manual Kakao channel onboarding",
-      );
+      expect(iwinvApi.stderr).toContain("manual Kakao channel onboarding");
 
       const solapiConfigPath = await createTempConfigFromObject({
         version: 1,

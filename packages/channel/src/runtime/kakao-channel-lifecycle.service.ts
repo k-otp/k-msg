@@ -1,10 +1,10 @@
 import {
   fail,
+  type KakaoChannel,
+  type KakaoChannelCategories,
   KMsgError,
   KMsgErrorCode,
   ok,
-  type KakaoChannel,
-  type KakaoChannelCategories,
   type Result,
 } from "@k-msg/core";
 import { AligoChannelAdapter } from "./adapters/aligo.adapter";
@@ -72,7 +72,9 @@ export class KakaoChannelLifecycleService {
     return this.capability;
   }
 
-  private unsupported(operation: KakaoChannelApiOperation): Result<never, KMsgError> {
+  private unsupported(
+    operation: KakaoChannelApiOperation,
+  ): Result<never, KMsgError> {
     const message = (() => {
       if (this.capability.mode === "manual") {
         if (this.iwinvAdapter) {
@@ -100,7 +102,9 @@ export class KakaoChannelLifecycleService {
     );
   }
 
-  private ensureApi(operation: KakaoChannelApiOperation): Result<void, KMsgError> {
+  private ensureApi(
+    operation: KakaoChannelApiOperation,
+  ): Result<void, KMsgError> {
     if (this.capability.mode !== "api") {
       return this.unsupported(operation);
     }
@@ -163,7 +167,9 @@ export class KakaoChannelLifecycleService {
     return apiAdapter.auth(params);
   }
 
-  async add(params: KakaoChannelAddParams): Promise<Result<KakaoChannel, KMsgError>> {
+  async add(
+    params: KakaoChannelAddParams,
+  ): Promise<Result<KakaoChannel, KMsgError>> {
     const ready = this.ensureApi("add");
     if (ready.isFailure) return ready;
     const apiAdapter = this.apiAdapter;

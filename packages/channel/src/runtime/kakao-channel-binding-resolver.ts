@@ -26,7 +26,9 @@ function extractProviderBindingHint(provider: KakaoProviderConfigEntry): {
   plusId?: string;
 } {
   const cfg =
-    provider.config && typeof provider.config === "object" ? provider.config : {};
+    provider.config && typeof provider.config === "object"
+      ? provider.config
+      : {};
 
   const senderKey =
     readString((cfg as Record<string, unknown>).senderKey) ??
@@ -115,9 +117,11 @@ export class KakaoChannelBindingResolver {
       selectSingleProviderId(this.config.providers);
 
     const defaultsSenderKey =
-      readString(defaultsKakao?.senderKey) ?? readString(defaultAliasEntry?.senderKey);
+      readString(defaultsKakao?.senderKey) ??
+      readString(defaultAliasEntry?.senderKey);
     const defaultsPlusId =
-      readString(defaultsKakao?.plusId) ?? readString(defaultAliasEntry?.plusId);
+      readString(defaultsKakao?.plusId) ??
+      readString(defaultAliasEntry?.plusId);
 
     if (defaultProviderId && (defaultsSenderKey || defaultsPlusId)) {
       pushUnique({

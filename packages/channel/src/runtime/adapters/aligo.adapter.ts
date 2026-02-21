@@ -1,9 +1,9 @@
 import {
   fail,
-  KMsgError,
-  KMsgErrorCode,
   type KakaoChannel,
   type KakaoChannelCategories,
+  KMsgError,
+  KMsgErrorCode,
   type Result,
 } from "@k-msg/core";
 import type {

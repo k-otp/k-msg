@@ -21,7 +21,8 @@ describe("KakaoChannelLifecycleService", () => {
   test("lists channels through api adapter", async () => {
     const provider: KakaoChannelRuntimeProvider = {
       id: "aligo-main",
-      getOnboardingSpec: () => createSpec({ providerId: "aligo", channelOnboarding: "api" }),
+      getOnboardingSpec: () =>
+        createSpec({ providerId: "aligo", channelOnboarding: "api" }),
       listKakaoChannels: async () =>
         ok([
           {
@@ -84,7 +85,9 @@ describe("KakaoChannelLifecycleService", () => {
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
       expect(result.error.code).toBe("INVALID_REQUEST");
-      expect(result.error.message).toContain("does not expose Kakao channel onboarding API");
+      expect(result.error.message).toContain(
+        "does not expose Kakao channel onboarding API",
+      );
     }
   });
 });
