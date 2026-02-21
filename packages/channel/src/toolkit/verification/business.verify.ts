@@ -3,7 +3,6 @@
  * 사업자 정보 및 서류 검증 시스템
  */
 
-import { EventEmitter } from "../shared/event-emitter";
 import {
   Channel,
   DocumentStatus,
@@ -11,6 +10,7 @@ import {
   type VerificationDocument,
   VerificationStatus,
 } from "../../types/channel.types";
+import { EventEmitter } from "../shared/event-emitter";
 
 export interface BusinessInfo {
   businessName: string;

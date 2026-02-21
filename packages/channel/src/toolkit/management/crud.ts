@@ -3,7 +3,6 @@
  * 채널 생성, 조회, 수정, 삭제 통합 관리
  */
 
-import { EventEmitter } from "../shared/event-emitter";
 import {
   type Channel,
   type ChannelCreateRequest,
@@ -16,6 +15,7 @@ import {
   SenderNumberStatus,
   VerificationStatus,
 } from "../../types/channel.types";
+import { EventEmitter } from "../shared/event-emitter";
 
 export interface PaginationOptions {
   page: number;

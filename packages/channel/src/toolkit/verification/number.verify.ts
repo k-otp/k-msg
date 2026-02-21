@@ -4,11 +4,6 @@
  */
 
 import { EventEmitter } from "../shared/event-emitter";
-import {
-  SenderNumber,
-  SenderNumberCategory,
-  SenderNumberStatus,
-} from "../../types/channel.types";
 
 export interface PhoneVerificationRequest {
   id: string;
@@ -87,7 +82,7 @@ export interface SMSProvider {
   sendSMS(
     phoneNumber: string,
     message: string,
-    options?: any,
+    options?: unknown,
   ): Promise<SMSResult>;
   getDeliveryStatus?(messageId: string): Promise<DeliveryStatus>;
 }
@@ -98,11 +93,11 @@ export interface VoiceProvider {
   makeCall(
     phoneNumber: string,
     message: string,
-    options?: any,
+    options?: unknown,
   ): Promise<VoiceResult>;
   makeMissedCall?(
     phoneNumber: string,
-    options?: any,
+    options?: unknown,
   ): Promise<MissedCallResult>;
 }
 
@@ -147,6 +142,7 @@ export interface PhoneNumberInfo {
 }
 
 export class NumberVerifier extends EventEmitter {
+  private options: NumberVerifierOptions;
   private verificationRequests = new Map<string, PhoneVerificationRequest>();
   private phoneNumberCache = new Map<string, PhoneNumberInfo>();
   private rateLimitTracker = new Map<string, Date[]>();
@@ -170,7 +166,7 @@ export class NumberVerifier extends EventEmitter {
     allowedCountries: ["KR"],
   };
 
-  constructor(private options: Partial<NumberVerifierOptions> = {}) {
+  constructor(options: Partial<NumberVerifierOptions> = {}) {
     super();
     this.options = { ...this.defaultOptions, ...options };
 
@@ -215,7 +211,7 @@ export class NumberVerifier extends EventEmitter {
     const requestId = this.generateRequestId();
     const verificationCode = this.generateVerificationCode();
     const expiresAt = new Date(
-      Date.now() + this.options.codeExpiryMinutes! * 60 * 1000,
+      Date.now() + this.options.codeExpiryMinutes * 60 * 1000,
     );
 
     const verificationRequest: PhoneVerificationRequest = {
@@ -326,7 +322,7 @@ export class NumberVerifier extends EventEmitter {
         (a) => a.purpose === "verify" && a.status === "failed",
       ).length;
 
-      if (failedAttempts >= this.options.maxAttempts!) {
+      if (failedAttempts >= this.options.maxAttempts) {
         request.status = PhoneVerificationStatus.BLOCKED;
         this.emit("verification:blocked", { verificationRequest: request });
 
@@ -339,13 +335,13 @@ export class NumberVerifier extends EventEmitter {
         request.status = PhoneVerificationStatus.FAILED;
         this.emit("verification:failed_attempt", {
           verificationRequest: request,
-          attemptsRemaining: this.options.maxAttempts! - failedAttempts,
+          attemptsRemaining: this.options.maxAttempts - failedAttempts,
         });
 
         return {
           success: false,
           status: PhoneVerificationStatus.FAILED,
-          message: `Invalid code. ${this.options.maxAttempts! - failedAttempts} attempts remaining.`,
+          message: `Invalid code. ${this.options.maxAttempts - failedAttempts} attempts remaining.`,
         };
       }
     }
@@ -381,7 +377,7 @@ export class NumberVerifier extends EventEmitter {
     // Generate new code and extend expiry
     request.verificationCode = this.generateVerificationCode();
     request.expiresAt = new Date(
-      Date.now() + this.options.codeExpiryMinutes! * 60 * 1000,
+      Date.now() + this.options.codeExpiryMinutes * 60 * 1000,
     );
     request.status = PhoneVerificationStatus.PENDING;
 
@@ -435,7 +431,7 @@ export class NumberVerifier extends EventEmitter {
     this.blockedNumbers.add(normalizedPhoneNumber);
 
     // Cancel any pending verifications for this number
-    for (const [requestId, request] of this.verificationRequests) {
+    for (const [_requestId, request] of this.verificationRequests) {
       if (
         request.phoneNumber === normalizedPhoneNumber &&
         request.status !== PhoneVerificationStatus.VERIFIED
@@ -524,7 +520,7 @@ export class NumberVerifier extends EventEmitter {
     }
 
     // Clean up old rate limit entries
-    const rateWindow = this.options.rateLimitMinutes! * 60 * 1000;
+    const rateWindow = this.options.rateLimitMinutes * 60 * 1000;
     for (const [phoneNumber, timestamps] of this.rateLimitTracker) {
       const validTimestamps = timestamps.filter(
         (ts) => now.getTime() - ts.getTime() < rateWindow,
@@ -633,15 +629,15 @@ export class NumberVerifier extends EventEmitter {
 
   private async sendSMS(
     request: PhoneVerificationRequest,
-    phoneInfo: PhoneNumberInfo,
+    _phoneInfo: PhoneNumberInfo,
   ): Promise<void> {
     if (!this.options.smsProvider) {
       throw new Error("SMS provider not configured");
     }
 
-    const message = this.options
-      .smsTemplate!.replace("{code}", request.verificationCode)
-      .replace("{expiry}", this.options.codeExpiryMinutes!.toString());
+    const message = this.options.smsTemplate
+      .replace("{code}", request.verificationCode)
+      .replace("{expiry}", this.options.codeExpiryMinutes.toString());
 
     const result = await this.options.smsProvider.sendSMS(
       request.phoneNumber,
@@ -655,13 +651,13 @@ export class NumberVerifier extends EventEmitter {
 
   private async sendVoiceCall(
     request: PhoneVerificationRequest,
-    phoneInfo: PhoneNumberInfo,
+    _phoneInfo: PhoneNumberInfo,
   ): Promise<void> {
     if (!this.options.voiceProvider) {
       throw new Error("Voice provider not configured");
     }
 
-    const message = this.options.voiceTemplate!.replace(
+    const message = this.options.voiceTemplate.replace(
       "{code}",
       request.verificationCode.split("").join(" "),
     );
@@ -678,7 +674,7 @@ export class NumberVerifier extends EventEmitter {
 
   private async sendMissedCall(
     request: PhoneVerificationRequest,
-    phoneInfo: PhoneNumberInfo,
+    _phoneInfo: PhoneNumberInfo,
   ): Promise<void> {
     if (!this.options.voiceProvider?.makeMissedCall) {
       throw new Error("Missed call verification not supported");
@@ -695,7 +691,7 @@ export class NumberVerifier extends EventEmitter {
     // For missed call verification, the code is typically the last 4-6 digits of the caller ID
     if (result.missedCallNumber) {
       const codeFromNumber = result.missedCallNumber.slice(
-        -this.options.codeLength!,
+        -this.options.codeLength,
       );
       request.verificationCode = codeFromNumber;
     }
@@ -707,8 +703,9 @@ export class NumberVerifier extends EventEmitter {
     const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
 
     // Check cache first
-    if (this.phoneNumberCache.has(normalizedPhoneNumber)) {
-      return this.phoneNumberCache.get(normalizedPhoneNumber)!;
+    const cached = this.phoneNumberCache.get(normalizedPhoneNumber);
+    if (cached) {
+      return cached;
     }
 
     // Basic Korean phone number validation and parsing
@@ -788,7 +785,7 @@ export class NumberVerifier extends EventEmitter {
   private isRateLimited(phoneNumber: string): boolean {
     const normalizedPhoneNumber = this.normalizePhoneNumber(phoneNumber);
     const timestamps = this.rateLimitTracker.get(normalizedPhoneNumber) || [];
-    const rateWindow = this.options.rateLimitMinutes! * 60 * 1000;
+    const rateWindow = this.options.rateLimitMinutes * 60 * 1000;
     const now = new Date();
 
     const recentAttempts = timestamps.filter(
@@ -807,7 +804,7 @@ export class NumberVerifier extends EventEmitter {
       return false;
     }
 
-    return dailyData.count >= this.options.maxDailyAttempts!;
+    return dailyData.count >= this.options.maxDailyAttempts;
   }
 
   private updateRateLimit(phoneNumber: string): void {
@@ -841,7 +838,7 @@ export class NumberVerifier extends EventEmitter {
   }
 
   private generateVerificationCode(): string {
-    const length = this.options.codeLength!;
+    const length = this.options.codeLength;
     let code = "";
 
     for (let i = 0; i < length; i++) {
