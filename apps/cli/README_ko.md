@@ -33,8 +33,12 @@ curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
 설치 스크립트 환경 변수:
 
 - `K_MSG_CLI_VERSION`: 대상 버전 덮어쓰기 (기본값: Pages 스크립트의 최신 버전)
-- `K_MSG_CLI_INSTALL_DIR`: 설치 디렉터리 (기본값: `~/.local/bin`)
+- `K_MSG_CLI_INSTALL_DIR`: 설치 디렉터리 강제 지정 (기본값: 쓰기 가능한 활성 `k-msg` 경로를 우선 감지하고, 실패 시 `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: release base URL 덮어쓰기 (기본값: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+
+PATH 충돌 관련 참고:
+
+- 설치 스크립트는 가능하면 현재 PATH에서 활성화된 `k-msg` 경로를 우선 업데이트하고, 설치 경로와 활성 경로가 다를 때도 활성 경로를 함께 갱신합니다. 이전 bun/npm/curl 설치본이 남아 버전이 뒤섞이는 문제를 줄이기 위한 동작입니다.
 
 ### GitHub Releases (수동 설치)
 
