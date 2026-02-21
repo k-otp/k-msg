@@ -1,5 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import os from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import * as z from "zod";
 import {
@@ -49,35 +48,31 @@ async function formatWithBiome(
   source: string,
   filePath: string,
 ): Promise<string> {
-  const tmpDir = await mkdtemp(path.join(os.tmpdir(), "k-msg-schema-"));
-  const tmpFilePath = path.join(tmpDir, path.basename(filePath));
+  const proc = Bun.spawn(
+    ["bun", "x", "@biomejs/biome", "format", "--stdin-file-path", filePath],
+    {
+      stdin: "pipe",
+      stdout: "pipe",
+      stderr: "pipe",
+    },
+  );
 
-  try {
-    await writeFile(tmpFilePath, source, "utf8");
+  proc.stdin.write(source);
+  proc.stdin.end();
 
-    const process = Bun.spawn(
-      ["bun", "x", "@biomejs/biome", "format", "--write", tmpFilePath],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      },
+  const [exitCode, stdout, stderr] = await Promise.all([
+    proc.exited,
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ]);
+
+  if (exitCode !== 0) {
+    throw new Error(
+      `Biome format failed for ${filePath}: ${stderr.trim() || `exit ${exitCode}`}`,
     );
-
-    const [exitCode, stderr] = await Promise.all([
-      process.exited,
-      new Response(process.stderr).text(),
-    ]);
-
-    if (exitCode !== 0) {
-      throw new Error(
-        `Biome format failed for ${filePath}: ${stderr.trim() || `exit ${exitCode}`}`,
-      );
-    }
-
-    return readFile(tmpFilePath, "utf8");
-  } finally {
-    await rm(tmpDir, { recursive: true, force: true });
   }
+
+  return stdout;
 }
 
 async function renderSchema(target: OutputTarget): Promise<string> {
