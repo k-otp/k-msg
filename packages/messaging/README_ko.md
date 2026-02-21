@@ -200,7 +200,9 @@ const queue = createDrizzleJobQueue({
 | --- | --- |
 | `0.19.x` | `^0.44.0 || ^0.45.0` |
 
-이 라인의 호환성은 CI에서 아래 버전으로 검증합니다:
+이 라인의 호환성은 CI `drizzle-compat` 매트릭스로 검증합니다:
 
-- `drizzle-orm@0.44.7` (최소 검증 타깃)
-- `drizzle-orm@0.45.1` (최대 검증 타깃)
+<!-- drizzle-compat-matrix:start -->
+- `drizzle-orm@0.44.7`
+- `drizzle-orm@0.45.1`
+<!-- drizzle-compat-matrix:end -->
