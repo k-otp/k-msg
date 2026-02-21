@@ -2,7 +2,7 @@
 
 > Canonical docs: [k-msg.and.guide](https://k-msg.and.guide)
 
-Channel and sender number management for the K-Message platform.
+Runtime-first Kakao channel orchestration for `k-msg`.
 
 ## Installation
 
@@ -12,72 +12,65 @@ npm install @k-msg/channel @k-msg/core
 bun add @k-msg/channel @k-msg/core
 ```
 
-## Features
+## Runtime API (`@k-msg/channel`)
 
-- **Channel Management**: Complete channel lifecycle management
-- **Sender Number Registration**: Automated sender number registration and verification
-- **Business Verification**: Business information verification for AlimTalk channels
-- **Permission Management**: Role-based access control for channels
-- **Status Monitoring**: Real-time channel status monitoring
+Root exports are runtime-focused:
 
-## Runtime Compatibility
+- `KakaoChannelCapabilityService`
+- `KakaoChannelBindingResolver`
+- `KakaoChannelLifecycleService`
+- runtime types (`KakaoChannelCapabilityMode`, `KakaoChannelBinding`, `ResolvedKakaoChannelBinding`, `KakaoChannelListItem`, ...)
 
-- Works in Edge runtimes without `nodejs_compat` (no runtime dependency on Node built-ins).
+### Capability modes
 
-## Basic Usage
+- `api`: provider exposes channel onboarding APIs (`list/auth/add/categories`)
+- `manual`: provider requires manual onboarding (no channel onboarding API calls)
+- `none`: provider does not support channel onboarding APIs
 
-```typescript
-import { ChannelService } from '@k-msg/channel';
+### Example: resolve config binding
 
-const channelService = new ChannelService();
+```ts
+import { KakaoChannelBindingResolver } from "@k-msg/channel";
 
-// Create a new AlimTalk channel
-const channel = await channelService.createChannel({
-  name: 'My Business Channel',
-  provider: 'iwinv',
-  businessInfo: {
-    name: 'My Company Ltd.',
-    registrationNumber: '123-45-67890',
-    category: 'E-COMMERCE',
-    contactEmail: 'contact@mycompany.com',
-    contactPhone: '02-1234-5678'
-  }
+const resolver = new KakaoChannelBindingResolver(config);
+
+const resolved = resolver.resolve({
+  providerId: "solapi-main",
+  channelAlias: "main",
+  senderKey: undefined,
+  plusId: undefined,
 });
 
-// Register sender number
-const senderNumber = await channelService.addSenderNumber(channel.id, {
-  phoneNumber: '15881234',
-  purpose: 'MARKETING'
-});
+// precedence: explicit > alias > defaults > provider config
+console.log(resolved.senderKey, resolved.plusId);
 ```
 
-## Channel Verification
+### Example: provider lifecycle calls
 
-```typescript
-// Verify business information
-const verification = await channelService.verifyBusiness(channel.id, {
-  documents: [
-    { type: 'BUSINESS_LICENSE', url: 'https://docs.example.com/license.pdf' },
-    { type: 'REPRESENTATIVE_ID', url: 'https://docs.example.com/id.pdf' }
-  ]
-});
+```ts
+import { KakaoChannelLifecycleService } from "@k-msg/channel";
 
-// Check verification status
-const status = await channelService.getVerificationStatus(channel.id);
-console.log('Verification status:', status);
+const service = new KakaoChannelLifecycleService(provider);
+
+const channels = await service.list();
+if (channels.isSuccess) {
+  console.log(channels.value); // KakaoChannelListItem[] with source="api"
+}
 ```
 
-## Sender Number Management
+## Toolkit API (`@k-msg/channel/toolkit`)
 
-```typescript
-// List all sender numbers for a channel
-const senderNumbers = await channelService.getSenderNumbers(channel.id);
+In-memory channel/sender helpers are now toolkit-only exports:
 
-// Verify sender number with SMS
-await channelService.verifySenderNumber(senderNumber.id, '123456');
+- `KakaoChannelManager`
+- `KakaoSenderNumberManager`
+- `ChannelCRUD`
+- `PermissionManager`
+- `ChannelService`
+- verification helpers and legacy channel types
 
-// Check sender number status
-const numberStatus = await channelService.getSenderNumberStatus(senderNumber.id);
+```ts
+import { KakaoChannelManager } from "@k-msg/channel/toolkit";
 ```
 
 ## License

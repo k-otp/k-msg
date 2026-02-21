@@ -33,6 +33,7 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
+    "@k-msg/channel": "workspace:*",
     "@k-msg/core": "workspace:*",
     "@k-msg/messaging": "workspace:*",
     "@k-msg/provider": "workspace:*",

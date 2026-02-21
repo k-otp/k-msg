@@ -5,7 +5,7 @@ prev: false
 title: "ReplacementError"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:46
+Defined in: [packages/template/src/personalization/variable.replacer.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L46)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:46
 
 > **message**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:52
+Defined in: [packages/template/src/personalization/variable.replacer.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L52)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:52
 
 > `optional` **position**: `object`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:54
+Defined in: [packages/template/src/personalization/variable.replacer.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L54)
 
 #### end
 
@@ -37,7 +37,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:54
 
 > **type**: `"missing_variable"` \| `"format_error"` \| `"syntax_error"` \| `"recursion_limit"`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:47
+Defined in: [packages/template/src/personalization/variable.replacer.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L47)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:47
 
 > `optional` **variable**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:53
+Defined in: [packages/template/src/personalization/variable.replacer.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L53)

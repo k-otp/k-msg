@@ -1,6 +1,7 @@
 [
   "../../packages/analytics/src/index.ts",
   "../../packages/channel/src/index.ts",
+  "../../packages/channel/src/toolkit/index.ts",
   "../../packages/core/src/index.ts",
   "../../packages/k-msg/src/adapters/bun/index.ts",
   "../../packages/k-msg/src/adapters/cloudflare/index.ts",

@@ -1,6 +1,12 @@
 import { defineCommand, option } from "@bunli/core";
+import {
+  KakaoChannelBindingResolver,
+  KakaoChannelCapabilityService,
+  KakaoChannelLifecycleService,
+  type KakaoChannelListItem,
+  type KakaoChannelRuntimeProvider,
+} from "@k-msg/channel";
 import type {
-  KakaoChannelProvider,
   TemplateContext,
   TemplateInspectionProvider,
   TemplateProvider,
@@ -85,9 +91,17 @@ function pickProvider(
 
 function resolveTemplateContextSenderKey(
   runtime: Runtime,
-  input: { channelAlias?: string; senderKey?: string },
+  input: {
+    providerId?: string;
+    channelAlias?: string;
+    senderKey?: string;
+  },
 ): TemplateContext | undefined {
-  const senderKey = resolveKakaoChannelSenderKey(runtime.config, input);
+  const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
+    providerId: input.providerId,
+    channelAlias: input.channelAlias,
+    senderKey: input.senderKey,
+  });
   return senderKey ? { kakaoChannelSenderKey: senderKey } : undefined;
 }
 
@@ -124,9 +138,101 @@ function createTemplateLifecycleService(
   );
 }
 
-const channelCategoriesCmd = defineCommand({
-  name: "categories",
-  description: "List Kakao channel categories (provider-dependent)",
+function createKakaoChannelBindingResolver(
+  runtime: Runtime,
+): KakaoChannelBindingResolver {
+  return new KakaoChannelBindingResolver(runtime.config);
+}
+
+function createKakaoChannelLifecycleService(
+  provider: ProviderWithCapabilities,
+): KakaoChannelLifecycleService {
+  return new KakaoChannelLifecycleService(
+    provider as unknown as KakaoChannelRuntimeProvider,
+    new KakaoChannelCapabilityService(),
+  );
+}
+
+function pickKakaoChannelApiProvider(
+  runtime: Runtime,
+  providerId: string | undefined,
+): ProviderWithCapabilities {
+  const capabilityService = new KakaoChannelCapabilityService();
+
+  if (providerId) {
+    return requireProviderById(runtime, providerId);
+  }
+
+  const candidates = runtime.providers.filter((provider) => {
+    const capability = capabilityService.resolve(
+      provider as unknown as KakaoChannelRuntimeProvider,
+    );
+    return capability.mode === "api";
+  });
+
+  if (candidates.length === 1) {
+    const only = candidates[0];
+    if (!only) {
+      throw new Error("Invariant violation: expected exactly one candidate");
+    }
+    return only;
+  }
+
+  if (candidates.length === 0) {
+    throw new CapabilityNotSupportedError(
+      "No configured provider supports kakao channel api",
+    );
+  }
+
+  throw new Error(
+    `Multiple providers support kakao channel api. Use --provider to pick one: ${candidates
+      .map((candidate) => candidate.id)
+      .join(", ")}`,
+  );
+}
+
+function printKakaoChannelListItems(items: KakaoChannelListItem[]): void {
+  if (items.length === 0) {
+    console.log("(no channels)");
+    return;
+  }
+
+  for (const item of items) {
+    const senderKey = item.senderKey ?? "-";
+    const plusId = item.plusId ? ` ${item.plusId}` : "";
+    const alias = item.alias ? ` alias=${item.alias}` : "";
+    console.log(
+      `${senderKey}${plusId} provider=${item.providerId} source=${item.source}${alias}`,
+    );
+  }
+}
+
+function createRemovedChannelCommand(input: {
+  name: string;
+  replacement: string;
+}) {
+  return defineCommand({
+    name: input.name,
+    description: "Removed command",
+    options: {
+      config: optConfig,
+      json: optJson,
+    },
+    handler: async ({ flags, context }) => {
+      const asJson = shouldUseJsonOutput(flags.json, context);
+      const error = new Error(
+        `kakao channel ${input.name} was removed. Use: ${input.replacement}`,
+      );
+      printError(error, asJson);
+      process.exitCode = 2;
+    },
+  });
+}
+
+const channelBindingListCmd = defineCommand({
+  name: "list",
+  description:
+    "List resolved Kakao channel bindings from config/provider hints",
   options: {
     config: optConfig,
     json: optJson,
@@ -136,22 +242,227 @@ const channelCategoriesCmd = defineCommand({
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
-      const provider = pickProvider(
-        runtime,
-        flags.provider,
-        (p) => hasFunction(p, "listKakaoChannelCategories"),
-        "kakao channel categories",
-      );
+      const resolver = createKakaoChannelBindingResolver(runtime);
+      const result = resolver.list({
+        ...(flags.provider ? { providerId: flags.provider } : {}),
+      });
 
-      const fn = (provider as unknown as KakaoChannelProvider)
-        .listKakaoChannelCategories;
-      if (typeof fn !== "function") {
-        throw new CapabilityNotSupportedError(
-          `Provider '${provider.id}' does not support kakao channel categories`,
+      if (asJson) {
+        console.log(JSON.stringify({ ok: true, result }, null, 2));
+        return;
+      }
+
+      printKakaoChannelListItems(result);
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = exitCodeForError(error);
+    }
+  },
+});
+
+const channelBindingResolveCmd = defineCommand({
+  name: "resolve",
+  description: "Resolve Kakao channel binding with precedence rules",
+  options: {
+    config: optConfig,
+    json: optJson,
+    provider: optProvider,
+    channel: option(z.string().optional(), {
+      description: "Kakao channel alias (from config)",
+    }),
+    "sender-key": option(z.string().optional(), {
+      description: "Kakao channel senderKey override",
+    }),
+    "plus-id": option(z.string().optional(), {
+      description: "Kakao channel plusId override",
+    }),
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const runtime = await loadRuntime(flags.config);
+      const resolver = createKakaoChannelBindingResolver(runtime);
+      const resolved = resolver.resolve({
+        ...(flags.provider ? { providerId: flags.provider } : {}),
+        ...(flags.channel ? { channelAlias: flags.channel } : {}),
+        ...(flags["sender-key"] ? { senderKey: flags["sender-key"] } : {}),
+        ...(flags["plus-id"] ? { plusId: flags["plus-id"] } : {}),
+        strictAlias:
+          typeof flags.channel === "string" && flags.channel.trim().length > 0,
+      });
+
+      if (asJson) {
+        console.log(JSON.stringify({ ok: true, result: resolved }, null, 2));
+        return;
+      }
+
+      console.log(`providerId=${resolved.providerId ?? "-"}`);
+      console.log(`providerType=${resolved.providerType ?? "-"}`);
+      console.log(`senderKey=${resolved.senderKey ?? "-"}`);
+      console.log(`plusId=${resolved.plusId ?? "-"}`);
+      console.log(`providerIdSource=${resolved.providerIdSource}`);
+      if (resolved.senderKeySource) {
+        console.log(`senderKeySource=${resolved.senderKeySource}`);
+      }
+      if (resolved.plusIdSource) {
+        console.log(`plusIdSource=${resolved.plusIdSource}`);
+      }
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = exitCodeForError(error);
+    }
+  },
+});
+
+const channelBindingSetCmd = defineCommand({
+  name: "set",
+  description: "Set aliases.kakaoChannels.<alias> binding entry",
+  options: {
+    config: optConfig,
+    json: optJson,
+    alias: option(z.string().min(1), {
+      description: "Alias key under aliases.kakaoChannels",
+    }),
+    provider: optProvider,
+    "sender-key": option(z.string().optional(), {
+      description: "Kakao channel senderKey",
+    }),
+    "plus-id": option(z.string().optional(), {
+      description: "Kakao channel plusId",
+    }),
+    name: option(z.string().optional(), {
+      description: "Channel name",
+    }),
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const alias = flags.alias.trim();
+      const raw = await loadKMsgConfig(flags.config);
+      raw.config.aliases = raw.config.aliases || {};
+      raw.config.aliases.kakaoChannels = raw.config.aliases.kakaoChannels || {};
+
+      const existing = raw.config.aliases.kakaoChannels[alias];
+      const providerId = flags.provider?.trim() || existing?.providerId?.trim();
+      const senderKey =
+        flags["sender-key"]?.trim() || existing?.senderKey?.trim();
+      const plusId = flags["plus-id"]?.trim() || existing?.plusId?.trim();
+      const name = flags.name?.trim() || existing?.name?.trim();
+
+      if (!providerId) {
+        throw new Error(
+          "providerId is required (use --provider or ensure alias already exists)",
+        );
+      }
+      if (!senderKey && !plusId) {
+        throw new Error(
+          "at least one of --sender-key or --plus-id is required for binding set",
         );
       }
 
-      const result = await fn.call(provider);
+      raw.config.aliases.kakaoChannels[alias] = {
+        providerId,
+        ...(senderKey ? { senderKey } : {}),
+        ...(plusId ? { plusId } : {}),
+        ...(name ? { name } : {}),
+      };
+      await saveKMsgConfig(raw.path, raw.config);
+
+      if (asJson) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: true,
+              result: raw.config.aliases.kakaoChannels[alias],
+            },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
+
+      console.log(`OK alias=${alias}`);
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = exitCodeForError(error);
+    }
+  },
+});
+
+const channelBindingDeleteCmd = defineCommand({
+  name: "delete",
+  description: "Delete aliases.kakaoChannels.<alias> binding entry",
+  options: {
+    config: optConfig,
+    json: optJson,
+    alias: option(z.string().min(1), {
+      description: "Alias key under aliases.kakaoChannels",
+    }),
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const alias = flags.alias.trim();
+      const raw = await loadKMsgConfig(flags.config);
+      const aliases = raw.config.aliases?.kakaoChannels;
+      if (!aliases || !aliases[alias]) {
+        throw new Error(`kakao channel alias not found: ${alias}`);
+      }
+
+      delete aliases[alias];
+      if (Object.keys(aliases).length === 0 && raw.config.aliases) {
+        delete raw.config.aliases.kakaoChannels;
+        if (Object.keys(raw.config.aliases).length === 0) {
+          delete raw.config.aliases;
+        }
+      }
+
+      await saveKMsgConfig(raw.path, raw.config);
+
+      if (asJson) {
+        console.log(JSON.stringify({ ok: true }, null, 2));
+        return;
+      }
+
+      console.log(`OK alias=${alias}`);
+    } catch (error) {
+      printError(error, asJson);
+      process.exitCode = exitCodeForError(error);
+    }
+  },
+});
+
+const channelBindingCmd = defineCommand({
+  name: "binding",
+  description: "Kakao channel binding management (config/provider-hint based)",
+  commands: [
+    channelBindingListCmd,
+    channelBindingResolveCmd,
+    channelBindingSetCmd,
+    channelBindingDeleteCmd,
+  ],
+  handler: async () => {
+    console.log("Use a subcommand: list | resolve | set | delete");
+  },
+});
+
+const channelApiCategoriesCmd = defineCommand({
+  name: "categories",
+  description: "List Kakao channel categories via provider API",
+  options: {
+    config: optConfig,
+    json: optJson,
+    provider: optProvider,
+  },
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
+    try {
+      const runtime = await loadRuntime(flags.config);
+      const provider = pickKakaoChannelApiProvider(runtime, flags.provider);
+      const service = createKakaoChannelLifecycleService(provider);
+      const result = await service.categories();
+
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -178,9 +489,9 @@ const channelCategoriesCmd = defineCommand({
   },
 });
 
-const channelListCmd = defineCommand({
+const channelApiListCmd = defineCommand({
   name: "list",
-  description: "List Kakao channels",
+  description: "List Kakao channels via provider API",
   options: {
     config: optConfig,
     json: optJson,
@@ -196,19 +507,13 @@ const channelListCmd = defineCommand({
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
-      const provider = pickProvider(
-        runtime,
-        flags.provider,
-        (p) => hasFunction(p, "listKakaoChannels"),
-        "kakao channel list",
-      );
-
-      const result = await (
-        provider as unknown as KakaoChannelProvider
-      ).listKakaoChannels.call(provider, {
-        plusId: flags["plus-id"],
-        senderKey: flags["sender-key"],
+      const provider = pickKakaoChannelApiProvider(runtime, flags.provider);
+      const service = createKakaoChannelLifecycleService(provider);
+      const result = await service.list({
+        ...(flags["plus-id"] ? { plusId: flags["plus-id"] } : {}),
+        ...(flags["sender-key"] ? { senderKey: flags["sender-key"] } : {}),
       });
+
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -222,14 +527,7 @@ const channelListCmd = defineCommand({
         return;
       }
 
-      if (result.value.length === 0) {
-        console.log("(no channels)");
-        return;
-      }
-
-      for (const ch of result.value) {
-        console.log(`${ch.senderKey}${ch.plusId ? ` ${ch.plusId}` : ""}`);
-      }
+      printKakaoChannelListItems(result.value);
     } catch (error) {
       printError(error, asJson);
       process.exitCode = exitCodeForError(error);
@@ -237,9 +535,9 @@ const channelListCmd = defineCommand({
   },
 });
 
-const channelAuthCmd = defineCommand({
+const channelApiAuthCmd = defineCommand({
   name: "auth",
-  description: "Request Kakao channel auth number",
+  description: "Request Kakao channel auth number via provider API",
   options: {
     config: optConfig,
     json: optJson,
@@ -253,25 +551,13 @@ const channelAuthCmd = defineCommand({
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
-      const provider = pickProvider(
-        runtime,
-        flags.provider,
-        (p) => hasFunction(p, "requestKakaoChannelAuth"),
-        "kakao channel auth",
-      );
-
-      const fn = (provider as unknown as KakaoChannelProvider)
-        .requestKakaoChannelAuth;
-      if (typeof fn !== "function") {
-        throw new CapabilityNotSupportedError(
-          `Provider '${provider.id}' does not support kakao channel auth`,
-        );
-      }
-
-      const result = await fn.call(provider, {
+      const provider = pickKakaoChannelApiProvider(runtime, flags.provider);
+      const service = createKakaoChannelLifecycleService(provider);
+      const result = await service.auth({
         plusId: flags["plus-id"],
         phoneNumber: flags.phone,
       });
+
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -290,9 +576,9 @@ const channelAuthCmd = defineCommand({
   },
 });
 
-const channelAddCmd = defineCommand({
+const channelApiAddCmd = defineCommand({
   name: "add",
-  description: "Add/register a Kakao channel",
+  description: "Add/register a Kakao channel via provider API",
   options: {
     config: optConfig,
     json: optJson,
@@ -313,26 +599,15 @@ const channelAddCmd = defineCommand({
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
       const runtime = await loadRuntime(flags.config);
-      const provider = pickProvider(
-        runtime,
-        flags.provider,
-        (p) => hasFunction(p, "addKakaoChannel"),
-        "kakao channel add",
-      );
-
-      const fn = (provider as unknown as KakaoChannelProvider).addKakaoChannel;
-      if (typeof fn !== "function") {
-        throw new CapabilityNotSupportedError(
-          `Provider '${provider.id}' does not support kakao channel add`,
-        );
-      }
-
-      const result = await fn.call(provider, {
+      const provider = pickKakaoChannelApiProvider(runtime, flags.provider);
+      const service = createKakaoChannelLifecycleService(provider);
+      const result = await service.add({
         plusId: flags["plus-id"],
         authNum: flags["auth-num"],
         phoneNumber: flags.phone,
         categoryCode: flags["category-code"],
       });
+
       if (result.isFailure) {
         printError(result.error, asJson);
         process.exitCode = exitCodeForError(result.error);
@@ -346,7 +621,7 @@ const channelAddCmd = defineCommand({
           raw.config.aliases.kakaoChannels || {};
         raw.config.aliases.kakaoChannels[flags.save] = {
           providerId: provider.id,
-          plusId: result.value.plusId,
+          ...(result.value.plusId ? { plusId: result.value.plusId } : {}),
           senderKey: result.value.senderKey,
           ...(result.value.name ? { name: result.value.name } : {}),
         };
@@ -369,17 +644,52 @@ const channelAddCmd = defineCommand({
   },
 });
 
+const channelApiCmd = defineCommand({
+  name: "api",
+  description:
+    "Kakao channel provider API operations (api-mode providers only)",
+  commands: [
+    channelApiCategoriesCmd,
+    channelApiListCmd,
+    channelApiAuthCmd,
+    channelApiAddCmd,
+  ],
+  handler: async () => {
+    console.log("Use a subcommand: categories | list | auth | add");
+  },
+});
+
+const removedChannelCategoriesCmd = createRemovedChannelCommand({
+  name: "categories",
+  replacement: "k-msg kakao channel api categories",
+});
+const removedChannelListCmd = createRemovedChannelCommand({
+  name: "list",
+  replacement:
+    "k-msg kakao channel binding list OR k-msg kakao channel api list",
+});
+const removedChannelAuthCmd = createRemovedChannelCommand({
+  name: "auth",
+  replacement: "k-msg kakao channel api auth",
+});
+const removedChannelAddCmd = createRemovedChannelCommand({
+  name: "add",
+  replacement: "k-msg kakao channel api add",
+});
+
 const channelCmd = defineCommand({
   name: "channel",
   description: "Kakao channel management",
   commands: [
-    channelCategoriesCmd,
-    channelListCmd,
-    channelAuthCmd,
-    channelAddCmd,
+    channelBindingCmd,
+    channelApiCmd,
+    removedChannelCategoriesCmd,
+    removedChannelListCmd,
+    removedChannelAuthCmd,
+    removedChannelAddCmd,
   ],
   handler: async () => {
-    console.log("Use a subcommand: categories | list | auth | add");
+    console.log("Use a subcommand: binding | api");
   },
 });
 
@@ -416,6 +726,7 @@ const templateListCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
@@ -484,6 +795,7 @@ const templateGetCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
@@ -549,6 +861,7 @@ const templateCreateCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
@@ -657,6 +970,7 @@ const templateUpdateCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
@@ -751,6 +1065,7 @@ const templateDeleteCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });
@@ -807,6 +1122,7 @@ const templateRequestCmd = defineCommand({
       const templateService = createTemplateLifecycleService(provider);
 
       const ctx = resolveTemplateContextSenderKey(runtime, {
+        providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
       });

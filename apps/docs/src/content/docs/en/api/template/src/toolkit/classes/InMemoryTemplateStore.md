@@ -5,7 +5,7 @@ prev: false
 title: "InMemoryTemplateStore"
 ---
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:5
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L5)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: packages/template/src/toolkit/in-memory-template-store.ts:5
 
 > **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:8
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L8)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: packages/template/src/toolkit/in-memory-template-store.ts:8
 
 > **deleteTemplate**(`templateId`): `Promise`\<`void`\>
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:65
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L65)
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: packages/template/src/toolkit/in-memory-template-store.ts:65
 
 > **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:39
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L39)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Defined in: packages/template/src/toolkit/in-memory-template-store.ts:39
 
 > **renderTemplate**(`templateId`, `variables`): `Promise`\<`string`\>
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:69
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L69)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: packages/template/src/toolkit/in-memory-template-store.ts:69
 
 > **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
 
-Defined in: packages/template/src/toolkit/in-memory-template-store.ts:43
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L43)
 
 #### Parameters
 
