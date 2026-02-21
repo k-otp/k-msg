@@ -7,7 +7,7 @@ title: "validateTemplatePayload"
 
 > **validateTemplatePayload**(`payload`, `options?`): [`Result`](/api/core/src/type-aliases/result/)\<[`NormalizedTemplatePayload`](/api/template/src/type-aliases/normalizedtemplatepayload/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
 
-Defined in: packages/template/src/runtime/template-input.ts:192
+Defined in: [packages/template/src/runtime/template-input.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L188)
 
 ## Parameters
 

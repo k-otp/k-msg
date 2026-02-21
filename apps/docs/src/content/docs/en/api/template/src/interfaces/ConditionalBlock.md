@@ -5,7 +5,7 @@ prev: false
 title: "ConditionalBlock"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:57
+Defined in: [packages/template/src/personalization/variable.replacer.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L57)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:57
 
 > **condition**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:58
+Defined in: [packages/template/src/personalization/variable.replacer.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L58)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:58
 
 > **content**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:59
+Defined in: [packages/template/src/personalization/variable.replacer.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L59)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:59
 
 > `optional` **elseContent**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:60
+Defined in: [packages/template/src/personalization/variable.replacer.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L60)

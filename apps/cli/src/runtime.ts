@@ -1,4 +1,10 @@
 import {
+  KakaoChannelBindingResolver,
+  type KakaoChannelResolveInput,
+  type KakaoChannelResolverConfig,
+  type ResolvedKakaoChannelBinding,
+} from "@k-msg/channel";
+import {
   type KMsgError,
   type MessageRepository,
   ok,
@@ -83,46 +89,53 @@ export type Runtime = {
   kmsg: KMsg;
 };
 
+export function createKakaoChannelBindingResolver(
+  config: KMsgCliConfig,
+): KakaoChannelBindingResolver {
+  return new KakaoChannelBindingResolver(
+    config as unknown as KakaoChannelResolverConfig,
+  );
+}
+
+export function resolveKakaoChannelBinding(
+  config: KMsgCliConfig,
+  input?: KakaoChannelResolveInput,
+): ResolvedKakaoChannelBinding {
+  return createKakaoChannelBindingResolver(config).resolve(input);
+}
+
 export function resolveKakaoChannelSenderKey(
   config: KMsgCliConfig,
-  input?: { channelAlias?: string; senderKey?: string },
+  input?: {
+    providerId?: string;
+    channelAlias?: string;
+    senderKey?: string;
+    plusId?: string;
+  },
 ): string | undefined {
-  const explicit = input?.senderKey?.trim();
-  if (explicit) return explicit;
-
-  const alias = input?.channelAlias?.trim();
-  if (alias) {
-    const entry = config.aliases?.kakaoChannels?.[alias];
-    return entry?.senderKey;
-  }
-
-  const defaults = config.defaults?.kakao;
-  if (defaults?.senderKey) return defaults.senderKey;
-  if (defaults?.channel) {
-    return config.aliases?.kakaoChannels?.[defaults.channel]?.senderKey;
-  }
-  return undefined;
+  return resolveKakaoChannelBinding(config, {
+    providerId: input?.providerId,
+    channelAlias: input?.channelAlias,
+    senderKey: input?.senderKey,
+    plusId: input?.plusId,
+  }).senderKey;
 }
 
 export function resolveKakaoChannelPlusId(
   config: KMsgCliConfig,
-  input?: { channelAlias?: string; plusId?: string },
+  input?: {
+    providerId?: string;
+    channelAlias?: string;
+    senderKey?: string;
+    plusId?: string;
+  },
 ): string | undefined {
-  const explicit = input?.plusId?.trim();
-  if (explicit) return explicit;
-
-  const alias = input?.channelAlias?.trim();
-  if (alias) {
-    const entry = config.aliases?.kakaoChannels?.[alias];
-    if (entry?.plusId) return entry.plusId;
-  }
-
-  const defaults = config.defaults?.kakao;
-  if (defaults?.plusId) return defaults.plusId;
-  if (defaults?.channel) {
-    return config.aliases?.kakaoChannels?.[defaults.channel]?.plusId;
-  }
-  return undefined;
+  return resolveKakaoChannelBinding(config, {
+    providerId: input?.providerId,
+    channelAlias: input?.channelAlias,
+    senderKey: input?.senderKey,
+    plusId: input?.plusId,
+  }).plusId;
 }
 
 export async function loadRuntime(configPath?: string): Promise<Runtime> {
@@ -148,8 +161,9 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
     providersById.set(provider.id, provider);
   }
 
-  const senderKey = resolveKakaoChannelSenderKey(resolved);
-  const plusId = resolveKakaoChannelPlusId(resolved);
+  const defaultKakaoBinding = resolveKakaoChannelBinding(resolved);
+  const senderKey = defaultKakaoBinding.senderKey;
+  const plusId = defaultKakaoBinding.plusId;
 
   const routing = resolved.routing
     ? {

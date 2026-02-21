@@ -5,7 +5,7 @@ prev: false
 title: "LoopBlock"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:63
+Defined in: [packages/template/src/personalization/variable.replacer.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L63)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:63
 
 > **array**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:65
+Defined in: [packages/template/src/personalization/variable.replacer.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L65)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:65
 
 > **content**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:66
+Defined in: [packages/template/src/personalization/variable.replacer.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L66)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:66
 
 > **variable**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:64
+Defined in: [packages/template/src/personalization/variable.replacer.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L64)

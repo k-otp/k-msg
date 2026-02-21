@@ -5,7 +5,7 @@ prev: false
 title: "TemplateVariableInfo"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:18
+Defined in: [packages/template/src/personalization/variable.replacer.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L18)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:18
 
 > **formatted**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:21
+Defined in: [packages/template/src/personalization/variable.replacer.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L21)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:21
 
 > **name**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:19
+Defined in: [packages/template/src/personalization/variable.replacer.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L19)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:19
 
 > **position**: `object`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:30
+Defined in: [packages/template/src/personalization/variable.replacer.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L30)
 
 #### end
 
@@ -45,7 +45,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:30
 
 > **type**: `"string"` \| `"number"` \| `"boolean"` \| `"undefined"` \| `"object"` \| `"date"` \| `"array"`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:22
+Defined in: [packages/template/src/personalization/variable.replacer.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L22)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:22
 
 > **value**: `any`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:20
+Defined in: [packages/template/src/personalization/variable.replacer.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L20)

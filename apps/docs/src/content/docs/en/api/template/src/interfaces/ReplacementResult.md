@@ -5,7 +5,7 @@ prev: false
 title: "ReplacementResult"
 ---
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:33
+Defined in: [packages/template/src/personalization/variable.replacer.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L33)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:33
 
 > **content**: `string`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:34
+Defined in: [packages/template/src/personalization/variable.replacer.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L34)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:34
 
 > **errors**: [`ReplacementError`](/api/template/src/interfaces/replacementerror/)[]
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:37
+Defined in: [packages/template/src/personalization/variable.replacer.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L37)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:37
 
 > **metadata**: `object`
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:38
+Defined in: [packages/template/src/personalization/variable.replacer.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L38)
 
 #### finalLength
 
@@ -53,7 +53,7 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:38
 
 > **missingVariables**: `string`[]
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:36
+Defined in: [packages/template/src/personalization/variable.replacer.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L36)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: packages/template/src/personalization/variable.replacer.ts:36
 
 > **variables**: [`TemplateVariableInfo`](/api/template/src/interfaces/templatevariableinfo/)[]
 
-Defined in: packages/template/src/personalization/variable.replacer.ts:35
+Defined in: [packages/template/src/personalization/variable.replacer.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L35)
