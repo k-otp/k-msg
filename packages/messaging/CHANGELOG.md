@@ -1,5 +1,14 @@
 # @k-msg/messaging
 
+## 0.19.1 — 2026-02-21
+
+### Patch changes
+
+- [be87ed1](https://github.com/k-otp/k-msg/commit/be87ed17146915a4595bcd7c810c67a1de609cff) Fix Drizzle SQL client rendering for parameterized queries in Cloudflare adapters by returning a Drizzle-compatible query wrapper (`getSQL().toQuery()`) instead of a plain `{ sql, params }` object.
+  
+  This resolves runtime failures like `query.getSQL is not a function` when `createDrizzleDeliveryTrackingStore` and other Drizzle-backed Cloudflare adapters execute parameterized SQL against Postgres connections. — Thanks @imjlk!
+- Updated dependencies: core@0.19.1
+
 ## 0.19.0 — 2026-02-19
 
 ### Minor changes
