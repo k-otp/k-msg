@@ -282,6 +282,19 @@ const queue = createDrizzleJobQueue({
 });
 ```
 
+### Supported Drizzle Versions
+
+| `@k-msg/messaging` | Supported `drizzle-orm` |
+| --- | --- |
+| `0.19.x` | `^0.44.0 || ^0.45.0` |
+
+Compatibility for this line is validated in CI against the `drizzle-compat` matrix:
+
+<!-- drizzle-compat-matrix:start -->
+- `drizzle-orm@0.44.7`
+- `drizzle-orm@0.45.1`
+<!-- drizzle-compat-matrix:end -->
+
 ## Tracking-based API failover
 
 When provider-native ALIMTALK failover is unsupported or partial, you can enable tracking-based API failover.
