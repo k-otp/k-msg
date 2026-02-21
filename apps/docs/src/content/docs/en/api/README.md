@@ -29,3 +29,5 @@ title: "k-msg-workspace"
 - [template/src](/api/template/src/readme/)
 - [template/src/toolkit](/api/template/src/toolkit/readme/)
 - [webhook/src](/api/webhook/src/readme/)
+- [webhook/src/adapters/cloudflare](/api/webhook/src/adapters/cloudflare/readme/)
+- [webhook/src/toolkit](/api/webhook/src/toolkit/readme/)

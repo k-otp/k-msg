@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:36](https://github.com
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -375,7 +375,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com
 
 ### searchEvents()
 
-> **searchEvents**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
+> **searchEvents**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
 
 Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L91)
 
@@ -385,15 +385,15 @@ Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com
 
 ##### filter?
 
-[`EventFilter`](/api/webhook/src/interfaces/eventfilter/) = `{}`
+[`EventFilter`](/api/webhook/src/toolkit/interfaces/eventfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
+`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
 
 ***
 

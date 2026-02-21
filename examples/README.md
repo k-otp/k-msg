@@ -37,6 +37,12 @@ This directory contains runnable templates for common integration setups.
   - Uses `@k-msg/provider` (IWINV)
   - No `nodejs_compat` required
 
+- `hono-worker-webhook-d1`
+  - Hono + Cloudflare Workers
+  - Runtime-first webhook endpoint registration + emit APIs
+  - D1-backed webhook endpoint/delivery persistence
+  - Uses `@k-msg/webhook` + `@k-msg/webhook/adapters/cloudflare`
+
 ## Notes
 
 - These templates are intentionally minimal and focused on wiring.

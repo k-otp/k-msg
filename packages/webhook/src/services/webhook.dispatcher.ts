@@ -13,41 +13,39 @@ export interface HttpClient {
 }
 
 export class DefaultHttpClient implements HttpClient {
-  async fetch(url: string, options: RequestInit): Promise<Response> {
-    return fetch(url, options);
+  async fetch(url: string, _options: RequestInit): Promise<Response> {
+    return fetch(url, _options);
   }
 }
 
 export class MockHttpClient implements HttpClient {
   private responses: Map<string, Response> = new Map();
+  private defaultResponse: Response = new Response(
+    JSON.stringify({ status: "ok" }),
+    {
+      status: 200,
+      statusText: "OK",
+      headers: { "content-type": "application/json" },
+    },
+  );
 
   setMockResponse(url: string, response: Response): void {
     this.responses.set(url, response);
   }
 
-  async fetch(url: string, options: RequestInit): Promise<Response> {
-    // For test URLs, return mock responses
-    if (url.includes("webhook.example.com") || url.includes("test-")) {
-      // Add small delay to simulate network latency
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 10 + 5),
-      );
+  setDefaultResponse(response: Response): void {
+    this.defaultResponse = response;
+  }
 
-      const mockResponse = this.responses.get(url);
-      if (mockResponse) {
-        return mockResponse;
-      }
-
-      // Default success response for test URLs
-      return new Response(JSON.stringify({ status: "ok" }), {
-        status: 200,
-        statusText: "OK",
-        headers: { "content-type": "application/json" },
-      });
+  async fetch(url: string, _options: RequestInit): Promise<Response> {
+    // Keep mock client fully deterministic and side-effect free.
+    const mockResponse = this.responses.get(url);
+    if (mockResponse) {
+      return mockResponse;
     }
 
-    // For non-test URLs, use real fetch
-    return fetch(url, options);
+    // Do not make real network calls from the mock client.
+    return this.defaultResponse;
   }
 }
 

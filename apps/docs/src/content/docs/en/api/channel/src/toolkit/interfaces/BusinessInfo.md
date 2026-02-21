@@ -5,7 +5,7 @@ prev: false
 title: "BusinessInfo"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:15
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L15)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:15
 
 > **address**: `object`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:21
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L21)
 
 #### city
 
@@ -41,7 +41,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:21
 
 > **businessName**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:16
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L16)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:16
 
 > **businessRegistrationNumber**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:17
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L17)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:17
 
 > **businessType**: `"corporation"` \| `"individual"` \| `"partnership"` \| `"other"`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:18
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L18)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:18
 
 > **contactInfo**: `object`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:28
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L28)
 
 #### email
 
@@ -85,7 +85,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:28
 
 > **establishedDate**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:20
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L20)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:20
 
 > **industry**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:19
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L19)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:19
 
 > **representatives**: `object`[]
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:33
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L33)
 
 #### email
 

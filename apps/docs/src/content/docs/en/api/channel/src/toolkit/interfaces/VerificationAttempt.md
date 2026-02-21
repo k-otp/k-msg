@@ -5,7 +5,7 @@ prev: false
 title: "VerificationAttempt"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:33
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L28)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:33
 
 > **attemptedAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:40
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L35)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:40
 
 > **attemptNumber**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:39
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L34)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:39
 
 > `optional` **failureReason**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:43
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L38)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:43
 
 > **method**: [`VerificationMethod`](/api/channel/src/toolkit/enumerations/verificationmethod/)
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:41
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L36)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:41
 
 > `optional` **purpose**: `"send"` \| `"verify"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:38
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L33)
 
 Distinguish provider/send attempts from user verification attempts.
 This prevents send failures from consuming user attempt limits.
@@ -56,7 +56,7 @@ This prevents send failures from consuming user attempt limits.
 
 > `optional` **responseTime**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:44
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L39)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:44
 
 > **status**: `"failed"` \| `"sent"` \| `"delivered"` \| `"verified"` \| `"expired"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:42
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L37)

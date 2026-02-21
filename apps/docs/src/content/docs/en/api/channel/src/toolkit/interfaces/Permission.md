@@ -5,7 +5,7 @@ prev: false
 title: "Permission"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:28
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L28)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:28
 
 > **action**: [`ActionType`](/api/channel/src/toolkit/enumerations/actiontype/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:31
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L31)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:31
 
 > `optional` **conditions**: `PermissionCondition`[]
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:33
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L33)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:33
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:29
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L29)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:29
 
 > **resource**: [`ResourceType`](/api/channel/src/toolkit/enumerations/resourcetype/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:30
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L30)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:30
 
 > **scope**: [`PermissionScope`](/api/channel/src/toolkit/enumerations/permissionscope/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:32
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L32)

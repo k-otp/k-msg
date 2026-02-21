@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:34](https://github.
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -385,7 +385,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:51](https://github.
 
 ### searchDeliveries()
 
-> **searchDeliveries**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
+> **searchDeliveries**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
 
 Defined in: [packages/webhook/src/registry/delivery.store.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L89)
 
@@ -395,15 +395,15 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:89](https://github.
 
 ##### filter?
 
-[`DeliveryFilter`](/api/webhook/src/interfaces/deliveryfilter/) = `{}`
+[`DeliveryFilter`](/api/webhook/src/toolkit/interfaces/deliveryfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
+`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
 
 ***
 

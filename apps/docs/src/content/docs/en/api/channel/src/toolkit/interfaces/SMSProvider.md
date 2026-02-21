@@ -5,7 +5,7 @@ prev: false
 title: "SMSProvider"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:84
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L79)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:84
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:85
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L80)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:85
 
 > **name**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:86
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L81)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:86
 
 > `optional` **getDeliveryStatus**(`messageId`): `Promise`\<`DeliveryStatus`\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:92
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L87)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:92
 
 > **sendSMS**(`phoneNumber`, `message`, `options?`): `Promise`\<`SMSResult`\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:87
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L82)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:87
 
 ##### options?
 
-`any`
+`unknown`
 
 #### Returns
 

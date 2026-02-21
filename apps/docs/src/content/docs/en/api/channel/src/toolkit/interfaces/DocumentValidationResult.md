@@ -5,7 +5,7 @@ prev: false
 title: "DocumentValidationResult"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:66
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L66)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:66
 
 > **confidence**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:68
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L68)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:68
 
 > `optional` **extractedData**: `Record`\<`string`, `any`\>
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:69
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L69)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:69
 
 > **issues**: `object`[]
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:70
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L70)
 
 #### message
 
@@ -49,4 +49,4 @@ Defined in: packages/channel/src/toolkit/verification/business.verify.ts:70
 
 > **isValid**: `boolean`
 
-Defined in: packages/channel/src/toolkit/verification/business.verify.ts:67
+Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L67)

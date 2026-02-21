@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelBinding"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:22
+Defined in: [packages/channel/src/runtime/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L22)
 
 ## Extended by
 
@@ -18,7 +18,7 @@ Defined in: packages/channel/src/runtime/types.ts:22
 
 > `optional` **alias**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:23
+Defined in: [packages/channel/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L23)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: packages/channel/src/runtime/types.ts:23
 
 > `optional` **name**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:27
+Defined in: [packages/channel/src/runtime/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L27)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: packages/channel/src/runtime/types.ts:27
 
 > `optional` **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:26
+Defined in: [packages/channel/src/runtime/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L26)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: packages/channel/src/runtime/types.ts:26
 
 > `optional` **providerId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:24
+Defined in: [packages/channel/src/runtime/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L24)
 
 ***
 
@@ -50,4 +50,4 @@ Defined in: packages/channel/src/runtime/types.ts:24
 
 > `optional` **senderKey**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:25
+Defined in: [packages/channel/src/runtime/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L25)
