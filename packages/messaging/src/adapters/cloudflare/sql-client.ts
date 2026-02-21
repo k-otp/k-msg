@@ -51,6 +51,18 @@ export interface CreateDrizzleSqlClientOptions {
   close?: CloudflareSqlClient["close"];
 }
 
+interface DrizzleSqlQueryLike {
+  toQuery(_config: unknown): {
+    sql: string;
+    params: unknown[];
+    typings?: unknown[];
+  };
+}
+
+interface DrizzleSqlQueryWrapperLike {
+  getSQL(): DrizzleSqlQueryLike;
+}
+
 function toNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -69,10 +81,18 @@ function defaultDrizzleQueryRenderer(input: {
   params: readonly unknown[];
 }): unknown {
   if (input.params.length === 0) return input.sql;
-  return {
-    sql: input.sql,
-    params: [...input.params],
+  const sql = input.sql;
+  const params = [...input.params];
+  const wrapped: DrizzleSqlQueryWrapperLike = {
+    getSQL(): DrizzleSqlQueryLike {
+      return {
+        toQuery() {
+          return { sql, params: [...params] };
+        },
+      };
+    },
   };
+  return wrapped;
 }
 
 function defaultDrizzleResultNormalizer<T = Record<string, unknown>>(input: {
