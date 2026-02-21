@@ -5,7 +5,7 @@ prev: false
 title: "PermissionCheck"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:86
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L86)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:86
 
 > **action**: [`ActionType`](/api/channel/src/toolkit/enumerations/actiontype/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:89
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L89)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:89
 
 > `optional` **context**: [`AccessContext`](/api/channel/src/toolkit/interfaces/accesscontext/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:91
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L91)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:91
 
 > **resource**: [`ResourceType`](/api/channel/src/toolkit/enumerations/resourcetype/)
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:88
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L88)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:88
 
 > `optional` **resourceId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:90
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L90)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:90
 
 > **userId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:87
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L87)

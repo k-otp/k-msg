@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelApiAdapter"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:76
+Defined in: [packages/channel/src/runtime/types.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L76)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/runtime/types.ts:76
 
 > **add**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/channel/src/runtime/types.ts:82
+Defined in: [packages/channel/src/runtime/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L82)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/channel/src/runtime/types.ts:82
 
 > **auth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/channel/src/runtime/types.ts:81
+Defined in: [packages/channel/src/runtime/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L81)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: packages/channel/src/runtime/types.ts:81
 
 > **categories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/channel/src/runtime/types.ts:80
+Defined in: [packages/channel/src/runtime/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L80)
 
 #### Returns
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/runtime/types.ts:80
 
 > **list**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/channel/src/runtime/types.ts:77
+Defined in: [packages/channel/src/runtime/types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L77)
 
 #### Parameters
 

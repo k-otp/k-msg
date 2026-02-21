@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelCapability"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:85
+Defined in: [packages/channel/src/runtime/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L85)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/runtime/types.ts:85
 
 > **mode**: [`KakaoChannelCapabilityMode`](/api/channel/src/type-aliases/kakaochannelcapabilitymode/)
 
-Defined in: packages/channel/src/runtime/types.ts:88
+Defined in: [packages/channel/src/runtime/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L88)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/runtime/types.ts:88
 
 > **providerId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:86
+Defined in: [packages/channel/src/runtime/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L86)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/runtime/types.ts:86
 
 > `optional` **providerType**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:87
+Defined in: [packages/channel/src/runtime/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L87)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/runtime/types.ts:87
 
 > **supports**: `object`
 
-Defined in: packages/channel/src/runtime/types.ts:89
+Defined in: [packages/channel/src/runtime/types.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L89)
 
 #### add
 

@@ -5,7 +5,7 @@ prev: false
 title: "VerificationType"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:47
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L42)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:47
 
 > **HYBRID**: `"hybrid"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:50
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L45)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:50
 
 > **SMS**: `"sms"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:48
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L43)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:48
 
 > **VOICE\_CALL**: `"voice_call"`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:49
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L44)

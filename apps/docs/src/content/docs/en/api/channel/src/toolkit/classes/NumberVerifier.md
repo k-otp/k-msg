@@ -5,7 +5,7 @@ prev: false
 title: "NumberVerifier"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:149
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L144)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:149
 
 > **new NumberVerifier**(`options?`): `NumberVerifier`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:173
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L169)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:173
 
 > **addListener**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:16
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L16)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:16
 
 > **blockPhoneNumber**(`phoneNumber`, `reason?`): `void`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:433
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:429](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L429)
 
 Block a phone number from verification
 
@@ -89,7 +89,7 @@ Block a phone number from verification
 
 > **cancelVerification**(`requestId`): `Promise`\<`boolean`\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:414
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:410](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L410)
 
 Cancel verification request
 
@@ -109,7 +109,7 @@ Cancel verification request
 
 > **cleanup**(): `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:511
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:507](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L507)
 
 Clean up expired verification requests
 
@@ -123,7 +123,7 @@ Clean up expired verification requests
 
 > **emit**(`eventName`, ...`args`): `boolean`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:44
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L44)
 
 #### Parameters
 
@@ -149,7 +149,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:44
 
 > **eventNames**(): `string`[]
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:71
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L71)
 
 #### Returns
 
@@ -165,7 +165,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:71
 
 > **getVerificationStats**(): `object`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:462
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:458](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L458)
 
 Get verification statistics
 
@@ -199,7 +199,7 @@ Get verification statistics
 
 > **getVerificationStatus**(`requestId`): [`PhoneVerificationRequest`](/api/channel/src/toolkit/interfaces/phoneverificationrequest/) \| `null`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:407
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L403)
 
 Get verification request status
 
@@ -219,7 +219,7 @@ Get verification request status
 
 > **listenerCount**(`eventName`): `number`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:67
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L67)
 
 #### Parameters
 
@@ -241,7 +241,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:67
 
 > **off**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:20
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L20)
 
 #### Parameters
 
@@ -267,7 +267,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:20
 
 > **on**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:9
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L9)
 
 #### Parameters
 
@@ -293,7 +293,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:9
 
 > **once**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:35
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L35)
 
 #### Parameters
 
@@ -319,7 +319,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:35
 
 > **removeAllListeners**(`eventName?`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:57
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L57)
 
 #### Parameters
 
@@ -341,7 +341,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:57
 
 > **removeListener**(`eventName`, `listener`): `this`
 
-Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:31
+Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/shared/event-emitter.ts#L31)
 
 #### Parameters
 
@@ -367,7 +367,7 @@ Defined in: packages/channel/src/toolkit/shared/event-emitter.ts:31
 
 > **resendCode**(`requestId`, `method?`): `Promise`\<[`PhoneVerificationRequest`](/api/channel/src/toolkit/interfaces/phoneverificationrequest/)\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:357
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:353](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L353)
 
 Resend verification code
 
@@ -391,7 +391,7 @@ Resend verification code
 
 > **startVerification**(`senderNumberId`, `phoneNumber`, `verificationType?`, `metadata?`): `Promise`\<[`PhoneVerificationRequest`](/api/channel/src/toolkit/interfaces/phoneverificationrequest/)\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:186
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L182)
 
 Start phone number verification process
 
@@ -441,7 +441,7 @@ Start phone number verification process
 
 > **unblockPhoneNumber**(`phoneNumber`): `void`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:453
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:449](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L449)
 
 Unblock a phone number
 
@@ -461,7 +461,7 @@ Unblock a phone number
 
 > **verifyCode**(`requestId`, `providedCode`): `Promise`\<\{ `message`: `string`; `status`: [`PhoneVerificationStatus`](/api/channel/src/toolkit/enumerations/phoneverificationstatus/); `success`: `boolean`; \}\>
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:249
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L245)
 
 Verify the provided code
 

@@ -19,6 +19,7 @@ interface EndpointHealth {
 export class LoadBalancer extends EventEmitter {
   private config: LoadBalancerConfig;
   private endpointHealth: Map<string, EndpointHealth> = new Map();
+  private endpoints: Map<string, WebhookEndpoint> = new Map();
   private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
   private connectionCounts: Map<string, number> = new Map();
   private roundRobinIndex = 0;
@@ -52,6 +53,7 @@ export class LoadBalancer extends EventEmitter {
     };
 
     this.endpointHealth.set(endpoint.id, health);
+    this.endpoints.set(endpoint.id, endpoint);
     this.connectionCounts.set(endpoint.id, 0);
 
     // 초기 건강 상태 확인
@@ -68,6 +70,7 @@ export class LoadBalancer extends EventEmitter {
    */
   async unregisterEndpoint(endpointId: string): Promise<void> {
     this.endpointHealth.delete(endpointId);
+    this.endpoints.delete(endpointId);
     this.circuitBreakers.delete(endpointId);
     this.connectionCounts.delete(endpointId);
 
@@ -425,25 +428,10 @@ export class LoadBalancer extends EventEmitter {
    */
   private startHealthChecks(): void {
     this.healthCheckInterval = setInterval(async () => {
-      const endpoints = Array.from(this.endpointHealth.keys());
+      const endpoints = Array.from(this.endpoints.values());
 
-      for (const endpointId of endpoints) {
-        const health = this.endpointHealth.get(endpointId);
-        if (health) {
-          // 실제 구현에서는 엔드포인트 정보를 저장해야 함
-          // 여기서는 모킹된 엔드포인트 사용
-          const mockEndpoint: WebhookEndpoint = {
-            id: endpointId,
-            url: `https://webhook.example.com/${endpointId}`,
-            active: true,
-            events: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            status: "active",
-          };
-
-          await this.checkEndpointHealth(mockEndpoint);
-        }
+      for (const endpoint of endpoints) {
+        await this.checkEndpointHealth(endpoint);
       }
     }, this.config.healthCheckInterval);
   }

@@ -5,7 +5,7 @@ prev: false
 title: "AccessContext"
 ---
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:78
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L78)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:78
 
 > `optional` **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:83
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L83)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:83
 
 > `optional` **organizationId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:80
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L80)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:80
 
 > `optional` **resourceOwnerId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:82
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L82)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:82
 
 > `optional` **teamId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:81
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L81)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/channel/src/toolkit/management/permissions.ts:81
 
 > **userId**: `string`
 
-Defined in: packages/channel/src/toolkit/management/permissions.ts:79
+Defined in: [packages/channel/src/toolkit/management/permissions.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L79)

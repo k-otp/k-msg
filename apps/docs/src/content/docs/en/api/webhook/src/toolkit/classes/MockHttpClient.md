@@ -25,9 +25,9 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:21](https://git
 
 ### fetch()
 
-> **fetch**(`url`, `options`): `Promise`\<`Response`\>
+> **fetch**(`url`, `_options`): `Promise`\<`Response`\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L28)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L40)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:28](https://git
 
 `string`
 
-##### options
+##### \_options
 
 `RequestInit`
 
@@ -49,11 +49,29 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:28](https://git
 
 ***
 
+### setDefaultResponse()
+
+> **setDefaultResponse**(`response`): `void`
+
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L36)
+
+#### Parameters
+
+##### response
+
+`Response`
+
+#### Returns
+
+`void`
+
+***
+
 ### setMockResponse()
 
 > **setMockResponse**(`url`, `response`): `void`
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L24)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L32)
 
 #### Parameters
 

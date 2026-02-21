@@ -5,7 +5,7 @@ prev: false
 title: "NumberVerifierOptions"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:68
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L63)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:68
 
 > **allowedCountries**: `string`[]
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:79
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L74)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:79
 
 > **blockedNumbers**: `string`[]
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:78
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L73)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:78
 
 > **codeExpiryMinutes**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:70
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L65)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:70
 
 > **codeLength**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:69
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L64)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:69
 
 > **enableMissedCallVerification**: `boolean`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:77
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L72)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:77
 
 > **enableVoiceFallback**: `boolean`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:76
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L71)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:76
 
 > **maxAttempts**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:71
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L66)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:71
 
 > **maxDailyAttempts**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:72
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L67)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:72
 
 > **rateLimitMinutes**: `number`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:75
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L70)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:75
 
 > `optional` **smsProvider**: [`SMSProvider`](/api/channel/src/toolkit/interfaces/smsprovider/)
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:80
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L75)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:80
 
 > **smsTemplate**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:73
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L68)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:73
 
 > `optional` **voiceProvider**: [`VoiceProvider`](/api/channel/src/toolkit/interfaces/voiceprovider/)
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:81
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L76)
 
 ***
 
@@ -109,4 +109,4 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:81
 
 > **voiceTemplate**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:74
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L69)

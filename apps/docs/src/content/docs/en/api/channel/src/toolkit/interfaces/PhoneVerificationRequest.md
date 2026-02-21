@@ -5,7 +5,7 @@ prev: false
 title: "PhoneVerificationRequest"
 ---
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:13
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L8)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:13
 
 > **attempts**: [`VerificationAttempt`](/api/channel/src/toolkit/interfaces/verificationattempt/)[]
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:20
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L15)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:20
 
 > `optional` **completedAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:23
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L18)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:23
 
 > **createdAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:22
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L17)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:22
 
 > **expiresAt**: `Date`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:21
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L16)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:21
 
 > **id**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:14
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L9)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:14
 
 > **metadata**: `object`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:24
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L19)
 
 #### callProvider?
 
@@ -81,7 +81,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:24
 
 > **phoneNumber**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:16
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L11)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:16
 
 > **senderNumberId**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:15
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L10)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:15
 
 > **status**: [`PhoneVerificationStatus`](/api/channel/src/toolkit/enumerations/phoneverificationstatus/)
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:19
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L14)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:19
 
 > **verificationCode**: `string`
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:18
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L13)
 
 ***
 
@@ -113,4 +113,4 @@ Defined in: packages/channel/src/toolkit/verification/number.verify.ts:18
 
 > **verificationType**: [`VerificationType`](/api/channel/src/toolkit/enumerations/verificationtype/)
 
-Defined in: packages/channel/src/toolkit/verification/number.verify.ts:17
+Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L12)

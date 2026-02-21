@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelResolveInput"
 ---
 
-Defined in: packages/channel/src/runtime/types.ts:134
+Defined in: [packages/channel/src/runtime/types.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L134)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/channel/src/runtime/types.ts:134
 
 > `optional` **channelAlias**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:136
+Defined in: [packages/channel/src/runtime/types.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L136)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/channel/src/runtime/types.ts:136
 
 > `optional` **plusId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:138
+Defined in: [packages/channel/src/runtime/types.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L138)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/channel/src/runtime/types.ts:138
 
 > `optional` **providerId**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:135
+Defined in: [packages/channel/src/runtime/types.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L135)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/channel/src/runtime/types.ts:135
 
 > `optional` **senderKey**: `string`
 
-Defined in: packages/channel/src/runtime/types.ts:137
+Defined in: [packages/channel/src/runtime/types.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L137)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/channel/src/runtime/types.ts:137
 
 > `optional` **strictAlias**: `boolean`
 
-Defined in: packages/channel/src/runtime/types.ts:139
+Defined in: [packages/channel/src/runtime/types.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L139)
