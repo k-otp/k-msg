@@ -18,6 +18,10 @@ k-msg --help
 `checksums.txt`로 검증한 뒤 OS 캐시 디렉터리에 압축 해제/캐시합니다.
 (`K_MSG_CLI_CACHE_DIR`로 경로를 덮어쓸 수 있습니다)
 
+새 네이티브 바이너리를 설치할 때 런처는 PATH 상의 쓰기 가능한 기존 `k-msg`
+바이너리(예: 오래된 curl 설치본)도 best-effort로 함께 동기화합니다.
+이 동작을 끄려면 `K_MSG_CLI_SYNC_PATHS=0`을 설정하세요.
+
 환경 변수 오버라이드:
 
 - `K_MSG_CLI_BASE_URL`: GitHub release base URL 덮어쓰기 (기본값: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
