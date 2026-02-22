@@ -5,7 +5,7 @@ prev: false
 title: "WebhookPersistence"
 ---
 
-Defined in: packages/webhook/src/runtime/types.ts:30
+Defined in: [packages/webhook/src/runtime/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L30)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/webhook/src/runtime/types.ts:30
 
 > **deliveryStore**: [`WebhookDeliveryStore`](/api/webhook/src/interfaces/webhookdeliverystore/)
 
-Defined in: packages/webhook/src/runtime/types.ts:32
+Defined in: [packages/webhook/src/runtime/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L32)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/webhook/src/runtime/types.ts:32
 
 > **endpointStore**: [`WebhookEndpointStore`](/api/webhook/src/interfaces/webhookendpointstore/)
 
-Defined in: packages/webhook/src/runtime/types.ts:31
+Defined in: [packages/webhook/src/runtime/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L31)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: packages/webhook/src/runtime/types.ts:31
 
 > `optional` **close**(): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/types.ts:34
+Defined in: [packages/webhook/src/runtime/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L34)
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: packages/webhook/src/runtime/types.ts:34
 
 > `optional` **init**(): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/types.ts:33
+Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L33)
 
 #### Returns
 

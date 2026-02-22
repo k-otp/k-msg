@@ -2,7 +2,6 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
-  ErrorUtils,
   type MessageRepository,
   type MessageType,
   type MessageVariables,
@@ -285,8 +284,8 @@ export class KMsg {
 
       const result = await provider.send(normalized);
 
-        if (result.isSuccess) {
-          const value: SendResult = {
+      if (result.isSuccess) {
+        const value: SendResult = {
           ...result.value,
           messageId,
           providerId: provider.id,
@@ -332,7 +331,7 @@ export class KMsg {
         providerId: provider.id,
       });
 
-        if (strategy === "full" && repo && persistedRecordId) {
+      if (strategy === "full" && repo && persistedRecordId) {
         const updateResult = await repo.update(
           persistedRecordId,
           this.toFailedPersistenceOutcome(normalized, provider.id, error),
@@ -342,18 +341,18 @@ export class KMsg {
             providerId: provider.id,
             persistedRecordId,
           });
-            if (this.hooks.onError) {
-              await this.hooks.onError(context, updateError);
-            }
-            if (this.hooks.onFinal) {
-              await this.hooks.onFinal(context, {
-                outcome: "failure",
-                error: updateError,
-              });
-            }
-            return fail(updateError);
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, updateError);
           }
-        } else {
+          if (this.hooks.onFinal) {
+            await this.hooks.onFinal(context, {
+              outcome: "failure",
+              error: updateError,
+            });
+          }
+          return fail(updateError);
+        }
+      } else {
         triggerLogPersistence();
       }
 
@@ -382,34 +381,34 @@ export class KMsg {
             persistedRecordId,
           });
 
-        if (this.hooks.onError) {
-          await this.hooks.onError(context, updateError);
-        }
-        if (this.hooks.onFinal) {
-          await this.hooks.onFinal(context, {
-            outcome: "failure",
-            error: updateError,
-          });
-        }
+          if (this.hooks.onError) {
+            await this.hooks.onError(context, updateError);
+          }
+          if (this.hooks.onFinal) {
+            await this.hooks.onFinal(context, {
+              outcome: "failure",
+              error: updateError,
+            });
+          }
 
-        return fail(updateError);
-      }
+          return fail(updateError);
+        }
       } else {
         triggerLogPersistence();
       }
 
-    if (this.hooks.onError) {
-      await this.hooks.onError(context, kMsgError);
-    }
-    if (this.hooks.onFinal) {
-      await this.hooks.onFinal(context, {
-        outcome: "failure",
-        error: kMsgError,
-      });
-    }
+      if (this.hooks.onError) {
+        await this.hooks.onError(context, kMsgError);
+      }
+      if (this.hooks.onFinal) {
+        await this.hooks.onFinal(context, {
+          outcome: "failure",
+          error: kMsgError,
+        });
+      }
 
-    return fail(kMsgError);
-  }
+      return fail(kMsgError);
+    }
   }
 
   private persistLogSave(repo: MessageRepository, input: SendInput): void {

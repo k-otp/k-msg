@@ -9,6 +9,14 @@ Defined in: [packages/messaging/src/hooks.ts:3](https://github.com/k-otp/k-msg/b
 
 ## Properties
 
+### attempt?
+
+> `optional` **attempt**: `number`
+
+Defined in: [packages/messaging/src/hooks.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L9)
+
+***
+
 ### messageId
 
 > **messageId**: `string`
@@ -22,6 +30,22 @@ Defined in: [packages/messaging/src/hooks.ts:4](https://github.com/k-otp/k-msg/b
 > **options**: [`SendOptions`](/api/core/src/type-aliases/sendoptions/)
 
 Defined in: [packages/messaging/src/hooks.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L5)
+
+***
+
+### providerId?
+
+> `optional` **providerId**: `string`
+
+Defined in: [packages/messaging/src/hooks.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L7)
+
+***
+
+### requestId?
+
+> `optional` **requestId**: `string`
+
+Defined in: [packages/messaging/src/hooks.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L8)
 
 ***
 

@@ -5,7 +5,7 @@ prev: false
 title: "MessageMedia"
 ---
 
-Defined in: [packages/core/src/types/message.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L54)
+Defined in: [packages/core/src/types/message.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L72)
 
 ## Properties
 
@@ -13,6 +13,6 @@ Defined in: [packages/core/src/types/message.ts:54](https://github.com/k-otp/k-m
 
 > `optional` **image**: [`MessageBinaryInput`](/api/core/src/type-aliases/messagebinaryinput/)
 
-Defined in: [packages/core/src/types/message.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L58)
+Defined in: [packages/core/src/types/message.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L76)
 
 Image attachment (used by MMS, FriendTalk image, RCS_MMS, ...).

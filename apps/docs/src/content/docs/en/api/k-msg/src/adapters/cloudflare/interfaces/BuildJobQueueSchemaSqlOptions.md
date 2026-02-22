@@ -5,7 +5,7 @@ prev: false
 title: "BuildJobQueueSchemaSqlOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L23)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L25)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:23](https:
 
 > **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L24)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L26)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:24](https:
 
 > `optional` **includeIndexes**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L26)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L28)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:26](https:
 
 > `optional` **tableName**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L25)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L27)

@@ -2,8 +2,8 @@ import {
   DEFAULT_DELIVERY_TRACKING_TABLE as DEFAULT_DELIVERY_TRACKING_TABLE_NAME,
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingSchemaOptions,
-  type DeliveryTrackingTypeStrategy,
   type DeliveryTrackingSchemaSpec,
+  type DeliveryTrackingTypeStrategy,
   getDeliveryTrackingSchemaSpec,
   resolveDeliveryTrackingSqlType,
 } from "./delivery-tracking-schema";

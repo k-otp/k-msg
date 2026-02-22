@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingSchemaOptions"
 ---
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:74
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L78)
 
 ## Extended by
 
@@ -19,7 +19,15 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > `optional` **columnMap**: `Partial`\<[`DeliveryTrackingColumnMap`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingcolumnmap/)\>
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:76
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L80)
+
+***
+
+### indexNames?
+
+> `optional` **indexNames**: `Partial`\<\{ `due`: `string`; `providerMessage`: `string`; `requestedAt`: `string`; \}\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L87)
 
 ***
 
@@ -27,7 +35,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > `optional` **storeRaw**: `boolean`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:78
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L89)
 
 ***
 
@@ -35,7 +43,26 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > `optional` **tableName**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:75
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L79)
+
+***
+
+### trackingIndexNames?
+
+> `optional` **trackingIndexNames**: `Partial`\<\{ `due`: `string`; `providerMessage`: `string`; `requestedAt`: `string`; \}\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L88)
+
+***
+
+### trackingTypeStrategy?
+
+> `optional` **trackingTypeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L85)
+
+New API: `typeStrategy`.
+Legacy alias preserved for compatibility with `trackingTypeStrategy`.
 
 ***
 
@@ -43,4 +70,4 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > `optional` **typeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:77
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L86)

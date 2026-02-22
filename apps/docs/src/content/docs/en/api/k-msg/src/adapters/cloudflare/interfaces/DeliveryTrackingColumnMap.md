@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingColumnMap"
 ---
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:28
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L28)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **attemptCount**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:44
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L44)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **deliveredAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:39
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L39)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **failedAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:40
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L40)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **from**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:34
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L34)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **lastCheckedAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:45
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L45)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **lastError**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:47
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L47)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **messageId**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:29
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L29)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **metadata**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:49
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L49)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **nextCheckAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:46
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L46)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **providerId**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:30
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L30)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **providerMessageId**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:31
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L31)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **providerStatusCode**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:36
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L36)
 
 ***
 
@@ -109,7 +109,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **providerStatusMessage**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:37
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L37)
 
 ***
 
@@ -117,7 +117,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **raw**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:48
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L48)
 
 ***
 
@@ -125,7 +125,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **requestedAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:41
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L41)
 
 ***
 
@@ -133,7 +133,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **scheduledAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:42
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L42)
 
 ***
 
@@ -141,7 +141,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **sentAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:38
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L38)
 
 ***
 
@@ -149,7 +149,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **status**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:35
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L35)
 
 ***
 
@@ -157,7 +157,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **statusUpdatedAt**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:43
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L43)
 
 ***
 
@@ -165,7 +165,7 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **to**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:33
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L33)
 
 ***
 
@@ -173,4 +173,4 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 
 > **type**: `string`
 
-Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:32
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L32)

@@ -41,25 +41,31 @@ export interface ErrorRetryPolicy {
   retryAfterMs?: (error: KMsgError) => number | undefined;
 }
 
-const DEFAULT_RETRYABLE_ERROR_CODES: ReadonlySet<RetryPolicyErrorCode> = new Set([
-  KMsgErrorCode.NETWORK_ERROR,
-  KMsgErrorCode.RATE_LIMIT_EXCEEDED,
-  KMsgErrorCode.NETWORK_TIMEOUT,
-  KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE,
-  KMsgErrorCode.PROVIDER_ERROR,
-  KMsgErrorCode.UNKNOWN_ERROR,
-]);
+const DEFAULT_RETRYABLE_ERROR_CODES: ReadonlySet<RetryPolicyErrorCode> =
+  new Set([
+    KMsgErrorCode.NETWORK_ERROR,
+    KMsgErrorCode.RATE_LIMIT_EXCEEDED,
+    KMsgErrorCode.NETWORK_TIMEOUT,
+    KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE,
+    KMsgErrorCode.PROVIDER_ERROR,
+    KMsgErrorCode.UNKNOWN_ERROR,
+  ]);
 
-const DEFAULT_NON_RETRYABLE_ERROR_CODES: ReadonlySet<RetryPolicyErrorCode> = new Set([
-  KMsgErrorCode.INVALID_REQUEST,
-  KMsgErrorCode.AUTHENTICATION_FAILED,
-  KMsgErrorCode.INSUFFICIENT_BALANCE,
-  KMsgErrorCode.TEMPLATE_NOT_FOUND,
-  KMsgErrorCode.MESSAGE_SEND_FAILED,
-]);
+const DEFAULT_NON_RETRYABLE_ERROR_CODES: ReadonlySet<RetryPolicyErrorCode> =
+  new Set([
+    KMsgErrorCode.INVALID_REQUEST,
+    KMsgErrorCode.AUTHENTICATION_FAILED,
+    KMsgErrorCode.INSUFFICIENT_BALANCE,
+    KMsgErrorCode.TEMPLATE_NOT_FOUND,
+    KMsgErrorCode.MESSAGE_SEND_FAILED,
+  ]);
 
 const normalizeNumber = (value: unknown): number | undefined => {
-  if (typeof value !== "number" || Number.isNaN(value) || !Number.isFinite(value)) {
+  if (
+    typeof value !== "number" ||
+    Number.isNaN(value) ||
+    !Number.isFinite(value)
+  ) {
     return undefined;
   }
 
@@ -98,7 +104,12 @@ const classifyByHttpStatus = (status: number): ProviderRetryHint => {
 const classifyByMessage = (message: string): ProviderRetryHint | undefined => {
   const normalized = message.toLowerCase();
 
-  if (normalized.includes("timeout") || normalized.includes("temporar") || normalized.includes("network") || normalized.includes("retry")) {
+  if (
+    normalized.includes("timeout") ||
+    normalized.includes("temporar") ||
+    normalized.includes("network") ||
+    normalized.includes("retry")
+  ) {
     return "retryable";
   }
 
@@ -107,7 +118,7 @@ const classifyByMessage = (message: string): ProviderRetryHint | undefined => {
 
 export class KMsgError extends Error {
   public readonly code: KMsgErrorCode;
-  public readonly details?: Record<string, any>;
+  public readonly details?: Record<string, unknown>;
   public readonly providerErrorCode?: string;
   public readonly providerErrorText?: string;
   public readonly httpStatus?: number;
@@ -119,7 +130,7 @@ export class KMsgError extends Error {
   constructor(
     code: KMsgErrorCode,
     message: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     metadata: KMsgErrorMetadata = {},
   ) {
     super(message);
@@ -130,7 +141,8 @@ export class KMsgError extends Error {
     this.providerErrorCode = metadata.providerErrorCode;
     this.providerErrorText = metadata.providerErrorText;
     this.httpStatus = normalizeNumber(metadata.httpStatus);
-    this.requestId = typeof metadata.requestId === "string" ? metadata.requestId : undefined;
+    this.requestId =
+      typeof metadata.requestId === "string" ? metadata.requestId : undefined;
     this.retryAfterMs = normalizeNumber(metadata.retryAfterMs);
     this.attempt = normalizeNumber(metadata.attempt);
 
@@ -163,12 +175,12 @@ export class KMsgError extends Error {
 }
 
 export const ErrorUtils = {
-  isRetryable(error: any, policy: ErrorRetryPolicy = {}): boolean {
+  isRetryable(error: unknown, policy: ErrorRetryPolicy = {}): boolean {
     return ErrorUtils.classifyForRetry(error, policy) === "retryable";
   },
 
   classifyForRetry(
-    error: any,
+    error: unknown,
     policy: ErrorRetryPolicy = {},
   ): ProviderRetryHint {
     if (error instanceof KMsgError) {
@@ -180,7 +192,8 @@ export const ErrorUtils = {
       }
 
       const nonRetryableCodes = new Set(
-        policy.nonRetryableCodes ?? Array.from(DEFAULT_NON_RETRYABLE_ERROR_CODES),
+        policy.nonRetryableCodes ??
+          Array.from(DEFAULT_NON_RETRYABLE_ERROR_CODES),
       );
       if (nonRetryableCodes.has(error.code)) {
         return "non_retryable";
@@ -209,10 +222,25 @@ export const ErrorUtils = {
       return "non_retryable";
     }
 
-    const status = toLowerString(error?.status) ?? toLowerString(error?.statusCode) ?? toLowerString(error?.code);
-    const statusCode = normalizeNumber(error?.status) ??
-      normalizeNumber(error?.statusCode) ??
-      normalizeNumber(error?.httpStatus);
+    const candidate =
+      error && typeof error === "object"
+        ? (error as {
+            status?: unknown;
+            statusCode?: unknown;
+            httpStatus?: unknown;
+            code?: unknown;
+            message?: unknown;
+          })
+        : undefined;
+
+    const status =
+      toLowerString(candidate?.status) ??
+      toLowerString(candidate?.statusCode) ??
+      toLowerString(candidate?.code);
+    const statusCode =
+      normalizeNumber(candidate?.status) ??
+      normalizeNumber(candidate?.statusCode) ??
+      normalizeNumber(candidate?.httpStatus);
 
     if (typeof status === "string" && status.startsWith("5")) {
       return "retryable";
@@ -227,16 +255,16 @@ export const ErrorUtils = {
     }
 
     const classifiedByMessage =
-      typeof error?.message === "string"
-        ? classifyByMessage(error.message)
+      typeof candidate?.message === "string"
+        ? classifyByMessage(candidate.message)
         : undefined;
 
     if (classifiedByMessage) {
       return classifiedByMessage;
     }
 
-    if (policy.classifyByMessage && typeof error?.message === "string") {
-      const classified = policy.classifyByMessage(error.message);
+    if (policy.classifyByMessage && typeof candidate?.message === "string") {
+      const classified = policy.classifyByMessage(candidate.message);
       if (classified) {
         return classified;
       }
@@ -261,7 +289,10 @@ export const ErrorUtils = {
       return normalizeRetryAfterMs(error.retryAfterMs);
     }
 
-    if (error.code === KMsgErrorCode.RATE_LIMIT_EXCEEDED && error.retryAfterMs === undefined) {
+    if (
+      error.code === KMsgErrorCode.RATE_LIMIT_EXCEEDED &&
+      error.retryAfterMs === undefined
+    ) {
       return undefined;
     }
 
@@ -269,7 +300,11 @@ export const ErrorUtils = {
   },
 
   isUnknownStatus: (statusCode: number | undefined): boolean => {
-    if (statusCode === undefined || Number.isNaN(statusCode) || !Number.isFinite(statusCode)) {
+    if (
+      statusCode === undefined ||
+      Number.isNaN(statusCode) ||
+      !Number.isFinite(statusCode)
+    ) {
       return false;
     }
 
@@ -288,19 +323,11 @@ export const ErrorUtils = {
     };
   },
 
-  withAttempt(
-    error: KMsgError,
-    attempt: number,
-  ): KMsgError {
-    return new KMsgError(
-      error.code,
-      error.message,
-      error.details,
-      {
-        ...ErrorUtils.toRetryMetadata(error),
-        attempt: normalizeNumber(attempt),
-      },
-    );
+  withAttempt(error: KMsgError, attempt: number): KMsgError {
+    return new KMsgError(error.code, error.message, error.details, {
+      ...ErrorUtils.toRetryMetadata(error),
+      attempt: normalizeNumber(attempt),
+    });
   },
 
   DEFAULT_RETRYABLE_ERROR_CODES,

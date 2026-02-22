@@ -112,7 +112,11 @@ describe("ErrorUtils", () => {
 
   test("classifyForRetry should fallback to policy for unknown code", () => {
     const unknownError = { code: "OUT_OF_SKIN", message: "unknown" };
-    expect(ErrorUtils.classifyForRetry(unknownError, { fallback: "retryable" })).toBe("retryable");
-    expect(ErrorUtils.classifyForRetry(unknownError, { fallback: "non_retryable" })).toBe("non_retryable");
+    expect(
+      ErrorUtils.classifyForRetry(unknownError, { fallback: "retryable" }),
+    ).toBe("retryable");
+    expect(
+      ErrorUtils.classifyForRetry(unknownError, { fallback: "non_retryable" }),
+    ).toBe("non_retryable");
   });
 });

@@ -7,4 +7,4 @@ title: "SendWarningCode"
 
 > **SendWarningCode** = `"FAILOVER_UNSUPPORTED_PROVIDER"` \| `"FAILOVER_PARTIAL_PROVIDER"` \| `"FALLBACK_CONTENT_MISSING"` \| `string` & `object`
 
-Defined in: [packages/core/src/types/message.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L116)
+Defined in: [packages/core/src/types/message.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L134)

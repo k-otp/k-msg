@@ -21,6 +21,18 @@ Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github
 
 (`error`) => `void` \| `Promise`\<`void`\>
 
+#### onFinal?
+
+(`context`, `state`) => `void` \| `Promise`\<`void`\>
+
+#### onQueued?
+
+(`context`) => `void` \| `Promise`\<`void`\>
+
+#### onRetryScheduled?
+
+(`context`, `error`, `metadata`) => `void` \| `Promise`\<`void`\>
+
 ## Returns
 
 [`KMsgHooks`](/api/messaging/src/interfaces/kmsghooks/)

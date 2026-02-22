@@ -5,7 +5,7 @@ prev: false
 title: "KMsgError"
 ---
 
-Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
+Defined in: [packages/core/src/errors.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L119)
 
 ## Extends
 
@@ -15,9 +15,9 @@ Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob
 
 ### Constructor
 
-> **new KMsgError**(`code`, `message`, `details?`): `KMsgError`
+> **new KMsgError**(`code`, `message`, `details?`, `metadata?`): `KMsgError`
 
-Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)
+Defined in: [packages/core/src/errors.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L130)
 
 #### Parameters
 
@@ -31,7 +31,11 @@ Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob
 
 ##### details?
 
-`Record`\<`string`, `any`\>
+`Record`\<`string`, `unknown`\>
+
+##### metadata?
+
+[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/) = `{}`
 
 #### Returns
 
@@ -42,6 +46,14 @@ Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob
 `Error.constructor`
 
 ## Properties
+
+### attempt?
+
+> `readonly` `optional` **attempt**: `number`
+
+Defined in: [packages/core/src/errors.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L127)
+
+***
 
 ### cause?
 
@@ -57,19 +69,35 @@ The cause of the error.
 
 ***
 
+### causeChain?
+
+> `readonly` `optional` **causeChain**: `unknown`[]
+
+Defined in: [packages/core/src/errors.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L128)
+
+***
+
 ### code
 
 > `readonly` **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
+Defined in: [packages/core/src/errors.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L120)
 
 ***
 
 ### details?
 
-> `readonly` `optional` **details**: `Record`\<`string`, `any`\>
+> `readonly` `optional` **details**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)
+Defined in: [packages/core/src/errors.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L121)
+
+***
+
+### httpStatus?
+
+> `readonly` `optional` **httpStatus**: `number`
+
+Defined in: [packages/core/src/errors.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L124)
 
 ***
 
@@ -94,6 +122,38 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 #### Inherited from
 
 `Error.name`
+
+***
+
+### providerErrorCode?
+
+> `readonly` `optional` **providerErrorCode**: `string`
+
+Defined in: [packages/core/src/errors.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L122)
+
+***
+
+### providerErrorText?
+
+> `readonly` `optional` **providerErrorText**: `string`
+
+Defined in: [packages/core/src/errors.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L123)
+
+***
+
+### requestId?
+
+> `readonly` `optional` **requestId**: `string`
+
+Defined in: [packages/core/src/errors.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L125)
+
+***
+
+### retryAfterMs?
+
+> `readonly` `optional` **retryAfterMs**: `number`
+
+Defined in: [packages/core/src/errors.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L126)
 
 ***
 
@@ -135,11 +195,19 @@ not capture any frames.
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/errors.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L34)
+Defined in: [packages/core/src/errors.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L160)
 
 #### Returns
 
 `object`
+
+##### attempt
+
+> **attempt**: `number` \| `undefined`
+
+##### causeChain
+
+> **causeChain**: `unknown`[] \| `undefined`
 
 ##### code
 
@@ -147,7 +215,11 @@ Defined in: [packages/core/src/errors.ts:34](https://github.com/k-otp/k-msg/blob
 
 ##### details
 
-> **details**: `Record`\<`string`, `any`\> \| `undefined`
+> **details**: `Record`\<`string`, `unknown`\> \| `undefined`
+
+##### httpStatus
+
+> **httpStatus**: `number` \| `undefined`
 
 ##### message
 
@@ -156,6 +228,22 @@ Defined in: [packages/core/src/errors.ts:34](https://github.com/k-otp/k-msg/blob
 ##### name
 
 > **name**: `string`
+
+##### providerErrorCode
+
+> **providerErrorCode**: `string` \| `undefined`
+
+##### providerErrorText
+
+> **providerErrorText**: `string` \| `undefined`
+
+##### requestId
+
+> **requestId**: `string` \| `undefined`
+
+##### retryAfterMs
+
+> **retryAfterMs**: `number` \| `undefined`
 
 ***
 

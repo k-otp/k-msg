@@ -107,7 +107,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https:/
 
 ##### aggregationType
 
-`"max"` | `"count"` | `"sum"` | `"avg"` | `"min"` | `"rate"`
+`"count"` | `"max"` | `"sum"` | `"avg"` | `"min"` | `"rate"`
 
 ##### filters?
 
@@ -143,7 +143,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https:
 
 ##### aggregationType
 
-`"max"` | `"count"` | `"sum"` | `"avg"` | `"min"`
+`"count"` | `"max"` | `"sum"` | `"avg"` | `"min"`
 
 #### Returns
 

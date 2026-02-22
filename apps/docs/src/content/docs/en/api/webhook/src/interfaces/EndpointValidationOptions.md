@@ -5,7 +5,7 @@ prev: false
 title: "EndpointValidationOptions"
 ---
 
-Defined in: packages/webhook/src/runtime/endpoint-validation.ts:3
+Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L3)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/webhook/src/runtime/endpoint-validation.ts:3
 
 > **allowHttpForLocalhost**: `boolean`
 
-Defined in: packages/webhook/src/runtime/endpoint-validation.ts:5
+Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L5)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: packages/webhook/src/runtime/endpoint-validation.ts:5
 
 > **allowPrivateHosts**: `boolean`
 
-Defined in: packages/webhook/src/runtime/endpoint-validation.ts:4
+Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L4)

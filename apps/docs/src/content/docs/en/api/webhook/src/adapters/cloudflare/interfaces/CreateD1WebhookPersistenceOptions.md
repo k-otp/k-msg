@@ -5,7 +5,7 @@ prev: false
 title: "CreateD1WebhookPersistenceOptions"
 ---
 
-Defined in: packages/webhook/src/adapters/cloudflare/index.ts:22
+Defined in: [packages/webhook/src/adapters/cloudflare/index.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/index.ts#L22)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/index.ts:22
 
 > `optional` **deliveryTableName**: `string`
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:8
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L8)
 
 #### Inherited from
 
@@ -29,7 +29,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:8
 
 > `optional` **endpointTableName**: `string`
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:7
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L7)
 
 #### Inherited from
 
@@ -41,4 +41,4 @@ Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:7
 
 > `optional` **initializeSchema**: `boolean`
 
-Defined in: packages/webhook/src/adapters/cloudflare/index.ts:24
+Defined in: [packages/webhook/src/adapters/cloudflare/index.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/index.ts#L24)

@@ -5,7 +5,7 @@ prev: false
 title: "WebhookDeliveryStore"
 ---
 
-Defined in: packages/webhook/src/runtime/types.ts:25
+Defined in: [packages/webhook/src/runtime/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L25)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/webhook/src/runtime/types.ts:25
 
 > **add**(`delivery`): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/types.ts:26
+Defined in: [packages/webhook/src/runtime/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L26)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/webhook/src/runtime/types.ts:26
 
 > **list**(`options?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: packages/webhook/src/runtime/types.ts:27
+Defined in: [packages/webhook/src/runtime/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L27)
 
 #### Parameters
 

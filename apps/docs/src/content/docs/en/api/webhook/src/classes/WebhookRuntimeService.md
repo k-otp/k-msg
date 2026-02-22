@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntimeService"
 ---
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:55
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L55)
 
 ## Implements
 
@@ -17,7 +17,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:55
 
 > **new WebhookRuntimeService**(`config`): `WebhookRuntimeService`
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:70
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L70)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:70
 
 > **addEndpoint**(`input`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:86
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L86)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:86
 
 > **addEndpoints**(`inputs`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:108
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L108)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ readonly [`WebhookEndpointInput`](/api/webhook/src/type-aliases/webhookendpointi
 
 > **emit**(`event`): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:211
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:211](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L211)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:211
 
 > **emitSync**(`event`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:226
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:226](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L226)
 
 #### Parameters
 
@@ -123,7 +123,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:226
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:248
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L248)
 
 #### Returns
 
@@ -139,7 +139,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:248
 
 > **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:160
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L160)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:160
 
 > **listDeliveries**(`options?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:256
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L256)
 
 #### Parameters
 
@@ -183,7 +183,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:256
 
 > **listEndpoints**(): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:165
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L165)
 
 #### Returns
 
@@ -199,7 +199,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:165
 
 > **probeEndpoint**(`input`): `Promise`\<[`WebhookTestResult`](/api/webhook/src/interfaces/webhooktestresult/)\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:170
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L170)
 
 #### Parameters
 
@@ -221,7 +221,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:170
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:155
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L155)
 
 #### Parameters
 
@@ -243,7 +243,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:155
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:266
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:266](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L266)
 
 #### Returns
 
@@ -259,7 +259,7 @@ Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:266
 
 > **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
 
-Defined in: packages/webhook/src/runtime/webhook-runtime.service.ts:119
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L119)
 
 #### Parameters
 

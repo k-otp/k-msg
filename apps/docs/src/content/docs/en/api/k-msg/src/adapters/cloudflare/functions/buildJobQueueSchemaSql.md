@@ -7,7 +7,7 @@ title: "buildJobQueueSchemaSql"
 
 > **buildJobQueueSchemaSql**(`options`): `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:314](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L314)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:325](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L325)
 
 ## Parameters
 
