@@ -1,0 +1,23 @@
+---
+import DefaultHead from "@astrojs/starlight/components/Head.astro";
+---
+
+<DefaultHead />
+<script type="module">
+  import clarity from "@microsoft/clarity";
+
+  clarity.init("vlennjsv6z");
+</script>
+<script
+  is:inline
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=G-2924TMM32H"
+></script>
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", "G-2924TMM32H");
+</script>
