@@ -156,6 +156,9 @@ Migration, threat model, and retention guidance are documented in:
 
 - [`docs/security/field-crypto-v1.md`](./docs/security/field-crypto-v1.md)
 - [`docs/security/field-crypto-basics.md`](./docs/security/field-crypto-basics.md)
+- [`docs/security/key-rotation-playbook.md`](./docs/security/key-rotation-playbook.md)
+- [`docs/security/migration-cli-runbook.md`](./docs/security/migration-cli-runbook.md)
+- [`docs/security/crypto-control-signals.md`](./docs/security/crypto-control-signals.md)
 - [`docs/migration/field-crypto-migration.md`](./docs/migration/field-crypto-migration.md)
 - [`docs/compliance/kr-b2b-retention.md`](./docs/compliance/kr-b2b-retention.md)
 

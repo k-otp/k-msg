@@ -1,6 +1,7 @@
 import {
   assertFieldCryptoConfig,
   createDefaultMasker,
+  type FieldCryptoCircuitState,
   type FieldCryptoConfig,
   FieldCryptoError,
   type FieldCryptoFailMode,
@@ -12,7 +13,10 @@ import {
   resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
+import { createCryptoCircuitController } from "./crypto-control-plane";
 import type {
+  DeliveryTrackingCryptoController,
+  DeliveryTrackingCryptoOperationContext,
   DeliveryTrackingFieldCryptoOptions,
   DeliveryTrackingRecordFilter,
 } from "./store.interface";
@@ -52,6 +56,10 @@ const DEFAULT_TO_MODE: FieldMode = "encrypt+hash";
 const DEFAULT_FROM_MODE: FieldMode = "encrypt+hash";
 const DEFAULT_METADATA_MODE: FieldMode = "plain";
 const validatedConfigs = new WeakSet<FieldCryptoConfig>();
+const controlPlaneByOptions = new WeakMap<
+  DeliveryTrackingFieldCryptoOptions,
+  DeliveryTrackingCryptoController
+>();
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -71,6 +79,93 @@ function resolveConfig(
     validatedConfigs.add(options.config);
   }
   return options.config;
+}
+
+function classifyCryptoOperationError(error: unknown): string | undefined {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "";
+  if (!message) return undefined;
+
+  const normalized = message.toLowerCase();
+  if (normalized.includes("aad")) return "aad_mismatch";
+  if (normalized.includes("kid")) return "kid_mismatch";
+  if (
+    normalized.includes("key") ||
+    normalized.includes("kms") ||
+    normalized.includes("vault")
+  ) {
+    return "key_error";
+  }
+  return "crypto_error";
+}
+
+function resolveController(
+  options: DeliveryTrackingFieldCryptoOptions | undefined,
+): DeliveryTrackingCryptoController | undefined {
+  if (!options?.controlSignal?.enabled) {
+    return options?.controlSignal?.controller;
+  }
+
+  if (options.controlSignal.controller) {
+    return options.controlSignal.controller;
+  }
+
+  const cached = controlPlaneByOptions.get(options);
+  if (cached) return cached;
+
+  const created = createCryptoCircuitController(options.controlSignal);
+  controlPlaneByOptions.set(options, created);
+  return created;
+}
+
+function toOperationContext(
+  context: {
+    tableName: string;
+    store: "sql" | "object" | "memory";
+    tenantId?: string;
+    providerId?: string;
+    messageId?: string;
+  },
+  operation: "encrypt" | "decrypt" | "hash",
+  kid?: string,
+): DeliveryTrackingCryptoOperationContext {
+  return {
+    operation,
+    tenantId: context.tenantId,
+    providerId: context.providerId,
+    kid,
+    tableName: context.tableName,
+    store: context.store,
+    messageId: context.messageId,
+  };
+}
+
+async function emitCircuitStateMetric(
+  options: DeliveryTrackingFieldCryptoOptions | undefined,
+  context: {
+    tableName: string;
+    store: "sql" | "object" | "memory";
+  },
+  state: FieldCryptoCircuitState,
+  operation: "encrypt" | "decrypt" | "hash",
+): Promise<void> {
+  await emitMetric(
+    options,
+    {
+      name: "crypto_circuit_state",
+      value: state === "open" ? 1 : state === "half-open" ? 0.5 : 0,
+      tags: {
+        state,
+        operation,
+      },
+    },
+    context.tableName,
+    context.store,
+  );
 }
 
 function resolveFailMode(config: FieldCryptoConfig): FieldCryptoFailMode {
@@ -427,6 +522,51 @@ export async function applyTrackingCryptoOnWrite(
     providerId: record.providerId,
     tenantId: options?.tenantId ?? context.tenantId,
   };
+  const controller = resolveController(options);
+  const baseOperationContext = toOperationContext(
+    {
+      tableName: context.tableName,
+      store: context.store,
+      tenantId: keyContext.tenantId,
+      providerId: keyContext.providerId,
+      messageId: keyContext.messageId,
+    },
+    "encrypt",
+  );
+
+  if (controller) {
+    const gate = controller.beforeOperation
+      ? await controller.beforeOperation(baseOperationContext)
+      : { allowed: true, state: "closed" as const };
+    await emitCircuitStateMetric(options, context, gate.state, "encrypt");
+    if (!gate.allowed) {
+      await emitMetric(
+        options,
+        {
+          name: "crypto_circuit_open_count",
+          value: 1,
+          tags: {
+            operation: "encrypt",
+          },
+        },
+        context.tableName,
+        context.store,
+      );
+      throw new FieldCryptoError(
+        "policy",
+        "crypto circuit is open for encrypt operation",
+        {
+          operation: "encrypt",
+          path: "to",
+        },
+        {
+          fieldPath: "to",
+          failMode,
+          openFallback: fallback,
+        },
+      );
+    }
+  }
 
   let activeKid: string | undefined;
 
@@ -490,6 +630,13 @@ export async function applyTrackingCryptoOnWrite(
       context.tableName,
       context.store,
     );
+    if (controller) {
+      await controller.onSuccess?.({
+        ...baseOperationContext,
+        kid: activeKid,
+      });
+      await emitCircuitStateMetric(options, context, "closed", "encrypt");
+    }
 
     return {
       toEnc: toProtected.encrypted ?? toProtected.plaintext,
@@ -506,6 +653,39 @@ export async function applyTrackingCryptoOnWrite(
       cryptoState: "encrypted",
     };
   } catch (error) {
+    const errorClass = classifyCryptoOperationError(error);
+    if (controller) {
+      await controller.onFailure?.({
+        ...baseOperationContext,
+        kid: activeKid,
+        error,
+        ...(errorClass ? { errorClass } : {}),
+      });
+      const gateAfterFailure = controller.beforeOperation
+        ? await controller.beforeOperation(baseOperationContext)
+        : { allowed: true, state: "closed" as const };
+      await emitCircuitStateMetric(
+        options,
+        context,
+        gateAfterFailure.state,
+        "encrypt",
+      );
+      if (gateAfterFailure.state === "open") {
+        await emitMetric(
+          options,
+          {
+            name: "crypto_circuit_open_count",
+            value: 1,
+            tags: {
+              operation: "encrypt",
+            },
+          },
+          context.tableName,
+          context.store,
+        );
+      }
+    }
+
     await emitMetric(
       options,
       {
@@ -622,6 +802,52 @@ export async function restoreTrackingCryptoOnRead(
     providerId: record.providerId,
     tenantId: options?.tenantId ?? context.tenantId,
   };
+  const controller = resolveController(options);
+  const baseOperationContext = toOperationContext(
+    {
+      tableName: context.tableName,
+      store: context.store,
+      tenantId: keyContext.tenantId,
+      providerId: keyContext.providerId,
+      messageId: keyContext.messageId,
+    },
+    "decrypt",
+    columns.cryptoKid,
+  );
+
+  if (controller) {
+    const gate = controller.beforeOperation
+      ? await controller.beforeOperation(baseOperationContext)
+      : { allowed: true, state: "closed" as const };
+    await emitCircuitStateMetric(options, context, gate.state, "decrypt");
+    if (!gate.allowed) {
+      await emitMetric(
+        options,
+        {
+          name: "crypto_circuit_open_count",
+          value: 1,
+          tags: {
+            operation: "decrypt",
+          },
+        },
+        context.tableName,
+        context.store,
+      );
+      throw new FieldCryptoError(
+        "policy",
+        "crypto circuit is open for decrypt operation",
+        {
+          operation: "decrypt",
+          path: "to",
+        },
+        {
+          fieldPath: "to",
+          failMode,
+          openFallback: fallback,
+        },
+      );
+    }
+  }
 
   try {
     const toMode = resolveFieldMode(config, "to", DEFAULT_TO_MODE);
@@ -673,9 +899,45 @@ export async function restoreTrackingCryptoOnRead(
       context.tableName,
       context.store,
     );
+    if (controller) {
+      await controller.onSuccess?.(baseOperationContext);
+      await emitCircuitStateMetric(options, context, "closed", "decrypt");
+    }
 
     return next;
   } catch (error) {
+    const errorClass = classifyCryptoOperationError(error);
+    if (controller) {
+      await controller.onFailure?.({
+        ...baseOperationContext,
+        error,
+        ...(errorClass ? { errorClass } : {}),
+      });
+      const gateAfterFailure = controller.beforeOperation
+        ? await controller.beforeOperation(baseOperationContext)
+        : { allowed: true, state: "closed" as const };
+      await emitCircuitStateMetric(
+        options,
+        context,
+        gateAfterFailure.state,
+        "decrypt",
+      );
+      if (gateAfterFailure.state === "open") {
+        await emitMetric(
+          options,
+          {
+            name: "crypto_circuit_open_count",
+            value: 1,
+            tags: {
+              operation: "decrypt",
+            },
+          },
+          context.tableName,
+          context.store,
+        );
+      }
+    }
+
     await emitMetric(
       options,
       {
