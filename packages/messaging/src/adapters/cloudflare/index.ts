@@ -1,4 +1,10 @@
 import {
+  type DeliveryTrackingColumnMap,
+  type DeliveryTrackingSchemaOptions,
+  type DeliveryTrackingTypeStrategy,
+  getDeliveryTrackingSchemaSpec,
+} from "./delivery-tracking-schema";
+import {
   type RenderDrizzleSchemaSourceOptions,
   renderDrizzleSchemaSource,
 } from "./drizzle-schema";
@@ -57,6 +63,7 @@ export {
   buildCloudflareSqlSchemaSql,
   initializeCloudflareSqlSchema,
   renderDrizzleSchemaSource,
+  getDeliveryTrackingSchemaSpec,
 };
 
 export type {
@@ -77,12 +84,17 @@ export type {
   InitializeCloudflareSqlSchemaOptions,
   CloudflareSqlSchemaTarget,
   RenderDrizzleSchemaSourceOptions,
+  DeliveryTrackingSchemaOptions,
+  DeliveryTrackingColumnMap,
+  DeliveryTrackingTypeStrategy,
 };
 
 export interface CreateDrizzleDeliveryTrackingStoreOptions
-  extends CreateDrizzleSqlClientOptions {
-  tableName?: string;
-}
+  extends CreateDrizzleSqlClientOptions,
+    DeliveryTrackingSchemaOptions {}
+
+export interface CreateD1DeliveryTrackingStoreOptions
+  extends DeliveryTrackingSchemaOptions {}
 
 export interface CreateDrizzleJobQueueOptions
   extends CreateDrizzleSqlClientOptions {
@@ -91,12 +103,14 @@ export interface CreateDrizzleJobQueueOptions
 
 export function createD1DeliveryTrackingStore(
   database: D1DatabaseLike,
-  options: { tableName?: string } = {},
+  options: CreateD1DeliveryTrackingStoreOptions = {},
 ): HyperdriveDeliveryTrackingStore {
-  return new HyperdriveDeliveryTrackingStore(
-    createD1SqlClient(database),
-    options.tableName,
-  );
+  return new HyperdriveDeliveryTrackingStore(createD1SqlClient(database), {
+    tableName: options.tableName,
+    columnMap: options.columnMap,
+    typeStrategy: options.typeStrategy,
+    storeRaw: options.storeRaw,
+  });
 }
 
 export function createD1JobQueue<T>(
@@ -113,7 +127,12 @@ export function createDrizzleDeliveryTrackingStore(
   options: CreateDrizzleDeliveryTrackingStoreOptions,
 ): HyperdriveDeliveryTrackingStore {
   const client = createDrizzleSqlClient(options);
-  return new HyperdriveDeliveryTrackingStore(client, options.tableName);
+  return new HyperdriveDeliveryTrackingStore(client, {
+    tableName: options.tableName,
+    columnMap: options.columnMap,
+    typeStrategy: options.typeStrategy,
+    storeRaw: options.storeRaw,
+  });
 }
 
 export function createDrizzleJobQueue<T>(

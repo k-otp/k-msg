@@ -6,6 +6,7 @@ const checkMode = process.argv.includes("--check");
 const generators = [
   "scripts/docs/collect-entrypoints.ts",
   "scripts/docs/generate-cli-help.ts",
+  "scripts/docs/sync-tracking-schema-docs.ts",
   "scripts/docs/generate-schema-docs.ts",
   "scripts/docs/generate-guides.ts",
 ];

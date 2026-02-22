@@ -7,7 +7,7 @@ title: "createD1DeliveryTrackingStore"
 
 > **createD1DeliveryTrackingStore**(`database`, `options?`): [`HyperdriveDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L92)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L104)
 
 ## Parameters
 
@@ -17,9 +17,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:92](https://git
 
 ### options?
 
-#### tableName?
-
-`string`
+[`CreateD1DeliveryTrackingStoreOptions`](/api/messaging/src/adapters/cloudflare/interfaces/created1deliverytrackingstoreoptions/) = `{}`
 
 ## Returns
 

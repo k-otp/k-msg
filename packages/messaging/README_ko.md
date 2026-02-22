@@ -119,18 +119,19 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()`와 `HyperdriveDeliveryTrackingStore`는 동일한 논리 스키마를 사용합니다.
 `DeliveryTrackingService.init()` 호출 시 테이블/인덱스가 자동 생성됩니다.
 
-Tracking 테이블: `kmsg_delivery_tracking`
+Tracking 테이블/인덱스 기본값은 어댑터 스키마 스펙에서 생성됩니다:
 
+<!-- tracking-schema-summary:start -->
+- Tracking 테이블 기본값: `kmsg_delivery_tracking` (`tableName`으로 override 가능)
 - 기본 키: `message_id`
 - 주요 컬럼: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
 - 시간 컬럼: `requested_at`, `status_updated_at`, `next_check_at`, `sent_at`, `delivered_at`, `failed_at`, `last_checked_at`, `scheduled_at`
-- 부가 컬럼: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `raw`, `metadata`
-
-인덱스:
-
-- `idx_kmsg_delivery_due(status, next_check_at)`
-- `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
-- `idx_kmsg_delivery_requested_at(requested_at)`
+- 부가 컬럼: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `metadata`
+- `raw` 컬럼은 기본 비활성(`storeRaw: false`)이며, 필요 시 `storeRaw: true`로 활성화됩니다.
+- 인덱스: `idx_kmsg_delivery_due(status, next_check_at)`
+- 인덱스: `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
+- 인덱스: `idx_kmsg_delivery_requested_at(requested_at)`
+<!-- tracking-schema-summary:end -->
 
 DB별 차이:
 
@@ -194,6 +195,38 @@ const queue = createDrizzleJobQueue({
   dialect: "postgres",
   db,
 });
+```
+
+### Tracking 스키마 커스터마이즈
+
+`storeRaw` 기본값은 `false`입니다. provider 원본 payload 저장이 꼭 필요할 때만 `true`로 켜세요.
+
+```ts
+import {
+  buildDeliveryTrackingSchemaSql,
+  createD1DeliveryTrackingStore,
+  getDeliveryTrackingSchemaSpec,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+const trackingOptions = {
+  tableName: "otp_delivery_tracking",
+  columnMap: {
+    messageId: "id",
+    nextCheckAt: "next_check_at_ms",
+  },
+  typeStrategy: {
+    messageId: "uuid",
+    timestamp: "integer",
+  },
+  storeRaw: true,
+} as const;
+
+const store = createD1DeliveryTrackingStore(env.DB, trackingOptions);
+const ddl = buildDeliveryTrackingSchemaSql({
+  dialect: "postgres",
+  ...trackingOptions,
+});
+const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 ```
 
 ### Drizzle 지원 버전

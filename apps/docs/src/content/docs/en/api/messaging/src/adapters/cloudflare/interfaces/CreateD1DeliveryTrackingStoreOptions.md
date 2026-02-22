@@ -2,10 +2,10 @@
 editUrl: false
 next: false
 prev: false
-title: "BuildDeliveryTrackingSchemaSqlOptions"
+title: "CreateD1DeliveryTrackingStoreOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L17)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L96)
 
 ## Extends
 
@@ -22,22 +22,6 @@ Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.
 #### Inherited from
 
 [`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/).[`columnMap`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/#columnmap)
-
-***
-
-### dialect
-
-> **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
-
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L19)
-
-***
-
-### includeIndexes?
-
-> `optional` **includeIndexes**: `boolean`
-
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L20)
 
 ***
 

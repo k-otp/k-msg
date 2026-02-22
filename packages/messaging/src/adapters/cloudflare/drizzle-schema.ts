@@ -1,7 +1,11 @@
+import {
+  type DeliveryTrackingColumnMap,
+  type DeliveryTrackingTypeStrategy,
+  getDeliveryTrackingSchemaSpec,
+} from "./delivery-tracking-schema";
 import type { SqlDialect } from "./sql-client";
 import {
   type CloudflareSqlSchemaTarget,
-  DEFAULT_DELIVERY_TRACKING_TABLE,
   DEFAULT_JOB_QUEUE_TABLE,
 } from "./sql-schema";
 
@@ -9,6 +13,9 @@ export interface RenderDrizzleSchemaSourceOptions {
   dialect: SqlDialect;
   target?: CloudflareSqlSchemaTarget;
   trackingTableName?: string;
+  trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
+  trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  trackingStoreRaw?: boolean;
   queueTableName?: string;
 }
 
@@ -25,39 +32,82 @@ function q(value: string): string {
   return JSON.stringify(value);
 }
 
-function renderPostgresTrackingSchema(tableName: string): string {
+function renderPostgresTrackingSchema(
+  options: RenderDrizzleSchemaSourceOptions,
+): string {
+  const spec = getDeliveryTrackingSchemaSpec({
+    tableName: options.trackingTableName,
+    columnMap: options.trackingColumnMap,
+    typeStrategy: options.trackingTypeStrategy,
+    storeRaw: options.trackingStoreRaw,
+  });
+  const c = spec.columnMap;
+  const s = spec.typeStrategy;
+
+  const messageId =
+    s.messageId === "uuid"
+      ? `uuid(${q(c.messageId)}).primaryKey()`
+      : s.messageId === "varchar"
+        ? `varchar(${q(c.messageId)}, { length: 255 }).primaryKey()`
+        : `text(${q(c.messageId)}).primaryKey()`;
+
+  const idField = (columnName: string): string =>
+    s.id === "varchar"
+      ? `varchar(${q(columnName)}, { length: 255 }).notNull()`
+      : `text(${q(columnName)}).notNull()`;
+
+  const shortTextField = (columnName: string, required: boolean): string => {
+    const base =
+      s.shortText === "varchar"
+        ? `varchar(${q(columnName)}, { length: 64 })`
+        : `text(${q(columnName)})`;
+    return required ? `${base}.notNull()` : base;
+  };
+
+  const timestampField = (columnName: string, required = false): string => {
+    const base =
+      s.timestamp === "integer"
+        ? `integer(${q(columnName)})`
+        : `bigint(${q(columnName)}, { mode: "number" })`;
+    return required ? `${base}.notNull()` : base;
+  };
+
+  const jsonField = (columnName: string): string =>
+    s.json === "text" ? `text(${q(columnName)})` : `jsonb(${q(columnName)})`;
+
+  const rawFieldLine = spec.storeRaw ? `\n    raw: ${jsonField(c.raw)},` : "";
+
   return `export const deliveryTrackingTable = pgTable(
-  ${q(tableName)},
+  ${q(spec.tableName)},
   {
-    messageId: text("message_id").primaryKey(),
-    providerId: text("provider_id").notNull(),
-    providerMessageId: text("provider_message_id").notNull(),
-    type: varchar("type", { length: 64 }).notNull(),
-    to: varchar("to", { length: 64 }).notNull(),
-    from: varchar("from", { length: 64 }),
-    status: varchar("status", { length: 64 }).notNull(),
-    providerStatusCode: varchar("provider_status_code", { length: 64 }),
-    providerStatusMessage: varchar("provider_status_message", { length: 64 }),
-    sentAt: bigint("sent_at", { mode: "number" }),
-    deliveredAt: bigint("delivered_at", { mode: "number" }),
-    failedAt: bigint("failed_at", { mode: "number" }),
-    requestedAt: bigint("requested_at", { mode: "number" }).notNull(),
-    scheduledAt: bigint("scheduled_at", { mode: "number" }),
-    statusUpdatedAt: bigint("status_updated_at", { mode: "number" }).notNull(),
-    attemptCount: integer("attempt_count").notNull().default(0),
-    lastCheckedAt: bigint("last_checked_at", { mode: "number" }),
-    nextCheckAt: bigint("next_check_at", { mode: "number" }).notNull(),
-    lastError: jsonb("last_error"),
-    raw: jsonb("raw"),
-    metadata: jsonb("metadata"),
+    messageId: ${messageId},
+    providerId: ${idField(c.providerId)},
+    providerMessageId: ${idField(c.providerMessageId)},
+    type: ${shortTextField(c.type, true)},
+    to: ${shortTextField(c.to, true)},
+    from: ${shortTextField(c.from, false)},
+    status: ${shortTextField(c.status, true)},
+    providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
+    providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
+    sentAt: ${timestampField(c.sentAt)},
+    deliveredAt: ${timestampField(c.deliveredAt)},
+    failedAt: ${timestampField(c.failedAt)},
+    requestedAt: ${timestampField(c.requestedAt, true)},
+    scheduledAt: ${timestampField(c.scheduledAt)},
+    statusUpdatedAt: ${timestampField(c.statusUpdatedAt, true)},
+    attemptCount: integer(${q(c.attemptCount)}).notNull().default(0),
+    lastCheckedAt: ${timestampField(c.lastCheckedAt)},
+    nextCheckAt: ${timestampField(c.nextCheckAt, true)},
+    lastError: ${jsonField(c.lastError)},${rawFieldLine}
+    metadata: ${jsonField(c.metadata)},
   },
   (table) => [
-    index("idx_kmsg_delivery_due").on(table.status, table.nextCheckAt),
-    index("idx_kmsg_delivery_provider_msg").on(
+    index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
+    index(${q(spec.indexNames.providerMessage)}).on(
       table.providerId,
       table.providerMessageId,
     ),
-    index("idx_kmsg_delivery_requested_at").on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
   ],
 );`;
 }
@@ -93,39 +143,75 @@ function renderPostgresQueueSchema(tableName: string): string {
 );`;
 }
 
-function renderMySqlTrackingSchema(tableName: string): string {
+function renderMySqlTrackingSchema(
+  options: RenderDrizzleSchemaSourceOptions,
+): string {
+  const spec = getDeliveryTrackingSchemaSpec({
+    tableName: options.trackingTableName,
+    columnMap: options.trackingColumnMap,
+    typeStrategy: options.trackingTypeStrategy,
+    storeRaw: options.trackingStoreRaw,
+  });
+  const c = spec.columnMap;
+  const s = spec.typeStrategy;
+
+  const messageId =
+    s.messageId === "uuid"
+      ? `varchar(${q(c.messageId)}, { length: 36 }).primaryKey()`
+      : `varchar(${q(c.messageId)}, { length: 255 }).primaryKey()`;
+
+  const idField = (columnName: string): string =>
+    `varchar(${q(columnName)}, { length: 255 }).notNull()`;
+
+  const shortTextField = (columnName: string, required: boolean): string => {
+    const base =
+      s.shortText === "varchar"
+        ? `varchar(${q(columnName)}, { length: 64 })`
+        : `text(${q(columnName)})`;
+    return required ? `${base}.notNull()` : base;
+  };
+
+  const timestampField = (columnName: string, required = false): string => {
+    const base =
+      s.timestamp === "integer"
+        ? `int(${q(columnName)})`
+        : `bigint(${q(columnName)}, { mode: "number" })`;
+    return required ? `${base}.notNull()` : base;
+  };
+
+  const rawFieldLine = spec.storeRaw ? `\n    raw: text(${q(c.raw)}),` : "";
+
   return `export const deliveryTrackingTable = mysqlTable(
-  ${q(tableName)},
+  ${q(spec.tableName)},
   {
-    messageId: varchar("message_id", { length: 255 }).primaryKey(),
-    providerId: varchar("provider_id", { length: 255 }).notNull(),
-    providerMessageId: varchar("provider_message_id", { length: 255 }).notNull(),
-    type: varchar("type", { length: 64 }).notNull(),
-    to: varchar("to", { length: 64 }).notNull(),
-    from: varchar("from", { length: 64 }),
-    status: varchar("status", { length: 64 }).notNull(),
-    providerStatusCode: varchar("provider_status_code", { length: 64 }),
-    providerStatusMessage: varchar("provider_status_message", { length: 64 }),
-    sentAt: bigint("sent_at", { mode: "number" }),
-    deliveredAt: bigint("delivered_at", { mode: "number" }),
-    failedAt: bigint("failed_at", { mode: "number" }),
-    requestedAt: bigint("requested_at", { mode: "number" }).notNull(),
-    scheduledAt: bigint("scheduled_at", { mode: "number" }),
-    statusUpdatedAt: bigint("status_updated_at", { mode: "number" }).notNull(),
-    attemptCount: int("attempt_count").notNull().default(0),
-    lastCheckedAt: bigint("last_checked_at", { mode: "number" }),
-    nextCheckAt: bigint("next_check_at", { mode: "number" }).notNull(),
-    lastError: text("last_error"),
-    raw: text("raw"),
-    metadata: text("metadata"),
+    messageId: ${messageId},
+    providerId: ${idField(c.providerId)},
+    providerMessageId: ${idField(c.providerMessageId)},
+    type: ${shortTextField(c.type, true)},
+    to: ${shortTextField(c.to, true)},
+    from: ${shortTextField(c.from, false)},
+    status: ${shortTextField(c.status, true)},
+    providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
+    providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
+    sentAt: ${timestampField(c.sentAt)},
+    deliveredAt: ${timestampField(c.deliveredAt)},
+    failedAt: ${timestampField(c.failedAt)},
+    requestedAt: ${timestampField(c.requestedAt, true)},
+    scheduledAt: ${timestampField(c.scheduledAt)},
+    statusUpdatedAt: ${timestampField(c.statusUpdatedAt, true)},
+    attemptCount: int(${q(c.attemptCount)}).notNull().default(0),
+    lastCheckedAt: ${timestampField(c.lastCheckedAt)},
+    nextCheckAt: ${timestampField(c.nextCheckAt, true)},
+    lastError: text(${q(c.lastError)}),${rawFieldLine}
+    metadata: text(${q(c.metadata)}),
   },
   (table) => [
-    index("idx_kmsg_delivery_due").on(table.status, table.nextCheckAt),
-    index("idx_kmsg_delivery_provider_msg").on(
+    index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
+    index(${q(spec.indexNames.providerMessage)}).on(
       table.providerId,
       table.providerMessageId,
     ),
-    index("idx_kmsg_delivery_requested_at").on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
   ],
 );`;
 }
@@ -161,39 +247,50 @@ function renderMySqlQueueSchema(tableName: string): string {
 );`;
 }
 
-function renderSqliteTrackingSchema(tableName: string): string {
+function renderSqliteTrackingSchema(
+  options: RenderDrizzleSchemaSourceOptions,
+): string {
+  const spec = getDeliveryTrackingSchemaSpec({
+    tableName: options.trackingTableName,
+    columnMap: options.trackingColumnMap,
+    typeStrategy: options.trackingTypeStrategy,
+    storeRaw: options.trackingStoreRaw,
+  });
+  const c = spec.columnMap;
+
+  const rawFieldLine = spec.storeRaw ? `\n    raw: text(${q(c.raw)}),` : "";
+
   return `export const deliveryTrackingTable = sqliteTable(
-  ${q(tableName)},
+  ${q(spec.tableName)},
   {
-    messageId: text("message_id").primaryKey(),
-    providerId: text("provider_id").notNull(),
-    providerMessageId: text("provider_message_id").notNull(),
-    type: text("type").notNull(),
-    to: text("to").notNull(),
-    from: text("from"),
-    status: text("status").notNull(),
-    providerStatusCode: text("provider_status_code"),
-    providerStatusMessage: text("provider_status_message"),
-    sentAt: integer("sent_at"),
-    deliveredAt: integer("delivered_at"),
-    failedAt: integer("failed_at"),
-    requestedAt: integer("requested_at").notNull(),
-    scheduledAt: integer("scheduled_at"),
-    statusUpdatedAt: integer("status_updated_at").notNull(),
-    attemptCount: integer("attempt_count").notNull().default(0),
-    lastCheckedAt: integer("last_checked_at"),
-    nextCheckAt: integer("next_check_at").notNull(),
-    lastError: text("last_error"),
-    raw: text("raw"),
-    metadata: text("metadata"),
+    messageId: text(${q(c.messageId)}).primaryKey(),
+    providerId: text(${q(c.providerId)}).notNull(),
+    providerMessageId: text(${q(c.providerMessageId)}).notNull(),
+    type: text(${q(c.type)}).notNull(),
+    to: text(${q(c.to)}).notNull(),
+    from: text(${q(c.from)}),
+    status: text(${q(c.status)}).notNull(),
+    providerStatusCode: text(${q(c.providerStatusCode)}),
+    providerStatusMessage: text(${q(c.providerStatusMessage)}),
+    sentAt: integer(${q(c.sentAt)}),
+    deliveredAt: integer(${q(c.deliveredAt)}),
+    failedAt: integer(${q(c.failedAt)}),
+    requestedAt: integer(${q(c.requestedAt)}).notNull(),
+    scheduledAt: integer(${q(c.scheduledAt)}),
+    statusUpdatedAt: integer(${q(c.statusUpdatedAt)}).notNull(),
+    attemptCount: integer(${q(c.attemptCount)}).notNull().default(0),
+    lastCheckedAt: integer(${q(c.lastCheckedAt)}),
+    nextCheckAt: integer(${q(c.nextCheckAt)}).notNull(),
+    lastError: text(${q(c.lastError)}),${rawFieldLine}
+    metadata: text(${q(c.metadata)}),
   },
   (table) => [
-    index("idx_kmsg_delivery_due").on(table.status, table.nextCheckAt),
-    index("idx_kmsg_delivery_provider_msg").on(
+    index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
+    index(${q(spec.indexNames.providerMessage)}).on(
       table.providerId,
       table.providerMessageId,
     ),
-    index("idx_kmsg_delivery_requested_at").on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
   ],
 );`;
 }
@@ -233,24 +330,20 @@ export function renderDrizzleSchemaSource(
   options: RenderDrizzleSchemaSourceOptions,
 ): string {
   const target = toSchemaTarget(options.target);
-  const trackingTableName =
-    options.trackingTableName ?? DEFAULT_DELIVERY_TRACKING_TABLE;
   const queueTableName = options.queueTableName ?? DEFAULT_JOB_QUEUE_TABLE;
   const sections: string[] = [];
 
   if (options.dialect === "postgres") {
     sections.push(
-      'import { bigint, index, integer, jsonb, pgTable, text, varchar } from "drizzle-orm/pg-core";',
+      'import { bigint, index, integer, jsonb, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";',
     );
     if (target === "tracking" || target === "both") {
-      sections.push(renderPostgresTrackingSchema(trackingTableName));
+      sections.push(renderPostgresTrackingSchema(options));
     }
     if (target === "queue" || target === "both") {
       sections.push(renderPostgresQueueSchema(queueTableName));
     }
-    return `// Generated by @k-msg/messaging
-${sections.join("\n\n")}
-`;
+    return `// Generated by @k-msg/messaging\n${sections.join("\n\n")}\n`;
   }
 
   if (options.dialect === "mysql") {
@@ -258,26 +351,22 @@ ${sections.join("\n\n")}
       'import { bigint, index, int, mysqlTable, text, varchar } from "drizzle-orm/mysql-core";',
     );
     if (target === "tracking" || target === "both") {
-      sections.push(renderMySqlTrackingSchema(trackingTableName));
+      sections.push(renderMySqlTrackingSchema(options));
     }
     if (target === "queue" || target === "both") {
       sections.push(renderMySqlQueueSchema(queueTableName));
     }
-    return `// Generated by @k-msg/messaging
-${sections.join("\n\n")}
-`;
+    return `// Generated by @k-msg/messaging\n${sections.join("\n\n")}\n`;
   }
 
   sections.push(
     'import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";',
   );
   if (target === "tracking" || target === "both") {
-    sections.push(renderSqliteTrackingSchema(trackingTableName));
+    sections.push(renderSqliteTrackingSchema(options));
   }
   if (target === "queue" || target === "both") {
     sections.push(renderSqliteQueueSchema(queueTableName));
   }
-  return `// Generated by @k-msg/messaging
-${sections.join("\n\n")}
-`;
+  return `// Generated by @k-msg/messaging\n${sections.join("\n\n")}\n`;
 }

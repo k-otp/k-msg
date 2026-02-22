@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L87)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L99)
 
 ## Extends
 
@@ -149,4 +149,4 @@ readonly `unknown`[]
 
 > `optional` **tableName**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L89)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L101)
