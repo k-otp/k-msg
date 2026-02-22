@@ -51,8 +51,12 @@ describe("key resolver adapters", () => {
 
     expect(["k-2026-01", "k-2026-02", "k-2026-03"]).toContain(encrypt.kid);
     expect(decrypt).toEqual(
-      expect.arrayContaining(["k-2025-12", "k-2026-01", "k-2026-02", "k-2026-03"]),
+      expect.arrayContaining([
+        "k-2025-12",
+        "k-2026-01",
+        "k-2026-02",
+        "k-2026-03",
+      ]),
     );
   });
 });
-

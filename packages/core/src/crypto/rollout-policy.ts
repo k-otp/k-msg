@@ -102,7 +102,8 @@ export function selectActiveKidByRollout(
   fallbackKid?: string,
 ): string | undefined {
   const buckets = sanitizeBuckets(policy.buckets);
-  const defaultKid = normalizeKid(policy.defaultKid) ?? normalizeKid(fallbackKid);
+  const defaultKid =
+    normalizeKid(policy.defaultKid) ?? normalizeKid(fallbackKid);
 
   if (buckets.length === 0) {
     return defaultKid;
@@ -120,4 +121,3 @@ export function getRolloutKnownKids(
 ): readonly string[] {
   return sanitizeBuckets(policy.buckets).map((bucket) => bucket.kid);
 }
-
