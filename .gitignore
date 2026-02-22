@@ -41,4 +41,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 _docs/
 apps/docs/src/content/docs/api/
+apps/docs/src/generated/cli/*.md
 apps/docs/.astro/

@@ -64,6 +64,12 @@
 
 모든 생성기는 `--check` 모드를 지원합니다.
 
+참고:
+
+- `bun run scripts/docs/run-generate.ts --check`는 의도적으로 `scripts/docs/generate-cli-help.ts`와 `scripts/docs/generate-schema-docs.ts`를 제외합니다.
+- `apps/docs/src/generated/cli/help.md`와 `apps/docs/src/generated/cli/schema.md`는 `docs:build`(Pages 배포 포함)에서 생성되며, `docs:check`에서는 강제하지 않습니다.
+- `apps/docs/src/generated/cli/help.md`와 `apps/docs/src/generated/cli/schema.md`는 Git 추적 대상이 아닙니다.
+
 `bun run docs:build`에는 아래 단계도 포함됩니다.
 
 - `scripts/docs/ensure-git-history.ts` (문서 생성 전 실행)
