@@ -2,36 +2,11 @@
 
 This CLI is built with [Bunli](https://bunli.dev/) and uses the unified `k-msg` package (KMsg + Providers).
 
-## Install (recommended)
-
-### npm
-
-```bash
-npm install -g @k-msg/cli
-# or: pnpm add -g @k-msg/cli
-
-k-msg --help
-```
-
-Note: the npm package downloads a native binary from GitHub Releases on first run
-(`bunli build:all` artifacts: `k-msg-cli-<version>-<target>.tar.gz`), verifies it
-using `checksums.txt`, then extracts and caches it under your OS cache directory
-(`K_MSG_CLI_CACHE_DIR` to override).
-
-When a new native binary is installed, the launcher also performs best-effort sync
-for writable legacy `k-msg` binaries found on PATH (for example, older curl-based
-installs). Set `K_MSG_CLI_SYNC_PATHS=0` to disable this behavior.
-
-Env overrides:
-
-- `K_MSG_CLI_BASE_URL`: override GitHub release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
-- `K_MSG_CLI_CACHE_DIR`: override where the extracted binary is cached
-- `K_MSG_CLI_LOCAL_BINARY`: copy a local binary instead of downloading (useful for local testing)
-
-### curl installer (GitHub Pages)
+## Install (curl only)
 
 ```bash
 curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
+k-msg --help
 ```
 
 Installer environment variables:
@@ -40,39 +15,8 @@ Installer environment variables:
 - `K_MSG_CLI_INSTALL_DIR`: target directory override (default: auto-detect active `k-msg` directory when writable, otherwise `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: override release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
 
-Path conflict note:
-
-- The installer now prefers updating the currently active `k-msg` path when possible, and also refreshes that path if it differs from the selected install dir. This reduces stale-version issues when users previously installed via `bun`/`npm`/older `curl` flows.
-- For safety, the installer does not overwrite active symlink/script launchers (for example package-manager shims). In that case it installs to `~/.local/bin` unless `K_MSG_CLI_INSTALL_DIR` is set.
-
-### GitHub Releases (manual)
-
-The distribution workflow also publishes prebuilt binaries to GitHub Releases as:
-
-- `k-msg-cli-<version>-darwin-arm64.tar.gz`
-- `k-msg-cli-<version>-darwin-x64.tar.gz`
-- `k-msg-cli-<version>-linux-arm64.tar.gz`
-- `k-msg-cli-<version>-linux-x64.tar.gz`
-- `k-msg-cli-<version>-windows-x64.tar.gz`
-
-After extracting, you'll find the binary at `<target>/k-msg` (or `<target>/k-msg.exe`).
-
-### macOS/Linux
-
-```bash
-tar -xzf k-msg-cli-<version>-<target>.tar.gz
-sudo install -m 0755 <target>/k-msg /usr/local/bin/k-msg
-
-# optional alias
-sudo ln -sf /usr/local/bin/k-msg /usr/local/bin/kmsg
-
-k-msg --help
-```
-
-### Windows
-
-Extract the archive and put `k-msg.exe` somewhere on your `PATH`.
-Optionally copy it as `kmsg.exe` as an alias.
+The project now standardizes user-facing CLI installation on the curl installer path.
+Other install paths are intentionally undocumented here.
 
 ## Run (local/dev)
 

@@ -2,6 +2,19 @@
 title: CLI Reference
 ---
 
+## Install (curl only)
+
+```bash
+curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
+k-msg --help
+```
+
+Installer environment variables:
+
+- `K_MSG_CLI_VERSION`: override target version (default: latest Pages script version)
+- `K_MSG_CLI_INSTALL_DIR`: target directory override (default: auto-detect active `k-msg` path when writable, otherwise `~/.local/bin`)
+- `K_MSG_CLI_BASE_URL`: override release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+
 import CliHelp from "../../../generated/cli/help.md";
 import CliSchema from "../../../generated/cli/schema.md";
 
