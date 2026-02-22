@@ -27,7 +27,6 @@ export class EndpointManager extends EventEmitter {
   private defaultConfig: StorageConfig = {
     type: "memory",
     retentionDays: 90,
-    enableEncryption: false,
   };
 
   constructor(config: Partial<StorageConfig> = {}) {

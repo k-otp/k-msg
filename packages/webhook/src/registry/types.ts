@@ -60,18 +60,9 @@ export interface StorageConfig {
   // Common options
   retentionDays?: number;
   /**
-   * Preferred option. If both legacy and `fieldCrypto` are set, `fieldCrypto` takes precedence.
+   * Field-level crypto policy for endpoint secret and delivery payload.
    */
   fieldCrypto?: FieldCryptoConfig;
-  /**
-   * @deprecated Use `fieldCrypto` instead.
-   */
-  enableEncryption?: boolean;
-  /**
-   * @deprecated Use `fieldCrypto` with a provider implementation.
-   * Legacy option kept for compatibility only.
-   */
-  encryptionKey?: string;
 }
 
 export interface PaginationOptions {
