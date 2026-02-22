@@ -1,5 +1,11 @@
 # @k-msg/provider
 
+## 0.24.0 — 2026-02-22
+
+### Patch changes
+
+- Updated dependencies: core@0.24.0, template@0.24.0
+
 ## 0.23.1 — 2026-02-22
 
 ### Patch changes
