@@ -16,6 +16,25 @@ import { strictBooleanFlagSchema } from "../cli/options";
 const chunkSizeSchema = z.coerce.number().int().positive().max(100_000);
 const maxChunksSchema = z.coerce.number().int().positive().max(100_000);
 
+type SqliteBinding = string | number | bigint | boolean | Uint8Array | null;
+
+function toSqliteBinding(value: unknown): SqliteBinding {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return value;
+  if (typeof value === "bigint") return value;
+  if (typeof value === "boolean") return value;
+  if (value instanceof Uint8Array) return value;
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function toSqliteBindings(values: readonly unknown[]): SqliteBinding[] {
+  return values.map((value) => toSqliteBinding(value));
+}
+
 function toSqliteClient(filePath: string): {
   client: CloudflareSqlClient;
   close: () => void;
@@ -29,15 +48,16 @@ function toSqliteClient(filePath: string): {
     ) {
       const trimmed = sql.trim().toUpperCase();
       const statement = database.query(sql);
+      const bindings = toSqliteBindings(params);
       if (trimmed.startsWith("SELECT")) {
-        const rows = statement.all(...params) as T[];
+        const rows = statement.all(...bindings) as T[];
         return {
           rows,
           rowCount: rows.length,
         };
       }
 
-      const result = statement.run(...params) as { changes?: number };
+      const result = statement.run(...bindings) as { changes?: number };
       return {
         rows: [],
         rowCount:
