@@ -5,11 +5,11 @@ prev: false
 title: "CreateDrizzleDeliveryTrackingStoreOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L82)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L92)
 
 ## Extends
 
-- [`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/)
+- [`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/)
 
 ## Properties
 
@@ -26,6 +26,18 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:51](https:
 #### Inherited from
 
 [`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`close`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#close)
+
+***
+
+### columnMap?
+
+> `optional` **columnMap**: `Partial`\<[`DeliveryTrackingColumnMap`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingcolumnmap/)\>
+
+Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:76
+
+#### Inherited from
+
+[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/).[`columnMap`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/#columnmap)
 
 ***
 
@@ -145,8 +157,36 @@ readonly `unknown`[]
 
 ***
 
+### storeRaw?
+
+> `optional` **storeRaw**: `boolean`
+
+Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:78
+
+#### Inherited from
+
+[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/).[`storeRaw`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/#storeraw)
+
+***
+
 ### tableName?
 
 > `optional` **tableName**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L84)
+Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:75
+
+#### Inherited from
+
+[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/).[`tableName`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/#tablename)
+
+***
+
+### typeStrategy?
+
+> `optional` **typeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
+
+Defined in: packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:77
+
+#### Inherited from
+
+[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/).[`typeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/#typestrategy)

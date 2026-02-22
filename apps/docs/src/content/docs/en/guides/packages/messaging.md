@@ -206,18 +206,19 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()` and `HyperdriveDeliveryTrackingStore` share the same logical table/index schema.
 `DeliveryTrackingService.init()` creates these automatically.
 
-Tracking table: `kmsg_delivery_tracking`
+Tracking table/index defaults are generated from the adapter schema spec:
 
+<!-- tracking-schema-summary:start -->
+- Tracking table default: `kmsg_delivery_tracking` (override with `tableName`)
 - Primary key: `message_id`
-- Main columns: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
+- Core columns: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
 - Time columns: `requested_at`, `status_updated_at`, `next_check_at`, `sent_at`, `delivered_at`, `failed_at`, `last_checked_at`, `scheduled_at`
-- Meta columns: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `raw`, `metadata`
-
-Indexes:
-
-- `idx_kmsg_delivery_due(status, next_check_at)`
-- `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
-- `idx_kmsg_delivery_requested_at(requested_at)`
+- Meta columns: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `metadata`
+- `raw` column is disabled by default (`storeRaw: false`) and enabled only when `storeRaw: true` is set.
+- Index: `idx_kmsg_delivery_due(status, next_check_at)`
+- Index: `idx_kmsg_delivery_provider_msg(provider_id, provider_message_id)`
+- Index: `idx_kmsg_delivery_requested_at(requested_at)`
+<!-- tracking-schema-summary:end -->
 
 Notes by dialect:
 
@@ -281,6 +282,38 @@ const queue = createDrizzleJobQueue({
   dialect: "postgres",
   db,
 });
+```
+
+### Tracking Schema Customization
+
+`storeRaw` defaults to `false`. Enable it only when you explicitly need provider raw payload storage.
+
+```ts
+import {
+  buildDeliveryTrackingSchemaSql,
+  createD1DeliveryTrackingStore,
+  getDeliveryTrackingSchemaSpec,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+const trackingOptions = {
+  tableName: "otp_delivery_tracking",
+  columnMap: {
+    messageId: "id",
+    nextCheckAt: "next_check_at_ms",
+  },
+  typeStrategy: {
+    messageId: "uuid",
+    timestamp: "integer",
+  },
+  storeRaw: true,
+} as const;
+
+const store = createD1DeliveryTrackingStore(env.DB, trackingOptions);
+const ddl = buildDeliveryTrackingSchemaSql({
+  dialect: "postgres",
+  ...trackingOptions,
+});
+const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 ```
 
 ### Supported Drizzle Versions

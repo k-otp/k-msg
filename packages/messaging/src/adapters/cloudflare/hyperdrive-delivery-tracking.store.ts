@@ -9,6 +9,13 @@ import {
   isTerminalDeliveryStatus,
   type TrackingRecord,
 } from "../../delivery-tracking/types";
+import {
+  type DeliveryTrackingColumnKey,
+  type DeliveryTrackingSchemaOptions,
+  type DeliveryTrackingSchemaSpec,
+  getDeliveryTrackingColumnKeys,
+  getDeliveryTrackingSchemaSpec,
+} from "./delivery-tracking-schema";
 import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
@@ -68,13 +75,22 @@ function toNumberValue(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+export type HyperdriveDeliveryTrackingStoreOptions =
+  | string
+  | DeliveryTrackingSchemaOptions;
+
 export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   private initPromise: Promise<void> | undefined;
+  private readonly schema: DeliveryTrackingSchemaSpec;
 
   constructor(
     private readonly client: CloudflareSqlClient,
-    private readonly tableName = "kmsg_delivery_tracking",
-  ) {}
+    options: HyperdriveDeliveryTrackingStoreOptions = {},
+  ) {
+    const resolved =
+      typeof options === "string" ? { tableName: options } : options;
+    this.schema = getDeliveryTrackingSchemaSpec(resolved);
+  }
 
   async init(): Promise<void> {
     if (this.initPromise) {
@@ -83,7 +99,10 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
     this.initPromise = initializeCloudflareSqlSchema(this.client, {
       target: "tracking",
-      trackingTableName: this.tableName,
+      trackingTableName: this.schema.tableName,
+      trackingColumnMap: this.schema.columnMap,
+      trackingTypeStrategy: this.schema.typeStrategy,
+      trackingStoreRaw: this.schema.storeRaw,
     }).catch((error) => {
       this.initPromise = undefined;
       throw error;
@@ -95,64 +114,19 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   async upsert(record: TrackingRecord): Promise<void> {
     await this.init();
 
-    const columns = [
-      "message_id",
-      "provider_id",
-      "provider_message_id",
-      "type",
-      "to",
-      "from",
-      "status",
-      "provider_status_code",
-      "provider_status_message",
-      "sent_at",
-      "delivered_at",
-      "failed_at",
-      "requested_at",
-      "scheduled_at",
-      "status_updated_at",
-      "attempt_count",
-      "last_checked_at",
-      "next_check_at",
-      "last_error",
-      "raw",
-      "metadata",
-    ] as const;
+    const keys = getDeliveryTrackingColumnKeys(this.schema.storeRaw);
+    const values = keys.map((key) => this.recordValueForKey(record, key));
 
-    const values: unknown[] = [
-      record.messageId,
-      record.providerId,
-      record.providerMessageId,
-      record.type,
-      record.to,
-      record.from ?? null,
-      record.status,
-      record.providerStatusCode ?? null,
-      record.providerStatusMessage ?? null,
-      record.sentAt ? record.sentAt.getTime() : null,
-      record.deliveredAt ? record.deliveredAt.getTime() : null,
-      record.failedAt ? record.failedAt.getTime() : null,
-      record.requestedAt.getTime(),
-      record.scheduledAt ? record.scheduledAt.getTime() : null,
-      record.statusUpdatedAt.getTime(),
-      record.attemptCount,
-      record.lastCheckedAt ? record.lastCheckedAt.getTime() : null,
-      record.nextCheckAt.getTime(),
-      record.lastError ? JSON.stringify(record.lastError) : null,
-      record.raw !== undefined ? JSON.stringify(record.raw) : null,
-      record.metadata ? JSON.stringify(record.metadata) : null,
-    ];
-
-    const colSql = columns
-      .map((column) => this.quoteIdentifier(column))
+    const colSql = keys
+      .map((key) => this.quoteIdentifier(this.columnName(key)))
       .join(", ");
-    const valueSql = this.placeholders(columns.length).join(", ");
+    const valueSql = this.placeholders(keys.length).join(", ");
 
     if (this.client.dialect === "mysql") {
-      const updates = columns
-        .filter((column) => column !== "message_id")
-        .map((column) => {
-          const qColumn = this.quoteIdentifier(column);
+      const updates = keys
+        .filter((key) => key !== "messageId")
+        .map((key) => {
+          const qColumn = this.quoteIdentifier(this.columnName(key));
           return `${qColumn} = VALUES(${qColumn})`;
         })
         .join(", ");
@@ -164,16 +138,16 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       return;
     }
 
-    const updates = columns
-      .filter((column) => column !== "message_id")
-      .map((column) => {
-        const qColumn = this.quoteIdentifier(column);
+    const updates = keys
+      .filter((key) => key !== "messageId")
+      .map((key) => {
+        const qColumn = this.quoteIdentifier(this.columnName(key));
         return `${qColumn} = excluded.${qColumn}`;
       })
       .join(", ");
 
     await this.client.query(
-      `INSERT INTO ${this.tableRef()} (${colSql}) VALUES (${valueSql}) ON CONFLICT (${this.quoteIdentifier("message_id")}) DO UPDATE SET ${updates}`,
+      `INSERT INTO ${this.tableRef()} (${colSql}) VALUES (${valueSql}) ON CONFLICT (${this.quoteIdentifier(this.columnName("messageId"))}) DO UPDATE SET ${updates}`,
       values,
     );
   }
@@ -183,7 +157,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
     const messageIdPlaceholder = this.placeholder(1);
     const { rows } = await this.client.query<TrackingRow>(
-      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier("message_id")} = ${messageIdPlaceholder} LIMIT 1`,
+      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${messageIdPlaceholder} LIMIT 1`,
       [messageId],
     );
     const row = rows[0];
@@ -203,7 +177,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const limitPlaceholder = this.placeholder(TERMINAL_STATUSES.length + 2);
 
     const { rows } = await this.client.query<TrackingRow>(
-      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier("status")} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier("next_check_at")} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier("next_check_at")} ASC LIMIT ${limitPlaceholder}`,
+      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
       [...TERMINAL_STATUSES, now.getTime(), safeLimit],
     );
 
@@ -226,8 +200,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const where = this.buildWhere(options);
     const orderBy =
       options.orderBy === "statusUpdatedAt"
-        ? "status_updated_at"
-        : "requested_at";
+        ? this.columnName("statusUpdatedAt")
+        : this.columnName("requestedAt");
     const direction = options.orderDirection === "asc" ? "ASC" : "DESC";
 
     const params = [...where.params, safeLimit, safeOffset];
@@ -265,9 +239,9 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if (fields.length === 0) return [];
 
     const fieldMap: Record<DeliveryTrackingCountByField, string> = {
-      providerId: "provider_id",
-      type: "type",
-      status: "status",
+      providerId: this.columnName("providerId"),
+      type: this.columnName("type"),
+      status: this.columnName("status"),
     };
 
     const groupColumns = fields.map((field) => fieldMap[field]);
@@ -303,107 +277,108 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   ): Promise<void> {
     await this.init();
 
-    const updates: Array<{ column: string; value: unknown }> = [];
+    const updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }> =
+      [];
 
     if (patch.providerId !== undefined) {
-      updates.push({ column: "provider_id", value: patch.providerId });
+      updates.push({ key: "providerId", value: patch.providerId });
     }
     if (patch.providerMessageId !== undefined) {
       updates.push({
-        column: "provider_message_id",
+        key: "providerMessageId",
         value: patch.providerMessageId,
       });
     }
     if (patch.type !== undefined) {
-      updates.push({ column: "type", value: patch.type });
+      updates.push({ key: "type", value: patch.type });
     }
     if (patch.to !== undefined) {
-      updates.push({ column: "to", value: patch.to });
+      updates.push({ key: "to", value: patch.to });
     }
     if ("from" in patch) {
-      updates.push({ column: "from", value: patch.from ?? null });
+      updates.push({ key: "from", value: patch.from ?? null });
     }
     if (patch.status !== undefined) {
-      updates.push({ column: "status", value: patch.status });
+      updates.push({ key: "status", value: patch.status });
     }
     if ("providerStatusCode" in patch) {
       updates.push({
-        column: "provider_status_code",
+        key: "providerStatusCode",
         value: patch.providerStatusCode ?? null,
       });
     }
     if ("providerStatusMessage" in patch) {
       updates.push({
-        column: "provider_status_message",
+        key: "providerStatusMessage",
         value: patch.providerStatusMessage ?? null,
       });
     }
     if ("sentAt" in patch) {
       updates.push({
-        column: "sent_at",
+        key: "sentAt",
         value: patch.sentAt ? patch.sentAt.getTime() : null,
       });
     }
     if ("deliveredAt" in patch) {
       updates.push({
-        column: "delivered_at",
+        key: "deliveredAt",
         value: patch.deliveredAt ? patch.deliveredAt.getTime() : null,
       });
     }
     if ("failedAt" in patch) {
       updates.push({
-        column: "failed_at",
+        key: "failedAt",
         value: patch.failedAt ? patch.failedAt.getTime() : null,
       });
     }
     if (patch.requestedAt !== undefined) {
       updates.push({
-        column: "requested_at",
+        key: "requestedAt",
         value: patch.requestedAt.getTime(),
       });
     }
     if ("scheduledAt" in patch) {
       updates.push({
-        column: "scheduled_at",
+        key: "scheduledAt",
         value: patch.scheduledAt ? patch.scheduledAt.getTime() : null,
       });
     }
     if (patch.statusUpdatedAt !== undefined) {
       updates.push({
-        column: "status_updated_at",
+        key: "statusUpdatedAt",
         value: patch.statusUpdatedAt.getTime(),
       });
     }
     if (patch.attemptCount !== undefined) {
-      updates.push({ column: "attempt_count", value: patch.attemptCount });
+      updates.push({ key: "attemptCount", value: patch.attemptCount });
     }
     if ("lastCheckedAt" in patch) {
       updates.push({
-        column: "last_checked_at",
+        key: "lastCheckedAt",
         value: patch.lastCheckedAt ? patch.lastCheckedAt.getTime() : null,
       });
     }
     if (patch.nextCheckAt !== undefined) {
       updates.push({
-        column: "next_check_at",
+        key: "nextCheckAt",
         value: patch.nextCheckAt.getTime(),
       });
     }
     if ("lastError" in patch) {
       updates.push({
-        column: "last_error",
+        key: "lastError",
         value: patch.lastError ? JSON.stringify(patch.lastError) : null,
       });
     }
-    if ("raw" in patch) {
+    if (this.schema.storeRaw && "raw" in patch) {
       updates.push({
-        column: "raw",
+        key: "raw",
         value: patch.raw !== undefined ? JSON.stringify(patch.raw) : null,
       });
     }
     if ("metadata" in patch) {
       updates.push({
-        column: "metadata",
+        key: "metadata",
         value: patch.metadata ? JSON.stringify(patch.metadata) : null,
       });
     }
@@ -413,14 +388,14 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const setSql = updates
       .map(
         (update, index) =>
-          `${this.quoteIdentifier(update.column)} = ${this.placeholder(index + 1)}`,
+          `${this.quoteIdentifier(this.columnName(update.key))} = ${this.placeholder(index + 1)}`,
       )
       .join(", ");
 
     const wherePlaceholder = this.placeholder(updates.length + 1);
 
     await this.client.query(
-      `UPDATE ${this.tableRef()} SET ${setSql} WHERE ${this.quoteIdentifier("message_id")} = ${wherePlaceholder}`,
+      `UPDATE ${this.tableRef()} SET ${setSql} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${wherePlaceholder}`,
       [...updates.map((update) => update.value), messageId],
     );
   }
@@ -430,68 +405,83 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   private rowToRecord(row: TrackingRow): TrackingRecord {
-    const requestedAt = toDate(row.requested_at) ?? new Date();
-    const statusUpdatedAt = toDate(row.status_updated_at) ?? requestedAt;
-    const nextCheckAt = toDate(row.next_check_at) ?? requestedAt;
+    const columnValue = (key: DeliveryTrackingColumnKey): unknown =>
+      row[this.columnName(key)];
+
+    const requestedAt = toDate(columnValue("requestedAt")) ?? new Date();
+    const statusUpdatedAt =
+      toDate(columnValue("statusUpdatedAt")) ?? requestedAt;
+    const nextCheckAt = toDate(columnValue("nextCheckAt")) ?? requestedAt;
 
     const record: TrackingRecord = {
-      messageId: toStringValue(row.message_id),
-      providerId: toStringValue(row.provider_id),
-      providerMessageId: toStringValue(row.provider_message_id),
-      type: toStringValue(row.type) as TrackingRecord["type"],
-      to: toStringValue(row.to),
+      messageId: toStringValue(columnValue("messageId")),
+      providerId: toStringValue(columnValue("providerId")),
+      providerMessageId: toStringValue(columnValue("providerMessageId")),
+      type: toStringValue(columnValue("type")) as TrackingRecord["type"],
+      to: toStringValue(columnValue("to")),
       requestedAt,
-      status: toStringValue(row.status) as TrackingRecord["status"],
+      status: toStringValue(columnValue("status")) as TrackingRecord["status"],
       statusUpdatedAt,
-      attemptCount: toNumberValue(row.attempt_count, 0),
+      attemptCount: toNumberValue(columnValue("attemptCount"), 0),
       nextCheckAt,
     };
 
-    const from = toStringValue(row.from);
+    const from = toStringValue(columnValue("from"));
     if (from.length > 0) record.from = from;
 
-    const providerStatusCode = toStringValue(row.provider_status_code);
+    const providerStatusCode = toStringValue(columnValue("providerStatusCode"));
     if (providerStatusCode.length > 0) {
       record.providerStatusCode = providerStatusCode;
     }
 
-    const providerStatusMessage = toStringValue(row.provider_status_message);
+    const providerStatusMessage = toStringValue(
+      columnValue("providerStatusMessage"),
+    );
     if (providerStatusMessage.length > 0) {
       record.providerStatusMessage = providerStatusMessage;
     }
 
-    const scheduledAt = toDate(row.scheduled_at);
+    const scheduledAt = toDate(columnValue("scheduledAt"));
     if (scheduledAt) record.scheduledAt = scheduledAt;
 
-    const sentAt = toDate(row.sent_at);
+    const sentAt = toDate(columnValue("sentAt"));
     if (sentAt) record.sentAt = sentAt;
 
-    const deliveredAt = toDate(row.delivered_at);
+    const deliveredAt = toDate(columnValue("deliveredAt"));
     if (deliveredAt) record.deliveredAt = deliveredAt;
 
-    const failedAt = toDate(row.failed_at);
+    const failedAt = toDate(columnValue("failedAt"));
     if (failedAt) record.failedAt = failedAt;
 
-    const lastCheckedAt = toDate(row.last_checked_at);
+    const lastCheckedAt = toDate(columnValue("lastCheckedAt"));
     if (lastCheckedAt) record.lastCheckedAt = lastCheckedAt;
 
     const lastError = safeJsonParse<TrackingRecord["lastError"]>(
-      row.last_error,
+      columnValue("lastError"),
     );
     if (lastError) record.lastError = lastError;
 
-    if (row.raw !== null && row.raw !== undefined) {
-      record.raw = safeJsonParse(row.raw) ?? row.raw;
+    if (this.schema.storeRaw) {
+      const rawValue = columnValue("raw");
+      if (rawValue !== null && rawValue !== undefined) {
+        record.raw = safeJsonParse(rawValue) ?? rawValue;
+      }
     }
 
-    const metadata = safeJsonParse<Record<string, unknown>>(row.metadata);
+    const metadata = safeJsonParse<Record<string, unknown>>(
+      columnValue("metadata"),
+    );
     if (metadata) record.metadata = metadata;
 
     return record;
   }
 
   private tableRef(): string {
-    return this.quoteIdentifier(this.tableName);
+    return this.quoteIdentifier(this.schema.tableName);
+  }
+
+  private columnName(key: DeliveryTrackingColumnKey): string {
+    return this.schema.columnMap[key];
   }
 
   private quoteIdentifier(identifier: string): string {
@@ -511,6 +501,58 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       values.push(this.placeholder(startIndex + index));
     }
     return values;
+  }
+
+  private recordValueForKey(
+    record: TrackingRecord,
+    key: DeliveryTrackingColumnKey,
+  ): unknown {
+    switch (key) {
+      case "messageId":
+        return record.messageId;
+      case "providerId":
+        return record.providerId;
+      case "providerMessageId":
+        return record.providerMessageId ?? "";
+      case "type":
+        return record.type;
+      case "to":
+        return record.to;
+      case "from":
+        return record.from ?? null;
+      case "status":
+        return record.status;
+      case "providerStatusCode":
+        return record.providerStatusCode ?? null;
+      case "providerStatusMessage":
+        return record.providerStatusMessage ?? null;
+      case "sentAt":
+        return record.sentAt ? record.sentAt.getTime() : null;
+      case "deliveredAt":
+        return record.deliveredAt ? record.deliveredAt.getTime() : null;
+      case "failedAt":
+        return record.failedAt ? record.failedAt.getTime() : null;
+      case "requestedAt":
+        return record.requestedAt.getTime();
+      case "scheduledAt":
+        return record.scheduledAt ? record.scheduledAt.getTime() : null;
+      case "statusUpdatedAt":
+        return record.statusUpdatedAt.getTime();
+      case "attemptCount":
+        return record.attemptCount;
+      case "lastCheckedAt":
+        return record.lastCheckedAt ? record.lastCheckedAt.getTime() : null;
+      case "nextCheckAt":
+        return record.nextCheckAt.getTime();
+      case "lastError":
+        return record.lastError ? JSON.stringify(record.lastError) : null;
+      case "raw":
+        return record.raw !== undefined ? JSON.stringify(record.raw) : null;
+      case "metadata":
+        return record.metadata ? JSON.stringify(record.metadata) : null;
+      default:
+        return null;
+    }
   }
 
   private buildWhere(filter: DeliveryTrackingRecordFilter): WhereSql {
@@ -538,38 +580,38 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       params.push(...values);
     };
 
-    addEquals("message_id", filter.messageId);
-    addEquals("provider_id", filter.providerId);
-    addEquals("provider_message_id", filter.providerMessageId);
-    addEquals("type", filter.type);
-    addEquals("status", filter.status);
-    addEquals("to", filter.to);
-    addEquals("from", filter.from);
+    addEquals(this.columnName("messageId"), filter.messageId);
+    addEquals(this.columnName("providerId"), filter.providerId);
+    addEquals(this.columnName("providerMessageId"), filter.providerMessageId);
+    addEquals(this.columnName("type"), filter.type);
+    addEquals(this.columnName("status"), filter.status);
+    addEquals(this.columnName("to"), filter.to);
+    addEquals(this.columnName("from"), filter.from);
 
     if (filter.requestedAtFrom) {
       clauses.push(
-        `${this.quoteIdentifier("requested_at")} >= ${this.placeholder(params.length + 1)}`,
+        `${this.quoteIdentifier(this.columnName("requestedAt"))} >= ${this.placeholder(params.length + 1)}`,
       );
       params.push(filter.requestedAtFrom.getTime());
     }
 
     if (filter.requestedAtTo) {
       clauses.push(
-        `${this.quoteIdentifier("requested_at")} <= ${this.placeholder(params.length + 1)}`,
+        `${this.quoteIdentifier(this.columnName("requestedAt"))} <= ${this.placeholder(params.length + 1)}`,
       );
       params.push(filter.requestedAtTo.getTime());
     }
 
     if (filter.statusUpdatedAtFrom) {
       clauses.push(
-        `${this.quoteIdentifier("status_updated_at")} >= ${this.placeholder(params.length + 1)}`,
+        `${this.quoteIdentifier(this.columnName("statusUpdatedAt"))} >= ${this.placeholder(params.length + 1)}`,
       );
       params.push(filter.statusUpdatedAtFrom.getTime());
     }
 
     if (filter.statusUpdatedAtTo) {
       clauses.push(
-        `${this.quoteIdentifier("status_updated_at")} <= ${this.placeholder(params.length + 1)}`,
+        `${this.quoteIdentifier(this.columnName("statusUpdatedAt"))} <= ${this.placeholder(params.length + 1)}`,
       );
       params.push(filter.statusUpdatedAtTo.getTime());
     }
