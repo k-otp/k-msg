@@ -7,7 +7,10 @@ export interface ProviderCliMetadata {
   defaultKakaoSenderKey?: string;
 }
 
-export const providerCliMetadata: Record<ProviderTypeWithConfig, ProviderCliMetadata> = {
+export const providerCliMetadata: Record<
+  ProviderTypeWithConfig,
+  ProviderCliMetadata
+> = {
   mock: {
     label: "Mock (local test)",
     routingSeedTypes: [
