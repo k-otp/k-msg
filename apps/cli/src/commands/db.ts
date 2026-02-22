@@ -9,6 +9,7 @@ import {
 } from "@k-msg/messaging/adapters/cloudflare";
 import { z } from "zod";
 import { strictBooleanFlagSchema } from "../cli/options";
+import trackingMigrateCmd from "./db-tracking-migrate";
 
 const dialectSchema = z.enum(["postgres", "mysql", "sqlite"]);
 const targetSchema = z.enum(["tracking", "queue", "both"]);
@@ -210,11 +211,20 @@ const schemaCmd = defineCommand({
   },
 });
 
+const trackingCmd = defineCommand({
+  name: "tracking",
+  description: "Tracking table migration utilities",
+  commands: [trackingMigrateCmd],
+  handler: async () => {
+    console.log("Use a subcommand: migrate");
+  },
+});
+
 export default defineCommand({
   name: "db",
   description: "Database schema utilities",
-  commands: [schemaCmd],
+  commands: [schemaCmd, trackingCmd],
   handler: async () => {
-    console.log("Use a subcommand: schema");
+    console.log("Use a subcommand: schema | tracking");
   },
 });
