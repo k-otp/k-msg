@@ -74,6 +74,11 @@ export interface ResolvedDeliveryTrackingTypeStrategy {
 export interface DeliveryTrackingSchemaOptions {
   tableName?: string;
   columnMap?: Partial<DeliveryTrackingColumnMap>;
+  /**
+   * New API: `typeStrategy`.
+   * Legacy alias preserved for compatibility with `trackingTypeStrategy`.
+   */
+  trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   storeRaw?: boolean;
 }
@@ -232,7 +237,7 @@ export function getDeliveryTrackingSchemaSpec(
     DEFAULT_DELIVERY_TRACKING_TABLE;
   const columnMap = resolveDeliveryTrackingColumnMap(options.columnMap);
   const typeStrategy = resolveDeliveryTrackingTypeStrategy(
-    options.typeStrategy,
+    options.typeStrategy ?? options.trackingTypeStrategy,
   );
   const storeRaw = options.storeRaw === true;
 

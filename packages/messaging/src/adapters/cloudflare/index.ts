@@ -108,7 +108,7 @@ export function createD1DeliveryTrackingStore(
   return new HyperdriveDeliveryTrackingStore(createD1SqlClient(database), {
     tableName: options.tableName,
     columnMap: options.columnMap,
-    typeStrategy: options.typeStrategy,
+    typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
     storeRaw: options.storeRaw,
   });
 }
@@ -130,7 +130,7 @@ export function createDrizzleDeliveryTrackingStore(
   return new HyperdriveDeliveryTrackingStore(client, {
     tableName: options.tableName,
     columnMap: options.columnMap,
-    typeStrategy: options.typeStrategy,
+    typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
     storeRaw: options.storeRaw,
   });
 }

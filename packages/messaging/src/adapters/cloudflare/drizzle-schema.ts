@@ -14,6 +14,7 @@ export interface RenderDrizzleSchemaSourceOptions {
   target?: CloudflareSqlSchemaTarget;
   trackingTableName?: string;
   trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
+  typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
   queueTableName?: string;
@@ -35,10 +36,12 @@ function q(value: string): string {
 function renderPostgresTrackingSchema(
   options: RenderDrizzleSchemaSourceOptions,
 ): string {
+  const trackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
   const spec = getDeliveryTrackingSchemaSpec({
     tableName: options.trackingTableName,
     columnMap: options.trackingColumnMap,
-    typeStrategy: options.trackingTypeStrategy,
+    typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
   });
   const c = spec.columnMap;
@@ -146,10 +149,12 @@ function renderPostgresQueueSchema(tableName: string): string {
 function renderMySqlTrackingSchema(
   options: RenderDrizzleSchemaSourceOptions,
 ): string {
+  const trackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
   const spec = getDeliveryTrackingSchemaSpec({
     tableName: options.trackingTableName,
     columnMap: options.trackingColumnMap,
-    typeStrategy: options.trackingTypeStrategy,
+    typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
   });
   const c = spec.columnMap;
@@ -250,10 +255,12 @@ function renderMySqlQueueSchema(tableName: string): string {
 function renderSqliteTrackingSchema(
   options: RenderDrizzleSchemaSourceOptions,
 ): string {
+  const trackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
   const spec = getDeliveryTrackingSchemaSpec({
     tableName: options.trackingTableName,
     columnMap: options.trackingColumnMap,
-    typeStrategy: options.trackingTypeStrategy,
+    typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
   });
   const c = spec.columnMap;
