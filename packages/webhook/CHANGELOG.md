@@ -1,5 +1,11 @@
 # @k-msg/webhook
 
+## 0.22.0 — 2026-02-22
+
+### Patch changes
+
+- Updated dependencies: core@0.22.0
+
 ## 0.21.1 — 2026-02-22
 
 ### Patch changes

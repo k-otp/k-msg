@@ -1,5 +1,21 @@
 # @k-msg/provider
 
+## 0.22.0 — 2026-02-22
+
+### Minor changes
+
+- [aa04c40](https://github.com/k-otp/k-msg/commit/aa04c40b7cc608252168008fb66a78c0020c367a) Improve k-msg integration contracts for status normalization, retry policy centralization, and tracking observability.
+  
+  - Add safer status normalization so unknown provider states do not get finalized as immediate failures.
+  - Expand retry/error utilities with policy-based classification and richer provider metadata propagation.
+  - Extend send hook lifecycle for queued/retry-scheduled/final outcomes.
+  - Add Cloudflare schema rendering options for delivery tracking index-name overrides.
+  - Upgrade mock provider scenarios for deterministic timeout/failure/delay testing. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.22.0, template@0.22.0
+
 ## 0.21.1 — 2026-02-22
 
 ### Patch changes
