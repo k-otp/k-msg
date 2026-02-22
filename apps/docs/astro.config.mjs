@@ -265,6 +265,9 @@ export default defineConfig({
     starlight({
       title: "k-msg",
       description: "k-msg documentation",
+      social: {
+        github: "https://github.com/k-otp/k-msg",
+      },
       locales: {
         root: {
           label: "한국어",
@@ -299,8 +302,6 @@ export default defineConfig({
       ],
       sidebar: [
         "index",
-        "cli",
-        "snippets",
         {
           label: "가이드",
           translations: {
@@ -345,6 +346,8 @@ export default defineConfig({
             },
           ],
         },
+        "cli",
+        "snippets",
         typeDocSidebarGroup,
       ],
     }),
