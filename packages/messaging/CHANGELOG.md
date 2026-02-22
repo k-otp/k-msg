@@ -1,5 +1,16 @@
 # @k-msg/messaging
 
+## 0.22.3 — 2026-02-22
+
+### Patch changes
+
+- [b89c773](https://github.com/k-otp/k-msg/commit/b89c773685a9457e5718bfd4aa8cee9aafdfe063) Add `typeStrategy.timestamp = "date"` support for Cloudflare delivery tracking schema generation on PostgreSQL.
+  
+  - `renderDrizzleSchemaSource()` now renders Postgres tracking timestamps as `timestamp(..., { withTimezone: true, mode: "date" })` when `date` strategy is selected.
+  - SQL schema generation maps Postgres timestamp columns to `TIMESTAMPTZ` for the same strategy.
+  - Hyperdrive delivery tracking store now binds timestamp values as `Date` objects for Postgres when `date` strategy is enabled. — Thanks @imjlk!
+- Updated dependencies: core@0.22.3, template@0.22.3
+
 ## 0.22.2 — 2026-02-22
 
 ### Patch changes
