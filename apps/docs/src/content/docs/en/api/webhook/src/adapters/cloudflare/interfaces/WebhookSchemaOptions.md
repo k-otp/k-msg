@@ -5,7 +5,7 @@ prev: false
 title: "WebhookSchemaOptions"
 ---
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:6
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L6)
 
 ## Extended by
 
@@ -17,7 +17,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:6
 
 > `optional` **deliveryTableName**: `string`
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:8
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L8)
 
 ***
 
@@ -25,4 +25,4 @@ Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:8
 
 > `optional` **endpointTableName**: `string`
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:7
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L7)

@@ -14,7 +14,7 @@ Analytics Engine
 
 ### aggregationType
 
-> **aggregationType**: `"max"` \| `"count"` \| `"sum"` \| `"avg"` \| `"min"` \| `"rate"` \| `"percentile"`
+> **aggregationType**: `"count"` \| `"max"` \| `"sum"` \| `"avg"` \| `"min"` \| `"rate"` \| `"percentile"`
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L11)
 

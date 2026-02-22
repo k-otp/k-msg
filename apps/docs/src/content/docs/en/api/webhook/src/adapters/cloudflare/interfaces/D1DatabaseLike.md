@@ -5,7 +5,7 @@ prev: false
 title: "D1DatabaseLike"
 ---
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:10
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L10)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:10
 
 > `optional` **exec**(`query`): `Promise`\<`unknown`\>
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:12
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L12)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:12
 
 > **prepare**(`query`): [`D1PreparedStatementLike`](/api/webhook/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:11
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L11)
 
 #### Parameters
 

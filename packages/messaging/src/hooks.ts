@@ -30,10 +30,7 @@ export interface KMsgHooks {
     result: SendResult,
   ) => void | Promise<void>;
   onError?: (context: HookContext, error: KMsgError) => void | Promise<void>;
-  onQueued?: (
-    context: HookContext,
-    result: SendResult,
-  ) => void | Promise<void>;
+  onQueued?: (context: HookContext, result: SendResult) => void | Promise<void>;
   onRetryScheduled?: (
     context: HookContext & RetryScheduledHookContext,
     error: KMsgError,

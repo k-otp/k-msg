@@ -5,7 +5,7 @@ prev: false
 title: "AlimTalkFailoverOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L109)
+Defined in: [packages/core/src/types/message.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L127)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:109](https://github.com/k-otp/k-
 
 > `optional` **enabled**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L110)
+Defined in: [packages/core/src/types/message.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L128)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/message.ts:110](https://github.com/k-otp/k-
 
 > `optional` **fallbackChannel**: `"sms"` \| `"lms"`
 
-Defined in: [packages/core/src/types/message.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L111)
+Defined in: [packages/core/src/types/message.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L129)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/message.ts:111](https://github.com/k-otp/k-
 
 > `optional` **fallbackContent**: `string`
 
-Defined in: [packages/core/src/types/message.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L112)
+Defined in: [packages/core/src/types/message.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L130)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/types/message.ts:112](https://github.com/k-otp/k-
 
 > `optional` **fallbackTitle**: `string`
 
-Defined in: [packages/core/src/types/message.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L113)
+Defined in: [packages/core/src/types/message.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L131)

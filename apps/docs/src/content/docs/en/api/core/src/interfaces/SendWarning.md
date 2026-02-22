@@ -5,7 +5,7 @@ prev: false
 title: "SendWarning"
 ---
 
-Defined in: [packages/core/src/types/message.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L122)
+Defined in: [packages/core/src/types/message.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L140)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:122](https://github.com/k-otp/k-
 
 > **code**: [`SendWarningCode`](/api/core/src/type-aliases/sendwarningcode/)
 
-Defined in: [packages/core/src/types/message.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L123)
+Defined in: [packages/core/src/types/message.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L141)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/message.ts:123](https://github.com/k-otp/k-
 
 > `optional` **details**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/types/message.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L125)
+Defined in: [packages/core/src/types/message.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L143)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/types/message.ts:125](https://github.com/k-otp/k-
 
 > **message**: `string`
 
-Defined in: [packages/core/src/types/message.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L124)
+Defined in: [packages/core/src/types/message.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L142)

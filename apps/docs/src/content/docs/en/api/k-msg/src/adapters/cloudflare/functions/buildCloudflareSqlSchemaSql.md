@@ -7,7 +7,7 @@ title: "buildCloudflareSqlSchemaSql"
 
 > **buildCloudflareSqlSchemaSql**(`options`): `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:324](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L324)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:335](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L335)
 
 ## Parameters
 

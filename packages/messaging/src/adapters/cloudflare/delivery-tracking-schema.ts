@@ -233,7 +233,9 @@ function resolveDeliveryTrackingTypeStrategy(
 function resolveDeliveryTrackingIndexNames(
   overrides: Partial<DeliveryTrackingSchemaSpec["indexNames"]> | undefined,
 ): DeliveryTrackingSchemaSpec["indexNames"] {
-  const next: DeliveryTrackingSchemaSpec["indexNames"] = { ...DEFAULT_INDEX_NAMES };
+  const next: DeliveryTrackingSchemaSpec["indexNames"] = {
+    ...DEFAULT_INDEX_NAMES,
+  };
 
   if (!overrides || typeof overrides !== "object") {
     return next;
@@ -260,7 +262,8 @@ export function getDeliveryTrackingSchemaSpec(
   options: DeliveryTrackingSchemaOptions = {},
 ): DeliveryTrackingSchemaSpec {
   const tableName =
-    normalizeNonEmptyString(options.tableName) ?? DEFAULT_DELIVERY_TRACKING_TABLE;
+    normalizeNonEmptyString(options.tableName) ??
+    DEFAULT_DELIVERY_TRACKING_TABLE;
   const columnMap = resolveDeliveryTrackingColumnMap(options.columnMap);
   const typeStrategy = resolveDeliveryTrackingTypeStrategy(
     options.typeStrategy ?? options.trackingTypeStrategy,

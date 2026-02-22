@@ -37,7 +37,9 @@ const sleep = (ms: number): Promise<void> =>
     setTimeout(resolve, Math.max(0, Math.floor(ms)));
   });
 
-const normalizeMockErrorCode = (code: MockSendScenarioStep["code"]): KMsgErrorCode => {
+const normalizeMockErrorCode = (
+  code: MockSendScenarioStep["code"],
+): KMsgErrorCode => {
   if (
     code === KMsgErrorCode.INVALID_REQUEST ||
     code === KMsgErrorCode.AUTHENTICATION_FAILED ||
