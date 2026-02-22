@@ -1,5 +1,46 @@
 # @k-msg/messaging
 
+## 0.24.0 — 2026-02-22
+
+### Minor changes
+
+- [c0490a9](https://github.com/k-otp/k-msg/commit/c0490a9056a9ed5a526383a03700696bab178486) Add P1 key-management abstraction for field crypto:
+  
+  - add `createEnvKeyResolver`, `createAwsKmsKeyResolver`, `createVaultTransitKeyResolver`
+  - add rollout policy helpers (`ActiveKidRolloutPolicy`, deterministic bucket selection)
+  - add `createRollingKeyResolver` for active-kid gradual rollout while keeping multi-kid decrypt safety
+  - expand tracking decrypt candidate resolution to include ciphertext envelope `kid` — Thanks @imjlk!
+- [d9b33e9](https://github.com/k-otp/k-msg/commit/d9b33e9b4202ab6854cb380b89b84dbf1dec1fba) Add P1/P2 wave-3 crypto hardening and operations features:
+  
+  - `@k-msg/core`
+    - extend crypto metric/control signal types with circuit-state event model
+  
+  - `@k-msg/messaging`
+    - add `CryptoCircuitController` and control-signal configuration for delivery tracking crypto
+    - emit circuit-state metrics (`crypto_circuit_state`, `crypto_circuit_open_count`) on encrypt/decrypt paths
+    - add regression tests for scope-level circuit behavior
+  
+  - `@k-msg/webhook`
+    - apply `fieldCrypto` to runtime persistence paths (in-memory and D1 via store wrapper)
+    - enforce runtime config validation for webhook `fieldCrypto` policies
+    - remove legacy registry storage options `enableEncryption` / `encryptionKey`
+  
+  Also update CI/docs operations:
+  
+  - add docs-check retry script and CI workflow improvements for flaky canceled/timeout behavior
+  - add dedicated crypto regression CI job
+  - expand security docs (ko/en + root docs) and CLI migration docs — Thanks @imjlk!
+- [580d670](https://github.com/k-otp/k-msg/commit/580d67067b8a2b5263f0b8b3d9efcdb2d384010a) Add tracking SQL field-crypto migration orchestrator primitives:
+  
+  - add migration planning/execution/status/retry modules
+  - add migration state tables and query helpers
+  - add migration metadata schema SQL builder
+  - add CLI command group: `k-msg db tracking migrate plan|apply|status|retry` (sqlite-first) — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.24.0, template@0.24.0
+
 ## 0.23.1 — 2026-02-22
 
 ### Patch changes
