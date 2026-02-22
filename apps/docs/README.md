@@ -66,6 +66,12 @@ Rules:
 
 All generators support `--check`.
 
+Note:
+
+- `bun run scripts/docs/run-generate.ts --check` intentionally skips `scripts/docs/generate-cli-help.ts` and `scripts/docs/generate-schema-docs.ts`.
+- `apps/docs/src/generated/cli/help.md` and `apps/docs/src/generated/cli/schema.md` are generated during docs build (`docs:build` / Pages deploy), not enforced by `docs:check`.
+- `apps/docs/src/generated/cli/help.md` and `apps/docs/src/generated/cli/schema.md` are not tracked in Git.
+
 `bun run docs:build` also runs:
 
 - `scripts/docs/ensure-git-history.ts` (before docs generation)

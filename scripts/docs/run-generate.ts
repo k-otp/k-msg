@@ -11,7 +11,15 @@ const generators = [
   "scripts/docs/generate-guides.ts",
 ];
 
-for (const script of generators) {
+const selectedGenerators = checkMode
+  ? generators.filter(
+      (script) =>
+        script !== "scripts/docs/generate-cli-help.ts" &&
+        script !== "scripts/docs/generate-schema-docs.ts",
+    )
+  : generators;
+
+for (const script of selectedGenerators) {
   const args = ["bun", script];
   if (checkMode) {
     args.push("--check");

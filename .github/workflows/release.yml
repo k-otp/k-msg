@@ -78,28 +78,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync release PR CLI help docs
-        if: ${{ steps.sampo.outcome == 'success' }}
-        run: |
-          set -euo pipefail
-
-          git fetch origin sampo/release
-          git checkout -B sampo/release origin/sampo/release
-
-          bun install --frozen-lockfile
-          bun run scripts/docs/run-generate.ts
-
-          if git diff --quiet -- apps/docs/src/generated/cli/help.md; then
-            echo "CLI help docs already in sync."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/docs/src/generated/cli/help.md
-          git commit -m "chore(docs): sync CLI help for release PR"
-          git push origin HEAD:sampo/release
-
       # Sampo may update versions/changelogs in the working tree while preparing the release PR.
       # To ensure publishing uses the exact merged `main` commit, we re-checkout at `github.sha`
       # into a separate directory when publishing is required.
