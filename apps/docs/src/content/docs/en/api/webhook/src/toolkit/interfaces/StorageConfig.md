@@ -5,7 +5,7 @@ prev: false
 title: "StorageConfig"
 ---
 
-Defined in: [packages/webhook/src/registry/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L43)
+Defined in: [packages/webhook/src/registry/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L44)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/registry/types.ts:43](https://github.com/k-otp
 
 > `optional` **connectionString**: `string`
 
-Defined in: [packages/webhook/src/registry/types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L53)
+Defined in: [packages/webhook/src/registry/types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L54)
 
 ***
 
@@ -21,23 +21,42 @@ Defined in: [packages/webhook/src/registry/types.ts:53](https://github.com/k-otp
 
 > `optional` **enableCompression**: `boolean`
 
-Defined in: [packages/webhook/src/registry/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L49)
+Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L50)
 
 ***
 
-### enableEncryption?
+### ~~enableEncryption?~~
 
 > `optional` **enableEncryption**: `boolean`
 
-Defined in: [packages/webhook/src/registry/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L61)
+Defined in: [packages/webhook/src/registry/types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L69)
+
+:::caution[Deprecated]
+Use `fieldCrypto` instead.
+:::
 
 ***
 
-### encryptionKey?
+### ~~encryptionKey?~~
 
 > `optional` **encryptionKey**: `string`
 
-Defined in: [packages/webhook/src/registry/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L62)
+Defined in: [packages/webhook/src/registry/types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L74)
+
+:::caution[Deprecated]
+Use `fieldCrypto` with a provider implementation.
+Legacy option kept for compatibility only.
+:::
+
+***
+
+### fieldCrypto?
+
+> `optional` **fieldCrypto**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+
+Defined in: [packages/webhook/src/registry/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L65)
+
+Preferred option. If both legacy and `fieldCrypto` are set, `fieldCrypto` takes precedence.
 
 ***
 
@@ -45,7 +64,7 @@ Defined in: [packages/webhook/src/registry/types.ts:62](https://github.com/k-otp
 
 > `optional` **fileAdapter**: [`FileStorageAdapter`](/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
-Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L48)
+Defined in: [packages/webhook/src/registry/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L49)
 
 ***
 
@@ -53,7 +72,7 @@ Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp
 
 > `optional` **filePath**: `string`
 
-Defined in: [packages/webhook/src/registry/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L47)
+Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L48)
 
 ***
 
@@ -61,7 +80,7 @@ Defined in: [packages/webhook/src/registry/types.ts:47](https://github.com/k-otp
 
 > `optional` **maxFileSize**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L50)
+Defined in: [packages/webhook/src/registry/types.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L51)
 
 ***
 
@@ -69,7 +88,7 @@ Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp
 
 > `optional` **maxMemoryUsage**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L57)
+Defined in: [packages/webhook/src/registry/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L58)
 
 ***
 
@@ -77,7 +96,7 @@ Defined in: [packages/webhook/src/registry/types.ts:57](https://github.com/k-otp
 
 > `optional` **retentionDays**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L60)
+Defined in: [packages/webhook/src/registry/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L61)
 
 ***
 
@@ -85,12 +104,12 @@ Defined in: [packages/webhook/src/registry/types.ts:60](https://github.com/k-otp
 
 > `optional` **tableName**: `string`
 
-Defined in: [packages/webhook/src/registry/types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L54)
+Defined in: [packages/webhook/src/registry/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L55)
 
 ***
 
 ### type
 
-> **type**: `"file"` \| `"database"` \| `"memory"`
+> **type**: `"file"` \| `"memory"` \| `"database"`
 
-Defined in: [packages/webhook/src/registry/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L44)
+Defined in: [packages/webhook/src/registry/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L45)

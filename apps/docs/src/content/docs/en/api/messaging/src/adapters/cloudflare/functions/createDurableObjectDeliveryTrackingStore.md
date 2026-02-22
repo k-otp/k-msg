@@ -7,7 +7,7 @@ title: "createDurableObjectDeliveryTrackingStore"
 
 > **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L185)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L215)
 
 ## Parameters
 
@@ -17,9 +17,25 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:185](https://gi
 
 ### options?
 
+#### compatPlainColumns?
+
+`boolean`
+
+#### fieldCrypto?
+
+[`DeliveryTrackingFieldCryptoOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
+
 #### keyPrefix?
 
 `string`
+
+#### retention?
+
+[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
+
+#### secureMode?
+
+`boolean`
 
 ## Returns
 

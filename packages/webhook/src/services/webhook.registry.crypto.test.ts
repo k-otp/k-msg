@@ -35,7 +35,9 @@ describe("WebhookRegistry field crypto", () => {
             }),
           },
         }),
-    ).toThrow("openFallback=plaintext requires unsafeAllowPlaintextStorage=true");
+    ).toThrow(
+      "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
+    );
   });
 
   test("constructor rejects invalid provider methods", () => {

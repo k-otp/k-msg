@@ -43,7 +43,7 @@ Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:36](http
 
 ### purpose?
 
-> `optional` **purpose**: `"send"` \| `"verify"`
+> `optional` **purpose**: `"verify"` \| `"send"`
 
 Defined in: [packages/channel/src/toolkit/verification/number.verify.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/number.verify.ts#L33)
 

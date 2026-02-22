@@ -481,7 +481,7 @@ Update message status
 
 ###### source?
 
-`"manual"` \| `"provider"` \| `"webhook"` \| `"system"`
+`"provider"` \| `"manual"` \| `"webhook"` \| `"system"`
 
 #### Returns
 

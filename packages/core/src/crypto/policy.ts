@@ -212,7 +212,18 @@ export function assertFieldCryptoConfig(
   const result = validateFieldCryptoConfig(config, options);
   if (result.valid) return;
 
-  const first = result.issues[0]!;
+  const first = result.issues[0];
+  if (!first) {
+    throw new FieldCryptoError(
+      "config",
+      "fieldCrypto config validation failed",
+      {
+        rule: "fieldCrypto.config.invalid",
+        issues: result.issues,
+      },
+    );
+  }
+
   throw new FieldCryptoError(
     "config",
     first.message,
