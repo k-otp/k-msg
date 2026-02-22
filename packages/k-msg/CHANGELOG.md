@@ -1,5 +1,17 @@
 # k-msg
 
+## 0.23.0 — 2026-02-22
+
+### Minor changes
+
+- [2b2081f](https://github.com/k-otp/k-msg/commit/2b2081fd419b92c9fdc632e96a1bd0a3d6a92e49) feat: add field-level crypto v1 across core/messaging/webhook with secure schema options, hash-based lookup columns, key-rotation interfaces, fail-open/closed policy handling, KR-B2B retention helpers, and security migration/runbook docs. — Thanks @imjlk!
+
+### Patch changes
+
+- [03749a1](https://github.com/k-otp/k-msg/commit/03749a116fef1b9d65654971e9145c5a8e30e5e0) docs: standardize CLI install guidance to the curl installer path and reorder docs sidebar to a guides-first flow (index -> guides -> cli -> snippets -> api). — Thanks @imjlk!
+- [b6de9ce](https://github.com/k-otp/k-msg/commit/b6de9cea68e505f0e25e21148aed79766d40fc94) docs: stop tracking generated CLI docs snapshots (`apps/docs/src/generated/cli/*.md`) and update docs/release checks to regenerate them at build/check time instead of committing them. — Thanks @imjlk!
+- Updated dependencies: core@0.23.0, messaging@0.23.0
+
 ## 0.22.3 — 2026-02-22
 
 ### Patch changes
