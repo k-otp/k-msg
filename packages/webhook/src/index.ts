@@ -19,6 +19,7 @@ export type {
   WebhookPersistence,
   WebhookRuntime,
   WebhookRuntimeConfig,
+  WebhookRuntimeFieldCryptoOptions,
   WebhookRuntimeSecurityOptions,
   WebhookRuntimeTestPayload,
 } from "./runtime/types";

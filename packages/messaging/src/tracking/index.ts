@@ -1,3 +1,7 @@
+export {
+  CryptoCircuitController,
+  createCryptoCircuitController,
+} from "../delivery-tracking/crypto-control-plane";
 export { createDeliveryTrackingHooks } from "../delivery-tracking/hooks";
 export {
   KR_B2B_BASELINE_RETENTION_DAYS,
@@ -9,6 +13,9 @@ export { DeliveryTrackingService } from "../delivery-tracking/service";
 export type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
+  DeliveryTrackingCryptoController,
+  DeliveryTrackingCryptoOperationContext,
+  DeliveryTrackingFieldCryptoControlSignalOptions,
   DeliveryTrackingFieldCryptoOptions,
   DeliveryTrackingListOptions,
   DeliveryTrackingRecordFilter,

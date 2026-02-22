@@ -91,7 +91,27 @@ export type FieldCryptoMetricName =
   | "crypto_encrypt_ms"
   | "crypto_decrypt_ms"
   | "crypto_fail_count"
-  | "key_kid_usage";
+  | "key_kid_usage"
+  | "crypto_circuit_open_count"
+  | "crypto_circuit_state";
+
+export type FieldCryptoCircuitState = "closed" | "open" | "half-open";
+
+export interface FieldCryptoControlScope {
+  tenantId?: string;
+  providerId?: string;
+  kid?: string;
+}
+
+export interface FieldCryptoControlSignalEvent {
+  state: FieldCryptoCircuitState;
+  reason: "threshold" | "cooldown" | "manual" | "recovered";
+  scope: string;
+  scopeParts: FieldCryptoControlScope;
+  operation: "encrypt" | "decrypt" | "hash";
+  at: number;
+  errorClass?: string;
+}
 
 export interface FieldCryptoMetricEvent {
   name: FieldCryptoMetricName;

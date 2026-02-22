@@ -131,6 +131,7 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
 - `k-msg db schema print|generate`
+- `k-msg db tracking migrate plan|apply|status|retry`
 - `k-msg kakao channel binding list|resolve|set|delete`
 - `k-msg kakao channel api categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
@@ -174,6 +175,23 @@ k-msg db schema generate \
   - `--drizzle-file <name>` 기본 `kmsg.schema.ts`
   - `--sql-file <name>` 기본 `kmsg.schema.sql`
   - `--force` 기본 `false` (없으면 기존 파일 존재 시 실패)
+
+## Tracking 마이그레이션 오케스트레이터
+
+field crypto 전환(legacy -> secure)을 중단/재시작 가능하게 수행하는 명령입니다.
+
+```bash
+k-msg db tracking migrate plan --sqlite-file ./local.db
+k-msg db tracking migrate apply --sqlite-file ./local.db
+k-msg db tracking migrate status --sqlite-file ./local.db
+k-msg db tracking migrate retry --sqlite-file ./local.db
+```
+
+운영 참고:
+
+- 상태는 DB 메타테이블 + 로컬 스냅샷(`.kmsg/migrations`)에 함께 저장됩니다.
+- `retry`는 실패한 청크만 재실행합니다.
+- 롤아웃 플래그(`compatPlainColumns`) 변경 전 `status` 확인을 권장합니다.
 
 ## 권장 AlimTalk 운영 흐름
 

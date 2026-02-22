@@ -25,38 +25,13 @@ Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp
 
 ***
 
-### ~~enableEncryption?~~
-
-> `optional` **enableEncryption**: `boolean`
-
-Defined in: [packages/webhook/src/registry/types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L69)
-
-:::caution[Deprecated]
-Use `fieldCrypto` instead.
-:::
-
-***
-
-### ~~encryptionKey?~~
-
-> `optional` **encryptionKey**: `string`
-
-Defined in: [packages/webhook/src/registry/types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L74)
-
-:::caution[Deprecated]
-Use `fieldCrypto` with a provider implementation.
-Legacy option kept for compatibility only.
-:::
-
-***
-
 ### fieldCrypto?
 
 > `optional` **fieldCrypto**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/registry/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L65)
 
-Preferred option. If both legacy and `fieldCrypto` are set, `fieldCrypto` takes precedence.
+Field-level crypto policy for endpoint secret and delivery payload.
 
 ***
 
