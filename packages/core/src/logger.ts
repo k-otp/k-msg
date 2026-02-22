@@ -35,6 +35,83 @@ export interface LoggerConfig {
   enableColors?: boolean;
 }
 
+const REDACTED_TOKEN = "[REDACTED]";
+const MASKED_TOKEN = "***";
+const SENSITIVE_CONTEXT_KEYS = [
+  "to",
+  "from",
+  "phone",
+  "phoneNumber",
+  "recipient",
+  "sender",
+  "secret",
+  "apiKey",
+  "apiSecret",
+  "authorization",
+  "auth",
+  "token",
+  "password",
+  "payload",
+  "message",
+  "content",
+  "text",
+] as const;
+
+function isSensitiveContextKey(rawKey: string): boolean {
+  const key = rawKey.toLowerCase();
+  return SENSITIVE_CONTEXT_KEYS.some((candidate) =>
+    key.includes(candidate.toLowerCase()),
+  );
+}
+
+function maskStringValue(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= 4) return MASKED_TOKEN;
+  if (trimmed.includes("@")) {
+    const [local, domain] = trimmed.split("@");
+    const head = local.slice(0, 2);
+    return `${head}${"*".repeat(Math.max(1, local.length - 2))}@${domain}`;
+  }
+  const head = trimmed.slice(0, 3);
+  const tail = trimmed.slice(-2);
+  return `${head}${"*".repeat(Math.max(1, trimmed.length - 5))}${tail}`;
+}
+
+function sanitizeContextValue(key: string, value: unknown): unknown {
+  if (value === undefined || value === null) return value;
+
+  if (isSensitiveContextKey(key)) {
+    if (typeof value === "string") return maskStringValue(value);
+    if (typeof value === "number" || typeof value === "boolean") {
+      return MASKED_TOKEN;
+    }
+    if (Array.isArray(value)) return REDACTED_TOKEN;
+    if (typeof value === "object") return REDACTED_TOKEN;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeContextValue(key, entry));
+  }
+
+  if (typeof value === "object") {
+    const next: Record<string, unknown> = {};
+    for (const [childKey, childValue] of Object.entries(value)) {
+      next[childKey] = sanitizeContextValue(childKey, childValue);
+    }
+    return next;
+  }
+
+  return value;
+}
+
+function sanitizeLogContext(context: LogContext): LogContext {
+  const sanitized: LogContext = {};
+  for (const [key, value] of Object.entries(context)) {
+    sanitized[key] = sanitizeContextValue(key, value);
+  }
+  return sanitized;
+}
+
 export class Logger {
   private config: LoggerConfig;
   private context: LogContext;
@@ -61,12 +138,14 @@ export class Logger {
   }
 
   private formatMessage(entry: LogEntry): string {
+    const context = sanitizeLogContext(entry.context);
+
     if (this.config.enableJson) {
       return JSON.stringify({
         level: entry.level,
         message: entry.message,
         timestamp: entry.timestamp.toISOString(),
-        context: entry.context,
+        context,
         ...(entry.error && {
           error: {
             name: entry.error.name,
@@ -83,8 +162,8 @@ export class Logger {
       ? this.colorizeLevel(entry.level)
       : entry.level;
     const contextStr =
-      Object.keys(entry.context).length > 0
-        ? ` [${Object.entries(entry.context)
+      Object.keys(context).length > 0
+        ? ` [${Object.entries(context)
             .map(([k, v]) => `${k}=${v}`)
             .join(", ")}]`
         : "";

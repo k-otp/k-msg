@@ -2,6 +2,7 @@
  * Registry Type Definitions
  */
 
+import type { FieldCryptoConfig } from "@k-msg/core";
 import type { FileStorageAdapter } from "../shared/file-storage";
 import type { WebhookEventType } from "../types/webhook.types";
 
@@ -58,7 +59,14 @@ export interface StorageConfig {
 
   // Common options
   retentionDays?: number;
+  fieldCrypto?: FieldCryptoConfig;
+  /**
+   * @deprecated Use `fieldCrypto` instead.
+   */
   enableEncryption?: boolean;
+  /**
+   * @deprecated Use `fieldCrypto` with a provider implementation.
+   */
   encryptionKey?: string;
 }
 

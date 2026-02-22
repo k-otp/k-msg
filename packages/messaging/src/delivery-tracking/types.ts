@@ -1,5 +1,6 @@
 import type {
   DeliveryStatus,
+  FieldMode,
   KMsgError,
   MessageType,
   Result,
@@ -22,7 +23,11 @@ export interface TrackingRecord {
   providerMessageId: string;
   type: MessageType;
   to: string;
+  toHash?: string;
+  toMasked?: string;
   from?: string;
+  fromHash?: string;
+  fromMasked?: string;
   requestedAt: Date;
   scheduledAt?: Date;
   status: DeliveryStatus;
@@ -38,6 +43,14 @@ export interface TrackingRecord {
   lastError?: TrackingError;
   raw?: unknown;
   metadata?: Record<string, unknown>;
+  metadataHashes?: Record<string, string>;
+  metadataEncrypted?: string;
+  cryptoKid?: string;
+  cryptoVersion?: number;
+  cryptoState?: "plain" | "encrypted" | "degraded";
+  retentionClass?: "opsLogs" | "telecomMetadata" | "billingEvidence";
+  retentionBucketYm?: number;
+  fieldModes?: Partial<Record<string, FieldMode>>;
 }
 
 export interface DeliveryTrackingApiFailoverRule {
