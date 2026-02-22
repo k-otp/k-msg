@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/provider",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "packageManager": "bun@1.3.8",
   "type": "module",
   "description": "Complete provider system with adapters and implementations for K-Message platform",
