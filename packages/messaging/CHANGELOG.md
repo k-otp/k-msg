@@ -1,5 +1,16 @@
 # @k-msg/messaging
 
+## 0.22.1 — 2026-02-22
+
+### Patch changes
+
+- [22e0212](https://github.com/k-otp/k-msg/commit/22e0212416885027776910b29a692a50a33c3841) Patch CI failures introduced after `0.22.0` by aligning lint/docs-generated artifacts with repository checks.
+  
+  - Remove explicit `any` usage in core error utilities.
+  - Apply Biome formatting/import cleanup for changed source files.
+  - Regenerate CLI help/docs artifacts required by `docs:check`. — Thanks @imjlk!
+- Updated dependencies: core@0.22.1, template@0.22.1
+
 ## 0.22.0 — 2026-02-22
 
 ### Minor changes

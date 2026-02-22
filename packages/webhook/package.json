@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/webhook",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "packageManager": "bun@1.3.8",
   "description": "Webhook system for real-time message event notifications",
   "type": "module",
