@@ -1,3 +1,7 @@
+import type {
+  DeliveryTrackingFieldCryptoOptions,
+  DeliveryTrackingRetentionConfig,
+} from "../../delivery-tracking/store.interface";
 import {
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingSchemaOptions,
@@ -87,14 +91,22 @@ export type {
   DeliveryTrackingSchemaOptions,
   DeliveryTrackingColumnMap,
   DeliveryTrackingTypeStrategy,
+  DeliveryTrackingFieldCryptoOptions,
+  DeliveryTrackingRetentionConfig,
 };
 
 export interface CreateDrizzleDeliveryTrackingStoreOptions
   extends CreateDrizzleSqlClientOptions,
-    DeliveryTrackingSchemaOptions {}
+    DeliveryTrackingSchemaOptions {
+  fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  retention?: DeliveryTrackingRetentionConfig;
+}
 
 export interface CreateD1DeliveryTrackingStoreOptions
-  extends DeliveryTrackingSchemaOptions {}
+  extends DeliveryTrackingSchemaOptions {
+  fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  retention?: DeliveryTrackingRetentionConfig;
+}
 
 export interface CreateDrizzleJobQueueOptions
   extends CreateDrizzleSqlClientOptions {
@@ -110,6 +122,9 @@ export function createD1DeliveryTrackingStore(
     columnMap: options.columnMap,
     typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
     storeRaw: options.storeRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
+    fieldCrypto: options.fieldCrypto,
+    retention: options.retention,
   });
 }
 
@@ -132,6 +147,9 @@ export function createDrizzleDeliveryTrackingStore(
     columnMap: options.columnMap,
     typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
     storeRaw: options.storeRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
+    fieldCrypto: options.fieldCrypto,
+    retention: options.retention,
   });
 }
 
@@ -144,11 +162,17 @@ export function createDrizzleJobQueue<T>(
 
 export function createKvDeliveryTrackingStore(
   namespace: CloudflareKvNamespaceLike,
-  options: { keyPrefix?: string } = {},
+  options: {
+    keyPrefix?: string;
+    fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+    retention?: DeliveryTrackingRetentionConfig;
+    secureMode?: boolean;
+    compatPlainColumns?: boolean;
+  } = {},
 ): CloudflareObjectDeliveryTrackingStore {
   return new CloudflareObjectDeliveryTrackingStore(
     createKvObjectStorage(namespace),
-    options.keyPrefix,
+    options,
   );
 }
 
@@ -164,11 +188,17 @@ export function createKvJobQueue<T>(
 
 export function createR2DeliveryTrackingStore(
   bucket: CloudflareR2BucketLike,
-  options: { keyPrefix?: string } = {},
+  options: {
+    keyPrefix?: string;
+    fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+    retention?: DeliveryTrackingRetentionConfig;
+    secureMode?: boolean;
+    compatPlainColumns?: boolean;
+  } = {},
 ): CloudflareObjectDeliveryTrackingStore {
   return new CloudflareObjectDeliveryTrackingStore(
     createR2ObjectStorage(bucket),
-    options.keyPrefix,
+    options,
   );
 }
 
@@ -184,11 +214,17 @@ export function createR2JobQueue<T>(
 
 export function createDurableObjectDeliveryTrackingStore(
   storage: CloudflareDurableObjectStorageLike,
-  options: { keyPrefix?: string } = {},
+  options: {
+    keyPrefix?: string;
+    fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+    retention?: DeliveryTrackingRetentionConfig;
+    secureMode?: boolean;
+    compatPlainColumns?: boolean;
+  } = {},
 ): CloudflareObjectDeliveryTrackingStore {
   return new CloudflareObjectDeliveryTrackingStore(
     createDurableObjectStorage(storage),
-    options.keyPrefix,
+    options,
   );
 }
 

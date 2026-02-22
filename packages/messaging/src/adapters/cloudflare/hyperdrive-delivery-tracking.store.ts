@@ -1,8 +1,21 @@
+import {
+  applyTrackingCryptoOnWrite,
+  normalizeTrackingFilterWithHashes,
+  restoreTrackingCryptoOnRead,
+  type TrackingCryptoColumns,
+  type TrackingCryptoMode,
+} from "../../delivery-tracking/field-crypto";
+import {
+  resolveRetentionDays,
+  toRetentionBucketYm,
+} from "../../delivery-tracking/retention";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
+  DeliveryTrackingFieldCryptoOptions,
   DeliveryTrackingListOptions,
   DeliveryTrackingRecordFilter,
+  DeliveryTrackingRetentionConfig,
   DeliveryTrackingStore,
 } from "../../delivery-tracking/store.interface";
 import {
@@ -78,13 +91,21 @@ function toNumberValue(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+export interface HyperdriveDeliveryTrackingStoreConfig
+  extends DeliveryTrackingSchemaOptions {
+  fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  retention?: DeliveryTrackingRetentionConfig;
+}
+
 export type HyperdriveDeliveryTrackingStoreOptions =
   | string
-  | DeliveryTrackingSchemaOptions;
+  | HyperdriveDeliveryTrackingStoreConfig;
 
 export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   private initPromise: Promise<void> | undefined;
   private readonly schema: DeliveryTrackingSchemaSpec;
+  private readonly fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  private readonly retention?: DeliveryTrackingRetentionConfig;
 
   constructor(
     private readonly client: CloudflareSqlClient,
@@ -92,7 +113,21 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   ) {
     const resolved =
       typeof options === "string" ? { tableName: options } : options;
-    this.schema = getDeliveryTrackingSchemaSpec(resolved);
+    const fieldCryptoSchema =
+      resolved.fieldCryptoSchema ??
+      (resolved.fieldCrypto
+        ? {
+            enabled: true,
+            mode: "secure",
+            compatPlainColumns: false,
+          }
+        : undefined);
+    this.schema = getDeliveryTrackingSchemaSpec({
+      ...resolved,
+      fieldCryptoSchema,
+    });
+    this.fieldCrypto = resolved.fieldCrypto;
+    this.retention = resolved.retention;
   }
 
   async init(): Promise<void> {
@@ -106,6 +141,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       trackingColumnMap: this.schema.columnMap,
       trackingTypeStrategy: this.schema.typeStrategy,
       trackingStoreRaw: this.schema.storeRaw,
+      fieldCryptoSchema: this.schema.fieldCrypto,
     }).catch((error) => {
       this.initPromise = undefined;
       throw error;
@@ -117,8 +153,9 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   async upsert(record: TrackingRecord): Promise<void> {
     await this.init();
 
-    const keys = getDeliveryTrackingColumnKeys(this.schema.storeRaw);
-    const values = keys.map((key) => this.recordValueForKey(record, key));
+    const prepared = await this.prepareRecordForStorage(record);
+    const keys = getDeliveryTrackingColumnKeys(this.schema);
+    const values = keys.map((key) => this.recordValueForKey(prepared, key));
 
     const colSql = keys
       .map((key) => this.quoteIdentifier(this.columnName(key)))
@@ -164,7 +201,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       [messageId],
     );
     const row = rows[0];
-    return row ? this.rowToRecord(row) : undefined;
+    return row ? await this.rowToRecord(row) : undefined;
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
@@ -184,7 +221,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       [...TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
     );
 
-    return rows.map((row) => this.rowToRecord(row));
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
   }
 
   async listRecords(
@@ -200,7 +237,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       ? Math.max(0, Math.floor(options.offset ?? 0))
       : 0;
 
-    const where = this.buildWhere(options);
+    const normalizedFilter = await this.normalizeFilterForCrypto(options);
+    const where = this.buildWhere(normalizedFilter);
     const orderBy =
       options.orderBy === "statusUpdatedAt"
         ? this.columnName("statusUpdatedAt")
@@ -216,13 +254,14 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       params,
     );
 
-    return rows.map((row) => this.rowToRecord(row));
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
   }
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
     await this.init();
 
-    const where = this.buildWhere(filter);
+    const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    const where = this.buildWhere(normalizedFilter);
     const { rows } = await this.client.query<{ count?: number | string }>(
       `SELECT COUNT(1) as count FROM ${this.tableRef()} ${where.sql}`,
       where.params,
@@ -252,7 +291,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       .map((column) => this.quoteIdentifier(column))
       .join(", ");
 
-    const where = this.buildWhere(filter);
+    const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    const where = this.buildWhere(normalizedFilter);
 
     const { rows } = await this.client.query<Record<string, unknown>>(
       `SELECT ${selectColumns}, COUNT(1) as count FROM ${this.tableRef()} ${where.sql} GROUP BY ${selectColumns}`,
@@ -280,6 +320,18 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   ): Promise<void> {
     await this.init();
 
+    if (this.patchTouchesCrypto(patch)) {
+      const current = await this.get(messageId);
+      if (!current) return;
+      const merged: TrackingRecord = {
+        ...current,
+        ...patch,
+        messageId: current.messageId,
+      };
+      await this.upsert(merged);
+      return;
+    }
+
     const updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }> =
       [];
 
@@ -295,10 +347,10 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if (patch.type !== undefined) {
       updates.push({ key: "type", value: patch.type });
     }
-    if (patch.to !== undefined) {
+    if (patch.to !== undefined && this.hasPlainColumns()) {
       updates.push({ key: "to", value: patch.to });
     }
-    if ("from" in patch) {
+    if ("from" in patch && this.hasPlainColumns()) {
       updates.push({ key: "from", value: patch.from ?? null });
     }
     if (patch.status !== undefined) {
@@ -425,7 +477,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     return this.toDbTimestamp(value);
   }
 
-  private rowToRecord(row: TrackingRow): TrackingRecord {
+  private async rowToRecord(row: TrackingRow): Promise<TrackingRecord> {
     const columnValue = (key: DeliveryTrackingColumnKey): unknown =>
       row[this.columnName(key)];
 
@@ -439,7 +491,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       providerId: toStringValue(columnValue("providerId")),
       providerMessageId: toStringValue(columnValue("providerMessageId")),
       type: toStringValue(columnValue("type")) as TrackingRecord["type"],
-      to: toStringValue(columnValue("to")),
+      to: this.hasPlainColumns() ? toStringValue(columnValue("to")) : "",
       requestedAt,
       status: toStringValue(columnValue("status")) as TrackingRecord["status"],
       statusUpdatedAt,
@@ -447,8 +499,10 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       nextCheckAt,
     };
 
-    const from = toStringValue(columnValue("from"));
-    if (from.length > 0) record.from = from;
+    if (this.hasPlainColumns()) {
+      const from = toStringValue(columnValue("from"));
+      if (from.length > 0) record.from = from;
+    }
 
     const providerStatusCode = toStringValue(columnValue("providerStatusCode"));
     if (providerStatusCode.length > 0) {
@@ -494,6 +548,53 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     );
     if (metadata) record.metadata = metadata;
 
+    if (this.schema.fieldCrypto.enabled) {
+      const metadataHashes = safeJsonParse<Record<string, string>>(
+        columnValue("metadataHashes"),
+      );
+      const restored = await restoreTrackingCryptoOnRead(
+        record,
+        {
+          toEnc: toStringValue(columnValue("toEnc")) || undefined,
+          toHash: toStringValue(columnValue("toHash")) || undefined,
+          toMasked: toStringValue(columnValue("toMasked")) || undefined,
+          fromEnc: toStringValue(columnValue("fromEnc")) || undefined,
+          fromHash: toStringValue(columnValue("fromHash")) || undefined,
+          fromMasked: toStringValue(columnValue("fromMasked")) || undefined,
+          metadataEnc: toStringValue(columnValue("metadataEnc")) || undefined,
+          metadataHashes,
+          metadata,
+          cryptoKid: toStringValue(columnValue("cryptoKid")) || undefined,
+          cryptoVersion:
+            toNumberValue(columnValue("cryptoVersion"), 0) > 0
+              ? toNumberValue(columnValue("cryptoVersion"), 0)
+              : undefined,
+          cryptoState: toStringValue(
+            columnValue("cryptoState"),
+          ) as TrackingRecord["cryptoState"],
+        },
+        this.fieldCrypto,
+        {
+          tableName: this.schema.tableName,
+          store: "sql",
+        },
+        this.cryptoMode(),
+      );
+      const retentionClass = toStringValue(columnValue("retentionClass"));
+      if (retentionClass.length > 0) {
+        restored.retentionClass =
+          retentionClass as TrackingRecord["retentionClass"];
+      }
+      const retentionBucketYm = toNumberValue(
+        columnValue("retentionBucketYm"),
+        0,
+      );
+      if (retentionBucketYm > 0) {
+        restored.retentionBucketYm = retentionBucketYm;
+      }
+      return restored;
+    }
+
     return record;
   }
 
@@ -525,7 +626,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   private recordValueForKey(
-    record: TrackingRecord,
+    record: TrackingRecord & TrackingCryptoColumns,
     key: DeliveryTrackingColumnKey,
   ): unknown {
     switch (key) {
@@ -539,8 +640,20 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
         return record.type;
       case "to":
         return record.to;
+      case "toEnc":
+        return record.toEnc ?? null;
+      case "toHash":
+        return record.toHash ?? null;
+      case "toMasked":
+        return record.toMasked ?? null;
       case "from":
         return record.from ?? null;
+      case "fromEnc":
+        return record.fromEnc ?? null;
+      case "fromHash":
+        return record.fromHash ?? null;
+      case "fromMasked":
+        return record.fromMasked ?? null;
       case "status":
         return record.status;
       case "providerStatusCode":
@@ -571,9 +684,101 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
         return record.raw !== undefined ? JSON.stringify(record.raw) : null;
       case "metadata":
         return record.metadata ? JSON.stringify(record.metadata) : null;
+      case "metadataEnc":
+        return record.metadataEnc ?? null;
+      case "metadataHashes":
+        return record.metadataHashes
+          ? JSON.stringify(record.metadataHashes)
+          : null;
+      case "cryptoKid":
+        return record.cryptoKid ?? null;
+      case "cryptoVersion":
+        return record.cryptoVersion ?? 1;
+      case "cryptoState":
+        return record.cryptoState ?? null;
+      case "retentionClass":
+        return record.retentionClass ?? null;
+      case "retentionBucketYm":
+        return record.retentionBucketYm ?? null;
       default:
         return null;
     }
+  }
+
+  private async prepareRecordForStorage(
+    record: TrackingRecord,
+  ): Promise<TrackingRecord & TrackingCryptoColumns> {
+    const mode = this.cryptoMode();
+    const cryptoColumns = await applyTrackingCryptoOnWrite(
+      record,
+      this.fieldCrypto,
+      {
+        tableName: this.schema.tableName,
+        store: "sql",
+      },
+      mode,
+    );
+
+    const retentionClass = record.retentionClass ?? "telecomMetadata";
+    const retentionDays = await resolveRetentionDays(this.retention, {
+      tenantId: this.fieldCrypto?.tenantId,
+      record,
+      retentionClass,
+    });
+    const retentionAnchor = new Date(record.requestedAt);
+    retentionAnchor.setUTCDate(retentionAnchor.getUTCDate() + retentionDays);
+
+    return {
+      ...record,
+      ...cryptoColumns,
+      retentionClass,
+      retentionBucketYm:
+        record.retentionBucketYm ?? toRetentionBucketYm(retentionAnchor),
+    };
+  }
+
+  private async normalizeFilterForCrypto<
+    T extends DeliveryTrackingRecordFilter,
+  >(filter: T): Promise<T> {
+    const normalized = await normalizeTrackingFilterWithHashes(
+      filter,
+      this.fieldCrypto,
+      this.cryptoMode(),
+    );
+    return normalized as T;
+  }
+
+  private patchTouchesCrypto(patch: Partial<TrackingRecord>): boolean {
+    if (!this.schema.fieldCrypto.enabled) {
+      return false;
+    }
+    return (
+      patch.to !== undefined ||
+      "from" in patch ||
+      "metadata" in patch ||
+      patch.toHash !== undefined ||
+      patch.fromHash !== undefined ||
+      patch.cryptoKid !== undefined ||
+      patch.cryptoState !== undefined ||
+      patch.cryptoVersion !== undefined ||
+      patch.retentionClass !== undefined ||
+      patch.retentionBucketYm !== undefined
+    );
+  }
+
+  private hasPlainColumns(): boolean {
+    if (!this.schema.fieldCrypto.enabled) return true;
+    if (this.schema.fieldCrypto.mode !== "secure") return true;
+    return this.schema.fieldCrypto.compatPlainColumns;
+  }
+
+  private cryptoMode(): TrackingCryptoMode {
+    return {
+      secureMode:
+        this.schema.fieldCrypto.enabled &&
+        this.schema.fieldCrypto.mode === "secure",
+      compatPlainColumns: this.hasPlainColumns(),
+    };
   }
 
   private buildWhere(filter: DeliveryTrackingRecordFilter): WhereSql {
@@ -606,8 +811,17 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     addEquals(this.columnName("providerMessageId"), filter.providerMessageId);
     addEquals(this.columnName("type"), filter.type);
     addEquals(this.columnName("status"), filter.status);
-    addEquals(this.columnName("to"), filter.to);
-    addEquals(this.columnName("from"), filter.from);
+    if (this.schema.fieldCrypto.enabled) {
+      addEquals(this.columnName("toHash"), filter.toHash);
+      addEquals(this.columnName("fromHash"), filter.fromHash);
+      if (this.hasPlainColumns()) {
+        addEquals(this.columnName("to"), filter.to);
+        addEquals(this.columnName("from"), filter.from);
+      }
+    } else {
+      addEquals(this.columnName("to"), filter.to);
+      addEquals(this.columnName("from"), filter.from);
+    }
 
     if (filter.requestedAtFrom) {
       clauses.push(
@@ -674,6 +888,17 @@ export function normalizeTrackingRecord(
   if (record.lastCheckedAt) next.lastCheckedAt = new Date(record.lastCheckedAt);
   if (record.lastError) next.lastError = { ...record.lastError };
   if (record.metadata) next.metadata = { ...record.metadata };
+  if (record.metadataHashes) next.metadataHashes = { ...record.metadataHashes };
+  if (record.toHash) next.toHash = record.toHash;
+  if (record.toMasked) next.toMasked = record.toMasked;
+  if (record.fromHash) next.fromHash = record.fromHash;
+  if (record.fromMasked) next.fromMasked = record.fromMasked;
+  if (record.cryptoKid) next.cryptoKid = record.cryptoKid;
+  if (record.cryptoState) next.cryptoState = record.cryptoState;
+  if (record.cryptoVersion) next.cryptoVersion = record.cryptoVersion;
+  if (record.retentionClass) next.retentionClass = record.retentionClass;
+  if (record.retentionBucketYm)
+    next.retentionBucketYm = record.retentionBucketYm;
 
   if (isTerminalDeliveryStatus(next.status)) {
     next.nextCheckAt = new Date(next.statusUpdatedAt);

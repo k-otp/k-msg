@@ -8,8 +8,10 @@ import { createCloudflareSqlClient } from "../../adapters/cloudflare/sql-client"
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
+  DeliveryTrackingFieldCryptoOptions,
   DeliveryTrackingListOptions,
   DeliveryTrackingRecordFilter,
+  DeliveryTrackingRetentionConfig,
   DeliveryTrackingStore,
 } from "../store.interface";
 import type { TrackingRecord } from "../types";
@@ -17,6 +19,8 @@ import type { TrackingRecord } from "../types";
 export interface SqliteDeliveryTrackingStoreOptions
   extends DeliveryTrackingSchemaOptions {
   dbPath?: string;
+  fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  retention?: DeliveryTrackingRetentionConfig;
 }
 
 function isSelectLikeStatement(statement: string): boolean {
@@ -34,8 +38,11 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     const schemaOptions: HyperdriveDeliveryTrackingStoreOptions = {
       tableName: options.tableName,
       columnMap: options.columnMap,
-      typeStrategy: options.typeStrategy,
+      typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
       storeRaw: options.storeRaw,
+      fieldCryptoSchema: options.fieldCryptoSchema,
+      fieldCrypto: options.fieldCrypto,
+      retention: options.retention,
     };
 
     const client = createCloudflareSqlClient({

@@ -1,8 +1,20 @@
+import {
+  applyTrackingCryptoOnWrite,
+  normalizeTrackingFilterWithHashes,
+  restoreTrackingCryptoOnRead,
+  type TrackingCryptoMode,
+} from "../../delivery-tracking/field-crypto";
+import {
+  resolveRetentionDays,
+  toRetentionBucketYm,
+} from "../../delivery-tracking/retention";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
+  DeliveryTrackingFieldCryptoOptions,
   DeliveryTrackingListOptions,
   DeliveryTrackingRecordFilter,
+  DeliveryTrackingRetentionConfig,
   DeliveryTrackingStore,
 } from "../../delivery-tracking/store.interface";
 import {
@@ -16,8 +28,14 @@ interface StoredTrackingRecord {
   providerId: string;
   providerMessageId: string;
   type: TrackingRecord["type"];
-  to: string;
+  to?: string;
+  toEnc?: string;
+  toHash?: string;
+  toMasked?: string;
   from?: string;
+  fromEnc?: string;
+  fromHash?: string;
+  fromMasked?: string;
   requestedAt: number;
   scheduledAt?: number;
   status: TrackingRecord["status"];
@@ -33,6 +51,21 @@ interface StoredTrackingRecord {
   lastError?: TrackingRecord["lastError"];
   raw?: unknown;
   metadata?: Record<string, unknown>;
+  metadataEnc?: string;
+  metadataHashes?: Record<string, string>;
+  cryptoKid?: string;
+  cryptoVersion?: number;
+  cryptoState?: TrackingRecord["cryptoState"];
+  retentionClass?: TrackingRecord["retentionClass"];
+  retentionBucketYm?: number;
+}
+
+export interface CloudflareObjectDeliveryTrackingStoreOptions {
+  keyPrefix?: string;
+  fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  retention?: DeliveryTrackingRetentionConfig;
+  secureMode?: boolean;
+  compatPlainColumns?: boolean;
 }
 
 function toArray<T>(value: T | T[] | undefined): T[] | undefined {
@@ -78,6 +111,12 @@ function matchesFilter(
   const statuses = toArray(filter.status);
   if (statuses && !statuses.includes(record.status)) return false;
 
+  const toHashes = toArray(filter.toHash);
+  if (toHashes && !toHashes.includes(record.toHash ?? "")) return false;
+
+  const fromHashes = toArray(filter.fromHash);
+  if (fromHashes && !fromHashes.includes(record.fromHash ?? "")) return false;
+
   const tos = toArray(filter.to);
   if (tos && !tos.includes(record.to)) return false;
 
@@ -108,17 +147,42 @@ function matchesFilter(
 export class CloudflareObjectDeliveryTrackingStore
   implements DeliveryTrackingStore
 {
+  private readonly keyPrefix: string;
+  private readonly fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
+  private readonly retention?: DeliveryTrackingRetentionConfig;
+  private readonly secureMode: boolean;
+  private readonly compatPlainColumns: boolean;
+
   constructor(
     private readonly storage: CloudflareObjectStorage,
-    private readonly keyPrefix = "kmsg/delivery-tracking",
-  ) {}
+    options: string | CloudflareObjectDeliveryTrackingStoreOptions = {},
+  ) {
+    if (typeof options === "string") {
+      this.keyPrefix = options;
+      this.secureMode = false;
+      this.compatPlainColumns = true;
+      return;
+    }
+
+    this.keyPrefix = options.keyPrefix ?? "kmsg/delivery-tracking";
+    this.fieldCrypto = options.fieldCrypto;
+    this.retention = options.retention;
+    this.secureMode =
+      typeof options.secureMode === "boolean"
+        ? options.secureMode
+        : Boolean(options.fieldCrypto);
+    this.compatPlainColumns =
+      typeof options.compatPlainColumns === "boolean"
+        ? options.compatPlainColumns
+        : !this.secureMode;
+  }
 
   async init(): Promise<void> {
     // no-op
   }
 
   async upsert(record: TrackingRecord): Promise<void> {
-    const normalized = this.serializeRecord(record);
+    const normalized = await this.serializeRecord(record);
     await this.storage.put(
       this.recordKey(record.messageId),
       JSON.stringify(normalized),
@@ -128,7 +192,7 @@ export class CloudflareObjectDeliveryTrackingStore
   async get(messageId: string): Promise<TrackingRecord | undefined> {
     const raw = await this.storage.get(this.recordKey(messageId));
     if (!raw) return undefined;
-    return this.deserializeRecord(raw);
+    return await this.deserializeRecord(raw);
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
@@ -143,7 +207,7 @@ export class CloudflareObjectDeliveryTrackingStore
     for (const key of keys) {
       const raw = await this.storage.get(key);
       if (!raw) continue;
-      const record = this.deserializeRecord(raw);
+      const record = await this.deserializeRecord(raw);
       if (!record) continue;
       if (isTerminalDeliveryStatus(record.status)) continue;
       if (record.nextCheckAt.getTime() > now.getTime()) continue;
@@ -168,6 +232,7 @@ export class CloudflareObjectDeliveryTrackingStore
 
     const orderBy = options.orderBy ?? "requestedAt";
     const orderDirection = options.orderDirection ?? "desc";
+    const normalizedFilter = await this.normalizeFilter(options);
 
     const keys = await this.storage.list(this.recordPrefix());
     const records: TrackingRecord[] = [];
@@ -175,9 +240,9 @@ export class CloudflareObjectDeliveryTrackingStore
     for (const key of keys) {
       const raw = await this.storage.get(key);
       if (!raw) continue;
-      const record = this.deserializeRecord(raw);
+      const record = await this.deserializeRecord(raw);
       if (!record) continue;
-      if (!matchesFilter(record, options)) continue;
+      if (!matchesFilter(record, normalizedFilter)) continue;
       records.push(record);
     }
 
@@ -195,15 +260,16 @@ export class CloudflareObjectDeliveryTrackingStore
   }
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    const normalizedFilter = await this.normalizeFilter(filter);
     const keys = await this.storage.list(this.recordPrefix());
     let count = 0;
 
     for (const key of keys) {
       const raw = await this.storage.get(key);
       if (!raw) continue;
-      const record = this.deserializeRecord(raw);
+      const record = await this.deserializeRecord(raw);
       if (!record) continue;
-      if (matchesFilter(record, filter)) count += 1;
+      if (matchesFilter(record, normalizedFilter)) count += 1;
     }
 
     return count;
@@ -216,6 +282,7 @@ export class CloudflareObjectDeliveryTrackingStore
     const fields = Array.from(groupBy).filter(Boolean);
     if (fields.length === 0) return [];
 
+    const normalizedFilter = await this.normalizeFilter(filter);
     const keys = await this.storage.list(this.recordPrefix());
     const buckets = new Map<
       string,
@@ -225,9 +292,9 @@ export class CloudflareObjectDeliveryTrackingStore
     for (const key of keys) {
       const raw = await this.storage.get(key);
       if (!raw) continue;
-      const record = this.deserializeRecord(raw);
+      const record = await this.deserializeRecord(raw);
       if (!record) continue;
-      if (!matchesFilter(record, filter)) continue;
+      if (!matchesFilter(record, normalizedFilter)) continue;
 
       const bucketKey: Record<string, string> = {};
       for (const field of fields) {
@@ -255,6 +322,17 @@ export class CloudflareObjectDeliveryTrackingStore
     messageId: string,
     patch: Partial<TrackingRecord>,
   ): Promise<void> {
+    if (this.patchTouchesCrypto(patch)) {
+      const current = await this.get(messageId);
+      if (!current) return;
+      await this.upsert({
+        ...current,
+        ...patch,
+        messageId: current.messageId,
+      });
+      return;
+    }
+
     const current = await this.get(messageId);
     if (!current) return;
 
@@ -275,30 +353,135 @@ export class CloudflareObjectDeliveryTrackingStore
     await this.upsert(next);
   }
 
-  private serializeRecord(record: TrackingRecord): StoredTrackingRecord {
+  private async normalizeFilter<T extends DeliveryTrackingRecordFilter>(
+    filter: T,
+  ): Promise<T> {
+    return (await normalizeTrackingFilterWithHashes(
+      filter,
+      this.fieldCrypto,
+      this.cryptoMode(),
+    )) as T;
+  }
+
+  private patchTouchesCrypto(patch: Partial<TrackingRecord>): boolean {
+    if (!this.secureMode) return false;
+    return (
+      patch.to !== undefined ||
+      "from" in patch ||
+      "metadata" in patch ||
+      patch.toHash !== undefined ||
+      patch.fromHash !== undefined ||
+      patch.cryptoKid !== undefined ||
+      patch.cryptoVersion !== undefined ||
+      patch.cryptoState !== undefined
+    );
+  }
+
+  private cryptoMode(): TrackingCryptoMode {
     return {
-      ...record,
+      secureMode: this.secureMode,
+      compatPlainColumns: this.compatPlainColumns,
+    };
+  }
+
+  private async serializeRecord(
+    record: TrackingRecord,
+  ): Promise<StoredTrackingRecord> {
+    const cryptoColumns = await applyTrackingCryptoOnWrite(
+      record,
+      this.fieldCrypto,
+      {
+        tableName: "kmsg_delivery_tracking_object",
+        store: "object",
+      },
+      this.cryptoMode(),
+    );
+
+    const retentionClass = record.retentionClass ?? "telecomMetadata";
+    const retentionDays = await resolveRetentionDays(this.retention, {
+      tenantId: this.fieldCrypto?.tenantId,
+      record,
+      retentionClass,
+    });
+    const retentionAnchor = new Date(record.requestedAt);
+    retentionAnchor.setUTCDate(retentionAnchor.getUTCDate() + retentionDays);
+
+    const base: StoredTrackingRecord = {
+      messageId: record.messageId,
+      providerId: record.providerId,
+      providerMessageId: record.providerMessageId,
+      type: record.type,
       requestedAt: record.requestedAt.getTime(),
       scheduledAt: record.scheduledAt?.getTime(),
+      status: record.status,
+      providerStatusCode: record.providerStatusCode,
+      providerStatusMessage: record.providerStatusMessage,
       sentAt: record.sentAt?.getTime(),
       deliveredAt: record.deliveredAt?.getTime(),
       failedAt: record.failedAt?.getTime(),
       statusUpdatedAt: record.statusUpdatedAt.getTime(),
+      attemptCount: record.attemptCount,
       lastCheckedAt: record.lastCheckedAt?.getTime(),
       nextCheckAt: record.nextCheckAt.getTime(),
+      lastError: record.lastError,
+      raw: record.raw,
+      retentionClass,
+      retentionBucketYm:
+        record.retentionBucketYm ?? toRetentionBucketYm(retentionAnchor),
+      ...(cryptoColumns.toEnc ? { toEnc: cryptoColumns.toEnc } : {}),
+      ...(cryptoColumns.toHash ? { toHash: cryptoColumns.toHash } : {}),
+      ...(cryptoColumns.toMasked ? { toMasked: cryptoColumns.toMasked } : {}),
+      ...(cryptoColumns.fromEnc ? { fromEnc: cryptoColumns.fromEnc } : {}),
+      ...(cryptoColumns.fromHash ? { fromHash: cryptoColumns.fromHash } : {}),
+      ...(cryptoColumns.fromMasked
+        ? { fromMasked: cryptoColumns.fromMasked }
+        : {}),
+      ...(cryptoColumns.metadataEnc
+        ? { metadataEnc: cryptoColumns.metadataEnc }
+        : {}),
+      ...(cryptoColumns.metadataHashes
+        ? { metadataHashes: cryptoColumns.metadataHashes }
+        : {}),
+      ...(cryptoColumns.metadata ? { metadata: cryptoColumns.metadata } : {}),
+      ...(cryptoColumns.cryptoKid
+        ? { cryptoKid: cryptoColumns.cryptoKid }
+        : {}),
+      ...(cryptoColumns.cryptoVersion
+        ? { cryptoVersion: cryptoColumns.cryptoVersion }
+        : {}),
+      ...(cryptoColumns.cryptoState
+        ? { cryptoState: cryptoColumns.cryptoState }
+        : {}),
     };
+
+    if (!this.secureMode || this.compatPlainColumns) {
+      base.to = record.to;
+      base.from = record.from;
+    }
+
+    return base;
   }
 
-  private deserializeRecord(raw: string): TrackingRecord | undefined {
+  private async deserializeRecord(
+    raw: string,
+  ): Promise<TrackingRecord | undefined> {
     try {
       const parsed = JSON.parse(raw) as StoredTrackingRecord;
-      return {
-        ...parsed,
+      const base: TrackingRecord = {
+        messageId: parsed.messageId,
+        providerId: parsed.providerId,
+        providerMessageId: parsed.providerMessageId,
+        type: parsed.type,
+        to: parsed.to ?? "",
+        from: parsed.from,
         requestedAt: new Date(parsed.requestedAt),
         scheduledAt:
           typeof parsed.scheduledAt === "number"
             ? new Date(parsed.scheduledAt)
             : undefined,
+        status: parsed.status,
+        providerStatusCode: parsed.providerStatusCode,
+        providerStatusMessage: parsed.providerStatusMessage,
         sentAt:
           typeof parsed.sentAt === "number"
             ? new Date(parsed.sentAt)
@@ -312,12 +495,42 @@ export class CloudflareObjectDeliveryTrackingStore
             ? new Date(parsed.failedAt)
             : undefined,
         statusUpdatedAt: new Date(parsed.statusUpdatedAt),
+        attemptCount: parsed.attemptCount,
         lastCheckedAt:
           typeof parsed.lastCheckedAt === "number"
             ? new Date(parsed.lastCheckedAt)
             : undefined,
         nextCheckAt: new Date(parsed.nextCheckAt),
+        lastError: parsed.lastError,
+        raw: parsed.raw,
+        metadata: parsed.metadata,
+        retentionClass: parsed.retentionClass,
+        retentionBucketYm: parsed.retentionBucketYm,
       };
+
+      return await restoreTrackingCryptoOnRead(
+        base,
+        {
+          toEnc: parsed.toEnc,
+          toHash: parsed.toHash,
+          toMasked: parsed.toMasked,
+          fromEnc: parsed.fromEnc,
+          fromHash: parsed.fromHash,
+          fromMasked: parsed.fromMasked,
+          metadataEnc: parsed.metadataEnc,
+          metadataHashes: parsed.metadataHashes,
+          metadata: parsed.metadata,
+          cryptoKid: parsed.cryptoKid,
+          cryptoVersion: parsed.cryptoVersion,
+          cryptoState: parsed.cryptoState,
+        },
+        this.fieldCrypto,
+        {
+          tableName: "kmsg_delivery_tracking_object",
+          store: "object",
+        },
+        this.cryptoMode(),
+      );
     } catch {
       return undefined;
     }

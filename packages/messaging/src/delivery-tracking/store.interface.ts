@@ -1,3 +1,4 @@
+import type { FieldCryptoConfig, FieldCryptoMetricEvent } from "@k-msg/core";
 import type { TrackingRecord } from "./types";
 
 export type DeliveryTrackingRecordOrderBy = "requestedAt" | "statusUpdatedAt";
@@ -10,7 +11,9 @@ export interface DeliveryTrackingRecordFilter {
   type?: TrackingRecord["type"] | Array<TrackingRecord["type"]>;
   status?: TrackingRecord["status"] | Array<TrackingRecord["status"]>;
   to?: string | string[];
+  toHash?: string | string[];
   from?: string | string[];
+  fromHash?: string | string[];
   requestedAtFrom?: Date;
   requestedAtTo?: Date;
   statusUpdatedAtFrom?: Date;
@@ -34,6 +37,39 @@ export type DeliveryTrackingCountByKey = Partial<
 export interface DeliveryTrackingCountByRow {
   key: DeliveryTrackingCountByKey;
   count: number;
+}
+
+export type DeliveryTrackingRetentionClass =
+  | "opsLogs"
+  | "telecomMetadata"
+  | "billingEvidence";
+
+export interface DeliveryTrackingRetentionPreset {
+  opsLogsDays: number;
+  telecomMetadataDays: number;
+  billingEvidenceDays: number;
+}
+
+export interface DeliveryTrackingRetentionConfig {
+  preset?: "kr-b2b-baseline";
+  tenantOverrideDays?: Partial<Record<DeliveryTrackingRetentionClass, number>>;
+  contractOverrideResolver?: (context: {
+    tenantId?: string;
+    record: TrackingRecord;
+    defaultDays: number;
+    retentionClass: DeliveryTrackingRetentionClass;
+  }) => number | undefined | Promise<number | undefined>;
+}
+
+export interface DeliveryTrackingFieldCryptoOptions {
+  config: FieldCryptoConfig;
+  tenantId?: string;
+  metrics?: (
+    event: FieldCryptoMetricEvent & {
+      store: "sql" | "object" | "memory";
+      tableName?: string;
+    },
+  ) => void | Promise<void>;
 }
 
 export interface DeliveryTrackingStore {

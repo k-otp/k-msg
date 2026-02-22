@@ -22,6 +22,18 @@ function cloneRecord(record: TrackingRecord): TrackingRecord {
     nextCheckAt: new Date(record.nextCheckAt),
     lastError: record.lastError ? { ...record.lastError } : undefined,
     metadata: record.metadata ? { ...record.metadata } : undefined,
+    metadataHashes: record.metadataHashes
+      ? { ...record.metadataHashes }
+      : undefined,
+    toHash: record.toHash,
+    toMasked: record.toMasked,
+    fromHash: record.fromHash,
+    fromMasked: record.fromMasked,
+    cryptoKid: record.cryptoKid,
+    cryptoVersion: record.cryptoVersion,
+    cryptoState: record.cryptoState,
+    retentionClass: record.retentionClass,
+    retentionBucketYm: record.retentionBucketYm,
   };
 }
 
@@ -52,6 +64,12 @@ function matchesFilter(
 
   const statuses = toArray(filter.status);
   if (statuses && !statuses.includes(record.status)) return false;
+
+  const toHashes = toArray(filter.toHash);
+  if (toHashes && !toHashes.includes(record.toHash ?? "")) return false;
+
+  const fromHashes = toArray(filter.fromHash);
+  if (fromHashes && !fromHashes.includes(record.fromHash ?? "")) return false;
 
   const tos = toArray(filter.to);
   if (tos && !tos.includes(record.to)) return false;

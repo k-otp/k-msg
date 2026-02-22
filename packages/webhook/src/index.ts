@@ -34,6 +34,10 @@ export {
   DefaultHttpClient,
   WebhookDispatcher,
 } from "./services/webhook.dispatcher";
+export type {
+  WebhookRegistryCryptoOptions,
+  WebhookRegistryOptions,
+} from "./services/webhook.registry";
 
 export type {
   WebhookAttempt,

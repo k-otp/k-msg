@@ -33,6 +33,10 @@ export {
   MockHttpClient,
   WebhookDispatcher,
 } from "../services/webhook.dispatcher";
+export type {
+  WebhookRegistryCryptoOptions,
+  WebhookRegistryOptions,
+} from "../services/webhook.registry";
 export { WebhookRegistry } from "../services/webhook.registry";
 
 export type { FileStorageAdapter } from "../shared/file-storage";

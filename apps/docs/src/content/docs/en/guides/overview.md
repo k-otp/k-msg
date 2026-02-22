@@ -96,6 +96,68 @@ Delivery-tracking API-level fallback can then auto-retry SMS/LMS once when:
 - delivery status becomes `FAILED`
 - failure is classified as non-Kakao-user failure
 
+## Field Crypto (Security Audit v1)
+
+`@k-msg/core` and `@k-msg/messaging` now support field-level crypto with:
+
+- `FieldMode`: `plain | encrypt | encrypt+hash | mask`
+- secure default when `fieldCrypto` is enabled
+- fail mode: `closed` by default (`open` must be explicit)
+- AAD binding for `messageId/providerId/tableName/fieldPath`
+- hash lookup (`to_hash`, `from_hash`) without deterministic encryption dependency
+
+Quick example with AES-GCM provider:
+
+```ts
+import {
+  createAesGcmFieldCryptoProvider,
+  type FieldCryptoConfig,
+} from "@k-msg/core";
+import { createD1DeliveryTrackingStore } from "@k-msg/messaging/adapters/cloudflare";
+
+const provider = createAesGcmFieldCryptoProvider({
+  activeKid: "k-2026-01",
+  keys: {
+    "k-2026-01": process.env.KMSG_AES_KEY_BASE64URL!,
+  },
+  hashKeys: {
+    "k-2026-01": process.env.KMSG_HMAC_KEY_BASE64URL!,
+  },
+  keyEncoding: "base64url",
+  hashKeyEncoding: "base64url",
+});
+
+const fieldCrypto: FieldCryptoConfig = {
+  enabled: true,
+  failMode: "closed",
+  fields: {
+    to: "encrypt+hash",
+    from: "encrypt+hash",
+    "metadata.phoneNumber": "encrypt+hash",
+  },
+  provider,
+};
+
+const trackingStore = createD1DeliveryTrackingStore(env.DB, {
+  tableName: "otp_delivery_tracking",
+  fieldCryptoSchema: {
+    enabled: true,
+    mode: "secure",
+    compatPlainColumns: false,
+  },
+  fieldCrypto: {
+    config: fieldCrypto,
+    tenantId: "tenant-a",
+  },
+});
+```
+
+Migration, threat model, and retention guidance are documented in:
+
+- [`docs/security/field-crypto-v1.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/field-crypto-v1.md)
+- [`docs/migration/field-crypto-migration.md`](https://github.com/k-otp/k-msg/blob/main/docs/migration/field-crypto-migration.md)
+- [`docs/compliance/kr-b2b-retention.md`](https://github.com/k-otp/k-msg/blob/main/docs/compliance/kr-b2b-retention.md)
+
 ## Project Roadmap
 
 Future development follows the implementation-aware roadmap:

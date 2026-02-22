@@ -1,6 +1,7 @@
 import {
   DEFAULT_DELIVERY_TRACKING_TABLE as DEFAULT_DELIVERY_TRACKING_TABLE_NAME,
   type DeliveryTrackingColumnMap,
+  type DeliveryTrackingFieldCryptoSchemaOptions,
   type DeliveryTrackingSchemaOptions,
   type DeliveryTrackingSchemaSpec,
   type DeliveryTrackingTypeStrategy,
@@ -36,6 +37,7 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
+  fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
   trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
   includeIndexes?: boolean;
@@ -48,6 +50,7 @@ export interface InitializeCloudflareSqlSchemaOptions {
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
+  fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
   trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
   includeIndexes?: boolean;
@@ -105,6 +108,7 @@ function buildDeliveryTrackingSchemaStatements(
     columnMap: options.columnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.storeRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
     indexNames: options.indexNames,
     trackingIndexNames: options.trackingIndexNames,
   });
@@ -121,8 +125,32 @@ function buildDeliveryTrackingSchemaStatements(
     `${q(columns.providerId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
     `${q(columns.providerMessageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
     `${q(columns.type)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
-    `${q(columns.to)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
-    `${q(columns.from)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+  ];
+
+  const secureOnly =
+    spec.fieldCrypto.enabled && spec.fieldCrypto.mode === "secure";
+  const includePlainColumns =
+    !secureOnly || spec.fieldCrypto.compatPlainColumns;
+
+  if (includePlainColumns) {
+    tableColumns.push(
+      `${q(columns.to)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
+      `${q(columns.from)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+    );
+  }
+
+  if (secureOnly) {
+    tableColumns.push(
+      `${q(columns.toEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+      `${q(columns.toHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+      `${q(columns.toMasked)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+      `${q(columns.fromEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.fromHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.fromMasked)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+    );
+  }
+
+  tableColumns.push(
     `${q(columns.status)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
     `${q(columns.providerStatusCode)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
     `${q(columns.providerStatusMessage)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
@@ -136,7 +164,19 @@ function buildDeliveryTrackingSchemaStatements(
     `${q(columns.lastCheckedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
     `${q(columns.nextCheckAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)} NOT NULL`,
     `${q(columns.lastError)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
-  ];
+  );
+
+  if (secureOnly) {
+    tableColumns.push(
+      `${q(columns.metadataEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.metadataHashes)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
+      `${q(columns.cryptoKid)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.cryptoVersion)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)} NOT NULL DEFAULT 1`,
+      `${q(columns.cryptoState)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+      `${q(columns.retentionClass)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+      `${q(columns.retentionBucketYm)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)}`,
+    );
+  }
 
   if (spec.storeRaw) {
     tableColumns.push(
@@ -144,9 +184,11 @@ function buildDeliveryTrackingSchemaStatements(
     );
   }
 
-  tableColumns.push(
-    `${q(columns.metadata)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
-  );
+  if (includePlainColumns) {
+    tableColumns.push(
+      `${q(columns.metadata)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
+    );
+  }
 
   const tableSql = `
 CREATE TABLE IF NOT EXISTS ${tableRef} (
@@ -164,6 +206,17 @@ CREATE TABLE IF NOT EXISTS ${tableRef} (
     },
     { name: spec.indexNames.requestedAt, columns: [columns.requestedAt] },
   ];
+
+  if (secureOnly) {
+    indexDefs.push(
+      { name: spec.indexNames.toHash, columns: [columns.toHash] },
+      { name: spec.indexNames.fromHash, columns: [columns.fromHash] },
+      {
+        name: spec.indexNames.retentionBucket,
+        columns: [columns.retentionClass, columns.retentionBucketYm],
+      },
+    );
+  }
 
   const indexStatements =
     includeIndexes === false
@@ -349,6 +402,7 @@ export function buildCloudflareSqlSchemaSql(
         columnMap: options.trackingColumnMap,
         typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
+        fieldCryptoSchema: options.fieldCryptoSchema,
         includeIndexes,
         trackingIndexNames: options.trackingIndexNames,
       }),
@@ -390,6 +444,7 @@ export async function initializeCloudflareSqlSchema(
         columnMap: options.trackingColumnMap,
         typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
+        fieldCryptoSchema: options.fieldCryptoSchema,
         includeIndexes,
         trackingIndexNames: options.trackingIndexNames,
       }),
