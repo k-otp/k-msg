@@ -59,7 +59,9 @@ describe("MockProvider", () => {
 
   test("supports timeout outcome with retry hint", async () => {
     const provider = new MockProvider();
-    provider.mockScenario([{ outcome: "timeout", retryAfterMs: 150, durationMs: 1 }]);
+    provider.mockScenario([
+      { outcome: "timeout", retryAfterMs: 150, durationMs: 1 },
+    ]);
 
     const result = await provider.send({
       type: "SMS",

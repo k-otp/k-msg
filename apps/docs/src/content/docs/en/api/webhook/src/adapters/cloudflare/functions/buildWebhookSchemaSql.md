@@ -7,7 +7,7 @@ title: "buildWebhookSchemaSql"
 
 > **buildWebhookSchemaSql**(`options?`): `string`[]
 
-Defined in: packages/webhook/src/adapters/cloudflare/sql-schema.ts:21
+Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L21)
 
 ## Parameters
 

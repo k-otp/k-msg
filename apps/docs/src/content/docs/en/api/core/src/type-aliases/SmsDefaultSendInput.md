@@ -7,7 +7,7 @@ title: "SmsDefaultSendInput"
 
 > **SmsDefaultSendInput** = `Omit`\<[`SmsSendOptions`](/api/core/src/interfaces/smssendoptions/), `"type"` \| `"text"`\> & `object`
 
-Defined in: [packages/core/src/types/message.ts:265](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L265)
+Defined in: [packages/core/src/types/message.ts:283](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L283)
 
 ## Type Declaration
 

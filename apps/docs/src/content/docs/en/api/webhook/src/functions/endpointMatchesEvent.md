@@ -7,7 +7,7 @@ title: "endpointMatchesEvent"
 
 > **endpointMatchesEvent**(`endpoint`, `event`): `boolean`
 
-Defined in: packages/webhook/src/runtime/event-matcher.ts:18
+Defined in: [packages/webhook/src/runtime/event-matcher.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/event-matcher.ts#L18)
 
 ## Parameters
 

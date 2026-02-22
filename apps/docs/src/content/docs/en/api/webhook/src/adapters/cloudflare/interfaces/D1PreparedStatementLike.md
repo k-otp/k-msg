@@ -5,7 +5,7 @@ prev: false
 title: "D1PreparedStatementLike"
 ---
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:3
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L3)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:3
 
 > **all**\<`T`\>(): `Promise`\<\{ `results`: `T`[]; \}\>
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:6
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L6)
 
 #### Type Parameters
 
@@ -31,7 +31,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:6
 
 > **bind**(...`values`): `D1PreparedStatementLike`
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:4
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L4)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:4
 
 > **first**\<`T`\>(): `Promise`\<`T` \| `null`\>
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:5
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L5)
 
 #### Type Parameters
 
@@ -67,7 +67,7 @@ Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:5
 
 > **run**(): `Promise`\<`unknown`\>
 
-Defined in: packages/webhook/src/adapters/cloudflare/d1-client.ts:7
+Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L7)
 
 #### Returns
 

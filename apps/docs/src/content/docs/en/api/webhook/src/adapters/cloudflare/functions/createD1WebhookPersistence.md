@@ -7,7 +7,7 @@ title: "createD1WebhookPersistence"
 
 > **createD1WebhookPersistence**(`db`, `options?`): [`WebhookPersistence`](/api/webhook/src/interfaces/webhookpersistence/)
 
-Defined in: packages/webhook/src/adapters/cloudflare/index.ts:27
+Defined in: [packages/webhook/src/adapters/cloudflare/index.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/index.ts#L27)
 
 ## Parameters
 

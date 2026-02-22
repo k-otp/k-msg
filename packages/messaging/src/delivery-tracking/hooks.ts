@@ -6,7 +6,11 @@ export function createDeliveryTrackingHooks(
   options?: {
     onError?: (error: unknown) => void | Promise<void>;
     onQueued?: (context: unknown) => void | Promise<void>;
-    onRetryScheduled?: (context: unknown, error: unknown, metadata: unknown) => void | Promise<void>;
+    onRetryScheduled?: (
+      context: unknown,
+      error: unknown,
+      metadata: unknown,
+    ) => void | Promise<void>;
     onFinal?: (context: unknown, state: unknown) => void | Promise<void>;
   },
 ): KMsgHooks {

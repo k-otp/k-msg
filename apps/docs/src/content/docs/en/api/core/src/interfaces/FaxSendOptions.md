@@ -5,7 +5,7 @@ prev: false
 title: "FaxSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L151)
+Defined in: [packages/core/src/types/message.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L169)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/types/message.ts:151](https://github.com/k-otp/k-
 
 > `optional` **fileIds**: `string`[]
 
-Defined in: [packages/core/src/types/message.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L152)
+Defined in: [packages/core/src/types/message.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L170)
 
 ***
 
@@ -25,4 +25,4 @@ Defined in: [packages/core/src/types/message.ts:152](https://github.com/k-otp/k-
 
 > `optional` **fileUrls**: `string`[]
 
-Defined in: [packages/core/src/types/message.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L153)
+Defined in: [packages/core/src/types/message.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L171)
