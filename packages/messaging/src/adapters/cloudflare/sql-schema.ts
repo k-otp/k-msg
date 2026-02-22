@@ -1,4 +1,8 @@
 import {
+  DEFAULT_CRYPTO_MIGRATION_CHUNKS_TABLE,
+  DEFAULT_CRYPTO_MIGRATION_RUNS_TABLE,
+} from "../../migration/field-crypto/state";
+import {
   DEFAULT_DELIVERY_TRACKING_TABLE as DEFAULT_DELIVERY_TRACKING_TABLE_NAME,
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingFieldCryptoSchemaOptions,
@@ -39,6 +43,9 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   trackingStoreRaw?: boolean;
   fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
   trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
+  includeMigrationMeta?: boolean;
+  migrationRunsTableName?: string;
+  migrationChunksTableName?: string;
   queueTableName?: string;
   includeIndexes?: boolean;
 }
@@ -52,7 +59,17 @@ export interface InitializeCloudflareSqlSchemaOptions {
   trackingStoreRaw?: boolean;
   fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
   trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
+  includeMigrationMeta?: boolean;
+  migrationRunsTableName?: string;
+  migrationChunksTableName?: string;
   queueTableName?: string;
+  includeIndexes?: boolean;
+}
+
+export interface BuildFieldCryptoMigrationMetaSchemaSqlOptions {
+  dialect: SqlDialect;
+  runsTableName?: string;
+  chunksTableName?: string;
   includeIndexes?: boolean;
 }
 
@@ -297,6 +314,70 @@ CREATE TABLE IF NOT EXISTS ${tableRef} (
   };
 }
 
+function buildFieldCryptoMigrationMetaSchemaStatements(
+  options: BuildFieldCryptoMigrationMetaSchemaSqlOptions,
+): SchemaStatements {
+  const runsTableName =
+    options.runsTableName ?? DEFAULT_CRYPTO_MIGRATION_RUNS_TABLE;
+  const chunksTableName =
+    options.chunksTableName ?? DEFAULT_CRYPTO_MIGRATION_CHUNKS_TABLE;
+  const includeIndexes = options.includeIndexes ?? true;
+  const q = (column: string) => quoteIdentifier(options.dialect, column);
+  const runsTableRef = quoteIdentifier(options.dialect, runsTableName);
+  const chunksTableRef = quoteIdentifier(options.dialect, chunksTableName);
+
+  const runsSql = `
+CREATE TABLE IF NOT EXISTS ${runsTableRef} (
+  ${q("plan_id")} TEXT PRIMARY KEY,
+  ${q("tracking_table_name")} TEXT NOT NULL,
+  ${q("schema_fingerprint")} TEXT NOT NULL,
+  ${q("status")} TEXT NOT NULL,
+  ${q("chunk_size")} INTEGER NOT NULL,
+  ${q("total_rows")} INTEGER NOT NULL DEFAULT 0,
+  ${q("total_chunks")} INTEGER NOT NULL DEFAULT 0,
+  ${q("processed_rows")} INTEGER NOT NULL DEFAULT 0,
+  ${q("processed_chunks")} INTEGER NOT NULL DEFAULT 0,
+  ${q("failed_chunks")} INTEGER NOT NULL DEFAULT 0,
+  ${q("cursor_requested_at")} BIGINT,
+  ${q("cursor_message_id")} TEXT,
+  ${q("created_at")} BIGINT NOT NULL,
+  ${q("updated_at")} BIGINT NOT NULL,
+  ${q("last_error")} TEXT
+)`;
+
+  const chunksSql = `
+CREATE TABLE IF NOT EXISTS ${chunksTableRef} (
+  ${q("plan_id")} TEXT NOT NULL,
+  ${q("chunk_no")} INTEGER NOT NULL,
+  ${q("status")} TEXT NOT NULL,
+  ${q("start_requested_at")} BIGINT,
+  ${q("start_message_id")} TEXT,
+  ${q("end_requested_at")} BIGINT,
+  ${q("end_message_id")} TEXT,
+  ${q("processed_rows")} INTEGER NOT NULL DEFAULT 0,
+  ${q("attempts")} INTEGER NOT NULL DEFAULT 0,
+  ${q("message_ids_json")} TEXT,
+  ${q("last_error")} TEXT,
+  ${q("updated_at")} BIGINT NOT NULL,
+  PRIMARY KEY (${q("plan_id")}, ${q("chunk_no")})
+)`;
+
+  const statusIndexName = `${chunksTableName}_status_idx`;
+  const indexStatements =
+    includeIndexes === false
+      ? []
+      : [
+          options.dialect === "mysql"
+            ? `CREATE INDEX ${quoteIdentifier(options.dialect, statusIndexName)} ON ${chunksTableRef} (${q("plan_id")}, ${q("status")})`
+            : `CREATE INDEX IF NOT EXISTS ${quoteIdentifier(options.dialect, statusIndexName)} ON ${chunksTableRef} (${q("plan_id")}, ${q("status")})`,
+        ];
+
+  return {
+    tableStatements: [runsSql, chunksSql],
+    indexStatements,
+  };
+}
+
 function mergeSchemaStatements(
   ...schemas: readonly SchemaStatements[]
 ): SchemaStatements {
@@ -385,6 +466,16 @@ export function buildJobQueueSchemaSql(
   ]);
 }
 
+export function buildFieldCryptoMigrationMetaSchemaSql(
+  options: BuildFieldCryptoMigrationMetaSchemaSqlOptions,
+): string {
+  const statements = buildFieldCryptoMigrationMetaSchemaStatements(options);
+  return renderStatements([
+    ...statements.tableStatements,
+    ...statements.indexStatements,
+  ]);
+}
+
 export function buildCloudflareSqlSchemaSql(
   options: BuildCloudflareSqlSchemaSqlOptions,
 ): string {
@@ -407,6 +498,17 @@ export function buildCloudflareSqlSchemaSql(
         trackingIndexNames: options.trackingIndexNames,
       }),
     );
+
+    if (options.includeMigrationMeta) {
+      schemas.push(
+        buildFieldCryptoMigrationMetaSchemaStatements({
+          dialect: options.dialect,
+          runsTableName: options.migrationRunsTableName,
+          chunksTableName: options.migrationChunksTableName,
+          includeIndexes,
+        }),
+      );
+    }
   }
 
   if (target === "queue" || target === "both") {
@@ -449,6 +551,17 @@ export async function initializeCloudflareSqlSchema(
         trackingIndexNames: options.trackingIndexNames,
       }),
     );
+
+    if (options.includeMigrationMeta) {
+      schemas.push(
+        buildFieldCryptoMigrationMetaSchemaStatements({
+          dialect: client.dialect,
+          runsTableName: options.migrationRunsTableName,
+          chunksTableName: options.migrationChunksTableName,
+          includeIndexes,
+        }),
+      );
+    }
   }
   if (target === "queue" || target === "both") {
     schemas.push(
