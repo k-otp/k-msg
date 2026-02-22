@@ -202,7 +202,12 @@ export function isCryptoEnvelope(value: unknown): value is CryptoEnvelope {
 }
 
 export function normalizePhoneForHash(value: string): string {
-  return value.replace(/[^\d+]/g, "").trim();
+  const trimmed = String(value ?? "").trim();
+  if (trimmed.length === 0) return "";
+
+  const hasLeadingPlus = trimmed.startsWith("+");
+  const digitsOnly = trimmed.replace(/\D/g, "");
+  return hasLeadingPlus ? `+${digitsOnly}` : digitsOnly;
 }
 
 export function createDefaultMasker(
