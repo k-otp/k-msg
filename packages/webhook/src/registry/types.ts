@@ -59,6 +59,9 @@ export interface StorageConfig {
 
   // Common options
   retentionDays?: number;
+  /**
+   * Preferred option. If both legacy and `fieldCrypto` are set, `fieldCrypto` takes precedence.
+   */
   fieldCrypto?: FieldCryptoConfig;
   /**
    * @deprecated Use `fieldCrypto` instead.
@@ -66,6 +69,7 @@ export interface StorageConfig {
   enableEncryption?: boolean;
   /**
    * @deprecated Use `fieldCrypto` with a provider implementation.
+   * Legacy option kept for compatibility only.
    */
   encryptionKey?: string;
 }

@@ -7,7 +7,7 @@ title: "createR2DeliveryTrackingStore"
 
 > **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L165)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L189)
 
 ## Parameters
 
@@ -17,9 +17,25 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:165](https://gi
 
 ### options?
 
+#### compatPlainColumns?
+
+`boolean`
+
+#### fieldCrypto?
+
+[`DeliveryTrackingFieldCryptoOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
+
 #### keyPrefix?
 
 `string`
+
+#### retention?
+
+[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
+
+#### secureMode?
+
+`boolean`
 
 ## Returns
 

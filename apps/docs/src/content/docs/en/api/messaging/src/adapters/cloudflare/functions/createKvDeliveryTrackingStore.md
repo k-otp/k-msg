@@ -7,7 +7,7 @@ title: "createKvDeliveryTrackingStore"
 
 > **createKvDeliveryTrackingStore**(`namespace`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L145)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L163)
 
 ## Parameters
 
@@ -17,9 +17,25 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:145](https://gi
 
 ### options?
 
+#### compatPlainColumns?
+
+`boolean`
+
+#### fieldCrypto?
+
+[`DeliveryTrackingFieldCryptoOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
+
 #### keyPrefix?
 
 `string`
+
+#### retention?
+
+[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
+
+#### secureMode?
+
+`boolean`
 
 ## Returns
 

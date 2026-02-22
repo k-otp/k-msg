@@ -1,3 +1,4 @@
+import { assertFieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
 import {
   applyTrackingCryptoOnWrite,
   normalizeTrackingFilterWithHashes,
@@ -175,6 +176,28 @@ export class CloudflareObjectDeliveryTrackingStore
       typeof options.compatPlainColumns === "boolean"
         ? options.compatPlainColumns
         : !this.secureMode;
+
+    if (this.secureMode && !this.fieldCrypto?.config) {
+      throw new FieldCryptoError(
+        "config",
+        "fieldCrypto config is required when secureMode=true",
+        {
+          rule: "fieldCrypto.secure_mode_requires_config",
+          path: "fieldCrypto",
+          hint: "Provide fieldCrypto.config or set secureMode=false",
+        },
+        {
+          fieldPath: "fieldCrypto",
+        },
+      );
+    }
+
+    if (this.fieldCrypto?.config) {
+      assertFieldCryptoConfig(this.fieldCrypto.config, {
+        secureMode: this.secureMode,
+        compatPlainColumns: this.compatPlainColumns,
+      });
+    }
   }
 
   async init(): Promise<void> {

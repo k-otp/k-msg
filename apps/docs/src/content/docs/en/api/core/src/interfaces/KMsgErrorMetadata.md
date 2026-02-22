@@ -5,7 +5,11 @@ prev: false
 title: "KMsgErrorMetadata"
 ---
 
-Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)
+Defined in: [packages/core/src/errors.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L24)
+
+## Extended by
+
+- [`FieldCryptoErrorMetadata`](/api/core/src/interfaces/fieldcryptoerrormetadata/)
 
 ## Properties
 
@@ -13,7 +17,7 @@ Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob
 
 > `optional` **attempt**: `number`
 
-Defined in: [packages/core/src/errors.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L25)
+Defined in: [packages/core/src/errors.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L30)
 
 ***
 
@@ -21,7 +25,7 @@ Defined in: [packages/core/src/errors.ts:25](https://github.com/k-otp/k-msg/blob
 
 > `optional` **causeChain**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L26)
+Defined in: [packages/core/src/errors.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L31)
 
 ***
 
@@ -29,7 +33,7 @@ Defined in: [packages/core/src/errors.ts:26](https://github.com/k-otp/k-msg/blob
 
 > `optional` **httpStatus**: `number`
 
-Defined in: [packages/core/src/errors.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L22)
+Defined in: [packages/core/src/errors.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L27)
 
 ***
 
@@ -37,7 +41,7 @@ Defined in: [packages/core/src/errors.ts:22](https://github.com/k-otp/k-msg/blob
 
 > `optional` **providerErrorCode**: `string`
 
-Defined in: [packages/core/src/errors.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L20)
+Defined in: [packages/core/src/errors.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L25)
 
 ***
 
@@ -45,7 +49,7 @@ Defined in: [packages/core/src/errors.ts:20](https://github.com/k-otp/k-msg/blob
 
 > `optional` **providerErrorText**: `string`
 
-Defined in: [packages/core/src/errors.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L21)
+Defined in: [packages/core/src/errors.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L26)
 
 ***
 
@@ -53,7 +57,7 @@ Defined in: [packages/core/src/errors.ts:21](https://github.com/k-otp/k-msg/blob
 
 > `optional` **requestId**: `string`
 
-Defined in: [packages/core/src/errors.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L23)
+Defined in: [packages/core/src/errors.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L28)
 
 ***
 
@@ -61,4 +65,4 @@ Defined in: [packages/core/src/errors.ts:23](https://github.com/k-otp/k-msg/blob
 
 > `optional` **retryAfterMs**: `number`
 
-Defined in: [packages/core/src/errors.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L24)
+Defined in: [packages/core/src/errors.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L29)

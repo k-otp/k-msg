@@ -1,3 +1,4 @@
+import { assertFieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
 import {
   applyTrackingCryptoOnWrite,
   normalizeTrackingFilterWithHashes,
@@ -128,6 +129,30 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     });
     this.fieldCrypto = resolved.fieldCrypto;
     this.retention = resolved.retention;
+
+    if (this.schema.fieldCrypto.enabled && !this.fieldCrypto?.config) {
+      throw new FieldCryptoError(
+        "config",
+        "fieldCrypto config is required when fieldCryptoSchema is enabled",
+        {
+          rule: "fieldCrypto.schema_requires_config",
+          path: "fieldCrypto",
+          hint: "Provide fieldCrypto.config or disable fieldCryptoSchema",
+        },
+        {
+          fieldPath: "fieldCrypto",
+        },
+      );
+    }
+
+    if (this.fieldCrypto?.config) {
+      assertFieldCryptoConfig(this.fieldCrypto.config, {
+        secureMode:
+          this.schema.fieldCrypto.enabled &&
+          this.schema.fieldCrypto.mode === "secure",
+        compatPlainColumns: this.schema.fieldCrypto.compatPlainColumns,
+      });
+    }
   }
 
   async init(): Promise<void> {

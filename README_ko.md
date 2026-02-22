@@ -96,6 +96,27 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 - 딜리버리 상태가 `FAILED`
 - 실패 원인이 카카오 미사용자로 판별됨
 
+## Field Crypto (Security Audit v1)
+
+`@k-msg/core`, `@k-msg/messaging`, `@k-msg/webhook`은 `fieldCrypto` 기반 필드 단위 암호화 정책을 지원합니다.
+
+- `FieldMode`: `plain | encrypt | encrypt+hash | mask`
+- `fieldCrypto` 활성화 시 secure 기본값 적용
+- 실패 정책 기본값은 `failMode: "closed"`
+- 조회는 암호문이 아니라 해시(`to_hash`, `from_hash`) 기반
+
+관련 문서:
+
+- [`docs/security/field-crypto-basics_ko.md`](./docs/security/field-crypto-basics_ko.md)
+- [`docs/security/field-crypto-v1.md`](./docs/security/field-crypto-v1.md)
+- [`docs/migration/field-crypto-migration.md`](./docs/migration/field-crypto-migration.md)
+- [`docs/compliance/kr-b2b-retention.md`](./docs/compliance/kr-b2b-retention.md)
+
+보안 용어가 낯설다면 아래 순서로 먼저 읽는 것을 권장합니다:
+
+- Astro docs(국문): [`/guides/security/glossary/`](https://k-msg.and.guide/guides/security/glossary/) -> [`/guides/security/recipes/`](https://k-msg.and.guide/guides/security/recipes/)
+- Astro docs(영문): [`/en/guides/security/glossary/`](https://k-msg.and.guide/en/guides/security/glossary/) -> [`/en/guides/security/recipes/`](https://k-msg.and.guide/en/guides/security/recipes/)
+
 ## 프로젝트 로드맵
 
 향후 개발 방향은 구현 상태 기반 로드맵을 기준으로 진행합니다:
