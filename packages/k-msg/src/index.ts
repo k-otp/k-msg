@@ -4,6 +4,7 @@
  */
 
 export {
+  ErrorUtils,
   fail,
   KMsgError,
   KMsgErrorCode,

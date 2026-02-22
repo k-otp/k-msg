@@ -13,6 +13,7 @@ describe("k-msg package exports", () => {
     expect("createDeliveryTrackingHooks" in facade).toBe(false);
     expect(typeof facade.KMsgError).toBe("function");
     expect(typeof facade.KMsgErrorCode).toBe("object");
+    expect(typeof facade.ErrorUtils).toBe("object");
     expect(typeof facade.ok).toBe("function");
     expect(typeof facade.fail).toBe("function");
   });
