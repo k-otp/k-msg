@@ -25,6 +25,12 @@ export interface FieldCryptoKeyContext {
   requestId?: string;
 }
 
+export interface KeySetState {
+  activeKid: string;
+  decryptKids?: readonly string[];
+  refreshedAt?: number;
+}
+
 export interface KeyResolver {
   resolveEncryptKey(
     context: FieldCryptoKeyContext,
