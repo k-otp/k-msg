@@ -32,6 +32,7 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   trackingTableName?: string;
   trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
   queueTableName?: string;
   includeIndexes?: boolean;
@@ -42,6 +43,7 @@ export interface InitializeCloudflareSqlSchemaOptions {
   trackingTableName?: string;
   trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
   queueTableName?: string;
   includeIndexes?: boolean;
@@ -91,10 +93,13 @@ function toSchemaTarget(
 function buildDeliveryTrackingSchemaStatements(
   options: BuildDeliveryTrackingSchemaSqlOptions,
 ): SchemaStatements {
+  const trackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
+
   const spec = getDeliveryTrackingSchemaSpec({
     tableName: options.tableName,
     columnMap: options.columnMap,
-    typeStrategy: options.typeStrategy,
+    typeStrategy: trackingTypeStrategy,
     storeRaw: options.storeRaw,
   });
 
@@ -324,6 +329,8 @@ export function buildJobQueueSchemaSql(
 export function buildCloudflareSqlSchemaSql(
   options: BuildCloudflareSqlSchemaSqlOptions,
 ): string {
+  const resolvedTrackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
   const target = toSchemaTarget(options.target);
   const includeIndexes = options.includeIndexes ?? true;
   const schemas: SchemaStatements[] = [];
@@ -334,7 +341,7 @@ export function buildCloudflareSqlSchemaSql(
         dialect: options.dialect,
         tableName: options.trackingTableName,
         columnMap: options.trackingColumnMap,
-        typeStrategy: options.trackingTypeStrategy,
+        typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
         includeIndexes,
       }),
@@ -362,6 +369,8 @@ export async function initializeCloudflareSqlSchema(
   client: CloudflareSqlClient,
   options: InitializeCloudflareSqlSchemaOptions = {},
 ): Promise<void> {
+  const resolvedTrackingTypeStrategy =
+    options.typeStrategy ?? options.trackingTypeStrategy;
   const target = toSchemaTarget(options.target);
   const includeIndexes = options.includeIndexes ?? true;
 
@@ -372,7 +381,7 @@ export async function initializeCloudflareSqlSchema(
         dialect: client.dialect,
         tableName: options.trackingTableName,
         columnMap: options.trackingColumnMap,
-        typeStrategy: options.trackingTypeStrategy,
+        typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
         includeIndexes,
       }),
