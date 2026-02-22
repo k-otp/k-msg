@@ -1,4 +1,10 @@
-import type { FieldCryptoConfig, FieldCryptoMetricEvent } from "@k-msg/core";
+import type {
+  FieldCryptoCircuitState,
+  FieldCryptoConfig,
+  FieldCryptoControlSignalEvent,
+  FieldCryptoMetricEvent,
+  MaybePromise,
+} from "@k-msg/core";
 import type { TrackingRecord } from "./types";
 
 export type DeliveryTrackingRecordOrderBy = "requestedAt" | "statusUpdatedAt";
@@ -69,6 +75,50 @@ export interface DeliveryTrackingFieldCryptoOptions {
       store: "sql" | "object" | "memory";
       tableName?: string;
     },
+  ) => void | Promise<void>;
+  controlSignal?: DeliveryTrackingFieldCryptoControlSignalOptions;
+}
+
+export interface DeliveryTrackingCryptoOperationContext {
+  operation: "encrypt" | "decrypt" | "hash";
+  tenantId?: string;
+  providerId?: string;
+  kid?: string;
+  tableName?: string;
+  store: "sql" | "object" | "memory";
+  messageId?: string;
+}
+
+export interface DeliveryTrackingCryptoController {
+  beforeOperation?(
+    context: DeliveryTrackingCryptoOperationContext,
+  ): MaybePromise<{
+    allowed: boolean;
+    state: FieldCryptoCircuitState;
+  }>;
+  onSuccess?(
+    context: DeliveryTrackingCryptoOperationContext,
+  ): MaybePromise<void>;
+  onFailure?(
+    context: DeliveryTrackingCryptoOperationContext & {
+      error: unknown;
+      errorClass?: string;
+    },
+  ): MaybePromise<void>;
+}
+
+export interface DeliveryTrackingFieldCryptoControlSignalOptions {
+  enabled?: boolean;
+  scopeBy?: "tenant_provider_kid" | "tenant_provider";
+  failureThreshold?: number;
+  windowMs?: number;
+  cooldownMs?: number;
+  controller?: DeliveryTrackingCryptoController;
+  onStateChange?: (
+    event: FieldCryptoControlSignalEvent,
+  ) => void | Promise<void>;
+  runbookTrigger?: (
+    event: FieldCryptoControlSignalEvent,
   ) => void | Promise<void>;
 }
 

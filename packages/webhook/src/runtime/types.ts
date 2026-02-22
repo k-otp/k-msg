@@ -1,3 +1,4 @@
+import type { FieldCryptoConfig } from "@k-msg/core";
 import type { HttpClient } from "../services/webhook.dispatcher";
 import type {
   WebhookConfig,
@@ -39,6 +40,12 @@ export interface WebhookRuntimeSecurityOptions {
   allowHttpForLocalhost?: boolean;
 }
 
+export interface WebhookRuntimeFieldCryptoOptions {
+  tenantId?: string;
+  endpoint?: FieldCryptoConfig;
+  delivery?: FieldCryptoConfig;
+}
+
 export type WebhookEndpointInput = Omit<
   WebhookEndpoint,
   "id" | "createdAt" | "updatedAt" | "status"
@@ -52,6 +59,7 @@ export interface WebhookRuntimeConfig {
   persistence?: WebhookPersistence;
   endpointStore?: WebhookEndpointStore;
   deliveryStore?: WebhookDeliveryStore;
+  fieldCrypto?: WebhookRuntimeFieldCryptoOptions;
   httpClient?: HttpClient;
   security?: WebhookRuntimeSecurityOptions;
   autoStart?: boolean;

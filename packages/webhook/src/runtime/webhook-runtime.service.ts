@@ -1,5 +1,10 @@
 import { logger } from "@k-msg/core";
 import {
+  validateWebhookFieldCryptoOptions,
+  wrapWebhookDeliveryStoreWithFieldCrypto,
+  wrapWebhookEndpointStoreWithFieldCrypto,
+} from "../crypto/field-crypto";
+import {
   type HttpClient,
   WebhookDispatcher,
 } from "../services/webhook.dispatcher";
@@ -74,8 +79,15 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
     const persistence = this.resolvePersistence(config);
     this.persistence = persistence;
-    this.endpointStore = persistence.endpointStore;
-    this.deliveryStore = persistence.deliveryStore;
+    validateWebhookFieldCryptoOptions(config.fieldCrypto);
+    this.endpointStore = wrapWebhookEndpointStoreWithFieldCrypto(
+      persistence.endpointStore,
+      config.fieldCrypto,
+    );
+    this.deliveryStore = wrapWebhookDeliveryStoreWithFieldCrypto(
+      persistence.deliveryStore,
+      config.fieldCrypto,
+    );
 
     const autoStart = config.autoStart ?? true;
     if (autoStart) {
