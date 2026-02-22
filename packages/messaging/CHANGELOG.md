@@ -1,5 +1,23 @@
 # @k-msg/messaging
 
+## 0.21.0 — 2026-02-22
+
+### Minor changes
+
+- [47f10ed](https://github.com/k-otp/k-msg/commit/47f10ed37595617a4b9019994670dfb888212d6f) Improve delivery-tracking SQL schema flexibility and privacy defaults.
+  
+  - Keep default tracking table as `kmsg_delivery_tracking`, with additive schema options:
+    `tableName`, `columnMap`, and `typeStrategy`.
+  - Add `storeRaw` option across SQL tracking paths (Cloudflare/D1/Drizzle/Hyperdrive/Bun SQL/SQLite).
+  - Change SQL default to `storeRaw: false` so provider raw payload is not persisted unless explicitly enabled.
+  - Expose `getDeliveryTrackingSchemaSpec()` for SSOT-style schema sync tooling.
+  - Add tests for schema rendering and store parity with `storeRaw` on/off.
+  - Add docs sync guard (`scripts/docs/sync-tracking-schema-docs.ts`) and refresh messaging/analytics/example docs. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.21.0, template@0.21.0
+
 ## 0.20.0 — 2026-02-21
 
 ### Minor changes
