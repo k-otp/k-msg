@@ -131,6 +131,7 @@ Required values by provider/channel:
 - `k-msg alimtalk preflight|send`
 - `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
 - `k-msg db schema print|generate`
+- `k-msg db tracking migrate plan|apply|status|retry`
 - `k-msg kakao channel binding list|resolve|set|delete`
 - `k-msg kakao channel api categories|list|auth|add`
 - `k-msg kakao template list|get|create|update|delete|request`
@@ -174,6 +175,23 @@ Flags:
   - `--drizzle-file <name>` default `kmsg.schema.ts`
   - `--sql-file <name>` default `kmsg.schema.sql`
   - `--force` default `false` (without it, generation fails if file exists)
+
+## Tracking migration orchestrator
+
+Field crypto migration commands are designed for resumable legacy->secure transitions.
+
+```bash
+k-msg db tracking migrate plan --sqlite-file ./local.db
+k-msg db tracking migrate apply --sqlite-file ./local.db
+k-msg db tracking migrate status --sqlite-file ./local.db
+k-msg db tracking migrate retry --sqlite-file ./local.db
+```
+
+Operational notes:
+
+- state is persisted in DB meta tables plus local snapshots under `.kmsg/migrations`
+- `retry` only replays failed chunks
+- use `status` before changing rollout flags (`compatPlainColumns`)
 
 ## Recommended AlimTalk flow
 

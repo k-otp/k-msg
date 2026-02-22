@@ -33,3 +33,6 @@ Before this runbook, read `./field-crypto-basics.md` for plain-language context.
 
 - Basics: `./field-crypto-basics.md`
 - Spec: `./field-crypto-v1.md`
+- Key rotation: `./key-rotation-playbook.md`
+- Migration CLI: `./migration-cli-runbook.md`
+- Control signals: `./crypto-control-signals.md`
