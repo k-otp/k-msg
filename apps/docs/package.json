@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.0",
     "@astrojs/starlight": "^0.37.6",
+    "@microsoft/clarity": "^1.0.2",
     "astro": "^5.14.0",
     "starlight-typedoc": "^0.21.5",
     "starlight-versions": "^0.6.0"
