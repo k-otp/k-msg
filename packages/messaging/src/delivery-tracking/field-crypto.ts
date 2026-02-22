@@ -1,4 +1,5 @@
 import {
+  assertFieldCryptoConfig,
   createDefaultMasker,
   type FieldCryptoConfig,
   FieldCryptoError,
@@ -8,6 +9,7 @@ import {
   type FieldCryptoOpenFallback,
   type FieldMode,
   normalizePhoneForHash,
+  resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
 import type {
@@ -49,6 +51,7 @@ interface ScalarProtection {
 const DEFAULT_TO_MODE: FieldMode = "encrypt+hash";
 const DEFAULT_FROM_MODE: FieldMode = "encrypt+hash";
 const DEFAULT_METADATA_MODE: FieldMode = "plain";
+const validatedConfigs = new WeakSet<FieldCryptoConfig>();
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -63,6 +66,10 @@ function resolveConfig(
 ): FieldCryptoConfig | undefined {
   if (!options?.config) return undefined;
   if (options.config.enabled === false) return undefined;
+  if (!validatedConfigs.has(options.config)) {
+    assertFieldCryptoConfig(options.config);
+    validatedConfigs.add(options.config);
+  }
   return options.config;
 }
 
@@ -74,22 +81,6 @@ function resolveOpenFallback(
   config: FieldCryptoConfig,
 ): FieldCryptoOpenFallback {
   return config.openFallback ?? "masked";
-}
-
-function resolveFieldMode(
-  config: FieldCryptoConfig,
-  path: string,
-  fallback: FieldMode,
-): FieldMode {
-  const exact = config.fields[path];
-  if (exact) return exact;
-
-  if (path.startsWith("metadata.")) {
-    const wildcard = config.fields["metadata.*"];
-    if (wildcard) return wildcard;
-  }
-
-  return fallback;
 }
 
 function shouldEncrypt(mode: FieldMode): boolean {
@@ -498,6 +489,8 @@ export async function applyTrackingCryptoOnWrite(
         value: 1,
         tags: {
           operation: "encrypt",
+          failMode,
+          fallback,
         },
       },
       context.tableName,
@@ -666,6 +659,8 @@ export async function restoreTrackingCryptoOnRead(
         value: 1,
         tags: {
           operation: "decrypt",
+          failMode,
+          fallback,
         },
       },
       context.tableName,

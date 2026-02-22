@@ -1,4 +1,9 @@
-import { createDefaultMasker, type FieldCryptoConfig } from "@k-msg/core";
+import {
+  assertFieldCryptoConfig,
+  createDefaultMasker,
+  FieldCryptoError,
+  type FieldCryptoConfig,
+} from "@k-msg/core";
 import type {
   WebhookDelivery,
   WebhookEndpoint,
@@ -25,8 +30,18 @@ function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
   const fallback = config.openFallback ?? "masked";
   if (fallback === "plaintext") {
     if (!config.unsafeAllowPlaintextStorage) {
-      throw new Error(
+      throw new FieldCryptoError(
+        "policy",
         "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
+        {
+          rule: "fieldCrypto.fail_open.plaintext_guard",
+          path: "openFallback",
+        },
+        {
+          fieldPath: "openFallback",
+          failMode: "open",
+          openFallback: "plaintext",
+        },
       );
     }
     return plaintext;
@@ -131,6 +146,7 @@ export class WebhookRegistry {
 
   constructor(options: WebhookRegistryOptions = {}) {
     this.options = options;
+    this.validateCryptoOptions(this.options.fieldCrypto);
   }
 
   async addEndpoint(endpoint: WebhookEndpoint): Promise<void> {
@@ -301,5 +317,19 @@ export class WebhookRegistry {
       ...delivery,
       payload: payload ?? delivery.payload,
     };
+  }
+
+  private validateCryptoOptions(
+    options: WebhookRegistryCryptoOptions | undefined,
+  ): void {
+    if (!options) return;
+
+    if (options.endpoint) {
+      assertFieldCryptoConfig(options.endpoint);
+    }
+
+    if (options.delivery) {
+      assertFieldCryptoConfig(options.delivery);
+    }
   }
 }
