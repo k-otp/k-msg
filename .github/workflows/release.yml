@@ -119,7 +119,7 @@ jobs:
           project_name="${CF_PAGES_PROJECT_NAME}"
           api_base="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
 
-          project_resp="$(curl -fsS \
+          project_resp="$(curl -sS \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             "${api_base}/${project_name}")"
 
@@ -128,7 +128,7 @@ jobs:
             err_codes="$(jq -r '.errors[]?.code // empty' <<<"${project_resp}" | paste -sd ',' -)"
             err_msgs="$(jq -r '.errors[]?.message // empty' <<<"${project_resp}" | paste -sd ' | ' -)"
 
-            list_resp="$(curl -fsS \
+            list_resp="$(curl -sS \
               -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
               "${api_base}?per_page=100")"
             known_projects="$(jq -r '.result[]?.name // empty' <<<"${list_resp}" | head -n 20 | paste -sd ',' -)"
