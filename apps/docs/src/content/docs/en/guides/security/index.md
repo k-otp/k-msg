@@ -6,9 +6,13 @@ description: "k-msg field crypto(v1) security and compliance baseline"
 
 This section covers encryption-at-write, hash-based lookup, key rotation, failure modes, and retention rules from an operator-focused perspective.
 
+Question this page answers: In what order should non-security users read the `fieldCrypto` docs?
+
 ## Documents
 
+- [Security Glossary](./glossary): plain-language terms
 - [Field Crypto v1](./field-crypto-v1): crypto model, AAD, failure handling, and metrics
+- [Security Recipes](./recipes): safe copy-paste configuration patterns
 - [KR B2B Retention](./kr-b2b-retention): baseline legal retention and tenant-contract priority
 
 ## Core principles

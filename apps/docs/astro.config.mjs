@@ -359,7 +359,9 @@ export default defineConfig({
               },
               items: [
                 "guides/security",
+                "guides/security/glossary",
                 "guides/security/field-crypto-v1",
+                "guides/security/recipes",
                 "guides/security/kr-b2b-retention",
               ],
             },

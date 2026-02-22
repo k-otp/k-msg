@@ -1,5 +1,9 @@
 # Field Crypto Runbook
 
+Question this page answers: How should operators respond when field crypto fails in production?
+
+Before this runbook, read `./field-crypto-basics.md` for plain-language context.
+
 ## Alarm: `crypto_fail_count` spike
 
 1. Check recent deploy/config changes (`kid`, provider key, AAD fields).
@@ -24,3 +28,8 @@
 
 - Do not log plaintext phone numbers or payload secrets.
 - Log masked values and `kid`, `error class`, `request id`.
+
+## Companion docs
+
+- Basics: `./field-crypto-basics.md`
+- Spec: `./field-crypto-v1.md`

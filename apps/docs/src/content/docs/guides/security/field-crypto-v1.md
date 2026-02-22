@@ -4,6 +4,10 @@ description: "k-msg 보안감사 대응 암호화 정책(v1) 요약"
 ---
 `fieldCrypto`는 `@k-msg/core`, `@k-msg/messaging`, `@k-msg/webhook`에서 공통으로 사용하는 필드 단위 암호화 계층입니다.
 
+이 문서가 답하는 질문: 운영자가 알아야 하는 `fieldCrypto` 기술 정책의 핵심은 무엇인가?
+
+용어가 익숙하지 않다면 먼저 [보안 용어집](./glossary)과 [보안 레시피](./recipes)를 확인하세요.
+
 ## 지원 모드
 
 - `plain`: 평문 저장 (기본 정책에서는 비권장)
