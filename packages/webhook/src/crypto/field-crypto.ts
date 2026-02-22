@@ -70,7 +70,9 @@ async function protectValue(
       messageId: input.aad.messageId,
       providerId: input.aad.providerId,
     };
-    const key = keyResolver ? await keyResolver.resolveEncryptKey(keyContext) : undefined;
+    const key = keyResolver
+      ? await keyResolver.resolveEncryptKey(keyContext)
+      : undefined;
     const kid = normalizeString(key?.kid);
     const encrypted = await config.provider.encrypt({
       value,

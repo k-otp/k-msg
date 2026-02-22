@@ -111,7 +111,9 @@ export interface CryptoCircuitControllerOptions {
   ) => void | Promise<void>;
 }
 
-export class CryptoCircuitController implements DeliveryTrackingCryptoController {
+export class CryptoCircuitController
+  implements DeliveryTrackingCryptoController
+{
   private readonly options: Required<
     Pick<
       CryptoCircuitControllerOptions,
@@ -217,7 +219,9 @@ export class CryptoCircuitController implements DeliveryTrackingCryptoController
 
     const now = nowMs();
     const cutoff = now - this.options.windowMs;
-    current.failures = current.failures.filter((timestamp) => timestamp >= cutoff);
+    current.failures = current.failures.filter(
+      (timestamp) => timestamp >= cutoff,
+    );
     current.failures.push(now);
     current.lastErrorClass = errorClass;
 
@@ -242,7 +246,9 @@ export class CryptoCircuitController implements DeliveryTrackingCryptoController
     this.stateByScope.set(scope, current);
   }
 
-  private async emitSignal(event: FieldCryptoControlSignalEvent): Promise<void> {
+  private async emitSignal(
+    event: FieldCryptoControlSignalEvent,
+  ): Promise<void> {
     await this.options.onStateChange?.(event);
     if (event.state === "open") {
       await this.options.runbookTrigger?.(event);

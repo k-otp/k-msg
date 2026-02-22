@@ -8,8 +8,8 @@ import {
   type WebhookEvent,
   WebhookEventType,
 } from "../types/webhook.types";
-import { WebhookRuntimeService } from "./webhook-runtime.service";
 import type { WebhookDeliveryStore, WebhookEndpointStore } from "./types";
+import { WebhookRuntimeService } from "./webhook-runtime.service";
 
 class RecordingHttpClient implements HttpClient {
   async fetch(): Promise<Response> {
