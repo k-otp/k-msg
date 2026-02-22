@@ -1,5 +1,16 @@
 # @k-msg/messaging
 
+## 0.21.1 — 2026-02-22
+
+### Patch changes
+
+- [ae66efd](https://github.com/k-otp/k-msg/commit/ae66efd3dc9a5e39a7bdd9ac460cc5e9aee14ee3) Fix delivery tracking schema option typing compatibility.
+  
+  - Accept legacy `trackingTypeStrategy` input in schema/config paths that previously switched to `typeStrategy`.
+  - Ensure `createD1DeliveryTrackingStore`, `createDrizzleDeliveryTrackingStore`, `initializeCloudflareSqlSchema`, and drizzle SQL render helpers honor both option keys.
+  - This preserves backward compatibility for existing consumers while keeping the new `typeStrategy` API. — Thanks @imjlk!
+- Updated dependencies: core@0.21.1, template@0.21.1
+
 ## 0.21.0 — 2026-02-22
 
 ### Minor changes
