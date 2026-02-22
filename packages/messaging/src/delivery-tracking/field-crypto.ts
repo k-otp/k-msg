@@ -141,17 +141,41 @@ async function resolveEncryptKid(
   return resolved.kid.trim();
 }
 
+function extractEnvelopeKid(ciphertext: unknown): string | undefined {
+  if (typeof ciphertext !== "string" || ciphertext.length === 0) {
+    return undefined;
+  }
+  if (ciphertext[0] !== "{") return undefined;
+
+  try {
+    const parsed = JSON.parse(ciphertext) as { kid?: unknown };
+    if (typeof parsed.kid !== "string") return undefined;
+    const normalized = parsed.kid.trim();
+    return normalized.length > 0 ? normalized : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function resolveDecryptKids(
   config: FieldCryptoConfig,
   context: FieldCryptoKeyContext & { ciphertext?: string },
 ): Promise<readonly string[] | undefined> {
-  if (!config.keyResolver?.resolveDecryptKeys) return undefined;
+  const envelopeKid = extractEnvelopeKid(context.ciphertext);
+  if (!config.keyResolver?.resolveDecryptKeys) {
+    return envelopeKid ? [envelopeKid] : undefined;
+  }
+
   const resolved = await config.keyResolver.resolveDecryptKeys(context);
-  if (!Array.isArray(resolved)) return undefined;
-  const normalized = resolved
+  const normalized = (Array.isArray(resolved) ? resolved : [])
     .filter((kid): kid is string => typeof kid === "string")
     .map((kid) => kid.trim())
     .filter((kid) => kid.length > 0);
+
+  if (envelopeKid && !normalized.includes(envelopeKid)) {
+    normalized.unshift(envelopeKid);
+  }
+
   return normalized.length > 0 ? normalized : undefined;
 }
 
