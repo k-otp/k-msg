@@ -5,7 +5,7 @@ prev: false
 title: "TrackingError"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L10)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L11)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:10](https://githu
 
 > **code**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L11)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L12)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:11](https://githu
 
 > **message**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L12)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L13)

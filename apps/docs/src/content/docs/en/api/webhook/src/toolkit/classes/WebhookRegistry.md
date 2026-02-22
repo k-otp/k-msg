@@ -5,13 +5,21 @@ prev: false
 title: "WebhookRegistry"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L7)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L142)
 
 ## Constructors
 
 ### Constructor
 
-> **new WebhookRegistry**(): `WebhookRegistry`
+> **new WebhookRegistry**(`options?`): `WebhookRegistry`
+
+Defined in: [packages/webhook/src/services/webhook.registry.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L147)
+
+#### Parameters
+
+##### options?
+
+[`WebhookRegistryOptions`](/api/webhook/src/interfaces/webhookregistryoptions/) = `{}`
 
 #### Returns
 
@@ -23,7 +31,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:7](https://github
 
 > **addDelivery**(`delivery`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L37)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L184)
 
 #### Parameters
 
@@ -41,7 +49,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:37](https://githu
 
 > **addEndpoint**(`endpoint`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L11)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L152)
 
 #### Parameters
 
@@ -59,7 +67,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:11](https://githu
 
 > **getDeliveries**(`endpointId?`, `timeRange?`, `eventType?`, `status?`, `limit?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L41)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L188)
 
 #### Parameters
 
@@ -99,7 +107,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:41](https://githu
 
 > **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L29)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L170)
 
 #### Parameters
 
@@ -117,7 +125,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:29](https://githu
 
 > **getFailedDeliveries**(`endpointId?`, `eventType?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L73)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:224](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L224)
 
 #### Parameters
 
@@ -139,7 +147,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:73](https://githu
 
 > **listEndpoints**(): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L33)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L176)
 
 #### Returns
 
@@ -151,7 +159,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:33](https://githu
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L25)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L166)
 
 #### Parameters
 
@@ -169,7 +177,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:25](https://githu
 
 > **updateEndpoint**(`endpointId`, `endpoint`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L15)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L156)
 
 #### Parameters
 

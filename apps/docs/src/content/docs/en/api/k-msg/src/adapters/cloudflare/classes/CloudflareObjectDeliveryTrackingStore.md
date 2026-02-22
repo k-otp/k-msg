@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectDeliveryTrackingStore"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L108)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L148)
 
 ## Implements
 
@@ -15,9 +15,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 ### Constructor
 
-> **new CloudflareObjectDeliveryTrackingStore**(`storage`, `keyPrefix?`): `CloudflareObjectDeliveryTrackingStore`
+> **new CloudflareObjectDeliveryTrackingStore**(`storage`, `options?`): `CloudflareObjectDeliveryTrackingStore`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L111)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L157)
 
 #### Parameters
 
@@ -25,9 +25,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 [`CloudflareObjectStorage`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
-##### keyPrefix?
+##### options?
 
-`string` = `"kmsg/delivery-tracking"`
+`string` | `CloudflareObjectDeliveryTrackingStoreOptions`
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:212](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L212)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:301](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L301)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ readonly [`DeliveryTrackingCountByField`](/api/messaging/src/tracking/type-alias
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:197](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L197)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:285](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L285)
 
 #### Parameters
 
@@ -87,7 +87,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **get**(`messageId`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L128)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L215)
 
 #### Parameters
 
@@ -109,7 +109,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L116)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L203)
 
 #### Returns
 
@@ -125,7 +125,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L134)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:221](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L221)
 
 #### Parameters
 
@@ -151,7 +151,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L157)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L244)
 
 #### Parameters
 
@@ -173,7 +173,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:254](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L254)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:344](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L344)
 
 #### Parameters
 
@@ -199,7 +199,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 > **upsert**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L120)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-delivery-tracking.store.ts#L207)
 
 #### Parameters
 

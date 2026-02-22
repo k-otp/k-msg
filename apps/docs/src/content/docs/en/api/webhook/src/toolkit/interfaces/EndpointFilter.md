@@ -5,7 +5,7 @@ prev: false
 title: "EndpointFilter"
 ---
 
-Defined in: [packages/webhook/src/registry/types.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L8)
+Defined in: [packages/webhook/src/registry/types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L9)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/registry/types.ts:8](https://github.com/k-otp/
 
 > `optional` **channelId**: `string`[]
 
-Defined in: [packages/webhook/src/registry/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L12)
+Defined in: [packages/webhook/src/registry/types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L13)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/registry/types.ts:12](https://github.com/k-otp
 
 > `optional` **createdAfter**: `Date`
 
-Defined in: [packages/webhook/src/registry/types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L13)
+Defined in: [packages/webhook/src/registry/types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L14)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/registry/types.ts:13](https://github.com/k-otp
 
 > `optional` **createdBefore**: `Date`
 
-Defined in: [packages/webhook/src/registry/types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L14)
+Defined in: [packages/webhook/src/registry/types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L15)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/webhook/src/registry/types.ts:14](https://github.com/k-otp
 
 > `optional` **events**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)[]
 
-Defined in: [packages/webhook/src/registry/types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L10)
+Defined in: [packages/webhook/src/registry/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L11)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/registry/types.ts:10](https://github.com/k-otp
 
 > `optional` **lastTriggeredAfter**: `Date`
 
-Defined in: [packages/webhook/src/registry/types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L15)
+Defined in: [packages/webhook/src/registry/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L16)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/webhook/src/registry/types.ts:15](https://github.com/k-otp
 
 > `optional` **lastTriggeredBefore**: `Date`
 
-Defined in: [packages/webhook/src/registry/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L16)
+Defined in: [packages/webhook/src/registry/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L17)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/webhook/src/registry/types.ts:16](https://github.com/k-otp
 
 > `optional` **providerId**: `string`[]
 
-Defined in: [packages/webhook/src/registry/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L11)
+Defined in: [packages/webhook/src/registry/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L12)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: [packages/webhook/src/registry/types.ts:11](https://github.com/k-otp
 
 > `optional` **status**: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`
 
-Defined in: [packages/webhook/src/registry/types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L9)
+Defined in: [packages/webhook/src/registry/types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L10)

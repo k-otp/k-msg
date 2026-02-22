@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingListOptions"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L20)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L23)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](htt
 
 > `optional` **from**: `string` \| `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L13)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L15)
 
 #### Inherited from
 
@@ -25,11 +25,23 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:13](htt
 
 ***
 
+### fromHash?
+
+> `optional` **fromHash**: `string` \| `string`[]
+
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L16)
+
+#### Inherited from
+
+[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`fromHash`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#fromhash)
+
+***
+
 ### limit
 
 > **limit**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L22)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L25)
 
 ***
 
@@ -37,7 +49,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:22](htt
 
 > `optional` **messageId**: `string` \| `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L7)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L8)
 
 #### Inherited from
 
@@ -49,7 +61,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:7](http
 
 > `optional` **offset**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L23)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L26)
 
 ***
 
@@ -57,7 +69,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](htt
 
 > `optional` **orderBy**: `DeliveryTrackingRecordOrderBy`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L24)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L27)
 
 ***
 
@@ -65,7 +77,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](htt
 
 > `optional` **orderDirection**: `DeliveryTrackingRecordOrderDirection`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L25)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L28)
 
 ***
 
@@ -73,7 +85,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](htt
 
 > `optional` **providerId**: `string` \| `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L8)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L9)
 
 #### Inherited from
 
@@ -85,7 +97,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:8](http
 
 > `optional` **providerMessageId**: `string` \| `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L9)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L10)
 
 #### Inherited from
 
@@ -97,7 +109,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:9](http
 
 > `optional` **requestedAtFrom**: `Date`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L14)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L17)
 
 #### Inherited from
 
@@ -109,7 +121,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](htt
 
 > `optional` **requestedAtTo**: `Date`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L15)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L18)
 
 #### Inherited from
 
@@ -121,7 +133,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](htt
 
 > `optional` **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L11)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L12)
 
 #### Inherited from
 
@@ -133,7 +145,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:11](htt
 
 > `optional` **statusUpdatedAtFrom**: `Date`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L16)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L19)
 
 #### Inherited from
 
@@ -145,7 +157,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](htt
 
 > `optional` **statusUpdatedAtTo**: `Date`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L17)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L20)
 
 #### Inherited from
 
@@ -157,7 +169,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](htt
 
 > `optional` **to**: `string` \| `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L12)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L13)
 
 #### Inherited from
 
@@ -165,11 +177,23 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:12](htt
 
 ***
 
+### toHash?
+
+> `optional` **toHash**: `string` \| `string`[]
+
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L14)
+
+#### Inherited from
+
+[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`toHash`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#tohash)
+
+***
+
 ### type?
 
 > `optional` **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L10)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L11)
 
 #### Inherited from
 

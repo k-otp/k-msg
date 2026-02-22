@@ -42,9 +42,11 @@ describe("field crypto policy", () => {
     );
 
     expect(result.valid).toBe(false);
-    expect(result.issues.some((issue) => issue.rule === "fieldCrypto.fields.non_empty")).toBe(
-      true,
-    );
+    expect(
+      result.issues.some(
+        (issue) => issue.rule === "fieldCrypto.fields.non_empty",
+      ),
+    ).toBe(true);
   });
 
   test("assertFieldCryptoConfig fails for fail-open plaintext without unsafe flag", () => {
@@ -92,8 +94,6 @@ describe("field crypto policy", () => {
   test("normalizePhoneForHash keeps leading plus and strips format chars", () => {
     expect(normalizePhoneForHash("010-1234-5678")).toBe("01012345678");
     expect(normalizePhoneForHash("010 1234 5678")).toBe("01012345678");
-    expect(normalizePhoneForHash("  +82 10-1234-5678 ")).toBe(
-      "+821012345678",
-    );
+    expect(normalizePhoneForHash("  +82 10-1234-5678 ")).toBe("+821012345678");
   });
 });

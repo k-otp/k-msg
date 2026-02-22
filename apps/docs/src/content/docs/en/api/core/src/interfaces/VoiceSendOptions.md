@@ -31,7 +31,7 @@ Defined in: [packages/core/src/types/message.ts:161](https://github.com/k-otp/k-
 
 ### replyRange?
 
-> `optional` **replyRange**: `2` \| `1` \| `7` \| `3` \| `4` \| `5` \| `6` \| `8` \| `9`
+> `optional` **replyRange**: `2` \| `1` \| `4` \| `3` \| `5` \| `7` \| `6` \| `8` \| `9`
 
 Defined in: [packages/core/src/types/message.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L163)
 

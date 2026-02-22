@@ -54,16 +54,13 @@ describe("delivery tracking field crypto policy", () => {
 
     expect(
       () =>
-        new CloudflareObjectDeliveryTrackingStore(
-          {} as never,
-          {
-            secureMode: true,
-            compatPlainColumns: false,
-            fieldCrypto: {
-              config: badConfig,
-            },
+        new CloudflareObjectDeliveryTrackingStore({} as never, {
+          secureMode: true,
+          compatPlainColumns: false,
+          fieldCrypto: {
+            config: badConfig,
           },
-        ),
+        }),
     ).toThrow("secure mode requires non-plain policy for `to`");
   });
 
@@ -84,7 +81,9 @@ describe("delivery tracking field crypto policy", () => {
             },
           },
         ),
-    ).toThrow("fieldCrypto config is required when fieldCryptoSchema is enabled");
+    ).toThrow(
+      "fieldCrypto config is required when fieldCryptoSchema is enabled",
+    );
   });
 
   test("fail-open path emits degraded state and metric tags", async () => {
@@ -121,7 +120,9 @@ describe("delivery tracking field crypto policy", () => {
     );
 
     expect(columns.cryptoState).toBe("degraded");
-    const failEvent = events.find((event) => event.name === "crypto_fail_count");
+    const failEvent = events.find(
+      (event) => event.name === "crypto_fail_count",
+    );
     expect(failEvent).toBeTruthy();
     expect((failEvent?.tags as Record<string, unknown>).operation).toBe(
       "encrypt",
