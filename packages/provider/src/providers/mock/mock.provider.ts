@@ -20,6 +20,43 @@ import {
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../../onboarding/specs";
 
+type MockSendScenarioStep = {
+  outcome: "success" | "failure" | "timeout" | "delay";
+  code?: KMsgErrorCode | string;
+  message?: string;
+  providerErrorCode?: string;
+  providerErrorText?: string;
+  httpStatus?: number;
+  retryAfterMs?: number;
+  causeChain?: unknown[];
+  durationMs?: number;
+};
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, Math.max(0, Math.floor(ms)));
+  });
+
+const normalizeMockErrorCode = (code: MockSendScenarioStep["code"]): KMsgErrorCode => {
+  if (
+    code === KMsgErrorCode.INVALID_REQUEST ||
+    code === KMsgErrorCode.AUTHENTICATION_FAILED ||
+    code === KMsgErrorCode.INSUFFICIENT_BALANCE ||
+    code === KMsgErrorCode.TEMPLATE_NOT_FOUND ||
+    code === KMsgErrorCode.RATE_LIMIT_EXCEEDED ||
+    code === KMsgErrorCode.NETWORK_ERROR ||
+    code === KMsgErrorCode.NETWORK_TIMEOUT ||
+    code === KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE ||
+    code === KMsgErrorCode.PROVIDER_ERROR ||
+    code === KMsgErrorCode.MESSAGE_SEND_FAILED ||
+    code === KMsgErrorCode.UNKNOWN_ERROR
+  ) {
+    return code;
+  }
+
+  return KMsgErrorCode.PROVIDER_ERROR;
+};
+
 export class MockProvider
   implements
     Provider,
@@ -48,6 +85,8 @@ export class MockProvider
 
   public calls: SendOptions[] = [];
   private failureCount = 0;
+  private scenario: MockSendScenarioStep[] = [];
+  private scenarioCursor = 0;
   private templates: Map<string, Template> = new Map();
   private templateSeq = 0;
   private channelSeq = 0;
@@ -96,12 +135,53 @@ export class MockProvider
   async send(params: SendOptions): Promise<Result<SendResult, KMsgError>> {
     this.calls.push(params);
 
-    if (this.failureCount > 0) {
-      this.failureCount--;
+    let outcome = this.nextScenarioOutcome();
+
+    while (outcome.outcome === "delay") {
+      await sleep(outcome.durationMs ?? 0);
+      outcome = this.nextScenarioOutcome();
+    }
+
+    if (outcome.outcome === "timeout") {
+      await sleep(outcome.durationMs ?? 0);
       return fail(
         new KMsgError(
-          KMsgErrorCode.PROVIDER_ERROR,
-          "Mock provider simulated failure",
+          KMsgErrorCode.NETWORK_TIMEOUT,
+          outcome.message ?? "Mock provider simulated timeout",
+          { provider: this.id },
+          {
+            providerErrorCode: outcome.providerErrorCode ?? "TIMEOUT",
+            providerErrorText: outcome.providerErrorText,
+            httpStatus: outcome.httpStatus,
+            retryAfterMs: outcome.retryAfterMs,
+          },
+        ),
+      );
+    }
+
+    if (outcome.outcome === "failure") {
+      const code = normalizeMockErrorCode(outcome.code);
+      return fail(
+        new KMsgError(
+          code,
+          outcome.message ?? "Mock provider simulated failure",
+          { provider: this.id },
+          {
+            providerErrorCode: outcome.providerErrorCode,
+            providerErrorText: outcome.providerErrorText,
+            httpStatus: outcome.httpStatus,
+            retryAfterMs: outcome.retryAfterMs,
+            causeChain: outcome.causeChain,
+          },
+        ),
+      );
+    }
+
+    if (outcome.outcome !== "success") {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.UNKNOWN_ERROR,
+          `Unsupported mock outcome: ${String(outcome.outcome)}`,
           { provider: this.id },
         ),
       );
@@ -133,10 +213,41 @@ export class MockProvider
 
   mockSuccess(): void {
     this.failureCount = 0;
+    this.clearScenario();
   }
 
   mockFailure(count: number): void {
     this.failureCount = count;
+    this.clearScenario();
+  }
+
+  mockScenario(steps: MockSendScenarioStep[]): void {
+    this.scenario = Array.isArray(steps) ? steps.slice() : [];
+    this.scenarioCursor = 0;
+  }
+
+  clearScenario(): void {
+    this.scenario = [];
+    this.scenarioCursor = 0;
+  }
+
+  private nextScenarioOutcome(): MockSendScenarioStep {
+    if (this.scenarioCursor < this.scenario.length) {
+      const next = this.scenario[this.scenarioCursor];
+      this.scenarioCursor += 1;
+      return next;
+    }
+
+    if (this.failureCount > 0) {
+      this.failureCount -= 1;
+      return {
+        outcome: "failure",
+        code: KMsgErrorCode.PROVIDER_ERROR,
+        message: "Mock provider simulated failure",
+      };
+    }
+
+    return { outcome: "success" };
   }
 
   getHistory(): SendOptions[] {

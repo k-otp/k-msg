@@ -16,6 +16,24 @@ export type MessageType =
 
 export type MessageStatus = "PENDING" | "SENT" | "FAILED";
 
+export const KNOWN_MESSAGE_STATUSES: MessageStatus[] = [
+  "PENDING",
+  "SENT",
+  "FAILED",
+];
+
+export const QUEUED_MESSAGE_STATUS: MessageStatus = "PENDING";
+
+export const normalizeMessageStatus = (status: unknown): MessageStatus => {
+  const raw = typeof status === "string" ? status.trim().toUpperCase() : "";
+
+  if (raw === "PENDING" || raw === "SENT" || raw === "FAILED") {
+    return raw;
+  }
+
+  return QUEUED_MESSAGE_STATUS;
+};
+
 export type MessageVariables = Record<
   string,
   string | number | boolean | Date | null | undefined

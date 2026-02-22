@@ -46,4 +46,73 @@ describe("ErrorUtils", () => {
     );
     expect(ErrorUtils.isRetryable(nonRetryableError)).toBe(false);
   });
+
+  test("resolveRetryAfterMs should normalize valid delay and ignore invalid values", () => {
+    const error = new KMsgError(
+      KMsgErrorCode.RATE_LIMIT_EXCEEDED,
+      "Rate limit exceeded",
+      undefined,
+      {
+        retryAfterMs: 3_000,
+      },
+    );
+
+    expect(ErrorUtils.resolveRetryAfterMs(error)).toBe(3000);
+
+    const withInvalid = new KMsgError(
+      KMsgErrorCode.UNKNOWN_ERROR,
+      "No delay",
+      undefined,
+      {
+        retryAfterMs: -1,
+      },
+    );
+
+    expect(ErrorUtils.resolveRetryAfterMs(withInvalid)).toBeUndefined();
+  });
+
+  test("toRetryMetadata should preserve provider and request metadata", () => {
+    const error = new KMsgError(
+      KMsgErrorCode.NETWORK_ERROR,
+      "Downstream timeout",
+      undefined,
+      {
+        providerErrorCode: "ECONNRESET",
+        providerErrorText: "socket hang up",
+        httpStatus: 504,
+        requestId: "req-123",
+        retryAfterMs: 1500,
+        attempt: 2,
+        causeChain: ["first", "second"],
+      },
+    );
+
+    expect(ErrorUtils.toRetryMetadata(error)).toMatchObject({
+      providerErrorCode: "ECONNRESET",
+      providerErrorText: "socket hang up",
+      httpStatus: 504,
+      requestId: "req-123",
+      retryAfterMs: 1500,
+      attempt: 2,
+      causeChain: ["first", "second"],
+    });
+  });
+
+  test("classifyForRetry should preserve provider status classifications", () => {
+    const retryableByStatus = ErrorUtils.classifyForRetry(
+      new KMsgError(KMsgErrorCode.PROVIDER_ERROR, "provider unavailable"),
+    );
+    expect(retryableByStatus).toBe("retryable");
+
+    const nonRetryableByStatus = ErrorUtils.classifyForRetry(
+      new KMsgError(KMsgErrorCode.INVALID_REQUEST, "bad request"),
+    );
+    expect(nonRetryableByStatus).toBe("non_retryable");
+  });
+
+  test("classifyForRetry should fallback to policy for unknown code", () => {
+    const unknownError = { code: "OUT_OF_SKIN", message: "unknown" };
+    expect(ErrorUtils.classifyForRetry(unknownError, { fallback: "retryable" })).toBe("retryable");
+    expect(ErrorUtils.classifyForRetry(unknownError, { fallback: "non_retryable" })).toBe("non_retryable");
+  });
 });

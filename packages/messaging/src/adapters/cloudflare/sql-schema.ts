@@ -3,6 +3,7 @@ import {
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingSchemaOptions,
   type DeliveryTrackingTypeStrategy,
+  type DeliveryTrackingSchemaSpec,
   getDeliveryTrackingSchemaSpec,
   resolveDeliveryTrackingSqlType,
 } from "./delivery-tracking-schema";
@@ -18,6 +19,7 @@ export interface BuildDeliveryTrackingSchemaSqlOptions
   extends DeliveryTrackingSchemaOptions {
   dialect: SqlDialect;
   includeIndexes?: boolean;
+  trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
 }
 
 export interface BuildJobQueueSchemaSqlOptions {
@@ -34,6 +36,7 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
+  trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
   includeIndexes?: boolean;
 }
@@ -45,6 +48,7 @@ export interface InitializeCloudflareSqlSchemaOptions {
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingStoreRaw?: boolean;
+  trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
   includeIndexes?: boolean;
 }
@@ -101,6 +105,8 @@ function buildDeliveryTrackingSchemaStatements(
     columnMap: options.columnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.storeRaw,
+    indexNames: options.indexNames,
+    trackingIndexNames: options.trackingIndexNames,
   });
 
   const includeIndexes = options.includeIndexes ?? true;
@@ -344,6 +350,7 @@ export function buildCloudflareSqlSchemaSql(
         typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
         includeIndexes,
+        trackingIndexNames: options.trackingIndexNames,
       }),
     );
   }
@@ -384,6 +391,7 @@ export async function initializeCloudflareSqlSchema(
         typeStrategy: resolvedTrackingTypeStrategy,
         storeRaw: options.trackingStoreRaw,
         includeIndexes,
+        trackingIndexNames: options.trackingIndexNames,
       }),
     );
   }

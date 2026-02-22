@@ -63,12 +63,16 @@ export interface DeliveryTrackingTypeStrategy {
   json?: DeliveryTrackingJsonType;
 }
 
-export interface ResolvedDeliveryTrackingTypeStrategy {
-  messageId: DeliveryTrackingMessageIdType;
-  id: DeliveryTrackingIdType;
-  shortText: DeliveryTrackingShortTextType;
-  timestamp: DeliveryTrackingTimestampType;
-  json: DeliveryTrackingJsonType;
+export interface DeliveryTrackingSchemaSpec {
+  tableName: string;
+  columnMap: DeliveryTrackingColumnMap;
+  typeStrategy: ResolvedDeliveryTrackingTypeStrategy;
+  storeRaw: boolean;
+  indexNames: {
+    due: string;
+    providerMessage: string;
+    requestedAt: string;
+  };
 }
 
 export interface DeliveryTrackingSchemaOptions {
@@ -80,19 +84,17 @@ export interface DeliveryTrackingSchemaOptions {
    */
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  indexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
+  trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   storeRaw?: boolean;
 }
 
-export interface DeliveryTrackingSchemaSpec {
-  tableName: string;
-  columnMap: DeliveryTrackingColumnMap;
-  typeStrategy: ResolvedDeliveryTrackingTypeStrategy;
-  storeRaw: boolean;
-  indexNames: {
-    due: string;
-    providerMessage: string;
-    requestedAt: string;
-  };
+export interface ResolvedDeliveryTrackingTypeStrategy {
+  messageId: DeliveryTrackingMessageIdType;
+  id: DeliveryTrackingIdType;
+  shortText: DeliveryTrackingShortTextType;
+  timestamp: DeliveryTrackingTimestampType;
+  json: DeliveryTrackingJsonType;
 }
 
 const DEFAULT_COLUMN_MAP: DeliveryTrackingColumnMap = {
@@ -133,7 +135,7 @@ const DEFAULT_INDEX_NAMES: DeliveryTrackingSchemaSpec["indexNames"] = {
   requestedAt: "idx_kmsg_delivery_requested_at",
 };
 
-const COLUMN_ORDER_WITH_RAW: readonly DeliveryTrackingColumnKey[] = [
+export const COLUMN_ORDER_WITH_RAW: readonly DeliveryTrackingColumnKey[] = [
   "messageId",
   "providerId",
   "providerMessageId",
@@ -166,6 +168,11 @@ function normalizeNonEmptyString(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function normalizeString(value: unknown): string | undefined {
+  const trimmed = normalizeNonEmptyString(value);
+  return trimmed?.length ? trimmed : undefined;
+}
+
 export function resolveDeliveryTrackingColumnMap(
   overrides: Partial<DeliveryTrackingColumnMap> | undefined,
 ): DeliveryTrackingColumnMap {
@@ -185,7 +192,7 @@ export function resolveDeliveryTrackingColumnMap(
   return next;
 }
 
-export function resolveDeliveryTrackingTypeStrategy(
+function resolveDeliveryTrackingTypeStrategy(
   overrides: Partial<DeliveryTrackingTypeStrategy> | undefined,
 ): ResolvedDeliveryTrackingTypeStrategy {
   const strategy: ResolvedDeliveryTrackingTypeStrategy = {
@@ -223,6 +230,26 @@ export function resolveDeliveryTrackingTypeStrategy(
   return strategy;
 }
 
+function resolveDeliveryTrackingIndexNames(
+  overrides: Partial<DeliveryTrackingSchemaSpec["indexNames"]> | undefined,
+): DeliveryTrackingSchemaSpec["indexNames"] {
+  const next: DeliveryTrackingSchemaSpec["indexNames"] = { ...DEFAULT_INDEX_NAMES };
+
+  if (!overrides || typeof overrides !== "object") {
+    return next;
+  }
+
+  const due = normalizeString(overrides.due);
+  const providerMessage = normalizeString(overrides.providerMessage);
+  const requestedAt = normalizeString(overrides.requestedAt);
+
+  if (due) next.due = due;
+  if (providerMessage) next.providerMessage = providerMessage;
+  if (requestedAt) next.requestedAt = requestedAt;
+
+  return next;
+}
+
 export function getDeliveryTrackingColumnKeys(
   storeRaw: boolean,
 ): readonly DeliveryTrackingColumnKey[] {
@@ -233,8 +260,7 @@ export function getDeliveryTrackingSchemaSpec(
   options: DeliveryTrackingSchemaOptions = {},
 ): DeliveryTrackingSchemaSpec {
   const tableName =
-    normalizeNonEmptyString(options.tableName) ??
-    DEFAULT_DELIVERY_TRACKING_TABLE;
+    normalizeNonEmptyString(options.tableName) ?? DEFAULT_DELIVERY_TRACKING_TABLE;
   const columnMap = resolveDeliveryTrackingColumnMap(options.columnMap);
   const typeStrategy = resolveDeliveryTrackingTypeStrategy(
     options.typeStrategy ?? options.trackingTypeStrategy,
@@ -246,7 +272,10 @@ export function getDeliveryTrackingSchemaSpec(
     columnMap,
     typeStrategy,
     storeRaw,
-    indexNames: { ...DEFAULT_INDEX_NAMES },
+    indexNames: resolveDeliveryTrackingIndexNames({
+      ...(options.indexNames ?? {}),
+      ...(options.trackingIndexNames ?? {}),
+    }),
   };
 }
 
@@ -259,51 +288,46 @@ export function resolveDeliveryTrackingSqlType(
     | "timestamp"
     | "attemptCount"
     | "json",
-  strategy: ResolvedDeliveryTrackingTypeStrategy,
+  strategy: ResolvedDeliveryTrackingTypeStrategy = DEFAULT_TYPE_STRATEGY,
 ): string {
-  if (kind === "attemptCount") {
-    return "INTEGER";
-  }
-
-  if (kind === "timestamp") {
-    return strategy.timestamp === "integer" ? "INTEGER" : "BIGINT";
-  }
-
-  if (kind === "json") {
-    if (strategy.json === "text") return "TEXT";
-    return dialect === "postgres" ? "JSONB" : "TEXT";
-  }
-
   if (kind === "messageId") {
     if (strategy.messageId === "uuid") {
       if (dialect === "postgres") return "UUID";
       if (dialect === "mysql") return "VARCHAR(36)";
       return "TEXT";
     }
-
     if (strategy.messageId === "varchar") {
+      if (dialect === "sqlite") return "TEXT";
       return "VARCHAR(255)";
     }
-
-    return dialect === "mysql" ? "VARCHAR(255)" : "TEXT";
+    return "TEXT";
   }
 
   if (kind === "id") {
-    if (strategy.id === "varchar") {
+    if (strategy.id === "varchar" && dialect !== "sqlite") {
       return "VARCHAR(255)";
     }
-    return dialect === "mysql" ? "VARCHAR(255)" : "TEXT";
+    return "TEXT";
   }
 
   if (kind === "shortText") {
-    if (strategy.shortText === "text") {
-      return "TEXT";
-    }
-    if (dialect === "sqlite") {
-      return "TEXT";
-    }
-    return "VARCHAR(64)";
+    if (dialect === "sqlite") return "TEXT";
+    return strategy.shortText === "text" ? "TEXT" : "VARCHAR(64)";
   }
 
+  if (kind === "timestamp") {
+    if (strategy.timestamp === "integer") return "INTEGER";
+    if (dialect === "mysql") return "BIGINT";
+    if (dialect === "sqlite") return "INTEGER";
+    return "BIGINT";
+  }
+
+  if (kind === "attemptCount") {
+    return "INTEGER";
+  }
+
+  if (strategy.json === "text") return "TEXT";
+  if (dialect === "postgres") return "JSONB";
+  if (dialect === "mysql") return "JSON";
   return "TEXT";
 }
