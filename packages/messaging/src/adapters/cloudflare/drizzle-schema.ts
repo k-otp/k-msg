@@ -1,5 +1,6 @@
 import {
   type DeliveryTrackingColumnMap,
+  type DeliveryTrackingSchemaSpec,
   type DeliveryTrackingTypeStrategy,
   getDeliveryTrackingSchemaSpec,
 } from "./delivery-tracking-schema";
@@ -16,7 +17,9 @@ export interface RenderDrizzleSchemaSourceOptions {
   trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
   typeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  indexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   trackingStoreRaw?: boolean;
+  trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
 }
 
@@ -43,6 +46,8 @@ function renderPostgresTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    indexNames: options.indexNames,
+    trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
   const s = spec.typeStrategy;
@@ -156,6 +161,8 @@ function renderMySqlTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    indexNames: options.indexNames,
+    trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
   const s = spec.typeStrategy;
@@ -262,6 +269,8 @@ function renderSqliteTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    indexNames: options.indexNames,
+    trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
 

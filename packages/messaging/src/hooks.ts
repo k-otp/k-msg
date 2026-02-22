@@ -4,6 +4,23 @@ export interface HookContext {
   messageId: string;
   options: SendOptions;
   timestamp: number;
+  providerId?: string;
+  requestId?: string;
+  attempt?: number;
+}
+
+export interface RetryScheduledHookContext {
+  attempt: number;
+  retryAfterMs?: number;
+}
+
+export type SendHookFinalOutcome = "success" | "failure" | "aborted";
+
+export interface SendHookFinalState {
+  outcome: SendHookFinalOutcome;
+  result?: SendResult;
+  error?: KMsgError;
+  retryAfterMs?: number;
 }
 
 export interface KMsgHooks {
@@ -13,4 +30,20 @@ export interface KMsgHooks {
     result: SendResult,
   ) => void | Promise<void>;
   onError?: (context: HookContext, error: KMsgError) => void | Promise<void>;
+  onQueued?: (
+    context: HookContext,
+    result: SendResult,
+  ) => void | Promise<void>;
+  onRetryScheduled?: (
+    context: HookContext & RetryScheduledHookContext,
+    error: KMsgError,
+    metadata: {
+      retryAfterMs?: number;
+      reason: string;
+    },
+  ) => void | Promise<void>;
+  onFinal?: (
+    context: HookContext,
+    state: SendHookFinalState,
+  ) => void | Promise<void>;
 }

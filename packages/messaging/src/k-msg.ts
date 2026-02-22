@@ -2,6 +2,7 @@ import {
   fail,
   KMsgError,
   KMsgErrorCode,
+  ErrorUtils,
   type MessageRepository,
   type MessageType,
   type MessageVariables,
@@ -171,11 +172,7 @@ export class KMsg {
     input: SendInput,
   ): Promise<Result<SendResult, KMsgError>> {
     const normalized = this.normalizeInput(input);
-    const context: HookContext = {
-      messageId: normalized.messageId,
-      options: normalized,
-      timestamp: Date.now(),
-    };
+    const context = this.createHookContext(normalized);
 
     if (this.hooks.onBeforeSend) {
       await this.hooks.onBeforeSend(context);
@@ -185,6 +182,12 @@ export class KMsg {
     if (providerResult.isFailure) {
       if (this.hooks.onError) {
         await this.hooks.onError(context, providerResult.error);
+      }
+      if (this.hooks.onFinal) {
+        await this.hooks.onFinal(context, {
+          outcome: "failure",
+          error: providerResult.error,
+        });
       }
       return fail(providerResult.error);
     }
@@ -229,6 +232,12 @@ export class KMsg {
           if (this.hooks.onError) {
             await this.hooks.onError(context, saveError);
           }
+          if (this.hooks.onFinal) {
+            await this.hooks.onFinal(context, {
+              outcome: "failure",
+              error: saveError,
+            });
+          }
           return fail(saveError);
         }
 
@@ -240,8 +249,15 @@ export class KMsg {
           to: normalized.to,
         };
 
-        if (this.hooks.onSuccess) {
-          await this.hooks.onSuccess(context, value);
+        if (this.hooks.onQueued) {
+          await this.hooks.onQueued(context, value);
+        }
+
+        if (this.hooks.onFinal) {
+          await this.hooks.onFinal(context, {
+            outcome: "success",
+            result: value,
+          });
         }
 
         return ok(value);
@@ -256,6 +272,12 @@ export class KMsg {
           if (this.hooks.onError) {
             await this.hooks.onError(context, saveError);
           }
+          if (this.hooks.onFinal) {
+            await this.hooks.onFinal(context, {
+              outcome: "failure",
+              error: saveError,
+            });
+          }
           return fail(saveError);
         }
         persistedRecordId = saveResult.value;
@@ -263,8 +285,8 @@ export class KMsg {
 
       const result = await provider.send(normalized);
 
-      if (result.isSuccess) {
-        const value: SendResult = {
+        if (result.isSuccess) {
+          const value: SendResult = {
           ...result.value,
           messageId,
           providerId: provider.id,
@@ -282,6 +304,12 @@ export class KMsg {
             if (this.hooks.onError) {
               await this.hooks.onError(context, updateError);
             }
+            if (this.hooks.onFinal) {
+              await this.hooks.onFinal(context, {
+                outcome: "failure",
+                error: updateError,
+              });
+            }
             return fail(updateError);
           }
         } else {
@@ -291,6 +319,12 @@ export class KMsg {
         if (this.hooks.onSuccess) {
           await this.hooks.onSuccess(context, value);
         }
+        if (this.hooks.onFinal) {
+          await this.hooks.onFinal(context, {
+            outcome: "success",
+            result: value,
+          });
+        }
         return ok(value);
       }
 
@@ -298,7 +332,7 @@ export class KMsg {
         providerId: provider.id,
       });
 
-      if (strategy === "full" && repo && persistedRecordId) {
+        if (strategy === "full" && repo && persistedRecordId) {
         const updateResult = await repo.update(
           persistedRecordId,
           this.toFailedPersistenceOutcome(normalized, provider.id, error),
@@ -308,17 +342,29 @@ export class KMsg {
             providerId: provider.id,
             persistedRecordId,
           });
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, updateError);
+            if (this.hooks.onError) {
+              await this.hooks.onError(context, updateError);
+            }
+            if (this.hooks.onFinal) {
+              await this.hooks.onFinal(context, {
+                outcome: "failure",
+                error: updateError,
+              });
+            }
+            return fail(updateError);
           }
-          return fail(updateError);
-        }
-      } else {
+        } else {
         triggerLogPersistence();
       }
 
       if (this.hooks.onError) {
         await this.hooks.onError(context, error);
+      }
+      if (this.hooks.onFinal) {
+        await this.hooks.onFinal(context, {
+          outcome: "failure",
+          error,
+        });
       }
 
       return fail(error);
@@ -336,22 +382,34 @@ export class KMsg {
             persistedRecordId,
           });
 
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, updateError);
-          }
-
-          return fail(updateError);
+        if (this.hooks.onError) {
+          await this.hooks.onError(context, updateError);
         }
+        if (this.hooks.onFinal) {
+          await this.hooks.onFinal(context, {
+            outcome: "failure",
+            error: updateError,
+          });
+        }
+
+        return fail(updateError);
+      }
       } else {
         triggerLogPersistence();
       }
 
-      if (this.hooks.onError) {
-        await this.hooks.onError(context, kMsgError);
-      }
-
-      return fail(kMsgError);
+    if (this.hooks.onError) {
+      await this.hooks.onError(context, kMsgError);
     }
+    if (this.hooks.onFinal) {
+      await this.hooks.onFinal(context, {
+        outcome: "failure",
+        error: kMsgError,
+      });
+    }
+
+    return fail(kMsgError);
+  }
   }
 
   private persistLogSave(repo: MessageRepository, input: SendInput): void {
@@ -436,11 +494,7 @@ export class KMsg {
     index: number;
     result: Result<SendResult, KMsgError>;
   }> {
-    const context: HookContext = {
-      messageId: item.normalized.messageId,
-      options: item.normalized,
-      timestamp: Date.now(),
-    };
+    const context = this.createHookContext(item.normalized);
 
     if (this.hooks.onBeforeSend) {
       await this.hooks.onBeforeSend(context);
@@ -454,6 +508,50 @@ export class KMsg {
         context,
       ),
     };
+  }
+
+  private createHookContext(
+    normalized: SendOptions & { messageId: string },
+  ): HookContext {
+    return {
+      messageId: normalized.messageId,
+      options: normalized,
+      timestamp: Date.now(),
+      requestId: this.resolveHookRequestId(normalized.providerOptions),
+      attempt: this.resolveHookAttempt(normalized.providerOptions),
+    };
+  }
+
+  private resolveHookAttempt(
+    providerOptions: Record<string, unknown> | undefined,
+  ): number | undefined {
+    if (!providerOptions || typeof providerOptions !== "object") {
+      return undefined;
+    }
+
+    const attempt = providerOptions.attempt;
+    if (!Number.isFinite(attempt) || typeof attempt !== "number") {
+      return undefined;
+    }
+
+    const normalized = Math.trunc(attempt);
+    return normalized > 0 ? normalized : undefined;
+  }
+
+  private resolveHookRequestId(
+    providerOptions: Record<string, unknown> | undefined,
+  ): string | undefined {
+    if (!providerOptions || typeof providerOptions !== "object") {
+      return undefined;
+    }
+
+    const requestId = providerOptions.requestId;
+    if (typeof requestId !== "string") {
+      return undefined;
+    }
+
+    const normalized = requestId.trim();
+    return normalized.length > 0 ? normalized : undefined;
   }
 
   private toKMsgError(
