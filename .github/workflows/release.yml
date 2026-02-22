@@ -17,7 +17,8 @@ concurrency:
 env:
   BUN_VERSION: "1.3.8"
   NODE_VERSION: "24"
-  CF_PAGES_PROJECT_NAME: "k-msg"
+  CF_PAGES_PROJECT_NAME: ${{ vars.CF_PAGES_PROJECT_NAME || 'k-msg' }}
+  CF_PAGES_BRANCH: ${{ vars.CF_PAGES_BRANCH || 'main' }}
 
 jobs:
   release:
@@ -115,6 +116,27 @@ jobs:
             exit 1
           fi
 
+          project_name="${CF_PAGES_PROJECT_NAME}"
+          api_base="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+
+          project_resp="$(curl -fsS \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "${api_base}/${project_name}")"
+
+          project_ok="$(jq -r '.success // false' <<<"${project_resp}")"
+          if [[ "${project_ok}" != "true" ]]; then
+            err_codes="$(jq -r '.errors[]?.code // empty' <<<"${project_resp}" | paste -sd ',' -)"
+            err_msgs="$(jq -r '.errors[]?.message // empty' <<<"${project_resp}" | paste -sd ' | ' -)"
+
+            list_resp="$(curl -fsS \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              "${api_base}?per_page=100")"
+            known_projects="$(jq -r '.result[]?.name // empty' <<<"${list_resp}" | head -n 20 | paste -sd ',' -)"
+
+            echo "::error::Cloudflare Pages project '${project_name}' not found under account '${CLOUDFLARE_ACCOUNT_ID}'. codes='${err_codes:-unknown}', messages='${err_msgs:-unknown}', known_projects='${known_projects:-none}'. Set repository variable CF_PAGES_PROJECT_NAME to the correct project name."
+            exit 1
+          fi
+
       - name: Build docs for release deploy
         if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
         run: |
@@ -131,4 +153,4 @@ jobs:
           cd publish-src
           bunx wrangler pages deploy apps/docs/dist \
             --project-name "${CF_PAGES_PROJECT_NAME}" \
-            --branch main
+            --branch "${CF_PAGES_BRANCH}"
