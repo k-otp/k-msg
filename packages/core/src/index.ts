@@ -1,4 +1,5 @@
 export * from "./crypto/errors";
+export * from "./crypto/policy";
 export * from "./crypto/types";
 export * from "./errors";
 export * from "./logger";
