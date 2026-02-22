@@ -52,7 +52,7 @@ export interface DeliveryTrackingColumnMap {
 export type DeliveryTrackingMessageIdType = "text" | "uuid" | "varchar";
 export type DeliveryTrackingIdType = "text" | "varchar";
 export type DeliveryTrackingShortTextType = "text" | "varchar";
-export type DeliveryTrackingTimestampType = "bigint" | "integer";
+export type DeliveryTrackingTimestampType = "bigint" | "integer" | "date";
 export type DeliveryTrackingJsonType = "auto" | "text";
 
 export interface DeliveryTrackingTypeStrategy {
@@ -219,7 +219,11 @@ function resolveDeliveryTrackingTypeStrategy(
     strategy.shortText = overrides.shortText;
   }
 
-  if (overrides.timestamp === "bigint" || overrides.timestamp === "integer") {
+  if (
+    overrides.timestamp === "bigint" ||
+    overrides.timestamp === "integer" ||
+    overrides.timestamp === "date"
+  ) {
     strategy.timestamp = overrides.timestamp;
   }
 
@@ -319,6 +323,11 @@ export function resolveDeliveryTrackingSqlType(
   }
 
   if (kind === "timestamp") {
+    if (strategy.timestamp === "date") {
+      if (dialect === "postgres") return "TIMESTAMPTZ";
+      if (dialect === "mysql") return "BIGINT";
+      return "INTEGER";
+    }
     if (strategy.timestamp === "integer") return "INTEGER";
     if (dialect === "mysql") return "BIGINT";
     if (dialect === "sqlite") return "INTEGER";

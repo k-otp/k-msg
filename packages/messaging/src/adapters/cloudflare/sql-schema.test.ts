@@ -55,6 +55,19 @@ describe("Cloudflare SQL schema builders", () => {
     );
   });
 
+  test("tracking schema supports postgres date timestamp strategy", () => {
+    const sql = buildCloudflareSqlSchemaSql({
+      dialect: "postgres",
+      target: "tracking",
+      typeStrategy: {
+        timestamp: "date",
+      },
+    });
+
+    expect(sql).toContain('"requested_at" TIMESTAMPTZ NOT NULL');
+    expect(sql).toContain('"next_check_at" TIMESTAMPTZ NOT NULL');
+  });
+
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
     let indexFailures = 0;
     const client = {
@@ -124,5 +137,22 @@ describe("Drizzle schema renderer", () => {
 
     expect(withoutRaw).not.toContain("raw:");
     expect(withRaw).toContain("raw:");
+  });
+
+  test("renders postgres timestamp(date) fields when date strategy is requested", () => {
+    const source = renderDrizzleSchemaSource({
+      dialect: "postgres",
+      target: "tracking",
+      typeStrategy: {
+        timestamp: "date",
+      },
+    });
+
+    expect(source).toContain(
+      'timestamp("requested_at", { withTimezone: true, mode: "date" }).notNull()',
+    );
+    expect(source).toContain(
+      "import { bigint, index, integer, jsonb, pgTable, text, timestamp, uuid, varchar }",
+    );
   });
 });

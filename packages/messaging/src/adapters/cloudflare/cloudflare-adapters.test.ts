@@ -145,6 +145,45 @@ describe("Cloudflare SQL adapters", () => {
     expect(mySql).toContain("?");
   });
 
+  test("HyperdriveDeliveryTrackingStore binds Date values for postgres date timestamp strategy", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      typeStrategy: {
+        timestamp: "date",
+      },
+    });
+
+    const now = new Date();
+    const record = {
+      messageId: "m-date",
+      providerId: "iwinv",
+      providerMessageId: "p-date",
+      type: "SMS" as const,
+      to: "01012345678",
+      status: "SENT" as const,
+      requestedAt: now,
+      statusUpdatedAt: now,
+      attemptCount: 0,
+      nextCheckAt: now,
+    };
+
+    await store.upsert(record);
+    await store.listDue(now, 10);
+
+    const insertParams =
+      postgres.queries.find((query) => query.sql.includes("INSERT INTO"))
+        ?.params ?? [];
+    const dueParams =
+      postgres.queries.find(
+        (query) =>
+          query.sql.includes("SELECT * FROM") &&
+          query.sql.includes("next_check_at"),
+      )?.params ?? [];
+
+    expect(insertParams.some((value) => value instanceof Date)).toBe(true);
+    expect(dueParams.some((value) => value instanceof Date)).toBe(true);
+  });
+
   test("HyperdriveDeliveryTrackingStore toggles raw column by storeRaw option", async () => {
     const withoutRaw = createCapturingSqlClient("sqlite");
     const withRaw = createCapturingSqlClient("sqlite");

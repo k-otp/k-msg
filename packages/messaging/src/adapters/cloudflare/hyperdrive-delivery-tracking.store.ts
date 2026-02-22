@@ -48,6 +48,9 @@ function toArray<T>(value: T | T[] | undefined): T[] | undefined {
 }
 
 function toDate(value: unknown): Date | undefined {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getTime());
+  }
   if (typeof value === "number" && Number.isFinite(value)) {
     return new Date(value);
   }
@@ -178,7 +181,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
     const { rows } = await this.client.query<TrackingRow>(
       `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
-      [...TERMINAL_STATUSES, now.getTime(), safeLimit],
+      [...TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
     );
 
     return rows.map((row) => this.rowToRecord(row));
@@ -316,37 +319,37 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if ("sentAt" in patch) {
       updates.push({
         key: "sentAt",
-        value: patch.sentAt ? patch.sentAt.getTime() : null,
+        value: this.toDbOptionalTimestamp(patch.sentAt),
       });
     }
     if ("deliveredAt" in patch) {
       updates.push({
         key: "deliveredAt",
-        value: patch.deliveredAt ? patch.deliveredAt.getTime() : null,
+        value: this.toDbOptionalTimestamp(patch.deliveredAt),
       });
     }
     if ("failedAt" in patch) {
       updates.push({
         key: "failedAt",
-        value: patch.failedAt ? patch.failedAt.getTime() : null,
+        value: this.toDbOptionalTimestamp(patch.failedAt),
       });
     }
     if (patch.requestedAt !== undefined) {
       updates.push({
         key: "requestedAt",
-        value: patch.requestedAt.getTime(),
+        value: this.toDbTimestamp(patch.requestedAt),
       });
     }
     if ("scheduledAt" in patch) {
       updates.push({
         key: "scheduledAt",
-        value: patch.scheduledAt ? patch.scheduledAt.getTime() : null,
+        value: this.toDbOptionalTimestamp(patch.scheduledAt),
       });
     }
     if (patch.statusUpdatedAt !== undefined) {
       updates.push({
         key: "statusUpdatedAt",
-        value: patch.statusUpdatedAt.getTime(),
+        value: this.toDbTimestamp(patch.statusUpdatedAt),
       });
     }
     if (patch.attemptCount !== undefined) {
@@ -355,13 +358,13 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if ("lastCheckedAt" in patch) {
       updates.push({
         key: "lastCheckedAt",
-        value: patch.lastCheckedAt ? patch.lastCheckedAt.getTime() : null,
+        value: this.toDbOptionalTimestamp(patch.lastCheckedAt),
       });
     }
     if (patch.nextCheckAt !== undefined) {
       updates.push({
         key: "nextCheckAt",
-        value: patch.nextCheckAt.getTime(),
+        value: this.toDbTimestamp(patch.nextCheckAt),
       });
     }
     if ("lastError" in patch) {
@@ -402,6 +405,24 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
   async close(): Promise<void> {
     await this.client.close?.();
+  }
+
+  private useNativeDateTimestamps(): boolean {
+    return (
+      this.schema.typeStrategy.timestamp === "date" &&
+      this.client.dialect === "postgres"
+    );
+  }
+
+  private toDbTimestamp(value: Date): number | Date {
+    return this.useNativeDateTimestamps() ? value : value.getTime();
+  }
+
+  private toDbOptionalTimestamp(
+    value: Date | null | undefined,
+  ): number | Date | null {
+    if (!value) return null;
+    return this.toDbTimestamp(value);
   }
 
   private rowToRecord(row: TrackingRow): TrackingRecord {
@@ -527,23 +548,23 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       case "providerStatusMessage":
         return record.providerStatusMessage ?? null;
       case "sentAt":
-        return record.sentAt ? record.sentAt.getTime() : null;
+        return this.toDbOptionalTimestamp(record.sentAt);
       case "deliveredAt":
-        return record.deliveredAt ? record.deliveredAt.getTime() : null;
+        return this.toDbOptionalTimestamp(record.deliveredAt);
       case "failedAt":
-        return record.failedAt ? record.failedAt.getTime() : null;
+        return this.toDbOptionalTimestamp(record.failedAt);
       case "requestedAt":
-        return record.requestedAt.getTime();
+        return this.toDbTimestamp(record.requestedAt);
       case "scheduledAt":
-        return record.scheduledAt ? record.scheduledAt.getTime() : null;
+        return this.toDbOptionalTimestamp(record.scheduledAt);
       case "statusUpdatedAt":
-        return record.statusUpdatedAt.getTime();
+        return this.toDbTimestamp(record.statusUpdatedAt);
       case "attemptCount":
         return record.attemptCount;
       case "lastCheckedAt":
-        return record.lastCheckedAt ? record.lastCheckedAt.getTime() : null;
+        return this.toDbOptionalTimestamp(record.lastCheckedAt);
       case "nextCheckAt":
-        return record.nextCheckAt.getTime();
+        return this.toDbTimestamp(record.nextCheckAt);
       case "lastError":
         return record.lastError ? JSON.stringify(record.lastError) : null;
       case "raw":
@@ -592,28 +613,28 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       clauses.push(
         `${this.quoteIdentifier(this.columnName("requestedAt"))} >= ${this.placeholder(params.length + 1)}`,
       );
-      params.push(filter.requestedAtFrom.getTime());
+      params.push(this.toDbTimestamp(filter.requestedAtFrom));
     }
 
     if (filter.requestedAtTo) {
       clauses.push(
         `${this.quoteIdentifier(this.columnName("requestedAt"))} <= ${this.placeholder(params.length + 1)}`,
       );
-      params.push(filter.requestedAtTo.getTime());
+      params.push(this.toDbTimestamp(filter.requestedAtTo));
     }
 
     if (filter.statusUpdatedAtFrom) {
       clauses.push(
         `${this.quoteIdentifier(this.columnName("statusUpdatedAt"))} >= ${this.placeholder(params.length + 1)}`,
       );
-      params.push(filter.statusUpdatedAtFrom.getTime());
+      params.push(this.toDbTimestamp(filter.statusUpdatedAtFrom));
     }
 
     if (filter.statusUpdatedAtTo) {
       clauses.push(
         `${this.quoteIdentifier(this.columnName("statusUpdatedAt"))} <= ${this.placeholder(params.length + 1)}`,
       );
-      params.push(filter.statusUpdatedAtTo.getTime());
+      params.push(this.toDbTimestamp(filter.statusUpdatedAtTo));
     }
 
     return {

@@ -76,7 +76,9 @@ function renderPostgresTrackingSchema(
     const base =
       s.timestamp === "integer"
         ? `integer(${q(columnName)})`
-        : `bigint(${q(columnName)}, { mode: "number" })`;
+        : s.timestamp === "date"
+          ? `timestamp(${q(columnName)}, { withTimezone: true, mode: "date" })`
+          : `bigint(${q(columnName)}, { mode: "number" })`;
     return required ? `${base}.notNull()` : base;
   };
 
@@ -351,7 +353,7 @@ export function renderDrizzleSchemaSource(
 
   if (options.dialect === "postgres") {
     sections.push(
-      'import { bigint, index, integer, jsonb, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";',
+      'import { bigint, index, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";',
     );
     if (target === "tracking" || target === "both") {
       sections.push(renderPostgresTrackingSchema(options));
