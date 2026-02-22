@@ -1,7 +1,7 @@
 import {
+  type ActiveKidRolloutPolicy,
   getRolloutKnownKids,
   selectActiveKidByRollout,
-  type ActiveKidRolloutPolicy,
 } from "./rollout-policy";
 import type { FieldCryptoKeyContext, KeyResolver, KeySetState } from "./types";
 
@@ -61,7 +61,10 @@ export function createStaticKeyResolver(
   options: StaticKeyResolverOptions,
 ): KeyResolver {
   const activeKid = normalizeKid(options.activeKid) ?? "default";
-  const decryptKids = dedupeKids([activeKid, ...normalizeKidList(options.decryptKids)]);
+  const decryptKids = dedupeKids([
+    activeKid,
+    ...normalizeKidList(options.decryptKids),
+  ]);
 
   return {
     async resolveEncryptKey() {
@@ -144,7 +147,11 @@ export function createRollingKeyResolver(
       const baseDecrypt = baseResolver.resolveDecryptKeys
         ? await baseResolver.resolveDecryptKeys(context)
         : [baseEncrypt.kid];
-      const selected = selectActiveKidByRollout(context, policy, baseEncrypt.kid);
+      const selected = selectActiveKidByRollout(
+        context,
+        policy,
+        baseEncrypt.kid,
+      );
       const rolloutKids = getRolloutKnownKids(policy);
 
       return dedupeKids([
@@ -156,4 +163,3 @@ export function createRollingKeyResolver(
     },
   };
 }
-

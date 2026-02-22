@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
+  type ActiveKidRolloutPolicy,
   getRolloutKnownKids,
   selectActiveKidByRollout,
-  type ActiveKidRolloutPolicy,
 } from "./rollout-policy";
 
 describe("active kid rollout policy", () => {
@@ -57,4 +57,3 @@ describe("active kid rollout policy", () => {
     expect(kids).toEqual(["k-2026-02", "k-2026-03"]);
   });
 });
-
