@@ -265,9 +265,13 @@ export default defineConfig({
     starlight({
       title: "k-msg",
       description: "k-msg documentation",
-      social: {
-        github: "https://github.com/k-otp/k-msg",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/k-otp/k-msg",
+        },
+      ],
       locales: {
         root: {
           label: "한국어",
