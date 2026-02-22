@@ -51,12 +51,10 @@ fields: {
 - Keep `compatPlainColumns=true` until post-cutover validation is complete.
 - Keep multi-kid decrypt configured during rollback window.
 
-## 6. Webhook legacy alias migration
+## 6. Webhook storage migration
 
-Webhook storage config still keeps legacy options for compatibility:
+Webhook storage config uses `fieldCrypto` as the only crypto contract.
 
-- `enableEncryption` (deprecated)
-- `encryptionKey` (deprecated)
-
-Use `fieldCrypto` as the single source of truth.  
-When both are set, `fieldCrypto` takes precedence.
+- Configure `fieldCrypto.endpoint` for endpoint `secret`
+- Configure `fieldCrypto.delivery` for delivery `payload`
+- Remove legacy config keys from deployment manifests before upgrade

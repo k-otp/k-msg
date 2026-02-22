@@ -12,6 +12,9 @@ Question this page answers: In what order should non-security users read the `fi
 
 - [Security Glossary](./glossary): plain-language terms
 - [Field Crypto v1](./field-crypto-v1): crypto model, AAD, failure handling, and metrics
+- [Key Management and Rotation](./key-management-rotation): KeyResolver model and zero-downtime rotation
+- [Migration Orchestrator](./migration-orchestrator): operational flow for plan/apply/status/retry
+- [Auto Mitigation](./auto-mitigation): scope-level isolation for key-error bursts
 - [Security Recipes](./recipes): safe copy-paste configuration patterns
 - [KR B2B Retention](./kr-b2b-retention): baseline legal retention and tenant-contract priority
 

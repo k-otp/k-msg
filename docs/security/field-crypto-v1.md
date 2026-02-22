@@ -59,6 +59,8 @@ Ciphertext is persisted as JSON envelope:
 - `crypto_decrypt_ms`
 - `crypto_fail_count`
 - `key_kid_usage`
+- `crypto_circuit_open_count`
+- `crypto_circuit_state`
 
 ## Logging policy
 
@@ -70,3 +72,6 @@ Ciphertext is persisted as JSON envelope:
 - Basics: `./field-crypto-basics.md`
 - Korean basics: `./field-crypto-basics_ko.md`
 - Runbook: `./field-crypto-runbook.md`
+- Key rotation: `./key-rotation-playbook.md`
+- Migration CLI: `./migration-cli-runbook.md`
+- Control signals: `./crypto-control-signals.md`

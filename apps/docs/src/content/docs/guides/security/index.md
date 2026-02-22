@@ -12,6 +12,9 @@ description: "k-msg field crypto(v1) 보안 정책과 운영 기준"
 
 - [보안 용어집](./glossary): 어려운 용어를 쉬운 말로 설명
 - [Field Crypto v1](./field-crypto-v1): 암호화 모델, AAD, 실패 정책, 운영 지표
+- [키 관리와 로테이션](./key-management-rotation): KeyResolver와 무중단 키 교체 원칙
+- [마이그레이션 오케스트레이터](./migration-orchestrator): plan/apply/status/retry 운영 흐름
+- [자동 완화](./auto-mitigation): key 오류 급증 시 scope 단위 자동 격리
 - [보안 레시피](./recipes): 바로 적용 가능한 안전 설정 패턴
 - [KR B2B 보관 정책](./kr-b2b-retention): 법정 보관 주기 기본값과 테넌트 계약 우선순위
 
