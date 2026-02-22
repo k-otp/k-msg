@@ -75,6 +75,7 @@ await analytics.init();
 ## Notes
 
 - `@k-msg/analytics` does not create its own database. It reads from the `kmsg_delivery_tracking` table written by `DeliveryTrackingService`.
+- Tracking SQL schema now disables the `raw` column by default (`storeRaw: false`); enable it in the tracking store only when needed.
 - For production usage, prefer a durable store (`SqliteDeliveryTrackingStore` or `BunSqlDeliveryTrackingStore`).
 - Runtime diagnostics in analytics modules use `@k-msg/core` logger (no direct `console.*` in runtime paths).
 

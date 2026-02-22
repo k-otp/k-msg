@@ -62,7 +62,8 @@ Table: `kmsg_delivery_tracking`
 - PK: `message_id`
 - Core: `provider_id`, `provider_message_id`, `type`, `to`, `from`, `status`
 - Timing: `requested_at`, `status_updated_at`, `next_check_at`, `sent_at`, `delivered_at`, `failed_at`, `last_checked_at`, `scheduled_at`
-- Metadata: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `raw`, `metadata`
+- Metadata: `attempt_count`, `provider_status_code`, `provider_status_message`, `last_error`, `metadata`
+- Optional: `raw` is created only when `storeRaw: true` is configured.
 
 Indexes:
 

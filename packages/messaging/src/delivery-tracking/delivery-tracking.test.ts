@@ -575,6 +575,53 @@ describe("DeliveryTrackingStore (SQLite)", () => {
     expect(record?.status).toBe("DELIVERED");
     expect(record?.providerStatusCode).toBe("2000");
   });
+
+  test("storeRaw defaults to false and can be enabled", async () => {
+    const now = new Date();
+
+    const defaultStore = new SqliteDeliveryTrackingStore({
+      dbPath: ":memory:",
+    });
+    await defaultStore.upsert({
+      messageId: "sqlite-no-raw",
+      providerId: "mock",
+      providerMessageId: "p-no-raw",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: now,
+      status: "SENT",
+      statusUpdatedAt: now,
+      attemptCount: 0,
+      nextCheckAt: now,
+      raw: { kept: false },
+    });
+
+    const withoutRaw = await defaultStore.get("sqlite-no-raw");
+    expect(withoutRaw?.raw).toBeUndefined();
+    await defaultStore.close();
+
+    const rawStore = new SqliteDeliveryTrackingStore({
+      dbPath: ":memory:",
+      storeRaw: true,
+    });
+    await rawStore.upsert({
+      messageId: "sqlite-with-raw",
+      providerId: "mock",
+      providerMessageId: "p-with-raw",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: now,
+      status: "SENT",
+      statusUpdatedAt: now,
+      attemptCount: 0,
+      nextCheckAt: now,
+      raw: { kept: true },
+    });
+
+    const withRaw = await rawStore.get("sqlite-with-raw");
+    expect(withRaw?.raw).toEqual({ kept: true });
+    await rawStore.close();
+  });
 });
 
 describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
@@ -636,5 +683,52 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
     expect(record?.providerStatusCode).toBe("2000");
 
     await store.close();
+  });
+
+  test("storeRaw defaults to false and can be enabled", async () => {
+    const now = new Date();
+
+    const defaultStore = new BunSqlDeliveryTrackingStore({
+      options: { adapter: "sqlite", filename: ":memory:" },
+    });
+    await defaultStore.upsert({
+      messageId: "bun-no-raw",
+      providerId: "mock",
+      providerMessageId: "p-no-raw",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: now,
+      status: "SENT",
+      statusUpdatedAt: now,
+      attemptCount: 0,
+      nextCheckAt: now,
+      raw: { kept: false },
+    });
+
+    const withoutRaw = await defaultStore.get("bun-no-raw");
+    expect(withoutRaw?.raw).toBeUndefined();
+    await defaultStore.close();
+
+    const rawStore = new BunSqlDeliveryTrackingStore({
+      options: { adapter: "sqlite", filename: ":memory:" },
+      storeRaw: true,
+    });
+    await rawStore.upsert({
+      messageId: "bun-with-raw",
+      providerId: "mock",
+      providerMessageId: "p-with-raw",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: now,
+      status: "SENT",
+      statusUpdatedAt: now,
+      attemptCount: 0,
+      nextCheckAt: now,
+      raw: { kept: true },
+    });
+
+    const withRaw = await rawStore.get("bun-with-raw");
+    expect(withRaw?.raw).toEqual({ kept: true });
+    await rawStore.close();
   });
 });

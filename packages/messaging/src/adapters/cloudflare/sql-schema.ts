@@ -1,13 +1,22 @@
+import {
+  DEFAULT_DELIVERY_TRACKING_TABLE as DEFAULT_DELIVERY_TRACKING_TABLE_NAME,
+  type DeliveryTrackingColumnMap,
+  type DeliveryTrackingSchemaOptions,
+  type DeliveryTrackingTypeStrategy,
+  getDeliveryTrackingSchemaSpec,
+  resolveDeliveryTrackingSqlType,
+} from "./delivery-tracking-schema";
 import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
 
-export const DEFAULT_DELIVERY_TRACKING_TABLE = "kmsg_delivery_tracking";
+export const DEFAULT_DELIVERY_TRACKING_TABLE =
+  DEFAULT_DELIVERY_TRACKING_TABLE_NAME;
 export const DEFAULT_JOB_QUEUE_TABLE = "kmsg_jobs";
 
 export type CloudflareSqlSchemaTarget = "tracking" | "queue" | "both";
 
-export interface BuildDeliveryTrackingSchemaSqlOptions {
+export interface BuildDeliveryTrackingSchemaSqlOptions
+  extends DeliveryTrackingSchemaOptions {
   dialect: SqlDialect;
-  tableName?: string;
   includeIndexes?: boolean;
 }
 
@@ -21,6 +30,9 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   dialect: SqlDialect;
   target?: CloudflareSqlSchemaTarget;
   trackingTableName?: string;
+  trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
+  trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  trackingStoreRaw?: boolean;
   queueTableName?: string;
   includeIndexes?: boolean;
 }
@@ -28,6 +40,9 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
 export interface InitializeCloudflareSqlSchemaOptions {
   target?: CloudflareSqlSchemaTarget;
   trackingTableName?: string;
+  trackingColumnMap?: Partial<DeliveryTrackingColumnMap>;
+  trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
+  trackingStoreRaw?: boolean;
   queueTableName?: string;
   includeIndexes?: boolean;
 }
@@ -76,47 +91,67 @@ function toSchemaTarget(
 function buildDeliveryTrackingSchemaStatements(
   options: BuildDeliveryTrackingSchemaSqlOptions,
 ): SchemaStatements {
-  const tableName = options.tableName ?? DEFAULT_DELIVERY_TRACKING_TABLE;
+  const spec = getDeliveryTrackingSchemaSpec({
+    tableName: options.tableName,
+    columnMap: options.columnMap,
+    typeStrategy: options.typeStrategy,
+    storeRaw: options.storeRaw,
+  });
+
   const includeIndexes = options.includeIndexes ?? true;
   const q = (column: string) => quoteIdentifier(options.dialect, column);
-  const tableRef = quoteIdentifier(options.dialect, tableName);
+  const tableRef = quoteIdentifier(options.dialect, spec.tableName);
 
-  const idType = options.dialect === "mysql" ? "VARCHAR(255)" : "TEXT";
-  const shortType = options.dialect === "mysql" ? "VARCHAR(64)" : "TEXT";
-  const jsonType = options.dialect === "postgres" ? "JSONB" : "TEXT";
+  const columns = spec.columnMap;
+  const strategy = spec.typeStrategy;
+
+  const tableColumns: string[] = [
+    `${q(columns.messageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "messageId", strategy)} PRIMARY KEY`,
+    `${q(columns.providerId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+    `${q(columns.providerMessageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+    `${q(columns.type)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
+    `${q(columns.to)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
+    `${q(columns.from)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+    `${q(columns.status)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
+    `${q(columns.providerStatusCode)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+    `${q(columns.providerStatusMessage)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+    `${q(columns.sentAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
+    `${q(columns.deliveredAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
+    `${q(columns.failedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
+    `${q(columns.requestedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)} NOT NULL`,
+    `${q(columns.scheduledAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
+    `${q(columns.statusUpdatedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)} NOT NULL`,
+    `${q(columns.attemptCount)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)} NOT NULL DEFAULT 0`,
+    `${q(columns.lastCheckedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
+    `${q(columns.nextCheckAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)} NOT NULL`,
+    `${q(columns.lastError)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
+  ];
+
+  if (spec.storeRaw) {
+    tableColumns.push(
+      `${q(columns.raw)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
+    );
+  }
+
+  tableColumns.push(
+    `${q(columns.metadata)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
+  );
 
   const tableSql = `
 CREATE TABLE IF NOT EXISTS ${tableRef} (
-  ${q("message_id")} ${idType} PRIMARY KEY,
-  ${q("provider_id")} ${idType} NOT NULL,
-  ${q("provider_message_id")} ${idType} NOT NULL,
-  ${q("type")} ${shortType} NOT NULL,
-  ${q("to")} ${shortType} NOT NULL,
-  ${q("from")} ${shortType},
-  ${q("status")} ${shortType} NOT NULL,
-  ${q("provider_status_code")} ${shortType},
-  ${q("provider_status_message")} ${shortType},
-  ${q("sent_at")} BIGINT,
-  ${q("delivered_at")} BIGINT,
-  ${q("failed_at")} BIGINT,
-  ${q("requested_at")} BIGINT NOT NULL,
-  ${q("scheduled_at")} BIGINT,
-  ${q("status_updated_at")} BIGINT NOT NULL,
-  ${q("attempt_count")} INTEGER NOT NULL DEFAULT 0,
-  ${q("last_checked_at")} BIGINT,
-  ${q("next_check_at")} BIGINT NOT NULL,
-  ${q("last_error")} ${jsonType},
-  ${q("raw")} ${jsonType},
-  ${q("metadata")} ${jsonType}
+  ${tableColumns.join(",\n  ")}
 )`;
 
   const indexDefs: Array<{ name: string; columns: string[] }> = [
-    { name: "idx_kmsg_delivery_due", columns: ["status", "next_check_at"] },
     {
-      name: "idx_kmsg_delivery_provider_msg",
-      columns: ["provider_id", "provider_message_id"],
+      name: spec.indexNames.due,
+      columns: [columns.status, columns.nextCheckAt],
     },
-    { name: "idx_kmsg_delivery_requested_at", columns: ["requested_at"] },
+    {
+      name: spec.indexNames.providerMessage,
+      columns: [columns.providerId, columns.providerMessageId],
+    },
+    { name: spec.indexNames.requestedAt, columns: [columns.requestedAt] },
   ];
 
   const indexStatements =
@@ -298,6 +333,9 @@ export function buildCloudflareSqlSchemaSql(
       buildDeliveryTrackingSchemaStatements({
         dialect: options.dialect,
         tableName: options.trackingTableName,
+        columnMap: options.trackingColumnMap,
+        typeStrategy: options.trackingTypeStrategy,
+        storeRaw: options.trackingStoreRaw,
         includeIndexes,
       }),
     );
@@ -333,6 +371,9 @@ export async function initializeCloudflareSqlSchema(
       buildDeliveryTrackingSchemaStatements({
         dialect: client.dialect,
         tableName: options.trackingTableName,
+        columnMap: options.trackingColumnMap,
+        typeStrategy: options.trackingTypeStrategy,
+        storeRaw: options.trackingStoreRaw,
         includeIndexes,
       }),
     );

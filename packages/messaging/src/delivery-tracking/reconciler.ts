@@ -273,6 +273,7 @@ export async function reconcileDeliveryStatuses(
           patchBase.attemptCount ?? record.attemptCount + 1,
           polling.backoffMs,
         );
+    const rawPatch = value.raw !== undefined ? { raw: value.raw } : {};
 
     updates.push({
       messageId: record.messageId,
@@ -294,11 +295,11 @@ export async function reconcileDeliveryStatuses(
           ? { deliveredAt: value.deliveredAt }
           : {}),
         ...(isValidDate(value.failedAt) ? { failedAt: value.failedAt } : {}),
-        raw: value.raw,
+        ...rawPatch,
       },
       nextCheckAt,
       terminal,
-      raw: value.raw,
+      ...rawPatch,
     });
   };
 
