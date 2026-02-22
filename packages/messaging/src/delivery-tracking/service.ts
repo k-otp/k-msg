@@ -6,7 +6,13 @@ import type {
 } from "@k-msg/core";
 import type { HookContext } from "../hooks";
 import { reconcileDeliveryStatuses } from "./reconciler";
-import type { DeliveryTrackingStore } from "./store.interface";
+import type {
+  DeliveryTrackingCountByField,
+  DeliveryTrackingCountByRow,
+  DeliveryTrackingListOptions,
+  DeliveryTrackingRecordFilter,
+  DeliveryTrackingStore,
+} from "./store.interface";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import {
   type ApiFailoverAttemptContext,
@@ -209,6 +215,29 @@ export class DeliveryTrackingService {
   async getRecord(messageId: string): Promise<TrackingRecord | undefined> {
     await this.ensureInit();
     return await this.store.get(messageId);
+  }
+
+  async listRecords(
+    options: DeliveryTrackingListOptions,
+  ): Promise<TrackingRecord[]> {
+    await this.ensureInit();
+    if (!this.store.listRecords) return [];
+    return await this.store.listRecords(options);
+  }
+
+  async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
+    await this.ensureInit();
+    if (!this.store.countRecords) return 0;
+    return await this.store.countRecords(filter);
+  }
+
+  async countBy(
+    filter: DeliveryTrackingRecordFilter,
+    groupBy: readonly DeliveryTrackingCountByField[],
+  ): Promise<DeliveryTrackingCountByRow[]> {
+    await this.ensureInit();
+    if (!this.store.countBy) return [];
+    return await this.store.countBy(filter, groupBy);
   }
 
   async runOnce(): Promise<void> {

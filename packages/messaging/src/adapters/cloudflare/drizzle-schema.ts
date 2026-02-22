@@ -1,5 +1,6 @@
 import {
   type DeliveryTrackingColumnMap,
+  type DeliveryTrackingFieldCryptoSchemaOptions,
   type DeliveryTrackingSchemaSpec,
   type DeliveryTrackingTypeStrategy,
   getDeliveryTrackingSchemaSpec,
@@ -19,6 +20,7 @@ export interface RenderDrizzleSchemaSourceOptions {
   trackingTypeStrategy?: Partial<DeliveryTrackingTypeStrategy>;
   indexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   trackingStoreRaw?: boolean;
+  fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
   trackingIndexNames?: Partial<DeliveryTrackingSchemaSpec["indexNames"]>;
   queueTableName?: string;
 }
@@ -46,11 +48,16 @@ function renderPostgresTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
     indexNames: options.indexNames,
     trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
   const s = spec.typeStrategy;
+  const secureOnly =
+    spec.fieldCrypto.enabled && spec.fieldCrypto.mode === "secure";
+  const includePlainColumns =
+    !secureOnly || spec.fieldCrypto.compatPlainColumns;
 
   const messageId =
     s.messageId === "uuid"
@@ -86,6 +93,21 @@ function renderPostgresTrackingSchema(
     s.json === "text" ? `text(${q(columnName)})` : `jsonb(${q(columnName)})`;
 
   const rawFieldLine = spec.storeRaw ? `\n    raw: ${jsonField(c.raw)},` : "";
+  const plainAddressFields = includePlainColumns
+    ? `\n    to: ${shortTextField(c.to, true)},\n    from: ${shortTextField(c.from, false)},`
+    : "";
+  const secureAddressFields = secureOnly
+    ? `\n    toEnc: ${idField(c.toEnc)},\n    toHash: ${idField(c.toHash)},\n    toMasked: ${idField(c.toMasked)},\n    fromEnc: ${s.id === "varchar" ? `varchar(${q(c.fromEnc)}, { length: 255 })` : `text(${q(c.fromEnc)})`},\n    fromHash: ${s.id === "varchar" ? `varchar(${q(c.fromHash)}, { length: 255 })` : `text(${q(c.fromHash)})`},\n    fromMasked: ${s.id === "varchar" ? `varchar(${q(c.fromMasked)}, { length: 255 })` : `text(${q(c.fromMasked)})`},`
+    : "";
+  const secureMetaFields = secureOnly
+    ? `\n    metadataEnc: ${s.id === "varchar" ? `varchar(${q(c.metadataEnc)}, { length: 255 })` : `text(${q(c.metadataEnc)})`},\n    metadataHashes: ${jsonField(c.metadataHashes)},\n    cryptoKid: ${s.id === "varchar" ? `varchar(${q(c.cryptoKid)}, { length: 255 })` : `text(${q(c.cryptoKid)})`},\n    cryptoVersion: integer(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: ${shortTextField(c.cryptoState, false)},\n    retentionClass: ${shortTextField(c.retentionClass, false)},\n    retentionBucketYm: integer(${q(c.retentionBucketYm)}),`
+    : "";
+  const plainMetadataField = includePlainColumns
+    ? `\n    metadata: ${jsonField(c.metadata)},`
+    : "";
+  const secureIndexes = secureOnly
+    ? `,\n    index(${q(spec.indexNames.toHash)}).on(table.toHash),\n    index(${q(spec.indexNames.fromHash)}).on(table.fromHash),\n    index(${q(spec.indexNames.retentionBucket)}).on(\n      table.retentionClass,\n      table.retentionBucketYm,\n    )`
+    : "";
 
   return `export const deliveryTrackingTable = pgTable(
   ${q(spec.tableName)},
@@ -94,8 +116,8 @@ function renderPostgresTrackingSchema(
     providerId: ${idField(c.providerId)},
     providerMessageId: ${idField(c.providerMessageId)},
     type: ${shortTextField(c.type, true)},
-    to: ${shortTextField(c.to, true)},
-    from: ${shortTextField(c.from, false)},
+    ${plainAddressFields.trimStart()}
+    ${secureAddressFields.trimStart()}
     status: ${shortTextField(c.status, true)},
     providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
     providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
@@ -108,8 +130,7 @@ function renderPostgresTrackingSchema(
     attemptCount: integer(${q(c.attemptCount)}).notNull().default(0),
     lastCheckedAt: ${timestampField(c.lastCheckedAt)},
     nextCheckAt: ${timestampField(c.nextCheckAt, true)},
-    lastError: ${jsonField(c.lastError)},${rawFieldLine}
-    metadata: ${jsonField(c.metadata)},
+    lastError: ${jsonField(c.lastError)},${rawFieldLine}${secureMetaFields}${plainMetadataField}
   },
   (table) => [
     index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
@@ -117,7 +138,7 @@ function renderPostgresTrackingSchema(
       table.providerId,
       table.providerMessageId,
     ),
-    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt)${secureIndexes},
   ],
 );`;
 }
@@ -163,11 +184,16 @@ function renderMySqlTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
     indexNames: options.indexNames,
     trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
   const s = spec.typeStrategy;
+  const secureOnly =
+    spec.fieldCrypto.enabled && spec.fieldCrypto.mode === "secure";
+  const includePlainColumns =
+    !secureOnly || spec.fieldCrypto.compatPlainColumns;
 
   const messageId =
     s.messageId === "uuid"
@@ -194,6 +220,21 @@ function renderMySqlTrackingSchema(
   };
 
   const rawFieldLine = spec.storeRaw ? `\n    raw: text(${q(c.raw)}),` : "";
+  const plainAddressFields = includePlainColumns
+    ? `\n    to: ${shortTextField(c.to, true)},\n    from: ${shortTextField(c.from, false)},`
+    : "";
+  const secureAddressFields = secureOnly
+    ? `\n    toEnc: ${idField(c.toEnc)},\n    toHash: ${idField(c.toHash)},\n    toMasked: ${idField(c.toMasked)},\n    fromEnc: varchar(${q(c.fromEnc)}, { length: 255 }),\n    fromHash: varchar(${q(c.fromHash)}, { length: 255 }),\n    fromMasked: varchar(${q(c.fromMasked)}, { length: 255 }),`
+    : "";
+  const secureMetaFields = secureOnly
+    ? `\n    metadataEnc: varchar(${q(c.metadataEnc)}, { length: 255 }),\n    metadataHashes: text(${q(c.metadataHashes)}),\n    cryptoKid: varchar(${q(c.cryptoKid)}, { length: 255 }),\n    cryptoVersion: int(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: ${shortTextField(c.cryptoState, false)},\n    retentionClass: ${shortTextField(c.retentionClass, false)},\n    retentionBucketYm: int(${q(c.retentionBucketYm)}),`
+    : "";
+  const plainMetadataField = includePlainColumns
+    ? `\n    metadata: text(${q(c.metadata)}),`
+    : "";
+  const secureIndexes = secureOnly
+    ? `,\n    index(${q(spec.indexNames.toHash)}).on(table.toHash),\n    index(${q(spec.indexNames.fromHash)}).on(table.fromHash),\n    index(${q(spec.indexNames.retentionBucket)}).on(\n      table.retentionClass,\n      table.retentionBucketYm,\n    )`
+    : "";
 
   return `export const deliveryTrackingTable = mysqlTable(
   ${q(spec.tableName)},
@@ -202,8 +243,8 @@ function renderMySqlTrackingSchema(
     providerId: ${idField(c.providerId)},
     providerMessageId: ${idField(c.providerMessageId)},
     type: ${shortTextField(c.type, true)},
-    to: ${shortTextField(c.to, true)},
-    from: ${shortTextField(c.from, false)},
+    ${plainAddressFields.trimStart()}
+    ${secureAddressFields.trimStart()}
     status: ${shortTextField(c.status, true)},
     providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
     providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
@@ -216,8 +257,7 @@ function renderMySqlTrackingSchema(
     attemptCount: int(${q(c.attemptCount)}).notNull().default(0),
     lastCheckedAt: ${timestampField(c.lastCheckedAt)},
     nextCheckAt: ${timestampField(c.nextCheckAt, true)},
-    lastError: text(${q(c.lastError)}),${rawFieldLine}
-    metadata: text(${q(c.metadata)}),
+    lastError: text(${q(c.lastError)}),${rawFieldLine}${secureMetaFields}${plainMetadataField}
   },
   (table) => [
     index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
@@ -225,7 +265,7 @@ function renderMySqlTrackingSchema(
       table.providerId,
       table.providerMessageId,
     ),
-    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt)${secureIndexes},
   ],
 );`;
 }
@@ -271,12 +311,32 @@ function renderSqliteTrackingSchema(
     columnMap: options.trackingColumnMap,
     typeStrategy: trackingTypeStrategy,
     storeRaw: options.trackingStoreRaw,
+    fieldCryptoSchema: options.fieldCryptoSchema,
     indexNames: options.indexNames,
     trackingIndexNames: options.trackingIndexNames,
   });
   const c = spec.columnMap;
+  const secureOnly =
+    spec.fieldCrypto.enabled && spec.fieldCrypto.mode === "secure";
+  const includePlainColumns =
+    !secureOnly || spec.fieldCrypto.compatPlainColumns;
 
   const rawFieldLine = spec.storeRaw ? `\n    raw: text(${q(c.raw)}),` : "";
+  const plainAddressFields = includePlainColumns
+    ? `\n    to: text(${q(c.to)}).notNull(),\n    from: text(${q(c.from)}),`
+    : "";
+  const secureAddressFields = secureOnly
+    ? `\n    toEnc: text(${q(c.toEnc)}).notNull(),\n    toHash: text(${q(c.toHash)}).notNull(),\n    toMasked: text(${q(c.toMasked)}).notNull(),\n    fromEnc: text(${q(c.fromEnc)}),\n    fromHash: text(${q(c.fromHash)}),\n    fromMasked: text(${q(c.fromMasked)}),`
+    : "";
+  const secureMetaFields = secureOnly
+    ? `\n    metadataEnc: text(${q(c.metadataEnc)}),\n    metadataHashes: text(${q(c.metadataHashes)}),\n    cryptoKid: text(${q(c.cryptoKid)}),\n    cryptoVersion: integer(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: text(${q(c.cryptoState)}),\n    retentionClass: text(${q(c.retentionClass)}),\n    retentionBucketYm: integer(${q(c.retentionBucketYm)}),`
+    : "";
+  const plainMetadataField = includePlainColumns
+    ? `\n    metadata: text(${q(c.metadata)}),`
+    : "";
+  const secureIndexes = secureOnly
+    ? `,\n    index(${q(spec.indexNames.toHash)}).on(table.toHash),\n    index(${q(spec.indexNames.fromHash)}).on(table.fromHash),\n    index(${q(spec.indexNames.retentionBucket)}).on(\n      table.retentionClass,\n      table.retentionBucketYm,\n    )`
+    : "";
 
   return `export const deliveryTrackingTable = sqliteTable(
   ${q(spec.tableName)},
@@ -285,8 +345,8 @@ function renderSqliteTrackingSchema(
     providerId: text(${q(c.providerId)}).notNull(),
     providerMessageId: text(${q(c.providerMessageId)}).notNull(),
     type: text(${q(c.type)}).notNull(),
-    to: text(${q(c.to)}).notNull(),
-    from: text(${q(c.from)}),
+    ${plainAddressFields.trimStart()}
+    ${secureAddressFields.trimStart()}
     status: text(${q(c.status)}).notNull(),
     providerStatusCode: text(${q(c.providerStatusCode)}),
     providerStatusMessage: text(${q(c.providerStatusMessage)}),
@@ -299,8 +359,7 @@ function renderSqliteTrackingSchema(
     attemptCount: integer(${q(c.attemptCount)}).notNull().default(0),
     lastCheckedAt: integer(${q(c.lastCheckedAt)}),
     nextCheckAt: integer(${q(c.nextCheckAt)}).notNull(),
-    lastError: text(${q(c.lastError)}),${rawFieldLine}
-    metadata: text(${q(c.metadata)}),
+    lastError: text(${q(c.lastError)}),${rawFieldLine}${secureMetaFields}${plainMetadataField}
   },
   (table) => [
     index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
@@ -308,7 +367,7 @@ function renderSqliteTrackingSchema(
       table.providerId,
       table.providerMessageId,
     ),
-    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt),
+    index(${q(spec.indexNames.requestedAt)}).on(table.requestedAt)${secureIndexes},
   ],
 );`;
 }

@@ -1,3 +1,5 @@
+export * from "./crypto/errors";
+export * from "./crypto/types";
 export * from "./errors";
 export * from "./logger";
 export * from "./persistence/repository";

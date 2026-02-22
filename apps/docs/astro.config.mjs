@@ -351,6 +351,18 @@ export default defineConfig({
                 "guides/examples/hono-worker-tracking-d1",
               ],
             },
+            {
+              label: "Security",
+              translations: {
+                ko: "보안",
+                en: "Security",
+              },
+              items: [
+                "guides/security",
+                "guides/security/field-crypto-v1",
+                "guides/security/kr-b2b-retention",
+              ],
+            },
           ],
         },
         "cli",
