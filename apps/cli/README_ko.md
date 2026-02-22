@@ -2,36 +2,11 @@
 
 이 CLI는 [Bunli](https://bunli.dev/)로 작성되었고, 통합 `k-msg` 패키지(KMsg + Providers)를 사용합니다.
 
-## 설치 (권장)
-
-### npm
-
-```bash
-npm install -g @k-msg/cli
-# 또는: pnpm add -g @k-msg/cli
-
-k-msg --help
-```
-
-참고: npm 패키지는 첫 실행 시 GitHub Releases에서 네이티브 바이너리를 내려받습니다.
-(`bunli build:all` 산출물: `k-msg-cli-<version>-<target>.tar.gz`)
-`checksums.txt`로 검증한 뒤 OS 캐시 디렉터리에 압축 해제/캐시합니다.
-(`K_MSG_CLI_CACHE_DIR`로 경로를 덮어쓸 수 있습니다)
-
-새 네이티브 바이너리를 설치할 때 런처는 PATH 상의 쓰기 가능한 기존 `k-msg`
-바이너리(예: 오래된 curl 설치본)도 best-effort로 함께 동기화합니다.
-이 동작을 끄려면 `K_MSG_CLI_SYNC_PATHS=0`을 설정하세요.
-
-환경 변수 오버라이드:
-
-- `K_MSG_CLI_BASE_URL`: GitHub release base URL 덮어쓰기 (기본값: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
-- `K_MSG_CLI_CACHE_DIR`: 압축 해제된 바이너리 캐시 경로 덮어쓰기
-- `K_MSG_CLI_LOCAL_BINARY`: 다운로드 대신 로컬 바이너리 복사(로컬 테스트 용도)
-
-### curl 설치 스크립트 (GitHub Pages)
+## 설치 (curl 단일 경로)
 
 ```bash
 curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
+k-msg --help
 ```
 
 설치 스크립트 환경 변수:
@@ -40,39 +15,8 @@ curl -fsSL https://k-otp.github.io/k-msg/cli/install.sh | bash
 - `K_MSG_CLI_INSTALL_DIR`: 설치 디렉터리 강제 지정 (기본값: 쓰기 가능한 활성 `k-msg` 경로를 우선 감지하고, 실패 시 `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: release base URL 덮어쓰기 (기본값: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
 
-PATH 충돌 관련 참고:
-
-- 설치 스크립트는 가능하면 현재 PATH에서 활성화된 `k-msg` 경로를 우선 업데이트하고, 설치 경로와 활성 경로가 다를 때도 활성 경로를 함께 갱신합니다. 이전 bun/npm/curl 설치본이 남아 버전이 뒤섞이는 문제를 줄이기 위한 동작입니다.
-- 안전을 위해 심볼릭 링크/스크립트 런처(예: 패키지 매니저 shim)는 자동 덮어쓰지 않습니다. 이 경우 `K_MSG_CLI_INSTALL_DIR`를 지정하지 않으면 `~/.local/bin`으로 설치됩니다.
-
-### GitHub Releases (수동 설치)
-
-배포 워크플로우는 아래 prebuilt 바이너리를 GitHub Releases에도 게시합니다:
-
-- `k-msg-cli-<version>-darwin-arm64.tar.gz`
-- `k-msg-cli-<version>-darwin-x64.tar.gz`
-- `k-msg-cli-<version>-linux-arm64.tar.gz`
-- `k-msg-cli-<version>-linux-x64.tar.gz`
-- `k-msg-cli-<version>-windows-x64.tar.gz`
-
-압축 해제 후 바이너리 경로는 `<target>/k-msg`(또는 `<target>/k-msg.exe`)입니다.
-
-### macOS/Linux
-
-```bash
-tar -xzf k-msg-cli-<version>-<target>.tar.gz
-sudo install -m 0755 <target>/k-msg /usr/local/bin/k-msg
-
-# 선택: alias
-sudo ln -sf /usr/local/bin/k-msg /usr/local/bin/kmsg
-
-k-msg --help
-```
-
-### Windows
-
-압축 파일을 해제한 뒤 `k-msg.exe`를 `PATH`에 포함된 위치에 두세요.
-원하면 alias 용도로 `kmsg.exe`로도 복사할 수 있습니다.
+사용자 안내 기준 CLI 설치 경로는 curl 설치 스크립트로 단일화했습니다.
+다른 설치 경로는 이 문서에서 안내하지 않습니다.
 
 ## 실행 (local/dev)
 
