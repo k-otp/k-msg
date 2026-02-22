@@ -1,5 +1,12 @@
 # k-msg
 
+## 0.22.2 — 2026-02-22
+
+### Patch changes
+
+- [217f799](https://github.com/k-otp/k-msg/commit/217f799292bdc0f4f3ce3278626e5de039ad96e1) Expose `ErrorUtils` from the `k-msg` root facade so consumers can use retry classification helpers without fallback imports. — Thanks @imjlk!
+- Updated dependencies: core@0.22.2, messaging@0.22.2
+
 ## 0.22.1 — 2026-02-22
 
 ### Patch changes
