@@ -1,5 +1,17 @@
 # @k-msg/core
 
+## 0.23.1 — 2026-02-22
+
+### Patch changes
+
+- [df9c3d7](https://github.com/k-otp/k-msg/commit/df9c3d78d3aa560412207d6021b564ec52e0602a) Harden field crypto P0 policy and improve beginner-facing security docs.
+  
+  - add fail-fast `fieldCrypto` policy validation API (`validateFieldCryptoConfig`, `assertFieldCryptoConfig`, `resolveFieldMode`)
+  - enforce secure-mode config checks at tracking store initialization
+  - strengthen fail-open metric tags and normalization consistency for hash lookups
+  - apply the same validation policy to webhook registry crypto options
+  - add plain-language security glossary/recipes in docs (ko/en) and root basics docs — Thanks @imjlk!
+
 ## 0.23.0 — 2026-02-22
 
 ### Minor changes
