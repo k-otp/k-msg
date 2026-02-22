@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:47](https://github.
 
 ### action
 
-> **action**: `"create"` \| `"read"` \| `"update"` \| `"delete"` \| `"verify"` \| `"suspend"` \| `"activate"`
+> **action**: `"verify"` \| `"create"` \| `"read"` \| `"update"` \| `"delete"` \| `"suspend"` \| `"activate"`
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L51)
 

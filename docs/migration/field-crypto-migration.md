@@ -50,3 +50,13 @@ fields: {
 
 - Keep `compatPlainColumns=true` until post-cutover validation is complete.
 - Keep multi-kid decrypt configured during rollback window.
+
+## 6. Webhook legacy alias migration
+
+Webhook storage config still keeps legacy options for compatibility:
+
+- `enableEncryption` (deprecated)
+- `encryptionKey` (deprecated)
+
+Use `fieldCrypto` as the single source of truth.  
+When both are set, `fieldCrypto` takes precedence.

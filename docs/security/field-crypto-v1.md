@@ -1,5 +1,9 @@
 # Field Crypto v1
 
+Question this page answers: What is the technical policy contract for field-level crypto in `k-msg` v1?
+
+If this is your first time with crypto terms, read `./field-crypto-basics.md` first.
+
 ## Scope
 
 `k-msg` v1 field crypto standardizes encryption, hash lookup, and key lifecycle across:
@@ -60,3 +64,9 @@ Ciphertext is persisted as JSON envelope:
 
 - Sensitive keys (`to`, `from`, `payload`, `secret`, `token`, `authorization`, etc.) are masked/redacted in core logger.
 - Use masked values in operational diagnostics.
+
+## Companion docs
+
+- Basics: `./field-crypto-basics.md`
+- Korean basics: `./field-crypto-basics_ko.md`
+- Runbook: `./field-crypto-runbook.md`

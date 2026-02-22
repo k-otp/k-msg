@@ -155,8 +155,15 @@ const trackingStore = createD1DeliveryTrackingStore(env.DB, {
 Migration, threat model, and retention guidance are documented in:
 
 - [`docs/security/field-crypto-v1.md`](./docs/security/field-crypto-v1.md)
+- [`docs/security/field-crypto-basics.md`](./docs/security/field-crypto-basics.md)
 - [`docs/migration/field-crypto-migration.md`](./docs/migration/field-crypto-migration.md)
 - [`docs/compliance/kr-b2b-retention.md`](./docs/compliance/kr-b2b-retention.md)
+
+If you are new to security terms, start here first:
+
+- Astro docs (KO): [`/guides/security/glossary/`](https://k-msg.and.guide/guides/security/glossary/) -> [`/guides/security/recipes/`](https://k-msg.and.guide/guides/security/recipes/)
+- Astro docs (EN): [`/en/guides/security/glossary/`](https://k-msg.and.guide/en/guides/security/glossary/) -> [`/en/guides/security/recipes/`](https://k-msg.and.guide/en/guides/security/recipes/)
+- Root docs (plain language): [`docs/security/field-crypto-basics.md`](./docs/security/field-crypto-basics.md)
 
 ## Project Roadmap
 

@@ -7,4 +7,4 @@ title: "CloudflareSqlSchemaTarget"
 
 > **CloudflareSqlSchemaTarget** = `"tracking"` \| `"queue"` \| `"both"`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L16)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L17)

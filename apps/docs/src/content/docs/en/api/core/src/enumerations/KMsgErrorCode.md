@@ -17,6 +17,46 @@ Defined in: [packages/core/src/errors.ts:3](https://github.com/k-otp/k-msg/blob/
 
 ***
 
+### CRYPTO\_CONFIG\_ERROR
+
+> **CRYPTO\_CONFIG\_ERROR**: `"CRYPTO_CONFIG_ERROR"`
+
+Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L12)
+
+***
+
+### CRYPTO\_DECRYPT\_FAILED
+
+> **CRYPTO\_DECRYPT\_FAILED**: `"CRYPTO_DECRYPT_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L14)
+
+***
+
+### CRYPTO\_ENCRYPT\_FAILED
+
+> **CRYPTO\_ENCRYPT\_FAILED**: `"CRYPTO_ENCRYPT_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L13)
+
+***
+
+### CRYPTO\_HASH\_FAILED
+
+> **CRYPTO\_HASH\_FAILED**: `"CRYPTO_HASH_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
+
+***
+
+### CRYPTO\_POLICY\_VIOLATION
+
+> **CRYPTO\_POLICY\_VIOLATION**: `"CRYPTO_POLICY_VIOLATION"`
+
+Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
+
+***
+
 ### INSUFFICIENT\_BALANCE
 
 > **INSUFFICIENT\_BALANCE**: `"INSUFFICIENT_BALANCE"`
@@ -93,4 +133,4 @@ Defined in: [packages/core/src/errors.ts:5](https://github.com/k-otp/k-msg/blob/
 
 > **UNKNOWN\_ERROR**: `"UNKNOWN_ERROR"`
 
-Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L12)
+Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)

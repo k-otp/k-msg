@@ -7,7 +7,7 @@ title: "setGlobalLogger"
 
 > **setGlobalLogger**(`logger`): `void`
 
-Defined in: [packages/core/src/logger.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L235)
+Defined in: [packages/core/src/logger.ts:314](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L314)
 
 ## Parameters
 

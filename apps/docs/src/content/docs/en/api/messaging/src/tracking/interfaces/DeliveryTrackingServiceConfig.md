@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingServiceConfig"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L63)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L69)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:63](https://git
 
 > `optional` **apiFailover**: [`DeliveryTrackingApiFailoverConfig`](/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverconfig/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L67)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L73)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:67](https://git
 
 > `optional` **polling**: `Partial`\<[`DeliveryTrackingPollingConfig`](/api/messaging/src/tracking/interfaces/deliverytrackingpollingconfig/)\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L66)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L72)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:66](https://git
 
 > **providers**: [`Provider`](/api/core/src/interfaces/provider/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L64)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L70)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:64](https://git
 
 > `optional` **store**: [`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L65)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L71)
