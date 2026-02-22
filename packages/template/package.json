@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/template",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "packageManager": "bun@1.3.8",
   "description": "AlimTalk template engine for parsing, building and managing templates",
   "type": "module",
