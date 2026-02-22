@@ -20,6 +20,41 @@ describe("Cloudflare SQL schema builders", () => {
     expect(sql).toContain("idx_kmsg_jobs_dequeue");
   });
 
+  test("tracking schema defaults to kmsg_delivery_tracking without raw column", () => {
+    const sql = buildCloudflareSqlSchemaSql({
+      dialect: "sqlite",
+      target: "tracking",
+    });
+
+    expect(sql).toContain(
+      'CREATE TABLE IF NOT EXISTS "kmsg_delivery_tracking"',
+    );
+    expect(sql).not.toContain('"raw"');
+  });
+
+  test("tracking schema includes raw column when storeRaw=true", () => {
+    const sql = buildCloudflareSqlSchemaSql({
+      dialect: "sqlite",
+      target: "tracking",
+      trackingStoreRaw: true,
+    });
+
+    expect(sql).toContain('"raw" TEXT');
+  });
+
+  test("tracking schema respects tableName override", () => {
+    const sql = buildCloudflareSqlSchemaSql({
+      dialect: "postgres",
+      target: "tracking",
+      trackingTableName: "otp_tracking",
+    });
+
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS "otp_tracking"');
+    expect(sql).not.toContain(
+      'CREATE TABLE IF NOT EXISTS "kmsg_delivery_tracking"',
+    );
+  });
+
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
     let indexFailures = 0;
     const client = {
@@ -74,5 +109,20 @@ describe("Drizzle schema renderer", () => {
     expect(source).toContain('"otp_tracking"');
     expect(source).toContain("deliveryTrackingTable");
     expect(source).not.toContain("jobQueueTable");
+  });
+
+  test("respects trackingStoreRaw option in rendered source", () => {
+    const withoutRaw = renderDrizzleSchemaSource({
+      dialect: "postgres",
+      target: "tracking",
+    });
+    const withRaw = renderDrizzleSchemaSource({
+      dialect: "postgres",
+      target: "tracking",
+      trackingStoreRaw: true,
+    });
+
+    expect(withoutRaw).not.toContain("raw:");
+    expect(withRaw).toContain("raw:");
   });
 });

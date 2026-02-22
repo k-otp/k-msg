@@ -145,6 +145,45 @@ describe("Cloudflare SQL adapters", () => {
     expect(mySql).toContain("?");
   });
 
+  test("HyperdriveDeliveryTrackingStore toggles raw column by storeRaw option", async () => {
+    const withoutRaw = createCapturingSqlClient("sqlite");
+    const withRaw = createCapturingSqlClient("sqlite");
+
+    const withoutRawStore = new HyperdriveDeliveryTrackingStore(
+      withoutRaw.client,
+    );
+    const withRawStore = new HyperdriveDeliveryTrackingStore(withRaw.client, {
+      storeRaw: true,
+    });
+
+    const record = {
+      messageId: "m-raw",
+      providerId: "iwinv",
+      providerMessageId: "p-raw",
+      type: "SMS" as const,
+      to: "01012345678",
+      status: "SENT" as const,
+      requestedAt: new Date(),
+      statusUpdatedAt: new Date(),
+      attemptCount: 0,
+      nextCheckAt: new Date(),
+      raw: { sample: true },
+    };
+
+    await withoutRawStore.upsert(record);
+    await withRawStore.upsert(record);
+
+    const withoutRawSql =
+      withoutRaw.queries.find((query) => query.sql.includes("INSERT INTO"))
+        ?.sql ?? "";
+    const withRawSql =
+      withRaw.queries.find((query) => query.sql.includes("INSERT INTO"))?.sql ??
+      "";
+
+    expect(withoutRawSql).not.toContain('"raw"');
+    expect(withRawSql).toContain('"raw"');
+  });
+
   test("createDrizzleSqlClient normalizes execute results and wraps transactions", async () => {
     const calls: unknown[] = [];
     const txCalls: unknown[] = [];
