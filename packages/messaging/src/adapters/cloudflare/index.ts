@@ -3,6 +3,30 @@ import type {
   DeliveryTrackingRetentionConfig,
 } from "../../delivery-tracking/store.interface";
 import {
+  applyFieldCryptoMigration,
+  retryFieldCryptoMigration,
+  statusFieldCryptoMigration,
+} from "../../migration/field-crypto/executor";
+import { planFieldCryptoMigration } from "../../migration/field-crypto/planner";
+import {
+  ensureFieldCryptoMigrationStateTables,
+  getFieldCryptoMigrationRun,
+  getFieldCryptoMigrationStatus,
+  getLatestFieldCryptoMigrationRun,
+  listFailedFieldCryptoMigrationChunks,
+} from "../../migration/field-crypto/state";
+import type {
+  FieldCryptoMigrationApplyInput,
+  FieldCryptoMigrationApplyResult,
+  FieldCryptoMigrationChunkRecord,
+  FieldCryptoMigrationPlan,
+  FieldCryptoMigrationPlanInput,
+  FieldCryptoMigrationRetryInput,
+  FieldCryptoMigrationRunRecord,
+  FieldCryptoMigrationStateTables,
+  FieldCryptoMigrationStatus,
+} from "../../migration/field-crypto/types";
+import {
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingSchemaOptions,
   type DeliveryTrackingTypeStrategy,
@@ -44,6 +68,7 @@ import {
   type BuildJobQueueSchemaSqlOptions,
   buildCloudflareSqlSchemaSql,
   buildDeliveryTrackingSchemaSql,
+  buildFieldCryptoMigrationMetaSchemaSql,
   buildJobQueueSchemaSql,
   type CloudflareSqlSchemaTarget,
   type InitializeCloudflareSqlSchemaOptions,
@@ -64,10 +89,20 @@ export {
   createDurableObjectStorage,
   buildDeliveryTrackingSchemaSql,
   buildJobQueueSchemaSql,
+  buildFieldCryptoMigrationMetaSchemaSql,
   buildCloudflareSqlSchemaSql,
   initializeCloudflareSqlSchema,
   renderDrizzleSchemaSource,
   getDeliveryTrackingSchemaSpec,
+  planFieldCryptoMigration,
+  applyFieldCryptoMigration,
+  retryFieldCryptoMigration,
+  statusFieldCryptoMigration,
+  ensureFieldCryptoMigrationStateTables,
+  getFieldCryptoMigrationRun,
+  getLatestFieldCryptoMigrationRun,
+  getFieldCryptoMigrationStatus,
+  listFailedFieldCryptoMigrationChunks,
 };
 
 export type {
@@ -83,6 +118,15 @@ export type {
   CloudflareR2BucketLike,
   CloudflareDurableObjectStorageLike,
   BuildDeliveryTrackingSchemaSqlOptions,
+  FieldCryptoMigrationPlanInput,
+  FieldCryptoMigrationPlan,
+  FieldCryptoMigrationApplyInput,
+  FieldCryptoMigrationRetryInput,
+  FieldCryptoMigrationApplyResult,
+  FieldCryptoMigrationRunRecord,
+  FieldCryptoMigrationChunkRecord,
+  FieldCryptoMigrationStateTables,
+  FieldCryptoMigrationStatus,
   BuildJobQueueSchemaSqlOptions,
   BuildCloudflareSqlSchemaSqlOptions,
   InitializeCloudflareSqlSchemaOptions,
