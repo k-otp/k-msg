@@ -4,6 +4,10 @@ description: "k-msg security-audit encryption policy (v1)"
 ---
 `fieldCrypto` is the field-level crypto layer shared across `@k-msg/core`, `@k-msg/messaging`, and `@k-msg/webhook`.
 
+Question this page answers: What are the technical policies operators must know for `fieldCrypto`?
+
+If terms are unfamiliar, start with [Security Glossary](./glossary) and [Security Recipes](./recipes).
+
 ## Supported modes
 
 - `plain`: store as plaintext (discouraged in secure environments)
