@@ -109,6 +109,9 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 
 - [`docs/security/field-crypto-basics_ko.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/field-crypto-basics_ko.md)
 - [`docs/security/field-crypto-v1.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/field-crypto-v1.md)
+- [`docs/security/key-rotation-playbook.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/key-rotation-playbook.md)
+- [`docs/security/migration-cli-runbook.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/migration-cli-runbook.md)
+- [`docs/security/crypto-control-signals.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/crypto-control-signals.md)
 - [`docs/migration/field-crypto-migration.md`](https://github.com/k-otp/k-msg/blob/main/docs/migration/field-crypto-migration.md)
 - [`docs/compliance/kr-b2b-retention.md`](https://github.com/k-otp/k-msg/blob/main/docs/compliance/kr-b2b-retention.md)
 
