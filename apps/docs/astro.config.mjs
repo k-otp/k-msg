@@ -283,6 +283,9 @@ export default defineConfig({
         },
       },
       defaultLocale: "root",
+      components: {
+        Head: "./src/components/Head.astro",
+      },
       plugins: [
         starlightTypeDoc({
           entryPoints: typedocEntryPoints,
