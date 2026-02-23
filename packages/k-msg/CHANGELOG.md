@@ -1,5 +1,17 @@
 # k-msg
 
+## 0.24.1 — 2026-02-23
+
+### Patch changes
+
+- [6fa327f](https://github.com/k-otp/k-msg/commit/6fa327fb1038a57b453394bfcca5499d581f7c0b) Re-export core field-crypto helpers from `k-msg` facade so consumers can avoid direct `@k-msg/core` dependency for common crypto setup.
+  
+  - add field-crypto provider/helpers (`createAesGcmFieldCryptoProvider`, `createNoopFieldCryptoProvider`, `normalizePhoneForHash`, `createDefaultMasker`)
+  - add field-crypto policy exports (`validateFieldCryptoConfig`, `assertFieldCryptoConfig`, `resolveFieldMode`)
+  - add key management exports (static/refreshable/rolling resolvers and ENV/AWS KMS/Vault adapters)
+  - add rollout and crypto event/type exports for tracking integration — Thanks @imjlk!
+- Updated dependencies: core@0.24.1, messaging@0.24.1
+
 ## 0.24.0 — 2026-02-22
 
 ### Patch changes
