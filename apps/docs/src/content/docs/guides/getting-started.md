@@ -20,40 +20,75 @@ K-Message는 한국형 멀티채널 메시징 라이브러리입니다. 알림�
 Bun을 사용하는 경우:
 
 ```bash
-bun add @k-msg/messaging @k-msg/provider
+bun add k-msg @k-msg/provider
 ```
 
 npm을 사용하는 경우:
 
 ```bash
-npm install @k-msg/messaging @k-msg/provider
+npm install k-msg @k-msg/provider
 ```
 
 ## 첫 메시지 보내기 (API 키 불필요)
 
 Mock Provider를 사용하면 API 키 없이 코드를 테스트할 수 있습니다.
 
+### 가장 간단한 방법: `KMsg.simple()`
+
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { MockProvider } from "@k-msg/provider";
 
-// 1. KMsg 인스턴스 생성
-const kmsg = new KMsg({
-  providers: [new MockProvider()],
-});
+// 프로바이더 하나로 간단하게 시작
+const kmsg = KMsg.simple(new MockProvider());
 
-// 2. 메시지 전송
+// 메시지 전송
 const result = await kmsg.send({
   to: "01012345678",
   text: "안녕하세요, 첫 메시지입니다!",
 });
 
-// 3. 결과 확인
+// 결과 확인
 if (result.ok) {
   console.log("전송 성공:", result.value.messageId);
 } else {
   console.log("전송 실패:", result.error.message);
 }
+```
+
+### Builder 패턴으로 설정
+
+여러 프로바이더나 상세 설정이 필요하면 `KMsg.builder()`를 사용합니다.
+
+```ts
+import { KMsg } from "k-msg";
+import { MockProvider } from "@k-msg/provider";
+
+const kmsg = KMsg.builder()
+  .addProvider(new MockProvider())
+  .withDefaults({ sms: { autoLmsBytes: 90 } })
+  .build();
+
+const result = await kmsg.send({
+  to: "01012345678",
+  text: "Builder 패턴으로 전송!",
+});
+```
+
+### 기존 방식 (생성자 직접 호출)
+
+```ts
+import { KMsg } from "k-msg";
+import { MockProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({
+  providers: [new MockProvider()],
+});
+
+const result = await kmsg.send({
+  to: "01012345678",
+  text: "안녕하세요, 첫 메시지입니다!",
+});
 ```
 
 **코드 설명:**
@@ -85,6 +120,24 @@ if (result.ok) {
 }
 ```
 
+### Result 헬퍼 메서드
+
+```ts
+import { Result } from "@k-msg/core";
+
+// tap: 성공/실패 관계없이 부수 효과 실행
+result.tap((r) => console.log("완료:", r));
+
+// tapOk: 성공 시에만 실행
+result.tapOk((value) => console.log("성공:", value.messageId));
+
+// tapErr: 실패 시에만 실행
+result.tapErr((error) => console.log("실패:", error.message));
+
+// expect: 성공 시 값 반환, 실패 시 에러 throw
+const sendResult = result.expect("메시지 전송 실패");
+```
+
 ## 메시지 타입 지정하기
 
 `type`을 지정하면 알림톡, 친구톡 등 다른 채널로 전송할 수 있습니다. `type`을 생략하면 SMS로 처리됩니다.
@@ -107,18 +160,33 @@ await kmsg.send({
 운영 환경에서는 Mock Provider를 실제 프로바이더로 교체합니다. 코드 구조는 그대로 유지됩니다.
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
+import { IWINVProvider } from "@k-msg/provider";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 
-const kmsg = new KMsg({
-  providers: [
+// Builder 패턴으로 여러 프로바이더 설정
+const kmsg = KMsg.builder()
+  .addProvider(
     new SolapiProvider({
       apiKey: process.env.SOLAPI_API_KEY!,
       apiSecret: process.env.SOLAPI_API_SECRET!,
       defaultFrom: "01000000000",
     }),
-  ],
-});
+  )
+  .addProvider(
+    new IWINVProvider({
+      apiKey: process.env.IWINV_API_KEY!,
+      baseUrl: "https://alimtalk.bizservice.iwinv.kr",
+      smsApiKey: process.env.IWINV_SMS_API_KEY,
+      smsAuthKey: process.env.IWINV_SMS_AUTH_KEY,
+      smsSenderNumber: "01000000000",
+    }),
+  )
+  .withRouting({
+    defaultProviderId: "solapi",
+    byType: { ALIMTALK: "iwinv" },
+  })
+  .build();
 
 // 전송 코드는 동일
 const result = await kmsg.send({
@@ -126,6 +194,14 @@ const result = await kmsg.send({
   text: "실제 메시지 전송",
 });
 ```
+
+## 초기화 방식 비교
+
+| 방식 | 용도 | 예시 |
+|------|------|------|
+| `KMsg.simple()` | 단일 프로바이더, 간단한 테스트 | `KMsg.simple(new MockProvider())` |
+| `KMsg.builder()` | 여러 프로바이더, 상세 설정 | `KMsg.builder().addProvider(...).build()` |
+| `new KMsg()` | 기존 방식, 객체 설정 선호 시 | `new KMsg({ providers: [...] })` |
 
 ## 다음 단계
 
