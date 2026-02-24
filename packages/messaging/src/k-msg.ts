@@ -291,7 +291,7 @@ export class KMsg {
       throw new Error("KMsg requires non-empty `providers`");
     }
 
-    this.providers = config.providers;
+    this.providers = [...config.providers];
     this.providersById = new Map();
     for (const provider of this.providers) {
       if (!provider || typeof provider.id !== "string") {
@@ -308,37 +308,6 @@ export class KMsg {
     this.defaults = config.defaults || {};
     this.rrIndexByKey = new Map();
     this.persistence = config.persistence;
-  }
-
-  /**
-   * Creates a KMsg instance with a single provider.
-   *
-   * This is a convenience factory method for the common case where you only
-   * need one provider. It automatically sets that provider as the default.
-   *
-   * @param provider - The provider instance to use for all messages
-   * @returns A new KMsg instance configured with the single provider
-   *
-   * @example
-   * ```ts
-   * import { KMsg } from '@k-msg/messaging';
-   * import { SolapiProvider } from '@k-msg/provider/solapi';
-   *
-   * const kmsg = KMsg.simple(new SolapiProvider({
-   *   apiKey: process.env.SOLAPI_API_KEY!,
-   *   apiSecret: process.env.SOLAPI_API_SECRET!,
-   *   defaultFrom: '01000000000',
-   * }));
-   *
-   * // Ready to send messages
-   * await kmsg.send({ to: '01012345678', text: 'Hello!' });
-   * ```
-   */
-  static simple(provider: Provider): KMsg {
-    return new KMsg({
-      providers: [provider],
-      routing: { defaultProviderId: provider.id },
-    });
   }
 
   /**
@@ -1536,7 +1505,7 @@ export class KMsgBuilder {
    */
   build(): KMsg {
     return new KMsg({
-      providers: this.providersList,
+      providers: [...this.providersList],
       routing: this.config.routing,
       defaults: this.config.defaults,
       hooks: this.config.hooks,

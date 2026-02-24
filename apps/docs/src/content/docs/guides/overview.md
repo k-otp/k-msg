@@ -163,7 +163,8 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 
 - `@k-msg/core`: 표준 타입/에러/Result/복원력 유틸(`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
 - `@k-msg/messaging`: `KMsg` Facade(정규화 + 라우팅)
-- `@k-msg/provider`: 기본 프로바이더(SOLAPI / IWINV / Aligo)
+- `@k-msg/provider`: 런타임 중립 기본 프로바이더(IWINV / Aligo / Mock)
+- `@k-msg/provider/solapi`: SOLAPI 프로바이더(`solapi`는 사용자 앱에서 직접 설치)
 - `@k-msg/template`: 템플릿 치환 유틸
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: 선택 구성요소
 
@@ -185,4 +186,3 @@ changeset/릴리즈 자동화 운영 정책은 아래 문서에 정리되어 있
 - Legacy `Platform` / `UniversalProvider` / `StandardRequest` 공개 API 제거
 - 메시지 구분 필드는 `type`로 통일(기존 `channel` 제거)
 - `templateCode` → `templateId`로 통일
-

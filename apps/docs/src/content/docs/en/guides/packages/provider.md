@@ -36,7 +36,7 @@ Import paths:
 
 - `@k-msg/provider`: runtime-neutral exports (`IWINVProvider`, `AligoProvider`, onboarding helpers, mock)
 - `@k-msg/provider/aligo`: Aligo provider exports
-- `@k-msg/provider/solapi`: SOLAPI provider exports
+- `@k-msg/provider/solapi`: SOLAPI provider exports (`solapi` must be installed by the user app)
 
 ## Provider Onboarding Matrix
 
@@ -109,4 +109,3 @@ When adding a new provider, start from `packages/provider/PROVIDER_README_TEMPLA
 For provider code organization conventions (facade + domain modules + shared utility rules), see:
 
 - `packages/provider/src/PROVIDER_STRUCTURE.md`
-

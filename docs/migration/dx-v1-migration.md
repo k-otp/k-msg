@@ -177,7 +177,6 @@ The direct constructor call remains supported, but factory methods are available
 |---------|----------|
 | `new KMsg({ providers })` | Full configuration (default) |
 | `KMsg.create({ providers })` | Functional style alias |
-| `KMsg.simple(provider)` | Single-provider shortcut |
 | `KMsg.builder().addProvider(...).build()` | Fluent configuration |
 
 **Single Provider (simplified):**
@@ -188,8 +187,10 @@ const kmsg = new KMsg({
   routing: { defaultProviderId: 'iwinv' },
 });
 
-// After (using simple)
-const kmsg = KMsg.simple(new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! }));
+// After (single provider without extra routing)
+const kmsg = new KMsg({
+  providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })],
+});
 ```
 
 **Builder Pattern (multi-provider):**
@@ -208,7 +209,6 @@ const kmsg = KMsg.builder()
     byType: { ALIMTALK: 'iwinv' },
   })
   .withDefaults({
-    from: '01000000000',
     sms: { autoLmsBytes: 90 },
   })
   .build();
@@ -298,9 +298,13 @@ await platform.send(request);
 import { KMsg } from 'k-msg';
 import { IWINVProvider } from '@k-msg/provider';
 
-const kmsg = KMsg.simple(new IWINVProvider({
-  apiKey: process.env.IWINV_API_KEY!,
-}));
+const kmsg = new KMsg({
+  providers: [
+    new IWINVProvider({
+      apiKey: process.env.IWINV_API_KEY!,
+    }),
+  ],
+});
 
 await kmsg.send({
   type: 'ALIMTALK',

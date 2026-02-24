@@ -36,7 +36,7 @@ import 경로:
 
 - `@k-msg/provider`: 런타임 중립 export (`IWINVProvider`, `AligoProvider`, 온보딩 헬퍼, mock)
 - `@k-msg/provider/aligo`: Aligo provider export
-- `@k-msg/provider/solapi`: SOLAPI provider export
+- `@k-msg/provider/solapi`: SOLAPI provider export (`solapi`는 사용자 앱에서 직접 설치)
 
 ## Provider 온보딩 매트릭스
 
@@ -109,4 +109,3 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 provider 코드 구조 표준(파사드 + 도메인 모듈 + shared 유틸 승격 기준)은 아래 문서를 참고하세요.
 
 - `packages/provider/src/PROVIDER_STRUCTURE.md`
-

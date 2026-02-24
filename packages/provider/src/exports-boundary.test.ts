@@ -4,7 +4,7 @@ describe("provider export boundaries", () => {
   test("root export is runtime-neutral", async () => {
     const root = await import("./index");
 
-    expect(typeof root.SolapiProvider).toBe("function");
+    expect("SolapiProvider" in root).toBe(false);
     expect(typeof root.AligoProvider).toBe("function");
     expect(typeof root.IWINVProvider).toBe("function");
     expect(typeof root.providerCliMetadata).toBe("object");
