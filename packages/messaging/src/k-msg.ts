@@ -311,6 +311,67 @@ export class KMsg {
   }
 
   /**
+   * Creates a KMsg instance with a single provider.
+   *
+   * This is a convenience factory method for the common case where you only
+   * need one provider. It automatically sets that provider as the default.
+   *
+   * @param provider - The provider instance to use for all messages
+   * @returns A new KMsg instance configured with the single provider
+   *
+   * @example
+   * ```ts
+   * import { KMsg } from '@k-msg/messaging';
+   * import { SolapiProvider } from '@k-msg/provider/solapi';
+   *
+   * const kmsg = KMsg.simple(new SolapiProvider({
+   *   apiKey: process.env.SOLAPI_API_KEY!,
+   *   apiSecret: process.env.SOLAPI_API_SECRET!,
+   *   defaultFrom: '01000000000',
+   * }));
+   *
+   * // Ready to send messages
+   * await kmsg.send({ to: '01012345678', text: 'Hello!' });
+   * ```
+   */
+  static simple(provider: Provider): KMsg {
+    return new KMsg({
+      providers: [provider],
+      routing: { defaultProviderId: provider.id },
+    });
+  }
+
+  /**
+   * Creates a KMsg instance with the specified configuration.
+   *
+   * This is a factory method alias for the constructor, useful for
+   * functional-style code or when you prefer named factory methods.
+   *
+   * @param config - Configuration object containing providers and optional settings
+   * @returns A new KMsg instance
+   *
+   * @example
+   * ```ts
+   * import { KMsg } from '@k-msg/messaging';
+   * import { SolapiProvider } from '@k-msg/provider/solapi';
+   *
+   * const kmsg = KMsg.create({
+   *   providers: [
+   *     new SolapiProvider({
+   *       apiKey: process.env.SOLAPI_API_KEY!,
+   *       apiSecret: process.env.SOLAPI_API_SECRET!,
+   *       defaultFrom: '01000000000',
+   *     }),
+   *   ],
+   *   routing: { defaultProviderId: 'solapi' },
+   * });
+   * ```
+   */
+  static create(config: KMsgConfig): KMsg {
+    return new KMsg(config);
+  }
+
+  /**
    * Performs a health check on all configured providers.
    *
    * Checks the health status of each provider and aggregates the results.
@@ -1311,5 +1372,155 @@ export class KMsg {
       typeof options.kakao?.plusId === "string" ? options.kakao.plusId : "";
     const trimmed = plusId.trim();
     return trimmed.length > 0 ? trimmed : undefined;
+  }
+}
+
+
+/**
+ * Fluent builder for creating KMsg instances.
+ *
+ * Provides a chainable API for configuring providers, routing, defaults, and hooks.
+ * Call `build()` to create the final KMsg instance.
+ *
+ * @example
+ * ```ts
+ * const kmsg = KMsg.builder()
+ *   .addProvider(new SolapiProvider({ apiKey: '...', apiSecret: '...' }))
+ *   .addProvider(new IWINVProvider({ apiKey: '...' }))
+ *   .withRouting({ defaultProviderId: 'solapi', byType: { ALIMTALK: 'iwinv' } })
+ *   .withDefaults({ sms: { autoLmsBytes: 90 } })
+ *   .withHooks({ onSuccess: (ctx, result) => console.log('Sent:', result.messageId) })
+ *   .build();
+ * ```
+ */
+export class KMsgBuilder {
+  private readonly config: Partial<KMsgConfig> = {};
+  private readonly providersList: Provider[] = [];
+
+  /**
+   * Adds a single provider to the builder.
+   *
+   * @param provider - The provider instance to add
+   * @returns this builder for method chaining
+   *
+   * @example
+   * ```ts
+   * builder.addProvider(new SolapiProvider({ apiKey: '...', apiSecret: '...' }))
+   * ```
+   */
+  addProvider(provider: Provider): this {
+    this.providersList.push(provider);
+    return this;
+  }
+
+  /**
+   * Adds multiple providers to the builder.
+   *
+   * @param providers - The provider instances to add
+   * @returns this builder for method chaining
+   *
+   * @example
+   * ```ts
+   * builder.addProviders(
+   *   new SolapiProvider({ apiKey: '...', apiSecret: '...' }),
+   *   new IWINVProvider({ apiKey: '...' })
+   * )
+   * ```
+   */
+  addProviders(...providers: Provider[]): this {
+    this.providersList.push(...providers);
+    return this;
+  }
+
+  /**
+   * Sets the routing configuration.
+   *
+   * @param routing - Routing configuration for provider selection
+   * @returns this builder for method chaining
+   *
+   * @example
+   * ```ts
+   * builder.withRouting({
+   *   defaultProviderId: 'solapi',
+   *   byType: { ALIMTALK: 'iwinv' },
+   *   strategy: 'round_robin'
+   * })
+   * ```
+   */
+  withRouting(routing: KMsgRoutingConfig): this {
+    this.config.routing = routing;
+    return this;
+  }
+
+  /**
+   * Sets the defaults configuration.
+   *
+   * @param defaults - Default values applied to outgoing messages
+   * @returns this builder for method chaining
+   *
+   * @example
+   * ```ts
+   * builder.withDefaults({
+   *   sms: { autoLmsBytes: 90 },
+   *   kakao: { profileId: 'my-profile' }
+   * })
+   * ```
+   */
+  withDefaults(defaults: KMsgDefaultsConfig): this {
+    this.config.defaults = defaults;
+    return this;
+  }
+
+  /**
+   * Sets the lifecycle hooks.
+   *
+   * @param hooks - Hook functions for send lifecycle events
+   * @returns this builder for method chaining
+   *
+   * @example
+   * ```ts
+   * builder.withHooks({
+   *   onSuccess: (ctx, result) => console.log('Sent:', result.messageId),
+   *   onError: (ctx, error) => console.error('Failed:', error.message)
+   * })
+   * ```
+   */
+  withHooks(hooks: KMsgHooks): this {
+    this.config.hooks = hooks;
+    return this;
+  }
+
+  /**
+   * Sets the persistence configuration.
+   *
+   * @param persistence - Persistence strategy and repository
+   * @returns this builder for method chaining
+   */
+  withPersistence(persistence: KMsgConfig["persistence"]): this {
+    this.config.persistence = persistence;
+    return this;
+  }
+
+  /**
+   * Builds and returns a new KMsg instance with the configured settings.
+   *
+   * @returns A new KMsg instance
+   * @throws Error if no providers have been added
+   *
+   * @example
+   * ```ts
+   * const kmsg = KMsg.builder()
+   *   .addProvider(new SolapiProvider({ apiKey: '...' }))
+   *   .build();
+   * ```
+   */
+  build(): KMsg {
+    return new KMsg({
+      providers: this.providersList,
+      routing: this.config.routing,
+      defaults: this.config.defaults,
+      hooks: this.config.hooks,
+      persistence: this.config.persistence,
+    });
   }
 }
