@@ -66,7 +66,7 @@ export class IWINVProvider
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id }
+        { providerId: this.id },
       );
     }
     return spec;
@@ -77,14 +77,14 @@ export class IWINVProvider
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         "IWINVProvider requires a config object",
-        { providerId: this.id }
+        { providerId: this.id },
       );
     }
     if (!config.apiKey || config.apiKey.length === 0) {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         "IWINVProvider requires `apiKey` configuration",
-        { providerId: this.id }
+        { providerId: this.id },
       );
     }
 
@@ -483,7 +483,7 @@ export const createDefaultIWINVProvider = () => {
     throw new KMsgError(
       KMsgErrorCode.INVALID_REQUEST,
       "IWINV_API_KEY environment variable is required",
-      { providerId: "iwinv" }
+      { providerId: "iwinv" },
     );
   }
 

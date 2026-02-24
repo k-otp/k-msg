@@ -188,7 +188,10 @@ export const Result = {
    * Result.tap(result, r => console.log('Completed:', r));
    * ```
    */
-  tap<T, E>(result: Result<T, E>, fn: (result: Result<T, E>) => void): Result<T, E> {
+  tap<T, E>(
+    result: Result<T, E>,
+    fn: (result: Result<T, E>) => void,
+  ): Result<T, E> {
     fn(result);
     return result;
   },

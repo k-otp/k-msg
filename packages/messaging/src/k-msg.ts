@@ -1396,7 +1396,6 @@ export class KMsg {
   }
 }
 
-
 /**
  * Fluent builder for creating KMsg instances.
  *
