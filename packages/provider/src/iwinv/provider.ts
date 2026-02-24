@@ -63,17 +63,29 @@ export class IWINVProvider
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Onboarding spec missing for provider: ${this.id}`,
+        { providerId: this.id }
+      );
     }
     return spec;
   }
 
   constructor(config: IWINVConfig) {
     if (!config || typeof config !== "object") {
-      throw new Error("IWINVProvider requires a config object");
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "IWINVProvider requires a config object",
+        { providerId: this.id }
+      );
     }
     if (!config.apiKey || config.apiKey.length === 0) {
-      throw new Error("IWINVProvider requires `apiKey`");
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "IWINVProvider requires `apiKey` configuration",
+        { providerId: this.id }
+      );
     }
 
     this.config = {
@@ -468,7 +480,11 @@ export const createDefaultIWINVProvider = () => {
   };
 
   if (!config.apiKey) {
-    throw new Error("IWINV_API_KEY environment variable is required");
+    throw new KMsgError(
+      KMsgErrorCode.INVALID_REQUEST,
+      "IWINV_API_KEY environment variable is required",
+      { providerId: "iwinv" }
+    );
   }
 
   return new IWINVProvider(config);
