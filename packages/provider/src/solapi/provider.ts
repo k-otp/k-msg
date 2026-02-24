@@ -5,7 +5,8 @@ import {
   type DeliveryStatusQuery,
   type DeliveryStatusResult,
   fail,
-  type KMsgError,
+  KMsgError,
+  KMsgErrorCode,
   type MessageType,
   ok,
   type Provider,
@@ -49,14 +50,22 @@ export class SolapiProvider implements Provider, BalanceProvider {
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Onboarding spec missing for provider: ${this.id}`,
+        { providerId: this.id }
+      );
     }
     return spec;
   }
 
   constructor(config: SolapiConfig, client?: SolapiSdkClient) {
     if (!config || typeof config !== "object") {
-      throw new Error("SolapiProvider requires a config object");
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "SolapiProvider requires a config object",
+        { providerId: this.id }
+      );
     }
     if (!config.apiKey || config.apiKey.length === 0) {
       throw new Error("SolapiProvider requires `apiKey`");
