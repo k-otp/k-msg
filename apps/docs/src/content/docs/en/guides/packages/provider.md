@@ -109,3 +109,4 @@ When adding a new provider, start from `packages/provider/PROVIDER_README_TEMPLA
 For provider code organization conventions (facade + domain modules + shared utility rules), see:
 
 - `packages/provider/src/PROVIDER_STRUCTURE.md`
+

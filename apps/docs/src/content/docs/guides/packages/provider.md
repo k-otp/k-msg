@@ -109,3 +109,4 @@ await kmsg.send({ to: "01012345678", text: "hello" });
 provider 코드 구조 표준(파사드 + 도메인 모듈 + shared 유틸 승격 기준)은 아래 문서를 참고하세요.
 
 - `packages/provider/src/PROVIDER_STRUCTURE.md`
+
