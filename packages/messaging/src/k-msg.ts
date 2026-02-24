@@ -28,39 +28,151 @@ function interpolateTemplate(
   });
 }
 
+/**
+ * Routing strategy for selecting providers when multiple candidates are available.
+ *
+ * - `"first"`: Always select the first available provider (default)
+ * - `"round_robin"`: Distribute requests across providers in rotation
+ */
 export type RoutingStrategy = "first" | "round_robin";
 
+/**
+ * Configuration for routing messages to specific providers.
+ *
+ * Controls how KMsg selects which provider to use for each message type.
+ * Routing is resolved in this order: explicit `providerId` > `byType` mapping >
+ * `defaultProviderId` > first provider that supports the message type.
+ *
+ * @example
+ * ```ts
+ * const routing: KMsgRoutingConfig = {
+ *   defaultProviderId: 'solapi',
+ *   byType: {
+ *     ALIMTALK: 'iwinv',
+ *     SMS: ['solapi', 'iwinv'],
+ *   },
+ *   strategy: 'round_robin',
+ * };
+ * ```
+ */
 export interface KMsgRoutingConfig {
+  /**
+   * Map of message types to provider IDs.
+   * Can be a single provider ID or an array for load balancing.
+   * When an array is provided, the `strategy` determines which provider is selected.
+   */
   byType?: Partial<Record<MessageType, string | string[]>>;
+
+  /**
+   * Default provider ID to use when no type-specific routing is configured
+   * and no explicit `providerId` is provided in the send options.
+   */
   defaultProviderId?: string;
+
+  /**
+   * Strategy for selecting from multiple providers when `byType` contains an array.
+   * @default "first"
+   */
   strategy?: RoutingStrategy;
 }
 
+/**
+ * Configuration for default values applied to outgoing messages.
+ *
+ * These defaults are merged with message-specific options during normalization,
+ * allowing you to reduce boilerplate for commonly repeated fields.
+ */
 export interface KMsgDefaultsConfig {
+  /**
+   * SMS/LMS-specific defaults.
+   */
   sms?: {
     /**
      * If type is omitted (SMS default input), upgrade to LMS when estimated bytes exceed this value.
-     * Default: 90
+     * @default 90
      */
     autoLmsBytes?: number;
   };
+
+  /**
+   * Kakao (ALIMTALK/FRIENDTALK) defaults.
+   */
   kakao?: {
+    /** Default Kakao profile ID (pfId) for template-based messages. */
     profileId?: string;
+    /** Default Kakao Plus friend ID. */
     plusId?: string;
   };
+
+  /**
+   * Naver Talk (NSA) defaults.
+   */
   naver?: {
+    /** Default Naver Talk ID. */
     talkId?: string;
   };
+
+  /**
+   * RCS defaults.
+   */
   rcs?: {
+    /** Default RCS brand ID. */
     brandId?: string;
   };
 }
 
+/**
+ * Configuration object for initializing a KMsg instance.
+ *
+ * @example
+ * ```ts
+ * const config: KMsgConfig = {
+ *   providers: [
+ *     new SolapiProvider({
+ *       apiKey: process.env.SOLAPI_API_KEY!,
+ *       apiSecret: process.env.SOLAPI_API_SECRET!,
+ *       defaultFrom: '01000000000',
+ *     }),
+ *   ],
+ *   routing: {
+ *     defaultProviderId: 'solapi',
+ *   },
+ *   defaults: {
+ *     sms: { autoLmsBytes: 90 },
+ *   },
+ * };
+ * ```
+ */
 export interface KMsgConfig {
+  /**
+   * Array of provider instances to use for sending messages.
+   * At least one provider is required.
+   */
   providers: Provider[];
+
+  /**
+   * Optional routing configuration for provider selection.
+   */
   routing?: KMsgRoutingConfig;
+
+  /**
+   * Optional defaults applied to outgoing messages.
+   */
   defaults?: KMsgDefaultsConfig;
+
+  /**
+   * Optional lifecycle hooks for send operations.
+   * Hooks are called at various stages: before send, on success, on error, and on completion.
+   */
   hooks?: KMsgHooks;
+
+  /**
+   * Optional persistence configuration for message storage.
+   * - `none`: No persistence (default)
+   * - `log`: Fire-and-forget async logging
+   * - `queue`: Queue for async processing
+   * - `full`: Full persistence with status updates
+   */
   persistence?: {
     strategy: PersistenceStrategy;
     repo: MessageRepository;
@@ -73,6 +185,77 @@ interface ResolvedInput {
   provider: Provider;
 }
 
+/**
+ * High-level messaging facade for sending messages through configured providers.
+ *
+ * KMsg provides a unified API for sending various message types (SMS, LMS, MMS,
+ * ALIMTALK, FRIENDTALK, RCS, etc.) through multiple providers with automatic
+ * routing, template interpolation, and lifecycle hooks.
+ *
+ * Key features:
+ * - Unified `send()` API for all message types
+ * - Automatic provider routing based on message type
+ * - Template variable interpolation with `#{variable}` syntax
+ * - Lifecycle hooks for monitoring and tracking
+ * - Batch sending with concurrency control
+ * - Optional persistence strategies
+ *
+ * @example
+ * Basic usage with a single provider:
+ * ```ts
+ * import { KMsg } from '@k-msg/messaging';
+ * import { SolapiProvider } from '@k-msg/provider/solapi';
+ *
+ * const kmsg = new KMsg({
+ *   providers: [
+ *     new SolapiProvider({
+ *       apiKey: process.env.SOLAPI_API_KEY!,
+ *       apiSecret: process.env.SOLAPI_API_SECRET!,
+ *       defaultFrom: '01000000000',
+ *     }),
+ *   ],
+ * });
+ *
+ * // Send SMS (type is inferred when omitted)
+ * const result = await kmsg.send({
+ *   to: '01012345678',
+ *   text: 'Hello, World!',
+ * });
+ *
+ * if (result.isSuccess) {
+ *   console.log('Message sent:', result.value.messageId);
+ * }
+ * ```
+ *
+ * @example
+ * Multi-provider setup with routing:
+ * ```ts
+ * import { KMsg } from '@k-msg/messaging';
+ * import { IWINVProvider } from '@k-msg/provider';
+ * import { SolapiProvider } from '@k-msg/provider/solapi';
+ *
+ * const kmsg = new KMsg({
+ *   providers: [
+ *     new SolapiProvider({ apiKey: '...', apiSecret: '...' }),
+ *     new IWINVProvider({ apiKey: '...' }),
+ *   ],
+ *   routing: {
+ *     defaultProviderId: 'solapi',
+ *     byType: {
+ *       ALIMTALK: 'iwinv',
+ *     },
+ *   },
+ * });
+ *
+ * // ALIMTALK will be routed to IWINV
+ * await kmsg.send({
+ *   type: 'ALIMTALK',
+ *   to: '01012345678',
+ *   templateId: 'AUTH_OTP',
+ *   variables: { code: '123456' },
+ * });
+ * ```
+ */
 export class KMsg {
   private readonly providers: Provider[];
   private readonly providersById: Map<string, Provider>;
@@ -85,6 +268,21 @@ export class KMsg {
     repo: MessageRepository;
   };
 
+  /**
+   * Creates a new KMsg instance with the specified configuration.
+   *
+   * @param config - Configuration object containing providers and optional settings
+   * @throws Error if config is invalid or providers array is empty
+   *
+   * @example
+   * ```ts
+   * const kmsg = new KMsg({
+   *   providers: [new SolapiProvider({ apiKey: '...', apiSecret: '...' })],
+   *   routing: { defaultProviderId: 'solapi' },
+   *   defaults: { sms: { autoLmsBytes: 90 } },
+   * });
+   * ```
+   */
   constructor(config: KMsgConfig) {
     if (!config || typeof config !== "object") {
       throw new Error("KMsg requires a config object");
@@ -112,6 +310,25 @@ export class KMsg {
     this.persistence = config.persistence;
   }
 
+  /**
+   * Performs a health check on all configured providers.
+   *
+   * Checks the health status of each provider and aggregates the results.
+   * Useful for monitoring and determining if the messaging system is operational.
+   *
+   * @returns A promise resolving to health check results containing:
+   *   - `healthy`: `true` if all providers are healthy, `false` otherwise
+   *   - `providers`: Map of provider IDs to their health status
+   *   - `issues`: Array of error messages for any unhealthy providers
+   *
+   * @example
+   * ```ts
+   * const health = await kmsg.healthCheck();
+   * if (!health.healthy) {
+   *   console.error('Provider issues:', health.issues);
+   * }
+   * ```
+   */
   async healthCheck(): Promise<{
     healthy: boolean;
     providers: Record<string, ProviderHealthStatus>;
@@ -147,6 +364,52 @@ export class KMsg {
     };
   }
 
+  /**
+   * Sends a single message and returns a Result.
+   *
+   * This method normalizes the input, selects an appropriate provider based on
+   * routing configuration, and sends the message. Template variables in the
+   * message text are interpolated if `variables` are provided.
+   *
+   * @param input - The message to send. Can be a single `SendInput` or an array.
+   *   When `type` is omitted, the message is treated as SMS and may be upgraded
+   *   to LMS based on content length and `defaults.sms.autoLmsBytes`.
+   * @returns A promise resolving to:
+   *   - For single input: `Result<SendResult, KMsgError>`
+   *   - For array input: `BatchSendResult` with individual results
+   *
+   * @example
+   * Send an SMS:
+   * ```ts
+   * const result = await kmsg.send({ to: '01012345678', text: 'Hello!' });
+   * if (result.isSuccess) {
+   *   console.log('Sent:', result.value.messageId);
+   * } else {
+   *   console.error('Failed:', result.error.message);
+   * }
+   * ```
+   *
+   * @example
+   * Send ALIMTALK with template variables:
+   * ```ts
+   * const result = await kmsg.send({
+   *   type: 'ALIMTALK',
+   *   to: '01012345678',
+   *   templateId: 'AUTH_OTP',
+   *   variables: { code: '123456', name: 'John' },
+   * });
+   * ```
+   *
+   * @example
+   * Send multiple messages (batch):
+   * ```ts
+   * const batchResult = await kmsg.send([
+   *   { to: '01011112222', text: 'Hello 1' },
+   *   { to: '01033334444', text: 'Hello 2' },
+   * ]);
+   * console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}`);
+   * ```
+   */
   async send(input: SendInput): Promise<Result<SendResult, KMsgError>>;
   async send(input: SendInput[]): Promise<BatchSendResult>;
   async send(
@@ -159,6 +422,31 @@ export class KMsg {
     return this.sendSingle(input);
   }
 
+  /**
+   * Sends a single message and throws on failure.
+   *
+   * This is a convenience method that unwraps the Result, returning the
+   * `SendResult` on success or throwing the `KMsgError` on failure.
+   * Useful when you want to use try/catch error handling instead of
+   * checking `result.isSuccess`.
+   *
+   * @param input - The message to send (single message only, not an array)
+   * @returns A promise resolving to `SendResult` on success
+   * @throws KMsgError if the message fails to send
+   *
+   * @example
+   * ```ts
+   * try {
+   *   const result = await kmsg.sendOrThrow({
+   *     to: '01012345678',
+   *     text: 'Hello!',
+   *   });
+   *   console.log('Sent:', result.messageId);
+   * } catch (error) {
+   *   console.error('Send failed:', error.message);
+   * }
+   * ```
+   */
   async sendOrThrow(input: SendInput): Promise<SendResult> {
     const result = await this.sendSingle(input);
     if (result.isFailure) {

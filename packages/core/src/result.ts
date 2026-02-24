@@ -1,23 +1,67 @@
+/**
+ * Represents a successful result containing a value.
+ */
 export type Ok<T> = {
+  /** Always true for successful results. */
   readonly isSuccess: true;
+  /** Always false for successful results. */
   readonly isFailure: false;
+  /** The contained success value. */
   readonly value: T;
 };
 
+/**
+ * Represents a failed result containing an error.
+ */
 export type Fail<E> = {
+  /** Always false for failed results. */
   readonly isSuccess: false;
+  /** Always true for failed results. */
   readonly isFailure: true;
+  /** The contained error. */
   readonly error: E;
 };
 
+/**
+ * A result type that represents either success (Ok) or failure (Fail).
+ * Used throughout k-msg for explicit error handling without exceptions.
+ *
+ * @template T - The type of the success value
+ * @template E - The type of the error (defaults to Error)
+ *
+ * @example
+ * ```ts
+ * function divide(a: number, b: number): Result<number, string> {
+ *   if (b === 0) return fail("division by zero");
+ *   return ok(a / b);
+ * }
+ *
+ * const result = divide(10, 2);
+ * if (result.isSuccess) {
+ *   console.log(result.value); // 5
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
 export type Result<T, E = Error> = Ok<T> | Fail<E>;
 
+/**
+ * Create a successful result containing the given value.
+ * @param value - The success value to wrap
+ * @returns An Ok result containing the value
+ */
 export const ok = <T>(value: T): Ok<T> => ({
   isSuccess: true,
   isFailure: false,
   value,
 });
 
+/**
+ * Create a failed result containing the given error.
+ * @param error - The error to wrap
+ * @returns A Fail result containing the error
+ */
 export const fail = <E>(error: E): Fail<E> => ({
   isSuccess: false,
   isFailure: true,
