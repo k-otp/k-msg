@@ -2,8 +2,7 @@ import {
   type KakaoChannel,
   type KakaoChannelCategories,
   type KakaoChannelProvider,
-  KMsgError,
-  KMsgErrorCode,
+  type KMsgError,
   type MessageType,
   type Provider,
   type ProviderHealthStatus,
@@ -60,29 +59,17 @@ export class AligoProvider
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id }
-      );
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
     }
     return spec;
   }
 
   constructor(private readonly config: AligoConfig) {
     if (!config || typeof config !== "object") {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        "AligoProvider requires a config object",
-        { providerId: this.id }
-      );
+      throw new Error("AligoProvider requires a config object");
     }
     if (!config.apiKey || config.apiKey.length === 0) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        "AligoProvider requires `apiKey` configuration",
-        { providerId: this.id }
-      );
+      throw new Error("AligoProvider requires `apiKey`");
     }
     if (!config.userId || config.userId.length === 0) {
       throw new Error("AligoProvider requires `userId`");

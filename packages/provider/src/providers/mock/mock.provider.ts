@@ -97,11 +97,11 @@ export class MockProvider
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id }
-      );
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
+
   constructor() {
     // Seed with a deterministic channel/template so CLI calls can be tested
     // without relying on cross-process state.

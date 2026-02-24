@@ -1,3 +1,5 @@
+export type Locale = 'ko' | 'en';
+
 export enum KMsgErrorCode {
   INVALID_REQUEST = "INVALID_REQUEST",
   AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED",
@@ -16,6 +18,75 @@ export enum KMsgErrorCode {
   CRYPTO_POLICY_VIOLATION = "CRYPTO_POLICY_VIOLATION",
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
+
+const DEFAULT_LOCALE: Locale = 'ko';
+
+const ERROR_MESSAGES: Record<KMsgErrorCode, { ko: string; en: string }> = {
+  [KMsgErrorCode.INVALID_REQUEST]: {
+    ko: "잘못된 요청입니다",
+    en: "Invalid request",
+  },
+  [KMsgErrorCode.AUTHENTICATION_FAILED]: {
+    ko: "인증에 실패했습니다",
+    en: "Authentication failed",
+  },
+  [KMsgErrorCode.INSUFFICIENT_BALANCE]: {
+    ko: "잔액이 부족합니다",
+    en: "Insufficient balance",
+  },
+  [KMsgErrorCode.TEMPLATE_NOT_FOUND]: {
+    ko: "템플릿을 찾을 수 없습니다",
+    en: "Template not found",
+  },
+  [KMsgErrorCode.RATE_LIMIT_EXCEEDED]: {
+    ko: "요청 한도를 초과했습니다",
+    en: "Rate limit exceeded",
+  },
+  [KMsgErrorCode.NETWORK_ERROR]: {
+    ko: "네트워크 오류가 발생했습니다",
+    en: "Network error",
+  },
+  [KMsgErrorCode.NETWORK_TIMEOUT]: {
+    ko: "네트워크 요청 시간이 초과되었습니다",
+    en: "Network timeout",
+  },
+  [KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE]: {
+    ko: "서비스를 일시적으로 사용할 수 없습니다",
+    en: "Service temporarily unavailable",
+  },
+  [KMsgErrorCode.PROVIDER_ERROR]: {
+    ko: "제공자 오류가 발생했습니다",
+    en: "Provider error",
+  },
+  [KMsgErrorCode.MESSAGE_SEND_FAILED]: {
+    ko: "메시지 전송에 실패했습니다",
+    en: "Message send failed",
+  },
+  [KMsgErrorCode.CRYPTO_CONFIG_ERROR]: {
+    ko: "암호화 설정 오류가 발생했습니다",
+    en: "Crypto configuration error",
+  },
+  [KMsgErrorCode.CRYPTO_ENCRYPT_FAILED]: {
+    ko: "암호화에 실패했습니다",
+    en: "Encryption failed",
+  },
+  [KMsgErrorCode.CRYPTO_DECRYPT_FAILED]: {
+    ko: "복호화에 실패했습니다",
+    en: "Decryption failed",
+  },
+  [KMsgErrorCode.CRYPTO_HASH_FAILED]: {
+    ko: "해시 생성에 실패했습니다",
+    en: "Hash generation failed",
+  },
+  [KMsgErrorCode.CRYPTO_POLICY_VIOLATION]: {
+    ko: "암호화 정책 위반이 발생했습니다",
+    en: "Crypto policy violation",
+  },
+  [KMsgErrorCode.UNKNOWN_ERROR]: {
+    ko: "알 수 없는 오류가 발생했습니다",
+    en: "Unknown error",
+  },
+};
 
 export type RetryPolicyErrorCode = KMsgErrorCode;
 
@@ -165,6 +236,19 @@ export class KMsgError extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, KMsgError);
     }
+  }
+
+  /**
+   * Returns a localized error message based on the provided locale.
+   * Falls back to Korean (default) if locale is not provided.
+   * Falls back to the original message if no localized message exists.
+   */
+  getLocalizedMessage(locale: Locale = DEFAULT_LOCALE): string {
+    const messages = ERROR_MESSAGES[this.code];
+    if (messages && messages[locale]) {
+      return messages[locale];
+    }
+    return this.message;
   }
 
   toJSON() {
