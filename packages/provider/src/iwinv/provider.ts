@@ -63,24 +63,24 @@ export class IWINVProvider
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id }
-      );
+      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+    }
+    return spec;
+  }
+
   constructor(config: IWINVConfig) {
     if (!config || typeof config !== "object") {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        "IWINVProvider requires a config object",
-        { providerId: this.id }
-      );
+      throw new Error("IWINVProvider requires a config object");
+    }
     if (!config.apiKey || config.apiKey.length === 0) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        "IWINVProvider requires `apiKey` configuration",
-        { providerId: this.id }
-      );
+      throw new Error("IWINVProvider requires `apiKey`");
+    }
+
+    this.config = {
+      ...config,
+      baseUrl: IWINV_ALIMTALK_BASE_URL,
+      sendEndpoint: config.sendEndpoint || "/api/v2/send/",
+    };
 
     const types: MessageType[] = ["ALIMTALK"];
     if (canSendSmsV2(this.config)) {
@@ -468,11 +468,11 @@ export const createDefaultIWINVProvider = () => {
   };
 
   if (!config.apiKey) {
-    throw new KMsgError(
-      KMsgErrorCode.INVALID_REQUEST,
-      "IWINV_API_KEY environment variable is required",
-      { providerId: this.id }
-    );
+    throw new Error("IWINV_API_KEY environment variable is required");
+  }
+
+  return new IWINVProvider(config);
+};
 
 // biome-ignore lint/complexity/noStaticOnlyClass: kept as a factory for convenience
 export class IWINVProviderFactory {
