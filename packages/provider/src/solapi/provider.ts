@@ -53,7 +53,7 @@ export class SolapiProvider implements Provider, BalanceProvider {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id }
+        { providerId: this.id },
       );
     }
     return spec;
@@ -64,7 +64,7 @@ export class SolapiProvider implements Provider, BalanceProvider {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         "SolapiProvider requires a config object",
-        { providerId: this.id }
+        { providerId: this.id },
       );
     }
     if (!config.apiKey || config.apiKey.length === 0) {
