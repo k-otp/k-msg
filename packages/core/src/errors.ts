@@ -1,4 +1,4 @@
-export type Locale = 'ko' | 'en';
+export type Locale = "ko" | "en";
 
 export enum KMsgErrorCode {
   INVALID_REQUEST = "INVALID_REQUEST",
@@ -19,7 +19,7 @@ export enum KMsgErrorCode {
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
 
-const DEFAULT_LOCALE: Locale = 'ko';
+const DEFAULT_LOCALE: Locale = "ko";
 
 const ERROR_MESSAGES: Record<KMsgErrorCode, { ko: string; en: string }> = {
   [KMsgErrorCode.INVALID_REQUEST]: {
@@ -245,7 +245,7 @@ export class KMsgError extends Error {
    */
   getLocalizedMessage(locale: Locale = DEFAULT_LOCALE): string {
     const messages = ERROR_MESSAGES[this.code];
-    if (messages && messages[locale]) {
+    if (messages?.[locale]) {
       return messages[locale];
     }
     return this.message;

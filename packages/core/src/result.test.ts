@@ -149,7 +149,6 @@ describe("Result.isOk / Result.isFail", () => {
   });
 });
 
-
 describe("Result.tap", () => {
   test("should call fn with result and return same result (success)", () => {
     const result = ok(42);
@@ -176,9 +175,12 @@ describe("Result.tap", () => {
   test("should allow chaining", () => {
     const result = ok(5);
     const logs: number[] = [];
-    const final = Result.tap(Result.map(result, (v) => v * 2), (r) => {
-      if (r.isSuccess) logs.push(r.value);
-    });
+    const final = Result.tap(
+      Result.map(result, (v) => v * 2),
+      (r) => {
+        if (r.isSuccess) logs.push(r.value);
+      },
+    );
     expect(final.isSuccess && final.value).toBe(10);
     expect(logs).toEqual([10]);
   });
