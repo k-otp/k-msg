@@ -212,7 +212,8 @@ The roadmap is a living document and is updated quarterly based on operational m
 
 - `@k-msg/core`: core types/utilities (`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
 - `@k-msg/messaging`: `KMsg` facade (normalization + routing)
-- `@k-msg/provider`: built-in providers (SOLAPI / IWINV / Aligo)
+- `@k-msg/provider`: built-in runtime-neutral providers (IWINV / Aligo / Mock)
+- `@k-msg/provider/solapi`: SOLAPI provider (`solapi` must be installed by the user app)
 - `@k-msg/template`: template interpolation utilities
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: optional supporting packages
 

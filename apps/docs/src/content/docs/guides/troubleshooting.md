@@ -12,7 +12,7 @@ K-Message는 모든 에러를 `KMsgError` 객체로 반환합니다. `result.err
 ```ts
 const result = await kmsg.send({ to: "01012345678", text: "테스트" });
 
-if (!result.ok) {
+if (result.isFailure) {
   console.log("에러 코드:", result.error.code);
   console.log("에러 메시지:", result.error.message);
   
@@ -107,17 +107,17 @@ const kmsg = new KMsg({
 **코드 예제**
 
 ```ts
-import { isBalanceProvider } from "@k-msg/core";
-
 // 잔액 확인 (프로바이더가 지원하는 경우)
 const provider = new SolapiProvider({ /* ... */ });
 
-if (isBalanceProvider(provider)) {
+if ("getBalance" in provider && typeof provider.getBalance === "function") {
   const balance = await provider.getBalance();
-  if (balance.ok) {
-    console.log(`현재 잔액: ${balance.value.balance}원`);
+  if (balance.isSuccess) {
+    console.log(
+      `현재 잔액: ${balance.value.amount} ${balance.value.currency ?? "KRW"}`,
+    );
     
-    if (balance.value.balance < 100) {
+    if (balance.value.amount < 100) {
       console.log("잔액이 부족합니다. 충전이 필요합니다.");
     }
   }
@@ -180,7 +180,7 @@ await kmsg.send({
 ```ts
 const result = await kmsg.send({ to: "01012345678", text: "테스트" });
 
-if (!result.ok && result.error.code === "NETWORK_ERROR") {
+if (result.isFailure && result.error.code === "NETWORK_ERROR") {
   // 네트워크 에러는 재시도 가능
   console.log("네트워크 오류. 잠시 후 재시도합니다.");
   
@@ -248,7 +248,7 @@ const kmsg = new KMsg({
 **코드 예제**
 
 ```ts
-if (!result.ok && result.error.code === "PROVIDER_ERROR") {
+if (result.isFailure && result.error.code === "PROVIDER_ERROR") {
   console.log("프로바이더 에러 코드:", result.error.providerErrorCode);
   console.log("프로바이더 에러 메시지:", result.error.providerErrorText);
   console.log("HTTP 상태:", result.error.httpStatus);
@@ -326,7 +326,7 @@ SMS 전송 실패의 일반적인 원인을 순서대로 확인해 보세요.
 ```ts
 const result = await kmsg.send({ to: "01012345678", text: "테스트" });
 
-if (!result.ok) {
+if (result.isFailure) {
   // 구체적 에러 확인
   console.log("에러 코드:", result.error.code);
   console.log("에러 메시지:", result.error.message);
@@ -354,7 +354,6 @@ if (!result.ok) {
 ```ts
 import { KMsg } from "k-msg";
 import { SolapiProvider } from "@k-msg/provider/solapi";
-import { isBalanceProvider } from "@k-msg/core";
 
 const provider = new SolapiProvider({
   apiKey: process.env.SOLAPI_API_KEY!,
@@ -363,12 +362,12 @@ const provider = new SolapiProvider({
 });
 
 // 잔액 조회 지원 여부 확인
-if (isBalanceProvider(provider)) {
+if ("getBalance" in provider && typeof provider.getBalance === "function") {
   const result = await provider.getBalance();
   
-  if (result.ok) {
-    console.log(`잔액: ${result.value.balance}원`);
-    console.log(`포인트: ${result.value.point}원`);
+  if (result.isSuccess) {
+    console.log(`잔액: ${result.value.amount}`);
+    console.log(`통화: ${result.value.currency ?? "KRW"}`);
   } else {
     console.log("잔액 조회 실패:", result.error.message);
   }

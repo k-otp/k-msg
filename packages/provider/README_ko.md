@@ -36,7 +36,7 @@ import 경로:
 
 - `@k-msg/provider`: 런타임 중립 export (`IWINVProvider`, `AligoProvider`, 온보딩 헬퍼, mock)
 - `@k-msg/provider/aligo`: Aligo provider export
-- `@k-msg/provider/solapi`: SOLAPI provider export
+- `@k-msg/provider/solapi`: SOLAPI provider export (`solapi`는 사용자 앱에서 직접 설치)
 
 ## Provider 온보딩 매트릭스
 

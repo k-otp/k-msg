@@ -33,14 +33,16 @@ npm install k-msg @k-msg/provider
 
 Mock Provider를 사용하면 API 키 없이 코드를 테스트할 수 있습니다.
 
-### 가장 간단한 방법: `KMsg.simple()`
+### 가장 간단한 방법: `new KMsg()`
 
 ```ts
 import { KMsg } from "k-msg";
 import { MockProvider } from "@k-msg/provider";
 
 // 프로바이더 하나로 간단하게 시작
-const kmsg = KMsg.simple(new MockProvider());
+const kmsg = new KMsg({
+  providers: [new MockProvider()],
+});
 
 // 메시지 전송
 const result = await kmsg.send({
@@ -49,7 +51,7 @@ const result = await kmsg.send({
 });
 
 // 결과 확인
-if (result.ok) {
+if (result.isSuccess) {
   console.log("전송 성공:", result.value.messageId);
 } else {
   console.log("전송 실패:", result.error.message);
@@ -75,13 +77,13 @@ const result = await kmsg.send({
 });
 ```
 
-### 기존 방식 (생성자 직접 호출)
+### 정적 팩토리 메서드: `KMsg.create()`
 
 ```ts
 import { KMsg } from "k-msg";
 import { MockProvider } from "@k-msg/provider";
 
-const kmsg = new KMsg({
+const kmsg = KMsg.create({
   providers: [new MockProvider()],
 });
 
@@ -96,7 +98,7 @@ const result = await kmsg.send({
 1. `MockProvider`는 실제 API 호출 없이 성공/실패를 시뮬레이션합니다
 2. `to`는 수신자 전화번호 (하이픈 없이)
 3. `text`는 메시지 내용
-4. 결과는 `Result` 타입으로 반환됩니다 (`ok` 또는 `fail`)
+4. 결과는 `Result` 타입으로 반환됩니다 (`isSuccess` 또는 `isFailure`)
 
 ## Result 패턴으로 에러 처리하기
 
@@ -108,7 +110,7 @@ const result = await kmsg.send({
   text: "테스트 메시지",
 });
 
-if (result.ok) {
+if (result.isSuccess) {
   // 성공: result.value에 SendResult가 있음
   const { messageId, status, providerMessageId } = result.value;
   console.log(`메시지 ID: ${messageId}`);
@@ -126,16 +128,16 @@ if (result.ok) {
 import { Result } from "@k-msg/core";
 
 // tap: 성공/실패 관계없이 부수 효과 실행
-result.tap((r) => console.log("완료:", r));
+Result.tap(result, (r) => console.log("완료:", r));
 
 // tapOk: 성공 시에만 실행
-result.tapOk((value) => console.log("성공:", value.messageId));
+Result.tapOk(result, (value) => console.log("성공:", value.messageId));
 
 // tapErr: 실패 시에만 실행
-result.tapErr((error) => console.log("실패:", error.message));
+Result.tapErr(result, (error) => console.log("실패:", error.message));
 
 // expect: 성공 시 값 반환, 실패 시 에러 throw
-const sendResult = result.expect("메시지 전송 실패");
+const sendResult = Result.expect(result, "메시지 전송 실패");
 ```
 
 ## 메시지 타입 지정하기
@@ -199,9 +201,9 @@ const result = await kmsg.send({
 
 | 방식 | 용도 | 예시 |
 |------|------|------|
-| `KMsg.simple()` | 단일 프로바이더, 간단한 테스트 | `KMsg.simple(new MockProvider())` |
+| `new KMsg()` | 단일 프로바이더, 가장 단순한 초기화 | `new KMsg({ providers: [new MockProvider()] })` |
 | `KMsg.builder()` | 여러 프로바이더, 상세 설정 | `KMsg.builder().addProvider(...).build()` |
-| `new KMsg()` | 기존 방식, 객체 설정 선호 시 | `new KMsg({ providers: [...] })` |
+| `KMsg.create()` | 정적 팩토리 호출 선호 시 | `KMsg.create({ providers: [...] })` |
 
 
 ## 민감 정보 암호화 (선택)

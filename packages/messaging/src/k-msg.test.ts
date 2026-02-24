@@ -228,6 +228,64 @@ describe("KMsg", () => {
     expect(sendMock).toHaveBeenCalled();
   });
 
+  test("builder reuse does not mutate already-built KMsg instances", async () => {
+    const smsProvider: Provider = {
+      id: "sms-only",
+      name: "SMS Only",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: mock(async (options: any) =>
+        ok({
+          messageId: options.messageId || "sms-id",
+          status: "SENT" as const,
+          providerId: "sms-only",
+          type: options.type,
+          to: options.to,
+        }),
+      ),
+    };
+
+    const alimSend = mock(async (options: any) =>
+      ok({
+        messageId: options.messageId || "alim-id",
+        status: "SENT" as const,
+        providerId: "alim-only",
+        type: options.type,
+        to: options.to,
+      }),
+    );
+
+    const alimProvider: Provider = {
+      id: "alim-only",
+      name: "ALIMTALK Only",
+      supportedTypes: ["ALIMTALK"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send: alimSend,
+    };
+
+    const builder = KMsg.builder().addProvider(smsProvider);
+    const firstKMsg = builder.build();
+
+    // Reuse builder after first build; previously built instance must stay immutable.
+    builder.addProvider(alimProvider);
+
+    const result = await firstKMsg.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { code: "1234" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(result.error.message).toContain(
+        "No provider available for type ALIMTALK",
+      );
+    }
+    expect(alimSend).not.toHaveBeenCalled();
+  });
+
   test("send accepts array input and returns ordered batch results", async () => {
     const sendMock = mock(async (options: any) => {
       const delayMs =
