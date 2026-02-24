@@ -28,6 +28,14 @@ export {
 } from "./iwinv/provider";
 export type { IWINVConfig } from "./iwinv/types/iwinv";
 export {
+  createDefaultSolapiProvider,
+  createSolapiProvider,
+  initializeSolapi,
+  SolapiProvider,
+  SolapiProviderFactory,
+} from "./solapi";
+export type { SolapiConfig } from "./solapi";
+export {
   getProviderOnboardingSpec,
   listProviderOnboardingSpecs,
   providerOnboardingSpecs,
