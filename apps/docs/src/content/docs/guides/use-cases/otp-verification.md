@@ -34,7 +34,7 @@ SMS를 선택하는 이유:
 ### 1. 기본 OTP 발송
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 
 // KMsg 인스턴스 생성

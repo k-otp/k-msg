@@ -352,7 +352,7 @@ if (!result.ok) {
 `BalanceProvider` 기능을 지원하는 프로바이더에서는 코드로 잔액을 조회할 수 있습니다.
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 import { isBalanceProvider } from "@k-msg/core";
 
