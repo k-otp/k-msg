@@ -53,7 +53,7 @@ SMS 권장:
 ### 1. KMsg 인스턴스 구성
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 

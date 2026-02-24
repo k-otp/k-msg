@@ -47,7 +47,7 @@ description: "알림톡을 활용한 주문 접수, 배송 안내 메시지 발�
 ### 1. KMsg 인스턴스 구성
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 

@@ -228,7 +228,7 @@ await kmsg.send({
 ### SMS 기본 전송
 
 ```ts
-import { KMsg } from "@k-msg/messaging";
+import { KMsg } from "k-msg";
 import { MockProvider } from "@k-msg/provider";
 
 const kmsg = new KMsg({ providers: [new MockProvider()] });
