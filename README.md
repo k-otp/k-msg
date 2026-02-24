@@ -10,35 +10,35 @@ Unified end-user API:
 - `kmsg.send({ type, ... })` (default SMS when `type` is omitted)
 
 
-## K-Message란?
+## What is K-Message?
 
-K-Message는 한국형 멀티채널 메시징 플랫폼을 위한 TypeScript 라이브러리입니다. 
-SMS, LMS, 알림톡, 친구톡을 하나의 통합 API로 관리할 수 있습니다.
+K-Message is a TypeScript library for Korean multi-channel messaging platforms.
+Manage SMS, LMS, AlimTalk, and FriendTalk with a single unified API.
 
-### 주요 특징
+### Key Features
 
-- **하나의 API로 다양한 채널 전송**: SMS, LMS, 알림톡, 친구톡 통합 관리
-- **다중 프로바이더 지원**: SOLAPI, IWINV, Aligo 등 한국 주요 메시징 프로바이더 플러그인
-- **TypeScript 네이티브**: 완벽한 타입 안전성과 IDE 자동완성 지원
-- **Result 패턴**: 명시적 에러 처리로 안전한 비즈니스 로직 작성
-- **Bun 최적화**: 현대적 JavaScript 런타임에 최적화된 성능
+- **Multi-channel sending with one API**: Unified management of SMS, LMS, AlimTalk, FriendTalk
+- **Multiple provider support**: Pluggable support for Korean messaging providers (SOLAPI, IWINV, Aligo)
+- **TypeScript native**: Full type safety and IDE autocomplete support
+- **Result pattern**: Explicit error handling for safe business logic
+- **Bun optimized**: Performance optimized for modern JavaScript runtime
 
-### 빠른 예제
+### Quick Example
 
 ```ts
 import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
 
 const kmsg = new KMsg({ providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })] });
-await kmsg.send({ to: "01012345678", text: "안녕하세요!" });
+await kmsg.send({ to: "01012345678", text: "Hello!" });
 ```
 
-### 언제 사용하나요?
+### When to Use
 
-- 한국 시장 대상 서비스에서 SMS/알림톡 발송이 필요할 때
-- 여러 메시징 프로바이더를 사용 중이거나 전환을 계획 중일 때
-- 타입 안전한 메시징 API를 원하는 TypeScript 프로젝트
-- 고가용성을 위해 프로바이더 장애 시 자동 페일오버가 필요할 때
+- When you need SMS/AlimTalk for Korean market services
+- When using multiple messaging providers or planning provider migration
+- TypeScript projects requiring type-safe messaging APIs
+- When automatic failover is needed for high availability
 
 ## Installation
 
