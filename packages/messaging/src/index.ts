@@ -1,4 +1,4 @@
 export * from "./hooks";
-export { KMsg } from "./k-msg";
+export { KMsg, KMsgBuilder } from "./k-msg";
 // Types
 export * from "./types/message.types";

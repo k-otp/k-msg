@@ -372,6 +372,27 @@ export class KMsg {
   }
 
   /**
+   * Creates a new fluent builder for constructing KMsg instances.
+   *
+   * The builder provides a chainable API for configuring providers,
+   * routing, defaults, and hooks.
+   *
+   * @returns A new KMsgBuilder instance
+   *
+   * @example
+   * ```ts
+   * const kmsg = KMsg.builder()
+   *   .addProvider(new SolapiProvider({ apiKey: '...', apiSecret: '...' }))
+   *   .withRouting({ defaultProviderId: 'solapi' })
+   *   .withDefaults({ sms: { autoLmsBytes: 90 } })
+   *   .build();
+   * ```
+   */
+  static builder(): KMsgBuilder {
+    return new KMsgBuilder();
+  }
+
+  /**
    * Performs a health check on all configured providers.
    *
    * Checks the health status of each provider and aggregates the results.

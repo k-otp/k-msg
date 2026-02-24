@@ -5,9 +5,9 @@ import {
   type DeliveryStatusQuery,
   type DeliveryStatusResult,
   fail,
-  type KMsgError,
+  KMsgError,
+  KMsgErrorCode,
   type MessageType,
-  ok,
   type Provider,
   type ProviderHealthStatus,
   type Result,
@@ -49,30 +49,30 @@ export class SolapiProvider implements Provider, BalanceProvider {
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
     if (!spec) {
-      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
-    }
-    return spec;
-  }
-
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Onboarding spec missing for provider: ${this.id}`,
+        { providerId: this.id }
+      );
   constructor(config: SolapiConfig, client?: SolapiSdkClient) {
     if (!config || typeof config !== "object") {
-      throw new Error("SolapiProvider requires a config object");
-    }
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "SolapiProvider requires a config object",
+        { providerId: this.id }
+      );
     if (!config.apiKey || config.apiKey.length === 0) {
-      throw new Error("SolapiProvider requires `apiKey`");
-    }
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "SolapiProvider requires `apiKey` configuration",
+        { providerId: this.id }
+      );
     if (!config.apiSecret || config.apiSecret.length === 0) {
-      throw new Error("SolapiProvider requires `apiSecret`");
-    }
-
-    this.config = {
-      ...config,
-      baseUrl:
-        typeof config.baseUrl === "string" && config.baseUrl.length > 0
-          ? config.baseUrl
-          : "https://api.solapi.com",
-    };
-    this.client =
+      throw new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "SolapiProvider requires `apiSecret` configuration",
+        { providerId: this.id }
+      );
       client ??
       new SolapiMessageService(this.config.apiKey, this.config.apiSecret);
   }
@@ -196,11 +196,11 @@ export const createDefaultSolapiProvider = () => {
   };
 
   if (!config.apiKey || !config.apiSecret) {
-    throw new Error(
+    throw new KMsgError(
+      KMsgErrorCode.INVALID_REQUEST,
       "SOLAPI_API_KEY and SOLAPI_API_SECRET environment variables are required",
+      { providerId: "solapi" }
     );
-  }
-
   return createSolapiProvider(config);
 };
 
