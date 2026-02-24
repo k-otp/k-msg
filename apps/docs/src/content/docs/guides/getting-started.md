@@ -203,6 +203,67 @@ const result = await kmsg.send({
 | `KMsg.builder()` | 여러 프로바이더, 상세 설정 | `KMsg.builder().addProvider(...).build()` |
 | `new KMsg()` | 기존 방식, 객체 설정 선호 시 | `new KMsg({ providers: [...] })` |
 
+
+## 민감 정보 암호화 (선택)
+
+전화번호 등 민감 정보를 암호화해서 저장해야 하는 경우, K-Message는 필드 단위 암호화를 지원합니다. Delivery Tracking과 함께 사용하면 전송 기록을 안전하게 보관할 수 있습니다.
+
+```ts
+import { KMsg } from "k-msg";
+import { IWINVProvider } from "@k-msg/provider";
+import {
+  createAesGcmFieldCryptoProvider,
+  type FieldCryptoConfig,
+} from "@k-msg/core";
+
+// 암호화 제공자 생성
+const cryptoProvider = createAesGcmFieldCryptoProvider({
+  activeKid: "k-2024-01",
+  keys: {
+    "k-2024-01": process.env.KMSG_AES_KEY_BASE64URL!,
+  },
+  hashKeys: {
+    "k-2024-01": process.env.KMSG_HMAC_KEY_BASE64URL!,
+  },
+  keyEncoding: "base64url",
+  hashKeyEncoding: "base64url",
+});
+
+// 필드 암호화 설정
+const fieldCrypto: FieldCryptoConfig = {
+  enabled: true,
+  failMode: "closed", // 암호화 실패 시 전송 중단
+  fields: {
+    to: "encrypt+hash",   // 수신자 번호: 암호화 + 해시
+    from: "encrypt+hash", // 발신자 번호: 암호화 + 해시
+  },
+  provider: cryptoProvider,
+};
+
+// Delivery Tracking Store에 적용 (D1 예시)
+import { createD1DeliveryTrackingStore } from "@k-msg/messaging/adapters/cloudflare";
+
+const trackingStore = createD1DeliveryTrackingStore(env.DB, {
+  tableName: "message_tracking",
+  fieldCryptoSchema: {
+    enabled: true,
+    mode: "secure",
+  },
+  fieldCrypto: {
+    config: fieldCrypto,
+    tenantId: "my-service",
+  },
+});
+```
+
+**주요 기능:**
+
+- `encrypt+hash`: 암호화 + 해시 (조회용 해시 컬럼 자동 생성)
+- `failMode: "closed"`: 암호화 실패 시 안전하게 중단
+- 키 로테이션 지원 (여러 키 동시 운영)
+
+자세한 내용은 [보안 가이드](/guides/security/field-crypto-v1/)를 참조하세요.
+
 ## 다음 단계
 
 - [개요](/guides/overview/)에서 프로젝트 구조와 기능 확인
