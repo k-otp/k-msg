@@ -148,3 +148,120 @@ describe("Result.isOk / Result.isFail", () => {
     expect(Result.isFail(ok(1))).toBe(false);
   });
 });
+
+describe("Result.tap", () => {
+  test("should call fn with result and return same result (success)", () => {
+    const result = ok(42);
+    let called = false;
+    const tapped = Result.tap(result, (r) => {
+      called = true;
+      expect(r).toBe(result);
+    });
+    expect(called).toBe(true);
+    expect(tapped).toBe(result);
+  });
+
+  test("should call fn with result and return same result (failure)", () => {
+    const result = fail(new Error("oops"));
+    let called = false;
+    const tapped = Result.tap(result, (r) => {
+      called = true;
+      expect(r).toBe(result);
+    });
+    expect(called).toBe(true);
+    expect(tapped).toBe(result);
+  });
+
+  test("should allow chaining", () => {
+    const result = ok(5);
+    const logs: number[] = [];
+    const final = Result.tap(
+      Result.map(result, (v) => v * 2),
+      (r) => {
+        if (r.isSuccess) logs.push(r.value);
+      },
+    );
+    expect(final.isSuccess && final.value).toBe(10);
+    expect(logs).toEqual([10]);
+  });
+});
+
+describe("Result.tapOk", () => {
+  test("should call fn only on success", () => {
+    const result = ok(42);
+    let called = false;
+    const tapped = Result.tapOk(result, (v) => {
+      called = true;
+      expect(v).toBe(42);
+    });
+    expect(called).toBe(true);
+    expect(tapped).toBe(result);
+  });
+
+  test("should not call fn on failure", () => {
+    const result = fail(new Error("oops"));
+    let called = false;
+    const tapped = Result.tapOk(result, () => {
+      called = true;
+    });
+    expect(called).toBe(false);
+    expect(tapped).toBe(result);
+  });
+
+  test("should allow chaining with tapErr", () => {
+    const result = ok("success");
+    const logs: string[] = [];
+    Result.tapOk(result, (v) => logs.push(`ok: ${v}`));
+    expect(logs).toEqual(["ok: success"]);
+  });
+});
+
+describe("Result.tapErr", () => {
+  test("should call fn only on failure", () => {
+    const result = fail(new Error("oops"));
+    let called = false;
+    const tapped = Result.tapErr(result, (e) => {
+      called = true;
+      expect(e.message).toBe("oops");
+    });
+    expect(called).toBe(true);
+    expect(tapped).toBe(result);
+  });
+
+  test("should not call fn on success", () => {
+    const result = ok(42);
+    let called = false;
+    const tapped = Result.tapErr(result, () => {
+      called = true;
+    });
+    expect(called).toBe(false);
+    expect(tapped).toBe(result);
+  });
+});
+
+describe("Result.expect", () => {
+  test("should return value on success", () => {
+    const result = ok(42);
+    expect(Result.expect(result, "should not throw")).toBe(42);
+  });
+
+  test("should throw with message on failure", () => {
+    const originalError = new Error("original");
+    const result = fail(originalError);
+    expect(() => Result.expect(result, "operation failed")).toThrow(
+      "operation failed",
+    );
+  });
+
+  test("should include original error as cause", () => {
+    const originalError = new Error("original");
+    const result = fail(originalError);
+    try {
+      Result.expect(result, "operation failed");
+      expect.unreachable();
+    } catch (e) {
+      expect((e as Error).message).toBe("operation failed");
+      expect((e as Error).cause).toBe(originalError);
+    }
+  });
+});

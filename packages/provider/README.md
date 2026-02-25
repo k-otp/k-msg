@@ -36,7 +36,7 @@ Import paths:
 
 - `@k-msg/provider`: runtime-neutral exports (`IWINVProvider`, `AligoProvider`, onboarding helpers, mock)
 - `@k-msg/provider/aligo`: Aligo provider exports
-- `@k-msg/provider/solapi`: SOLAPI provider exports
+- `@k-msg/provider/solapi`: SOLAPI provider exports (`solapi` must be installed by the user app)
 
 ## Provider Onboarding Matrix
 

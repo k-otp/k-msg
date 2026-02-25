@@ -1,3 +1,17 @@
+/**
+ * Supported message types in the k-msg platform.
+ *
+ * - ALIMTALK: Kakao AlimTalk (notification talk) with approved template
+ * - FRIENDTALK: Kakao FriendTalk (friend message, no template required)
+ * - SMS: Short message (up to 90 bytes, typically ~90 Korean characters)
+ * - LMS: Long message with subject line
+ * - MMS: Multimedia message with image attachment
+ * - NSA: Naver Smart Alarm (notification service)
+ * - VOICE: Voice call message
+ * - FAX: Fax transmission
+ * - RCS_SMS/LMS/MMS: Rich Communication Services text/media messages
+ * - RCS_TPL/ITPL/LTPL: RCS template-based messages
+ */
 export type MessageType =
   | "ALIMTALK"
   | "FRIENDTALK"
@@ -14,6 +28,13 @@ export type MessageType =
   | "RCS_ITPL"
   | "RCS_LTPL";
 
+/**
+ * Message delivery status.
+ *
+ * - PENDING: Queued or in transit
+ * - SENT: Successfully delivered to the carrier
+ * - FAILED: Delivery failed
+ */
 export type MessageStatus = "PENDING" | "SENT" | "FAILED";
 
 export const KNOWN_MESSAGE_STATUSES: MessageStatus[] = [
@@ -34,6 +55,11 @@ export const normalizeMessageStatus = (status: unknown): MessageStatus => {
   return QUEUED_MESSAGE_STATUS;
 };
 
+/**
+ * Variables for template interpolation.
+ * Values are substituted into #{variableName} placeholders in templates.
+ * @example { name: "John", code: "123456" }
+ */
 export type MessageVariables = Record<
   string,
   string | number | boolean | Date | null | undefined
@@ -86,6 +112,10 @@ export interface CommonSendOptions {
    * Optional routing hint to force a specific provider by id.
    */
   providerId?: string;
+  /**
+   * Recipient phone number in Korean format without hyphens.
+   * @example "01012345678"
+   */
   to: string;
   /**
    * Sender number / sender id. Optional at KMsg layer; providers may require it.
@@ -270,6 +300,10 @@ export interface RcsTemplateSendOptions extends CommonSendOptions {
   rcs?: RcsSendOptions;
 }
 
+/**
+ * Union of all supported send option types.
+ * Use this for type narrowing based on the `type` discriminator.
+ */
 export type SendOptions =
   | SmsSendOptions
   | AlimTalkSendOptions
@@ -280,6 +314,10 @@ export type SendOptions =
   | RcsTextSendOptions
   | RcsTemplateSendOptions;
 
+/**
+ * Relaxed SMS input type that allows omitting `type` and using `content` as an alias for `text`.
+ * Used for developer convenience when sending simple SMS messages.
+ */
 export type SmsDefaultSendInput = Omit<SmsSendOptions, "type" | "text"> & {
   type?: undefined;
   /**
@@ -299,16 +337,41 @@ export type SmsDefaultSendInput = Omit<SmsSendOptions, "type" | "text"> & {
  */
 export type SendInput = SendOptions | SmsDefaultSendInput;
 
+/**
+ * Result of a message send operation.
+ * Returned by Provider.send() and KMsg.send().
+ */
 export interface SendResult {
   /**
    * Correlation id (equals the request `messageId`).
    */
   messageId: string;
+  /**
+   * Identifier of the provider that handled this message.
+   */
   providerId: string;
+  /**
+   * Provider-specific message identifier for tracking.
+   */
   providerMessageId?: string;
+  /**
+   * Current delivery status of the message.
+   */
   status: MessageStatus;
+  /**
+   * The message type that was sent.
+   */
   type: MessageType;
+  /**
+   * Recipient phone number.
+   */
   to: string;
+  /**
+   * Non-fatal warnings (e.g., failover partially applied).
+   */
   warnings?: SendWarning[];
+  /**
+   * Raw provider response for debugging (provider-specific shape).
+   */
   raw?: unknown;
 }

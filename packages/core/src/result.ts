@@ -1,23 +1,67 @@
+/**
+ * Represents a successful result containing a value.
+ */
 export type Ok<T> = {
+  /** Always true for successful results. */
   readonly isSuccess: true;
+  /** Always false for successful results. */
   readonly isFailure: false;
+  /** The contained success value. */
   readonly value: T;
 };
 
+/**
+ * Represents a failed result containing an error.
+ */
 export type Fail<E> = {
+  /** Always false for failed results. */
   readonly isSuccess: false;
+  /** Always true for failed results. */
   readonly isFailure: true;
+  /** The contained error. */
   readonly error: E;
 };
 
+/**
+ * A result type that represents either success (Ok) or failure (Fail).
+ * Used throughout k-msg for explicit error handling without exceptions.
+ *
+ * @template T - The type of the success value
+ * @template E - The type of the error (defaults to Error)
+ *
+ * @example
+ * ```ts
+ * function divide(a: number, b: number): Result<number, string> {
+ *   if (b === 0) return fail("division by zero");
+ *   return ok(a / b);
+ * }
+ *
+ * const result = divide(10, 2);
+ * if (result.isSuccess) {
+ *   console.log(result.value); // 5
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
 export type Result<T, E = Error> = Ok<T> | Fail<E>;
 
+/**
+ * Create a successful result containing the given value.
+ * @param value - The success value to wrap
+ * @returns An Ok result containing the value
+ */
 export const ok = <T>(value: T): Ok<T> => ({
   isSuccess: true,
   isFailure: false,
   value,
 });
 
+/**
+ * Create a failed result containing the given error.
+ * @param error - The error to wrap
+ * @returns A Fail result containing the error
+ */
 export const fail = <E>(error: E): Fail<E> => ({
   isSuccess: false,
   isFailure: true,
@@ -128,5 +172,89 @@ export const Result = {
    */
   isFail<T, E>(result: Result<T, E>): result is Fail<E> {
     return result.isFailure;
+  },
+
+  /**
+   * Execute a side-effect without breaking the chain.
+   * Calls fn with the result (ok or fail) and returns the same result.
+   *
+   * @param result - The Result to tap
+   * @param fn - Side-effect function called with the result
+   * @returns The same Result for chaining
+   *
+   * @example
+   * ```ts
+   * const result = await provider.send(options);
+   * Result.tap(result, r => console.log('Completed:', r));
+   * ```
+   */
+  tap<T, E>(
+    result: Result<T, E>,
+    fn: (result: Result<T, E>) => void,
+  ): Result<T, E> {
+    fn(result);
+    return result;
+  },
+
+  /**
+   * Execute a side-effect on success only.
+   * Calls fn with the value only if result is ok, returns the same result.
+   *
+   * @param result - The Result to tap
+   * @param fn - Side-effect function called with the value on success
+   * @returns The same Result for chaining
+   *
+   * @example
+   * ```ts
+   * Result.tapOk(result, value => console.log('Success:', value.messageId));
+   * ```
+   */
+  tapOk<T, E>(result: Result<T, E>, fn: (value: T) => void): Result<T, E> {
+    if (result.isSuccess) {
+      fn(result.value);
+    }
+    return result;
+  },
+
+  /**
+   * Execute a side-effect on failure only.
+   * Calls fn with the error only if result is fail, returns the same result.
+   *
+   * @param result - The Result to tap
+   * @param fn - Side-effect function called with the error on failure
+   * @returns The same Result for chaining
+   *
+   * @example
+   * ```ts
+   * Result.tapErr(result, error => console.error('Failed:', error.message));
+   * ```
+   */
+  tapErr<T, E>(result: Result<T, E>, fn: (error: E) => void): Result<T, E> {
+    if (result.isFailure) {
+      fn(result.error);
+    }
+    return result;
+  },
+
+  /**
+   * Return the value on success, or throw with a custom message on failure.
+   * Use this when you want to convert a failed Result to an exception.
+   *
+   * @param result - The Result to expect
+   * @param message - Custom error message to use if result is fail
+   * @returns The success value
+   * @throws Error with the provided message (and original error as cause)
+   *
+   * @example
+   * ```ts
+   * const value = Result.expect(result, 'Message send failed');
+   * // throws Error('Message send failed') if result is fail
+   * ```
+   */
+  expect<T, E>(result: Result<T, E>, message: string): T {
+    if (result.isSuccess) {
+      return result.value;
+    }
+    throw new Error(message, { cause: result.error });
   },
 };

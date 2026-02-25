@@ -2,6 +2,9 @@
  * @k-msg/provider
  *
  * Provider implementations for the unified `SendOptions + Result` API.
+ *
+ * SOLAPI symbols are exported only from `@k-msg/provider/solapi`.
+ * Install `solapi` in your app when using SOLAPI providers.
  */
 
 export {
