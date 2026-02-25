@@ -1,8 +1,8 @@
 ---
-"@k-msg/core": minor
-"@k-msg/messaging": minor
-"@k-msg/provider": minor
-"k-msg": minor
+"npm/k-msg": minor
+"npm/@k-msg/core": minor
+"npm/@k-msg/provider": minor
+"npm/@k-msg/messaging": minor
 ---
 
 feat(dx): unified Provider imports, KMsg builder pattern, Result extensions, field-level crypto, comprehensive guides
