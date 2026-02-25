@@ -9,6 +9,37 @@ Unified end-user API:
 - `new KMsg({ providers, routing, defaults, hooks })`
 - `kmsg.send({ type, ... })` (default SMS when `type` is omitted)
 
+
+## What is K-Message?
+
+K-Message is a TypeScript library for Korean multi-channel messaging platforms.
+Manage SMS, LMS, AlimTalk, and FriendTalk with a single unified API.
+
+### Key Features
+
+- **Multi-channel sending with one API**: Unified management of SMS, LMS, AlimTalk, FriendTalk
+- **Multiple provider support**: Pluggable support for Korean messaging providers (SOLAPI, IWINV, Aligo)
+- **TypeScript native**: Full type safety and IDE autocomplete support
+- **Result pattern**: Explicit error handling for safe business logic
+- **Bun optimized**: Performance optimized for modern JavaScript runtime
+
+### Quick Example
+
+```ts
+import { KMsg } from "k-msg";
+import { IWINVProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({ providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })] });
+await kmsg.send({ to: "01012345678", text: "Hello!" });
+```
+
+### When to Use
+
+- When you need SMS/AlimTalk for Korean market services
+- When using multiple messaging providers or planning provider migration
+- TypeScript projects requiring type-safe messaging APIs
+- When automatic failover is needed for high availability
+
 ## Installation
 
 ```bash
@@ -181,7 +212,8 @@ The roadmap is a living document and is updated quarterly based on operational m
 
 - `@k-msg/core`: core types/utilities (`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
 - `@k-msg/messaging`: `KMsg` facade (normalization + routing)
-- `@k-msg/provider`: built-in providers (SOLAPI / IWINV / Aligo)
+- `@k-msg/provider`: built-in runtime-neutral providers (IWINV / Aligo / Mock)
+- `@k-msg/provider/solapi`: SOLAPI provider (`solapi` must be installed by the user app)
 - `@k-msg/template`: template interpolation utilities
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: optional supporting packages
 

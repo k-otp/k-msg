@@ -9,6 +9,36 @@
 - `new KMsg({ providers, routing, defaults, hooks })`
 - `kmsg.send({ type, ... })` (`type` 생략 시 기본 문자(SMS)로 처리)
 
+## K-Message란?
+
+K-Message는 한국형 멀티채널 메시징 플랫폼을 위한 TypeScript 라이브러리입니다.
+SMS, LMS, 알림톡, 친구톡을 하나의 통합 API로 관리할 수 있습니다.
+
+### 주요 특징
+
+- **하나의 API로 다양한 채널 전송**: SMS, LMS, 알림톡, 친구톡 통합 관리
+- **다중 프로바이더 지원**: SOLAPI, IWINV, Aligo 등 한국 주요 메시징 프로바이더 플러그인
+- **TypeScript 네이티브**: 완벽한 타입 안전성과 IDE 자동완성 지원
+- **Result 패턴**: 명시적 에러 처리로 안전한 비즈니스 로직 작성
+- **Bun 최적화**: 현대적 JavaScript 런타임에 최적화된 성능
+
+### 빠른 예제
+
+```ts
+import { KMsg } from "k-msg";
+import { IWINVProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({ providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })] });
+await kmsg.send({ to: "01012345678", text: "안녕하세요!" });
+```
+
+### 언제 사용하나요?
+
+- 한국 시장 대상 서비스에서 SMS/알림톡 발송이 필요할 때
+- 여러 메시징 프로바이더를 사용 중이거나 전환을 계획 중일 때
+- 타입 안전한 메시징 API를 원하는 TypeScript 프로젝트
+- 고가용성을 위해 프로바이더 장애 시 자동 페일오버가 필요할 때
+
 ## 설치
 
 ```bash
@@ -133,7 +163,8 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 
 - `@k-msg/core`: 표준 타입/에러/Result/복원력 유틸(`Provider`, `SendOptions`, `Result`, `KMsgError`, ...)
 - `@k-msg/messaging`: `KMsg` Facade(정규화 + 라우팅)
-- `@k-msg/provider`: 기본 프로바이더(SOLAPI / IWINV / Aligo)
+- `@k-msg/provider`: 런타임 중립 기본 프로바이더(IWINV / Aligo / Mock)
+- `@k-msg/provider/solapi`: SOLAPI 프로바이더(`solapi`는 사용자 앱에서 직접 설치)
 - `@k-msg/template`: 템플릿 치환 유틸
 - `@k-msg/analytics`, `@k-msg/webhook`, `@k-msg/channel`: 선택 구성요소
 
