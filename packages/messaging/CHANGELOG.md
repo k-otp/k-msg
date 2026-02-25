@@ -1,5 +1,38 @@
 # @k-msg/messaging
 
+## 0.25.0 — 2026-02-25
+
+### Minor changes
+
+- [bbf102d](https://github.com/k-otp/k-msg/commit/bbf102d150ec268500c7f8c6e0d3a922476ede9c) feat(dx): unified Provider imports, KMsg builder pattern, Result extensions, field-level crypto, comprehensive guides
+  
+  ## Breaking Changes
+  - Legacy `Platform` / `UniversalProvider` / `StandardRequest` public APIs removed
+  - Message discriminant is `type` (old `channel` naming removed)
+  - `templateCode` renamed to `templateId`
+  
+  ## New Features
+  
+  ### API Improvements
+  - **Unified Provider imports**: All providers now importable from `@k-msg/provider`
+  - **KMsg.simple()**: One-liner for single provider setup
+  - **KMsg.builder()**: Fluent API for complex configurations
+  - **Result extensions**: `tap`, `tapOk`, `tapErr`, `expect` methods
+  - **Error localization**: `KMsgError.getLocalizedMessage(locale)`
+  
+  ### Documentation
+  - Getting started tutorial with Mock Provider
+  - Message types comparison guide
+  - Provider selection guide
+  - Troubleshooting guide with FAQ
+  - Use case guides (OTP, order notification, marketing)
+  - DX v1 migration guide
+  - Field crypto section with privacy warnings — Thanks Sisyphus!
+
+### Patch changes
+
+- Updated dependencies: core@0.25.0, template@0.25.0
+
 ## 0.24.1 — 2026-02-23
 
 ### Patch changes
