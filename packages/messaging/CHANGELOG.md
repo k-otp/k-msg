@@ -1,5 +1,27 @@
 # @k-msg/messaging
 
+## 0.26.0 — 2026-02-26
+
+### Minor changes
+
+- [688192d](https://github.com/k-otp/k-msg/commit/688192d53837838d12515222b4015779331324fe) feat(core,messaging,k-msg): add shared policy/normalization utilities with safe defaults and opt-out modes
+  
+  - core
+    - expose canonical message/delivery status constants and guards
+    - add terminal/pollable delivery helper utilities
+    - add retry policy JSON parsing/validation helpers (`safe`/`compat`)
+    - add provider error normalization helper with source trace metadata
+  - messaging
+    - add queue send-input builder with `safe` and `unsafe_passthrough` validation modes
+    - route `MessageJobProcessor` payload transformation through the shared builder
+    - align tracking internals with core terminal status helpers
+  - k-msg facade
+    - re-export new core helpers from the root package (status + policy/normalization APIs) — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.26.0, template@0.26.0
+
 ## 0.25.1 — 2026-02-26
 
 ### Patch changes
