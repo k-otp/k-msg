@@ -1,7 +1,7 @@
 ---
-"@k-msg/core": minor
-"@k-msg/messaging": minor
-"k-msg": minor
+npm/@k-msg/core: minor
+npm/@k-msg/messaging: minor
+npm/k-msg: minor
 ---
 
 feat(core,messaging,k-msg): add shared policy/normalization utilities with safe defaults and opt-out modes
