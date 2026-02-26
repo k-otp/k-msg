@@ -1,5 +1,16 @@
 # @k-msg/messaging
 
+## 0.25.1 — 2026-02-26
+
+### Patch changes
+
+- [b2c0859](https://github.com/k-otp/k-msg/commit/b2c08591f360790f1c4e7c999cf820c59ee29288) Add Drizzle ORM `1.0.0-beta` compatibility metadata.
+  
+  - Extend `@k-msg/messaging` peer range to include `>=1.0.0-beta <1.0.0`
+  - Add `drizzle-orm@beta` to the drizzle compatibility CI matrix
+  - Refresh Drizzle compatibility tables in docs — Thanks @imjlk!
+- Updated dependencies: core@0.25.1, template@0.25.1
+
 ## 0.25.0 — 2026-02-25
 
 ### Minor changes
