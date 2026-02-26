@@ -11,9 +11,23 @@ describe("k-msg package exports", () => {
 
     expect("IWINVProvider" in facade).toBe(false);
     expect("createDeliveryTrackingHooks" in facade).toBe(false);
+    expect("buildSendInputFromJob" in facade).toBe(false);
     expect(typeof facade.KMsgError).toBe("function");
     expect(typeof facade.KMsgErrorCode).toBe("object");
     expect(typeof facade.ErrorUtils).toBe("object");
+    expect(Array.isArray(facade.KMSG_MESSAGE_TYPES)).toBe(true);
+    expect(Array.isArray(facade.KMSG_DELIVERY_STATUSES)).toBe(true);
+    expect(Array.isArray(facade.KMSG_TERMINAL_STATUSES)).toBe(true);
+    expect(Array.isArray(facade.KMSG_POLLABLE_STATUSES)).toBe(true);
+    expect(typeof facade.isKMsgMessageType).toBe("function");
+    expect(typeof facade.isKMsgDeliveryStatus).toBe("function");
+    expect(typeof facade.isTerminalDeliveryStatus).toBe("function");
+    expect(typeof facade.isPollableDeliveryStatus).toBe("function");
+    expect(typeof facade.getPollableStatuses).toBe("function");
+    expect(typeof facade.parseErrorRetryPolicyFromJson).toBe("function");
+    expect(typeof facade.normalizeErrorRetryPolicy).toBe("function");
+    expect(typeof facade.validateErrorRetryPolicy).toBe("function");
+    expect(typeof facade.normalizeProviderError).toBe("function");
     expect(typeof facade.ok).toBe("function");
     expect(typeof facade.fail).toBe("function");
   });
