@@ -320,13 +320,14 @@ const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 
 | `@k-msg/messaging` | Supported `drizzle-orm` |
 | --- | --- |
-| `0.19.x` | `^0.44.0 || ^0.45.0` |
+| `0.19.x` | `^0.44.0 || ^0.45.0 || >=1.0.0-beta <1.0.0` |
 
 Compatibility for this line is validated in CI against the `drizzle-compat` matrix:
 
 <!-- drizzle-compat-matrix:start -->
 - `drizzle-orm@0.44.7`
 - `drizzle-orm@0.45.1`
+- `drizzle-orm@beta`
 <!-- drizzle-compat-matrix:end -->
 
 ## Tracking-based API failover
