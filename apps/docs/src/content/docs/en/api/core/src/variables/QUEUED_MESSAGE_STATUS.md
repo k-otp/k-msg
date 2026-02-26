@@ -7,4 +7,4 @@ title: "QUEUED_MESSAGE_STATUS"
 
 > `const` **QUEUED\_MESSAGE\_STATUS**: [`MessageStatus`](/api/core/src/type-aliases/messagestatus/) = `"PENDING"`
 
-Defined in: [packages/core/src/types/message.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L25)
+Defined in: [packages/core/src/types/message.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L46)

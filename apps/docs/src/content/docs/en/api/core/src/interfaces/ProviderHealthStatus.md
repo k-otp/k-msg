@@ -5,7 +5,9 @@ prev: false
 title: "ProviderHealthStatus"
 ---
 
-Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L97)
+Defined in: [packages/core/src/provider.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L167)
+
+Health check result from a provider.
 
 ## Properties
 
@@ -13,7 +15,9 @@ Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/bl
 
 > `optional` **data**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/provider.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L101)
+Defined in: [packages/core/src/provider.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L175)
+
+Provider-specific health details.
 
 ***
 
@@ -21,7 +25,9 @@ Defined in: [packages/core/src/provider.ts:101](https://github.com/k-otp/k-msg/b
 
 > **healthy**: `boolean`
 
-Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L98)
+Defined in: [packages/core/src/provider.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L169)
+
+Whether the provider is operational.
 
 ***
 
@@ -29,7 +35,9 @@ Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/bl
 
 > **issues**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L99)
+Defined in: [packages/core/src/provider.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L171)
+
+List of issues if not healthy.
 
 ***
 
@@ -37,4 +45,6 @@ Defined in: [packages/core/src/provider.ts:99](https://github.com/k-otp/k-msg/bl
 
 > `optional` **latencyMs**: `number`
 
-Defined in: [packages/core/src/provider.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L100)
+Defined in: [packages/core/src/provider.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L173)
+
+Response latency in milliseconds.

@@ -7,7 +7,9 @@ title: "Ok"
 
 > **Ok**\<`T`\> = `object`
 
-Defined in: [packages/core/src/result.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L1)
+Defined in: [packages/core/src/result.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L4)
+
+Represents a successful result containing a value.
 
 ## Type Parameters
 
@@ -21,7 +23,9 @@ Defined in: [packages/core/src/result.ts:1](https://github.com/k-otp/k-msg/blob/
 
 > `readonly` **isFailure**: `false`
 
-Defined in: [packages/core/src/result.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L3)
+Defined in: [packages/core/src/result.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L8)
+
+Always false for successful results.
 
 ***
 
@@ -29,7 +33,9 @@ Defined in: [packages/core/src/result.ts:3](https://github.com/k-otp/k-msg/blob/
 
 > `readonly` **isSuccess**: `true`
 
-Defined in: [packages/core/src/result.ts:2](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L2)
+Defined in: [packages/core/src/result.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L6)
+
+Always true for successful results.
 
 ***
 
@@ -37,4 +43,6 @@ Defined in: [packages/core/src/result.ts:2](https://github.com/k-otp/k-msg/blob/
 
 > `readonly` **value**: `T`
 
-Defined in: [packages/core/src/result.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L4)
+Defined in: [packages/core/src/result.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L10)
+
+The contained success value.

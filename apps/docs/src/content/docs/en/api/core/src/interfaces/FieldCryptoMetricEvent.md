@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMetricEvent"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L90)
+Defined in: [packages/core/src/crypto/types.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L116)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:90](https://github.com/k-otp/k-ms
 
 > `optional` **kid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L93)
+Defined in: [packages/core/src/crypto/types.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L119)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:93](https://github.com/k-otp/k-ms
 
 > **name**: [`FieldCryptoMetricName`](/api/core/src/type-aliases/fieldcryptometricname/)
 
-Defined in: [packages/core/src/crypto/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L91)
+Defined in: [packages/core/src/crypto/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L117)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:91](https://github.com/k-otp/k-ms
 
 > `optional` **tags**: `Record`\<`string`, `string` \| `number` \| `boolean` \| `undefined`\>
 
-Defined in: [packages/core/src/crypto/types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L94)
+Defined in: [packages/core/src/crypto/types.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L120)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/crypto/types.ts:94](https://github.com/k-otp/k-ms
 
 > `optional` **value**: `number`
 
-Defined in: [packages/core/src/crypto/types.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L92)
+Defined in: [packages/core/src/crypto/types.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L118)

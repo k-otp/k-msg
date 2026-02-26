@@ -7,7 +7,10 @@ title: "SmsDefaultSendInput"
 
 > **SmsDefaultSendInput** = `Omit`\<[`SmsSendOptions`](/api/core/src/interfaces/smssendoptions/), `"type"` \| `"text"`\> & `object`
 
-Defined in: [packages/core/src/types/message.ts:283](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L283)
+Defined in: [packages/core/src/types/message.ts:321](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L321)
+
+Relaxed SMS input type that allows omitting `type` and using `content` as an alias for `text`.
+Used for developer convenience when sending simple SMS messages.
 
 ## Type Declaration
 

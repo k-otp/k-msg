@@ -5,7 +5,7 @@ prev: false
 title: "AlimTalkFailoverOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L127)
+Defined in: [packages/core/src/types/message.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L157)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:127](https://github.com/k-otp/k-
 
 > `optional` **enabled**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L128)
+Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L158)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/message.ts:128](https://github.com/k-otp/k-
 
 > `optional` **fallbackChannel**: `"sms"` \| `"lms"`
 
-Defined in: [packages/core/src/types/message.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L129)
+Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L159)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/message.ts:129](https://github.com/k-otp/k-
 
 > `optional` **fallbackContent**: `string`
 
-Defined in: [packages/core/src/types/message.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L130)
+Defined in: [packages/core/src/types/message.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L160)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/types/message.ts:130](https://github.com/k-otp/k-
 
 > `optional` **fallbackTitle**: `string`
 
-Defined in: [packages/core/src/types/message.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L131)
+Defined in: [packages/core/src/types/message.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L161)

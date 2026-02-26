@@ -5,7 +5,10 @@ prev: false
 title: "SendResult"
 ---
 
-Defined in: [packages/core/src/types/message.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L302)
+Defined in: [packages/core/src/types/message.ts:344](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L344)
+
+Result of a message send operation.
+Returned by Provider.send() and KMsg.send().
 
 ## Properties
 
@@ -13,7 +16,7 @@ Defined in: [packages/core/src/types/message.ts:302](https://github.com/k-otp/k-
 
 > **messageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L306)
+Defined in: [packages/core/src/types/message.ts:348](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L348)
 
 Correlation id (equals the request `messageId`).
 
@@ -23,7 +26,9 @@ Correlation id (equals the request `messageId`).
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:307](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L307)
+Defined in: [packages/core/src/types/message.ts:352](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L352)
+
+Identifier of the provider that handled this message.
 
 ***
 
@@ -31,7 +36,9 @@ Defined in: [packages/core/src/types/message.ts:307](https://github.com/k-otp/k-
 
 > `optional` **providerMessageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:308](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L308)
+Defined in: [packages/core/src/types/message.ts:356](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L356)
+
+Provider-specific message identifier for tracking.
 
 ***
 
@@ -39,7 +46,9 @@ Defined in: [packages/core/src/types/message.ts:308](https://github.com/k-otp/k-
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/core/src/types/message.ts:313](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L313)
+Defined in: [packages/core/src/types/message.ts:376](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L376)
+
+Raw provider response for debugging (provider-specific shape).
 
 ***
 
@@ -47,7 +56,9 @@ Defined in: [packages/core/src/types/message.ts:313](https://github.com/k-otp/k-
 
 > **status**: [`MessageStatus`](/api/core/src/type-aliases/messagestatus/)
 
-Defined in: [packages/core/src/types/message.ts:309](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L309)
+Defined in: [packages/core/src/types/message.ts:360](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L360)
+
+Current delivery status of the message.
 
 ***
 
@@ -55,7 +66,9 @@ Defined in: [packages/core/src/types/message.ts:309](https://github.com/k-otp/k-
 
 > **to**: `string`
 
-Defined in: [packages/core/src/types/message.ts:311](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L311)
+Defined in: [packages/core/src/types/message.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L368)
+
+Recipient phone number.
 
 ***
 
@@ -63,7 +76,9 @@ Defined in: [packages/core/src/types/message.ts:311](https://github.com/k-otp/k-
 
 > **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
 
-Defined in: [packages/core/src/types/message.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L310)
+Defined in: [packages/core/src/types/message.ts:364](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L364)
+
+The message type that was sent.
 
 ***
 
@@ -71,4 +86,6 @@ Defined in: [packages/core/src/types/message.ts:310](https://github.com/k-otp/k-
 
 > `optional` **warnings**: [`SendWarning`](/api/core/src/interfaces/sendwarning/)[]
 
-Defined in: [packages/core/src/types/message.ts:312](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L312)
+Defined in: [packages/core/src/types/message.ts:372](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L372)
+
+Non-fatal warnings (e.g., failover partially applied).

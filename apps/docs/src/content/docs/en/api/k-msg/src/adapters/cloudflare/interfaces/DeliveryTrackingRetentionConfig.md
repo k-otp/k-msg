@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingRetentionConfig"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L53)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L59)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:53](htt
 
 > `optional` **contractOverrideResolver**: (`context`) => `number` \| `Promise`\<`number` \| `undefined`\> \| `undefined`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L56)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L62)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:56](htt
 
 > `optional` **preset**: `"kr-b2b-baseline"`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L54)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L60)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:54](htt
 
 > `optional` **tenantOverrideDays**: `Partial`\<`Record`\<[`DeliveryTrackingRetentionClass`](/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/), `number`\>\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L55)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L61)

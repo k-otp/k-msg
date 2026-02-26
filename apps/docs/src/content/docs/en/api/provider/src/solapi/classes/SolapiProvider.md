@@ -5,7 +5,7 @@ prev: false
 title: "SolapiProvider"
 ---
 
-Defined in: [packages/provider/src/solapi/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L26)
+Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L27)
 
 SOLAPI Provider package entrypoint
 
@@ -20,7 +20,7 @@ SOLAPI Provider package entrypoint
 
 > **new SolapiProvider**(`config`, `client?`): `SolapiProvider`
 
-Defined in: [packages/provider/src/solapi/provider.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L57)
+Defined in: [packages/provider/src/solapi/provider.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L62)
 
 #### Parameters
 
@@ -42,7 +42,16 @@ Defined in: [packages/provider/src/solapi/provider.ts:57](https://github.com/k-o
 
 > `readonly` **id**: `"solapi"` = `"solapi"`
 
-Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L27)
+Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L28)
+
+Unique identifier for this provider instance.
+Used for routing and logging.
+
+#### Example
+
+```ts
+"solapi"
+```
 
 #### Implementation of
 
@@ -54,7 +63,15 @@ Defined in: [packages/provider/src/solapi/provider.ts:27](https://github.com/k-o
 
 > `readonly` **name**: `"SOLAPI Messaging Provider"` = `"SOLAPI Messaging Provider"`
 
-Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L28)
+Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L29)
+
+Human-readable name for display purposes.
+
+#### Example
+
+```ts
+"SOLAPI"
+```
 
 #### Implementation of
 
@@ -66,7 +83,10 @@ Defined in: [packages/provider/src/solapi/provider.ts:28](https://github.com/k-o
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L29)
+Defined in: [packages/provider/src/solapi/provider.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L30)
+
+Message types this provider supports.
+Messages of unsupported types will be rejected.
 
 #### Implementation of
 
@@ -78,7 +98,9 @@ Defined in: [packages/provider/src/solapi/provider.ts:29](https://github.com/k-o
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L136)
+Defined in: [packages/provider/src/solapi/provider.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L145)
+
+Query the remaining balance/points for the provider account.
 
 #### Parameters
 
@@ -100,7 +122,10 @@ Defined in: [packages/provider/src/solapi/provider.ts:136](https://github.com/k-
 
 > **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L126)
+Defined in: [packages/provider/src/solapi/provider.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L135)
+
+Query delivery status for a previously sent message.
+Optional capability - not all providers support this.
 
 #### Parameters
 
@@ -122,7 +147,10 @@ Defined in: [packages/provider/src/solapi/provider.ts:126](https://github.com/k-
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/solapi/provider.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L49)
+Defined in: [packages/provider/src/solapi/provider.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L50)
+
+Get the onboarding specification for this provider.
+Used by tooling to guide provider configuration.
 
 #### Returns
 
@@ -138,7 +166,10 @@ Defined in: [packages/provider/src/solapi/provider.ts:49](https://github.com/k-o
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L80)
+Defined in: [packages/provider/src/solapi/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L89)
+
+Check if the provider is operational.
+Used for health monitoring and circuit breaker decisions.
 
 #### Returns
 
@@ -154,7 +185,9 @@ Defined in: [packages/provider/src/solapi/provider.ts:80](https://github.com/k-o
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/solapi/provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L110)
+Defined in: [packages/provider/src/solapi/provider.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L119)
+
+Send a message through this provider.
 
 #### Parameters
 
@@ -165,6 +198,8 @@ Defined in: [packages/provider/src/solapi/provider.ts:110](https://github.com/k-
 #### Returns
 
 `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+
+Result with SendResult on success, KMsgError on failure.
 
 #### Implementation of
 

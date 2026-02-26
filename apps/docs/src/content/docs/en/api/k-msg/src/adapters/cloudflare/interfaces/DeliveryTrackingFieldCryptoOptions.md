@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingFieldCryptoOptions"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L64)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L70)
 
 ## Properties
 
@@ -13,7 +13,15 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:64](htt
 
 > **config**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L65)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L71)
+
+***
+
+### controlSignal?
+
+> `optional` **controlSignal**: [`DeliveryTrackingFieldCryptoControlSignalOptions`](/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/)
+
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L79)
 
 ***
 
@@ -21,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:65](htt
 
 > `optional` **metrics**: (`event`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L67)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L73)
 
 #### Parameters
 
@@ -39,4 +47,4 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:67](htt
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L66)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L72)

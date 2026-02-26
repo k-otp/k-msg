@@ -5,7 +5,7 @@ prev: false
 title: "PaginationOptions"
 ---
 
-Defined in: [packages/webhook/src/registry/types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L77)
+Defined in: [packages/webhook/src/registry/types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L68)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/registry/types.ts:77](https://github.com/k-otp
 
 > **limit**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L79)
+Defined in: [packages/webhook/src/registry/types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L70)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/registry/types.ts:79](https://github.com/k-otp
 
 > **page**: `number`
 
-Defined in: [packages/webhook/src/registry/types.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L78)
+Defined in: [packages/webhook/src/registry/types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L69)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/registry/types.ts:78](https://github.com/k-otp
 
 > `optional` **sortBy**: `string`
 
-Defined in: [packages/webhook/src/registry/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L80)
+Defined in: [packages/webhook/src/registry/types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L71)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/webhook/src/registry/types.ts:80](https://github.com/k-otp
 
 > `optional` **sortOrder**: `"asc"` \| `"desc"`
 
-Defined in: [packages/webhook/src/registry/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L81)
+Defined in: [packages/webhook/src/registry/types.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L72)

@@ -7,7 +7,9 @@ title: "Fail"
 
 > **Fail**\<`E`\> = `object`
 
-Defined in: [packages/core/src/result.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L7)
+Defined in: [packages/core/src/result.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L16)
+
+Represents a failed result containing an error.
 
 ## Type Parameters
 
@@ -21,7 +23,9 @@ Defined in: [packages/core/src/result.ts:7](https://github.com/k-otp/k-msg/blob/
 
 > `readonly` **error**: `E`
 
-Defined in: [packages/core/src/result.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L10)
+Defined in: [packages/core/src/result.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L22)
+
+The contained error.
 
 ***
 
@@ -29,7 +33,9 @@ Defined in: [packages/core/src/result.ts:10](https://github.com/k-otp/k-msg/blob
 
 > `readonly` **isFailure**: `true`
 
-Defined in: [packages/core/src/result.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L9)
+Defined in: [packages/core/src/result.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L20)
+
+Always true for failed results.
 
 ***
 
@@ -37,4 +43,6 @@ Defined in: [packages/core/src/result.ts:9](https://github.com/k-otp/k-msg/blob/
 
 > `readonly` **isSuccess**: `false`
 
-Defined in: [packages/core/src/result.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L8)
+Defined in: [packages/core/src/result.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L18)
+
+Always false for failed results.
