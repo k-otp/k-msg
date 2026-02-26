@@ -5,7 +5,7 @@ prev: false
 title: "WebhookPersistence"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L30)
+Defined in: [packages/webhook/src/runtime/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L31)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:30](https://github.com/k-otp/
 
 > **deliveryStore**: [`WebhookDeliveryStore`](/api/webhook/src/interfaces/webhookdeliverystore/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L32)
+Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L33)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:32](https://github.com/k-otp/
 
 > **endpointStore**: [`WebhookEndpointStore`](/api/webhook/src/interfaces/webhookendpointstore/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L31)
+Defined in: [packages/webhook/src/runtime/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L32)
 
 ## Methods
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:31](https://github.com/k-otp/
 
 > `optional` **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L34)
+Defined in: [packages/webhook/src/runtime/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L35)
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:34](https://github.com/k-otp/
 
 > `optional` **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L33)
+Defined in: [packages/webhook/src/runtime/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L34)
 
 #### Returns
 

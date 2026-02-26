@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingCountByRow"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L37)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L43)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:37](htt
 
 > **count**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L39)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L45)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:39](htt
 
 > **key**: `DeliveryTrackingCountByKey`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L38)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L44)

@@ -1,0 +1,10 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "Locale"
+---
+
+> **Locale** = `"ko"` \| `"en"`
+
+Defined in: [packages/core/src/errors.ts:1](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L1)

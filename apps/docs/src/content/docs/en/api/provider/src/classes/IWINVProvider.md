@@ -7,6 +7,24 @@ title: "IWINVProvider"
 
 Defined in: [packages/provider/src/iwinv/provider.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L54)
 
+Core provider interface for sending messages.
+
+All providers must implement this interface. Optional capabilities
+(balance, templates, delivery status) are exposed via separate interfaces.
+
+## Example
+
+```ts
+class MyProvider implements Provider {
+  readonly id = "my-provider";
+  readonly name = "My Provider";
+  readonly supportedTypes = ["SMS", "LMS"] as const;
+
+  async healthCheck() { return { healthy: true, issues: [] }; }
+  async send(params) { ... }
+}
+```
+
 ## Implements
 
 - [`Provider`](/api/core/src/interfaces/provider/)
@@ -19,7 +37,7 @@ Defined in: [packages/provider/src/iwinv/provider.ts:54](https://github.com/k-ot
 
 > **new IWINVProvider**(`config`): `IWINVProvider`
 
-Defined in: [packages/provider/src/iwinv/provider.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L71)
+Defined in: [packages/provider/src/iwinv/provider.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L75)
 
 #### Parameters
 
@@ -39,6 +57,15 @@ Defined in: [packages/provider/src/iwinv/provider.ts:71](https://github.com/k-ot
 
 Defined in: [packages/provider/src/iwinv/provider.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L57)
 
+Unique identifier for this provider instance.
+Used for routing and logging.
+
+#### Example
+
+```ts
+"solapi"
+```
+
 #### Implementation of
 
 [`Provider`](/api/core/src/interfaces/provider/).[`id`](/api/core/src/interfaces/provider/#id)
@@ -50,6 +77,14 @@ Defined in: [packages/provider/src/iwinv/provider.ts:57](https://github.com/k-ot
 > `readonly` **name**: `"IWINV Messaging Provider"` = `"IWINV Messaging Provider"`
 
 Defined in: [packages/provider/src/iwinv/provider.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L58)
+
+Human-readable name for display purposes.
+
+#### Example
+
+```ts
+"SOLAPI"
+```
 
 #### Implementation of
 
@@ -63,6 +98,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:58](https://github.com/k-ot
 
 Defined in: [packages/provider/src/iwinv/provider.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L59)
 
+Message types this provider supports.
+Messages of unsupported types will be rejected.
+
 #### Implementation of
 
 [`Provider`](/api/core/src/interfaces/provider/).[`supportedTypes`](/api/core/src/interfaces/provider/#supportedtypes)
@@ -73,7 +111,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:59](https://github.com/k-ot
 
 > **createTemplate**(`input`, `_ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:391](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L391)
+Defined in: [packages/provider/src/iwinv/provider.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L403)
+
+Create a new template.
 
 #### Parameters
 
@@ -99,7 +139,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:391](https://github.com/k-o
 
 > **deleteTemplate**(`code`, `_ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:416](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L416)
+Defined in: [packages/provider/src/iwinv/provider.ts:428](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L428)
+
+Delete a template by code.
 
 #### Parameters
 
@@ -125,7 +167,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:416](https://github.com/k-o
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L189)
+Defined in: [packages/provider/src/iwinv/provider.ts:201](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L201)
+
+Query the remaining balance/points for the provider account.
 
 #### Parameters
 
@@ -147,7 +191,10 @@ Defined in: [packages/provider/src/iwinv/provider.ts:189](https://github.com/k-o
 
 > **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L160)
+Defined in: [packages/provider/src/iwinv/provider.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L172)
+
+Query delivery status for a previously sent message.
+Optional capability - not all providers support this.
 
 #### Parameters
 
@@ -171,6 +218,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:160](https://github.com/k-o
 
 Defined in: [packages/provider/src/iwinv/provider.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L63)
 
+Get the onboarding specification for this provider.
+Used by tooling to guide provider configuration.
+
 #### Returns
 
 [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
@@ -185,7 +235,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:63](https://github.com/k-ot
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:427](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L427)
+Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L439)
+
+Get a template by code.
 
 #### Parameters
 
@@ -211,7 +263,10 @@ Defined in: [packages/provider/src/iwinv/provider.ts:427](https://github.com/k-o
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L92)
+Defined in: [packages/provider/src/iwinv/provider.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L104)
+
+Check if the provider is operational.
+Used for health monitoring and circuit breaker decisions.
 
 #### Returns
 
@@ -227,7 +282,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:92](https://github.com/k-ot
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L439)
+Defined in: [packages/provider/src/iwinv/provider.ts:451](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L451)
+
+List templates with optional filtering and pagination.
 
 #### Parameters
 
@@ -263,7 +320,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:439](https://github.com/k-o
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L127)
+Defined in: [packages/provider/src/iwinv/provider.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L139)
+
+Send a message through this provider.
 
 #### Parameters
 
@@ -275,6 +334,8 @@ Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-o
 
 `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
+Result with SendResult on success, KMsgError on failure.
+
 #### Implementation of
 
 [`Provider`](/api/core/src/interfaces/provider/).[`send`](/api/core/src/interfaces/provider/#send)
@@ -285,7 +346,9 @@ Defined in: [packages/provider/src/iwinv/provider.ts:127](https://github.com/k-o
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.ts:402](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L402)
+Defined in: [packages/provider/src/iwinv/provider.ts:414](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L414)
+
+Update an existing template by code.
 
 #### Parameters
 

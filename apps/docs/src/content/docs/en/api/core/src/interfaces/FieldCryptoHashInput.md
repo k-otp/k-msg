@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoHashInput"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L53)
+Defined in: [packages/core/src/crypto/types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L59)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:53](https://github.com/k-otp/k-ms
 
 > `optional` **kid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L56)
+Defined in: [packages/core/src/crypto/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L62)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:56](https://github.com/k-otp/k-ms
 
 > **path**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L55)
+Defined in: [packages/core/src/crypto/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L61)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/crypto/types.ts:55](https://github.com/k-otp/k-ms
 
 > **value**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L54)
+Defined in: [packages/core/src/crypto/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L60)

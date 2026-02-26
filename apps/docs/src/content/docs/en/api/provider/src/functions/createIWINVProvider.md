@@ -7,7 +7,7 @@ title: "createIWINVProvider"
 
 > **createIWINVProvider**(`config`): [`IWINVProvider`](/api/provider/src/classes/iwinvprovider/)
 
-Defined in: [packages/provider/src/iwinv/provider.ts:452](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L452)
+Defined in: [packages/provider/src/iwinv/provider.ts:464](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L464)
 
 ## Parameters
 

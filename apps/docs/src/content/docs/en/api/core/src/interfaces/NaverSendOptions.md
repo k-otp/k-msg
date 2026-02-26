@@ -5,7 +5,7 @@ prev: false
 title: "NaverSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L146)
+Defined in: [packages/core/src/types/message.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L176)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/types/message.ts:146](https://github.com/k-otp/k-
 
 > `optional` **buttons**: `unknown`[]
 
-Defined in: [packages/core/src/types/message.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L154)
+Defined in: [packages/core/src/types/message.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L184)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/types/message.ts:154](https://github.com/k-otp/k-
 
 > `optional` **disableSms**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L152)
+Defined in: [packages/core/src/types/message.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L182)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/core/src/types/message.ts:152](https://github.com/k-otp/k-
 
 > `optional` **talkId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L147)
+Defined in: [packages/core/src/types/message.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L177)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/types/message.ts:147](https://github.com/k-otp/k-
 
 > `optional` **templateId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L151)
+Defined in: [packages/core/src/types/message.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L181)
 
 Override the template identifier for NSA (provider-specific).
 
@@ -51,4 +51,4 @@ Override the template identifier for NSA (provider-specific).
 
 > `optional` **variables**: [`MessageVariables`](/api/core/src/type-aliases/messagevariables/)
 
-Defined in: [packages/core/src/types/message.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L153)
+Defined in: [packages/core/src/types/message.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L183)

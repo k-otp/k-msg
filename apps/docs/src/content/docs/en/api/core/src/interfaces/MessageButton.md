@@ -5,7 +5,7 @@ prev: false
 title: "MessageButton"
 ---
 
-Defined in: [packages/core/src/types/message.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L42)
+Defined in: [packages/core/src/types/message.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L68)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:42](https://github.com/k-otp/k-m
 
 > **name**: `string`
 
-Defined in: [packages/core/src/types/message.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L43)
+Defined in: [packages/core/src/types/message.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L69)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/message.ts:43](https://github.com/k-otp/k-m
 
 > **type**: `string`
 
-Defined in: [packages/core/src/types/message.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L47)
+Defined in: [packages/core/src/types/message.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L73)
 
 Provider-dependent. Common values: "WL" (web link), "AL" (app link), ...
 
@@ -31,7 +31,7 @@ Provider-dependent. Common values: "WL" (web link), "AL" (app link), ...
 
 > `optional` **urlMobile**: `string`
 
-Defined in: [packages/core/src/types/message.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L49)
+Defined in: [packages/core/src/types/message.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L75)
 
 ***
 
@@ -39,4 +39,4 @@ Defined in: [packages/core/src/types/message.ts:49](https://github.com/k-otp/k-m
 
 > `optional` **urlPc**: `string`
 
-Defined in: [packages/core/src/types/message.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L48)
+Defined in: [packages/core/src/types/message.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L74)

@@ -5,7 +5,9 @@ prev: false
 title: "KakaoChannelProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L77)
+Defined in: [packages/core/src/provider.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L132)
+
+Interface for providers that support Kakao channel management.
 
 ## Methods
 
@@ -13,7 +15,9 @@ Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/bl
 
 > `optional` **addKakaoChannel**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L89)
+Defined in: [packages/core/src/provider.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L156)
+
+Add a Kakao channel after authentication.
 
 #### Parameters
 
@@ -45,7 +49,9 @@ Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/bl
 
 > `optional` **listKakaoChannelCategories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L82)
+Defined in: [packages/core/src/provider.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L143)
+
+List available channel categories for registration.
 
 #### Returns
 
@@ -57,7 +63,9 @@ Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/bl
 
 > **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L78)
+Defined in: [packages/core/src/provider.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L136)
+
+List registered Kakao channels.
 
 #### Parameters
 
@@ -81,7 +89,9 @@ Defined in: [packages/core/src/provider.ts:78](https://github.com/k-otp/k-msg/bl
 
 > `optional` **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L85)
+Defined in: [packages/core/src/provider.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L149)
+
+Request authentication SMS for channel registration.
 
 #### Parameters
 
