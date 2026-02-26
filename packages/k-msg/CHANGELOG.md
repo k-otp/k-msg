@@ -1,5 +1,19 @@
 # k-msg
 
+## 0.27.0 — 2026-02-26
+
+### Minor changes
+
+- [a3ac022](https://github.com/k-otp/k-msg/commit/a3ac02295a5156287912fd86036d612f1cf5a98c) optimize bundling boundaries and add lightweight core subpath
+  
+  - mark core/messaging/provider/k-msg as side-effect-free for better tree shaking
+  - externalize workspace/runtime deps during package builds to reduce duplicated bundled payload across subpath entries
+  - add `k-msg/core` subpath that re-exports `@k-msg/core` without pulling `KMsg` facade into the same entrypoint — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.27.0, messaging@0.27.0
+
 ## 0.26.0 — 2026-02-26
 
 ### Minor changes
