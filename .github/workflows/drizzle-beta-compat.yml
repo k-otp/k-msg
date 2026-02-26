@@ -1,0 +1,55 @@
+name: Drizzle Beta Compat
+
+on:
+  schedule:
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: drizzle-beta-compat
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: "1.3.8"
+
+jobs:
+  beta-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve drizzle-orm beta
+        run: |
+          set -euo pipefail
+          BETA="$(npm view drizzle-orm@beta version)"
+          echo "drizzle-orm@beta=${BETA}"
+
+      - name: Pin drizzle-orm beta
+        run: bun add --cwd packages/messaging --dev --exact --no-save drizzle-orm@beta
+
+      - name: Build core types for workspace references
+        run: bun run --cwd packages/core build:types
+
+      - name: Messaging typecheck
+        run: bun run --cwd packages/messaging typecheck
+
+      - name: Drizzle adapter tests
+        run: bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts
+
+      - name: Drizzle schema render snapshot tests
+        run: bun --cwd packages/messaging test src/adapters/cloudflare/sql-schema.test.ts

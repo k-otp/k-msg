@@ -5,26 +5,83 @@ type Semver = {
   major: number;
   minor: number;
   patch: number;
+  prerelease: Array<number | string>;
 };
 
 function parseSemver(input: string): Semver {
-  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(input.trim());
+  const match =
+    /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(
+      input.trim(),
+    );
   if (!match) {
     throw new Error(`Invalid semver: '${input}'`);
   }
+
+  const prerelease = (match[4] ?? "")
+    .split(".")
+    .filter((entry) => entry.length > 0)
+    .map((entry) => (/^\d+$/.test(entry) ? Number(entry) : entry));
+
   return {
     major: Number(match[1]),
     minor: Number(match[2]),
     patch: Number(match[3]),
+    prerelease,
   };
 }
 
-function compareSemver(a: string, b: string): number {
-  const va = parseSemver(a);
-  const vb = parseSemver(b);
+function tryParseSemver(input: string): Semver | null {
+  try {
+    return parseSemver(input);
+  } catch {
+    return null;
+  }
+}
+
+function compareParsedSemver(a: Semver, b: Semver): number {
+  const va = a;
+  const vb = b;
   if (va.major !== vb.major) return va.major - vb.major;
   if (va.minor !== vb.minor) return va.minor - vb.minor;
-  return va.patch - vb.patch;
+  if (va.patch !== vb.patch) return va.patch - vb.patch;
+
+  const aPre = va.prerelease;
+  const bPre = vb.prerelease;
+
+  if (aPre.length === 0 && bPre.length === 0) return 0;
+  if (aPre.length === 0) return 1;
+  if (bPre.length === 0) return -1;
+
+  const max = Math.max(aPre.length, bPre.length);
+  for (let i = 0; i < max; i += 1) {
+    const left = aPre[i];
+    const right = bPre[i];
+    if (left === undefined) return -1;
+    if (right === undefined) return 1;
+
+    if (typeof left === "number" && typeof right === "number") {
+      if (left !== right) return left - right;
+      continue;
+    }
+
+    if (typeof left === "number") return -1;
+    if (typeof right === "number") return 1;
+
+    const byLexical = left.localeCompare(right);
+    if (byLexical !== 0) return byLexical;
+  }
+
+  return 0;
+}
+
+function compareVersionToken(a: string, b: string): number {
+  const va = tryParseSemver(a);
+  const vb = tryParseSemver(b);
+
+  if (va && vb) return compareParsedSemver(va, vb);
+  if (va) return -1;
+  if (vb) return 1;
+  return a.localeCompare(b);
 }
 
 function compareMajorMinor(a: string, b: string): number {
@@ -62,7 +119,7 @@ function parseMatrixVersions(ciContent: string): string[] {
   }
   return [...match[2].matchAll(/"([^"]+)"/g)]
     .map((item) => item[1])
-    .sort(compareSemver);
+    .sort(compareVersionToken);
 }
 
 function updateCiMatrix(ciContent: string, versions: string[]): string {
@@ -183,7 +240,7 @@ async function main(): Promise<void> {
   const ciContent = await readFile(ciPath, "utf8");
   const matrixVersions = parseMatrixVersions(ciContent);
   const nextMatrixVersions = [...new Set([...matrixVersions, latest])].sort(
-    compareSemver,
+    compareVersionToken,
   );
   const ciChanged = await writeIfChanged(
     ciPath,

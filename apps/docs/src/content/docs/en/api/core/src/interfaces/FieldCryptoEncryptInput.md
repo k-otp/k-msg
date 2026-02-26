@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoEncryptInput"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L39)
+Defined in: [packages/core/src/crypto/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L45)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:39](https://github.com/k-otp/k-ms
 
 > **aad**: [`FieldCryptoAad`](/api/core/src/interfaces/fieldcryptoaad/)
 
-Defined in: [packages/core/src/crypto/types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L41)
+Defined in: [packages/core/src/crypto/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L47)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:41](https://github.com/k-otp/k-ms
 
 > `optional` **kid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L43)
+Defined in: [packages/core/src/crypto/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L49)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:43](https://github.com/k-otp/k-ms
 
 > **path**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L42)
+Defined in: [packages/core/src/crypto/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L48)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/crypto/types.ts:42](https://github.com/k-otp/k-ms
 
 > **value**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L40)
+Defined in: [packages/core/src/crypto/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L46)

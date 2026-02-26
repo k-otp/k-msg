@@ -7,11 +7,59 @@ title: "Result"
 
 > **Result**: `object`
 
-Defined in: [packages/core/src/result.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L13)
+Defined in: [packages/core/src/result.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L47)
 
 Result utility functions for chaining and transformation
 
 ## Type Declaration
+
+### expect()
+
+> **expect**\<`T`, `E`\>(`result`, `message`): `T`
+
+Return the value on success, or throw with a custom message on failure.
+Use this when you want to convert a failed Result to an exception.
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+##### E
+
+`E`
+
+#### Parameters
+
+##### result
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The Result to expect
+
+##### message
+
+`string`
+
+Custom error message to use if result is fail
+
+#### Returns
+
+`T`
+
+The success value
+
+#### Throws
+
+Error with the provided message (and original error as cause)
+
+#### Example
+
+```ts
+const value = Result.expect(result, 'Message send failed');
+// throws Error('Message send failed') if result is fail
+```
 
 ### flatMap()
 
@@ -232,6 +280,136 @@ Pattern match on a Result
 #### Returns
 
 `U`
+
+### tap()
+
+> **tap**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+Execute a side-effect without breaking the chain.
+Calls fn with the result (ok or fail) and returns the same result.
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+##### E
+
+`E`
+
+#### Parameters
+
+##### result
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The Result to tap
+
+##### fn
+
+(`result`) => `void`
+
+Side-effect function called with the result
+
+#### Returns
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The same Result for chaining
+
+#### Example
+
+```ts
+const result = await provider.send(options);
+Result.tap(result, r => console.log('Completed:', r));
+```
+
+### tapErr()
+
+> **tapErr**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+Execute a side-effect on failure only.
+Calls fn with the error only if result is fail, returns the same result.
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+##### E
+
+`E`
+
+#### Parameters
+
+##### result
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The Result to tap
+
+##### fn
+
+(`error`) => `void`
+
+Side-effect function called with the error on failure
+
+#### Returns
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The same Result for chaining
+
+#### Example
+
+```ts
+Result.tapErr(result, error => console.error('Failed:', error.message));
+```
+
+### tapOk()
+
+> **tapOk**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+Execute a side-effect on success only.
+Calls fn with the value only if result is ok, returns the same result.
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+##### E
+
+`E`
+
+#### Parameters
+
+##### result
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The Result to tap
+
+##### fn
+
+(`value`) => `void`
+
+Side-effect function called with the value on success
+
+#### Returns
+
+[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+
+The same Result for chaining
+
+#### Example
+
+```ts
+Result.tapOk(result, value => console.log('Success:', value.messageId));
+```
 
 ### unwrap()
 

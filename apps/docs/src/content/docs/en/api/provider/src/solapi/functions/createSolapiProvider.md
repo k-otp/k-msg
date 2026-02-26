@@ -7,7 +7,7 @@ title: "createSolapiProvider"
 
 > **createSolapiProvider**(`config`): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
 
-Defined in: [packages/provider/src/solapi/provider.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L181)
+Defined in: [packages/provider/src/solapi/provider.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L190)
 
 SOLAPI Provider package entrypoint
 
