@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { ErrorUtils, KMsgError, KMsgErrorCode } from "./errors";
+import {
+  ErrorUtils,
+  KMsgError,
+  KMsgErrorCode,
+  normalizeErrorRetryPolicy,
+  normalizeProviderError,
+  parseErrorRetryPolicyFromJson,
+  validateErrorRetryPolicy,
+} from "./errors";
 
 describe("KMsgError", () => {
   test("should create error with correct properties", () => {
@@ -118,5 +126,117 @@ describe("ErrorUtils", () => {
     expect(
       ErrorUtils.classifyForRetry(unknownError, { fallback: "non_retryable" }),
     ).toBe("non_retryable");
+  });
+});
+
+describe("retry policy parser", () => {
+  test("normalizes valid policy in safe mode", () => {
+    const result = validateErrorRetryPolicy({
+      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
+      nonRetryableCodes: ["INVALID_REQUEST"],
+      fallback: "retryable",
+    });
+
+    expect(result.policy).toEqual({
+      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
+      nonRetryableCodes: ["INVALID_REQUEST"],
+      fallback: "retryable",
+    });
+    expect(result.issues).toHaveLength(0);
+  });
+
+  test("safe mode removes unknown and conflicting codes with issues", () => {
+    const result = validateErrorRetryPolicy({
+      retryableCodes: ["NETWORK_ERROR", "OUT_OF_SKIN", "INVALID_REQUEST"],
+      nonRetryableCodes: ["INVALID_REQUEST"],
+    });
+
+    expect(result.policy).toEqual({
+      retryableCodes: ["NETWORK_ERROR"],
+      nonRetryableCodes: ["INVALID_REQUEST"],
+    });
+    expect(result.issues.some((issue) => issue.code === "unknown_code")).toBe(
+      true,
+    );
+    expect(
+      result.issues.some((issue) => issue.code === "conflicting_code"),
+    ).toBe(true);
+  });
+
+  test("compat mode accepts comma-delimited code strings", () => {
+    const normalized = normalizeErrorRetryPolicy(
+      {
+        retryableCodes: "NETWORK_ERROR, PROVIDER_ERROR",
+        nonRetryableCodes: "INVALID_REQUEST",
+        fallback: "non-retryable",
+      },
+      { mode: "compat" },
+    );
+
+    expect(normalized).toEqual({
+      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
+      nonRetryableCodes: ["INVALID_REQUEST"],
+      fallback: "non_retryable",
+    });
+  });
+
+  test("returns null for invalid json payload", () => {
+    expect(parseErrorRetryPolicyFromJson("{bad-json")).toBeNull();
+  });
+});
+
+describe("normalizeProviderError", () => {
+  test("keeps metadata from KMsgError and reports metadata sources", () => {
+    const normalized = normalizeProviderError(
+      new KMsgError(KMsgErrorCode.NETWORK_TIMEOUT, "timeout", undefined, {
+        providerErrorCode: "ETIMEDOUT",
+        providerErrorText: "gateway timeout",
+        httpStatus: 504,
+        requestId: "req-1",
+        retryAfterMs: 1000,
+        attempt: 2,
+        causeChain: ["root"],
+      }),
+    );
+
+    expect(normalized.code).toBe(KMsgErrorCode.NETWORK_TIMEOUT);
+    expect(normalized.providerErrorCode).toBe("ETIMEDOUT");
+    expect(normalized.sources.providerErrorCode).toBe("metadata");
+    expect(normalized.sources.httpStatus).toBe("metadata");
+    expect(normalized.sources.classification).toBe("fallback");
+  });
+
+  test("compat mode can read legacy fields from details", () => {
+    const normalized = normalizeProviderError(
+      new KMsgError(KMsgErrorCode.UNKNOWN_ERROR, "failed", {
+        errorCode: "LEGACY_1",
+        errorMessage: "legacy message",
+        httpStatus: 503,
+        requestId: "legacy-req",
+        retryAfterMs: 1200,
+        attempt: 3,
+      }),
+      { mode: "compat" },
+    );
+
+    expect(normalized.providerErrorCode).toBe("LEGACY_1");
+    expect(normalized.providerErrorText).toBe("legacy message");
+    expect(normalized.httpStatus).toBe(503);
+    expect(normalized.requestId).toBe("legacy-req");
+    expect(normalized.retryAfterMs).toBe(1200);
+    expect(normalized.attempt).toBe(3);
+    expect(normalized.sources.providerErrorCode).toBe("details");
+  });
+
+  test("normalizes http-like errors and respects policy source", () => {
+    const normalized = normalizeProviderError(
+      { status: 503, message: "server down", requestId: "req-http" },
+      { policy: { fallback: "retryable" } },
+    );
+
+    expect(normalized.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(normalized.classification).toBe("retryable");
+    expect(normalized.sources.code).toBe("http");
+    expect(normalized.sources.classification).toBe("policy");
   });
 });

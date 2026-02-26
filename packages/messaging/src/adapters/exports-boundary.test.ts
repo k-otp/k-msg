@@ -39,6 +39,8 @@ describe("messaging export boundaries", () => {
 
     expect(typeof queue.JobStatus).toBe("object");
     expect(queue.JobStatus.PENDING).toBe("pending");
+    expect(typeof queue.buildSendInputFromJob).toBe("function");
+    expect(typeof queue.buildSendInputFromJobDetailed).toBe("function");
   });
 
   test("bun adapter exports runtime-specific bun symbols", async () => {

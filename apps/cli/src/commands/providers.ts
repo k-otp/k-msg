@@ -1,27 +1,12 @@
 import { defineCommand, option } from "@bunli/core";
-import type { MessageType } from "@k-msg/core";
+import { KMSG_MESSAGE_TYPES, type MessageType } from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import { printError, shouldUseJsonOutput } from "../cli/utils";
 import { runProviderDoctor } from "../onboarding";
 import { loadRuntime } from "../runtime";
 
-const messageTypes = [
-  "ALIMTALK",
-  "FRIENDTALK",
-  "SMS",
-  "LMS",
-  "MMS",
-  "NSA",
-  "VOICE",
-  "FAX",
-  "RCS_SMS",
-  "RCS_LMS",
-  "RCS_MMS",
-  "RCS_TPL",
-  "RCS_ITPL",
-  "RCS_LTPL",
-] as const satisfies readonly MessageType[];
+const messageTypes = [...KMSG_MESSAGE_TYPES] as [MessageType, ...MessageType[]];
 
 function detectCapabilities(provider: Record<string, unknown>): string[] {
   const caps: string[] = [];

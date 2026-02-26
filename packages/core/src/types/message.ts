@@ -28,6 +28,29 @@ export type MessageType =
   | "RCS_ITPL"
   | "RCS_LTPL";
 
+export const KMSG_MESSAGE_TYPES = [
+  "ALIMTALK",
+  "FRIENDTALK",
+  "SMS",
+  "LMS",
+  "MMS",
+  "NSA",
+  "VOICE",
+  "FAX",
+  "RCS_SMS",
+  "RCS_LMS",
+  "RCS_MMS",
+  "RCS_TPL",
+  "RCS_ITPL",
+  "RCS_LTPL",
+] as const satisfies readonly MessageType[];
+
+const KMSG_MESSAGE_TYPE_SET: ReadonlySet<string> = new Set(KMSG_MESSAGE_TYPES);
+
+export function isKMsgMessageType(value: string): value is MessageType {
+  return KMSG_MESSAGE_TYPE_SET.has(value);
+}
+
 /**
  * Message delivery status.
  *

@@ -1,11 +1,13 @@
-import type {
-  DeliveryStatus,
-  FieldMode,
-  KMsgError,
-  MessageType,
-  Result,
-  SendInput,
-  SendResult,
+import {
+  type DeliveryStatus,
+  type FieldMode,
+  isTerminalDeliveryStatus as isCoreTerminalDeliveryStatus,
+  KMSG_TERMINAL_STATUSES,
+  type KMsgError,
+  type MessageType,
+  type Result,
+  type SendInput,
+  type SendResult,
 } from "@k-msg/core";
 
 export interface TrackingError {
@@ -110,15 +112,11 @@ export const DEFAULT_POLLING_CONFIG: DeliveryTrackingPollingConfig = {
   unsupportedProviderStrategy: "skip",
 };
 
-export const TERMINAL_DELIVERY_STATUSES: readonly DeliveryStatus[] = [
-  "DELIVERED",
-  "FAILED",
-  "CANCELLED",
-  "UNKNOWN",
-];
+export const TERMINAL_DELIVERY_STATUSES: readonly DeliveryStatus[] =
+  KMSG_TERMINAL_STATUSES;
 
 export function isTerminalDeliveryStatus(status: DeliveryStatus): boolean {
-  return TERMINAL_DELIVERY_STATUSES.includes(status);
+  return isCoreTerminalDeliveryStatus(status);
 }
 
 export interface TrackingUpdate {
