@@ -14,6 +14,14 @@ Provider implementations and advanced/runtime-specific APIs should be imported d
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
 
+For core-only utilities in bundle-sensitive apps, prefer `k-msg/core` (or `@k-msg/core`) instead of importing them from `k-msg` root.
+
+```ts
+import { parseErrorRetryPolicyFromJson } from "k-msg/core";
+// or
+import { parseErrorRetryPolicyFromJson } from "@k-msg/core";
+```
+
 ## Installation
 
 ```bash
