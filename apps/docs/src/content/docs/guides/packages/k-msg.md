@@ -14,6 +14,14 @@ description: "Generated from `packages/k-msg/README_ko.md`"
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
 
+번들 크기에 민감한 환경에서 core 유틸만 필요하면 `k-msg` 루트 대신 `k-msg/core`(또는 `@k-msg/core`) 경로를 권장합니다.
+
+```ts
+import { parseErrorRetryPolicyFromJson } from "k-msg/core";
+// 또는
+import { parseErrorRetryPolicyFromJson } from "@k-msg/core";
+```
+
 ## 설치
 
 ```bash
