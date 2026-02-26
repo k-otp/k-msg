@@ -1,18 +1,13 @@
-import type { DeliveryStatus, MessageType } from "@k-msg/core";
+import {
+  type DeliveryStatus,
+  KMSG_DELIVERY_STATUSES,
+  type MessageType,
+} from "@k-msg/core";
 import type {
   DeliveryTrackingCountByRow,
   DeliveryTrackingRecordFilter,
   DeliveryTrackingStore,
 } from "@k-msg/messaging/tracking";
-
-const ALL_DELIVERY_STATUSES: readonly DeliveryStatus[] = [
-  "PENDING",
-  "SENT",
-  "DELIVERED",
-  "FAILED",
-  "CANCELLED",
-  "UNKNOWN",
-];
 
 function emptyStatusCounts(): Record<DeliveryStatus, number> {
   return {
@@ -33,7 +28,7 @@ function applyCountByRows(
   for (const row of rows) {
     const status = row.key.status as DeliveryStatus | undefined;
     if (!status) continue;
-    if (!ALL_DELIVERY_STATUSES.includes(status)) continue;
+    if (!KMSG_DELIVERY_STATUSES.includes(status)) continue;
     out[status] = Number(row.count) || 0;
   }
   return out;
