@@ -62,6 +62,19 @@ jobs:
 
           echo "has_changesets=${has_changesets}" >>"$GITHUB_OUTPUT"
 
+      - name: Install dependencies for publish validation
+        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
+        run: bun install --frozen-lockfile
+
+      - name: Pre-publish smoke checks
+        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
+        run: |
+          set -euo pipefail
+          bun run --cwd packages/core build:types
+          bun run --cwd packages/messaging typecheck
+          bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts src/delivery-tracking/field-crypto-policy.test.ts src/delivery-tracking/crypto-control-plane.test.ts
+          bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts
+
       - name: Run Sampo (release PR only)
         # Keep AUTO_RELEASE_PR=false during normal development.
         # Toggle to true only when you want a batch release PR to be created.
