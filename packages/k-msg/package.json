@@ -7,11 +7,17 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js"
     },
     "./adapters/bun": {
       "types": "./dist/adapters/bun/index.d.ts",
@@ -31,8 +37,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external '@k-msg/*'",
-    "build:cjs": "bun build ./src/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external '@k-msg/*'",
+    "build:esm": "bun build ./src/index.ts ./src/core/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts ./src/core/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external '@k-msg/*'",
     "build:types": "tsc",
     "dev": "bun --watch src/index.ts",
     "test": "bun test",

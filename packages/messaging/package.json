@@ -7,6 +7,7 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -49,8 +50,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'bun:sqlite'",
-    "build:cjs": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'bun:sqlite'",
+    "build:esm": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'bun:sqlite' --external '@k-msg/*' --external 'zod' --external 'drizzle-orm'",
+    "build:cjs": "bun build ./src/index.ts ./src/tracking/index.ts ./src/sender/index.ts ./src/queue/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'bun:sqlite' --external '@k-msg/*' --external 'zod' --external 'drizzle-orm'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",

@@ -6,6 +6,7 @@
   "../../packages/k-msg/src/adapters/bun/index.ts",
   "../../packages/k-msg/src/adapters/cloudflare/index.ts",
   "../../packages/k-msg/src/adapters/node/index.ts",
+  "../../packages/k-msg/src/core/index.ts",
   "../../packages/k-msg/src/index.ts",
   "../../packages/messaging/src/adapters/bun/index.ts",
   "../../packages/messaging/src/adapters/cloudflare/index.ts",

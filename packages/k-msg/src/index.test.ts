@@ -31,4 +31,12 @@ describe("k-msg package exports", () => {
     expect(typeof facade.ok).toBe("function");
     expect(typeof facade.fail).toBe("function");
   });
+
+  test("core subpath exposes lightweight core-only exports", async () => {
+    const coreFacade = await import("./core/index");
+
+    expect(typeof coreFacade.parseErrorRetryPolicyFromJson).toBe("function");
+    expect(typeof coreFacade.normalizeProviderError).toBe("function");
+    expect("KMsg" in coreFacade).toBe(false);
+  });
 });
