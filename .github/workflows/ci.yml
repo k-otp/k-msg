@@ -169,7 +169,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        drizzle: ["0.44.7", "0.45.1", "1.0.0-beta"]
+        drizzle: ["0.44.7", "0.45.1", "beta"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
