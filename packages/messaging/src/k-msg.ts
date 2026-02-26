@@ -5,6 +5,7 @@ import {
   type MessageRepository,
   type MessageType,
   type MessageVariables,
+  normalizeProviderError,
   ok,
   type PersistenceStrategy,
   type Provider,
@@ -899,17 +900,46 @@ export class KMsg {
     if (error instanceof KMsgError) {
       const knownError = error;
       if (!details) return error;
-      return new KMsgError(knownError.code, knownError.message, {
-        ...(knownError.details || {}),
-        ...details,
-      });
+      const normalized = normalizeProviderError(knownError, { mode: "compat" });
+      return new KMsgError(
+        knownError.code,
+        knownError.message,
+        {
+          ...(knownError.details || {}),
+          ...details,
+        },
+        {
+          providerErrorCode: normalized.providerErrorCode,
+          providerErrorText: normalized.providerErrorText,
+          httpStatus: normalized.httpStatus,
+          requestId: normalized.requestId,
+          retryAfterMs: normalized.retryAfterMs,
+          attempt: normalized.attempt,
+          causeChain: normalized.causeChain,
+        },
+      );
     }
 
-    return new KMsgError(
-      KMsgErrorCode.UNKNOWN_ERROR,
-      error instanceof Error ? error.message : String(error),
-      details,
-    );
+    const normalized = normalizeProviderError(error, {
+      mode: "compat",
+      defaultCode: KMsgErrorCode.UNKNOWN_ERROR,
+    });
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof (error as { message?: unknown })?.message === "string"
+          ? (error as { message: string }).message
+          : String(error);
+
+    return new KMsgError(normalized.code, message, details, {
+      providerErrorCode: normalized.providerErrorCode,
+      providerErrorText: normalized.providerErrorText,
+      httpStatus: normalized.httpStatus,
+      requestId: normalized.requestId,
+      retryAfterMs: normalized.retryAfterMs,
+      attempt: normalized.attempt,
+      causeChain: normalized.causeChain,
+    });
   }
 
   private resolveProviderChunkSize(provider: Provider): number {

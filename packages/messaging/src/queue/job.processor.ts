@@ -19,6 +19,7 @@ import {
   type RecipientResult,
 } from "../types/message.types";
 import type { Job, JobQueue } from "./job-queue.interface";
+import { buildSendInputFromJob } from "./send-input.builder";
 
 export interface JobProcessorOptions {
   concurrency: number;
@@ -400,6 +401,20 @@ export class MessageJobProcessor extends JobProcessor {
     job: Job<MessageRequest>,
   ): Promise<MessageResult> {
     const { data: messageRequest } = job;
+    const requestOptions = (messageRequest.options as any) || {};
+    const attempt = job.attempts + 1;
+    const envelope = {
+      requestId: job.id,
+      correlationId:
+        typeof job.metadata?.correlationId === "string"
+          ? job.metadata.correlationId
+          : job.id,
+      providerOptions:
+        requestOptions.providerOptions &&
+        typeof requestOptions.providerOptions === "object"
+          ? requestOptions.providerOptions
+          : undefined,
+    };
 
     // Emit processing event
     this.emit("message:processing", {
@@ -411,19 +426,46 @@ export class MessageJobProcessor extends JobProcessor {
 
     const results: RecipientResult[] = await Promise.all(
       messageRequest.recipients.map(async (recipient) => {
-        const sendOptions: SendOptions = {
-          type: "ALIMTALK",
-          to: recipient.phoneNumber,
-          from:
-            (messageRequest.options as any)?.from ||
-            (messageRequest.options as any)?.senderNumber ||
-            "",
-          templateId: messageRequest.templateId,
-          variables: {
-            ...messageRequest.variables,
-            ...recipient.variables,
-          } as Record<string, string>,
-        };
+        const sendInputResult = buildSendInputFromJob(
+          {
+            type:
+              typeof (messageRequest as any).type === "string"
+                ? (messageRequest as any).type
+                : "ALIMTALK",
+            to: recipient.phoneNumber,
+            from: requestOptions.from || requestOptions.senderNumber,
+            templateId: messageRequest.templateId,
+            text:
+              typeof (messageRequest as any).text === "string"
+                ? (messageRequest as any).text
+                : undefined,
+            variables: {
+              ...messageRequest.variables,
+              ...recipient.variables,
+            },
+            providerOptions:
+              requestOptions.providerOptions &&
+              typeof requestOptions.providerOptions === "object"
+                ? requestOptions.providerOptions
+                : undefined,
+          },
+          envelope,
+          attempt,
+        );
+
+        if (sendInputResult.isFailure) {
+          return {
+            phoneNumber: recipient.phoneNumber,
+            status: MessageStatus.FAILED,
+            error: {
+              code: sendInputResult.error.code,
+              message: sendInputResult.error.message,
+            },
+            metadata: recipient.metadata,
+          };
+        }
+
+        const sendOptions = sendInputResult.value as SendOptions;
 
         const response = await this.provider.send(sendOptions);
 

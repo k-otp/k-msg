@@ -1,4 +1,8 @@
-import { assertFieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
+import {
+  assertFieldCryptoConfig,
+  FieldCryptoError,
+  KMSG_TERMINAL_STATUSES,
+} from "@k-msg/core";
 import {
   applyTrackingCryptoOnWrite,
   normalizeTrackingFilterWithHashes,
@@ -32,13 +36,6 @@ import {
 } from "./delivery-tracking-schema";
 import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
-
-const TERMINAL_STATUSES = [
-  "DELIVERED",
-  "FAILED",
-  "CANCELLED",
-  "UNKNOWN",
-] as const;
 
 type TrackingRow = Record<string, unknown>;
 
@@ -237,13 +234,18 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       : 0;
     if (safeLimit === 0) return [];
 
-    const statusPlaceholders = this.placeholders(TERMINAL_STATUSES.length, 1);
-    const nowPlaceholder = this.placeholder(TERMINAL_STATUSES.length + 1);
-    const limitPlaceholder = this.placeholder(TERMINAL_STATUSES.length + 2);
+    const statusPlaceholders = this.placeholders(
+      KMSG_TERMINAL_STATUSES.length,
+      1,
+    );
+    const nowPlaceholder = this.placeholder(KMSG_TERMINAL_STATUSES.length + 1);
+    const limitPlaceholder = this.placeholder(
+      KMSG_TERMINAL_STATUSES.length + 2,
+    );
 
     const { rows } = await this.client.query<TrackingRow>(
       `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
-      [...TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
+      [...KMSG_TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
     );
 
     return await Promise.all(rows.map((row) => this.rowToRecord(row)));
