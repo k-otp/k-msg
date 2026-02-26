@@ -7,6 +7,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,8 +35,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi'",
-    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi'",
+    "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",
