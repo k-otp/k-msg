@@ -7,7 +7,7 @@ title: "createDefaultMasker"
 
 > **createDefaultMasker**(`visibleStart?`, `visibleEnd?`): (`value`) => `string`
 
-Defined in: [packages/core/src/crypto/types.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L213)
+Defined in: [packages/core/src/crypto/types.ts:239](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L239)
 
 ## Parameters
 

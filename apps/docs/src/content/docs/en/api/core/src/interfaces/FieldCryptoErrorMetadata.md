@@ -17,7 +17,7 @@ Defined in: [packages/core/src/crypto/errors.ts:26](https://github.com/k-otp/k-m
 
 > `optional` **attempt**: `number`
 
-Defined in: [packages/core/src/errors.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L30)
+Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L101)
 
 #### Inherited from
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/errors.ts:30](https://github.com/k-otp/k-msg/blob
 
 > `optional` **causeChain**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L31)
+Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L102)
 
 #### Inherited from
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/crypto/errors.ts:27](https://github.com/k-otp/k-m
 
 > `optional` **httpStatus**: `number`
 
-Defined in: [packages/core/src/errors.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L27)
+Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L98)
 
 #### Inherited from
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/crypto/errors.ts:29](https://github.com/k-otp/k-m
 
 > `optional` **providerErrorCode**: `string`
 
-Defined in: [packages/core/src/errors.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L25)
+Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L96)
 
 #### Inherited from
 
@@ -89,7 +89,7 @@ Defined in: [packages/core/src/errors.ts:25](https://github.com/k-otp/k-msg/blob
 
 > `optional` **providerErrorText**: `string`
 
-Defined in: [packages/core/src/errors.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L26)
+Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L97)
 
 #### Inherited from
 
@@ -101,7 +101,7 @@ Defined in: [packages/core/src/errors.ts:26](https://github.com/k-otp/k-msg/blob
 
 > `optional` **requestId**: `string`
 
-Defined in: [packages/core/src/errors.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L28)
+Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L99)
 
 #### Inherited from
 
@@ -113,7 +113,7 @@ Defined in: [packages/core/src/errors.ts:28](https://github.com/k-otp/k-msg/blob
 
 > `optional` **retryAfterMs**: `number`
 
-Defined in: [packages/core/src/errors.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L29)
+Defined in: [packages/core/src/errors.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L100)
 
 #### Inherited from
 

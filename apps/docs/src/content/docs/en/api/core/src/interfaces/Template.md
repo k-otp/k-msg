@@ -5,7 +5,10 @@ prev: false
 title: "Template"
 ---
 
-Defined in: [packages/core/src/provider.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L16)
+Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L20)
+
+Represents an AlimTalk template registered with a provider.
+Templates must be approved by Kakao before use.
 
 ## Properties
 
@@ -13,7 +16,9 @@ Defined in: [packages/core/src/provider.ts:16](https://github.com/k-otp/k-msg/bl
 
 > `optional` **buttons**: `unknown`[]
 
-Defined in: [packages/core/src/provider.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L23)
+Defined in: [packages/core/src/provider.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L34)
+
+Button configurations attached to the template.
 
 ***
 
@@ -21,7 +26,9 @@ Defined in: [packages/core/src/provider.ts:23](https://github.com/k-otp/k-msg/bl
 
 > `optional` **category**: `string`
 
-Defined in: [packages/core/src/provider.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L21)
+Defined in: [packages/core/src/provider.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L30)
+
+Template category (e.g., "authentication", "promotion").
 
 ***
 
@@ -29,7 +36,9 @@ Defined in: [packages/core/src/provider.ts:21](https://github.com/k-otp/k-msg/bl
 
 > **code**: `string`
 
-Defined in: [packages/core/src/provider.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L18)
+Defined in: [packages/core/src/provider.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L24)
+
+Template code used in send requests.
 
 ***
 
@@ -37,7 +46,9 @@ Defined in: [packages/core/src/provider.ts:18](https://github.com/k-otp/k-msg/bl
 
 > **content**: `string`
 
-Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L20)
+Defined in: [packages/core/src/provider.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L28)
+
+Template body with #{variable} placeholders.
 
 ***
 
@@ -45,7 +56,9 @@ Defined in: [packages/core/src/provider.ts:20](https://github.com/k-otp/k-msg/bl
 
 > **createdAt**: `Date`
 
-Defined in: [packages/core/src/provider.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L25)
+Defined in: [packages/core/src/provider.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L38)
+
+When the template was created.
 
 ***
 
@@ -53,7 +66,9 @@ Defined in: [packages/core/src/provider.ts:25](https://github.com/k-otp/k-msg/bl
 
 > **id**: `string`
 
-Defined in: [packages/core/src/provider.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L17)
+Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L22)
+
+Unique template identifier.
 
 ***
 
@@ -61,7 +76,9 @@ Defined in: [packages/core/src/provider.ts:17](https://github.com/k-otp/k-msg/bl
 
 > **name**: `string`
 
-Defined in: [packages/core/src/provider.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L19)
+Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L26)
+
+Human-readable template name.
 
 ***
 
@@ -69,7 +86,9 @@ Defined in: [packages/core/src/provider.ts:19](https://github.com/k-otp/k-msg/bl
 
 > **status**: `"PENDING"` \| `"APPROVED"` \| `"REJECTED"` \| `"INSPECTION"`
 
-Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L22)
+Defined in: [packages/core/src/provider.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L32)
+
+Approval status of the template.
 
 ***
 
@@ -77,7 +96,9 @@ Defined in: [packages/core/src/provider.ts:22](https://github.com/k-otp/k-msg/bl
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L26)
+Defined in: [packages/core/src/provider.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L40)
+
+When the template was last updated.
 
 ***
 
@@ -85,4 +106,6 @@ Defined in: [packages/core/src/provider.ts:26](https://github.com/k-otp/k-msg/bl
 
 > `optional` **variables**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L24)
+Defined in: [packages/core/src/provider.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L36)
+
+Names of variables expected in the template content.

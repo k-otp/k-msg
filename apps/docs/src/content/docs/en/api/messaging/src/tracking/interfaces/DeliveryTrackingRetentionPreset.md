@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingRetentionPreset"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L47)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L53)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:47](htt
 
 > **billingEvidenceDays**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L50)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L56)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:50](htt
 
 > **opsLogsDays**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L48)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L54)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:48](htt
 
 > **telecomMetadataDays**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L49)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L55)

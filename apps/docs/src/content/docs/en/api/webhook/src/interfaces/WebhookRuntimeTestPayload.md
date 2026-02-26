@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntimeTestPayload"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L60)
+Defined in: [packages/webhook/src/runtime/types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L68)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:60](https://github.com/k-otp/
 
 > **endpointId**: `string`
 
-Defined in: [packages/webhook/src/runtime/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L61)
+Defined in: [packages/webhook/src/runtime/types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L69)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/webhook/src/runtime/types.ts:61](https://github.com/k-otp/
 
 > `optional` **event**: `Partial`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L62)
+Defined in: [packages/webhook/src/runtime/types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L70)

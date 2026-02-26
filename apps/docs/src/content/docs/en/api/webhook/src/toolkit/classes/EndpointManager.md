@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:20](https://githu
 
 > **new EndpointManager**(`config?`): `EndpointManager`
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L33)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L32)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:33](https://githu
 
 > **addEndpoint**(`endpoint`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L49)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L48)
 
 엔드포인트 추가
 
@@ -85,7 +85,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:16](https://github.com
 
 > **cleanupExpiredEndpoints**(): `Promise`\<`number`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L293)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:292](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L292)
 
 만료된 엔드포인트 정리
 
@@ -125,7 +125,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 > **getActiveEndpointsForEvent**(`eventType`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L245)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L244)
 
 특정 이벤트 타입을 구독하는 활성 엔드포인트 조회
 
@@ -145,7 +145,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:245](https://gith
 
 > **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L153)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L152)
 
 엔드포인트 조회
 
@@ -165,7 +165,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:153](https://gith
 
 > **getEndpointByUrl**(`url`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L160)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L159)
 
 URL로 엔드포인트 조회
 
@@ -185,7 +185,7 @@ URL로 엔드포인트 조회
 
 > **getStats**(): `object`
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:261](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L261)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L260)
 
 엔드포인트 통계 조회
 
@@ -323,7 +323,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:57](https://github.com
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L131)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L130)
 
 엔드포인트 제거
 
@@ -369,7 +369,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **searchEndpoints**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L168)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L167)
 
 필터 조건에 맞는 엔드포인트 검색
 
@@ -393,7 +393,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:168](https://gith
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:512](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L512)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:511](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L511)
 
 엔드포인트 관리자 종료
 
@@ -407,7 +407,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:512](https://gith
 
 > **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
 
-Defined in: [packages/webhook/src/registry/endpoint.manager.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L81)
+Defined in: [packages/webhook/src/registry/endpoint.manager.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L80)
 
 엔드포인트 업데이트
 

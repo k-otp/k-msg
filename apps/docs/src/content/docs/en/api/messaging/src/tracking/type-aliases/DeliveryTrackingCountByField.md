@@ -7,4 +7,4 @@ title: "DeliveryTrackingCountByField"
 
 > **DeliveryTrackingCountByField** = `"providerId"` \| `"type"` \| `"status"`
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L31)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L37)

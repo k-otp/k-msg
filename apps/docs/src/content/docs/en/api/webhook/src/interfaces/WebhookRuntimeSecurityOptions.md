@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntimeSecurityOptions"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L37)
+Defined in: [packages/webhook/src/runtime/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L38)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:37](https://github.com/k-otp/
 
 > `optional` **allowHttpForLocalhost**: `boolean`
 
-Defined in: [packages/webhook/src/runtime/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L39)
+Defined in: [packages/webhook/src/runtime/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L40)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/webhook/src/runtime/types.ts:39](https://github.com/k-otp/
 
 > `optional` **allowPrivateHosts**: `boolean`
 
-Defined in: [packages/webhook/src/runtime/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L38)
+Defined in: [packages/webhook/src/runtime/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L39)
