@@ -5,7 +5,7 @@ prev: false
 title: "VoiceSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L189)
+Defined in: [packages/core/src/types/message.ts:212](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L212)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/types/message.ts:189](https://github.com/k-otp/k-
 
 > `optional` **counselorNumber**: `string`
 
-Defined in: [packages/core/src/types/message.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L194)
+Defined in: [packages/core/src/types/message.ts:217](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L217)
 
 ***
 
@@ -25,15 +25,15 @@ Defined in: [packages/core/src/types/message.ts:194](https://github.com/k-otp/k-
 
 > `optional` **headerMessage**: `string`
 
-Defined in: [packages/core/src/types/message.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L191)
+Defined in: [packages/core/src/types/message.ts:214](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L214)
 
 ***
 
 ### replyRange?
 
-> `optional` **replyRange**: `2` \| `1` \| `4` \| `3` \| `5` \| `7` \| `6` \| `8` \| `9`
+> `optional` **replyRange**: `2` \| `1` \| `8` \| `4` \| `3` \| `5` \| `7` \| `6` \| `9`
 
-Defined in: [packages/core/src/types/message.ts:193](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L193)
+Defined in: [packages/core/src/types/message.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L216)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/types/message.ts:193](https://github.com/k-otp/k-
 
 > `optional` **tailMessage**: `string`
 
-Defined in: [packages/core/src/types/message.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L192)
+Defined in: [packages/core/src/types/message.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L215)
 
 ***
 
@@ -49,4 +49,4 @@ Defined in: [packages/core/src/types/message.ts:192](https://github.com/k-otp/k-
 
 > `optional` **voiceType**: `"FEMALE"` \| `"MALE"`
 
-Defined in: [packages/core/src/types/message.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L190)
+Defined in: [packages/core/src/types/message.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L213)

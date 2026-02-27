@@ -17,6 +17,12 @@ K-Message는 모놀리식 단일 패키지가 아니라, 사용 목적에 따라
 - 런타임 어댑터 서브패스 (`/adapters/bun`, `/adapters/node`, `/adapters/cloudflare`)
 - `@k-msg/core`의 주요 타입 재노출
 
+번들 크기에 민감하고 core 유틸만 필요한 경우에는 루트(`k-msg`) 대신 `k-msg/core`(또는 `@k-msg/core`) import를 권장합니다.
+
+```ts
+import { parseErrorRetryPolicyFromJson } from "k-msg/core";
+```
+
 ### @k-msg/core
 
 **핵심 타입과 유틸리티**

@@ -5,7 +5,7 @@ prev: false
 title: "TrackingReconcileResult"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L132)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L130)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:132](https://gith
 
 > **errors**: `object`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L134)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L132)
 
 #### error
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:134](https://gith
 
 > **updates**: [`TrackingUpdate`](/api/messaging/src/tracking/interfaces/trackingupdate/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L133)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L131)

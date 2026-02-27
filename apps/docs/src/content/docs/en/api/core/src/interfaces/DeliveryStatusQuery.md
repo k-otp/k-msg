@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryStatusQuery"
 ---
 
-Defined in: [packages/core/src/types/delivery-status.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L11)
+Defined in: [packages/core/src/types/delivery-status.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L62)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:11](https://github.com/k
 
 > **providerMessageId**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L12)
+Defined in: [packages/core/src/types/delivery-status.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L63)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:12](https://github.com/k
 
 > **requestedAt**: `Date`
 
-Defined in: [packages/core/src/types/delivery-status.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L15)
+Defined in: [packages/core/src/types/delivery-status.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L66)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:15](https://github.com/k
 
 > `optional` **scheduledAt**: `Date`
 
-Defined in: [packages/core/src/types/delivery-status.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L16)
+Defined in: [packages/core/src/types/delivery-status.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L67)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:16](https://github.com/k
 
 > **to**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L14)
+Defined in: [packages/core/src/types/delivery-status.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L65)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/core/src/types/delivery-status.ts:14](https://github.com/k
 
 > **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
 
-Defined in: [packages/core/src/types/delivery-status.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L13)
+Defined in: [packages/core/src/types/delivery-status.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L64)
