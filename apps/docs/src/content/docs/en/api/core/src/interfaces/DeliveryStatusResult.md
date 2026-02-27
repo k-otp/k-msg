@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryStatusResult"
 ---
 
-Defined in: [packages/core/src/types/delivery-status.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L19)
+Defined in: [packages/core/src/types/delivery-status.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L70)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:19](https://github.com/k
 
 > `optional` **deliveredAt**: `Date`
 
-Defined in: [packages/core/src/types/delivery-status.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L26)
+Defined in: [packages/core/src/types/delivery-status.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L77)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:26](https://github.com/k
 
 > `optional` **failedAt**: `Date`
 
-Defined in: [packages/core/src/types/delivery-status.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L27)
+Defined in: [packages/core/src/types/delivery-status.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L78)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:27](https://github.com/k
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L20)
+Defined in: [packages/core/src/types/delivery-status.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L71)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:20](https://github.com/k
 
 > **providerMessageId**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L21)
+Defined in: [packages/core/src/types/delivery-status.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L72)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:21](https://github.com/k
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/core/src/types/delivery-status.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L28)
+Defined in: [packages/core/src/types/delivery-status.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L79)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:28](https://github.com/k
 
 > `optional` **sentAt**: `Date`
 
-Defined in: [packages/core/src/types/delivery-status.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L25)
+Defined in: [packages/core/src/types/delivery-status.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L76)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:25](https://github.com/k
 
 > **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)
 
-Defined in: [packages/core/src/types/delivery-status.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L22)
+Defined in: [packages/core/src/types/delivery-status.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L73)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:22](https://github.com/k
 
 > `optional` **statusCode**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L23)
+Defined in: [packages/core/src/types/delivery-status.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L74)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/core/src/types/delivery-status.ts:23](https://github.com/k
 
 > `optional` **statusMessage**: `string`
 
-Defined in: [packages/core/src/types/delivery-status.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L24)
+Defined in: [packages/core/src/types/delivery-status.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L75)

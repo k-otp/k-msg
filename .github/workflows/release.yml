@@ -75,6 +75,10 @@ jobs:
           bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts src/delivery-tracking/field-crypto-policy.test.ts src/delivery-tracking/crypto-control-plane.test.ts
           bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts
 
+      - name: Pre-publish npm pack smoke checks
+        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
+        run: bash ./scripts/ci/npm-pack-smoke.sh
+
       - name: Run Sampo (release PR only)
         # Keep AUTO_RELEASE_PR=false during normal development.
         # Toggle to true only when you want a batch release PR to be created.

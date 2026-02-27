@@ -7,7 +7,7 @@ title: "MessageStatus"
 
 > **MessageStatus** = `"PENDING"` \| `"SENT"` \| `"FAILED"`
 
-Defined in: [packages/core/src/types/message.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L38)
+Defined in: [packages/core/src/types/message.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L61)
 
 Message delivery status.
 

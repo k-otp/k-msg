@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingApiFailoverRule"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L56)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L58)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:56](https://githu
 
 > `optional` **messageIncludes**: `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L58)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L60)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:58](https://githu
 
 > `optional` **statusCodes**: `string`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L57)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L59)

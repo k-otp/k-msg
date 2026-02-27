@@ -5,7 +5,7 @@ prev: false
 title: "AlimTalkFailoverOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L157)
+Defined in: [packages/core/src/types/message.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L180)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/message.ts:157](https://github.com/k-otp/k-
 
 > `optional` **enabled**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L158)
+Defined in: [packages/core/src/types/message.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L181)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/types/message.ts:158](https://github.com/k-otp/k-
 
 > `optional` **fallbackChannel**: `"sms"` \| `"lms"`
 
-Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L159)
+Defined in: [packages/core/src/types/message.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L182)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/types/message.ts:159](https://github.com/k-otp/k-
 
 > `optional` **fallbackContent**: `string`
 
-Defined in: [packages/core/src/types/message.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L160)
+Defined in: [packages/core/src/types/message.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L183)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/types/message.ts:160](https://github.com/k-otp/k-
 
 > `optional` **fallbackTitle**: `string`
 
-Defined in: [packages/core/src/types/message.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L161)
+Defined in: [packages/core/src/types/message.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L184)
