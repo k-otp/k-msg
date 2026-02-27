@@ -5,7 +5,7 @@ prev: false
 title: "KMsgError"
 ---
 
-Defined in: [packages/core/src/errors.ts:200](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L200)
+Defined in: [packages/core/src/errors.ts:296](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L296)
 
 ## Extends
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:200](https://github.com/k-otp/k-msg/blo
 
 > **new KMsgError**(`code`, `message`, `details?`, `metadata?`): `KMsgError`
 
-Defined in: [packages/core/src/errors.ts:211](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L211)
+Defined in: [packages/core/src/errors.ts:307](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L307)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/errors.ts:211](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **attempt**: `number`
 
-Defined in: [packages/core/src/errors.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L208)
+Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L304)
 
 ***
 
@@ -77,7 +77,7 @@ The cause of the error.
 
 > `readonly` `optional` **causeChain**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L209)
+Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L305)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/core/src/errors.ts:209](https://github.com/k-otp/k-msg/blo
 
 > `readonly` **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:201](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L201)
+Defined in: [packages/core/src/errors.ts:297](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L297)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/core/src/errors.ts:201](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **details**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/errors.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L202)
+Defined in: [packages/core/src/errors.ts:298](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L298)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/core/src/errors.ts:202](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **httpStatus**: `number`
 
-Defined in: [packages/core/src/errors.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L205)
+Defined in: [packages/core/src/errors.ts:301](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L301)
 
 ***
 
@@ -133,7 +133,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 > `readonly` `optional` **providerErrorCode**: `string`
 
-Defined in: [packages/core/src/errors.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L203)
+Defined in: [packages/core/src/errors.ts:299](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L299)
 
 ***
 
@@ -141,7 +141,7 @@ Defined in: [packages/core/src/errors.ts:203](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **providerErrorText**: `string`
 
-Defined in: [packages/core/src/errors.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L204)
+Defined in: [packages/core/src/errors.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L300)
 
 ***
 
@@ -149,7 +149,7 @@ Defined in: [packages/core/src/errors.ts:204](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **requestId**: `string`
 
-Defined in: [packages/core/src/errors.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L206)
+Defined in: [packages/core/src/errors.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L302)
 
 ***
 
@@ -157,7 +157,7 @@ Defined in: [packages/core/src/errors.ts:206](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **retryAfterMs**: `number`
 
-Defined in: [packages/core/src/errors.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L207)
+Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L303)
 
 ***
 
@@ -199,7 +199,7 @@ not capture any frames.
 
 > **getLocalizedMessage**(`locale?`): `string`
 
-Defined in: [packages/core/src/errors.ts:246](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L246)
+Defined in: [packages/core/src/errors.ts:342](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L342)
 
 Returns a localized error message based on the provided locale.
 Falls back to Korean (default) if locale is not provided.
@@ -221,7 +221,7 @@ Falls back to the original message if no localized message exists.
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/errors.ts:254](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L254)
+Defined in: [packages/core/src/errors.ts:350](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L350)
 
 #### Returns
 

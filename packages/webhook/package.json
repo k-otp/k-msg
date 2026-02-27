@@ -56,7 +56,9 @@
     "callbacks"
   ],
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.d.ts",
     "README.md",
     "README_ko.md"
   ],

@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingPollingConfig"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L91)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L93)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:91](https://githu
 
 > **backoffMs**: `number`[]
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L97)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L99)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:97](https://githu
 
 > **batchSize**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L93)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L95)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:93](https://githu
 
 > **concurrency**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L94)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L96)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:94](https://githu
 
 > **initialDelayMs**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L95)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L97)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:95](https://githu
 
 > **intervalMs**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L92)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L94)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:92](https://githu
 
 > **maxTrackingDurationMs**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L98)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L100)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:98](https://githu
 
 > **scheduledGraceMs**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L96)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L98)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:96](https://githu
 
 > **unsupportedProviderStrategy**: [`UnsupportedProviderStrategy`](/api/messaging/src/tracking/type-aliases/unsupportedproviderstrategy/)
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L99)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L101)

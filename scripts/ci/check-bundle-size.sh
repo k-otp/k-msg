@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Bundle-size guard for publishable ESM artifacts.
+# Threshold governance is documented in scripts/ci/README.md.
+
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT_DIR"
 
