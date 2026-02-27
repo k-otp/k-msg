@@ -5,7 +5,7 @@ prev: false
 title: "KakaoSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L142)
+Defined in: [packages/core/src/types/message.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L165)
 
 ## Indexable
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/types/message.ts:142](https://github.com/k-otp/k-
 
 > `optional` **adFlag**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L146)
+Defined in: [packages/core/src/types/message.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L169)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/types/message.ts:146](https://github.com/k-otp/k-
 
 > `optional` **buttons**: `unknown`[]
 
-Defined in: [packages/core/src/types/message.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L147)
+Defined in: [packages/core/src/types/message.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L170)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/core/src/types/message.ts:147](https://github.com/k-otp/k-
 
 > `optional` **disableSms**: `boolean`
 
-Defined in: [packages/core/src/types/message.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L145)
+Defined in: [packages/core/src/types/message.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L168)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/types/message.ts:145](https://github.com/k-otp/k-
 
 > `optional` **imageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L148)
+Defined in: [packages/core/src/types/message.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L171)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/types/message.ts:148](https://github.com/k-otp/k-
 
 > `optional` **imageLink**: `string`
 
-Defined in: [packages/core/src/types/message.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L152)
+Defined in: [packages/core/src/types/message.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L175)
 
 FriendTalk image upload link hint (SOLAPI).
 
@@ -59,7 +59,7 @@ FriendTalk image upload link hint (SOLAPI).
 
 > `optional` **plusId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L144)
+Defined in: [packages/core/src/types/message.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L167)
 
 ***
 
@@ -67,4 +67,4 @@ Defined in: [packages/core/src/types/message.ts:144](https://github.com/k-otp/k-
 
 > `optional` **profileId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L143)
+Defined in: [packages/core/src/types/message.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L166)

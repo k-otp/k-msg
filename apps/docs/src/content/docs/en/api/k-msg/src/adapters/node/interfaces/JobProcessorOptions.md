@@ -5,7 +5,7 @@ prev: false
 title: "JobProcessorOptions"
 ---
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L23)
+Defined in: [packages/messaging/src/queue/job.processor.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L24)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:23](https://github.co
 
 > `optional` **circuitBreaker**: `object`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L33)
+Defined in: [packages/messaging/src/queue/job.processor.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L34)
 
 #### failureThreshold
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:33](https://github.co
 
 > **concurrency**: `number`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L24)
+Defined in: [packages/messaging/src/queue/job.processor.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L25)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:24](https://github.co
 
 > **enableMetrics**: `boolean`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L28)
+Defined in: [packages/messaging/src/queue/job.processor.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L29)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:28](https://github.co
 
 > **maxRetries**: `number`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L26)
+Defined in: [packages/messaging/src/queue/job.processor.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L27)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:26](https://github.co
 
 > **pollInterval**: `number`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L27)
+Defined in: [packages/messaging/src/queue/job.processor.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L28)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:27](https://github.co
 
 > `optional` **rateLimiter**: `object`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L29)
+Defined in: [packages/messaging/src/queue/job.processor.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L30)
 
 #### maxRequests
 
@@ -81,4 +81,4 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:29](https://github.co
 
 > **retryDelays**: `number`[]
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L25)
+Defined in: [packages/messaging/src/queue/job.processor.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L26)

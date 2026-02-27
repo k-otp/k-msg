@@ -15,6 +15,7 @@ title: "k-msg-workspace"
 - [k-msg/src/adapters/bun](/api/k-msg/src/adapters/bun/readme/)
 - [k-msg/src/adapters/cloudflare](/api/k-msg/src/adapters/cloudflare/readme/)
 - [k-msg/src/adapters/node](/api/k-msg/src/adapters/node/readme/)
+- [k-msg/src/core](/api/k-msg/src/core/readme/)
 - [messaging/src](/api/messaging/src/readme/)
 - [messaging/src/adapters/bun](/api/messaging/src/adapters/bun/readme/)
 - [messaging/src/adapters/cloudflare](/api/messaging/src/adapters/cloudflare/readme/)

@@ -5,7 +5,7 @@ prev: false
 title: "ApiFailoverClassificationContext"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L61)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L63)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:61](https://githu
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L65)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L67)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://githu
 
 > **record**: [`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L62)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L64)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:62](https://githu
 
 > `optional` **statusCode**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L63)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L65)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:63](https://githu
 
 > `optional` **statusMessage**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L64)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L66)

@@ -5,7 +5,7 @@ prev: false
 title: "KMsg"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L259)
+Defined in: [packages/messaging/src/k-msg.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L260)
 
 High-level messaging facade for sending messages through configured providers.
 
@@ -83,7 +83,7 @@ await kmsg.send({
 
 > **new KMsg**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:286](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L286)
+Defined in: [packages/messaging/src/k-msg.ts:287](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L287)
 
 Creates a new KMsg instance with the specified configuration.
 
@@ -119,7 +119,7 @@ const kmsg = new KMsg({
 
 > **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
-Defined in: [packages/messaging/src/k-msg.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L383)
+Defined in: [packages/messaging/src/k-msg.ts:384](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L384)
 
 Performs a health check on all configured providers.
 
@@ -152,7 +152,7 @@ if (!health.healthy) {
 
 > **send**(`input`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/messaging/src/k-msg.ts:464](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L464)
+Defined in: [packages/messaging/src/k-msg.ts:465](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L465)
 
 Sends a single message and returns a Result.
 
@@ -213,7 +213,7 @@ console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}
 
 > **send**(`input`): `Promise`\<[`BatchSendResult`](/api/messaging/src/interfaces/batchsendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:465](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L465)
+Defined in: [packages/messaging/src/k-msg.ts:466](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L466)
 
 Sends a single message and returns a Result.
 
@@ -276,7 +276,7 @@ console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}
 
 > **sendOrThrow**(`input`): `Promise`\<[`SendResult`](/api/core/src/interfaces/sendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:501](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L501)
+Defined in: [packages/messaging/src/k-msg.ts:502](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L502)
 
 Sends a single message and throws on failure.
 
@@ -323,7 +323,7 @@ try {
 
 > `static` **builder**(): [`KMsgBuilder`](/api/messaging/src/classes/kmsgbuilder/)
 
-Defined in: [packages/messaging/src/k-msg.ts:360](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L360)
+Defined in: [packages/messaging/src/k-msg.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L361)
 
 Creates a new fluent builder for constructing KMsg instances.
 
@@ -352,7 +352,7 @@ const kmsg = KMsg.builder()
 
 > `static` **create**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L339)
+Defined in: [packages/messaging/src/k-msg.ts:340](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L340)
 
 Creates a KMsg instance with the specified configuration.
 

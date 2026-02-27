@@ -49,7 +49,9 @@
     "verification"
   ],
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.d.ts",
     "README.md"
   ],
   "repository": {
