@@ -1,5 +1,17 @@
 # k-msg
 
+## 0.27.1 — 2026-02-27
+
+### Patch changes
+
+- [4b563dc](https://github.com/k-otp/k-msg/commit/4b563dc15dc60d8dd91738e7d20c93054fb1d7ab) improve release readiness with CI smoke checks and docs alignment
+  
+  - add pre-publish `npm pack --dry-run` smoke checks to catch packaging regressions before publish
+  - exclude sourcemap artifacts from published npm tarballs by narrowing package `files` globs
+  - document bundle-size threshold update rules and recommend `k-msg/core` for bundle-sensitive usage
+  - include refreshed generated API docs snapshot for current core and messaging helper surface — Thanks @imjlk!
+- Updated dependencies: core@0.27.1, messaging@0.27.1
+
 ## 0.27.0 — 2026-02-26
 
 ### Minor changes
