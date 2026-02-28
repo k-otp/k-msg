@@ -5,7 +5,7 @@ prev: false
 title: "BulkMessageRequest"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L121)
+Defined in: packages/messaging/src/types/message.runtime.ts:119
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:121](https://github.c
 
 > `optional` **commonVariables**: [`VariableMap`](/api/messaging/src/interfaces/variablemap/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L129)
+Defined in: packages/messaging/src/types/message.runtime.ts:123
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:129](https://github.c
 
 > `optional` **options**: [`BulkSendingOptions`](/api/messaging/src/interfaces/bulksendingoptions/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L130)
+Defined in: packages/messaging/src/types/message.runtime.ts:124
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:130](https://github.c
 
 > **recipients**: [`BulkRecipient`](/api/messaging/src/interfaces/bulkrecipient/)[]
 
-Defined in: [packages/messaging/src/types/message.types.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L128)
+Defined in: packages/messaging/src/types/message.runtime.ts:122
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:128](https://github.c
 
 > **templateId**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L127)
+Defined in: packages/messaging/src/types/message.runtime.ts:121
 
 ***
 
@@ -45,7 +45,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:127](https://github.c
 
 > `optional` **type**: [`BulkMessageType`](/api/messaging/src/type-aliases/bulkmessagetype/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L126)
-
-BulkMessageSender currently targets template-based channels.
-Default: "ALIMTALK"
+Defined in: packages/messaging/src/types/message.runtime.ts:120

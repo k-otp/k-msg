@@ -10,9 +10,9 @@ import {
 } from "@k-msg/core";
 import { isObjectRecord } from "../shared/type-guards";
 import { mapAligoKakaoError } from "./aligo.error";
-import { parseAligoDateTime } from "./aligo.helpers";
 import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
+import { parseAligoDateTime } from "./aligo.shared.helpers";
 
 export async function listKakaoChannels(
   ctx: AligoRuntimeContext,

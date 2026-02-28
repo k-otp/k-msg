@@ -9,7 +9,7 @@ import {
   type TemplateCreateInput,
   type TemplateUpdateInput,
 } from "@k-msg/core";
-import { validateTemplatePayload } from "@k-msg/template";
+import { validateTemplatePayload } from "@k-msg/template/send";
 import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
 import { isObjectRecord } from "../shared/type-guards";
 import {

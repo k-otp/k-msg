@@ -5,7 +5,7 @@ prev: false
 title: "MessageRequest"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L9)
+Defined in: packages/messaging/src/types/message.runtime.ts:8
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:9](https://github.com
 
 > `optional` **options**: [`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L14)
+Defined in: packages/messaging/src/types/message.runtime.ts:13
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:14](https://github.co
 
 > **recipients**: [`Recipient`](/api/messaging/src/interfaces/recipient/)[]
 
-Defined in: [packages/messaging/src/types/message.types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L11)
+Defined in: packages/messaging/src/types/message.runtime.ts:10
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:11](https://github.co
 
 > `optional` **scheduling**: [`SchedulingOptions`](/api/messaging/src/interfaces/schedulingoptions/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L13)
+Defined in: packages/messaging/src/types/message.runtime.ts:12
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:13](https://github.co
 
 > **templateId**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L10)
+Defined in: packages/messaging/src/types/message.runtime.ts:9
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:10](https://github.co
 
 > **variables**: [`VariableMap`](/api/messaging/src/interfaces/variablemap/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L12)
+Defined in: packages/messaging/src/types/message.runtime.ts:11
