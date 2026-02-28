@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 
 export interface AnalyticsConfig {
   enableRealTimeTracking: boolean;
@@ -113,7 +113,7 @@ export const MetricDataSchema = z.object({
   timestamp: z.date(),
   value: z.number(),
   dimensions: z.record(z.string(), z.string()),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.optional(z.record(z.string(), z.any())),
 });
 
 export const AnalyticsQuerySchema = z.object({
@@ -122,19 +122,19 @@ export const AnalyticsQuerySchema = z.object({
     start: z.date(),
     end: z.date(),
   }),
-  interval: z.enum(["minute", "hour", "day", "week", "month"]).optional(),
-  filters: z.record(z.string(), z.any()).optional(),
-  groupBy: z.array(z.string()).optional(),
-  orderBy: z
-    .array(
+  interval: z.optional(z.enum(["minute", "hour", "day", "week", "month"])),
+  filters: z.optional(z.record(z.string(), z.any())),
+  groupBy: z.optional(z.array(z.string())),
+  orderBy: z.optional(
+    z.array(
       z.object({
         field: z.string(),
         direction: z.enum(["asc", "desc"]),
       }),
-    )
-    .optional(),
-  limit: z.number().min(1).max(10000).optional(),
-  offset: z.number().min(0).optional(),
+    ),
+  ),
+  limit: z.optional(z.number().check(z.minimum(1), z.maximum(10000))),
+  offset: z.optional(z.number().check(z.minimum(0))),
 });
 
 export const InsightDataSchema = z.object({
@@ -146,10 +146,10 @@ export const InsightDataSchema = z.object({
   metric: z.nativeEnum(MetricType),
   dimensions: z.record(z.string(), z.string()),
   value: z.number(),
-  expectedValue: z.number().optional(),
-  confidence: z.number().min(0).max(1),
+  expectedValue: z.optional(z.number()),
+  confidence: z.number().check(z.minimum(0), z.maximum(1)),
   actionable: z.boolean(),
-  recommendations: z.array(z.string()).optional(),
+  recommendations: z.optional(z.array(z.string())),
   detectedAt: z.date(),
 });
 

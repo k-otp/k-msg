@@ -9,6 +9,8 @@ title: "updateTemplate"
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L181)
 
+Aligo template CRUD focused entrypoint.
+
 ## Parameters
 
 ### ctx

@@ -5,7 +5,7 @@ prev: false
 title: "MessageError"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:85
+Defined in: [packages/messaging/src/types/message.runtime.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L85)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:85
 
 > **code**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:86
+Defined in: [packages/messaging/src/types/message.runtime.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L86)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:86
 
 > `optional` **details**: `Record`\<`string`, `unknown`\>
 
-Defined in: packages/messaging/src/types/message.runtime.ts:88
+Defined in: [packages/messaging/src/types/message.runtime.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L88)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:88
 
 > **message**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:87
+Defined in: [packages/messaging/src/types/message.runtime.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L87)
