@@ -1,5 +1,15 @@
 # @k-msg/template
 
+## 0.28.0 — 2026-02-28
+
+### Minor changes
+
+- [4c11ff5](https://github.com/k-otp/k-msg/commit/4c11ff5ac8859de63952370eb53722275a8987d9) Switch public schemas to zod/mini while preserving parse/safeParse behavior; schema concrete internals now use mini types. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.28.0
+
 ## 0.27.2 — 2026-02-28
 
 ### Patch changes
