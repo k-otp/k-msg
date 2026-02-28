@@ -1,12 +1,12 @@
-import {
-  type KMsgError,
-  type Result,
-  type Template,
-  type TemplateContext,
-  type TemplateCreateInput,
-  type TemplateInspectionProvider,
-  type TemplateProvider,
-  type TemplateUpdateInput,
+import type {
+  KMsgError,
+  Result,
+  Template,
+  TemplateContext,
+  TemplateCreateInput,
+  TemplateInspectionProvider,
+  TemplateProvider,
+  TemplateUpdateInput,
 } from "@k-msg/core";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 import {

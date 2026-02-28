@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  AligoProvider as AligoSendProviderAlias,
   AligoSendProvider,
+  AligoProvider as AligoSendProviderAlias,
   createAligoProvider,
 } from "./aligo/send";
 import { AligoTemplateProvider } from "./aligo/template";
