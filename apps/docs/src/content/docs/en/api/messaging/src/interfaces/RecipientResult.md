@@ -5,7 +5,7 @@ prev: false
 title: "RecipientResult"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L68)
+Defined in: packages/messaging/src/types/message.runtime.ts:67
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:68](https://github.co
 
 > `optional` **error**: [`MessageError`](/api/messaging/src/interfaces/messageerror/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L72)
+Defined in: packages/messaging/src/types/message.runtime.ts:71
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:72](https://github.co
 
 > `optional` **messageId**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L70)
+Defined in: packages/messaging/src/types/message.runtime.ts:69
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:70](https://github.co
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/messaging/src/types/message.types.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L73)
+Defined in: packages/messaging/src/types/message.runtime.ts:72
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:73](https://github.co
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L69)
+Defined in: packages/messaging/src/types/message.runtime.ts:68
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:69](https://github.co
 
 > **status**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L71)
+Defined in: packages/messaging/src/types/message.runtime.ts:70

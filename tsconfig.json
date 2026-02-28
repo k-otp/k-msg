@@ -26,7 +26,19 @@
     // Path Aliases for Editor - Point to src folder
     "paths": {
       "@k-msg/*": ["./packages/*/src"],
-      "@k-msg/messaging/*": ["./packages/messaging/src/*"]
+      "@k-msg/messaging/*": ["./packages/messaging/src/*"],
+      "@k-msg/provider/aligo/send": ["./packages/provider/src/aligo/send.ts"],
+      "@k-msg/provider/aligo/template": [
+        "./packages/provider/src/aligo/template.ts"
+      ],
+      "@k-msg/provider/iwinv/send": ["./packages/provider/src/iwinv/send.ts"],
+      "@k-msg/provider/iwinv/template": [
+        "./packages/provider/src/iwinv/template.ts"
+      ],
+      "@k-msg/template/send": ["./packages/template/src/send/index.ts"],
+      "@k-msg/template/lifecycle": [
+        "./packages/template/src/lifecycle/index.ts"
+      ]
     }
   },
   "exclude": ["dist", "node_modules", "**/*.test.ts"]

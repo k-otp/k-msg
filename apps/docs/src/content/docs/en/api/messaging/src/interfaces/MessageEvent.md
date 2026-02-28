@@ -5,7 +5,7 @@ prev: false
 title: "MessageEvent"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L205)
+Defined in: packages/messaging/src/types/message.runtime.ts:188
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:205](https://github.c
 
 > **data**: `T`
 
-Defined in: [packages/messaging/src/types/message.types.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L209)
+Defined in: packages/messaging/src/types/message.runtime.ts:192
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:209](https://github.c
 
 > **id**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L206)
+Defined in: packages/messaging/src/types/message.runtime.ts:189
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:206](https://github.c
 
 > **metadata**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L210)
+Defined in: packages/messaging/src/types/message.runtime.ts:193
 
 #### correlationId?
 
@@ -59,7 +59,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:210](https://github.c
 
 > **timestamp**: `Date`
 
-Defined in: [packages/messaging/src/types/message.types.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L208)
+Defined in: packages/messaging/src/types/message.runtime.ts:191
 
 ***
 
@@ -67,4 +67,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:208](https://github.c
 
 > **type**: [`MessageEventType`](/api/messaging/src/enumerations/messageeventtype/)
 
-Defined in: [packages/messaging/src/types/message.types.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L207)
+Defined in: packages/messaging/src/types/message.runtime.ts:190

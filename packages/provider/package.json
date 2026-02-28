@@ -19,10 +19,30 @@
       "import": "./dist/aligo/index.mjs",
       "require": "./dist/aligo/index.js"
     },
+    "./aligo/send": {
+      "types": "./dist/aligo/send.d.ts",
+      "import": "./dist/aligo/send.mjs",
+      "require": "./dist/aligo/send.js"
+    },
+    "./aligo/template": {
+      "types": "./dist/aligo/template.d.ts",
+      "import": "./dist/aligo/template.mjs",
+      "require": "./dist/aligo/template.js"
+    },
     "./iwinv": {
       "types": "./dist/iwinv/index.d.ts",
       "import": "./dist/iwinv/index.mjs",
       "require": "./dist/iwinv/index.js"
+    },
+    "./iwinv/send": {
+      "types": "./dist/iwinv/send.d.ts",
+      "import": "./dist/iwinv/send.mjs",
+      "require": "./dist/iwinv/send.js"
+    },
+    "./iwinv/template": {
+      "types": "./dist/iwinv/template.d.ts",
+      "import": "./dist/iwinv/template.mjs",
+      "require": "./dist/iwinv/template.js"
     },
     "./solapi": {
       "types": "./dist/solapi/index.d.ts",
@@ -35,8 +55,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
-    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/iwinv/index.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
+    "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/aligo/send.ts ./src/aligo/template.ts ./src/iwinv/index.ts ./src/iwinv/send.ts ./src/iwinv/template.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/aligo/send.ts ./src/aligo/template.ts ./src/iwinv/index.ts ./src/iwinv/send.ts ./src/iwinv/template.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",

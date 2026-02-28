@@ -58,6 +58,18 @@ SOLAPI, IWINV, Aligo 등 실제 메시징 프로바이더 구현을 제공합니
 - `MockProvider` (테스트용)
 - Provider 온보딩 스펙 레지스트리
 
+번들 최적화가 필요한 경우 provider subpath를 직접 사용할 수 있습니다.
+
+- `@k-msg/provider/iwinv/send`: IWINV send/status/balance 전용
+- `@k-msg/provider/iwinv/template`: IWINV template CRUD 전용
+- `@k-msg/provider/aligo/send`: Aligo send/channel 전용
+- `@k-msg/provider/aligo/template`: Aligo template CRUD 전용
+
+```ts
+import { IWINVProvider } from "@k-msg/provider/iwinv/send";
+import { AligoTemplateProvider } from "@k-msg/provider/aligo/template";
+```
+
 ### @k-msg/template
 
 **템플릿 엔진**
@@ -68,6 +80,11 @@ SOLAPI, IWINV, Aligo 등 실제 메시징 프로바이더 구현을 제공합니
 - `TemplatePersonalizer` - 개인화 처리
 - `TemplateLifecycleService` - 템플릿 생명주기 관리
 - 툴킷 (`/toolkit`): 빌더, 레지스트리, 인메모리 스토어
+
+경량 경로가 필요하면 subpath를 사용할 수 있습니다.
+
+- `@k-msg/template/send`: send 경로에서 필요한 최소 유틸 (`interpolate`, 버튼/페이로드 검증)
+- `@k-msg/template/lifecycle`: lifecycle 서비스와 관련 타입
 
 ### @k-msg/analytics
 

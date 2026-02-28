@@ -5,7 +5,7 @@ prev: false
 title: "MessageResult"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L52)
+Defined in: packages/messaging/src/types/message.runtime.ts:51
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:52](https://github.co
 
 > **metadata**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L61)
+Defined in: packages/messaging/src/types/message.runtime.ts:60
 
 #### createdAt
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:61](https://github.co
 
 > **requestId**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L53)
+Defined in: packages/messaging/src/types/message.runtime.ts:52
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:53](https://github.co
 
 > **results**: [`RecipientResult`](/api/messaging/src/interfaces/recipientresult/)[]
 
-Defined in: [packages/messaging/src/types/message.types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L54)
+Defined in: packages/messaging/src/types/message.runtime.ts:53
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:54](https://github.co
 
 > **summary**: `object`
 
-Defined in: [packages/messaging/src/types/message.types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L55)
+Defined in: packages/messaging/src/types/message.runtime.ts:54
 
 #### failed
 

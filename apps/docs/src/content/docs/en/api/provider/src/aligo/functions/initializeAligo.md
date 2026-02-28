@@ -7,7 +7,7 @@ title: "initializeAligo"
 
 > **initializeAligo**(): `void`
 
-Defined in: [packages/provider/src/aligo/provider.ts:241](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L241)
+Defined in: [packages/provider/src/aligo/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L89)
 
 Aligo Provider package entrypoint
 
