@@ -9,6 +9,8 @@ title: "listTemplates"
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:315](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L315)
 
+Aligo template CRUD focused entrypoint.
+
 ## Parameters
 
 ### ctx

@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryReport"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:91
+Defined in: [packages/messaging/src/types/message.runtime.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L91)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:91
 
 > **attempts**: [`DeliveryAttempt`](/api/messaging/src/interfaces/deliveryattempt/)[]
 
-Defined in: packages/messaging/src/types/message.runtime.ts:100
+Defined in: [packages/messaging/src/types/message.runtime.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L100)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:100
 
 > `optional` **clickedAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:97
+Defined in: [packages/messaging/src/types/message.runtime.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L97)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:97
 
 > `optional` **deliveredAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:96
+Defined in: [packages/messaging/src/types/message.runtime.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L96)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:96
 
 > `optional` **error**: [`MessageError`](/api/messaging/src/interfaces/messageerror/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:99
+Defined in: [packages/messaging/src/types/message.runtime.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L99)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:99
 
 > `optional` **failedAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:98
+Defined in: [packages/messaging/src/types/message.runtime.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L98)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:98
 
 > **messageId**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:92
+Defined in: [packages/messaging/src/types/message.runtime.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L92)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:92
 
 > **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: packages/messaging/src/types/message.runtime.ts:101
+Defined in: [packages/messaging/src/types/message.runtime.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L101)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:101
 
 > **phoneNumber**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:93
+Defined in: [packages/messaging/src/types/message.runtime.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L93)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:93
 
 > `optional` **sentAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:95
+Defined in: [packages/messaging/src/types/message.runtime.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L95)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:95
 
 > **status**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:94
+Defined in: [packages/messaging/src/types/message.runtime.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L94)

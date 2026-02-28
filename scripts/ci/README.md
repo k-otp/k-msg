@@ -10,6 +10,7 @@ Guards published ESM artifact size regressions with fixed byte thresholds.
 - Enforces both `raw` and `gzip` thresholds per artifact.
 - Includes send-only forbidden import checks:
   - `zod` (sender/send-only bundles)
+  - `zod/mini` (sender/send-only bundles)
   - `drizzle-orm` (sender/send-only bundles)
   - `@k-msg/template` (provider send-only bundles)
 

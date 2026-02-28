@@ -75,11 +75,14 @@ done
 
 declare -a FORBIDDEN_IMPORT_CHECKS=(
   "packages/messaging/dist/sender/index.mjs|zod"
+  "packages/messaging/dist/sender/index.mjs|zod/mini"
   "packages/messaging/dist/sender/index.mjs|drizzle-orm"
   "packages/provider/dist/aligo/send.mjs|zod"
+  "packages/provider/dist/aligo/send.mjs|zod/mini"
   "packages/provider/dist/aligo/send.mjs|drizzle-orm"
   "packages/provider/dist/aligo/send.mjs|@k-msg/template"
   "packages/provider/dist/iwinv/send.mjs|zod"
+  "packages/provider/dist/iwinv/send.mjs|zod/mini"
   "packages/provider/dist/iwinv/send.mjs|drizzle-orm"
   "packages/provider/dist/iwinv/send.mjs|@k-msg/template"
 )

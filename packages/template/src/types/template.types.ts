@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 
 export enum TemplateType {
   ALIMTALK = "ALIMTALK",
@@ -73,46 +73,46 @@ export interface AlimTalkTemplate {
 
 // Zod schemas
 export const TemplateVariableSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().check(z.minLength(1)),
   type: z.enum(["string", "number", "date", "custom"]),
   required: z.boolean(),
-  maxLength: z.number().optional(),
-  format: z.string().optional(),
-  description: z.string().optional(),
-  example: z.string().optional(),
+  maxLength: z.optional(z.number()),
+  format: z.optional(z.string()),
+  description: z.optional(z.string()),
+  example: z.optional(z.string()),
 });
 
 export const TemplateButtonSchema = z.object({
   type: z.enum(["WL", "AL", "DS", "BK", "MD"]),
-  name: z.string().min(1),
-  linkMobile: z.string().url().optional(),
-  linkPc: z.string().url().optional(),
-  linkIos: z.string().url().optional(),
-  linkAndroid: z.string().url().optional(),
-  schemeIos: z.string().optional(),
-  schemeAndroid: z.string().optional(),
+  name: z.string().check(z.minLength(1)),
+  linkMobile: z.optional(z.url()),
+  linkPc: z.optional(z.url()),
+  linkIos: z.optional(z.url()),
+  linkAndroid: z.optional(z.url()),
+  schemeIos: z.optional(z.string()),
+  schemeAndroid: z.optional(z.string()),
 });
 
 export const AlimTalkTemplateSchema = z.object({
   id: z.string(),
   code: z.string(),
-  name: z.string().min(1),
-  content: z.string().min(1),
+  name: z.string().check(z.minLength(1)),
+  content: z.string().check(z.minLength(1)),
   variables: z.array(TemplateVariableSchema),
-  buttons: z.array(TemplateButtonSchema).optional(),
+  buttons: z.optional(z.array(TemplateButtonSchema)),
   category: z.nativeEnum(TemplateCategory),
   status: z.nativeEnum(TemplateStatus),
   provider: z.string(),
   metadata: z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
-    approvedAt: z.date().optional(),
-    rejectedAt: z.date().optional(),
-    rejectionReason: z.string().optional(),
+    approvedAt: z.optional(z.date()),
+    rejectedAt: z.optional(z.date()),
+    rejectionReason: z.optional(z.string()),
     usage: z.object({
-      sent: z.number().min(0),
-      delivered: z.number().min(0),
-      failed: z.number().min(0),
+      sent: z.number().check(z.minimum(0)),
+      delivered: z.number().check(z.minimum(0)),
+      failed: z.number().check(z.minimum(0)),
     }),
   }),
 });

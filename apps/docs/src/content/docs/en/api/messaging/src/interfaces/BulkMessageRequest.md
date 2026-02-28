@@ -5,7 +5,7 @@ prev: false
 title: "BulkMessageRequest"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:119
+Defined in: [packages/messaging/src/types/message.runtime.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L119)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:119
 
 > `optional` **commonVariables**: [`VariableMap`](/api/messaging/src/interfaces/variablemap/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:123
+Defined in: [packages/messaging/src/types/message.runtime.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L123)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:123
 
 > `optional` **options**: [`BulkSendingOptions`](/api/messaging/src/interfaces/bulksendingoptions/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:124
+Defined in: [packages/messaging/src/types/message.runtime.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L124)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:124
 
 > **recipients**: [`BulkRecipient`](/api/messaging/src/interfaces/bulkrecipient/)[]
 
-Defined in: packages/messaging/src/types/message.runtime.ts:122
+Defined in: [packages/messaging/src/types/message.runtime.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L122)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:122
 
 > **templateId**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:121
+Defined in: [packages/messaging/src/types/message.runtime.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L121)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:121
 
 > `optional` **type**: [`BulkMessageType`](/api/messaging/src/type-aliases/bulkmessagetype/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:120
+Defined in: [packages/messaging/src/types/message.runtime.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L120)

@@ -5,7 +5,7 @@ prev: false
 title: "MessageEvent"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:188
+Defined in: [packages/messaging/src/types/message.runtime.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L188)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:188
 
 > **data**: `T`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:192
+Defined in: [packages/messaging/src/types/message.runtime.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L192)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:192
 
 > **id**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:189
+Defined in: [packages/messaging/src/types/message.runtime.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L189)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:189
 
 > **metadata**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:193
+Defined in: [packages/messaging/src/types/message.runtime.ts:193](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L193)
 
 #### correlationId?
 
@@ -59,7 +59,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:193
 
 > **timestamp**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:191
+Defined in: [packages/messaging/src/types/message.runtime.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L191)
 
 ***
 
@@ -67,4 +67,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:191
 
 > **type**: [`MessageEventType`](/api/messaging/src/enumerations/messageeventtype/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:190
+Defined in: [packages/messaging/src/types/message.runtime.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L190)

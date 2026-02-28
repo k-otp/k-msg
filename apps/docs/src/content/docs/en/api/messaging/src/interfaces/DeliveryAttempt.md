@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryAttempt"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:104
+Defined in: [packages/messaging/src/types/message.runtime.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L104)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:104
 
 > **attemptedAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:106
+Defined in: [packages/messaging/src/types/message.runtime.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L106)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:106
 
 > **attemptNumber**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:105
+Defined in: [packages/messaging/src/types/message.runtime.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L105)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:105
 
 > `optional` **error**: [`MessageError`](/api/messaging/src/interfaces/messageerror/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:108
+Defined in: [packages/messaging/src/types/message.runtime.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L108)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:108
 
 > **provider**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:109
+Defined in: [packages/messaging/src/types/message.runtime.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L109)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:109
 
 > **status**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
 
-Defined in: packages/messaging/src/types/message.runtime.ts:107
+Defined in: [packages/messaging/src/types/message.runtime.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L107)
