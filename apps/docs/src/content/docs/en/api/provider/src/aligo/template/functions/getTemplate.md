@@ -9,6 +9,8 @@ title: "getTemplate"
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L112)
 
+Aligo template CRUD focused entrypoint.
+
 ## Parameters
 
 ### ctx

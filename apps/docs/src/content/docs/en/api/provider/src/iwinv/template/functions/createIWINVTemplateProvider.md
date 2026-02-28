@@ -7,7 +7,7 @@ title: "createIWINVTemplateProvider"
 
 > **createIWINVTemplateProvider**(`config`): [`IWINVTemplateProvider`](/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
 
-Defined in: packages/provider/src/iwinv/template.ts:112
+Defined in: [packages/provider/src/iwinv/template.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L112)
 
 ## Parameters
 

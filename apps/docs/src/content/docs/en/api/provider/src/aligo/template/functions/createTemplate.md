@@ -9,6 +9,8 @@ title: "createTemplate"
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L31)
 
+Aligo template CRUD focused entrypoint.
+
 ## Parameters
 
 ### ctx

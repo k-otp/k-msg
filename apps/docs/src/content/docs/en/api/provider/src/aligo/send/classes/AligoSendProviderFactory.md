@@ -5,7 +5,7 @@ prev: false
 title: "AligoSendProviderFactory"
 ---
 
-Defined in: packages/provider/src/aligo/provider.send.ts:174
+Defined in: [packages/provider/src/aligo/provider.send.ts:174](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L174)
 
 Aligo send/channel focused entrypoint.
 
@@ -25,7 +25,7 @@ Aligo send/channel focused entrypoint.
 
 > `static` **create**(`config`): [`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
 
-Defined in: packages/provider/src/aligo/provider.send.ts:175
+Defined in: [packages/provider/src/aligo/provider.send.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L175)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: packages/provider/src/aligo/provider.send.ts:175
 
 > `static` **createDefault**(): [`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
 
-Defined in: packages/provider/src/aligo/provider.send.ts:179
+Defined in: [packages/provider/src/aligo/provider.send.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L179)
 
 #### Returns
 

@@ -9,6 +9,8 @@ title: "deleteTemplate"
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:274](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L274)
 
+Aligo template CRUD focused entrypoint.
+
 ## Parameters
 
 ### ctx

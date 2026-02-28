@@ -5,7 +5,7 @@ prev: false
 title: "BulkSendingOptions"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:133
+Defined in: [packages/messaging/src/types/message.runtime.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L133)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:133
 
 > `optional` **batchDelay**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:137
+Defined in: [packages/messaging/src/types/message.runtime.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L137)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:137
 
 > `optional` **batchSize**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:136
+Defined in: [packages/messaging/src/types/message.runtime.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L136)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:136
 
 > `optional` **deduplication**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:41
+Defined in: [packages/messaging/src/types/message.runtime.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L41)
 
 #### enabled
 
@@ -53,7 +53,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:41
 
 > `optional` **failover**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:35
+Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L35)
 
 #### enabled
 
@@ -81,7 +81,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:35
 
 > `optional` **from**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:134
+Defined in: [packages/messaging/src/types/message.runtime.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L134)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:134
 
 > `optional` **maxConcurrency**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:138
+Defined in: [packages/messaging/src/types/message.runtime.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L138)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:138
 
 > `optional` **priority**: `"high"` \| `"normal"` \| `"low"`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:33
+Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L33)
 
 #### Inherited from
 
@@ -109,7 +109,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:33
 
 > `optional` **retryOptions**: `Partial`\<[`RetryOptions`](/api/core/src/interfaces/retryoptions/)\>
 
-Defined in: packages/messaging/src/types/message.runtime.ts:139
+Defined in: [packages/messaging/src/types/message.runtime.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L139)
 
 ***
 
@@ -117,7 +117,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:139
 
 > `optional` **senderNumber**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:135
+Defined in: [packages/messaging/src/types/message.runtime.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L135)
 
 ***
 
@@ -125,7 +125,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:135
 
 > `optional` **tracking**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:45
+Defined in: [packages/messaging/src/types/message.runtime.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L45)
 
 #### enabled
 
@@ -145,7 +145,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:45
 
 > `optional` **ttl**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:34
+Defined in: [packages/messaging/src/types/message.runtime.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L34)
 
 #### Inherited from
 
