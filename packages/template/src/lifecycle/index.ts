@@ -2,7 +2,6 @@
  * Template lifecycle APIs.
  */
 
-export { TemplateLifecycleService } from "../runtime/template-lifecycle.service";
 export type {
   Template,
   TemplateContext,
@@ -11,3 +10,4 @@ export type {
   TemplateProvider,
   TemplateUpdateInput,
 } from "@k-msg/core";
+export { TemplateLifecycleService } from "../runtime/template-lifecycle.service";

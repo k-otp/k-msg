@@ -3,12 +3,6 @@
  */
 
 export {
-  AligoTemplateProvider,
-  createAligoTemplateProvider,
-  createDefaultAligoTemplateProvider,
-  AligoTemplateProviderFactory,
-} from "./provider.template";
-export {
   createTemplate,
   deleteTemplate,
   getTemplate,
@@ -16,4 +10,10 @@ export {
   requestTemplateInspection,
   updateTemplate,
 } from "./aligo.template";
+export {
+  AligoTemplateProvider,
+  AligoTemplateProviderFactory,
+  createAligoTemplateProvider,
+  createDefaultAligoTemplateProvider,
+} from "./provider.template";
 export type { AligoConfig } from "./types/aligo";
