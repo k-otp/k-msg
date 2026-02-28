@@ -9,17 +9,17 @@ import {
   type TemplateCreateInput,
   type TemplateUpdateInput,
 } from "@k-msg/core";
-import { validateTemplatePayload } from "@k-msg/template";
+import { validateTemplatePayload } from "@k-msg/template/send";
 import { isObjectRecord } from "../shared/type-guards";
 import { mapAligoKakaoError } from "./aligo.error";
+import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
+import type { AligoRuntimeContext } from "./aligo.internal.types";
 import {
   mapAligoTemplateStatus,
   parseAligoDateTime,
   resolveKakaoSenderKey,
-  toAligoTplButton,
-} from "./aligo.helpers";
-import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
-import type { AligoRuntimeContext } from "./aligo.internal.types";
+} from "./aligo.shared.helpers";
+import { toAligoTplButton } from "./aligo.template.helpers";
 
 function withProviderContext(error: KMsgError, providerId: string): KMsgError {
   return new KMsgError(error.code, error.message, {

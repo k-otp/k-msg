@@ -6,7 +6,12 @@ Guards published ESM artifact size regressions with fixed byte thresholds.
 
 - Script path: `scripts/ci/check-bundle-size.sh`
 - CI job: `bundle-size` in `.github/workflows/ci.yml`
-- Scope: `@k-msg/core`, `@k-msg/messaging`, `@k-msg/provider`, `k-msg`
+- Scope: `@k-msg/core`, `@k-msg/template` (subpaths), `@k-msg/messaging`, `@k-msg/provider`, `k-msg`
+- Enforces both `raw` and `gzip` thresholds per artifact.
+- Includes send-only forbidden import checks:
+  - `zod` (sender/send-only bundles)
+  - `drizzle-orm` (sender/send-only bundles)
+  - `@k-msg/template` (provider send-only bundles)
 
 ### Threshold Update Policy
 

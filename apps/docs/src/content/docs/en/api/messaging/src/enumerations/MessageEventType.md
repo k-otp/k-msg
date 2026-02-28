@@ -5,7 +5,7 @@ prev: false
 title: "MessageEventType"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L178)
+Defined in: packages/messaging/src/types/message.runtime.ts:165
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:178](https://github.c
 
 > **CHANNEL\_CREATED**: `"channel.created"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:195](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L195)
+Defined in: packages/messaging/src/types/message.runtime.ts:179
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:195](https://github.c
 
 > **CHANNEL\_VERIFIED**: `"channel.verified"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:196](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L196)
+Defined in: packages/messaging/src/types/message.runtime.ts:180
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:196](https://github.c
 
 > **MESSAGE\_CANCELLED**: `"message.cancelled"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L192)
+Defined in: packages/messaging/src/types/message.runtime.ts:177
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:192](https://github.c
 
 > **MESSAGE\_CLICKED**: `"message.clicked"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L191)
+Defined in: packages/messaging/src/types/message.runtime.ts:176
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:191](https://github.c
 
 > **MESSAGE\_DELIVERED**: `"message.delivered"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L189)
+Defined in: packages/messaging/src/types/message.runtime.ts:174
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:189](https://github.c
 
 > **MESSAGE\_FAILED**: `"message.failed"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L190)
+Defined in: packages/messaging/src/types/message.runtime.ts:175
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:190](https://github.c
 
 > **MESSAGE\_QUEUED**: `"message.queued"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L187)
+Defined in: packages/messaging/src/types/message.runtime.ts:172
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:187](https://github.c
 
 > **MESSAGE\_SENT**: `"message.sent"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L188)
+Defined in: packages/messaging/src/types/message.runtime.ts:173
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:188](https://github.c
 
 > **PROVIDER\_ERROR**: `"system.provider_error"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L202)
+Defined in: packages/messaging/src/types/message.runtime.ts:185
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:202](https://github.c
 
 > **QUOTA\_EXCEEDED**: `"system.quota_exceeded"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:201](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L201)
+Defined in: packages/messaging/src/types/message.runtime.ts:184
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:201](https://github.c
 
 > **QUOTA\_WARNING**: `"system.quota_warning"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:200](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L200)
+Defined in: packages/messaging/src/types/message.runtime.ts:183
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:200](https://github.c
 
 > **SENDER\_NUMBER\_ADDED**: `"sender_number.added"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:197](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L197)
+Defined in: packages/messaging/src/types/message.runtime.ts:181
 
 ***
 
@@ -109,7 +109,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:197](https://github.c
 
 > **TEMPLATE\_APPROVED**: `"template.approved"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L181)
+Defined in: packages/messaging/src/types/message.runtime.ts:167
 
 ***
 
@@ -117,7 +117,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:181](https://github.c
 
 > **TEMPLATE\_CREATED**: `"template.created"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L180)
+Defined in: packages/messaging/src/types/message.runtime.ts:166
 
 ***
 
@@ -125,7 +125,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:180](https://github.c
 
 > **TEMPLATE\_DELETED**: `"template.deleted"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L184)
+Defined in: packages/messaging/src/types/message.runtime.ts:170
 
 ***
 
@@ -133,7 +133,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:184](https://github.c
 
 > **TEMPLATE\_REJECTED**: `"template.rejected"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L182)
+Defined in: packages/messaging/src/types/message.runtime.ts:168
 
 ***
 
@@ -141,4 +141,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:182](https://github.c
 
 > **TEMPLATE\_UPDATED**: `"template.updated"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L183)
+Defined in: packages/messaging/src/types/message.runtime.ts:169

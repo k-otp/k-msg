@@ -8,17 +8,17 @@ import {
   type SendResult,
 } from "@k-msg/core";
 import { mapAligoError } from "./aligo.error";
-import {
-  formatAligoDate,
-  getAligoEndpoint,
-  resolveAligoTemplateMessage,
-  resolveImageRef,
-} from "./aligo.helpers";
 import { requestAligo } from "./aligo.http";
 import type {
   AligoMessageType,
   AligoRuntimeContext,
 } from "./aligo.internal.types";
+import {
+  formatAligoDate,
+  getAligoEndpoint,
+  resolveAligoTemplateMessage,
+  resolveImageRef,
+} from "./aligo.shared.helpers";
 import type { AligoResponse, AligoSMSRequest } from "./types/aligo";
 
 export function collectSendWarnings(
