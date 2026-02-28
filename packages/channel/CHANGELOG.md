@@ -1,5 +1,12 @@
 # @k-msg/channel
 
+## 0.27.2 — 2026-02-28
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+- Updated dependencies: core@0.27.2
+
 ## 0.27.1 — 2026-02-27
 
 ### Patch changes
