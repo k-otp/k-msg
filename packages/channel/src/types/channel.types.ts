@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 
 export interface Channel {
   id: string;
@@ -187,57 +187,57 @@ export interface SenderNumberFilters {
 
 // Zod schemas
 export const ChannelCreateRequestSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().check(z.minLength(1), z.maxLength(100)),
   type: z.nativeEnum(ChannelType),
-  provider: z.string().min(1),
-  profileKey: z.string().min(1),
-  businessInfo: z
-    .object({
-      name: z.string().min(1),
-      registrationNumber: z.string().min(1),
-      category: z.string().min(1),
-      contactPerson: z.string().min(1),
-      contactEmail: z.string().email(),
-      contactPhone: z.string().regex(/^[0-9-+\s()]+$/),
-    })
-    .optional(),
-  kakaoInfo: z
-    .object({
-      plusFriendId: z.string().min(1),
-      brandName: z.string().min(1),
-      logoUrl: z.string().url().optional(),
-      description: z.string().max(500).optional(),
-    })
-    .optional(),
+  provider: z.string().check(z.minLength(1)),
+  profileKey: z.string().check(z.minLength(1)),
+  businessInfo: z.optional(
+    z.object({
+      name: z.string().check(z.minLength(1)),
+      registrationNumber: z.string().check(z.minLength(1)),
+      category: z.string().check(z.minLength(1)),
+      contactPerson: z.string().check(z.minLength(1)),
+      contactEmail: z.email(),
+      contactPhone: z.string().check(z.regex(/^[0-9-+\s()]+$/)),
+    }),
+  ),
+  kakaoInfo: z.optional(
+    z.object({
+      plusFriendId: z.string().check(z.minLength(1)),
+      brandName: z.string().check(z.minLength(1)),
+      logoUrl: z.optional(z.url()),
+      description: z.optional(z.string().check(z.maxLength(500))),
+    }),
+  ),
 });
 
 export const SenderNumberCreateRequestSchema = z.object({
-  phoneNumber: z.string().regex(/^[0-9]{10,11}$/),
+  phoneNumber: z.string().check(z.regex(/^[0-9]{10,11}$/)),
   category: z.nativeEnum(SenderNumberCategory),
-  businessInfo: z
-    .object({
-      businessName: z.string().min(1),
-      businessRegistrationNumber: z.string().min(1),
-      contactPerson: z.string().min(1),
-      contactEmail: z.string().email(),
-    })
-    .optional(),
+  businessInfo: z.optional(
+    z.object({
+      businessName: z.string().check(z.minLength(1)),
+      businessRegistrationNumber: z.string().check(z.minLength(1)),
+      contactPerson: z.string().check(z.minLength(1)),
+      contactEmail: z.email(),
+    }),
+  ),
 });
 
 export const ChannelFiltersSchema = z.object({
-  provider: z.string().optional(),
-  type: z.nativeEnum(ChannelType).optional(),
-  status: z.nativeEnum(ChannelStatus).optional(),
-  verified: z.boolean().optional(),
-  createdAfter: z.date().optional(),
-  createdBefore: z.date().optional(),
+  provider: z.optional(z.string()),
+  type: z.optional(z.nativeEnum(ChannelType)),
+  status: z.optional(z.nativeEnum(ChannelStatus)),
+  verified: z.optional(z.boolean()),
+  createdAfter: z.optional(z.date()),
+  createdBefore: z.optional(z.date()),
 });
 
 export const SenderNumberFiltersSchema = z.object({
-  channelId: z.string().optional(),
-  status: z.nativeEnum(SenderNumberStatus).optional(),
-  category: z.nativeEnum(SenderNumberCategory).optional(),
-  verified: z.boolean().optional(),
+  channelId: z.optional(z.string()),
+  status: z.optional(z.nativeEnum(SenderNumberStatus)),
+  category: z.optional(z.nativeEnum(SenderNumberCategory)),
+  verified: z.optional(z.boolean()),
 });
 
 export type ChannelCreateRequestType = z.infer<

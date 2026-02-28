@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 
 export interface WebhookConfig {
   // 재시도 설정
@@ -176,53 +176,56 @@ export interface WebhookTestResult {
 export const WebhookEventSchema = z.object({
   id: z.string(),
   type: z.string(),
-  timestamp: z.preprocess((value) => {
-    if (value instanceof Date) return value;
-    if (typeof value === "string" || typeof value === "number") {
-      return new Date(value);
-    }
-    return value;
-  }, z.date()),
+  timestamp: z.pipe(
+    z.transform((value) => {
+      if (value instanceof Date) return value;
+      if (typeof value === "string" || typeof value === "number") {
+        return new Date(value);
+      }
+      return value;
+    }),
+    z.date(),
+  ),
   data: z.any(),
   metadata: z.object({
-    providerId: z.string().optional(),
-    channelId: z.string().optional(),
-    templateId: z.string().optional(),
-    messageId: z.string().optional(),
-    userId: z.string().optional(),
-    organizationId: z.string().optional(),
-    correlationId: z.string().optional(),
-    retryCount: z.number().optional(),
+    providerId: z.optional(z.string()),
+    channelId: z.optional(z.string()),
+    templateId: z.optional(z.string()),
+    messageId: z.optional(z.string()),
+    userId: z.optional(z.string()),
+    organizationId: z.optional(z.string()),
+    correlationId: z.optional(z.string()),
+    retryCount: z.optional(z.number()),
   }),
   version: z.string(),
 });
 
 export const WebhookEndpointSchema = z.object({
   id: z.string(),
-  url: z.string().url(),
-  name: z.string().optional(),
-  description: z.string().optional(),
+  url: z.url(),
+  name: z.optional(z.string()),
+  description: z.optional(z.string()),
   active: z.boolean(),
   events: z.array(z.string()),
-  headers: z.record(z.string(), z.string()).optional(),
-  secret: z.string().optional(),
-  retryConfig: z
-    .object({
-      maxRetries: z.number().min(0).max(10),
-      retryDelayMs: z.number().min(1000),
-      backoffMultiplier: z.number().min(1).max(5),
-    })
-    .optional(),
-  filters: z
-    .object({
-      providerId: z.array(z.string()).optional(),
-      channelId: z.array(z.string()).optional(),
-      templateId: z.array(z.string()).optional(),
-    })
-    .optional(),
+  headers: z.optional(z.record(z.string(), z.string())),
+  secret: z.optional(z.string()),
+  retryConfig: z.optional(
+    z.object({
+      maxRetries: z.number().check(z.minimum(0), z.maximum(10)),
+      retryDelayMs: z.number().check(z.minimum(1000)),
+      backoffMultiplier: z.number().check(z.minimum(1), z.maximum(5)),
+    }),
+  ),
+  filters: z.optional(
+    z.object({
+      providerId: z.optional(z.array(z.string())),
+      channelId: z.optional(z.array(z.string())),
+      templateId: z.optional(z.array(z.string())),
+    }),
+  ),
   createdAt: z.date(),
   updatedAt: z.date(),
-  lastTriggeredAt: z.date().optional(),
+  lastTriggeredAt: z.optional(z.date()),
   status: z.enum(["active", "inactive", "error", "suspended"]),
 });
 
@@ -230,8 +233,8 @@ export const WebhookDeliverySchema = z.object({
   id: z.string(),
   endpointId: z.string(),
   eventId: z.string(),
-  eventType: z.string().optional(),
-  url: z.string().url(),
+  eventType: z.optional(z.string()),
+  url: z.url(),
   httpMethod: z.enum(["POST", "PUT", "PATCH"]),
   headers: z.record(z.string(), z.string()),
   payload: z.string(),
@@ -239,17 +242,17 @@ export const WebhookDeliverySchema = z.object({
     z.object({
       attemptNumber: z.number(),
       timestamp: z.date(),
-      httpStatus: z.number().optional(),
-      responseBody: z.string().optional(),
-      responseHeaders: z.record(z.string(), z.string()).optional(),
-      error: z.string().optional(),
+      httpStatus: z.optional(z.number()),
+      responseBody: z.optional(z.string()),
+      responseHeaders: z.optional(z.record(z.string(), z.string())),
+      error: z.optional(z.string()),
       latencyMs: z.number(),
     }),
   ),
   status: z.enum(["pending", "success", "failed", "exhausted"]),
   createdAt: z.date(),
-  completedAt: z.date().optional(),
-  nextRetryAt: z.date().optional(),
+  completedAt: z.optional(z.date()),
+  nextRetryAt: z.optional(z.date()),
 });
 
 export type WebhookEventData = z.infer<typeof WebhookEventSchema>;
