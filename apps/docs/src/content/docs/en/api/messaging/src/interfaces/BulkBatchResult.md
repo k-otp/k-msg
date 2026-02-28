@@ -5,7 +5,7 @@ prev: false
 title: "BulkBatchResult"
 ---
 
-Defined in: [packages/messaging/src/types/message.types.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L168)
+Defined in: packages/messaging/src/types/message.runtime.ts:156
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:168](https://github.c
 
 > **batchId**: `string`
 
-Defined in: [packages/messaging/src/types/message.types.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L169)
+Defined in: packages/messaging/src/types/message.runtime.ts:157
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:169](https://github.c
 
 > **batchNumber**: `number`
 
-Defined in: [packages/messaging/src/types/message.types.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L170)
+Defined in: packages/messaging/src/types/message.runtime.ts:158
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:170](https://github.c
 
 > `optional` **completedAt**: `Date`
 
-Defined in: [packages/messaging/src/types/message.types.ts:174](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L174)
+Defined in: packages/messaging/src/types/message.runtime.ts:162
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:174](https://github.c
 
 > **createdAt**: `Date`
 
-Defined in: [packages/messaging/src/types/message.types.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L173)
+Defined in: packages/messaging/src/types/message.runtime.ts:161
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/types/message.types.ts:173](https://github.c
 
 > **recipients**: [`RecipientResult`](/api/messaging/src/interfaces/recipientresult/)[]
 
-Defined in: [packages/messaging/src/types/message.types.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L171)
+Defined in: packages/messaging/src/types/message.runtime.ts:159
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/messaging/src/types/message.types.ts:171](https://github.c
 
 > **status**: `"failed"` \| `"pending"` \| `"processing"` \| `"completed"`
 
-Defined in: [packages/messaging/src/types/message.types.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.types.ts#L172)
+Defined in: packages/messaging/src/types/message.runtime.ts:160

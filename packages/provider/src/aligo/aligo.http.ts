@@ -1,5 +1,5 @@
 import { fail, KMsgError, KMsgErrorCode, ok, type Result } from "@k-msg/core";
-import { normalizeAligoKakaoCode } from "./aligo.helpers";
+import { normalizeAligoKakaoCode } from "./aligo.shared.helpers";
 
 export async function requestAligo(params: {
   host: string;

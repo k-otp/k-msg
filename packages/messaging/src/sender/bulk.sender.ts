@@ -16,7 +16,7 @@ import {
   type BulkRecipient,
   MessageStatus,
   type RecipientResult,
-} from "../types/message.types";
+} from "../types/message.runtime";
 
 export class BulkMessageSender {
   private kmsg: KMsg;

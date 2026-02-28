@@ -46,7 +46,7 @@ jobs:
           fi
 
           CHANGED="$(git diff --name-only "$BASE" "${{ github.sha }}")"
-          if echo "$CHANGED" | grep -Eq '^(packages/(core|messaging|provider|k-msg)/|scripts/ci/check-bundle-size\.sh|package\.json|bun\.lock|\.github/workflows/ci\.yml)'; then
+          if echo "$CHANGED" | grep -Eq '^(packages/(core|template|messaging|provider|k-msg)/|scripts/ci/check-bundle-size\.sh|scripts/ci/README\.md|package\.json|bun\.lock|\.github/workflows/ci\.yml)'; then
             echo "should_run=true" >>"$GITHUB_OUTPUT"
           else
             echo "should_run=false" >>"$GITHUB_OUTPUT"
