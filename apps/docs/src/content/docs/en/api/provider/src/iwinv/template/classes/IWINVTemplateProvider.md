@@ -5,7 +5,7 @@ prev: false
 title: "IWINVTemplateProvider"
 ---
 
-Defined in: packages/provider/src/iwinv/template.ts:31
+Defined in: [packages/provider/src/iwinv/template.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L31)
 
 Interface for providers that support AlimTalk template management.
 
@@ -19,7 +19,7 @@ Interface for providers that support AlimTalk template management.
 
 > **new IWINVTemplateProvider**(`config`): `IWINVTemplateProvider`
 
-Defined in: packages/provider/src/iwinv/template.ts:36
+Defined in: [packages/provider/src/iwinv/template.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L36)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: packages/provider/src/iwinv/template.ts:36
 
 > `readonly` **id**: `"iwinv"` = `"iwinv"`
 
-Defined in: packages/provider/src/iwinv/template.ts:32
+Defined in: [packages/provider/src/iwinv/template.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L32)
 
 ## Methods
 
@@ -45,7 +45,7 @@ Defined in: packages/provider/src/iwinv/template.ts:32
 
 > **createTemplate**(`input`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/template.ts:55
+Defined in: [packages/provider/src/iwinv/template.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L55)
 
 Create a new template.
 
@@ -69,7 +69,7 @@ Create a new template.
 
 > **deleteTemplate**(`code`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/template.ts:79
+Defined in: [packages/provider/src/iwinv/template.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L79)
 
 Delete a template by code.
 
@@ -93,7 +93,7 @@ Delete a template by code.
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/template.ts:87
+Defined in: [packages/provider/src/iwinv/template.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L87)
 
 Get a template by code.
 
@@ -121,7 +121,7 @@ Get a template by code.
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/template.ts:99
+Defined in: [packages/provider/src/iwinv/template.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L99)
 
 List templates with optional filtering and pagination.
 
@@ -159,7 +159,7 @@ List templates with optional filtering and pagination.
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/template.ts:65
+Defined in: [packages/provider/src/iwinv/template.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L65)
 
 Update an existing template by code.
 

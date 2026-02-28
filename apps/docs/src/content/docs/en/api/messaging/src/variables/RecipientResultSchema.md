@@ -5,6 +5,6 @@ prev: false
 title: "RecipientResultSchema"
 ---
 
-> `const` **RecipientResultSchema**: `ZodObject`\<\{ `error`: `ZodOptional`\<`ZodObject`\<\{ `code`: `ZodString`; `details`: `ZodOptional`\<`ZodRecord`\<`ZodString`, `ZodAny`\>\>; `message`: `ZodString`; \}, `$strip`\>\>; `messageId`: `ZodOptional`\<`ZodString`\>; `metadata`: `ZodOptional`\<`ZodRecord`\<`ZodString`, `ZodAny`\>\>; `phoneNumber`: `ZodString`; `status`: `ZodEnum`\<*typeof* [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)\>; \}, `$strip`\>
+> `const` **RecipientResultSchema**: `ZodMiniObject`\<\{ `error`: `ZodMiniOptional`\<`ZodMiniObject`\<\{ `code`: `ZodMiniString`\<`string`\>; `details`: `ZodMiniOptional`\<`ZodMiniRecord`\<`ZodMiniString`\<`string`\>, `ZodMiniAny`\>\>; `message`: `ZodMiniString`\<`string`\>; \}, `$strip`\>\>; `messageId`: `ZodMiniOptional`\<`ZodMiniString`\<`string`\>\>; `metadata`: `ZodMiniOptional`\<`ZodMiniRecord`\<`ZodMiniString`\<`string`\>, `ZodMiniAny`\>\>; `phoneNumber`: `ZodMiniString`\<`string`\>; `status`: `ZodMiniEnum`\<*typeof* [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)\>; \}, `$strip`\>
 
-Defined in: packages/messaging/src/types/message.schema.ts:60
+Defined in: [packages/messaging/src/types/message.schema.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.schema.ts#L65)

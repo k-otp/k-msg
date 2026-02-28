@@ -5,6 +5,6 @@ prev: false
 title: "MessageErrorSchema"
 ---
 
-> `const` **MessageErrorSchema**: `ZodObject`\<\{ `code`: `ZodString`; `details`: `ZodOptional`\<`ZodRecord`\<`ZodString`, `ZodAny`\>\>; `message`: `ZodString`; \}, `$strip`\>
+> `const` **MessageErrorSchema**: `ZodMiniObject`\<\{ `code`: `ZodMiniString`\<`string`\>; `details`: `ZodMiniOptional`\<`ZodMiniRecord`\<`ZodMiniString`\<`string`\>, `ZodMiniAny`\>\>; `message`: `ZodMiniString`\<`string`\>; \}, `$strip`\>
 
-Defined in: packages/messaging/src/types/message.schema.ts:54
+Defined in: [packages/messaging/src/types/message.schema.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.schema.ts#L59)

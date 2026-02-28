@@ -5,7 +5,7 @@ prev: false
 title: "SchedulingOptions"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:26
+Defined in: [packages/messaging/src/types/message.runtime.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L26)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:26
 
 > `optional` **retryCount**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:29
+Defined in: [packages/messaging/src/types/message.runtime.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L29)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:29
 
 > **scheduledAt**: `Date`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:27
+Defined in: [packages/messaging/src/types/message.runtime.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L27)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:27
 
 > `optional` **timezone**: `string`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:28
+Defined in: [packages/messaging/src/types/message.runtime.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L28)

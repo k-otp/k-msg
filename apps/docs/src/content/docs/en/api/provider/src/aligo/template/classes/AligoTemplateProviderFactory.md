@@ -5,9 +5,7 @@ prev: false
 title: "AligoTemplateProviderFactory"
 ---
 
-Defined in: packages/provider/src/aligo/provider.template.ts:115
-
-Aligo template CRUD focused entrypoint.
+Defined in: [packages/provider/src/aligo/provider.template.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L115)
 
 ## Constructors
 
@@ -25,7 +23,7 @@ Aligo template CRUD focused entrypoint.
 
 > `static` **create**(`config`): [`AligoTemplateProvider`](/api/provider/src/aligo/template/classes/aligotemplateprovider/)
 
-Defined in: packages/provider/src/aligo/provider.template.ts:116
+Defined in: [packages/provider/src/aligo/provider.template.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L116)
 
 #### Parameters
 
@@ -43,7 +41,7 @@ Defined in: packages/provider/src/aligo/provider.template.ts:116
 
 > `static` **createDefault**(): [`AligoTemplateProvider`](/api/provider/src/aligo/template/classes/aligotemplateprovider/)
 
-Defined in: packages/provider/src/aligo/provider.template.ts:120
+Defined in: [packages/provider/src/aligo/provider.template.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L120)
 
 #### Returns
 

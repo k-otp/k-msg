@@ -5,9 +5,9 @@ prev: false
 title: "AligoTemplateProvider"
 ---
 
-Defined in: packages/provider/src/aligo/provider.template.ts:23
+Defined in: [packages/provider/src/aligo/provider.template.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L23)
 
-Aligo template CRUD focused entrypoint.
+Interface for providers that support AlimTalk template management.
 
 ## Implements
 
@@ -20,7 +20,7 @@ Aligo template CRUD focused entrypoint.
 
 > **new AligoTemplateProvider**(`config`): `AligoTemplateProvider`
 
-Defined in: packages/provider/src/aligo/provider.template.ts:32
+Defined in: [packages/provider/src/aligo/provider.template.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L32)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: packages/provider/src/aligo/provider.template.ts:32
 
 > `readonly` **id**: `"aligo"` = `"aligo"`
 
-Defined in: packages/provider/src/aligo/provider.template.ts:26
+Defined in: [packages/provider/src/aligo/provider.template.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L26)
 
 ## Methods
 
@@ -46,7 +46,7 @@ Defined in: packages/provider/src/aligo/provider.template.ts:26
 
 > **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:57
+Defined in: [packages/provider/src/aligo/provider.template.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L57)
 
 Create a new template.
 
@@ -74,7 +74,7 @@ Create a new template.
 
 > **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:72
+Defined in: [packages/provider/src/aligo/provider.template.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L72)
 
 Delete a template by code.
 
@@ -102,7 +102,7 @@ Delete a template by code.
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:79
+Defined in: [packages/provider/src/aligo/provider.template.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L79)
 
 Get a template by code.
 
@@ -130,7 +130,7 @@ Get a template by code.
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:86
+Defined in: [packages/provider/src/aligo/provider.template.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L86)
 
 List templates with optional filtering and pagination.
 
@@ -168,7 +168,7 @@ List templates with optional filtering and pagination.
 
 > **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:93
+Defined in: [packages/provider/src/aligo/provider.template.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L93)
 
 Request inspection for a template (submits for approval review).
 
@@ -196,7 +196,7 @@ Request inspection for a template (submits for approval review).
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/aligo/provider.template.ts:64
+Defined in: [packages/provider/src/aligo/provider.template.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L64)
 
 Update an existing template by code.
 

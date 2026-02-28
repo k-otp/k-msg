@@ -5,7 +5,7 @@ prev: false
 title: "SendingOptions"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:32
+Defined in: [packages/messaging/src/types/message.runtime.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L32)
 
 ## Extended by
 
@@ -17,7 +17,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:32
 
 > `optional` **deduplication**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:41
+Defined in: [packages/messaging/src/types/message.runtime.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L41)
 
 #### enabled
 
@@ -33,7 +33,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:41
 
 > `optional` **failover**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:35
+Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L35)
 
 #### enabled
 
@@ -57,7 +57,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:35
 
 > `optional` **priority**: `"high"` \| `"normal"` \| `"low"`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:33
+Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L33)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:33
 
 > `optional` **tracking**: `object`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:45
+Defined in: [packages/messaging/src/types/message.runtime.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L45)
 
 #### enabled
 
@@ -81,4 +81,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:45
 
 > `optional` **ttl**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:34
+Defined in: [packages/messaging/src/types/message.runtime.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L34)

@@ -7,4 +7,4 @@ title: "WebhookEndpointData"
 
 > **WebhookEndpointData** = `z.infer`\<*typeof* [`WebhookEndpointSchema`](/api/webhook/src/variables/webhookendpointschema/)\>
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L256)
+Defined in: [packages/webhook/src/types/webhook.types.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L259)

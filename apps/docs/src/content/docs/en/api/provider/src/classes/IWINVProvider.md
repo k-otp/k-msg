@@ -23,7 +23,7 @@ Interface for providers that support AlimTalk template management.
 
 > **new IWINVProvider**(`config`): `IWINVProvider`
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:85
+Defined in: [packages/provider/src/iwinv/provider.send.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L85)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Defined in: packages/provider/src/iwinv/provider.send.ts:85
 
 > `readonly` **id**: `"iwinv"` = `"iwinv"`
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:67
+Defined in: [packages/provider/src/iwinv/provider.send.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L67)
 
 Unique identifier for this provider instance.
 Used for routing and logging.
@@ -66,7 +66,7 @@ Used for routing and logging.
 
 > `readonly` **name**: `"IWINV Messaging Provider"` = `"IWINV Messaging Provider"`
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:68
+Defined in: [packages/provider/src/iwinv/provider.send.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L68)
 
 Human-readable name for display purposes.
 
@@ -86,7 +86,7 @@ Human-readable name for display purposes.
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:69
+Defined in: [packages/provider/src/iwinv/provider.send.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L69)
 
 Message types this provider supports.
 Messages of unsupported types will be rejected.
@@ -157,7 +157,7 @@ Delete a template by code.
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:207
+Defined in: [packages/provider/src/iwinv/provider.send.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L207)
 
 Query the remaining balance/points for the provider account.
 
@@ -181,7 +181,7 @@ Query the remaining balance/points for the provider account.
 
 > **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:178
+Defined in: [packages/provider/src/iwinv/provider.send.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L178)
 
 Query delivery status for a previously sent message.
 Optional capability - not all providers support this.
@@ -206,7 +206,7 @@ Optional capability - not all providers support this.
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:73
+Defined in: [packages/provider/src/iwinv/provider.send.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L73)
 
 Get the onboarding specification for this provider.
 Used by tooling to guide provider configuration.
@@ -253,7 +253,7 @@ Get a template by code.
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:110
+Defined in: [packages/provider/src/iwinv/provider.send.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L110)
 
 Check if the provider is operational.
 Used for health monitoring and circuit breaker decisions.
@@ -310,7 +310,7 @@ List templates with optional filtering and pagination.
 
 > **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: packages/provider/src/iwinv/provider.send.ts:145
+Defined in: [packages/provider/src/iwinv/provider.send.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L145)
 
 Send a message through this provider.
 

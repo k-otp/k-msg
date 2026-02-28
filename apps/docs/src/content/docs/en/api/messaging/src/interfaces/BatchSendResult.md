@@ -5,7 +5,7 @@ prev: false
 title: "BatchSendResult"
 ---
 
-Defined in: packages/messaging/src/types/message.runtime.ts:3
+Defined in: [packages/messaging/src/types/message.runtime.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L3)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: packages/messaging/src/types/message.runtime.ts:3
 
 > **results**: [`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>[]
 
-Defined in: packages/messaging/src/types/message.runtime.ts:5
+Defined in: [packages/messaging/src/types/message.runtime.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L5)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: packages/messaging/src/types/message.runtime.ts:5
 
 > **total**: `number`
 
-Defined in: packages/messaging/src/types/message.runtime.ts:4
+Defined in: [packages/messaging/src/types/message.runtime.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L4)
