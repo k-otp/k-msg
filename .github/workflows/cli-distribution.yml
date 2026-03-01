@@ -113,6 +113,22 @@ jobs:
         if: ${{ steps.release.outputs.exists != 'true' }}
         run: bun run --cwd apps/cli build:all
 
+      - name: Completions smoke (source)
+        if: ${{ steps.release.outputs.exists != 'true' }}
+        run: bun --cwd apps/cli src/k-msg.ts completions bash >/dev/null
+
+      - name: Completions smoke (built binary)
+        if: ${{ steps.release.outputs.exists != 'true' }}
+        run: |
+          set -euo pipefail
+          bun run --cwd apps/cli build:native
+          BIN="$(find apps/cli/dist -type f \( -name 'k-msg' -o -name 'k-msg.exe' \) | head -n 1)"
+          if [[ -z "$BIN" ]]; then
+            echo "Unable to find built CLI binary in apps/cli/dist"
+            exit 1
+          fi
+          "$BIN" completions zsh >/dev/null
+
       - name: Prepare release assets
         if: ${{ steps.release.outputs.exists != 'true' }}
         run: |

@@ -1,4 +1,4 @@
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import { KMSG_MESSAGE_TYPES, type MessageType } from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
@@ -291,11 +291,8 @@ const balanceCmd = defineCommand({
   },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "providers",
   description: "Provider utilities",
   commands: [listCmd, healthCmd, balanceCmd, doctorCmd],
-  handler: async () => {
-    console.log("Use a subcommand: list | health | balance | doctor");
-  },
 });

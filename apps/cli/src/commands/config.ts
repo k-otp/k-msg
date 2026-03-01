@@ -1,5 +1,4 @@
-import { createInterface } from "node:readline/promises";
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { MessageType } from "@k-msg/core";
 import {
   type ProviderConfigFieldSpec,
@@ -9,6 +8,13 @@ import {
 } from "@k-msg/provider";
 import { z } from "zod";
 import { optConfig, optJson, strictBooleanFlagSchema } from "../cli/options";
+import {
+  isPromptCancelledError,
+  type PromptApi,
+  promptConfirm,
+  promptSelect,
+  promptText,
+} from "../cli/prompt";
 import { shouldUseJsonOutput } from "../cli/utils";
 import { CONFIG_SCHEMA_LATEST_URL } from "../config/constants";
 import { loadKMsgConfig, resolveConfigPathForWrite } from "../config/load";
@@ -24,19 +30,6 @@ interface PlaintextCredentialLocation {
   keyPath: string;
 }
 
-type SelectOption<T> = {
-  label: string;
-  value: T;
-  hint?: string;
-};
-
-const ESC = "\u001B";
-const CSI = `${ESC}[`;
-const CLEAR_LINE = `${CSI}2K`;
-const CURSOR_START = `${CSI}G`;
-const CURSOR_HIDE = `${CSI}?25l`;
-const CURSOR_SHOW = `${CSI}?25h`;
-
 function canPromptInTerminal(terminal: {
   isInteractive: boolean;
   isCI: boolean;
@@ -44,234 +37,8 @@ function canPromptInTerminal(terminal: {
   return terminal.isInteractive && !terminal.isCI;
 }
 
-function canUseArrowSelect(): boolean {
-  return (
-    process.stdin.isTTY === true &&
-    process.stdout.isTTY === true &&
-    typeof process.stdin.setRawMode === "function"
-  );
-}
-
-async function askText(input: {
-  message: string;
-  defaultValue?: string;
-  validate?: (value: string) => boolean | string;
-}): Promise<string> {
-  const defaultHint =
-    typeof input.defaultValue === "string" && input.defaultValue.length > 0
-      ? ` (${input.defaultValue})`
-      : "";
-  const promptText = `${input.message}${defaultHint} `;
-
-  while (true) {
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    let raw = "";
-    try {
-      raw = await rl.question(promptText);
-    } finally {
-      rl.close();
-    }
-
-    const value = raw.trim() || input.defaultValue || "";
-    if (!input.validate) {
-      return value;
-    }
-    const validated = input.validate(value);
-    if (validated === true) {
-      return value;
-    }
-    console.error(typeof validated === "string" ? validated : "Invalid input");
-  }
-}
-
-async function askConfirm(input: {
-  message: string;
-  defaultValue?: boolean;
-}): Promise<boolean> {
-  const defaultHint =
-    input.defaultValue === true
-      ? "Y/n"
-      : input.defaultValue === false
-        ? "y/N"
-        : "y/n";
-
-  while (true) {
-    const raw = await askText({
-      message: `${input.message} (${defaultHint})`,
-    });
-    const normalized = raw.trim().toLowerCase();
-    if (normalized.length === 0 && input.defaultValue !== undefined) {
-      return input.defaultValue;
-    }
-    if (normalized === "y" || normalized === "yes") return true;
-    if (normalized === "n" || normalized === "no") return false;
-    console.error("Please answer with y/yes or n/no");
-  }
-}
-
-function renderNumberedSelect<T>(
-  message: string,
-  options: SelectOption<T>[],
-  defaultIndex: number,
-): void {
-  console.log(message);
-  for (const [index, option] of options.entries()) {
-    const marker = index === defaultIndex ? "*" : " ";
-    const hint = option.hint ? ` (${option.hint})` : "";
-    console.log(`  ${marker} ${index + 1}) ${option.label}${hint}`);
-  }
-}
-
-async function promptSelectByNumber<T>(
-  message: string,
-  options: {
-    options: SelectOption<T>[];
-    default?: T;
-  },
-): Promise<T> {
-  if (options.options.length === 0) {
-    throw new Error("Select options cannot be empty");
-  }
-
-  let defaultIndex = 0;
-  if (options.default !== undefined) {
-    const resolved = options.options.findIndex(
-      (option) => option.value === options.default,
-    );
-    if (resolved >= 0) {
-      defaultIndex = resolved;
-    }
-  }
-
-  renderNumberedSelect(message, options.options, defaultIndex);
-  const raw = await askText({
-    message: "Select number",
-    defaultValue: String(defaultIndex + 1),
-    validate: (value) => {
-      const index = Number.parseInt(value.trim(), 10);
-      if (!Number.isInteger(index)) return "Enter a numeric index";
-      if (index < 1 || index > options.options.length) {
-        return `Enter a number between 1 and ${options.options.length}`;
-      }
-      return true;
-    },
-  });
-  const parsedIndex = Number.parseInt(raw.trim(), 10) - 1;
-  const selected = options.options[parsedIndex];
-  if (!selected) {
-    throw new Error(
-      `Invalid selection index: ${parsedIndex + 1}. Range is 1-${options.options.length}`,
-    );
-  }
-
-  return selected.value;
-}
-
-function clearRenderedOptions(optionCount: number): void {
-  for (let i = 0; i < optionCount; i += 1) {
-    process.stdout.write(`${CSI}1A${CLEAR_LINE}`);
-  }
-}
-
-function drawArrowOptions<T>(
-  options: SelectOption<T>[],
-  selectedIndex: number,
-): void {
-  clearRenderedOptions(options.length);
-  for (const [index, option] of options.entries()) {
-    process.stdout.write(CLEAR_LINE + CURSOR_START);
-    const prefix = index === selectedIndex ? "❯ " : "  ";
-    const hint = option.hint ? ` (${option.hint})` : "";
-    console.log(`${prefix}${option.label}${hint}`);
-  }
-}
-
-async function promptSelectWithArrows<T>(
-  message: string,
-  options: {
-    options: SelectOption<T>[];
-    default?: T;
-  },
-): Promise<T> {
-  if (!canUseArrowSelect()) {
-    return promptSelectByNumber(message, options);
-  }
-  if (options.options.length === 0) {
-    throw new Error("Select options cannot be empty");
-  }
-
-  let selectedIndex = 0;
-  if (options.default !== undefined) {
-    const resolved = options.options.findIndex(
-      (option) => option.value === options.default,
-    );
-    if (resolved >= 0) selectedIndex = resolved;
-  }
-
-  console.log(message);
-  process.stdout.write(CURSOR_HIDE);
-  for (const option of options.options) {
-    const hint = option.hint ? ` (${option.hint})` : "";
-    console.log(`  ${option.label}${hint}`);
-  }
-  drawArrowOptions(options.options, selectedIndex);
-
-  return new Promise<T>((resolve, reject) => {
-    const cleanup = () => {
-      process.stdin.off("data", onData);
-      try {
-        process.stdin.setRawMode(false);
-      } catch {
-        // ignore
-      }
-      process.stdin.pause();
-      process.stdout.write(CURSOR_SHOW);
-    };
-
-    const onData = (data: Buffer) => {
-      try {
-        const key = data.toString();
-        if (key === "\u001B[A") {
-          selectedIndex = Math.max(0, selectedIndex - 1);
-          drawArrowOptions(options.options, selectedIndex);
-          return;
-        }
-        if (key === "\u001B[B") {
-          selectedIndex = Math.min(
-            options.options.length - 1,
-            selectedIndex + 1,
-          );
-          drawArrowOptions(options.options, selectedIndex);
-          return;
-        }
-        if (key === "\r" || key === "\n") {
-          cleanup();
-          clearRenderedOptions(options.options.length);
-          const selected = options.options[selectedIndex];
-          if (!selected) {
-            throw new Error("Select option resolution failed");
-          }
-          console.log(`✓ ${selected.label}`);
-          resolve(selected.value);
-          return;
-        }
-        if (key === "\u0003") {
-          cleanup();
-          process.exit(0);
-        }
-      } catch (error) {
-        cleanup();
-        reject(error);
-      }
-    };
-
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.on("data", onData);
-  });
+function reportPromptCancellation(): void {
+  console.error("Prompt cancelled.");
 }
 
 function parseProviderType(
@@ -667,11 +434,14 @@ function nextProviderId(type: ProviderType, existingIds: Set<string>): string {
   return `${type}-${suffix}`;
 }
 
-async function promptProviderId(input: {
-  type: ProviderType;
-  existingIds: Set<string>;
-  allowReplace: boolean;
-}): Promise<string> {
+async function promptProviderId(
+  prompt: PromptApi,
+  input: {
+    type: ProviderType;
+    existingIds: Set<string>;
+    allowReplace: boolean;
+  },
+): Promise<string> {
   const { type, existingIds, allowReplace } = input;
   const primaryId = type;
   if (!existingIds.has(primaryId)) {
@@ -681,7 +451,7 @@ async function promptProviderId(input: {
     return nextProviderId(type, existingIds);
   }
   const nextId = nextProviderId(type, existingIds);
-  const shouldReplace = await askConfirm({
+  const shouldReplace = await promptConfirm(prompt, {
     message: `Provider '${primaryId}' already exists. Replace it? (No = create ${nextId})`,
     defaultValue: false,
   });
@@ -691,14 +461,17 @@ async function promptProviderId(input: {
   return nextId;
 }
 
-async function promptProviderType(input: {
-  preselected?: ProviderType;
-}): Promise<ProviderType> {
+async function promptProviderType(
+  prompt: PromptApi,
+  input: {
+    preselected?: ProviderType;
+  },
+): Promise<ProviderType> {
   if (input.preselected) {
     return input.preselected;
   }
 
-  return promptSelectWithArrows<ProviderType>("Select provider type", {
+  return promptSelect<ProviderType>(prompt, "Select provider type", {
     options: providerTypes.map((type) => ({
       label: providerCliMetadata[type].label,
       value: type,
@@ -707,16 +480,19 @@ async function promptProviderType(input: {
   });
 }
 
-async function promptProviderEntry(input: {
-  preselectedType?: ProviderType;
-  existingIds: Set<string>;
-  allowReplace: boolean;
-}): Promise<ProviderEntry> {
-  const type = await promptProviderType({
+async function promptProviderEntry(
+  prompt: PromptApi,
+  input: {
+    preselectedType?: ProviderType;
+    existingIds: Set<string>;
+    allowReplace: boolean;
+  },
+): Promise<ProviderEntry> {
+  const type = await promptProviderType(prompt, {
     preselected: input.preselectedType,
   });
 
-  const id = await promptProviderId({
+  const id = await promptProviderId(prompt, {
     type,
     existingIds: input.existingIds,
     allowReplace: input.allowReplace,
@@ -725,7 +501,7 @@ async function promptProviderEntry(input: {
   const config: Record<string, unknown> = {};
 
   for (const [key, fieldSpec] of providerFieldEntries(type)) {
-    const raw = await askText({
+    const raw = await promptText(prompt, {
       message: `${type}.config.${key}`,
       defaultValue: fieldSpec.defaultValue,
       validate: fieldSpec.required
@@ -747,18 +523,20 @@ async function promptProviderEntry(input: {
   };
 }
 
-async function buildInteractiveTemplateConfig(): Promise<KMsgCliConfig> {
+async function buildInteractiveTemplateConfig(
+  prompt: PromptApi,
+): Promise<KMsgCliConfig> {
   const config = createConfigSkeleton();
 
   let addAnother = false;
   do {
-    const entry = await promptProviderEntry({
+    const entry = await promptProviderEntry(prompt, {
       existingIds: new Set(config.providers.map((provider) => provider.id)),
       allowReplace: true,
     });
     upsertProvider(config, entry);
 
-    addAnother = await askConfirm({
+    addAnother = await promptConfirm(prompt, {
       message: "Add another provider?",
       defaultValue: false,
     });
@@ -796,42 +574,53 @@ const initCmd = defineCommand({
       description: "Template mode (interactive|full)",
     }),
   },
-  handler: async ({ flags, terminal }) => {
-    const targetPath = await resolveConfigPathForWrite(flags.config);
+  handler: async ({ flags, terminal, prompt }) => {
+    try {
+      const targetPath = await resolveConfigPathForWrite(flags.config);
 
-    let templateMode: "interactive" | "full" = flags.template;
-    if (templateMode === "interactive" && !canPromptInTerminal(terminal)) {
-      templateMode = "full";
-      console.log("Non-interactive environment detected. Using template=full.");
-    }
+      let templateMode: "interactive" | "full" = flags.template;
+      if (templateMode === "interactive" && !canPromptInTerminal(terminal)) {
+        templateMode = "full";
+        console.log(
+          "Non-interactive environment detected. Using template=full.",
+        );
+      }
 
-    if (!flags.force && (await Bun.file(targetPath).exists())) {
-      if (canPromptInTerminal(terminal)) {
-        const ok = await askConfirm({
-          message: `Config already exists: ${targetPath}. Overwrite?`,
-          defaultValue: false,
-        });
-        if (!ok) return;
-      } else {
-        console.error(`Config already exists: ${targetPath}`);
+      if (!flags.force && (await Bun.file(targetPath).exists())) {
+        if (canPromptInTerminal(terminal)) {
+          const ok = await promptConfirm(prompt, {
+            message: `Config already exists: ${targetPath}. Overwrite?`,
+            defaultValue: false,
+          });
+          if (!ok) return;
+        } else {
+          console.error(`Config already exists: ${targetPath}`);
+          process.exitCode = 2;
+          return;
+        }
+      }
+
+      const config =
+        templateMode === "interactive"
+          ? await buildInteractiveTemplateConfig(prompt)
+          : createFullTemplateConfig();
+
+      applySharedConfigDefaults(config);
+      const plaintextCredentials = collectPlaintextCredentialLocations(config);
+      await saveKMsgConfig(targetPath, config);
+      printConfigSavedSummary({
+        targetPath,
+        providerCount: config.providers.length,
+        plaintextCredentials,
+      });
+    } catch (error) {
+      if (isPromptCancelledError(error)) {
+        reportPromptCancellation();
         process.exitCode = 2;
         return;
       }
+      throw error;
     }
-
-    const config =
-      templateMode === "interactive"
-        ? await buildInteractiveTemplateConfig()
-        : createFullTemplateConfig();
-
-    applySharedConfigDefaults(config);
-    const plaintextCredentials = collectPlaintextCredentialLocations(config);
-    await saveKMsgConfig(targetPath, config);
-    printConfigSavedSummary({
-      targetPath,
-      providerCount: config.providers.length,
-      plaintextCredentials,
-    });
   },
 });
 
@@ -841,71 +630,77 @@ const providerAddCmd = defineCommand({
   options: {
     config: optConfig,
   },
-  handler: async ({ flags, positional, terminal }) => {
+  handler: async ({ flags, positional, terminal, prompt }) => {
     if (!canPromptInTerminal(terminal)) {
       console.error("config provider add requires an interactive terminal");
       process.exitCode = 2;
       return;
     }
 
-    const targetPath = await resolveConfigPathForWrite(flags.config);
-    const config = await loadConfigOrSkeleton(targetPath);
+    try {
+      const targetPath = await resolveConfigPathForWrite(flags.config);
+      const config = await loadConfigOrSkeleton(targetPath);
 
-    const requestedTypeRaw = positional[0];
-    const requestedType = parseProviderType(requestedTypeRaw);
-    if (typeof requestedTypeRaw === "string" && !requestedType) {
-      console.error(
-        `Unknown provider type: ${requestedTypeRaw} (supported: ${providerTypeSchema.options.join(", ")})`,
-      );
-      process.exitCode = 2;
-      return;
+      const requestedTypeRaw = positional[0];
+      const requestedType = parseProviderType(requestedTypeRaw);
+      if (typeof requestedTypeRaw === "string" && !requestedType) {
+        console.error(
+          `Unknown provider type: ${requestedTypeRaw} (supported: ${providerTypeSchema.options.join(", ")})`,
+        );
+        process.exitCode = 2;
+        return;
+      }
+
+      const provider = await promptProviderEntry(prompt, {
+        preselectedType: requestedType,
+        existingIds: new Set(config.providers.map((entry) => entry.id)),
+        allowReplace: true,
+      });
+
+      const result = upsertProvider(config, provider);
+
+      const includeRouting = await promptConfirm(prompt, {
+        message: "Add provider to routing.byType for matching message types?",
+        defaultValue: true,
+      });
+      if (includeRouting) {
+        addProviderToRouting(config, provider);
+      }
+
+      const shouldSetDefault = await promptConfirm(prompt, {
+        message: "Set as default provider?",
+        defaultValue: config.providers.length === 1,
+      });
+      if (shouldSetDefault && config.providers.length > 0) {
+        ensureRoutingExists(config);
+        config.routing.defaultProviderId = provider.id;
+      }
+
+      applySharedConfigDefaults(config);
+      const plaintextCredentials = collectPlaintextCredentialLocations(config);
+
+      await saveKMsgConfig(targetPath, config);
+      printConfigSavedSummary({
+        targetPath,
+        providerCount: config.providers.length,
+        plaintextCredentials,
+      });
+      console.log(`Provider ${provider.id} ${result}`);
+    } catch (error) {
+      if (isPromptCancelledError(error)) {
+        reportPromptCancellation();
+        process.exitCode = 2;
+        return;
+      }
+      throw error;
     }
-
-    const provider = await promptProviderEntry({
-      preselectedType: requestedType,
-      existingIds: new Set(config.providers.map((entry) => entry.id)),
-      allowReplace: true,
-    });
-
-    const result = upsertProvider(config, provider);
-
-    const includeRouting = await askConfirm({
-      message: "Add provider to routing.byType for matching message types?",
-      defaultValue: true,
-    });
-    if (includeRouting) {
-      addProviderToRouting(config, provider);
-    }
-
-    const shouldSetDefault = await askConfirm({
-      message: "Set as default provider?",
-      defaultValue: config.providers.length === 1,
-    });
-    if (shouldSetDefault && config.providers.length > 0) {
-      ensureRoutingExists(config);
-      config.routing.defaultProviderId = provider.id;
-    }
-
-    applySharedConfigDefaults(config);
-    const plaintextCredentials = collectPlaintextCredentialLocations(config);
-
-    await saveKMsgConfig(targetPath, config);
-    printConfigSavedSummary({
-      targetPath,
-      providerCount: config.providers.length,
-      plaintextCredentials,
-    });
-    console.log(`Provider ${provider.id} ${result}`);
   },
 });
 
-const providerCmd = defineCommand({
+const providerCmd = defineGroup({
   name: "provider",
   description: "Provider-level config helpers",
   commands: [providerAddCmd],
-  handler: async () => {
-    console.log("Use a subcommand: add");
-  },
 });
 
 const showCmd = defineCommand({
@@ -948,11 +743,8 @@ const validateCmd = defineCommand({
   },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "config",
   description: "Configuration helpers",
   commands: [initCmd, showCmd, validateCmd, providerCmd],
-  handler: async () => {
-    console.log("Use a subcommand: init | show | validate | provider");
-  },
 });
