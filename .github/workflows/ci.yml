@@ -113,7 +113,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 8
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
@@ -130,6 +130,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: CLI completions doctor (strict)
+        run: bun run --cwd apps/cli doctor:completions
 
       - name: Warn if changeset missing
         if: github.event_name == 'pull_request'

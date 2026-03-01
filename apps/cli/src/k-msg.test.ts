@@ -359,6 +359,26 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
+    "completions work outside project cwd",
+    async () => {
+      const cwd = await createTempCwd();
+
+      const script = expectCommand(
+        await runCli(["completions", "zsh"], { cwd }),
+      );
+      script.toHaveSucceeded();
+      expect(script.stdout).toContain("# zsh completion for k-msg");
+
+      const protocol = expectCommand(
+        await runCli(["complete", "--", ""], { cwd }),
+      );
+      protocol.toHaveSucceeded();
+      expect(protocol.stdout).not.toContain(":1");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "config validate/show",
     async () => {
       const configPath = await createTempConfig();

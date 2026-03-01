@@ -24,6 +24,9 @@ Other install paths are intentionally undocumented here.
 # Generate command types
 bun run --cwd apps/cli generate
 
+# Validate completion metadata graph (strict)
+bun run --cwd apps/cli doctor:completions
+
 # Build native binary
 bun run --cwd apps/cli build
 ./apps/cli/dist/k-msg --help
@@ -34,6 +37,32 @@ bun --cwd apps/cli dist/k-msg.js --help
 
 # Or run TS directly (dev)
 bun --cwd apps/cli src/k-msg.ts --help
+```
+
+## Shell Completions
+
+```bash
+# Print completion script
+k-msg completions bash
+k-msg completions zsh
+k-msg completions fish
+k-msg completions powershell
+
+# Completion protocol callback (used by shell scripts)
+k-msg complete -- ""
+```
+
+Shell init examples:
+
+```bash
+# bash
+k-msg completions bash > ~/.bash_completion.d/k-msg
+source ~/.bash_completion.d/k-msg
+
+# zsh
+k-msg completions zsh > "${HOME}/.zfunc/_k-msg"
+fpath+=("${HOME}/.zfunc")
+autoload -Uz compinit && compinit
 ```
 
 ## Config (`k-msg.config.json`)
@@ -129,6 +158,7 @@ Required values by provider/channel:
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
+- `k-msg completions <bash|zsh|fish|powershell>`
 - `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
 - `k-msg db schema print|generate`
 - `k-msg db tracking migrate plan|apply|status|retry`
@@ -347,6 +377,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
 - exit code:
   - `0`: success
   - `2`: input/config error
+  - `2`: interactive prompt cancelled (`Ctrl+C`)
   - `3`: provider/network error
   - `4`: unsupported capability (for example, provider does not support `balance`)
 

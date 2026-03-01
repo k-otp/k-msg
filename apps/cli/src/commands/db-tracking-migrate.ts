@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   applyFieldCryptoMigration,
   type CloudflareSqlClient,
@@ -346,11 +346,8 @@ const retryCmd = defineCommand({
   },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "migrate",
   description: "Legacy -> secure field-crypto migration orchestrator",
   commands: [planCmd, applyCmd, statusCmd, retryCmd],
-  handler: async () => {
-    console.log("Use a subcommand: plan | apply | status | retry");
-  },
 });

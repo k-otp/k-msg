@@ -1,4 +1,4 @@
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { SendInput } from "@k-msg/core";
 import { z } from "zod";
 import { optConfig, optJson, optProvider } from "../cli/options";
@@ -80,11 +80,8 @@ const sendCmd = defineCommand({
   },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "sms",
   description: "SMS utilities",
   commands: [sendCmd],
-  handler: async () => {
-    console.log("Use a subcommand: send");
-  },
 });
