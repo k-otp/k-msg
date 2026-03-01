@@ -99,10 +99,10 @@ jobs:
           if gh release view "$TAG" --json assets >/dev/null 2>&1; then
             echo "exists=true" >>"$GITHUB_OUTPUT"
 
-            mapfile -t release_assets < <(gh release view "$TAG" --json assets --jq '.assets[].name')
+            release_assets="$(gh release view "$TAG" --json assets --jq '.assets[].name')"
             missing_assets=0
             for expected in "${expected_assets[@]}"; do
-              if ! printf '%s\n' "${release_assets[@]}" | grep -Fxq "$expected"; then
+              if ! printf '%s\n' "$release_assets" | grep -Fxq "$expected"; then
                 echo "Missing release asset: $expected"
                 missing_assets=1
               fi
