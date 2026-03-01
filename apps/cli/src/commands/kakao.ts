@@ -1,4 +1,4 @@
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   KakaoChannelBindingResolver,
   KakaoChannelCapabilityService,
@@ -433,7 +433,7 @@ const channelBindingDeleteCmd = defineCommand({
   },
 });
 
-const channelBindingCmd = defineCommand({
+const channelBindingCmd = defineGroup({
   name: "binding",
   description: "Kakao channel binding management (config/provider-hint based)",
   commands: [
@@ -442,9 +442,6 @@ const channelBindingCmd = defineCommand({
     channelBindingSetCmd,
     channelBindingDeleteCmd,
   ],
-  handler: async () => {
-    console.log("Use a subcommand: list | resolve | set | delete");
-  },
 });
 
 const channelApiCategoriesCmd = defineCommand({
@@ -644,7 +641,7 @@ const channelApiAddCmd = defineCommand({
   },
 });
 
-const channelApiCmd = defineCommand({
+const channelApiCmd = defineGroup({
   name: "api",
   description:
     "Kakao channel provider API operations (api-mode providers only)",
@@ -654,9 +651,6 @@ const channelApiCmd = defineCommand({
     channelApiAuthCmd,
     channelApiAddCmd,
   ],
-  handler: async () => {
-    console.log("Use a subcommand: categories | list | auth | add");
-  },
 });
 
 const removedChannelCategoriesCmd = createRemovedChannelCommand({
@@ -677,7 +671,7 @@ const removedChannelAddCmd = createRemovedChannelCommand({
   replacement: "k-msg kakao channel api add",
 });
 
-const channelCmd = defineCommand({
+const channelCmd = defineGroup({
   name: "channel",
   description: "Kakao channel management",
   commands: [
@@ -688,9 +682,6 @@ const channelCmd = defineCommand({
     removedChannelAuthCmd,
     removedChannelAddCmd,
   ],
-  handler: async () => {
-    console.log("Use a subcommand: binding | api");
-  },
 });
 
 const templateListCmd = defineCommand({
@@ -1149,7 +1140,7 @@ const templateRequestCmd = defineCommand({
   },
 });
 
-const templateCmd = defineCommand({
+const templateCmd = defineGroup({
   name: "template",
   description: "Kakao template management",
   commands: [
@@ -1160,18 +1151,10 @@ const templateCmd = defineCommand({
     templateDeleteCmd,
     templateRequestCmd,
   ],
-  handler: async () => {
-    console.log(
-      "Use a subcommand: list | get | create | update | delete | request",
-    );
-  },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "kakao",
   description: "Kakao channel/template management",
   commands: [channelCmd, templateCmd],
-  handler: async () => {
-    console.log("Use a subcommand: channel | template");
-  },
 });

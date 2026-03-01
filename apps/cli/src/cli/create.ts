@@ -1,7 +1,9 @@
 import { createCLI } from "@bunli/core";
 import { aiAgentPlugin } from "@bunli/plugin-ai-detect";
+import { completionsPlugin } from "@bunli/plugin-completions";
 import { cli as generatedCli } from "../../.bunli/commands.gen";
 import pkg from "../../package.json";
+import { ensureCompletionsMetadataModule } from "./completions-metadata";
 
 function hasAnyNonEmptyEnv(env: Bun.Env, keys: readonly string[]): boolean {
   const envRecord = env as Record<string, string | undefined>;
@@ -22,11 +24,18 @@ const CLI_DESCRIPTION =
     : "k-msg CLI";
 
 export async function createKMsgCli() {
+  const completionsMetadataPath = await ensureCompletionsMetadataModule();
+
   const cli = await createCLI({
     name: CLI_NAME,
     version: CLI_VERSION,
     description: CLI_DESCRIPTION,
     plugins: [
+      completionsPlugin({
+        generatedPath: completionsMetadataPath,
+        commandName: CLI_NAME,
+        executable: CLI_NAME,
+      }),
       aiAgentPlugin({
         customAgents: [
           {

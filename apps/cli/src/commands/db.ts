@@ -1,6 +1,6 @@
 import { access, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   buildCloudflareSqlSchemaSql,
   type CloudflareSqlSchemaTarget,
@@ -202,29 +202,20 @@ const schemaGenerateCmd = defineCommand({
   },
 });
 
-const schemaCmd = defineCommand({
+const schemaCmd = defineGroup({
   name: "schema",
   description: "Schema generators for SQL and Drizzle",
   commands: [schemaPrintCmd, schemaGenerateCmd],
-  handler: async () => {
-    console.log("Use a subcommand: print | generate");
-  },
 });
 
-const trackingCmd = defineCommand({
+const trackingCmd = defineGroup({
   name: "tracking",
   description: "Tracking table migration utilities",
   commands: [trackingMigrateCmd],
-  handler: async () => {
-    console.log("Use a subcommand: migrate");
-  },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "db",
   description: "Database schema utilities",
   commands: [schemaCmd, trackingCmd],
-  handler: async () => {
-    console.log("Use a subcommand: schema | tracking");
-  },
 });

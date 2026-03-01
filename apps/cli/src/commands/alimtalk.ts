@@ -1,4 +1,4 @@
-import { defineCommand, option } from "@bunli/core";
+import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { MessageVariables, SendInput } from "@k-msg/core";
 import { z } from "zod";
 import {
@@ -296,11 +296,8 @@ const preflightCmd = defineCommand({
   },
 });
 
-export default defineCommand({
+export default defineGroup({
   name: "alimtalk",
   description: "AlimTalk utilities",
   commands: [sendCmd, preflightCmd],
-  handler: async () => {
-    console.log("Use a subcommand: send | preflight");
-  },
 });
