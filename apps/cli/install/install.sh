@@ -96,12 +96,17 @@ install_binary() {
 }
 
 append_line_once() {
-  local file_path line
+  local file_path line trailing_newline_count
   file_path="$1"
   line="$2"
 
   mkdir -p "$(dirname "$file_path")"
   touch "$file_path"
+  # Avoid concatenating onto an existing last line when the file has no trailing newline.
+  trailing_newline_count="$(tail -c 1 "$file_path" 2>/dev/null | wc -l | tr -d ' ')"
+  if [[ -s "$file_path" && "$trailing_newline_count" == "0" ]]; then
+    printf '\n' >>"$file_path"
+  fi
   if ! grep -Fqx "$line" "$file_path"; then
     printf '%s\n' "$line" >>"$file_path"
   fi
