@@ -95,6 +95,130 @@ install_binary() {
   fi
 }
 
+append_line_once() {
+  local file_path line
+  file_path="$1"
+  line="$2"
+
+  touch "$file_path"
+  if ! grep -Fqx "$line" "$file_path"; then
+    printf '%s\n' "$line" >>"$file_path"
+  fi
+}
+
+is_falsey_value() {
+  local value
+  value="${1:-}"
+
+  case "$value" in
+    0 | false | FALSE | False | no | NO | No | off | OFF | Off)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+detect_user_shell_name() {
+  local shell_input
+  shell_input="${K_MSG_CLI_SHELL:-${SHELL:-}}"
+  if [[ -z "$shell_input" ]]; then
+    echo ""
+    return
+  fi
+
+  basename "$shell_input"
+}
+
+setup_zsh_completion() {
+  local install_path shell_name zfunc_dir completion_file zshrc_line zshrc_file
+  install_path="$1"
+  shell_name="$2"
+  zfunc_dir="${HOME}/.zfunc"
+  completion_file="${zfunc_dir}/_${CLI_NAME}"
+  zshrc_file="${HOME}/.zshrc"
+  zshrc_line="fpath+=(\"${zfunc_dir}\")"
+
+  mkdir -p "$zfunc_dir"
+  "$install_path" completions zsh >"$completion_file"
+  append_line_once "$zshrc_file" "$zshrc_line"
+  append_line_once "$zshrc_file" "autoload -Uz compinit && compinit"
+
+  echo "Configured ${shell_name} completions at ${completion_file}"
+}
+
+setup_bash_completion() {
+  local install_path shell_name completion_dir completion_file bash_source_line
+  install_path="$1"
+  shell_name="$2"
+  completion_dir="${HOME}/.bash_completion.d"
+  completion_file="${completion_dir}/${CLI_NAME}"
+  bash_source_line="[[ -f \"${completion_file}\" ]] && source \"${completion_file}\""
+
+  mkdir -p "$completion_dir"
+  "$install_path" completions bash >"$completion_file"
+  append_line_once "${HOME}/.bashrc" "$bash_source_line"
+
+  if [[ -f "${HOME}/.bash_profile" ]]; then
+    append_line_once "${HOME}/.bash_profile" "$bash_source_line"
+  fi
+
+  echo "Configured ${shell_name} completions at ${completion_file}"
+}
+
+setup_fish_completion() {
+  local install_path shell_name completion_dir completion_file
+  install_path="$1"
+  shell_name="$2"
+  completion_dir="${HOME}/.config/fish/completions"
+  completion_file="${completion_dir}/${CLI_NAME}.fish"
+
+  mkdir -p "$completion_dir"
+  "$install_path" completions fish >"$completion_file"
+  echo "Configured ${shell_name} completions at ${completion_file}"
+}
+
+setup_shell_completions() {
+  local install_path shell_name
+  install_path="$1"
+
+  if is_falsey_value "${K_MSG_CLI_SETUP_COMPLETIONS:-true}"; then
+    echo "Skipping shell completion setup (K_MSG_CLI_SETUP_COMPLETIONS=${K_MSG_CLI_SETUP_COMPLETIONS})"
+    return
+  fi
+
+  shell_name="$(detect_user_shell_name)"
+  if [[ -z "$shell_name" ]]; then
+    echo "Skipping shell completion setup (unable to detect shell; set K_MSG_CLI_SHELL to override)"
+    return
+  fi
+
+  case "$shell_name" in
+    zsh)
+      if setup_zsh_completion "$install_path" "$shell_name"; then
+        return
+      fi
+      ;;
+    bash)
+      if setup_bash_completion "$install_path" "$shell_name"; then
+        return
+      fi
+      ;;
+    fish)
+      if setup_fish_completion "$install_path" "$shell_name"; then
+        return
+      fi
+      ;;
+    *)
+      echo "Skipping shell completion setup for unsupported shell: ${shell_name}"
+      return
+      ;;
+  esac
+
+  echo "Warning: failed to configure shell completions automatically for ${shell_name}."
+}
+
 print_detected_commands() {
   local found
   found="$(type -a -p "$CLI_NAME" 2>/dev/null | awk '!seen[$0]++' || true)"
@@ -225,6 +349,9 @@ main() {
       echo "Note: skipped replacing active script launcher: ${active_before}"
     fi
   fi
+
+  setup_shell_completions "$install_path"
+
   echo "Run:"
   echo "  ${CLI_NAME} --help"
 }

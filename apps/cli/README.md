@@ -14,9 +14,13 @@ Installer environment variables:
 - `K_MSG_CLI_VERSION`: override target version (default: latest Pages script version)
 - `K_MSG_CLI_INSTALL_DIR`: target directory override (default: auto-detect active `k-msg` directory when writable, otherwise `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: override release base URL (default: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+- `K_MSG_CLI_SETUP_COMPLETIONS`: set `false` to skip automatic shell completion setup (default: `true`)
+- `K_MSG_CLI_SHELL`: override shell detection for completion setup (`zsh|bash|fish`)
 
 The project now standardizes user-facing CLI installation on the curl installer path.
 Other install paths are intentionally undocumented here.
+
+By default, the installer also auto-configures shell completion for detected `zsh`, `bash`, or `fish`.
 
 ## Run (local/dev)
 
@@ -40,6 +44,9 @@ bun --cwd apps/cli src/k-msg.ts --help
 ```
 
 ## Shell Completions
+
+If installed via curl installer, completion is configured automatically for your detected shell.
+Use manual setup only when you want custom paths or a non-default shell setup.
 
 ```bash
 # Print completion script
