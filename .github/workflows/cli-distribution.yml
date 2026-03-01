@@ -87,10 +87,38 @@ jobs:
         run: |
           set -euo pipefail
           TAG="${{ steps.meta.outputs.tag }}"
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          VERSION="${{ steps.meta.outputs.version }}"
+          expected_assets=(
+            "k-msg-cli-${VERSION}-darwin-arm64.tar.gz"
+            "k-msg-cli-${VERSION}-darwin-x64.tar.gz"
+            "k-msg-cli-${VERSION}-linux-arm64.tar.gz"
+            "k-msg-cli-${VERSION}-linux-x64.tar.gz"
+            "k-msg-cli-${VERSION}-windows-x64.tar.gz"
+          )
+
+          if gh release view "$TAG" --json assets >/dev/null 2>&1; then
             echo "exists=true" >>"$GITHUB_OUTPUT"
+
+            mapfile -t release_assets < <(gh release view "$TAG" --json assets --jq '.assets[].name')
+            missing_assets=0
+            for expected in "${expected_assets[@]}"; do
+              if ! printf '%s\n' "${release_assets[@]}" | grep -Fxq "$expected"; then
+                echo "Missing release asset: $expected"
+                missing_assets=1
+              fi
+            done
+
+            if [[ "$missing_assets" -eq 0 ]]; then
+              echo "assets_ready=true" >>"$GITHUB_OUTPUT"
+              echo "should_build=false" >>"$GITHUB_OUTPUT"
+            else
+              echo "assets_ready=false" >>"$GITHUB_OUTPUT"
+              echo "should_build=true" >>"$GITHUB_OUTPUT"
+            fi
           else
             echo "exists=false" >>"$GITHUB_OUTPUT"
+            echo "assets_ready=false" >>"$GITHUB_OUTPUT"
+            echo "should_build=true" >>"$GITHUB_OUTPUT"
           fi
 
       - name: Check if CLI version is already on npm
@@ -106,31 +134,40 @@ jobs:
           fi
 
       - name: Build workspace packages (for CLI bundle)
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         run: bun run build:all
 
       - name: Build CLI (all targets)
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         run: bun run --cwd apps/cli build:all
 
       - name: Completions smoke (source)
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         run: bun --cwd apps/cli src/k-msg.ts completions bash >/dev/null
 
       - name: Completions smoke (built binary)
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         run: |
           set -euo pipefail
-          bun run --cwd apps/cli build:native
-          BIN="$(find apps/cli/dist -type f \( -name 'k-msg' -o -name 'k-msg.exe' \) | head -n 1)"
+          TARBALL="$(find apps/cli/dist -maxdepth 1 -type f -name '*.tar.gz' | sort | head -n 1)"
+          if [[ -z "$TARBALL" ]]; then
+            echo "Unable to find compressed CLI artifacts in apps/cli/dist"
+            exit 1
+          fi
+
+          TMP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$TMP_DIR"' EXIT
+          tar -xzf "$TARBALL" -C "$TMP_DIR"
+
+          BIN="$(find "$TMP_DIR" -type f \( -name 'k-msg' -o -name 'k-msg.exe' \) | head -n 1)"
           if [[ -z "$BIN" ]]; then
-            echo "Unable to find built CLI binary in apps/cli/dist"
+            echo "Unable to find built CLI binary in extracted artifact"
             exit 1
           fi
           "$BIN" completions zsh >/dev/null
 
       - name: Prepare release assets
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         run: |
           set -euo pipefail
           VERSION="${{ steps.meta.outputs.version }}"
@@ -138,17 +175,24 @@ jobs:
           rm -rf apps/cli/dist/release
           mkdir -p apps/cli/dist/release
           shopt -s nullglob
+          tarballs=(apps/cli/dist/*.tar.gz)
 
-          for f in apps/cli/dist/*.tar.gz; do
+          if [[ ${#tarballs[@]} -eq 0 ]]; then
+            echo "No compressed CLI artifacts found in apps/cli/dist"
+            ls -la apps/cli/dist
+            exit 1
+          fi
+
+          for f in "${tarballs[@]}"; do
             base="$(basename "$f")"
             target="${base%.tar.gz}"
-            mv "$f" "apps/cli/dist/release/k-msg-cli-${VERSION}-${target}.tar.gz"
+            cp "$f" "apps/cli/dist/release/k-msg-cli-${VERSION}-${target}.tar.gz"
           done
 
-          (cd apps/cli/dist/release && shasum -a 256 *.tar.gz > checksums.txt)
+          (cd apps/cli/dist/release && shasum -a 256 ./*.tar.gz > checksums.txt)
 
       - name: Upload assets to GitHub Release
-        if: ${{ steps.release.outputs.exists != 'true' }}
+        if: ${{ steps.release.outputs.should_build == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
@@ -156,6 +200,7 @@ jobs:
           name: k-msg CLI v${{ steps.meta.outputs.version }}
           files: apps/cli/dist/release/*
           fail_on_unmatched_files: true
+          overwrite_files: true
 
       - name: Pack CLI for npm
         id: pack
