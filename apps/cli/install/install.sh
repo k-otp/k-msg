@@ -100,6 +100,7 @@ append_line_once() {
   file_path="$1"
   line="$2"
 
+  mkdir -p "$(dirname "$file_path")"
   touch "$file_path"
   if ! grep -Fqx "$line" "$file_path"; then
     printf '%s\n' "$line" >>"$file_path"
@@ -131,40 +132,73 @@ detect_user_shell_name() {
   basename "$shell_input"
 }
 
+resolve_zsh_rc_file() {
+  local zdotdir
+  zdotdir="${ZDOTDIR:-${HOME}}"
+  echo "${zdotdir}/.zshrc"
+}
+
+resolve_bash_login_file() {
+  if [[ -f "${HOME}/.bash_profile" ]]; then
+    echo "${HOME}/.bash_profile"
+    return
+  fi
+
+  if [[ -f "${HOME}/.profile" ]]; then
+    echo "${HOME}/.profile"
+    return
+  fi
+
+  echo "${HOME}/.bash_profile"
+}
+
 setup_zsh_completion() {
   local install_path shell_name zfunc_dir completion_file zshrc_line zshrc_file
   install_path="$1"
   shell_name="$2"
   zfunc_dir="${HOME}/.zfunc"
   completion_file="${zfunc_dir}/_${CLI_NAME}"
-  zshrc_file="${HOME}/.zshrc"
+  zshrc_file="$(resolve_zsh_rc_file)"
   zshrc_line="fpath+=(\"${zfunc_dir}\")"
 
   mkdir -p "$zfunc_dir"
   "$install_path" completions zsh >"$completion_file"
+  if head -n 1 "$completion_file" | grep -Fqx "#compdef ${CLI_NAME}"; then
+    awk -v cli="$CLI_NAME" -v alias="$CLI_ALIAS" '
+      NR == 1 {
+        print "#compdef " cli " " alias
+        next
+      }
+      { print }
+    ' "$completion_file" >"${completion_file}.tmp"
+    mv "${completion_file}.tmp" "$completion_file"
+  fi
   append_line_once "$zshrc_file" "$zshrc_line"
   append_line_once "$zshrc_file" "autoload -Uz compinit && compinit"
 
   echo "Configured ${shell_name} completions at ${completion_file}"
+  echo "Reload ${shell_name} to apply now:"
+  echo "  source \"${zshrc_file}\""
 }
 
 setup_bash_completion() {
-  local install_path shell_name completion_dir completion_file bash_source_line
+  local install_path shell_name completion_dir completion_file bash_source_line login_file
   install_path="$1"
   shell_name="$2"
   completion_dir="${HOME}/.bash_completion.d"
   completion_file="${completion_dir}/${CLI_NAME}"
   bash_source_line="[[ -f \"${completion_file}\" ]] && source \"${completion_file}\""
+  login_file="$(resolve_bash_login_file)"
 
   mkdir -p "$completion_dir"
   "$install_path" completions bash >"$completion_file"
+  append_line_once "$completion_file" "complete -F __k_msg_complete ${CLI_ALIAS}"
   append_line_once "${HOME}/.bashrc" "$bash_source_line"
-
-  if [[ -f "${HOME}/.bash_profile" ]]; then
-    append_line_once "${HOME}/.bash_profile" "$bash_source_line"
-  fi
+  append_line_once "$login_file" "$bash_source_line"
 
   echo "Configured ${shell_name} completions at ${completion_file}"
+  echo "Reload ${shell_name} to apply now:"
+  echo "  source \"${HOME}/.bashrc\""
 }
 
 setup_fish_completion() {
@@ -176,7 +210,10 @@ setup_fish_completion() {
 
   mkdir -p "$completion_dir"
   "$install_path" completions fish >"$completion_file"
+  append_line_once "$completion_file" "complete -c ${CLI_ALIAS} -w ${CLI_NAME}"
   echo "Configured ${shell_name} completions at ${completion_file}"
+  echo "Reload ${shell_name} to apply now:"
+  echo "  source \"${completion_file}\""
 }
 
 setup_shell_completions() {

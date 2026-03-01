@@ -21,6 +21,10 @@ The project now standardizes user-facing CLI installation on the curl installer 
 Other install paths are intentionally undocumented here.
 
 By default, the installer also auto-configures shell completion for detected `zsh`, `bash`, or `fish`.
+It resolves shell init files by context:
+- `zsh`: `${ZDOTDIR:-$HOME}/.zshrc`
+- `bash`: `~/.bashrc` plus login profile (`~/.bash_profile` or `~/.profile`)
+- `fish`: `~/.config/fish/completions/k-msg.fish`
 
 ## Run (local/dev)
 
@@ -47,6 +51,7 @@ bun --cwd apps/cli src/k-msg.ts --help
 
 If installed via curl installer, completion is configured automatically for your detected shell.
 Use manual setup only when you want custom paths or a non-default shell setup.
+Installer-generated completion also covers the `kmsg` alias.
 
 ```bash
 # Print completion script
