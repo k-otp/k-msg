@@ -21,6 +21,10 @@ k-msg --help
 다른 설치 경로는 이 문서에서 안내하지 않습니다.
 
 기본 동작으로 설치 시 감지된 `zsh`, `bash`, `fish`에 대해 shell completion도 자동 설정됩니다.
+셸 컨텍스트 기준 초기화 파일은 아래처럼 결정됩니다.
+- `zsh`: `${ZDOTDIR:-$HOME}/.zshrc`
+- `bash`: `~/.bashrc` + 로그인 프로필(`~/.bash_profile` 또는 `~/.profile`)
+- `fish`: `~/.config/fish/completions/k-msg.fish`
 
 ## 실행 (local/dev)
 
@@ -47,6 +51,7 @@ bun --cwd apps/cli src/k-msg.ts --help
 
 curl 설치 스크립트를 사용한 경우 감지된 쉘에 자동완성이 자동 설정됩니다.
 아래 수동 설정은 경로를 직접 제어하거나 비표준 쉘 초기화 구성을 쓸 때만 필요합니다.
+설치로 생성된 자동완성은 `kmsg` alias도 함께 지원합니다.
 
 ```bash
 # shell completion 스크립트 출력
