@@ -24,6 +24,9 @@ k-msg --help
 # 커맨드 타입 생성
 bun run --cwd apps/cli generate
 
+# completion metadata 그래프 검증 (strict)
+bun run --cwd apps/cli doctor:completions
+
 # 네이티브 바이너리 빌드
 bun run --cwd apps/cli build
 ./apps/cli/dist/k-msg --help
@@ -34,6 +37,32 @@ bun --cwd apps/cli dist/k-msg.js --help
 
 # 또는 TS 직접 실행 (dev)
 bun --cwd apps/cli src/k-msg.ts --help
+```
+
+## Shell 자동완성
+
+```bash
+# shell completion 스크립트 출력
+k-msg completions bash
+k-msg completions zsh
+k-msg completions fish
+k-msg completions powershell
+
+# completion 프로토콜 콜백 (쉘 스크립트 내부 사용)
+k-msg complete -- ""
+```
+
+shell 초기화 예시:
+
+```bash
+# bash
+k-msg completions bash > ~/.bash_completion.d/k-msg
+source ~/.bash_completion.d/k-msg
+
+# zsh
+k-msg completions zsh > "${HOME}/.zfunc/_k-msg"
+fpath+=("${HOME}/.zfunc")
+autoload -Uz compinit && compinit
 ```
 
 ## 설정 (`k-msg.config.json`)
@@ -129,6 +158,7 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
+- `k-msg completions <bash|zsh|fish|powershell>`
 - `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
 - `k-msg db schema print|generate`
 - `k-msg db tracking migrate plan|apply|status|retry`
@@ -348,6 +378,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
 - 종료 코드:
   - `0`: 성공
   - `2`: 입력/설정 오류
+  - `2`: interactive prompt 취소 (`Ctrl+C`)
   - `3`: provider/network 오류
   - `4`: 지원되지 않는 기능(capability) (예: provider의 `balance` 미지원)
 
