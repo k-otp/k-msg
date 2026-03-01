@@ -14,9 +14,13 @@ k-msg --help
 - `K_MSG_CLI_VERSION`: 대상 버전 덮어쓰기 (기본값: Pages 스크립트의 최신 버전)
 - `K_MSG_CLI_INSTALL_DIR`: 설치 디렉터리 강제 지정 (기본값: 쓰기 가능한 활성 `k-msg` 경로를 우선 감지하고, 실패 시 `~/.local/bin`)
 - `K_MSG_CLI_BASE_URL`: release base URL 덮어쓰기 (기본값: `https://github.com/k-otp/k-msg/releases/download/cli-v<version>`)
+- `K_MSG_CLI_SETUP_COMPLETIONS`: `false`로 설정하면 자동 shell completion 설정을 건너뜀 (기본값: `true`)
+- `K_MSG_CLI_SHELL`: completion 설정용 쉘 감지값 강제 지정 (`zsh|bash|fish`)
 
 사용자 안내 기준 CLI 설치 경로는 curl 설치 스크립트로 단일화했습니다.
 다른 설치 경로는 이 문서에서 안내하지 않습니다.
+
+기본 동작으로 설치 시 감지된 `zsh`, `bash`, `fish`에 대해 shell completion도 자동 설정됩니다.
 
 ## 실행 (local/dev)
 
@@ -40,6 +44,9 @@ bun --cwd apps/cli src/k-msg.ts --help
 ```
 
 ## Shell 자동완성
+
+curl 설치 스크립트를 사용한 경우 감지된 쉘에 자동완성이 자동 설정됩니다.
+아래 수동 설정은 경로를 직접 제어하거나 비표준 쉘 초기화 구성을 쓸 때만 필요합니다.
 
 ```bash
 # shell completion 스크립트 출력
