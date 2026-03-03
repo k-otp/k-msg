@@ -1,5 +1,14 @@
 # @k-msg/cli
 
+## 0.9.2 — 2026-03-01
+
+### Patch changes
+
+- [b6a505d](https://github.com/k-otp/k-msg/commit/b6a505dfbc8115c2884dfccdfd9a54c6dfee8031) Fix installer shell-init appends for files without a trailing newline.
+  
+  - Prevent `.zshrc`/`.bashrc` line concatenation when appending completion setup lines.
+  - Keep completion setup idempotent and safe for existing shell config files. — Thanks @imjlk!
+
 ## 0.9.1 — 2026-03-01
 
 ### Patch changes
