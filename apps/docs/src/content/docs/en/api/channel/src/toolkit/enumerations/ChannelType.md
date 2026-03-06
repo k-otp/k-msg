@@ -5,7 +5,7 @@ prev: false
 title: "ChannelType"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L17)
+Defined in: [packages/channel/src/types/channel.types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L16)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:17](https://github.com/
 
 > **KAKAO\_ALIMTALK**: `"KAKAO_ALIMTALK"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L18)
+Defined in: [packages/channel/src/types/channel.types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L17)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:18](https://github.com/
 
 > **KAKAO\_FRIENDTALK**: `"KAKAO_FRIENDTALK"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L19)
+Defined in: [packages/channel/src/types/channel.types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L18)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:19](https://github.com/
 
 > **LMS**: `"LMS"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L21)
+Defined in: [packages/channel/src/types/channel.types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L20)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:21](https://github.com/
 
 > **MMS**: `"MMS"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L22)
+Defined in: [packages/channel/src/types/channel.types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L21)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:22](https://github.com/
 
 > **SMS**: `"SMS"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L20)
+Defined in: [packages/channel/src/types/channel.types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L19)

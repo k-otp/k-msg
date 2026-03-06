@@ -5,7 +5,7 @@ prev: false
 title: "ChannelCRUD"
 ---
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L68)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L67)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:68](https://github.
 
 > **new ChannelCRUD**(`options?`): `ChannelCRUD`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L84)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L83)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:16](https://gi
 
 > **cleanup**(): `object`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:665](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L665)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:652](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L652)
 
 #### Returns
 
@@ -85,7 +85,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:665](https://github
 
 > **createChannel**(`request`, `userId?`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L94)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L93)
 
 #### Parameters
 
@@ -107,7 +107,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:94](https://github.
 
 > **createSenderNumber**(`channelId`, `request`, `userId?`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:328](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L328)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:315](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L315)
 
 #### Parameters
 
@@ -133,7 +133,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:328](https://github
 
 > **deleteChannel**(`channelId`, `userId?`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L205)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:198](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L198)
 
 #### Parameters
 
@@ -155,7 +155,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:205](https://github
 
 > **deleteSenderNumber**(`senderNumberId`, `userId?`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:458](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L458)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:445](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L445)
 
 #### Parameters
 
@@ -177,7 +177,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:458](https://github
 
 > **destroy**(): `void`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:696](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L696)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:683](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L683)
 
 #### Returns
 
@@ -231,7 +231,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:71](https://gi
 
 > **getAuditLogs**(`entityType?`, `entityId?`, `limit?`): [`AuditLogEntry`](/api/channel/src/toolkit/interfaces/auditlogentry/)[]
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:592](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L592)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:579](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L579)
 
 #### Parameters
 
@@ -257,7 +257,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:592](https://github
 
 > **getChannel**(`channelId`, `userId?`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L146)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L139)
 
 #### Parameters
 
@@ -279,7 +279,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:146](https://github
 
 > **getSenderNumber**(`senderNumberId`, `userId?`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L383)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:370](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L370)
 
 #### Parameters
 
@@ -301,7 +301,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:383](https://github
 
 > **getStatistics**(): `object`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:611](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L611)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:598](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L598)
 
 #### Returns
 
@@ -349,7 +349,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:611](https://github
 
 > **listChannels**(`filters?`, `pagination?`): `Promise`\<[`PaginatedResult`](/api/channel/src/toolkit/interfaces/paginatedresult/)\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L240)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L233)
 
 #### Parameters
 
@@ -393,7 +393,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:67](https://gi
 
 > **listSenderNumbers**(`filters?`, `pagination?`): `Promise`\<[`PaginatedResult`](/api/channel/src/toolkit/interfaces/paginatedresult/)\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:501](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L501)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:488](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L488)
 
 #### Parameters
 
@@ -541,7 +541,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:31](https://gi
 
 > **updateChannel**(`channelId`, `updates`, `userId?`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L159)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L152)
 
 #### Parameters
 
@@ -567,7 +567,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:159](https://github
 
 > **updateSenderNumber**(`senderNumberId`, `updates`, `userId?`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:396](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L396)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L383)
 
 #### Parameters
 

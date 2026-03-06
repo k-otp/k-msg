@@ -13,7 +13,6 @@ import {
   type SenderNumberCreateRequest,
   type SenderNumberFilters,
   SenderNumberStatus,
-  VerificationStatus,
 } from "../../types/channel.types";
 import { EventEmitter } from "../shared/event-emitter";
 
@@ -102,7 +101,7 @@ export class ChannelCRUD extends EventEmitter {
       name: request.name,
       provider: request.provider,
       type: request.type,
-      status: ChannelStatus.PENDING,
+      status: ChannelStatus.ACTIVE,
       profileKey: request.profileKey,
       senderNumbers: [],
       metadata: {
@@ -110,12 +109,6 @@ export class ChannelCRUD extends EventEmitter {
         kakaoInfo: request.kakaoInfo,
         limits: this.getDefaultLimits(request.type),
         features: this.getDefaultFeatures(request.type),
-      },
-      verification: {
-        status: request.businessInfo
-          ? VerificationStatus.PENDING
-          : VerificationStatus.NOT_REQUIRED,
-        documents: [],
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -255,12 +248,6 @@ export class ChannelCRUD extends EventEmitter {
     }
     if (filters.status) {
       channels = channels.filter((c) => c.status === filters.status);
-    }
-    if (filters.verified !== undefined) {
-      const targetStatus = filters.verified
-        ? VerificationStatus.VERIFIED
-        : VerificationStatus.PENDING;
-      channels = channels.filter((c) => c.verification.status === targetStatus);
     }
     if (filters.createdAfter) {
       channels = channels.filter((c) => c.createdAt >= filters.createdAfter!);

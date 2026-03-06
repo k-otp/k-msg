@@ -1,4 +1,4 @@
-export type { Job, JobQueue } from "./job-queue.interface";
+export type { Job, JobQueue, JobRetryDirective } from "./job-queue.interface";
 export { JobStatus } from "./job-queue.interface";
 export type {
   BuildSendInputDetailedResult,
