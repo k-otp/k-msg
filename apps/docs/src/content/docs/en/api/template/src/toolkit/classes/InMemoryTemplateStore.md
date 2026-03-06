@@ -21,7 +21,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:5](https:
 
 ### createTemplate()
 
-> **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+> **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L8)
 
@@ -29,11 +29,11 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https:
 
 ##### template
 
-`Omit`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/), `"id"` \| `"metadata"`\>
+`Omit`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/), `"id"` \| `"metadata"`\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:65](https
 
 ### getTemplate()
 
-> **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
+> **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L39)
 
@@ -69,7 +69,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
+`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:69](https
 
 ### updateTemplate()
 
-> **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+> **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L43)
 
@@ -109,8 +109,8 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:43](https
 
 ##### updates
 
-`Partial`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>

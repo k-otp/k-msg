@@ -63,7 +63,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:84](ht
 
 ### requiredDocuments
 
-> **requiredDocuments**: [`DocumentType`](/api/channel/src/toolkit/enumerations/documenttype/)[]
+> **requiredDocuments**: [`DocumentType`](/en/api/channel/src/toolkit/enumerations/documenttype/)[]
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L79)
 

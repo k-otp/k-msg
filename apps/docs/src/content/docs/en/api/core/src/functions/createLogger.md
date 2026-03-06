@@ -5,7 +5,7 @@ prev: false
 title: "createLogger"
 ---
 
-> **createLogger**(`context?`, `config?`): [`Logger`](/api/core/src/classes/logger/)
+> **createLogger**(`context?`, `config?`): [`Logger`](/en/api/core/src/classes/logger/)
 
 Defined in: [packages/core/src/logger.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L300)
 
@@ -13,12 +13,12 @@ Defined in: [packages/core/src/logger.ts:300](https://github.com/k-otp/k-msg/blo
 
 ### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 ### config?
 
-`Partial`\<[`LoggerConfig`](/api/core/src/interfaces/loggerconfig/)\>
+`Partial`\<[`LoggerConfig`](/en/api/core/src/interfaces/loggerconfig/)\>
 
 ## Returns
 
-[`Logger`](/api/core/src/classes/logger/)
+[`Logger`](/en/api/core/src/classes/logger/)

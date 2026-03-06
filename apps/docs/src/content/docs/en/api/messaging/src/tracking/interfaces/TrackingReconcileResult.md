@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:132](https://gith
 
 #### error
 
-> **error**: [`KMsgError`](/api/core/src/classes/kmsgerror/)
+> **error**: [`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 #### messageId
 
@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:132](https://gith
 
 ### updates
 
-> **updates**: [`TrackingUpdate`](/api/messaging/src/tracking/interfaces/trackingupdate/)[]
+> **updates**: [`TrackingUpdate`](/en/api/messaging/src/tracking/interfaces/trackingupdate/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L131)

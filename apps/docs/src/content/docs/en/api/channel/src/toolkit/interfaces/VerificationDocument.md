@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:106](https://github.com
 
 ### status
 
-> **status**: [`DocumentStatus`](/api/channel/src/toolkit/enumerations/documentstatus/)
+> **status**: [`DocumentStatus`](/en/api/channel/src/toolkit/enumerations/documentstatus/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L111)
 
@@ -43,7 +43,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:111](https://github.com
 
 ### type
 
-> **type**: [`DocumentType`](/api/channel/src/toolkit/enumerations/documenttype/)
+> **type**: [`DocumentType`](/en/api/channel/src/toolkit/enumerations/documenttype/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L107)
 

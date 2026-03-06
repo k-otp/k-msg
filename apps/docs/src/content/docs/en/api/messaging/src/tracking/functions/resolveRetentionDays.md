@@ -13,17 +13,17 @@ Defined in: [packages/messaging/src/delivery-tracking/retention.ts:29](https://g
 
 ### config
 
-[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/) | `undefined`
+[`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/) | `undefined`
 
 ### context
 
 #### record
 
-[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
+[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
 
 #### retentionClass
 
-[`DeliveryTrackingRetentionClass`](/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/)
+[`DeliveryTrackingRetentionClass`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/)
 
 #### tenantId?
 

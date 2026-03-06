@@ -23,7 +23,7 @@ Aligo send/channel focused entrypoint.
 
 ### create()
 
-> `static` **create**(`config`): [`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
+> `static` **create**(`config`): [`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/)
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L175)
 
@@ -31,20 +31,20 @@ Defined in: [packages/provider/src/aligo/provider.send.ts:175](https://github.co
 
 ##### config
 
-[`AligoConfig`](/api/provider/src/aligo/interfaces/aligoconfig/)
+[`AligoConfig`](/en/api/provider/src/aligo/interfaces/aligoconfig/)
 
 #### Returns
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/)
 
 ***
 
 ### createDefault()
 
-> `static` **createDefault**(): [`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
+> `static` **createDefault**(): [`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/)
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L179)
 
 #### Returns
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/)

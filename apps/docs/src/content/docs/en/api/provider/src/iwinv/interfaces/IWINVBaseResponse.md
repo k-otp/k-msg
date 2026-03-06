@@ -12,10 +12,10 @@ IWINV 알림톡 REST API 규격서 기반
 
 ## Extended by
 
-- [`SendMessageResponse`](/api/provider/src/iwinv/interfaces/sendmessageresponse/)
-- [`TemplateListResponse`](/api/provider/src/iwinv/interfaces/templatelistresponse/)
-- [`HistoryResponse`](/api/provider/src/iwinv/interfaces/historyresponse/)
-- [`BalanceResponse`](/api/provider/src/iwinv/interfaces/balanceresponse/)
+- [`SendMessageResponse`](/en/api/provider/src/iwinv/interfaces/sendmessageresponse/)
+- [`TemplateListResponse`](/en/api/provider/src/iwinv/interfaces/templatelistresponse/)
+- [`HistoryResponse`](/en/api/provider/src/iwinv/interfaces/historyresponse/)
+- [`BalanceResponse`](/en/api/provider/src/iwinv/interfaces/balanceresponse/)
 
 ## Properties
 

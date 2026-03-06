@@ -67,6 +67,6 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:98](https://githu
 
 ### unsupportedProviderStrategy
 
-> **unsupportedProviderStrategy**: [`UnsupportedProviderStrategy`](/api/messaging/src/tracking/type-aliases/unsupportedproviderstrategy/)
+> **unsupportedProviderStrategy**: [`UnsupportedProviderStrategy`](/en/api/messaging/src/tracking/type-aliases/unsupportedproviderstrategy/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L101)

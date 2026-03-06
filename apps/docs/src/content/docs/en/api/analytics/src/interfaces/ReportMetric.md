@@ -35,7 +35,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:64](https://github.
 
 ### type
 
-> **type**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
+> **type**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L61)
 

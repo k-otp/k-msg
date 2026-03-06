@@ -47,7 +47,7 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:16](https://github.c
 
 ##### options?
 
-`Partial`\<[`BulkOperationOptions`](/api/core/src/interfaces/bulkoperationoptions/)\> = `{}`
+`Partial`\<[`BulkOperationOptions`](/en/api/core/src/interfaces/bulkoperationoptions/)\> = `{}`
 
 #### Returns
 

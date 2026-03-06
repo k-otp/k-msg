@@ -25,7 +25,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:63](https://git
 
 ##### statuses?
 
-[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[]
+[`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)[]
 
 #### Returns
 
@@ -69,19 +69,19 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:45](https://git
 
 ### dequeue()
 
-> **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **dequeue**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L43)
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 ***
 
 ### enqueue()
 
-> **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
+> **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L32)
 
@@ -115,7 +115,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:32](https://git
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 ***
 
@@ -137,7 +137,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:47](https://git
 
 ##### retry?
 
-[`JobRetryDirective`](/api/messaging/src/queue/interfaces/jobretrydirective/)
+[`JobRetryDirective`](/en/api/messaging/src/queue/interfaces/jobretrydirective/)
 
 #### Returns
 
@@ -147,7 +147,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:47](https://git
 
 ### getJob()
 
-> **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L57)
 
@@ -159,19 +159,19 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:57](https://git
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 ***
 
 ### peek()
 
-> **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **peek**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L53)
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 ***
 

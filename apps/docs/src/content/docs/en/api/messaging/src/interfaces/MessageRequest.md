@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:8](https://github.c
 
 ### options?
 
-> `optional` **options**: [`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/)
+> `optional` **options**: [`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L13)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:13](https://github.
 
 ### recipients
 
-> **recipients**: [`Recipient`](/api/messaging/src/interfaces/recipient/)[]
+> **recipients**: [`Recipient`](/en/api/messaging/src/interfaces/recipient/)[]
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L10)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:10](https://github.
 
 ### scheduling?
 
-> `optional` **scheduling**: [`SchedulingOptions`](/api/messaging/src/interfaces/schedulingoptions/)
+> `optional` **scheduling**: [`SchedulingOptions`](/en/api/messaging/src/interfaces/schedulingoptions/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L12)
 
@@ -43,6 +43,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:9](https://github.c
 
 ### variables
 
-> **variables**: [`VariableMap`](/api/messaging/src/interfaces/variablemap/)
+> **variables**: [`VariableMap`](/en/api/messaging/src/interfaces/variablemap/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L11)

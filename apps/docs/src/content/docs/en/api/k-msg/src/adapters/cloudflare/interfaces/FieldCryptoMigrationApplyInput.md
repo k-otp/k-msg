@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:70](https://
 
 ## Extends
 
-- [`FieldCryptoMigrationStateTables`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/)
+- [`FieldCryptoMigrationStateTables`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/)
 
 ## Properties
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://
 
 #### Inherited from
 
-[`FieldCryptoMigrationStateTables`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/).[`chunksTableName`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/#chunkstablename)
+[`FieldCryptoMigrationStateTables`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/).[`chunksTableName`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/#chunkstablename)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://
 
 #### Inherited from
 
-[`FieldCryptoMigrationStateTables`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/).[`runsTableName`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/#runstablename)
+[`FieldCryptoMigrationStateTables`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/).[`runsTableName`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/#runstablename)
 
 ***
 

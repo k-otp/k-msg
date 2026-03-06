@@ -5,7 +5,7 @@ prev: false
 title: "applyFieldCryptoMigration"
 ---
 
-> **applyFieldCryptoMigration**(`client`, `options`): `Promise`\<[`FieldCryptoMigrationApplyResult`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>
+> **applyFieldCryptoMigration**(`client`, `options`): `Promise`\<[`FieldCryptoMigrationApplyResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>
 
 Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/executor.ts#L169)
 
@@ -13,12 +13,12 @@ Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:169](http
 
 ### client
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 ### options
 
-[`FieldCryptoMigrationApplyInput`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyinput/)
+[`FieldCryptoMigrationApplyInput`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyinput/)
 
 ## Returns
 
-`Promise`\<[`FieldCryptoMigrationApplyResult`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>
+`Promise`\<[`FieldCryptoMigrationApplyResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>

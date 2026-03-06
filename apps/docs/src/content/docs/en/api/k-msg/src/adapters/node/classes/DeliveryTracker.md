@@ -103,7 +103,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 ### getDeliveryReport()
 
-> **getDeliveryReport**(`messageId`): [`DeliveryReport`](/api/messaging/src/interfaces/deliveryreport/) \| `undefined`
+> **getDeliveryReport**(`messageId`): [`DeliveryReport`](/en/api/messaging/src/interfaces/deliveryreport/) \| `undefined`
 
 Defined in: [packages/messaging/src/delivery/tracker.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery/tracker.ts#L347)
 
@@ -117,7 +117,7 @@ Get delivery report for a message
 
 #### Returns
 
-[`DeliveryReport`](/api/messaging/src/interfaces/deliveryreport/) \| `undefined`
+[`DeliveryReport`](/en/api/messaging/src/interfaces/deliveryreport/) \| `undefined`
 
 ***
 
@@ -133,7 +133,7 @@ Get messages by status
 
 ##### status
 
-[`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
+[`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
 #### Returns
 
@@ -403,7 +403,7 @@ Start tracking a message
 
 ###### initialStatus?
 
-[`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
+[`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
 ###### metadata?
 
@@ -435,7 +435,7 @@ Update message status
 
 ##### status
 
-[`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
+[`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
 ##### details?
 

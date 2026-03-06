@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:20](https://github
 
 ### client
 
-> **client**: [`AwsKmsKeyResolverClient`](/api/core/src/interfaces/awskmskeyresolverclient/)
+> **client**: [`AwsKmsKeyResolverClient`](/en/api/core/src/interfaces/awskmskeyresolverclient/)
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L17)
 

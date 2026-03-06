@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:116](https://github.com
 
 ##### config?
 
-`Partial`\<[`DashboardConfig`](/api/analytics/src/interfaces/dashboardconfig/)\> = `{}`
+`Partial`\<[`DashboardConfig`](/en/api/analytics/src/interfaces/dashboardconfig/)\> = `{}`
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:221](https://github.com
 
 ##### widget
 
-[`DashboardWidget`](/api/analytics/src/interfaces/dashboardwidget/)
+[`DashboardWidget`](/en/api/analytics/src/interfaces/dashboardwidget/)
 
 #### Returns
 
@@ -49,7 +49,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:221](https://github.com
 
 ### generateDashboard()
 
-> **generateDashboard**(`timeRange`, `filters?`, `metrics?`): `Promise`\<[`DashboardData`](/api/analytics/src/interfaces/dashboarddata/)\>
+> **generateDashboard**(`timeRange`, `filters?`, `metrics?`): `Promise`\<[`DashboardData`](/en/api/analytics/src/interfaces/dashboarddata/)\>
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L124)
 
@@ -73,11 +73,11 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:124](https://github.com
 
 ##### metrics?
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[] = `[]`
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[] = `[]`
 
 #### Returns
 
-`Promise`\<[`DashboardData`](/api/analytics/src/interfaces/dashboarddata/)\>
+`Promise`\<[`DashboardData`](/en/api/analytics/src/interfaces/dashboarddata/)\>
 
 ***
 
@@ -103,7 +103,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:228](https://github.com
 
 ### streamDashboard()
 
-> **streamDashboard**(`timeRange`, `filters?`): `AsyncGenerator`\<[`DashboardData`](/api/analytics/src/interfaces/dashboarddata/)\>
+> **streamDashboard**(`timeRange`, `filters?`): `AsyncGenerator`\<[`DashboardData`](/en/api/analytics/src/interfaces/dashboarddata/)\>
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L165)
 
@@ -127,7 +127,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:165](https://github.com
 
 #### Returns
 
-`AsyncGenerator`\<[`DashboardData`](/api/analytics/src/interfaces/dashboarddata/)\>
+`AsyncGenerator`\<[`DashboardData`](/en/api/analytics/src/interfaces/dashboarddata/)\>
 
 ***
 
@@ -143,7 +143,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:214](https://github.com
 
 ##### config
 
-`Partial`\<[`DashboardConfig`](/api/analytics/src/interfaces/dashboardconfig/)\>
+`Partial`\<[`DashboardConfig`](/en/api/analytics/src/interfaces/dashboardconfig/)\>
 
 #### Returns
 
@@ -153,7 +153,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:214](https://github.com
 
 ### updateWidget()
 
-> **updateWidget**(`widgetId`, `metrics`, `timeRange`, `filters?`): `Promise`\<[`WidgetData`](/api/analytics/src/interfaces/widgetdata/) \| `null`\>
+> **updateWidget**(`widgetId`, `metrics`, `timeRange`, `filters?`): `Promise`\<[`WidgetData`](/en/api/analytics/src/interfaces/widgetdata/) \| `null`\>
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L182)
 
@@ -167,7 +167,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:182](https://github.com
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### timeRange
 
@@ -185,4 +185,4 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:182](https://github.com
 
 #### Returns
 
-`Promise`\<[`WidgetData`](/api/analytics/src/interfaces/widgetdata/) \| `null`\>
+`Promise`\<[`WidgetData`](/en/api/analytics/src/interfaces/widgetdata/) \| `null`\>

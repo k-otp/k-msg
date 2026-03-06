@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/runtime/types.ts:85](https://github.com/k-otp/
 
 ### mode
 
-> **mode**: [`KakaoChannelCapabilityMode`](/api/channel/src/type-aliases/kakaochannelcapabilitymode/)
+> **mode**: [`KakaoChannelCapabilityMode`](/en/api/channel/src/type-aliases/kakaochannelcapabilitymode/)
 
 Defined in: [packages/channel/src/runtime/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L88)
 

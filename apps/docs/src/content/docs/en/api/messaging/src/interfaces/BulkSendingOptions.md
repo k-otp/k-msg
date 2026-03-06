@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:133](https://github
 
 ## Extends
 
-- [`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/)
+- [`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/)
 
 ## Properties
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:41](https://github.
 
 #### Inherited from
 
-[`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/).[`deduplication`](/api/messaging/src/interfaces/sendingoptions/#deduplication)
+[`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/).[`deduplication`](/en/api/messaging/src/interfaces/sendingoptions/#deduplication)
 
 ***
 
@@ -73,7 +73,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.
 
 #### Inherited from
 
-[`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/).[`failover`](/api/messaging/src/interfaces/sendingoptions/#failover)
+[`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/).[`failover`](/en/api/messaging/src/interfaces/sendingoptions/#failover)
 
 ***
 
@@ -101,13 +101,13 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.
 
 #### Inherited from
 
-[`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/).[`priority`](/api/messaging/src/interfaces/sendingoptions/#priority)
+[`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/).[`priority`](/en/api/messaging/src/interfaces/sendingoptions/#priority)
 
 ***
 
 ### retryOptions?
 
-> `optional` **retryOptions**: `Partial`\<[`RetryOptions`](/api/core/src/interfaces/retryoptions/)\>
+> `optional` **retryOptions**: `Partial`\<[`RetryOptions`](/en/api/core/src/interfaces/retryoptions/)\>
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L139)
 
@@ -137,7 +137,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:45](https://github.
 
 #### Inherited from
 
-[`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/).[`tracking`](/api/messaging/src/interfaces/sendingoptions/#tracking)
+[`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/).[`tracking`](/en/api/messaging/src/interfaces/sendingoptions/#tracking)
 
 ***
 
@@ -149,4 +149,4 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:34](https://github.
 
 #### Inherited from
 
-[`SendingOptions`](/api/messaging/src/interfaces/sendingoptions/).[`ttl`](/api/messaging/src/interfaces/sendingoptions/#ttl)
+[`SendingOptions`](/en/api/messaging/src/interfaces/sendingoptions/).[`ttl`](/en/api/messaging/src/interfaces/sendingoptions/#ttl)

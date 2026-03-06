@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:45](https://github.com/k-o
 
 ### endpoint
 
-> **endpoint**: [`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+> **endpoint**: [`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L43)
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:43](https://github.com/k-o
 
 ### event
 
-> **event**: [`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+> **event**: [`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L42)
 

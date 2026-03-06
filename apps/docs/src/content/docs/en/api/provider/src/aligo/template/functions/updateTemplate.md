@@ -5,7 +5,7 @@ prev: false
 title: "updateTemplate"
 ---
 
-> **updateTemplate**(`ctx`, `code`, `patch`, `templateCtx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **updateTemplate**(`ctx`, `code`, `patch`, `templateCtx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/aligo.template.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/aligo.template.ts#L181)
 
@@ -23,12 +23,12 @@ Aligo template CRUD focused entrypoint.
 
 ### patch
 
-[`TemplateUpdateInput`](/api/core/src/type-aliases/templateupdateinput/)
+[`TemplateUpdateInput`](/en/api/core/src/type-aliases/templateupdateinput/)
 
 ### templateCtx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 ## Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>

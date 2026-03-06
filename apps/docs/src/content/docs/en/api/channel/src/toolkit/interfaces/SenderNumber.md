@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:33](https://github.com/
 
 ### category
 
-> **category**: [`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
+> **category**: [`SenderNumberCategory`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L43)
 
@@ -78,7 +78,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:40](https://github.com/
 
 ### status
 
-> **status**: [`SenderNumberStatus`](/api/channel/src/toolkit/enumerations/sendernumberstatus/)
+> **status**: [`SenderNumberStatus`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L41)
 

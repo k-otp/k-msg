@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:67](https://github.
 
 ### error?
 
-> `optional` **error**: [`MessageError`](/api/messaging/src/interfaces/messageerror/)
+> `optional` **error**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L71)
 
@@ -43,6 +43,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:68](https://github.
 
 ### status
 
-> **status**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
+> **status**: [`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L70)

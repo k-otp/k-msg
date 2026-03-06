@@ -43,7 +43,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:26](https://github.com/
 
 ### enabledEvents
 
-> **enabledEvents**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)[]
+> **enabledEvents**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L22)
 

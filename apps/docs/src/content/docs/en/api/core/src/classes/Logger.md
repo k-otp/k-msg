@@ -19,11 +19,11 @@ Defined in: [packages/core/src/logger.ts:119](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 ##### config?
 
-`Partial`\<[`LoggerConfig`](/api/core/src/interfaces/loggerconfig/)\> = `{}`
+`Partial`\<[`LoggerConfig`](/en/api/core/src/interfaces/loggerconfig/)\> = `{}`
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/logger.ts:256](https://github.com/k-otp/k-msg/blo
 
 ##### context
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 #### Returns
 
@@ -63,7 +63,7 @@ Defined in: [packages/core/src/logger.ts:218](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 #### Returns
 
@@ -85,7 +85,7 @@ Defined in: [packages/core/src/logger.ts:246](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 ##### error?
 
@@ -111,7 +111,7 @@ Defined in: [packages/core/src/logger.ts:227](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 #### Returns
 
@@ -143,7 +143,7 @@ Defined in: [packages/core/src/logger.ts:268](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 #### Returns
 
@@ -187,7 +187,7 @@ Defined in: [packages/core/src/logger.ts:236](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/) = `{}`
+[`LogContext`](/en/api/core/src/interfaces/logcontext/) = `{}`
 
 ##### error?
 

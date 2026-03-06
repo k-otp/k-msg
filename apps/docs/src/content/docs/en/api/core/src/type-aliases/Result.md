@@ -5,7 +5,7 @@ prev: false
 title: "Result"
 ---
 
-> **Result**\<`T`, `E`\> = [`Ok`](/api/core/src/type-aliases/ok/)\<`T`\> \| [`Fail`](/api/core/src/type-aliases/fail/)\<`E`\>
+> **Result**\<`T`, `E`\> = [`Ok`](/en/api/core/src/type-aliases/ok/)\<`T`\> \| [`Fail`](/en/api/core/src/type-aliases/fail/)\<`E`\>
 
 Defined in: [packages/core/src/result.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L47)
 

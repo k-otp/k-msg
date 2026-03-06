@@ -5,7 +5,7 @@ prev: false
 title: "getFieldCryptoMigrationStatus"
 ---
 
-> **getFieldCryptoMigrationStatus**(`client`, `planId`, `options?`): `Promise`\<[`FieldCryptoMigrationStatus`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatus/)\>
+> **getFieldCryptoMigrationStatus**(`client`, `planId`, `options?`): `Promise`\<[`FieldCryptoMigrationStatus`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatus/)\>
 
 Defined in: [packages/messaging/src/migration/field-crypto/state.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L374)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/state.ts:374](https:/
 
 ### client
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 ### planId
 
@@ -21,8 +21,8 @@ Defined in: [packages/messaging/src/migration/field-crypto/state.ts:374](https:/
 
 ### options?
 
-[`FieldCryptoMigrationStateTables`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/) = `{}`
+[`FieldCryptoMigrationStateTables`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/) = `{}`
 
 ## Returns
 
-`Promise`\<[`FieldCryptoMigrationStatus`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatus/)\>
+`Promise`\<[`FieldCryptoMigrationStatus`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatus/)\>

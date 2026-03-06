@@ -113,7 +113,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://git
 
 ### status
 
-> **status**: [`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)
+> **status**: [`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L13)
 

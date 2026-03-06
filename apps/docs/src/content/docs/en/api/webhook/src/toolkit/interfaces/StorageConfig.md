@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp
 
 ### fieldCrypto?
 
-> `optional` **fieldCrypto**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **fieldCrypto**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/registry/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L65)
 
@@ -37,7 +37,7 @@ Field-level crypto policy for endpoint secret and delivery payload.
 
 ### fileAdapter?
 
-> `optional` **fileAdapter**: [`FileStorageAdapter`](/api/webhook/src/toolkit/interfaces/filestorageadapter/)
+> `optional` **fileAdapter**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
 Defined in: [packages/webhook/src/registry/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L49)
 

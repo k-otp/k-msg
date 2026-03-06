@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:19](https://github.com/k-otp/
 
 ##### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 #### Returns
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:19](https://github.com/k-otp/
 
 ### get()
 
-> **get**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **get**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L22)
 
@@ -41,19 +41,19 @@ Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 ***
 
 ### list()
 
-> **list**(): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **list**(): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L23)
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:20](https://github.com/k-otp/
 
 ##### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 #### Returns
 

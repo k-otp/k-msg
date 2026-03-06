@@ -22,7 +22,7 @@ Defined in: [packages/webhook/src/retry/retry.manager.ts:26](https://github.com/
 
 ##### webhookConfig
 
-[`WebhookConfig`](/api/webhook/src/interfaces/webhookconfig/)
+[`WebhookConfig`](/en/api/webhook/src/interfaces/webhookconfig/)
 
 #### Returns
 

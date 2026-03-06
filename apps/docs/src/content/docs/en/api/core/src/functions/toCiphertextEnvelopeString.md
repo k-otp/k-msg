@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:442](https://github.com/k-otp/k-m
 
 ### ciphertext
 
-`string` | [`CryptoEnvelope`](/api/core/src/interfaces/cryptoenvelope/)
+`string` | [`CryptoEnvelope`](/en/api/core/src/interfaces/cryptoenvelope/)
 
 ## Returns
 

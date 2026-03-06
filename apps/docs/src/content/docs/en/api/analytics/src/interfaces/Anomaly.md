@@ -79,7 +79,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:30](https://git
 
 ### metricType
 
-> **metricType**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
+> **metricType**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L31)
 

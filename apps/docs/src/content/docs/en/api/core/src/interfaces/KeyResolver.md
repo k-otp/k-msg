@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/types.ts:34](https://github.com/k-otp/k-ms
 
 ### resolveDecryptKeys()?
 
-> `optional` **resolveDecryptKeys**(`context`): [`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<readonly `string`[]\>
+> `optional` **resolveDecryptKeys**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<readonly `string`[]\>
 
 Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L38)
 
@@ -19,17 +19,17 @@ Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-ms
 
 ##### context
 
-[`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/) & `object`
+[`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/) & `object`
 
 #### Returns
 
-[`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<readonly `string`[]\>
+[`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<readonly `string`[]\>
 
 ***
 
 ### resolveEncryptKey()
 
-> **resolveEncryptKey**(`context`): [`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<\{ `kid`: `string`; \}\>
+> **resolveEncryptKey**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `kid`: `string`; \}\>
 
 Defined in: [packages/core/src/crypto/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L35)
 
@@ -37,8 +37,8 @@ Defined in: [packages/core/src/crypto/types.ts:35](https://github.com/k-otp/k-ms
 
 ##### context
 
-[`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/)
+[`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)
 
 #### Returns
 
-[`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<\{ `kid`: `string`; \}\>
+[`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `kid`: `string`; \}\>

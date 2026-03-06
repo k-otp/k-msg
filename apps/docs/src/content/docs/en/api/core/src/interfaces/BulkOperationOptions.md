@@ -53,6 +53,6 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:12](https://github.c
 
 ### retryOptions
 
-> **retryOptions**: [`RetryOptions`](/api/core/src/interfaces/retryoptions/)
+> **retryOptions**: [`RetryOptions`](/en/api/core/src/interfaces/retryoptions/)
 
 Defined in: [packages/core/src/resilience/bulk-operation.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L10)

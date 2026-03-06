@@ -79,7 +79,7 @@ Add a bot keyword button
 
 ### build()
 
-> **build**(): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
+> **build**(): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
 
 Defined in: [packages/template/src/builder/template.builder.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L374)
 
@@ -87,7 +87,7 @@ Build the final template
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
 
 ***
 
@@ -103,7 +103,7 @@ Add a custom button
 
 ##### button
 
-[`TemplateButton`](/api/template/src/interfaces/templatebutton/)
+[`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)
 
 #### Returns
 
@@ -123,7 +123,7 @@ Set template category
 
 ##### category
 
-[`TemplateCategory`](/api/template/src/enumerations/templatecategory/)
+[`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/)
 
 #### Returns
 
@@ -251,7 +251,7 @@ Set template metadata
 
 ##### metadata
 
-`Partial`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\[`"metadata"`\]\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\[`"metadata"`\]\>
 
 #### Returns
 
@@ -345,7 +345,7 @@ Set template status
 
 ##### status
 
-[`TemplateStatus`](/api/template/src/enumerations/templatestatus/)
+[`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/)
 
 #### Returns
 

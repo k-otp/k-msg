@@ -72,7 +72,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/
 
 ##### payload
 
-[`IWINVIPRestrictionAlert`](/api/provider/src/iwinv/interfaces/iwinviprestrictionalert/)
+[`IWINVIPRestrictionAlert`](/en/api/provider/src/iwinv/interfaces/iwinviprestrictionalert/)
 
 #### Returns
 

@@ -13,7 +13,7 @@ Defined in: [packages/template/src/runtime/template-input.ts:18](https://github.
 
 ### buttons?
 
-> `optional` **buttons**: [`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
+> `optional` **buttons**: [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 Defined in: [packages/template/src/runtime/template-input.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L21)
 

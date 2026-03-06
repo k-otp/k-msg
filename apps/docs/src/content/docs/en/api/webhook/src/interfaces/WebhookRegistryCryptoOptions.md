@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:13](https://githu
 
 ### delivery?
 
-> `optional` **delivery**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **delivery**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/services/webhook.registry.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L16)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:16](https://githu
 
 ### endpoint?
 
-> `optional` **endpoint**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **endpoint**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/services/webhook.registry.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L15)
 

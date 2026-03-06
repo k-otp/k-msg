@@ -9,7 +9,7 @@ Defined in: [packages/core/src/crypto/errors.ts:26](https://github.com/k-otp/k-m
 
 ## Extends
 
-- [`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/)
+- [`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/)
 
 ## Properties
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`attempt`](/api/core/src/interfaces/kmsgerrormetadata/#attempt)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`attempt`](/en/api/core/src/interfaces/kmsgerrormetadata/#attempt)
 
 ***
 
@@ -33,13 +33,13 @@ Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`causeChain`](/api/core/src/interfaces/kmsgerrormetadata/#causechain)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`causeChain`](/en/api/core/src/interfaces/kmsgerrormetadata/#causechain)
 
 ***
 
 ### failMode?
 
-> `optional` **failMode**: [`FieldCryptoFailMode`](/api/core/src/type-aliases/fieldcryptofailmode/)
+> `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/errors.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L28)
 
@@ -61,13 +61,13 @@ Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`httpStatus`](/api/core/src/interfaces/kmsgerrormetadata/#httpstatus)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`httpStatus`](/en/api/core/src/interfaces/kmsgerrormetadata/#httpstatus)
 
 ***
 
 ### openFallback?
 
-> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/errors.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L29)
 
@@ -81,7 +81,7 @@ Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`providerErrorCode`](/api/core/src/interfaces/kmsgerrormetadata/#providererrorcode)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`providerErrorCode`](/en/api/core/src/interfaces/kmsgerrormetadata/#providererrorcode)
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`providerErrorText`](/api/core/src/interfaces/kmsgerrormetadata/#providererrortext)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`providerErrorText`](/en/api/core/src/interfaces/kmsgerrormetadata/#providererrortext)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`requestId`](/api/core/src/interfaces/kmsgerrormetadata/#requestid)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`requestId`](/en/api/core/src/interfaces/kmsgerrormetadata/#requestid)
 
 ***
 
@@ -117,4 +117,4 @@ Defined in: [packages/core/src/errors.ts:100](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/).[`retryAfterMs`](/api/core/src/interfaces/kmsgerrormetadata/#retryafterms)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/).[`retryAfterMs`](/en/api/core/src/interfaces/kmsgerrormetadata/#retryafterms)

@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:21](https://github.com/k
 
 ### list
 
-> **list**: [`SendRecipient`](/api/provider/src/iwinv/interfaces/sendrecipient/)[]
+> **list**: [`SendRecipient`](/en/api/provider/src/iwinv/interfaces/sendrecipient/)[]
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L30)
 

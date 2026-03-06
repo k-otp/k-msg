@@ -9,9 +9,9 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:15](https://
 
 ## Extended by
 
-- [`FieldCryptoMigrationPlanInput`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationplaninput/)
-- [`FieldCryptoMigrationApplyInput`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyinput/)
-- [`FieldCryptoMigrationRetryInput`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationretryinput/)
+- [`FieldCryptoMigrationPlanInput`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationplaninput/)
+- [`FieldCryptoMigrationApplyInput`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyinput/)
+- [`FieldCryptoMigrationRetryInput`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationretryinput/)
 
 ## Properties
 

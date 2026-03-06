@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:128](https://github
 
 ### variables
 
-> **variables**: [`VariableMap`](/api/messaging/src/interfaces/variablemap/)
+> **variables**: [`VariableMap`](/en/api/messaging/src/interfaces/variablemap/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L129)

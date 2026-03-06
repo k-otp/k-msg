@@ -25,7 +25,7 @@ Defined in: [packages/channel/src/runtime/types.ts:126](https://github.com/k-otp
 
 #### kakaoChannels?
 
-> `optional` **kakaoChannels**: `Record`\<`string`, [`KakaoChannelAliasEntry`](/api/channel/src/interfaces/kakaochannelaliasentry/)\>
+> `optional` **kakaoChannels**: `Record`\<`string`, [`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/)\>
 
 ***
 
@@ -63,7 +63,7 @@ Defined in: [packages/channel/src/runtime/types.ts:117](https://github.com/k-otp
 
 ### providers?
 
-> `optional` **providers**: [`KakaoProviderConfigEntry`](/api/channel/src/interfaces/kakaoproviderconfigentry/)[]
+> `optional` **providers**: [`KakaoProviderConfigEntry`](/en/api/channel/src/interfaces/kakaoproviderconfigentry/)[]
 
 Defined in: [packages/channel/src/runtime/types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L130)
 

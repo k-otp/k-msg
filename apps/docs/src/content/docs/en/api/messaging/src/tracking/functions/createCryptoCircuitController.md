@@ -5,7 +5,7 @@ prev: false
 title: "createCryptoCircuitController"
 ---
 
-> **createCryptoCircuitController**(`options?`): [`CryptoCircuitController`](/api/messaging/src/tracking/classes/cryptocircuitcontroller/)
+> **createCryptoCircuitController**(`options?`): [`CryptoCircuitController`](/en/api/messaging/src/tracking/classes/cryptocircuitcontroller/)
 
 Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/crypto-control-plane.ts#L259)
 
@@ -13,8 +13,8 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:25
 
 ### options?
 
-[`DeliveryTrackingFieldCryptoControlSignalOptions`](/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/) = `{}`
+[`DeliveryTrackingFieldCryptoControlSignalOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/) = `{}`
 
 ## Returns
 
-[`CryptoCircuitController`](/api/messaging/src/tracking/classes/cryptocircuitcontroller/)
+[`CryptoCircuitController`](/en/api/messaging/src/tracking/classes/cryptocircuitcontroller/)

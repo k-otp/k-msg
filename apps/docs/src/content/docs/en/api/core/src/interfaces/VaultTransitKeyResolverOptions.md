@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:22](https://
 
 ### client
 
-> **client**: [`VaultTransitKeyResolverClient`](/api/core/src/interfaces/vaulttransitkeyresolverclient/)
+> **client**: [`VaultTransitKeyResolverClient`](/en/api/core/src/interfaces/vaulttransitkeyresolverclient/)
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L18)
 

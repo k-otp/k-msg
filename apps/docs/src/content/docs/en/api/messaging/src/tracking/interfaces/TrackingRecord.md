@@ -59,7 +59,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:40](https://githu
 
 ### fieldModes?
 
-> `optional` **fieldModes**: `Partial`\<`Record`\<`string`, [`FieldMode`](/api/core/src/type-aliases/fieldmode/)\>\>
+> `optional` **fieldModes**: `Partial`\<`Record`\<`string`, [`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)\>\>
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L55)
 
@@ -99,7 +99,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:43](https://githu
 
 ### lastError?
 
-> `optional` **lastError**: [`TrackingError`](/api/messaging/src/tracking/interfaces/trackingerror/)
+> `optional` **lastError**: [`TrackingError`](/en/api/messaging/src/tracking/interfaces/trackingerror/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L45)
 
@@ -230,7 +230,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:38](https://githu
 
 ### status
 
-> **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)
+> **status**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L35)
 
@@ -270,6 +270,6 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:29](https://githu
 
 ### type
 
-> **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
+> **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L26)

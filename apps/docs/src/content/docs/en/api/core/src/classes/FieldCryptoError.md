@@ -9,7 +9,7 @@ Defined in: [packages/core/src/crypto/errors.ts:32](https://github.com/k-otp/k-m
 
 ## Extends
 
-- [`KMsgError`](/api/core/src/classes/kmsgerror/)
+- [`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-m
 
 ##### kind
 
-[`FieldCryptoErrorKind`](/api/core/src/type-aliases/fieldcryptoerrorkind/)
+[`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
 
 ##### message
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-m
 
 ##### metadata?
 
-[`FieldCryptoErrorMetadata`](/api/core/src/interfaces/fieldcryptoerrormetadata/) = `{}`
+[`FieldCryptoErrorMetadata`](/en/api/core/src/interfaces/fieldcryptoerrormetadata/) = `{}`
 
 #### Returns
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-m
 
 #### Overrides
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`constructor`](/api/core/src/classes/kmsgerror/#constructor)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`constructor`](/en/api/core/src/classes/kmsgerror/#constructor)
 
 ## Properties
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`attempt`](/api/core/src/classes/kmsgerror/#attempt)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`attempt`](/en/api/core/src/classes/kmsgerror/#attempt)
 
 ***
 
@@ -69,7 +69,7 @@ The cause of the error.
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`cause`](/api/core/src/classes/kmsgerror/#cause)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`cause`](/en/api/core/src/classes/kmsgerror/#cause)
 
 ***
 
@@ -81,19 +81,19 @@ Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`causeChain`](/api/core/src/classes/kmsgerror/#causechain)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`causeChain`](/en/api/core/src/classes/kmsgerror/#causechain)
 
 ***
 
 ### code
 
-> `readonly` **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+> `readonly` **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 Defined in: [packages/core/src/errors.ts:297](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L297)
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`code`](/api/core/src/classes/kmsgerror/#code)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`code`](/en/api/core/src/classes/kmsgerror/#code)
 
 ***
 
@@ -105,13 +105,13 @@ Defined in: [packages/core/src/errors.ts:298](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`details`](/api/core/src/classes/kmsgerror/#details)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`details`](/en/api/core/src/classes/kmsgerror/#details)
 
 ***
 
 ### failMode?
 
-> `readonly` `optional` **failMode**: [`FieldCryptoFailMode`](/api/core/src/type-aliases/fieldcryptofailmode/)
+> `readonly` `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/errors.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L35)
 
@@ -133,13 +133,13 @@ Defined in: [packages/core/src/errors.ts:301](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`httpStatus`](/api/core/src/classes/kmsgerror/#httpstatus)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`httpStatus`](/en/api/core/src/classes/kmsgerror/#httpstatus)
 
 ***
 
 ### kind
 
-> `readonly` **kind**: [`FieldCryptoErrorKind`](/api/core/src/type-aliases/fieldcryptoerrorkind/)
+> `readonly` **kind**: [`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
 
 Defined in: [packages/core/src/crypto/errors.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L33)
 
@@ -153,7 +153,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`message`](/api/core/src/classes/kmsgerror/#message)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`message`](/en/api/core/src/classes/kmsgerror/#message)
 
 ***
 
@@ -165,13 +165,13 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`name`](/api/core/src/classes/kmsgerror/#name)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`name`](/en/api/core/src/classes/kmsgerror/#name)
 
 ***
 
 ### openFallback?
 
-> `readonly` `optional` **openFallback**: [`FieldCryptoOpenFallback`](/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `readonly` `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/errors.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L36)
 
@@ -185,7 +185,7 @@ Defined in: [packages/core/src/errors.ts:299](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`providerErrorCode`](/api/core/src/classes/kmsgerror/#providererrorcode)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`providerErrorCode`](/en/api/core/src/classes/kmsgerror/#providererrorcode)
 
 ***
 
@@ -197,7 +197,7 @@ Defined in: [packages/core/src/errors.ts:300](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`providerErrorText`](/api/core/src/classes/kmsgerror/#providererrortext)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`providerErrorText`](/en/api/core/src/classes/kmsgerror/#providererrortext)
 
 ***
 
@@ -209,7 +209,7 @@ Defined in: [packages/core/src/errors.ts:302](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`requestId`](/api/core/src/classes/kmsgerror/#requestid)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`requestId`](/en/api/core/src/classes/kmsgerror/#requestid)
 
 ***
 
@@ -221,7 +221,7 @@ Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blo
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`retryAfterMs`](/api/core/src/classes/kmsgerror/#retryafterms)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`retryAfterMs`](/en/api/core/src/classes/kmsgerror/#retryafterms)
 
 ***
 
@@ -233,7 +233,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`stack`](/api/core/src/classes/kmsgerror/#stack)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`stack`](/en/api/core/src/classes/kmsgerror/#stack)
 
 ***
 
@@ -255,7 +255,7 @@ not capture any frames.
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`stackTraceLimit`](/api/core/src/classes/kmsgerror/#stacktracelimit)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`stackTraceLimit`](/en/api/core/src/classes/kmsgerror/#stacktracelimit)
 
 ## Methods
 
@@ -273,7 +273,7 @@ Falls back to the original message if no localized message exists.
 
 ##### locale?
 
-[`Locale`](/api/core/src/type-aliases/locale/) = `DEFAULT_LOCALE`
+[`Locale`](/en/api/core/src/type-aliases/locale/) = `DEFAULT_LOCALE`
 
 #### Returns
 
@@ -281,7 +281,7 @@ Falls back to the original message if no localized message exists.
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`getLocalizedMessage`](/api/core/src/classes/kmsgerror/#getlocalizedmessage)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`getLocalizedMessage`](/en/api/core/src/classes/kmsgerror/#getlocalizedmessage)
 
 ***
 
@@ -305,7 +305,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 ##### code
 
-> **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+> **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 ##### details
 
@@ -313,7 +313,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 ##### failMode
 
-> **failMode**: [`FieldCryptoFailMode`](/api/core/src/type-aliases/fieldcryptofailmode/) \| `undefined`
+> **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/) \| `undefined`
 
 ##### fieldPath
 
@@ -325,7 +325,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 ##### kind
 
-> **kind**: [`FieldCryptoErrorKind`](/api/core/src/type-aliases/fieldcryptoerrorkind/)
+> **kind**: [`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
 
 ##### message
 
@@ -337,7 +337,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 ##### openFallback
 
-> **openFallback**: [`FieldCryptoOpenFallback`](/api/core/src/type-aliases/fieldcryptoopenfallback/) \| `undefined`
+> **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/) \| `undefined`
 
 ##### providerErrorCode
 
@@ -357,7 +357,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 #### Overrides
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`toJSON`](/api/core/src/classes/kmsgerror/#tojson)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`toJSON`](/en/api/core/src/classes/kmsgerror/#tojson)
 
 ***
 
@@ -429,7 +429,7 @@ a();
 
 ##### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/api/core/src/classes/kmsgerror/#capturestacktrace)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/en/api/core/src/classes/kmsgerror/#capturestacktrace)
 
 #### Call Signature
 
@@ -455,7 +455,7 @@ Create .stack property on a target object
 
 ##### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/api/core/src/classes/kmsgerror/#capturestacktrace)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/en/api/core/src/classes/kmsgerror/#capturestacktrace)
 
 ***
 
@@ -481,7 +481,7 @@ Indicates whether the argument provided is a built-in Error instance or not.
 
 ##### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`isError`](/api/core/src/classes/kmsgerror/#iserror)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`isError`](/en/api/core/src/classes/kmsgerror/#iserror)
 
 #### Call Signature
 
@@ -507,7 +507,7 @@ True if the value is an instance of Error, false otherwise
 
 ##### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`isError`](/api/core/src/classes/kmsgerror/#iserror)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`isError`](/en/api/core/src/classes/kmsgerror/#iserror)
 
 ***
 
@@ -537,4 +537,4 @@ https://v8.dev/docs/stack-trace-api#customizing-stack-traces
 
 #### Inherited from
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/).[`prepareStackTrace`](/api/core/src/classes/kmsgerror/#preparestacktrace)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`prepareStackTrace`](/en/api/core/src/classes/kmsgerror/#preparestacktrace)

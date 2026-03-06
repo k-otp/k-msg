@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:118](https://gith
 
 ### status
 
-[`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)
+[`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
 
 ## Returns
 

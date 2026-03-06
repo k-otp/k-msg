@@ -25,7 +25,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:29](https://git
 
 ##### config?
 
-`Partial`\<[`BatchConfig`](/api/webhook/src/toolkit/interfaces/batchconfig/)\> = `{}`
+`Partial`\<[`BatchConfig`](/en/api/webhook/src/toolkit/interfaces/batchconfig/)\> = `{}`
 
 #### Returns
 
@@ -49,7 +49,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:38](https://git
 
 ##### job
 
-[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/)
+[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/)
 
 #### Returns
 
@@ -239,7 +239,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 ### processAllBatches()
 
-> **processAllBatches**(): `Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/)[]\>
+> **processAllBatches**(): `Promise`\<[`WebhookBatch`](/en/api/webhook/src/interfaces/webhookbatch/)[]\>
 
 Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L128)
 
@@ -247,13 +247,13 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:128](https://gi
 
 #### Returns
 
-`Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/)[]\>
+`Promise`\<[`WebhookBatch`](/en/api/webhook/src/interfaces/webhookbatch/)[]\>
 
 ***
 
 ### processBatchForEndpoint()
 
-> **processBatchForEndpoint**(`endpointId`): `Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/) \| `null`\>
+> **processBatchForEndpoint**(`endpointId`): `Promise`\<[`WebhookBatch`](/en/api/webhook/src/interfaces/webhookbatch/) \| `null`\>
 
 Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L69)
 
@@ -267,7 +267,7 @@ Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:69](https://git
 
 #### Returns
 
-`Promise`\<[`WebhookBatch`](/api/webhook/src/interfaces/webhookbatch/) \| `null`\>
+`Promise`\<[`WebhookBatch`](/en/api/webhook/src/interfaces/webhookbatch/) \| `null`\>
 
 ***
 

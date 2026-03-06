@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:11
 
 ## Implements
 
-- [`DeliveryTrackingCryptoController`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
+- [`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
 
 ## Constructors
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:12
 
 ### beforeOperation()
 
-> **beforeOperation**(`context`): `Promise`\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
+> **beforeOperation**(`context`): `Promise`\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
 
 Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/crypto-control-plane.ts#L138)
 
@@ -41,15 +41,15 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:13
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
 
 #### Returns
 
-`Promise`\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
+`Promise`\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
 
 #### Implementation of
 
-[`DeliveryTrackingCryptoController`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`beforeOperation`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#beforeoperation)
+[`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`beforeOperation`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#beforeoperation)
 
 ***
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:20
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/) & `object`
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/) & `object`
 
 #### Returns
 
@@ -71,7 +71,7 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:20
 
 #### Implementation of
 
-[`DeliveryTrackingCryptoController`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`onFailure`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#onfailure)
+[`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`onFailure`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#onfailure)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:17
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
 
 #### Returns
 
@@ -93,4 +93,4 @@ Defined in: [packages/messaging/src/delivery-tracking/crypto-control-plane.ts:17
 
 #### Implementation of
 
-[`DeliveryTrackingCryptoController`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`onSuccess`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#onsuccess)
+[`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/).[`onSuccess`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/#onsuccess)

@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/rollout-policy.ts:119](https://github.com/
 
 ### policy
 
-[`ActiveKidRolloutPolicy`](/api/core/src/interfaces/activekidrolloutpolicy/)
+[`ActiveKidRolloutPolicy`](/en/api/core/src/interfaces/activekidrolloutpolicy/)
 
 ## Returns
 

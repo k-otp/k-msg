@@ -5,7 +5,7 @@ prev: false
 title: "createD1JobQueue"
 ---
 
-> **createD1JobQueue**\<`T`\>(`database`, `options?`): [`HyperdriveJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>
+> **createD1JobQueue**\<`T`\>(`database`, `options?`): [`HyperdriveJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L175)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:175](https://gi
 
 ### database
 
-[`D1DatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1databaselike/)
+[`D1DatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/d1databaselike/)
 
 ### options?
 
@@ -29,4 +29,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:175](https://gi
 
 ## Returns
 
-[`HyperdriveJobQueue`](/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>
+[`HyperdriveJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>

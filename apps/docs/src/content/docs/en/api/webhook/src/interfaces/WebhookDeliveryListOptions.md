@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:12](https://github.com/k-otp/
 
 ### eventType?
 
-> `optional` **eventType**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)
+> `optional` **eventType**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)
 
 Defined in: [packages/webhook/src/runtime/types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L13)
 

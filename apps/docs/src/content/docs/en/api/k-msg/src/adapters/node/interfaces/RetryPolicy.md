@@ -59,6 +59,6 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:24](https://github.co
 
 ### retryableStatuses
 
-> **retryableStatuses**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)[]
+> **retryableStatuses**: [`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)[]
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L23)

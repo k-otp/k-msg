@@ -317,6 +317,24 @@ export default defineConfig({
           },
           items: [
             "guides/overview",
+            "guides/getting-started",
+            "guides/package-selection",
+            "guides/provider-selection",
+            "guides/message-types",
+            "guides/troubleshooting",
+            {
+              label: "Use Cases",
+              translations: {
+                ko: "사용 사례",
+                en: "Use Cases",
+              },
+              items: [
+                "guides/use-cases",
+                "guides/use-cases/otp-verification",
+                "guides/use-cases/order-notification",
+                "guides/use-cases/marketing-message",
+              ],
+            },
             {
               label: "Packages",
               translations: {
@@ -349,6 +367,7 @@ export default defineConfig({
                 "guides/examples/hono-pages-tracking-hyperdrive",
                 "guides/examples/hono-worker-queue-do",
                 "guides/examples/hono-worker-tracking-d1",
+                "guides/examples/hono-worker-webhook-d1",
               ],
             },
             {

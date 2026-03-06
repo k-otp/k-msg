@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/types.ts:119](https://github.com/k-otp/k-m
 
 ### name
 
-> **name**: [`FieldCryptoMetricName`](/api/core/src/type-aliases/fieldcryptometricname/)
+> **name**: [`FieldCryptoMetricName`](/en/api/core/src/type-aliases/fieldcryptometricname/)
 
 Defined in: [packages/core/src/crypto/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L117)
 

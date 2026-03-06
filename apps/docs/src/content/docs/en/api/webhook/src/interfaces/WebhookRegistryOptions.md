@@ -11,6 +11,6 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:19](https://githu
 
 ### fieldCrypto?
 
-> `optional` **fieldCrypto**: [`WebhookRegistryCryptoOptions`](/api/webhook/src/interfaces/webhookregistrycryptooptions/)
+> `optional` **fieldCrypto**: [`WebhookRegistryCryptoOptions`](/en/api/webhook/src/interfaces/webhookregistrycryptooptions/)
 
 Defined in: [packages/webhook/src/services/webhook.registry.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L20)

@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:479](https
 
 ### options
 
-[`BuildCloudflareSqlSchemaSqlOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/buildcloudflaresqlschemasqloptions/)
+[`BuildCloudflareSqlSchemaSqlOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/buildcloudflaresqlschemasqloptions/)
 
 ## Returns
 

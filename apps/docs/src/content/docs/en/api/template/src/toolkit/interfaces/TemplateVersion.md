@@ -35,7 +35,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:45](https://git
 
 ### template
 
-> **template**: [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
+> **template**: [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
 
 Defined in: [packages/template/src/registry/template.registry.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L42)
 

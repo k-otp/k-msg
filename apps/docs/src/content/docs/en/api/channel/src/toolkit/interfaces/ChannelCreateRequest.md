@@ -91,6 +91,6 @@ Defined in: [packages/channel/src/types/channel.types.ts:132](https://github.com
 
 ### type
 
-> **type**: [`ChannelType`](/api/channel/src/toolkit/enumerations/channeltype/)
+> **type**: [`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L131)

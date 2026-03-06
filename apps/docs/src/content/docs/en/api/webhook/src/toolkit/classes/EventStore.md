@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:36](https://github.com
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/en/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -117,7 +117,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 ### getEvent()
 
-> **getEvent**(`eventId`): `Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\> \| `null`\>
+> **getEvent**(`eventId`): `Promise`\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\> \| `null`\>
 
 Defined in: [packages/webhook/src/registry/event.store.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L84)
 
@@ -131,13 +131,13 @@ Defined in: [packages/webhook/src/registry/event.store.ts:84](https://github.com
 
 #### Returns
 
-`Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\> \| `null`\>
+`Promise`\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\> \| `null`\>
 
 ***
 
 ### getEventsByType()
 
-> **getEventsByType**(`eventType`, `limit?`): `Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]\>
+> **getEventsByType**(`eventType`, `limit?`): `Promise`\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]\>
 
 Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L215)
 
@@ -147,7 +147,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.co
 
 ##### eventType
 
-[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)
+[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)
 
 ##### limit?
 
@@ -155,13 +155,13 @@ Defined in: [packages/webhook/src/registry/event.store.ts:215](https://github.co
 
 #### Returns
 
-`Promise`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]\>
+`Promise`\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]\>
 
 ***
 
 ### getEventStats()
 
-> **getEventStats**(`timeRange?`): `Promise`\<\{ `eventsByChannel`: `Record`\<`string`, `number`\>; `eventsByProvider`: `Record`\<`string`, `number`\>; `eventsByType`: `Record`\<[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/), `number`\>; `eventsPerHour`: `Record`\<`string`, `number`\>; `totalEvents`: `number`; \}\>
+> **getEventStats**(`timeRange?`): `Promise`\<\{ `eventsByChannel`: `Record`\<`string`, `number`\>; `eventsByProvider`: `Record`\<`string`, `number`\>; `eventsByType`: `Record`\<[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/), `number`\>; `eventsPerHour`: `Record`\<`string`, `number`\>; `totalEvents`: `number`; \}\>
 
 Defined in: [packages/webhook/src/registry/event.store.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L233)
 
@@ -181,7 +181,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:233](https://github.co
 
 #### Returns
 
-`Promise`\<\{ `eventsByChannel`: `Record`\<`string`, `number`\>; `eventsByProvider`: `Record`\<`string`, `number`\>; `eventsByType`: `Record`\<[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/), `number`\>; `eventsPerHour`: `Record`\<`string`, `number`\>; `totalEvents`: `number`; \}\>
+`Promise`\<\{ `eventsByChannel`: `Record`\<`string`, `number`\>; `eventsByProvider`: `Record`\<`string`, `number`\>; `eventsByType`: `Record`\<[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/), `number`\>; `eventsPerHour`: `Record`\<`string`, `number`\>; `totalEvents`: `number`; \}\>
 
 ***
 
@@ -365,7 +365,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com
 
 ##### event
 
-[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 #### Returns
 
@@ -375,7 +375,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:53](https://github.com
 
 ### searchEvents()
 
-> **searchEvents**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
+> **searchEvents**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
 
 Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L91)
 
@@ -385,15 +385,15 @@ Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com
 
 ##### filter?
 
-[`EventFilter`](/api/webhook/src/toolkit/interfaces/eventfilter/) = `{}`
+[`EventFilter`](/en/api/webhook/src/toolkit/interfaces/eventfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/en/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
+`Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>\>
 
 ***
 

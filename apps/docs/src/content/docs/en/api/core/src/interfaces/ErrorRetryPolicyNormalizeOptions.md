@@ -11,6 +11,6 @@ Defined in: [packages/core/src/errors.ts:133](https://github.com/k-otp/k-msg/blo
 
 ### mode?
 
-> `optional` **mode**: [`ErrorRetryPolicyMode`](/api/core/src/type-aliases/errorretrypolicymode/)
+> `optional` **mode**: [`ErrorRetryPolicyMode`](/en/api/core/src/type-aliases/errorretrypolicymode/)
 
 Defined in: [packages/core/src/errors.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L134)

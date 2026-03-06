@@ -23,7 +23,7 @@ SOLAPI Provider package entrypoint
 
 ### create()
 
-> `static` **create**(`config`): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+> `static` **create**(`config`): [`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)
 
 Defined in: [packages/provider/src/solapi/provider.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L218)
 
@@ -31,20 +31,20 @@ Defined in: [packages/provider/src/solapi/provider.ts:218](https://github.com/k-
 
 ##### config
 
-[`SolapiConfig`](/api/provider/src/solapi/interfaces/solapiconfig/)
+[`SolapiConfig`](/en/api/provider/src/solapi/interfaces/solapiconfig/)
 
 #### Returns
 
-[`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+[`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)
 
 ***
 
 ### createDefault()
 
-> `static` **createDefault**(): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+> `static` **createDefault**(): [`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)
 
 Defined in: [packages/provider/src/solapi/provider.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L222)
 
 #### Returns
 
-[`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+[`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)

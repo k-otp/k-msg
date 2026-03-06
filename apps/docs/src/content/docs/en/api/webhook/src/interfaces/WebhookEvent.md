@@ -81,7 +81,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:65](https://github.com/
 
 ### type
 
-> **type**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)
+> **type**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L64)
 

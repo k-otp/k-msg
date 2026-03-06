@@ -11,7 +11,7 @@ Defined in: [packages/core/src/persistence/repository.ts:7](https://github.com/k
 
 ### find()
 
-> **find**(`messageId`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **find**(`messageId`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/persistence/repository.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L18)
 
@@ -23,13 +23,13 @@ Defined in: [packages/core/src/persistence/repository.ts:18](https://github.com/
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### save()
 
-> **save**(`input`, `options?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`string`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **save**(`input`, `options?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`string`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/persistence/repository.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L8)
 
@@ -37,23 +37,23 @@ Defined in: [packages/core/src/persistence/repository.ts:8](https://github.com/k
 
 ##### input
 
-[`SendInput`](/api/core/src/type-aliases/sendinput/)
+[`SendInput`](/en/api/core/src/type-aliases/sendinput/)
 
 ##### options?
 
 ###### strategy?
 
-[`PersistenceStrategy`](/api/core/src/type-aliases/persistencestrategy/)
+[`PersistenceStrategy`](/en/api/core/src/type-aliases/persistencestrategy/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`string`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`string`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### update()
 
-> **update**(`messageId`, `result`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **update**(`messageId`, `result`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/persistence/repository.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/persistence/repository.ts#L13)
 
@@ -65,8 +65,8 @@ Defined in: [packages/core/src/persistence/repository.ts:13](https://github.com/
 
 ##### result
 
-`Partial`\<[`SendResult`](/api/core/src/interfaces/sendresult/)\>
+`Partial`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>

@@ -5,7 +5,7 @@ prev: false
 title: "createIWINVProvider"
 ---
 
-> **createIWINVProvider**(`config`): [`IWINVProvider`](/api/provider/src/classes/iwinvprovider/)
+> **createIWINVProvider**(`config`): [`IWINVProvider`](/en/api/provider/src/classes/iwinvprovider/)
 
 Defined in: [packages/provider/src/iwinv/provider.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L85)
 
@@ -13,8 +13,8 @@ Defined in: [packages/provider/src/iwinv/provider.ts:85](https://github.com/k-ot
 
 ### config
 
-[`IWINVConfig`](/api/provider/src/iwinv/interfaces/iwinvconfig/)
+[`IWINVConfig`](/en/api/provider/src/iwinv/interfaces/iwinvconfig/)
 
 ## Returns
 
-[`IWINVProvider`](/api/provider/src/classes/iwinvprovider/)
+[`IWINVProvider`](/en/api/provider/src/classes/iwinvprovider/)

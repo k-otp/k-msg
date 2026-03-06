@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:95](https://
 
 ### matchedPermissions
 
-> **matchedPermissions**: [`Permission`](/api/channel/src/toolkit/interfaces/permission/)[]
+> **matchedPermissions**: [`Permission`](/en/api/channel/src/toolkit/interfaces/permission/)[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L97)
 

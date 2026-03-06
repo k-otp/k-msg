@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:6](https://github.c
 
 ### enabledMetrics
 
-> **enabledMetrics**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)[]
+> **enabledMetrics**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L7)
 

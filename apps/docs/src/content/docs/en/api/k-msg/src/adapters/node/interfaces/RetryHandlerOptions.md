@@ -27,11 +27,11 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:54](https://github.co
 
 ##### attempt
 
-[`RetryAttempt`](/api/k-msg/src/adapters/node/interfaces/retryattempt/)
+[`RetryAttempt`](/en/api/k-msg/src/adapters/node/interfaces/retryattempt/)
 
 ##### item
 
-[`RetryQueueItem`](/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
+[`RetryQueueItem`](/en/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
 
 #### Returns
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:60](https://github.co
 
 ##### item
 
-[`RetryQueueItem`](/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
+[`RetryQueueItem`](/en/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
 
 #### Returns
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.co
 
 ##### item
 
-[`RetryQueueItem`](/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
+[`RetryQueueItem`](/en/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
 
 ##### error
 
@@ -97,7 +97,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.co
 
 ##### item
 
-[`RetryQueueItem`](/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
+[`RetryQueueItem`](/en/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
 
 ##### result
 
@@ -111,7 +111,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.co
 
 ### policy
 
-> **policy**: [`RetryPolicy`](/api/k-msg/src/adapters/node/interfaces/retrypolicy/)
+> **policy**: [`RetryPolicy`](/en/api/k-msg/src/adapters/node/interfaces/retrypolicy/)
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L51)
 
@@ -131,11 +131,11 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:55](https://github.co
 
 ##### item
 
-[`RetryQueueItem`](/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
+[`RetryQueueItem`](/en/api/k-msg/src/adapters/node/interfaces/retryqueueitem/)
 
 ##### attempt
 
-[`RetryAttempt`](/api/k-msg/src/adapters/node/interfaces/retryattempt/)
+[`RetryAttempt`](/en/api/k-msg/src/adapters/node/interfaces/retryattempt/)
 
 #### Returns
 

@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:42](https://gith
 
 ### issues
 
-> **issues**: [`BuildSendInputIssue`](/api/messaging/src/queue/interfaces/buildsendinputissue/)[]
+> **issues**: [`BuildSendInputIssue`](/en/api/messaging/src/queue/interfaces/buildsendinputissue/)[]
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L44)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:44](https://gith
 
 ### mode
 
-> **mode**: [`BuildSendInputValidationMode`](/api/messaging/src/queue/type-aliases/buildsendinputvalidationmode/)
+> **mode**: [`BuildSendInputValidationMode`](/en/api/messaging/src/queue/type-aliases/buildsendinputvalidationmode/)
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L45)
 
@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:45](https://gith
 
 ### result
 
-> **result**: [`Result`](/api/core/src/type-aliases/result/)\<[`SendInput`](/api/core/src/type-aliases/sendinput/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
+> **result**: [`Result`](/en/api/core/src/type-aliases/result/)\<[`SendInput`](/en/api/core/src/type-aliases/sendinput/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L43)

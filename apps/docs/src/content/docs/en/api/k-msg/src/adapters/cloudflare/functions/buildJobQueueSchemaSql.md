@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:459](https
 
 ### options
 
-[`BuildJobQueueSchemaSqlOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/buildjobqueueschemasqloptions/)
+[`BuildJobQueueSchemaSqlOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/buildjobqueueschemasqloptions/)
 
 ## Returns
 

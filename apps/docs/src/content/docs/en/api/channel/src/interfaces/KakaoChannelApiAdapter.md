@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/runtime/types.ts:76](https://github.com/k-otp/
 
 ### add()
 
-> **add**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **add**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L82)
 
@@ -19,17 +19,17 @@ Defined in: [packages/channel/src/runtime/types.ts:82](https://github.com/k-otp/
 
 ##### params
 
-[`KakaoChannelAddParams`](/api/channel/src/interfaces/kakaochanneladdparams/)
+[`KakaoChannelAddParams`](/en/api/channel/src/interfaces/kakaochanneladdparams/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### auth()
 
-> **auth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **auth**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L81)
 
@@ -37,29 +37,29 @@ Defined in: [packages/channel/src/runtime/types.ts:81](https://github.com/k-otp/
 
 ##### params
 
-[`KakaoChannelAuthParams`](/api/channel/src/interfaces/kakaochannelauthparams/)
+[`KakaoChannelAuthParams`](/en/api/channel/src/interfaces/kakaochannelauthparams/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### categories()
 
-> **categories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **categories**(): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L80)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### list()
 
-> **list**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **list**(`params?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L77)
 
@@ -67,8 +67,8 @@ Defined in: [packages/channel/src/runtime/types.ts:77](https://github.com/k-otp/
 
 ##### params?
 
-[`KakaoChannelListParams`](/api/channel/src/interfaces/kakaochannellistparams/)
+[`KakaoChannelListParams`](/en/api/channel/src/interfaces/kakaochannellistparams/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>

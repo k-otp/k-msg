@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:92](htt
 
 ### beforeOperation()?
 
-> `optional` **beforeOperation**(`context`): [`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
+> `optional` **beforeOperation**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L93)
 
@@ -19,17 +19,17 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:93](htt
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
 
 #### Returns
 
-[`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
+[`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `allowed`: `boolean`; `state`: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/); \}\>
 
 ***
 
 ### onFailure()?
 
-> `optional` **onFailure**(`context`): [`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<`void`\>
+> `optional` **onFailure**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`void`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L102)
 
@@ -37,17 +37,17 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:102](ht
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/) & `object`
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/) & `object`
 
 #### Returns
 
-[`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<`void`\>
+[`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`void`\>
 
 ***
 
 ### onSuccess()?
 
-> `optional` **onSuccess**(`context`): [`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<`void`\>
+> `optional` **onSuccess**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`void`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L99)
 
@@ -55,8 +55,8 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:99](htt
 
 ##### context
 
-[`DeliveryTrackingCryptoOperationContext`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
+[`DeliveryTrackingCryptoOperationContext`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptooperationcontext/)
 
 #### Returns
 
-[`MaybePromise`](/api/core/src/type-aliases/maybepromise/)\<`void`\>
+[`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`void`\>

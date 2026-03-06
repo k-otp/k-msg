@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:91](https://github.
 
 ### attempts
 
-> **attempts**: [`DeliveryAttempt`](/api/messaging/src/interfaces/deliveryattempt/)[]
+> **attempts**: [`DeliveryAttempt`](/en/api/messaging/src/interfaces/deliveryattempt/)[]
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L100)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:96](https://github.
 
 ### error?
 
-> `optional` **error**: [`MessageError`](/api/messaging/src/interfaces/messageerror/)
+> `optional` **error**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L99)
 
@@ -83,6 +83,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:95](https://github.
 
 ### status
 
-> **status**: [`MessageStatus`](/api/messaging/src/enumerations/messagestatus/)
+> **status**: [`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L94)

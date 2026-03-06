@@ -9,8 +9,8 @@ Defined in: [packages/channel/src/runtime/types.ts:22](https://github.com/k-otp/
 
 ## Extended by
 
-- [`KakaoChannelListItem`](/api/channel/src/interfaces/kakaochannellistitem/)
-- [`ResolvedKakaoChannelBinding`](/api/channel/src/interfaces/resolvedkakaochannelbinding/)
+- [`KakaoChannelListItem`](/en/api/channel/src/interfaces/kakaochannellistitem/)
+- [`ResolvedKakaoChannelBinding`](/en/api/channel/src/interfaces/resolvedkakaochannelbinding/)
 
 ## Properties
 

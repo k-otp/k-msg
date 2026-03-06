@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:27](ht
 
 ### aggregate()
 
-> **aggregate**(`metrics`, `interval`, `options?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **aggregate**(`metrics`, `interval`, `options?`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L34)
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](ht
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### interval
 
@@ -47,17 +47,17 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](ht
 
 ##### options?
 
-[`AggregationOptions`](/api/analytics/src/interfaces/aggregationoptions/) = `...`
+[`AggregationOptions`](/en/api/analytics/src/interfaces/aggregationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### aggregateRolling()
 
-> **aggregateRolling**(`metrics`, `windowSize`, `step?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **aggregateRolling**(`metrics`, `windowSize`, `step?`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L74)
 
@@ -67,7 +67,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](ht
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### windowSize
 
@@ -79,13 +79,13 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](ht
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### decomposeSeasonality()
 
-> **decomposeSeasonality**(`metrics`, `seasonLength?`): `Promise`\<\{ `residual`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `seasonal`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `trend`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; \}\>
+> **decomposeSeasonality**(`metrics`, `seasonLength?`): `Promise`\<\{ `residual`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `seasonal`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `trend`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; \}\>
 
 Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L121)
 
@@ -95,7 +95,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](h
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### seasonLength?
 
@@ -103,13 +103,13 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:121](h
 
 #### Returns
 
-`Promise`\<\{ `residual`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `seasonal`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; `trend`: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]; \}\>
+`Promise`\<\{ `residual`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `seasonal`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `trend`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; \}\>
 
 ***
 
 ### downsample()
 
-> **downsample**(`metrics`, `targetInterval`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **downsample**(`metrics`, `targetInterval`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L156)
 
@@ -119,7 +119,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](h
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### targetInterval
 
@@ -127,4 +127,4 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](h
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>

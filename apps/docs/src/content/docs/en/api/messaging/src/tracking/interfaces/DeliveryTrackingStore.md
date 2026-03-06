@@ -23,7 +23,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:137](ht
 
 ### countBy()?
 
-> `optional` **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
+> `optional` **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L132)
 
@@ -31,15 +31,15 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:132](ht
 
 ##### filter
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 ##### groupBy
 
-readonly [`DeliveryTrackingCountByField`](/api/messaging/src/tracking/type-aliases/deliverytrackingcountbyfield/)[]
+readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingcountbyfield/)[]
 
 #### Returns
 
-`Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
+`Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:131](ht
 
 ##### filter
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 #### Returns
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:131](ht
 
 ### get()
 
-> **get**(`messageId`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
+> **get**(`messageId`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L128)
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:128](ht
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
 ***
 
@@ -93,7 +93,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:126](ht
 
 ### listDue()
 
-> **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+> **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L129)
 
@@ -109,13 +109,13 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:129](ht
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 ***
 
 ### listRecords()?
 
-> `optional` **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+> `optional` **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L130)
 
@@ -123,11 +123,11 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:130](ht
 
 ##### options
 
-[`DeliveryTrackingListOptions`](/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
+[`DeliveryTrackingListOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 ***
 
@@ -145,7 +145,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:136](ht
 
 ##### patch
 
-`Partial`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)\>
+`Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
 
 #### Returns
 
@@ -163,7 +163,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:127](ht
 
 ##### record
 
-[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
+[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
 
 #### Returns
 

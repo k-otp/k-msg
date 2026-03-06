@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:41](ht
 
 ### autoVerificationResults?
 
-> `optional` **autoVerificationResults**: [`AutoVerificationResult`](/api/channel/src/toolkit/interfaces/autoverificationresult/)[]
+> `optional` **autoVerificationResults**: [`AutoVerificationResult`](/en/api/channel/src/toolkit/interfaces/autoverificationresult/)[]
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L51)
 
@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:51](ht
 
 ### businessInfo
 
-> **businessInfo**: [`BusinessInfo`](/api/channel/src/toolkit/interfaces/businessinfo/)
+> **businessInfo**: [`BusinessInfo`](/en/api/channel/src/toolkit/interfaces/businessinfo/)
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L44)
 
@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:43](ht
 
 ### documents
 
-> **documents**: [`VerificationDocument`](/api/channel/src/toolkit/interfaces/verificationdocument/)[]
+> **documents**: [`VerificationDocument`](/en/api/channel/src/toolkit/interfaces/verificationdocument/)[]
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L45)
 
@@ -75,7 +75,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:50](ht
 
 ### status
 
-> **status**: [`VerificationStatus`](/api/channel/src/toolkit/enumerations/verificationstatus/)
+> **status**: [`VerificationStatus`](/en/api/channel/src/toolkit/enumerations/verificationstatus/)
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L46)
 

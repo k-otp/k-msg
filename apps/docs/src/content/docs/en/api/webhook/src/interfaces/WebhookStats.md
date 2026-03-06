@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:162](https://github.com
 
 ### eventBreakdown
 
-> **eventBreakdown**: `Record`\<[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/), `number`\>
+> **eventBreakdown**: `Record`\<[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/), `number`\>
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L161)
 

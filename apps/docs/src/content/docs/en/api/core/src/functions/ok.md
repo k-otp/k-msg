@@ -5,7 +5,7 @@ prev: false
 title: "ok"
 ---
 
-> **ok**\<`T`\>(`value`): [`Ok`](/api/core/src/type-aliases/ok/)\<`T`\>
+> **ok**\<`T`\>(`value`): [`Ok`](/en/api/core/src/type-aliases/ok/)\<`T`\>
 
 Defined in: [packages/core/src/result.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/result.ts#L54)
 
@@ -27,6 +27,6 @@ The success value to wrap
 
 ## Returns
 
-[`Ok`](/api/core/src/type-aliases/ok/)\<`T`\>
+[`Ok`](/en/api/core/src/type-aliases/ok/)\<`T`\>
 
 An Ok result containing the value

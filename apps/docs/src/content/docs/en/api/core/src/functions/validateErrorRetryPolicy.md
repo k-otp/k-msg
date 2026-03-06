@@ -5,7 +5,7 @@ prev: false
 title: "validateErrorRetryPolicy"
 ---
 
-> **validateErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicyValidationResult`](/api/core/src/interfaces/errorretrypolicyvalidationresult/)
+> **validateErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicyValidationResult`](/en/api/core/src/interfaces/errorretrypolicyvalidationresult/)
 
 Defined in: [packages/core/src/errors.ts:510](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L510)
 
@@ -17,8 +17,8 @@ Defined in: [packages/core/src/errors.ts:510](https://github.com/k-otp/k-msg/blo
 
 ### options?
 
-[`ErrorRetryPolicyNormalizeOptions`](/api/core/src/interfaces/errorretrypolicynormalizeoptions/) = `{}`
+[`ErrorRetryPolicyNormalizeOptions`](/en/api/core/src/interfaces/errorretrypolicynormalizeoptions/) = `{}`
 
 ## Returns
 
-[`ErrorRetryPolicyValidationResult`](/api/core/src/interfaces/errorretrypolicyvalidationresult/)
+[`ErrorRetryPolicyValidationResult`](/en/api/core/src/interfaces/errorretrypolicyvalidationresult/)

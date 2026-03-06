@@ -23,7 +23,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:107](h
 
 ##### options?
 
-`Partial`\<[`BusinessVerifierOptions`](/api/channel/src/toolkit/interfaces/businessverifieroptions/)\> = `{}`
+`Partial`\<[`BusinessVerifierOptions`](/en/api/channel/src/toolkit/interfaces/businessverifieroptions/)\> = `{}`
 
 #### Returns
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:107](h
 
 ### addDocument()
 
-> **addDocument**(`requestId`, `document`): `Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+> **addDocument**(`requestId`, `document`): `Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:237](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L237)
 
@@ -51,11 +51,11 @@ Update verification request with additional documents
 
 ##### document
 
-[`VerificationDocument`](/api/channel/src/toolkit/interfaces/verificationdocument/)
+[`VerificationDocument`](/en/api/channel/src/toolkit/interfaces/verificationdocument/)
 
 #### Returns
 
-`Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+`Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 ***
 
@@ -87,7 +87,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:16](https://gi
 
 ### approveVerification()
 
-> **approveVerification**(`requestId`, `reviewerId`, `notes?`): `Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+> **approveVerification**(`requestId`, `reviewerId`, `notes?`): `Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L172)
 
@@ -109,7 +109,7 @@ Manually approve verification
 
 #### Returns
 
-`Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+`Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 ***
 
@@ -157,7 +157,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:71](https://gi
 
 ### getVerificationByChannelId()
 
-> **getVerificationByChannelId**(`channelId`): [`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
+> **getVerificationByChannelId**(`channelId`): [`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L160)
 
@@ -171,13 +171,13 @@ Get verification request by channel ID
 
 #### Returns
 
-[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
+[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
 
 ***
 
 ### getVerificationRequest()
 
-> **getVerificationRequest**(`requestId`): [`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
+> **getVerificationRequest**(`requestId`): [`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L153)
 
@@ -191,7 +191,7 @@ Get verification request by ID
 
 #### Returns
 
-[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
+[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/) \| `null`
 
 ***
 
@@ -249,7 +249,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:67](https://gi
 
 ### listVerificationRequests()
 
-> **listVerificationRequests**(`filters?`): [`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)[]
+> **listVerificationRequests**(`filters?`): [`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)[]
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:272](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L272)
 
@@ -265,7 +265,7 @@ List verification requests with filters
 
 ###### status?
 
-[`VerificationStatus`](/api/channel/src/toolkit/enumerations/verificationstatus/)
+[`VerificationStatus`](/en/api/channel/src/toolkit/enumerations/verificationstatus/)
 
 ###### submittedAfter?
 
@@ -277,7 +277,7 @@ List verification requests with filters
 
 #### Returns
 
-[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)[]
+[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)[]
 
 ***
 
@@ -361,7 +361,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:35](https://gi
 
 ### rejectVerification()
 
-> **rejectVerification**(`requestId`, `reviewerId`, `reason`): `Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+> **rejectVerification**(`requestId`, `reviewerId`, `reason`): `Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L203)
 
@@ -383,7 +383,7 @@ Manually reject verification
 
 #### Returns
 
-`Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+`Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 ***
 
@@ -437,7 +437,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:31](https://gi
 
 ### submitVerification()
 
-> **submitVerification**(`channelId`, `businessInfo`, `documents`): `Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+> **submitVerification**(`channelId`, `businessInfo`, `documents`): `Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L116)
 
@@ -451,12 +451,12 @@ Submit business verification request
 
 ##### businessInfo
 
-[`BusinessInfo`](/api/channel/src/toolkit/interfaces/businessinfo/)
+[`BusinessInfo`](/en/api/channel/src/toolkit/interfaces/businessinfo/)
 
 ##### documents
 
-[`VerificationDocument`](/api/channel/src/toolkit/interfaces/verificationdocument/)[]
+[`VerificationDocument`](/en/api/channel/src/toolkit/interfaces/verificationdocument/)[]
 
 #### Returns
 
-`Promise`\<[`VerificationRequest`](/api/channel/src/toolkit/interfaces/verificationrequest/)\>
+`Promise`\<[`VerificationRequest`](/en/api/channel/src/toolkit/interfaces/verificationrequest/)\>

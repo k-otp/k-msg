@@ -5,7 +5,7 @@ prev: false
 title: "normalizeMessageStatus"
 ---
 
-> **normalizeMessageStatus**(`status`): [`MessageStatus`](/api/core/src/type-aliases/messagestatus/)
+> **normalizeMessageStatus**(`status`): [`MessageStatus`](/en/api/core/src/type-aliases/messagestatus/)
 
 Defined in: [packages/core/src/types/message.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L71)
 
@@ -17,4 +17,4 @@ Defined in: [packages/core/src/types/message.ts:71](https://github.com/k-otp/k-m
 
 ## Returns
 
-[`MessageStatus`](/api/core/src/type-aliases/messagestatus/)
+[`MessageStatus`](/en/api/core/src/type-aliases/messagestatus/)

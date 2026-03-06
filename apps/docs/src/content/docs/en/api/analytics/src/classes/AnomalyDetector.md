@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:83](https://git
 
 ##### config?
 
-`Partial`\<[`AnomalyDetectionConfig`](/api/analytics/src/interfaces/anomalydetectionconfig/)\> = `{}`
+`Partial`\<[`AnomalyDetectionConfig`](/en/api/analytics/src/interfaces/anomalydetectionconfig/)\> = `{}`
 
 #### Returns
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:83](https://git
 
 ### detectBatchAnomalies()
 
-> **detectBatchAnomalies**(`metrics`, `timeWindow?`): `Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
+> **detectBatchAnomalies**(`metrics`, `timeWindow?`): `Promise`\<[`Anomaly`](/en/api/analytics/src/interfaces/anomaly/)[]\>
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L121)
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://gi
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### timeWindow?
 
@@ -53,13 +53,13 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:121](https://gi
 
 #### Returns
 
-`Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
+`Promise`\<[`Anomaly`](/en/api/analytics/src/interfaces/anomaly/)[]\>
 
 ***
 
 ### detectRealTimeAnomalies()
 
-> **detectRealTimeAnomalies**(`metric`): `Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
+> **detectRealTimeAnomalies**(`metric`): `Promise`\<[`Anomaly`](/en/api/analytics/src/interfaces/anomaly/)[]\>
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L90)
 
@@ -69,17 +69,17 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://git
 
 ##### metric
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
 
 #### Returns
 
-`Promise`\<[`Anomaly`](/api/analytics/src/interfaces/anomaly/)[]\>
+`Promise`\<[`Anomaly`](/en/api/analytics/src/interfaces/anomaly/)[]\>
 
 ***
 
 ### detectTrendChanges()
 
-> **detectTrendChanges**(`metrics`, `windowSize?`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectTrendChanges**(`metrics`, `windowSize?`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L179)
 
@@ -89,7 +89,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://gi
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### windowSize?
 
@@ -97,7 +97,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://gi
 
 #### Returns
 
-`Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:248](https://gi
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 #### Returns
 

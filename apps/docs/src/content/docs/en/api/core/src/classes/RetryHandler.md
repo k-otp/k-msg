@@ -45,7 +45,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:69](https://github.co
 
 ##### options?
 
-`Partial`\<[`RetryOptions`](/api/core/src/interfaces/retryoptions/)\> = `{}`
+`Partial`\<[`RetryOptions`](/en/api/core/src/interfaces/retryoptions/)\> = `{}`
 
 #### Returns
 
@@ -83,7 +83,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:30](https://github.co
 
 ##### options?
 
-`Partial`\<[`RetryOptions`](/api/core/src/interfaces/retryoptions/)\> = `{}`
+`Partial`\<[`RetryOptions`](/en/api/core/src/interfaces/retryoptions/)\> = `{}`
 
 #### Returns
 

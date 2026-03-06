@@ -9,7 +9,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:21](https://git
 
 ## Implements
 
-- [`HttpClient`](/api/webhook/src/interfaces/httpclient/)
+- [`HttpClient`](/en/api/webhook/src/interfaces/httpclient/)
 
 ## Constructors
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:40](https://git
 
 #### Implementation of
 
-[`HttpClient`](/api/webhook/src/interfaces/httpclient/).[`fetch`](/api/webhook/src/interfaces/httpclient/#fetch)
+[`HttpClient`](/en/api/webhook/src/interfaces/httpclient/).[`fetch`](/en/api/webhook/src/interfaces/httpclient/#fetch)
 
 ***
 

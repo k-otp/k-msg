@@ -5,7 +5,7 @@ prev: false
 title: "createEnvKeyResolver"
 ---
 
-> **createEnvKeyResolver**(`options?`): [`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+> **createEnvKeyResolver**(`options?`): [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L34)
 
@@ -13,8 +13,8 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:34](https://github.com
 
 ### options?
 
-[`EnvKeyResolverOptions`](/api/core/src/interfaces/envkeyresolveroptions/) = `{}`
+[`EnvKeyResolverOptions`](/en/api/core/src/interfaces/envkeyresolveroptions/) = `{}`
 
 ## Returns
 
-[`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+[`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)

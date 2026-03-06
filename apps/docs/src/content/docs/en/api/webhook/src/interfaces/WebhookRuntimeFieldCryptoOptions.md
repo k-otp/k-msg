@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:43](https://github.com/k-otp/
 
 ### delivery?
 
-> `optional` **delivery**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **delivery**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/runtime/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L46)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:46](https://github.com/k-otp/
 
 ### endpoint?
 
-> `optional` **endpoint**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **endpoint**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/runtime/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L45)
 

@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/types.ts:80](https://github.com/k-otp/k-ms
 
 ### failMode?
 
-> `optional` **failMode**: [`FieldCryptoFailMode`](/api/core/src/type-aliases/fieldcryptofailmode/)
+> `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L82)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-ms
 
 ### fields
 
-> **fields**: `Record`\<`string`, [`FieldMode`](/api/core/src/type-aliases/fieldmode/)\>
+> **fields**: `Record`\<`string`, [`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)\>
 
 Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L81)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-ms
 
 ### keyResolver?
 
-> `optional` **keyResolver**: [`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+> `optional` **keyResolver**: [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
 Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L86)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-ms
 
 ### openFallback?
 
-> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L83)
 
@@ -59,7 +59,7 @@ Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-ms
 
 ### provider
 
-> **provider**: [`FieldCryptoProvider`](/api/core/src/interfaces/fieldcryptoprovider/)
+> **provider**: [`FieldCryptoProvider`](/en/api/core/src/interfaces/fieldcryptoprovider/)
 
 Defined in: [packages/core/src/crypto/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L87)
 

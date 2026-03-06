@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:91](https://github
 
 ##### config?
 
-`Partial`\<[`ExportConfig`](/api/analytics/src/interfaces/exportconfig/)\> = `{}`
+`Partial`\<[`ExportConfig`](/en/api/analytics/src/interfaces/exportconfig/)\> = `{}`
 
 #### Returns
 
@@ -49,7 +49,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:271](https://githu
 
 ### exportInsights()
 
-> **exportInsights**(`insights`, `format`, `options?`): `Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+> **exportInsights**(`insights`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L203)
 
@@ -59,11 +59,11 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:203](https://githu
 
 ##### insights
 
-[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]
+[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
 
 ##### format
 
-[`ExportFormat`](/api/analytics/src/interfaces/exportformat/)
+[`ExportFormat`](/en/api/analytics/src/interfaces/exportformat/)
 
 ##### options?
 
@@ -71,13 +71,13 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:203](https://githu
 
 #### Returns
 
-`Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+`Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 ***
 
 ### exportMetrics()
 
-> **exportMetrics**(`metrics`, `format`, `options?`): `Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+> **exportMetrics**(`metrics`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L160)
 
@@ -87,11 +87,11 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:160](https://githu
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### format
 
-[`ExportFormat`](/api/analytics/src/interfaces/exportformat/)
+[`ExportFormat`](/en/api/analytics/src/interfaces/exportformat/)
 
 ##### options?
 
@@ -99,13 +99,13 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:160](https://githu
 
 #### Returns
 
-`Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+`Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 ***
 
 ### exportReport()
 
-> **exportReport**(`report`, `format`, `options?`): `Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+> **exportReport**(`report`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L98)
 
@@ -115,11 +115,11 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:98](https://github
 
 ##### report
 
-[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)
+[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)
 
 ##### format
 
-[`ExportFormat`](/api/analytics/src/interfaces/exportformat/)
+[`ExportFormat`](/en/api/analytics/src/interfaces/exportformat/)
 
 ##### options?
 
@@ -127,13 +127,13 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:98](https://github
 
 #### Returns
 
-`Promise`\<[`ExportResult`](/api/analytics/src/interfaces/exportresult/)\>
+`Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
 ***
 
 ### getExportStatus()
 
-> **getExportStatus**(`exportId`): [`ExportResult`](/api/analytics/src/interfaces/exportresult/) \| `null`
+> **getExportStatus**(`exportId`): [`ExportResult`](/en/api/analytics/src/interfaces/exportresult/) \| `null`
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L253)
 
@@ -147,13 +147,13 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:253](https://githu
 
 #### Returns
 
-[`ExportResult`](/api/analytics/src/interfaces/exportresult/) \| `null`
+[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/) \| `null`
 
 ***
 
 ### listExports()
 
-> **listExports**(`limit?`): [`ExportResult`](/api/analytics/src/interfaces/exportresult/)[]
+> **listExports**(`limit?`): [`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)[]
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L260)
 
@@ -167,4 +167,4 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:260](https://githu
 
 #### Returns
 
-[`ExportResult`](/api/analytics/src/interfaces/exportresult/)[]
+[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)[]

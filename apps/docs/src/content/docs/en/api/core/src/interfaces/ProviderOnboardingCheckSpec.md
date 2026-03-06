@@ -49,7 +49,7 @@ Defined in: [packages/core/src/types/onboarding.ts:30](https://github.com/k-otp/
 
 ### kind
 
-> **kind**: [`ProviderOnboardingCheckKind`](/api/core/src/type-aliases/provideronboardingcheckkind/)
+> **kind**: [`ProviderOnboardingCheckKind`](/en/api/core/src/type-aliases/provideronboardingcheckkind/)
 
 Defined in: [packages/core/src/types/onboarding.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L33)
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/types/onboarding.ts:33](https://github.com/k-otp/
 
 ### probeOperation?
 
-> `optional` **probeOperation**: [`ProviderOnboardingProbeOperation`](/api/core/src/type-aliases/provideronboardingprobeoperation/)
+> `optional` **probeOperation**: [`ProviderOnboardingProbeOperation`](/en/api/core/src/type-aliases/provideronboardingprobeoperation/)
 
 Defined in: [packages/core/src/types/onboarding.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L49)
 
@@ -67,7 +67,7 @@ Well-known probe operation used when kind === "api_probe".
 
 ### scopes
 
-> **scopes**: [`ProviderOnboardingScope`](/api/core/src/type-aliases/provideronboardingscope/)[]
+> **scopes**: [`ProviderOnboardingScope`](/en/api/core/src/type-aliases/provideronboardingscope/)[]
 
 Defined in: [packages/core/src/types/onboarding.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L35)
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/types/onboarding.ts:35](https://github.com/k-otp/
 
 ### severity
 
-> **severity**: [`ProviderOnboardingSeverity`](/api/core/src/type-aliases/provideronboardingseverity/)
+> **severity**: [`ProviderOnboardingSeverity`](/en/api/core/src/type-aliases/provideronboardingseverity/)
 
 Defined in: [packages/core/src/types/onboarding.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L34)
 

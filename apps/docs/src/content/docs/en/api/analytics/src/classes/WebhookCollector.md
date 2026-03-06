@@ -23,7 +23,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://
 
 ##### config?
 
-`Partial`\<[`WebhookCollectorConfig`](/api/analytics/src/interfaces/webhookcollectorconfig/)\> = `{}`
+`Partial`\<[`WebhookCollectorConfig`](/en/api/analytics/src/interfaces/webhookcollectorconfig/)\> = `{}`
 
 #### Returns
 
@@ -89,7 +89,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.c
 
 ### getProcessedWebhooks()
 
-> **getProcessedWebhooks**(`since?`): [`WebhookData`](/api/analytics/src/interfaces/webhookdata/)[]
+> **getProcessedWebhooks**(`since?`): [`WebhookData`](/en/api/analytics/src/interfaces/webhookdata/)[]
 
 Defined in: [packages/analytics/src/collectors/webhook.collector.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L111)
 
@@ -103,7 +103,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:111](https:/
 
 #### Returns
 
-[`WebhookData`](/api/analytics/src/interfaces/webhookdata/)[]
+[`WebhookData`](/en/api/analytics/src/interfaces/webhookdata/)[]
 
 ***
 
@@ -217,7 +217,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.c
 
 ### receiveWebhook()
 
-> **receiveWebhook**(`webhook`): `Promise`\<[`EventData`](/api/analytics/src/interfaces/eventdata/)[]\>
+> **receiveWebhook**(`webhook`): `Promise`\<[`EventData`](/en/api/analytics/src/interfaces/eventdata/)[]\>
 
 Defined in: [packages/analytics/src/collectors/webhook.collector.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L57)
 
@@ -227,11 +227,11 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:57](https://
 
 ##### webhook
 
-[`WebhookData`](/api/analytics/src/interfaces/webhookdata/)
+[`WebhookData`](/en/api/analytics/src/interfaces/webhookdata/)
 
 #### Returns
 
-`Promise`\<[`EventData`](/api/analytics/src/interfaces/eventdata/)[]\>
+`Promise`\<[`EventData`](/en/api/analytics/src/interfaces/eventdata/)[]\>
 
 ***
 

@@ -67,7 +67,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:69](https://github.
 
 ### metric
 
-> **metric**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
+> **metric**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L74)
 

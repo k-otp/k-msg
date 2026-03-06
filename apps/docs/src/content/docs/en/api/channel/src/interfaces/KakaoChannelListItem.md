@@ -9,7 +9,7 @@ Defined in: [packages/channel/src/runtime/types.ts:37](https://github.com/k-otp/
 
 ## Extends
 
-- [`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/)
+- [`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/)
 
 ## Properties
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/runtime/types.ts:23](https://github.com/k-otp/
 
 #### Inherited from
 
-[`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/).[`alias`](/api/channel/src/interfaces/kakaochannelbinding/#alias)
+[`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/).[`alias`](/en/api/channel/src/interfaces/kakaochannelbinding/#alias)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/channel/src/runtime/types.ts:27](https://github.com/k-otp/
 
 #### Inherited from
 
-[`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/).[`name`](/api/channel/src/interfaces/kakaochannelbinding/#name)
+[`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/).[`name`](/en/api/channel/src/interfaces/kakaochannelbinding/#name)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/runtime/types.ts:26](https://github.com/k-otp/
 
 #### Inherited from
 
-[`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/).[`plusId`](/api/channel/src/interfaces/kakaochannelbinding/#plusid)
+[`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/).[`plusId`](/en/api/channel/src/interfaces/kakaochannelbinding/#plusid)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/channel/src/runtime/types.ts:24](https://github.com/k-otp/
 
 #### Inherited from
 
-[`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/).[`providerId`](/api/channel/src/interfaces/kakaochannelbinding/#providerid)
+[`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/).[`providerId`](/en/api/channel/src/interfaces/kakaochannelbinding/#providerid)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/channel/src/runtime/types.ts:25](https://github.com/k-otp/
 
 #### Inherited from
 
-[`KakaoChannelBinding`](/api/channel/src/interfaces/kakaochannelbinding/).[`senderKey`](/api/channel/src/interfaces/kakaochannelbinding/#senderkey)
+[`KakaoChannelBinding`](/en/api/channel/src/interfaces/kakaochannelbinding/).[`senderKey`](/en/api/channel/src/interfaces/kakaochannelbinding/#senderkey)
 
 ***
 

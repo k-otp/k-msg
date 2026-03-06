@@ -5,7 +5,7 @@ prev: false
 title: "buildSendInputFromJobDetailed"
 ---
 
-> **buildSendInputFromJobDetailed**(`job`, `envelope`, `attempt`, `options?`): [`BuildSendInputDetailedResult`](/api/messaging/src/queue/interfaces/buildsendinputdetailedresult/)
+> **buildSendInputFromJobDetailed**(`job`, `envelope`, `attempt`, `options?`): [`BuildSendInputDetailedResult`](/en/api/messaging/src/queue/interfaces/buildsendinputdetailedresult/)
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L91)
 
@@ -13,11 +13,11 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:91](https://gith
 
 ### job
 
-[`SendInputJobPayload`](/api/messaging/src/queue/interfaces/sendinputjobpayload/)
+[`SendInputJobPayload`](/en/api/messaging/src/queue/interfaces/sendinputjobpayload/)
 
 ### envelope
 
-[`SendInputEnvelope`](/api/messaging/src/queue/interfaces/sendinputenvelope/)
+[`SendInputEnvelope`](/en/api/messaging/src/queue/interfaces/sendinputenvelope/)
 
 ### attempt
 
@@ -25,8 +25,8 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:91](https://gith
 
 ### options?
 
-[`BuildSendInputOptions`](/api/messaging/src/queue/interfaces/buildsendinputoptions/) = `{}`
+[`BuildSendInputOptions`](/en/api/messaging/src/queue/interfaces/buildsendinputoptions/) = `{}`
 
 ## Returns
 
-[`BuildSendInputDetailedResult`](/api/messaging/src/queue/interfaces/buildsendinputdetailedresult/)
+[`BuildSendInputDetailedResult`](/en/api/messaging/src/queue/interfaces/buildsendinputdetailedresult/)

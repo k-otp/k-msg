@@ -50,7 +50,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:19](https:/
 
 ### metricType
 
-> **metricType**: [`MetricType`](/api/analytics/src/enumerations/metrictype/)
+> **metricType**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L10)
 

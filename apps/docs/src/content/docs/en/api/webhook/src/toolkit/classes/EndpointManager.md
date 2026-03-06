@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:32](https://githu
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/en/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -47,7 +47,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:48](https://githu
 
 ##### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 #### Returns
 
@@ -123,7 +123,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 ### getActiveEndpointsForEvent()
 
-> **getActiveEndpointsForEvent**(`eventType`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **getActiveEndpointsForEvent**(`eventType`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L244)
 
@@ -133,17 +133,17 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:244](https://gith
 
 ##### eventType
 
-[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)
+[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 ***
 
 ### getEndpoint()
 
-> **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L152)
 
@@ -157,13 +157,13 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:152](https://gith
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 ***
 
 ### getEndpointByUrl()
 
-> **getEndpointByUrl**(`url`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **getEndpointByUrl**(`url`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L159)
 
@@ -177,7 +177,7 @@ URL로 엔드포인트 조회
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 ***
 
@@ -203,7 +203,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:260](https://gith
 
 ##### eventSubscriptions
 
-> **eventSubscriptions**: `Record`\<[`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/), `number`\>
+> **eventSubscriptions**: `Record`\<[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/), `number`\>
 
 ##### inactiveEndpoints
 
@@ -367,7 +367,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 ### searchEndpoints()
 
-> **searchEndpoints**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
+> **searchEndpoints**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L167)
 
@@ -377,15 +377,15 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:167](https://gith
 
 ##### filter?
 
-[`EndpointFilter`](/api/webhook/src/toolkit/interfaces/endpointfilter/) = `{}`
+[`EndpointFilter`](/en/api/webhook/src/toolkit/interfaces/endpointfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/en/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>\>
+`Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>\>
 
 ***
 
@@ -405,7 +405,7 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:511](https://gith
 
 ### updateEndpoint()
 
-> **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+> **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 Defined in: [packages/webhook/src/registry/endpoint.manager.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/endpoint.manager.ts#L80)
 
@@ -419,8 +419,8 @@ Defined in: [packages/webhook/src/registry/endpoint.manager.ts:80](https://githu
 
 ##### updates
 
-`Partial`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+`Partial`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>

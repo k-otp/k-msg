@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:7](https://g
 
 ### getKeyState()
 
-> **getKeyState**(`context`): `Promise`\<[`KeySetState`](/api/core/src/interfaces/keysetstate/)\>
+> **getKeyState**(`context`): `Promise`\<[`KeySetState`](/en/api/core/src/interfaces/keysetstate/)\>
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L8)
 
@@ -19,8 +19,8 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:8](https://g
 
 ##### context
 
-[`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/) & `object`
+[`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/) & `object`
 
 #### Returns
 
-`Promise`\<[`KeySetState`](/api/core/src/interfaces/keysetstate/)\>
+`Promise`\<[`KeySetState`](/en/api/core/src/interfaces/keysetstate/)\>

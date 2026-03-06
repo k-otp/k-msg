@@ -79,7 +79,7 @@ Defined in: [packages/template/src/parser/variable.parser.ts:123](https://github
 
 ##### variableDefinitions
 
-[`TemplateVariable`](/api/template/src/interfaces/templatevariable/)[]
+[`TemplateVariable`](/en/api/template/src/interfaces/templatevariable/)[]
 
 #### Returns
 
@@ -107,7 +107,7 @@ Defined in: [packages/template/src/parser/variable.parser.ts:51](https://github.
 
 ##### variableDefinitions
 
-[`TemplateVariable`](/api/template/src/interfaces/templatevariable/)[]
+[`TemplateVariable`](/en/api/template/src/interfaces/templatevariable/)[]
 
 ##### providedVariables
 

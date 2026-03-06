@@ -35,6 +35,6 @@ Defined in: [packages/provider/src/config-fields.ts:9](https://github.com/k-otp/
 
 ### type
 
-> **type**: [`ProviderConfigFieldType`](/api/provider/src/type-aliases/providerconfigfieldtype/)
+> **type**: [`ProviderConfigFieldType`](/en/api/provider/src/type-aliases/providerconfigfieldtype/)
 
 Defined in: [packages/provider/src/config-fields.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/config-fields.ts#L8)

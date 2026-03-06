@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:27](https://github.com/k-otp/
 
 ##### delivery
 
-[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)
+[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)
 
 #### Returns
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:27](https://github.com/k-otp/
 
 ### list()
 
-> **list**(`options?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+> **list**(`options?`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L28)
 
@@ -37,8 +37,8 @@ Defined in: [packages/webhook/src/runtime/types.ts:28](https://github.com/k-otp/
 
 ##### options?
 
-[`WebhookDeliveryListOptions`](/api/webhook/src/interfaces/webhookdeliverylistoptions/)
+[`WebhookDeliveryListOptions`](/en/api/webhook/src/interfaces/webhookdeliverylistoptions/)
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>

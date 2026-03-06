@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:12](https://g
 
 ### prepare()
 
-> **prepare**(`query`): [`D1PreparedStatementLike`](/api/webhook/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
+> **prepare**(`query`): [`D1PreparedStatementLike`](/en/api/webhook/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
 
 Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/d1-client.ts#L11)
 
@@ -41,4 +41,4 @@ Defined in: [packages/webhook/src/adapters/cloudflare/d1-client.ts:11](https://g
 
 #### Returns
 
-[`D1PreparedStatementLike`](/api/webhook/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
+[`D1PreparedStatementLike`](/en/api/webhook/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)

@@ -13,7 +13,7 @@ Defined in: [packages/core/src/logger.ts:314](https://github.com/k-otp/k-msg/blo
 
 ### logger
 
-[`Logger`](/api/core/src/classes/logger/)
+[`Logger`](/en/api/core/src/classes/logger/)
 
 ## Returns
 

@@ -12,7 +12,7 @@ IWINV 알림톡 REST API 규격서 기반
 
 ## Extends
 
-- [`IWINVBaseResponse`](/api/provider/src/iwinv/interfaces/iwinvbaseresponse/)
+- [`IWINVBaseResponse`](/en/api/provider/src/iwinv/interfaces/iwinvbaseresponse/)
 
 ## Properties
 
@@ -24,7 +24,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:13](https://github.com/k
 
 #### Inherited from
 
-[`IWINVBaseResponse`](/api/provider/src/iwinv/interfaces/iwinvbaseresponse/).[`code`](/api/provider/src/iwinv/interfaces/iwinvbaseresponse/#code)
+[`IWINVBaseResponse`](/en/api/provider/src/iwinv/interfaces/iwinvbaseresponse/).[`code`](/en/api/provider/src/iwinv/interfaces/iwinvbaseresponse/#code)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:14](https://github.com/k
 
 #### Inherited from
 
-[`IWINVBaseResponse`](/api/provider/src/iwinv/interfaces/iwinvbaseresponse/).[`message`](/api/provider/src/iwinv/interfaces/iwinvbaseresponse/#message)
+[`IWINVBaseResponse`](/en/api/provider/src/iwinv/interfaces/iwinvbaseresponse/).[`message`](/en/api/provider/src/iwinv/interfaces/iwinvbaseresponse/#message)
 
 ***
 

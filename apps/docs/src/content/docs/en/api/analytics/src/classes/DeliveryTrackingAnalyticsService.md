@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/services/delivery-tracking.analytics.ts:63](
 
 ###### store
 
-[`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
 #### Returns
 

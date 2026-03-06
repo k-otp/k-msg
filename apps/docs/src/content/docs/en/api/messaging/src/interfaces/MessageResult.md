@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:52](https://github.
 
 ### results
 
-> **results**: [`RecipientResult`](/api/messaging/src/interfaces/recipientresult/)[]
+> **results**: [`RecipientResult`](/en/api/messaging/src/interfaces/recipientresult/)[]
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L53)
 

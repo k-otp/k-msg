@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://githu
 
 ##### config
 
-[`AnalyticsConfig`](/api/analytics/src/interfaces/analyticsconfig/)
+[`AnalyticsConfig`](/en/api/analytics/src/interfaces/analyticsconfig/)
 
 #### Returns
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://githu
 
 ### detectAnomalies()
 
-> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L65)
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://githu
 
 ##### metricType
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### timeRange
 
@@ -53,13 +53,13 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://githu
 
 #### Returns
 
-`Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 ***
 
 ### detectRealTimeAnomalies()
 
-> **detectRealTimeAnomalies**(`metric`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectRealTimeAnomalies**(`metric`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L26)
 
@@ -69,17 +69,17 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://githu
 
 ##### metric
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
 
 #### Returns
 
-`Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 ***
 
 ### generateInsights()
 
-> **generateInsights**(`query`, `data`): `Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+> **generateInsights**(`query`, `data`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L98)
 
@@ -89,15 +89,15 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://githu
 
 ##### query
 
-[`AnalyticsQuery`](/api/analytics/src/interfaces/analyticsquery/)
+[`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
 
 ##### data
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 #### Returns
 
-`Promise`\<[`InsightData`](/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:131](https://gith
 
 ##### metricType
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### forecastDays
 

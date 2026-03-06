@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:34](https://github.
 
 ##### config?
 
-`Partial`\<[`StorageConfig`](/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
+`Partial`\<[`StorageConfig`](/en/api/webhook/src/toolkit/interfaces/storageconfig/)\> = `{}`
 
 #### Returns
 
@@ -103,7 +103,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 ### getDeliveriesByEndpoint()
 
-> **getDeliveriesByEndpoint**(`endpointId`, `limit?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+> **getDeliveriesByEndpoint**(`endpointId`, `limit?`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 Defined in: [packages/webhook/src/registry/delivery.store.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L175)
 
@@ -121,13 +121,13 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:175](https://github
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 ***
 
 ### getDelivery()
 
-> **getDelivery**(`deliveryId`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/) \| `null`\>
+> **getDelivery**(`deliveryId`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/) \| `null`\>
 
 Defined in: [packages/webhook/src/registry/delivery.store.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L82)
 
@@ -141,7 +141,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:82](https://github.
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/) \| `null`\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/) \| `null`\>
 
 ***
 
@@ -177,7 +177,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:209](https://github
 
 ### getFailedDeliveries()
 
-> **getFailedDeliveries**(`endpointId?`, `limit?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+> **getFailedDeliveries**(`endpointId?`, `limit?`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 Defined in: [packages/webhook/src/registry/delivery.store.ts:193](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L193)
 
@@ -195,7 +195,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:193](https://github
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 ***
 
@@ -375,7 +375,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:51](https://github.
 
 ##### delivery
 
-[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)
+[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)
 
 #### Returns
 
@@ -385,7 +385,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:51](https://github.
 
 ### searchDeliveries()
 
-> **searchDeliveries**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
+> **searchDeliveries**(`filter?`, `pagination?`): `Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)\>\>
 
 Defined in: [packages/webhook/src/registry/delivery.store.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L89)
 
@@ -395,15 +395,15 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:89](https://github.
 
 ##### filter?
 
-[`DeliveryFilter`](/api/webhook/src/toolkit/interfaces/deliveryfilter/) = `{}`
+[`DeliveryFilter`](/en/api/webhook/src/toolkit/interfaces/deliveryfilter/) = `{}`
 
 ##### pagination?
 
-[`PaginationOptions`](/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
+[`PaginationOptions`](/en/api/webhook/src/toolkit/interfaces/paginationoptions/) = `...`
 
 #### Returns
 
-`Promise`\<[`SearchResult`](/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>\>
+`Promise`\<[`SearchResult`](/en/api/webhook/src/toolkit/interfaces/searchresult/)\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)\>\>
 
 ***
 

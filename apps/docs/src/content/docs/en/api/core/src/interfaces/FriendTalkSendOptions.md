@@ -9,13 +9,13 @@ Defined in: [packages/core/src/types/message.ts:280](https://github.com/k-otp/k-
 
 ## Extends
 
-- [`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/)
+- [`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/)
 
 ## Properties
 
 ### buttons?
 
-> `optional` **buttons**: [`MessageButton`](/api/core/src/interfaces/messagebutton/)[]
+> `optional` **buttons**: [`MessageButton`](/en/api/core/src/interfaces/messagebutton/)[]
 
 Defined in: [packages/core/src/types/message.ts:285](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L285)
 
@@ -31,7 +31,7 @@ Sender number / sender id. Optional at KMsg layer; providers may require it.
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`from`](/api/core/src/interfaces/commonsendoptions/#from)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`from`](/en/api/core/src/interfaces/commonsendoptions/#from)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/types/message.ts:284](https://github.com/k-otp/k-
 
 ### kakao?
 
-> `optional` **kakao**: [`KakaoSendOptions`](/api/core/src/interfaces/kakaosendoptions/)
+> `optional` **kakao**: [`KakaoSendOptions`](/en/api/core/src/interfaces/kakaosendoptions/)
 
 Defined in: [packages/core/src/types/message.ts:287](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L287)
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/types/message.ts:287](https://github.com/k-otp/k-
 
 ### media?
 
-> `optional` **media**: [`MessageMedia`](/api/core/src/interfaces/messagemedia/)
+> `optional` **media**: [`MessageMedia`](/en/api/core/src/interfaces/messagemedia/)
 
 Defined in: [packages/core/src/types/message.ts:283](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L283)
 
@@ -70,7 +70,7 @@ Providers must echo this value back in SendResult.messageId.
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`messageId`](/api/core/src/interfaces/commonsendoptions/#messageid)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`messageId`](/en/api/core/src/interfaces/commonsendoptions/#messageid)
 
 ***
 
@@ -99,7 +99,7 @@ Examples: "82", "+82".
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`options`](/api/core/src/interfaces/commonsendoptions/#options)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`options`](/en/api/core/src/interfaces/commonsendoptions/#options)
 
 ***
 
@@ -113,7 +113,7 @@ Optional routing hint to force a specific provider by id.
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`providerId`](/api/core/src/interfaces/commonsendoptions/#providerid)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`providerId`](/en/api/core/src/interfaces/commonsendoptions/#providerid)
 
 ***
 
@@ -127,7 +127,7 @@ Provider-specific escape hatch (use sparingly).
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`providerOptions`](/api/core/src/interfaces/commonsendoptions/#provideroptions)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`providerOptions`](/en/api/core/src/interfaces/commonsendoptions/#provideroptions)
 
 ***
 
@@ -155,7 +155,7 @@ Recipient phone number in Korean format without hyphens.
 
 #### Inherited from
 
-[`CommonSendOptions`](/api/core/src/interfaces/commonsendoptions/).[`to`](/api/core/src/interfaces/commonsendoptions/#to)
+[`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/).[`to`](/en/api/core/src/interfaces/commonsendoptions/#to)
 
 ***
 
@@ -169,6 +169,6 @@ Defined in: [packages/core/src/types/message.ts:281](https://github.com/k-otp/k-
 
 ### variables?
 
-> `optional` **variables**: [`MessageVariables`](/api/core/src/type-aliases/messagevariables/)
+> `optional` **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
 Defined in: [packages/core/src/types/message.ts:286](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L286)

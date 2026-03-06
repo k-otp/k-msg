@@ -11,7 +11,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:13](https://git
 
 ### category?
 
-> `optional` **category**: [`TemplateCategory`](/api/template/src/enumerations/templatecategory/)
+> `optional` **category**: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/)
 
 Defined in: [packages/template/src/registry/template.registry.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L15)
 
@@ -59,7 +59,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:14](https://git
 
 ### status?
 
-> `optional` **status**: [`TemplateStatus`](/api/template/src/enumerations/templatestatus/)
+> `optional` **status**: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/)
 
 Defined in: [packages/template/src/registry/template.registry.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L16)
 

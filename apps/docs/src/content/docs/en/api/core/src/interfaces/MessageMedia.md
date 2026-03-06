@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/message.ts:121](https://github.com/k-otp/k-
 
 ### image?
 
-> `optional` **image**: [`MessageBinaryInput`](/api/core/src/type-aliases/messagebinaryinput/)
+> `optional` **image**: [`MessageBinaryInput`](/en/api/core/src/type-aliases/messagebinaryinput/)
 
 Defined in: [packages/core/src/types/message.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L125)
 

@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:31](https://github
 
 ##### config?
 
-`Partial`\<[`QueueConfig`](/api/webhook/src/toolkit/interfaces/queueconfig/)\> = `{}`
+`Partial`\<[`QueueConfig`](/en/api/webhook/src/toolkit/interfaces/queueconfig/)\> = `{}`
 
 #### Returns
 
@@ -91,7 +91,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:226](https://githu
 
 ### dequeue()
 
-> **dequeue**(): `Promise`\<[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
+> **dequeue**(): `Promise`\<[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
 
 Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L101)
 
@@ -99,13 +99,13 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:101](https://githu
 
 #### Returns
 
-`Promise`\<[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
+`Promise`\<[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
 
 ***
 
 ### dequeueFromPriority()
 
-> **dequeueFromPriority**(`priority`): `Promise`\<[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
+> **dequeueFromPriority**(`priority`): `Promise`\<[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
 
 Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L131)
 
@@ -119,7 +119,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:131](https://githu
 
 #### Returns
 
-`Promise`\<[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
+`Promise`\<[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`\>
 
 ***
 
@@ -161,7 +161,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:53](https://github
 
 ##### job
 
-[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/)
+[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/)
 
 #### Returns
 
@@ -287,7 +287,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 ### peek()
 
-> **peek**(): [`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`
+> **peek**(): [`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`
 
 Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/queue.manager.ts#L154)
 
@@ -295,7 +295,7 @@ Defined in: [packages/webhook/src/dispatcher/queue.manager.ts:154](https://githu
 
 #### Returns
 
-[`DispatchJob`](/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`
+[`DispatchJob`](/en/api/webhook/src/toolkit/interfaces/dispatchjob/) \| `null`
 
 ***
 

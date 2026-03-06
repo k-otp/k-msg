@@ -5,7 +5,7 @@ prev: false
 title: "createR2DeliveryTrackingStore"
 ---
 
-> **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+> **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L233)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:233](https://gi
 
 ### bucket
 
-[`CloudflareR2BucketLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
+[`CloudflareR2BucketLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflarer2bucketlike/)
 
 ### options?
 
@@ -23,7 +23,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:233](https://gi
 
 #### fieldCrypto?
 
-[`DeliveryTrackingFieldCryptoOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
+[`DeliveryTrackingFieldCryptoOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
 
 #### keyPrefix?
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:233](https://gi
 
 #### retention?
 
-[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
+[`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
 
 #### secureMode?
 
@@ -39,4 +39,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:233](https://gi
 
 ## Returns
 
-[`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+[`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)

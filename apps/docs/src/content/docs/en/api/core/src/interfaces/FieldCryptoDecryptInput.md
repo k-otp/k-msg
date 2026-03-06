@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/types.ts:52](https://github.com/k-otp/k-ms
 
 ### aad
 
-> **aad**: [`FieldCryptoAad`](/api/core/src/interfaces/fieldcryptoaad/)
+> **aad**: [`FieldCryptoAad`](/en/api/core/src/interfaces/fieldcryptoaad/)
 
 Defined in: [packages/core/src/crypto/types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L54)
 

@@ -62,7 +62,7 @@ Human-readable name for display purposes.
 
 ### supportedTypes
 
-> `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/core/src/provider.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L222)
 
@@ -73,7 +73,7 @@ Messages of unsupported types will be rejected.
 
 ### getDeliveryStatus()?
 
-> `optional` **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> `optional` **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/provider.ts:238](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L238)
 
@@ -84,17 +84,17 @@ Optional capability - not all providers support this.
 
 ##### query
 
-[`DeliveryStatusQuery`](/api/core/src/interfaces/deliverystatusquery/)
+[`DeliveryStatusQuery`](/en/api/core/src/interfaces/deliverystatusquery/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### getOnboardingSpec()?
 
-> `optional` **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+> `optional` **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 Defined in: [packages/core/src/provider.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L245)
 
@@ -103,13 +103,13 @@ Used by tooling to guide provider configuration.
 
 #### Returns
 
-[`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+[`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 ***
 
 ### healthCheck()
 
-> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 Defined in: [packages/core/src/provider.ts:228](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L228)
 
@@ -118,13 +118,13 @@ Used for health monitoring and circuit breaker decisions.
 
 #### Returns
 
-`Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+`Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 ***
 
 ### send()
 
-> **send**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **send**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/provider.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L233)
 
@@ -134,10 +134,10 @@ Send a message through this provider.
 
 ##### params
 
-[`SendOptions`](/api/core/src/type-aliases/sendoptions/)
+[`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Result with SendResult on success, KMsgError on failure.
