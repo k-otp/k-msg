@@ -49,6 +49,6 @@ Override the template identifier for NSA (provider-specific).
 
 ### variables?
 
-> `optional` **variables**: [`MessageVariables`](/api/core/src/type-aliases/messagevariables/)
+> `optional` **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
 Defined in: [packages/core/src/types/message.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L206)

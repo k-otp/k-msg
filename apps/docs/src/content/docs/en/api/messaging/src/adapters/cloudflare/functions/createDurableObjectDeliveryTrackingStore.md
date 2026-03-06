@@ -5,7 +5,7 @@ prev: false
 title: "createDurableObjectDeliveryTrackingStore"
 ---
 
-> **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+> **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L259)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:259](https://gi
 
 ### storage
 
-[`CloudflareDurableObjectStorageLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
+[`CloudflareDurableObjectStorageLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
 
 ### options?
 
@@ -23,7 +23,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:259](https://gi
 
 #### fieldCrypto?
 
-[`DeliveryTrackingFieldCryptoOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
+[`DeliveryTrackingFieldCryptoOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
 
 #### keyPrefix?
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:259](https://gi
 
 #### retention?
 
-[`DeliveryTrackingRetentionConfig`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
+[`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
 
 #### secureMode?
 
@@ -39,4 +39,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:259](https://gi
 
 ## Returns
 
-[`CloudflareObjectDeliveryTrackingStore`](/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
+[`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)

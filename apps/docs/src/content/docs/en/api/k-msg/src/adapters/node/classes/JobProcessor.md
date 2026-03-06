@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:54](https://github.co
 
 ## Extended by
 
-- [`MessageJobProcessor`](/api/k-msg/src/adapters/node/classes/messagejobprocessor/)
+- [`MessageJobProcessor`](/en/api/k-msg/src/adapters/node/classes/messagejobprocessor/)
 
 ## Constructors
 
@@ -27,11 +27,11 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:64](https://github.co
 
 ##### options
 
-[`JobProcessorOptions`](/api/k-msg/src/adapters/node/interfaces/jobprocessoroptions/)
+[`JobProcessorOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessoroptions/)
 
 ##### jobQueue?
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`any`\>
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`any`\>
 
 #### Returns
 
@@ -159,7 +159,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 ### getJob()
 
-> **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
+> **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L208)
 
@@ -173,13 +173,13 @@ Get specific job by ID
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
 ***
 
 ### getMetrics()
 
-> **getMetrics**(): [`JobProcessorMetrics`](/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
+> **getMetrics**(): [`JobProcessorMetrics`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L166)
 
@@ -187,7 +187,7 @@ Get current metrics
 
 #### Returns
 
-[`JobProcessorMetrics`](/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
+[`JobProcessorMetrics`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
 
 ***
 
@@ -227,7 +227,7 @@ Register a job handler
 
 ##### handler
 
-[`JobHandler`](/api/k-msg/src/adapters/node/type-aliases/jobhandler/)\<`T`\>
+[`JobHandler`](/en/api/k-msg/src/adapters/node/type-aliases/jobhandler/)\<`T`\>
 
 #### Returns
 

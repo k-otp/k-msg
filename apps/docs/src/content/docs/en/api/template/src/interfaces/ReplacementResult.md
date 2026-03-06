@@ -19,7 +19,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:34](http
 
 ### errors
 
-> **errors**: [`ReplacementError`](/api/template/src/interfaces/replacementerror/)[]
+> **errors**: [`ReplacementError`](/en/api/template/src/interfaces/replacementerror/)[]
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L37)
 
@@ -59,6 +59,6 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:36](http
 
 ### variables
 
-> **variables**: [`TemplateVariableInfo`](/api/template/src/interfaces/templatevariableinfo/)[]
+> **variables**: [`TemplateVariableInfo`](/en/api/template/src/interfaces/templatevariableinfo/)[]
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L35)

@@ -54,7 +54,7 @@ Raw provider response for debugging (provider-specific shape).
 
 ### status
 
-> **status**: [`MessageStatus`](/api/core/src/type-aliases/messagestatus/)
+> **status**: [`MessageStatus`](/en/api/core/src/type-aliases/messagestatus/)
 
 Defined in: [packages/core/src/types/message.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L383)
 
@@ -74,7 +74,7 @@ Recipient phone number.
 
 ### type
 
-> **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
+> **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/)
 
 Defined in: [packages/core/src/types/message.ts:387](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L387)
 
@@ -84,7 +84,7 @@ The message type that was sent.
 
 ### warnings?
 
-> `optional` **warnings**: [`SendWarning`](/api/core/src/interfaces/sendwarning/)[]
+> `optional` **warnings**: [`SendWarning`](/en/api/core/src/interfaces/sendwarning/)[]
 
 Defined in: [packages/core/src/types/message.ts:395](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L395)
 

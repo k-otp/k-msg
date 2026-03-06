@@ -19,7 +19,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:22](https://github.
 
 ##### options
 
-[`CircuitBreakerOptions`](/api/core/src/interfaces/circuitbreakeroptions/)
+[`CircuitBreakerOptions`](/en/api/core/src/interfaces/circuitbreakeroptions/)
 
 #### Returns
 

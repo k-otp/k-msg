@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:15](https://gi
 
 ##### config
 
-[`AnalyticsConfig`](/api/analytics/src/interfaces/analyticsconfig/)
+[`AnalyticsConfig`](/en/api/analytics/src/interfaces/analyticsconfig/)
 
 #### Returns
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:23](https://gi
 
 ##### metric
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
 
 #### Returns
 
@@ -73,7 +73,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:39](https://gi
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 #### Returns
 
@@ -107,7 +107,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://gi
 
 ##### type
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### timeRange
 
@@ -127,7 +127,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://gi
 
 ### getRecentMetrics()
 
-> **getRecentMetrics**(`types`, `durationMs`): `Promise`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
+> **getRecentMetrics**(`types`, `durationMs`): `Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
 
 Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L48)
 
@@ -137,7 +137,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://gi
 
 ##### types
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)[]
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[]
 
 ##### durationMs
 
@@ -145,7 +145,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://gi
 
 #### Returns
 
-`Promise`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
+`Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
 
 ***
 
@@ -161,7 +161,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:105](https://g
 
 ##### type
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### dimensions
 
@@ -189,7 +189,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:143](https://g
 
 ##### type
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### dimensions
 
@@ -217,7 +217,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:124](https://g
 
 ##### type
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
 ##### dimensions
 

@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:28](https:
 
 ### prepare()
 
-> **prepare**(`query`): [`D1PreparedStatementLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
+> **prepare**(`query`): [`D1PreparedStatementLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L29)
 
@@ -23,4 +23,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:29](https:
 
 #### Returns
 
-[`D1PreparedStatementLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)
+[`D1PreparedStatementLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/d1preparedstatementlike/)

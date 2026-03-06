@@ -15,7 +15,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:26](
 
 ## Implements
 
-- [`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`T`\>
+- [`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`T`\>
 
 ## Constructors
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:27](
 
 ##### storage
 
-[`CloudflareObjectStorage`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
+[`CloudflareObjectStorage`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
 ##### keyPrefix?
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:192]
 
 ##### statuses?
 
-[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
+[`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
 
 #### Returns
 
@@ -59,7 +59,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:192]
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`cleanupTerminal`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#cleanupterminal)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`cleanupTerminal`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#cleanupterminal)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:185]
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`clear`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#clear)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`clear`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#clear)
 
 ***
 
@@ -101,29 +101,29 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:91](
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`complete`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#complete)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`complete`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#complete)
 
 ***
 
 ### dequeue()
 
-> **dequeue**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **dequeue**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L64)
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`dequeue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#dequeue)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`dequeue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#dequeue)
 
 ***
 
 ### enqueue()
 
-> **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
+> **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L32)
 
@@ -157,11 +157,11 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:32](
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`enqueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#enqueue)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`enqueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#enqueue)
 
 ***
 
@@ -183,7 +183,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:107]
 
 ##### retry?
 
-[`JobRetryDirective`](/api/messaging/src/queue/interfaces/jobretrydirective/) = `...`
+[`JobRetryDirective`](/en/api/messaging/src/queue/interfaces/jobretrydirective/) = `...`
 
 #### Returns
 
@@ -191,13 +191,13 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:107]
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`fail`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#fail)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`fail`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#fail)
 
 ***
 
 ### getJob()
 
-> **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L172)
 
@@ -209,27 +209,27 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:172]
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`getJob`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#getjob)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`getJob`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#getjob)
 
 ***
 
 ### peek()
 
-> **peek**(): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **peek**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L147)
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`peek`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#peek)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`peek`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#peek)
 
 ***
 
@@ -251,7 +251,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:178]
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`remove`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#remove)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`remove`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#remove)
 
 ***
 
@@ -267,4 +267,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:162]
 
 #### Implementation of
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`size`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#size)
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`size`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#size)

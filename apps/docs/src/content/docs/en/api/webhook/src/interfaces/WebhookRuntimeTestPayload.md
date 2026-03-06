@@ -19,6 +19,6 @@ Defined in: [packages/webhook/src/runtime/types.ts:69](https://github.com/k-otp/
 
 ### event?
 
-> `optional` **event**: `Partial`\<[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>
+> `optional` **event**: `Partial`\<[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L70)

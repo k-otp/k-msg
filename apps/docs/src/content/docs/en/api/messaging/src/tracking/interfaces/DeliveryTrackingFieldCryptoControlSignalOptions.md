@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:110](ht
 
 ### controller?
 
-> `optional` **controller**: [`DeliveryTrackingCryptoController`](/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
+> `optional` **controller**: [`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L116)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:117](ht
 
 ##### event
 
-[`FieldCryptoControlSignalEvent`](/api/core/src/interfaces/fieldcryptocontrolsignalevent/)
+[`FieldCryptoControlSignalEvent`](/en/api/core/src/interfaces/fieldcryptocontrolsignalevent/)
 
 #### Returns
 
@@ -69,7 +69,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:120](ht
 
 ##### event
 
-[`FieldCryptoControlSignalEvent`](/api/core/src/interfaces/fieldcryptocontrolsignalevent/)
+[`FieldCryptoControlSignalEvent`](/en/api/core/src/interfaces/fieldcryptocontrolsignalevent/)
 
 #### Returns
 

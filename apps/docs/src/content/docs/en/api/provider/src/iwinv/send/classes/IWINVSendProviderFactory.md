@@ -23,7 +23,7 @@ IWINV send/status/balance focused entrypoint.
 
 ### create()
 
-> `static` **create**(`config`): [`IWINVSendProvider`](/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
+> `static` **create**(`config`): [`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
 
 Defined in: [packages/provider/src/iwinv/provider.send.ts:429](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L429)
 
@@ -31,20 +31,20 @@ Defined in: [packages/provider/src/iwinv/provider.send.ts:429](https://github.co
 
 ##### config
 
-[`IWINVConfig`](/api/provider/src/iwinv/interfaces/iwinvconfig/)
+[`IWINVConfig`](/en/api/provider/src/iwinv/interfaces/iwinvconfig/)
 
 #### Returns
 
-[`IWINVSendProvider`](/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
 
 ***
 
 ### createDefault()
 
-> `static` **createDefault**(): [`IWINVSendProvider`](/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
+> `static` **createDefault**(): [`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
 
 Defined in: [packages/provider/src/iwinv/provider.send.ts:433](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L433)
 
 #### Returns
 
-[`IWINVSendProvider`](/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)

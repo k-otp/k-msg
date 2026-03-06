@@ -21,6 +21,11 @@ type ExampleDoc = {
   koPath: string;
 };
 
+type GuideSummary = {
+  en: string;
+  ko: string;
+};
+
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const docsRoot = path.join(repoRoot, "apps/docs/src/content/docs");
 const checkMode = process.argv.includes("--check");
@@ -211,15 +216,33 @@ function buildIndexPage(params: {
   const description = isKo ? "k-msg 문서" : "k-msg docs";
   const navItems = isKo
     ? `- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
-- API 문서: [/api/readme/](/api/readme/)
+- 시작하기: [${urlRoot}/guides/getting-started/](${urlRoot}/guides/getting-started/)
+- 패키지 선택: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
+- Provider 선택: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
+- 트러블슈팅: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
+- API 문서: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
 - CLI 문서: [${urlRoot}/cli/](${urlRoot}/cli/)
 - 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)`
-    : `- Overview: [/en/guides/overview/](/en/guides/overview/)
-- API docs: [/api/readme/](/api/readme/)
-- CLI docs: [/en/cli/](/en/cli/)
-- Code snippets: [/en/snippets/](/en/snippets/)`;
+    : `- Overview: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
+- Getting Started: [${urlRoot}/guides/getting-started/](${urlRoot}/guides/getting-started/)
+- Package Selection: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
+- Provider Selection: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
+- Troubleshooting: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
+- API docs: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
+- CLI docs: [${urlRoot}/cli/](${urlRoot}/cli/)
+- Code snippets: [${urlRoot}/snippets/](${urlRoot}/snippets/)`;
   const packageHeading = isKo ? "## 패키지 가이드" : "## Package Guides";
   const exampleHeading = isKo ? "## 예제 가이드" : "## Example Guides";
+  const startHereHeading = isKo ? "## 시작 경로" : "## Start Here";
+  const startHere = isKo
+    ? `- [시작하기](${urlRoot}/guides/getting-started/): Mock Provider로 가장 빠르게 첫 전송을 확인합니다.
+- [패키지 선택 가이드](${urlRoot}/guides/package-selection/): 어떤 패키지를 설치해야 하는지 먼저 정리합니다.
+- [Provider 선택 가이드](${urlRoot}/guides/provider-selection/): IWINV, SOLAPI, Aligo 선택 기준을 비교합니다.
+- [사용 사례 가이드](${urlRoot}/guides/use-cases/): OTP, 주문 알림, 마케팅 메시지 구현 흐름을 바로 봅니다.`
+    : `- [Getting Started](${urlRoot}/guides/getting-started/): send your first message quickly with the Mock Provider.
+- [Package Selection](${urlRoot}/guides/package-selection/): choose the smallest package set before wiring your app.
+- [Provider Selection](${urlRoot}/guides/provider-selection/): compare IWINV, SOLAPI, and Aligo by use case.
+- [Use Cases](${urlRoot}/guides/use-cases/): jump straight to OTP, order notification, and marketing flows.`;
   const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
   const content = `---
 title: ${title}
@@ -231,6 +254,10 @@ import { LinkButton } from "@astrojs/starlight/components";
 <LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</LinkButton>
 
 ${navItems}
+
+${startHereHeading}
+
+${startHere}
 
 ${packageHeading}
 
@@ -247,11 +274,81 @@ ${exampleLinks}
   };
 }
 
-function buildGuideIndex(
-  locale: Locale,
-  section: "packages" | "examples",
-): OutputFile {
+const packageSummaries: Record<string, GuideSummary> = {
+  "k-msg": {
+    en: "Unified facade most apps should start with.",
+    ko: "대부분의 앱이 먼저 시작해야 하는 통합 facade입니다.",
+  },
+  analytics: {
+    en: "Reporting and aggregation on top of delivery tracking data.",
+    ko: "배달 추적 데이터를 기반으로 통계와 리포트를 만듭니다.",
+  },
+  channel: {
+    en: "Provider-aware channel lifecycle helpers and in-memory toolkit helpers.",
+    ko: "프로바이더별 채널 lifecycle helper와 인메모리 toolkit helper를 제공합니다.",
+  },
+  core: {
+    en: "Low-level types, Result, errors, and resilience primitives.",
+    ko: "저수준 타입, Result, 에러, 복원력 유틸을 제공합니다.",
+  },
+  messaging: {
+    en: "Routing, queueing, delivery tracking, and runtime adapters behind KMsg.",
+    ko: "KMsg 뒤에서 라우팅, 큐, 배달 추적, 런타임 어댑터를 담당합니다.",
+  },
+  provider: {
+    en: "Built-in provider implementations and onboarding metadata.",
+    ko: "내장 provider 구현체와 onboarding 메타데이터를 제공합니다.",
+  },
+  template: {
+    en: "Template parsing, interpolation, lifecycle, and toolkit utilities.",
+    ko: "템플릿 파싱, 치환, lifecycle, toolkit 유틸을 제공합니다.",
+  },
+  webhook: {
+    en: "Webhook runtime, persistence, retries, and Cloudflare adapters.",
+    ko: "웹훅 runtime, persistence, 재시도, Cloudflare 어댑터를 제공합니다.",
+  },
+};
+
+const exampleSummaries: Record<string, GuideSummary> = {
+  "express-node-send-only": {
+    en: "Minimal Node + Express send-only server.",
+    ko: "가장 단순한 Node + Express send-only 서버 예제입니다.",
+  },
+  "hono-bun-send-only": {
+    en: "Fast Bun + Hono send-only API.",
+    ko: "Bun + Hono 기반의 빠른 send-only API 예제입니다.",
+  },
+  "hono-pages-send-only": {
+    en: "Cloudflare Pages Functions send-only starter.",
+    ko: "Cloudflare Pages Functions용 send-only 스타터입니다.",
+  },
+  "hono-pages-tracking-hyperdrive": {
+    en: "Pages + Hyperdrive example with delivery tracking.",
+    ko: "Pages + Hyperdrive 기반 delivery tracking 예제입니다.",
+  },
+  "hono-worker-queue-do": {
+    en: "Workers + Durable Objects queue processing example.",
+    ko: "Workers + Durable Objects 큐 처리 예제입니다.",
+  },
+  "hono-worker-tracking-d1": {
+    en: "Workers + D1 delivery tracking example.",
+    ko: "Workers + D1 delivery tracking 예제입니다.",
+  },
+  "hono-worker-webhook-d1": {
+    en: "Workers + D1 webhook runtime example.",
+    ko: "Workers + D1 웹훅 runtime 예제입니다.",
+  },
+};
+
+function buildGuideIndex(params: {
+  locale: Locale;
+  section: "packages" | "examples";
+  packageDocs: PackageDoc[];
+  exampleDocs: ExampleDoc[];
+}): OutputFile {
+  const { locale, section, packageDocs, exampleDocs } = params;
   const isKo = locale === "ko";
+  const urlRoot = docsUrlRoot(locale);
   const title =
     section === "packages"
       ? isKo
@@ -261,7 +358,51 @@ function buildGuideIndex(
         ? "예제 가이드"
         : "Example Guides";
 
-  const content = `---\ntitle: ${title}\n---\n\n${isKo ? "자동 생성 문서 목록입니다." : "Auto-generated documentation index."}\n`;
+  const intro =
+    section === "packages"
+      ? isKo
+        ? `프로젝트에 맞는 패키지를 빠르게 고를 수 있도록 역할별로 정리한 허브입니다.
+
+- 먼저 읽기: [패키지 선택 가이드](${urlRoot}/guides/package-selection/)
+- 대부분의 사용자 시작점: [k-msg](${urlRoot}/guides/packages/k-msg/)
+- 저수준 커스터마이징이 필요하면: [@k-msg/core](${urlRoot}/guides/packages/core/)`
+        : `This hub helps you choose the right package entry point quickly.
+
+- Read first: [Package Selection](${urlRoot}/guides/package-selection/)
+- Default starting point for most users: [k-msg](${urlRoot}/guides/packages/k-msg/)
+- Drop lower when you need custom wiring: [@k-msg/core](${urlRoot}/guides/packages/core/)`
+      : isKo
+        ? `런타임과 목적에 맞는 예제를 고를 수 있도록 정리한 허브입니다.
+
+- 첫 send-only 검증: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/)
+- Cloudflare queue/tracking: [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/), [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
+- Webhook runtime: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/)`
+        : `This hub helps you choose the right example by runtime and goal.
+
+- First send-only check: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/)
+- Cloudflare queue/tracking: [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/), [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
+- Webhook runtime: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/)`;
+
+  const list =
+    section === "packages"
+      ? packageDocs
+          .map((pkg) => {
+            const summary =
+              packageSummaries[pkg.dirName]?.[locale] ??
+              (isKo ? "패키지 문서를 확인하세요." : "See the package guide.");
+            return `- [${pkg.packageName}](${urlRoot}/guides/packages/${pkg.dirName}/): ${summary}`;
+          })
+          .join("\n")
+      : exampleDocs
+          .map((example) => {
+            const summary =
+              exampleSummaries[example.dirName]?.[locale] ??
+              (isKo ? "예제 문서를 확인하세요." : "See the example guide.");
+            return `- [${example.dirName}](${urlRoot}/guides/examples/${example.dirName}/): ${summary}`;
+          })
+          .join("\n");
+
+  const content = `---\ntitle: ${title}\n---\n\n${intro}\n\n## ${isKo ? "목록" : "Directory"}\n\n${list}\n`;
 
   return {
     path: path.join(docsFsRoot(locale), "guides", section, "index.md"),
@@ -277,10 +418,30 @@ async function collectOutputs(): Promise<OutputFile[]> {
   outputs.push(
     buildIndexPage({ locale: "en", packageDocs, exampleDocs }),
     buildIndexPage({ locale: "ko", packageDocs, exampleDocs }),
-    buildGuideIndex("en", "packages"),
-    buildGuideIndex("ko", "packages"),
-    buildGuideIndex("en", "examples"),
-    buildGuideIndex("ko", "examples"),
+    buildGuideIndex({
+      locale: "en",
+      section: "packages",
+      packageDocs,
+      exampleDocs,
+    }),
+    buildGuideIndex({
+      locale: "ko",
+      section: "packages",
+      packageDocs,
+      exampleDocs,
+    }),
+    buildGuideIndex({
+      locale: "en",
+      section: "examples",
+      packageDocs,
+      exampleDocs,
+    }),
+    buildGuideIndex({
+      locale: "ko",
+      section: "examples",
+      packageDocs,
+      exampleDocs,
+    }),
   );
 
   outputs.push(

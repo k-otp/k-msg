@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/drizzle-schema.ts:406](h
 
 ### options
 
-[`RenderDrizzleSchemaSourceOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/renderdrizzleschemasourceoptions/)
+[`RenderDrizzleSchemaSourceOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/renderdrizzleschemasourceoptions/)
 
 ## Returns
 

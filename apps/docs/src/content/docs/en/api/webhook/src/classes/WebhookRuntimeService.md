@@ -9,7 +9,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:60](https:/
 
 ## Implements
 
-- [`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/)
+- [`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/)
 
 ## Constructors
 
@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:75](https:/
 
 ##### config
 
-[`WebhookRuntimeConfig`](/api/webhook/src/interfaces/webhookruntimeconfig/)
+[`WebhookRuntimeConfig`](/en/api/webhook/src/interfaces/webhookruntimeconfig/)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:75](https:/
 
 ### addEndpoint()
 
-> **addEndpoint**(`input`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+> **addEndpoint**(`input`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L98)
 
@@ -41,21 +41,21 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:98](https:/
 
 ##### input
 
-[`WebhookEndpointInput`](/api/webhook/src/type-aliases/webhookendpointinput/)
+[`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpointinput/)
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`addEndpoint`](/api/webhook/src/interfaces/webhookruntime/#addendpoint)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`addEndpoint`](/en/api/webhook/src/interfaces/webhookruntime/#addendpoint)
 
 ***
 
 ### addEndpoints()
 
-> **addEndpoints**(`inputs`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **addEndpoints**(`inputs`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L120)
 
@@ -63,15 +63,15 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:120](https:
 
 ##### inputs
 
-readonly [`WebhookEndpointInput`](/api/webhook/src/type-aliases/webhookendpointinput/)[]
+readonly [`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpointinput/)[]
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`addEndpoints`](/api/webhook/src/interfaces/webhookruntime/#addendpoints)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`addEndpoints`](/en/api/webhook/src/interfaces/webhookruntime/#addendpoints)
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:223](https:
 
 ##### event
 
-[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 #### Returns
 
@@ -93,13 +93,13 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:223](https:
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`emit`](/api/webhook/src/interfaces/webhookruntime/#emit)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`emit`](/en/api/webhook/src/interfaces/webhookruntime/#emit)
 
 ***
 
 ### emitSync()
 
-> **emitSync**(`event`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+> **emitSync**(`event`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:238](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L238)
 
@@ -107,15 +107,15 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:238](https:
 
 ##### event
 
-[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`emitSync`](/api/webhook/src/interfaces/webhookruntime/#emitsync)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`emitSync`](/en/api/webhook/src/interfaces/webhookruntime/#emitsync)
 
 ***
 
@@ -131,13 +131,13 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:260](https:
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`flush`](/api/webhook/src/interfaces/webhookruntime/#flush)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`flush`](/en/api/webhook/src/interfaces/webhookruntime/#flush)
 
 ***
 
 ### getEndpoint()
 
-> **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **getEndpoint**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L172)
 
@@ -149,17 +149,17 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:172](https:
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`getEndpoint`](/api/webhook/src/interfaces/webhookruntime/#getendpoint)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`getEndpoint`](/en/api/webhook/src/interfaces/webhookruntime/#getendpoint)
 
 ***
 
 ### listDeliveries()
 
-> **listDeliveries**(`options?`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+> **listDeliveries**(`options?`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:268](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L268)
 
@@ -167,37 +167,37 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:268](https:
 
 ##### options?
 
-[`WebhookDeliveryListOptions`](/api/webhook/src/interfaces/webhookdeliverylistoptions/) = `{}`
+[`WebhookDeliveryListOptions`](/en/api/webhook/src/interfaces/webhookdeliverylistoptions/) = `{}`
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)[]\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)[]\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`listDeliveries`](/api/webhook/src/interfaces/webhookruntime/#listdeliveries)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`listDeliveries`](/en/api/webhook/src/interfaces/webhookruntime/#listdeliveries)
 
 ***
 
 ### listEndpoints()
 
-> **listEndpoints**(): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **listEndpoints**(): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L177)
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`listEndpoints`](/api/webhook/src/interfaces/webhookruntime/#listendpoints)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`listEndpoints`](/en/api/webhook/src/interfaces/webhookruntime/#listendpoints)
 
 ***
 
 ### probeEndpoint()
 
-> **probeEndpoint**(`input`): `Promise`\<[`WebhookTestResult`](/api/webhook/src/interfaces/webhooktestresult/)\>
+> **probeEndpoint**(`input`): `Promise`\<[`WebhookTestResult`](/en/api/webhook/src/interfaces/webhooktestresult/)\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L182)
 
@@ -205,15 +205,15 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:182](https:
 
 ##### input
 
-`string` | [`WebhookRuntimeTestPayload`](/api/webhook/src/interfaces/webhookruntimetestpayload/)
+`string` | [`WebhookRuntimeTestPayload`](/en/api/webhook/src/interfaces/webhookruntimetestpayload/)
 
 #### Returns
 
-`Promise`\<[`WebhookTestResult`](/api/webhook/src/interfaces/webhooktestresult/)\>
+`Promise`\<[`WebhookTestResult`](/en/api/webhook/src/interfaces/webhooktestresult/)\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`probeEndpoint`](/api/webhook/src/interfaces/webhookruntime/#probeendpoint)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`probeEndpoint`](/en/api/webhook/src/interfaces/webhookruntime/#probeendpoint)
 
 ***
 
@@ -235,7 +235,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:167](https:
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`removeEndpoint`](/api/webhook/src/interfaces/webhookruntime/#removeendpoint)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`removeEndpoint`](/en/api/webhook/src/interfaces/webhookruntime/#removeendpoint)
 
 ***
 
@@ -251,13 +251,13 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:278](https:
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`shutdown`](/api/webhook/src/interfaces/webhookruntime/#shutdown)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`shutdown`](/en/api/webhook/src/interfaces/webhookruntime/#shutdown)
 
 ***
 
 ### updateEndpoint()
 
-> **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+> **updateEndpoint**(`endpointId`, `updates`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L131)
 
@@ -269,12 +269,12 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:131](https:
 
 ##### updates
 
-`Partial`\<[`WebhookEndpointInput`](/api/webhook/src/type-aliases/webhookendpointinput/)\>
+`Partial`\<[`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpointinput/)\>
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\>
 
 #### Implementation of
 
-[`WebhookRuntime`](/api/webhook/src/interfaces/webhookruntime/).[`updateEndpoint`](/api/webhook/src/interfaces/webhookruntime/#updateendpoint)
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`updateEndpoint`](/en/api/webhook/src/interfaces/webhookruntime/#updateendpoint)

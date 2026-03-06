@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:30](https://github.com/
 
 ### query
 
-> **query**: [`AnalyticsQuery`](/api/analytics/src/interfaces/analyticsquery/)
+> **query**: [`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L31)
 

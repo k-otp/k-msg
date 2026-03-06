@@ -11,7 +11,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:14](https://git
 
 ### algorithms
 
-> **algorithms**: [`AnomalyAlgorithm`](/api/analytics/src/interfaces/anomalyalgorithm/)[]
+> **algorithms**: [`AnomalyAlgorithm`](/en/api/analytics/src/interfaces/anomalyalgorithm/)[]
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L15)
 

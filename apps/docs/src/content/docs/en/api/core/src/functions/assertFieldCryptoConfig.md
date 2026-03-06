@@ -13,11 +13,11 @@ Defined in: [packages/core/src/crypto/policy.ts:208](https://github.com/k-otp/k-
 
 ### config
 
-[`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+[`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 ### options?
 
-[`FieldCryptoPolicyOptions`](/api/core/src/interfaces/fieldcryptopolicyoptions/) = `{}`
+[`FieldCryptoPolicyOptions`](/en/api/core/src/interfaces/fieldcryptopolicyoptions/) = `{}`
 
 ## Returns
 

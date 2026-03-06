@@ -13,7 +13,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:54](https://github.com/k
 
 ### status
 
-[`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)
+[`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
 
 ## Returns
 

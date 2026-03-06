@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:69](https://git
 
 ### apiFailover?
 
-> `optional` **apiFailover**: [`DeliveryTrackingApiFailoverConfig`](/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverconfig/)
+> `optional` **apiFailover**: [`DeliveryTrackingApiFailoverConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverconfig/)
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L73)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:73](https://git
 
 ### polling?
 
-> `optional` **polling**: `Partial`\<[`DeliveryTrackingPollingConfig`](/api/messaging/src/tracking/interfaces/deliverytrackingpollingconfig/)\>
+> `optional` **polling**: `Partial`\<[`DeliveryTrackingPollingConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingpollingconfig/)\>
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L72)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:72](https://git
 
 ### providers
 
-> **providers**: [`Provider`](/api/core/src/interfaces/provider/)[]
+> **providers**: [`Provider`](/en/api/core/src/interfaces/provider/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L70)
 
@@ -35,6 +35,6 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:70](https://git
 
 ### store?
 
-> `optional` **store**: [`DeliveryTrackingStore`](/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
+> `optional` **store**: [`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L71)

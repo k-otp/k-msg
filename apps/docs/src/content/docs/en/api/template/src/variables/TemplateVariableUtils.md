@@ -63,7 +63,7 @@ Replace variables in content
 
 ##### variables
 
-[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
+[`TemplateVariableMap`](/en/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 
@@ -83,7 +83,7 @@ Validate content has all required variables
 
 ##### variables
 
-[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
+[`TemplateVariableMap`](/en/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 

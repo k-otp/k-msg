@@ -13,17 +13,17 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ### child()
 
-> **child**: (`context`) => [`Logger`](/api/core/src/classes/logger/)
+> **child**: (`context`) => [`Logger`](/en/api/core/src/classes/logger/)
 
 #### Parameters
 
 ##### context
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 #### Returns
 
-[`Logger`](/api/core/src/classes/logger/)
+[`Logger`](/en/api/core/src/classes/logger/)
 
 ### debug()
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 #### Returns
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 ##### error?
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 #### Returns
 
@@ -105,7 +105,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 #### Returns
 
@@ -141,7 +141,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ##### context?
 
-[`LogContext`](/api/core/src/interfaces/logcontext/)
+[`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 ##### error?
 

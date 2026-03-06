@@ -117,7 +117,7 @@ const kmsg = new KMsg({
 
 ### healthCheck()
 
-> **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
+> **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
 Defined in: [packages/messaging/src/k-msg.ts:384](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L384)
 
@@ -128,7 +128,7 @@ Useful for monitoring and determining if the messaging system is operational.
 
 #### Returns
 
-`Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
+`Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
 A promise resolving to health check results containing:
   - `healthy`: `true` if all providers are healthy, `false` otherwise
@@ -150,7 +150,7 @@ if (!health.healthy) {
 
 #### Call Signature
 
-> **send**(`input`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **send**(`input`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/messaging/src/k-msg.ts:465](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L465)
 
@@ -164,7 +164,7 @@ message text are interpolated if `variables` are provided.
 
 ###### input
 
-[`SendInput`](/api/core/src/type-aliases/sendinput/)
+[`SendInput`](/en/api/core/src/type-aliases/sendinput/)
 
 The message to send. Can be a single `SendInput` or an array.
   When `type` is omitted, the message is treated as SMS and may be upgraded
@@ -172,7 +172,7 @@ The message to send. Can be a single `SendInput` or an array.
 
 ##### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 A promise resolving to:
   - For single input: `Result<SendResult, KMsgError>`
@@ -211,7 +211,7 @@ console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}
 
 #### Call Signature
 
-> **send**(`input`): `Promise`\<[`BatchSendResult`](/api/messaging/src/interfaces/batchsendresult/)\>
+> **send**(`input`): `Promise`\<[`BatchSendResult`](/en/api/messaging/src/interfaces/batchsendresult/)\>
 
 Defined in: [packages/messaging/src/k-msg.ts:466](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L466)
 
@@ -225,7 +225,7 @@ message text are interpolated if `variables` are provided.
 
 ###### input
 
-[`SendInput`](/api/core/src/type-aliases/sendinput/)[]
+[`SendInput`](/en/api/core/src/type-aliases/sendinput/)[]
 
 The message to send. Can be a single `SendInput` or an array.
   When `type` is omitted, the message is treated as SMS and may be upgraded
@@ -233,7 +233,7 @@ The message to send. Can be a single `SendInput` or an array.
 
 ##### Returns
 
-`Promise`\<[`BatchSendResult`](/api/messaging/src/interfaces/batchsendresult/)\>
+`Promise`\<[`BatchSendResult`](/en/api/messaging/src/interfaces/batchsendresult/)\>
 
 A promise resolving to:
   - For single input: `Result<SendResult, KMsgError>`
@@ -274,7 +274,7 @@ console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}
 
 ### sendOrThrow()
 
-> **sendOrThrow**(`input`): `Promise`\<[`SendResult`](/api/core/src/interfaces/sendresult/)\>
+> **sendOrThrow**(`input`): `Promise`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
 
 Defined in: [packages/messaging/src/k-msg.ts:502](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L502)
 
@@ -289,13 +289,13 @@ checking `result.isSuccess`.
 
 ##### input
 
-[`SendInput`](/api/core/src/type-aliases/sendinput/)
+[`SendInput`](/en/api/core/src/type-aliases/sendinput/)
 
 The message to send (single message only, not an array)
 
 #### Returns
 
-`Promise`\<[`SendResult`](/api/core/src/interfaces/sendresult/)\>
+`Promise`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
 
 A promise resolving to `SendResult` on success
 
@@ -321,7 +321,7 @@ try {
 
 ### builder()
 
-> `static` **builder**(): [`KMsgBuilder`](/api/messaging/src/classes/kmsgbuilder/)
+> `static` **builder**(): [`KMsgBuilder`](/en/api/messaging/src/classes/kmsgbuilder/)
 
 Defined in: [packages/messaging/src/k-msg.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L361)
 
@@ -332,7 +332,7 @@ routing, defaults, and hooks.
 
 #### Returns
 
-[`KMsgBuilder`](/api/messaging/src/classes/kmsgbuilder/)
+[`KMsgBuilder`](/en/api/messaging/src/classes/kmsgbuilder/)
 
 A new KMsgBuilder instance
 

@@ -13,7 +13,7 @@ Defined in: [packages/core/src/logger.ts:335](https://github.com/k-otp/k-msg/blo
 
 ### config?
 
-`Partial`\<[`LoggerConfig`](/api/core/src/interfaces/loggerconfig/)\>
+`Partial`\<[`LoggerConfig`](/en/api/core/src/interfaces/loggerconfig/)\>
 
 ## Returns
 

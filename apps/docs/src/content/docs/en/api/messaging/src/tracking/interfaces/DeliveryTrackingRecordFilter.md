@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:13](htt
 
 ## Extended by
 
-- [`DeliveryTrackingListOptions`](/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
+- [`DeliveryTrackingListOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
 
 ## Properties
 
@@ -71,7 +71,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](htt
 
 ### status?
 
-> `optional` **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)[]
+> `optional` **status**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L18)
 
@@ -111,6 +111,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](htt
 
 ### type?
 
-> `optional` **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> `optional` **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L17)

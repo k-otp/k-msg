@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:155](https://gi
 
 ## Extends
 
-- [`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/)
+- [`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/)
 
 ## Properties
 
@@ -25,37 +25,37 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:51](https:
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`close`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#close)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`close`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#close)
 
 ***
 
 ### db
 
-> **db**: [`DrizzleSqlDatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
+> **db**: [`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L39)
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`db`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#db)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`db`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#db)
 
 ***
 
 ### dialect
 
-> **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+> **dialect**: [`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L38)
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`dialect`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#dialect)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`dialect`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#dialect)
 
 ***
 
 ### mapTransactionDb()?
 
-> `optional` **mapTransactionDb**: (`value`) => [`DrizzleSqlDatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
+> `optional` **mapTransactionDb**: (`value`) => [`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L50)
 
@@ -67,17 +67,17 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:50](https:
 
 #### Returns
 
-[`DrizzleSqlDatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
+[`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`mapTransactionDb`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#maptransactiondb)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`mapTransactionDb`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#maptransactiondb)
 
 ***
 
 ### normalizeResult()?
 
-> `optional` **normalizeResult**: \<`T`\>(`input`) => [`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
+> `optional` **normalizeResult**: \<`T`\>(`input`) => [`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L45)
 
@@ -105,11 +105,11 @@ readonly `unknown`[]
 
 #### Returns
 
-[`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
+[`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`normalizeResult`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#normalizeresult)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`normalizeResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#normalizeresult)
 
 ***
 
@@ -125,7 +125,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:40](https:
 
 ###### dialect
 
-[`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+[`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 ###### params
 
@@ -141,7 +141,7 @@ readonly `unknown`[]
 
 #### Inherited from
 
-[`CreateDrizzleSqlClientOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`renderQuery`](/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#renderquery)
+[`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`renderQuery`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#renderquery)
 
 ***
 

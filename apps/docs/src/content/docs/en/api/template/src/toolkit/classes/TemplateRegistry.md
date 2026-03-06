@@ -23,7 +23,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:99](https://git
 
 ##### options?
 
-`Partial`\<[`TemplateRegistryOptions`](/api/template/src/toolkit/interfaces/templateregistryoptions/)\> = `{}`
+`Partial`\<[`TemplateRegistryOptions`](/en/api/template/src/toolkit/interfaces/templateregistryoptions/)\> = `{}`
 
 #### Returns
 
@@ -147,7 +147,7 @@ Export templates to JSON
 
 ##### filters?
 
-[`TemplateSearchFilters`](/api/template/src/toolkit/interfaces/templatesearchfilters/)
+[`TemplateSearchFilters`](/en/api/template/src/toolkit/interfaces/templatesearchfilters/)
 
 #### Returns
 
@@ -157,7 +157,7 @@ Export templates to JSON
 
 ### get()
 
-> **get**(`templateId`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **get**(`templateId`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L208)
 
@@ -171,13 +171,13 @@ Get template by ID
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 ***
 
 ### getByCategory()
 
-> **getByCategory**(`category`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
+> **getByCategory**(`category`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
 
 Defined in: [packages/template/src/registry/template.registry.ts:350](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L350)
 
@@ -187,17 +187,17 @@ Get templates by category
 
 ##### category
 
-[`TemplateCategory`](/api/template/src/enumerations/templatecategory/)
+[`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/)
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
 
 ***
 
 ### getByCode()
 
-> **getByCode**(`code`, `provider`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **getByCode**(`code`, `provider`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L215)
 
@@ -215,13 +215,13 @@ Get template by code and provider
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 ***
 
 ### getByProvider()
 
-> **getByProvider**(`provider`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
+> **getByProvider**(`provider`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
 
 Defined in: [packages/template/src/registry/template.registry.ts:338](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L338)
 
@@ -235,13 +235,13 @@ Get templates by provider
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)[]
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
 
 ***
 
 ### getHistory()
 
-> **getHistory**(`templateId`): [`TemplateHistory`](/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
+> **getHistory**(`templateId`): [`TemplateHistory`](/en/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L399)
 
@@ -255,7 +255,7 @@ Get template version history
 
 #### Returns
 
-[`TemplateHistory`](/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
+[`TemplateHistory`](/en/api/template/src/toolkit/interfaces/templatehistory/) \| `null`
 
 ***
 
@@ -291,7 +291,7 @@ Get registry statistics
 
 ### getUsageStats()
 
-> **getUsageStats**(`templateId`): [`TemplateUsageStats`](/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
+> **getUsageStats**(`templateId`): [`TemplateUsageStats`](/en/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:441](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L441)
 
@@ -305,13 +305,13 @@ Get template usage statistics
 
 #### Returns
 
-[`TemplateUsageStats`](/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
+[`TemplateUsageStats`](/en/api/template/src/toolkit/interfaces/templateusagestats/) \| `null`
 
 ***
 
 ### getVersion()
 
-> **getVersion**(`templateId`, `version`): [`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **getVersion**(`templateId`, `version`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L406)
 
@@ -329,7 +329,7 @@ Get specific template version
 
 #### Returns
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/) \| `null`
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
 
 ***
 
@@ -449,7 +449,7 @@ Register a new template
 
 ##### template
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
 
 #### Returns
 
@@ -507,7 +507,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:31](https://github.co
 
 ### restoreVersion()
 
-> **restoreVersion**(`templateId`, `version`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+> **restoreVersion**(`templateId`, `version`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 Defined in: [packages/template/src/registry/template.registry.ts:417](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L417)
 
@@ -525,13 +525,13 @@ Restore template to a specific version
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 ***
 
 ### search()
 
-> **search**(`filters?`, `options?`): [`TemplateSearchResult`](/api/template/src/toolkit/interfaces/templatesearchresult/)
+> **search**(`filters?`, `options?`): [`TemplateSearchResult`](/en/api/template/src/toolkit/interfaces/templatesearchresult/)
 
 Defined in: [packages/template/src/registry/template.registry.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L222)
 
@@ -541,21 +541,21 @@ Search templates with filters and pagination
 
 ##### filters?
 
-[`TemplateSearchFilters`](/api/template/src/toolkit/interfaces/templatesearchfilters/) = `{}`
+[`TemplateSearchFilters`](/en/api/template/src/toolkit/interfaces/templatesearchfilters/) = `{}`
 
 ##### options?
 
-[`TemplateSearchOptions`](/api/template/src/toolkit/interfaces/templatesearchoptions/) = `{}`
+[`TemplateSearchOptions`](/en/api/template/src/toolkit/interfaces/templatesearchoptions/) = `{}`
 
 #### Returns
 
-[`TemplateSearchResult`](/api/template/src/toolkit/interfaces/templatesearchresult/)
+[`TemplateSearchResult`](/en/api/template/src/toolkit/interfaces/templatesearchresult/)
 
 ***
 
 ### update()
 
-> **update**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+> **update**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 Defined in: [packages/template/src/registry/template.registry.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L153)
 
@@ -569,11 +569,11 @@ Update an existing template
 
 ##### updates
 
-`Partial`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 ***
 

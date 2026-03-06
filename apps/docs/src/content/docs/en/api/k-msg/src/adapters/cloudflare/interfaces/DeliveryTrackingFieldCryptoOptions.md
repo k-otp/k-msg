@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:70](htt
 
 ### config
 
-> **config**: [`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+> **config**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L71)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:71](htt
 
 ### controlSignal?
 
-> `optional` **controlSignal**: [`DeliveryTrackingFieldCryptoControlSignalOptions`](/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/)
+> `optional` **controlSignal**: [`DeliveryTrackingFieldCryptoControlSignalOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/)
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L79)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:73](htt
 
 ##### event
 
-[`FieldCryptoMetricEvent`](/api/core/src/interfaces/fieldcryptometricevent/) & `object`
+[`FieldCryptoMetricEvent`](/en/api/core/src/interfaces/fieldcryptometricevent/) & `object`
 
 #### Returns
 

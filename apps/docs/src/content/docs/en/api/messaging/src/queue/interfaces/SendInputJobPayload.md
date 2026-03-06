@@ -67,6 +67,6 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:32](https://gith
 
 ### variables?
 
-> `optional` **variables**: [`MessageVariables`](/api/core/src/type-aliases/messagevariables/)
+> `optional` **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L37)

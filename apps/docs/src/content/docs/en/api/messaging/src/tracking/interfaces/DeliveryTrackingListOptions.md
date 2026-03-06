@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:29](htt
 
 ## Extends
 
-- [`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
+- [`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 ## Properties
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:21](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`from`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#from)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`from`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#from)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:22](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`fromHash`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#fromhash)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`fromHash`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#fromhash)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`messageId`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#messageid)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`messageId`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#messageid)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`providerId`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#providerid)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`providerId`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#providerid)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`providerMessageId`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#providermessageid)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`providerMessageId`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#providermessageid)
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`requestedAtFrom`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#requestedatfrom)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`requestedAtFrom`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#requestedatfrom)
 
 ***
 
@@ -125,19 +125,19 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`requestedAtTo`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#requestedatto)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`requestedAtTo`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#requestedatto)
 
 ***
 
 ### status?
 
-> `optional` **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)[]
+> `optional` **status**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L18)
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`status`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#status)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`status`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#status)
 
 ***
 
@@ -149,7 +149,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`statusUpdatedAtFrom`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#statusupdatedatfrom)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`statusUpdatedAtFrom`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#statusupdatedatfrom)
 
 ***
 
@@ -161,7 +161,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:26](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`statusUpdatedAtTo`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#statusupdatedatto)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`statusUpdatedAtTo`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#statusupdatedatto)
 
 ***
 
@@ -173,7 +173,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:19](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`to`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#to)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`to`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#to)
 
 ***
 
@@ -185,16 +185,16 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](htt
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`toHash`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#tohash)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`toHash`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#tohash)
 
 ***
 
 ### type?
 
-> `optional` **type**: [`MessageType`](/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> `optional` **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L17)
 
 #### Inherited from
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`type`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#type)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/).[`type`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/#type)

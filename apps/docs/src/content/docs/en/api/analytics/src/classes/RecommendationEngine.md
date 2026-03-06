@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:123](https
 
 ##### config?
 
-`Partial`\<[`RecommendationConfig`](/api/analytics/src/interfaces/recommendationconfig/)\> = `{}`
+`Partial`\<[`RecommendationConfig`](/en/api/analytics/src/interfaces/recommendationconfig/)\> = `{}`
 
 #### Returns
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:194](https
 
 ### generateRecommendations()
 
-> **generateRecommendations**(`metrics`): `Promise`\<[`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]\>
+> **generateRecommendations**(`metrics`): `Promise`\<[`Recommendation`](/en/api/analytics/src/interfaces/recommendation/)[]\>
 
 Defined in: [packages/analytics/src/insights/recommendation.engine.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L131)
 
@@ -63,17 +63,17 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:131](https
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 #### Returns
 
-`Promise`\<[`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]\>
+`Promise`\<[`Recommendation`](/en/api/analytics/src/interfaces/recommendation/)[]\>
 
 ***
 
 ### getRecommendationsByCategory()
 
-> **getRecommendationsByCategory**(`category`): [`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]
+> **getRecommendationsByCategory**(`category`): [`Recommendation`](/en/api/analytics/src/interfaces/recommendation/)[]
 
 Defined in: [packages/analytics/src/insights/recommendation.engine.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L173)
 
@@ -87,7 +87,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:173](https
 
 #### Returns
 
-[`Recommendation`](/api/analytics/src/interfaces/recommendation/)[]
+[`Recommendation`](/en/api/analytics/src/interfaces/recommendation/)[]
 
 ***
 

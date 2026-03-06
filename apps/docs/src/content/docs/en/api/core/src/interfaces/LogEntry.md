@@ -11,7 +11,7 @@ Defined in: [packages/core/src/logger.ts:18](https://github.com/k-otp/k-msg/blob
 
 ### context
 
-> **context**: [`LogContext`](/api/core/src/interfaces/logcontext/)
+> **context**: [`LogContext`](/en/api/core/src/interfaces/logcontext/)
 
 Defined in: [packages/core/src/logger.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L22)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/logger.ts:23](https://github.com/k-otp/k-msg/blob
 
 ### level
 
-> **level**: [`LogLevel`](/api/core/src/enumerations/loglevel/)
+> **level**: [`LogLevel`](/en/api/core/src/enumerations/loglevel/)
 
 Defined in: [packages/core/src/logger.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L19)
 

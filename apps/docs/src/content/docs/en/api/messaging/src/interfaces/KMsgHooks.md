@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/hooks.ts:27](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 #### Returns
 
@@ -37,11 +37,11 @@ Defined in: [packages/messaging/src/hooks.ts:32](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 ##### error
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 #### Returns
 
@@ -59,11 +59,11 @@ Defined in: [packages/messaging/src/hooks.ts:42](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 ##### state
 
-[`SendHookFinalState`](/api/messaging/src/interfaces/sendhookfinalstate/)
+[`SendHookFinalState`](/en/api/messaging/src/interfaces/sendhookfinalstate/)
 
 #### Returns
 
@@ -81,11 +81,11 @@ Defined in: [packages/messaging/src/hooks.ts:33](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 ##### result
 
-[`SendResult`](/api/core/src/interfaces/sendresult/)
+[`SendResult`](/en/api/core/src/interfaces/sendresult/)
 
 #### Returns
 
@@ -103,11 +103,11 @@ Defined in: [packages/messaging/src/hooks.ts:34](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/) & [`RetryScheduledHookContext`](/api/messaging/src/interfaces/retryscheduledhookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/) & [`RetryScheduledHookContext`](/en/api/messaging/src/interfaces/retryscheduledhookcontext/)
 
 ##### error
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 ##### metadata
 
@@ -135,11 +135,11 @@ Defined in: [packages/messaging/src/hooks.ts:28](https://github.com/k-otp/k-msg/
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 ##### result
 
-[`SendResult`](/api/core/src/interfaces/sendresult/)
+[`SendResult`](/en/api/core/src/interfaces/sendresult/)
 
 #### Returns
 

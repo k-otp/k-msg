@@ -13,11 +13,11 @@ Defined in: [packages/webhook/src/runtime/event-matcher.ts:18](https://github.co
 
 ### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 ### event
 
-[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 ## Returns
 

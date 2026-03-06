@@ -34,7 +34,7 @@ Use this when you want to convert a failed Result to an exception.
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The Result to expect
 
@@ -63,7 +63,7 @@ const value = Result.expect(result, 'Message send failed');
 
 ### flatMap()
 
-> **flatMap**\<`T`, `U`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`U`, `E`\>
+> **flatMap**\<`T`, `U`, `E`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`U`, `E`\>
 
 Chain Result-returning operations
 
@@ -85,19 +85,19 @@ Chain Result-returning operations
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### fn
 
-(`value`) => [`Result`](/api/core/src/type-aliases/result/)\<`U`, `E`\>
+(`value`) => [`Result`](/en/api/core/src/type-aliases/result/)\<`U`, `E`\>
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`U`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`U`, `E`\>
 
 ### fromPromise()
 
-> **fromPromise**\<`T`, `E`\>(`promise`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>\>
+> **fromPromise**\<`T`, `E`\>(`promise`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>\>
 
 Convert a Promise to a Result
 
@@ -119,7 +119,7 @@ Convert a Promise to a Result
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>\>
 
 ### isFail()
 
@@ -141,7 +141,7 @@ Check if a Result is Fail
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 #### Returns
 
@@ -167,7 +167,7 @@ Check if a Result is Ok
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 #### Returns
 
@@ -175,7 +175,7 @@ Check if a Result is Ok
 
 ### map()
 
-> **map**\<`T`, `U`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`U`, `E`\>
+> **map**\<`T`, `U`, `E`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`U`, `E`\>
 
 Transform the success value of a Result
 
@@ -197,7 +197,7 @@ Transform the success value of a Result
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### fn
 
@@ -205,11 +205,11 @@ Transform the success value of a Result
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`U`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`U`, `E`\>
 
 ### mapError()
 
-> **mapError**\<`T`, `E`, `F`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `F`\>
+> **mapError**\<`T`, `E`, `F`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `F`\>
 
 Transform the error of a Result
 
@@ -231,7 +231,7 @@ Transform the error of a Result
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### fn
 
@@ -239,7 +239,7 @@ Transform the error of a Result
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `F`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `F`\>
 
 ### match()
 
@@ -265,7 +265,7 @@ Pattern match on a Result
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### handlers
 
@@ -283,7 +283,7 @@ Pattern match on a Result
 
 ### tap()
 
-> **tap**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+> **tap**\<`T`, `E`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 Execute a side-effect without breaking the chain.
 Calls fn with the result (ok or fail) and returns the same result.
@@ -302,7 +302,7 @@ Calls fn with the result (ok or fail) and returns the same result.
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The Result to tap
 
@@ -314,7 +314,7 @@ Side-effect function called with the result
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The same Result for chaining
 
@@ -327,7 +327,7 @@ Result.tap(result, r => console.log('Completed:', r));
 
 ### tapErr()
 
-> **tapErr**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+> **tapErr**\<`T`, `E`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 Execute a side-effect on failure only.
 Calls fn with the error only if result is fail, returns the same result.
@@ -346,7 +346,7 @@ Calls fn with the error only if result is fail, returns the same result.
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The Result to tap
 
@@ -358,7 +358,7 @@ Side-effect function called with the error on failure
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The same Result for chaining
 
@@ -370,7 +370,7 @@ Result.tapErr(result, error => console.error('Failed:', error.message));
 
 ### tapOk()
 
-> **tapOk**\<`T`, `E`\>(`result`, `fn`): [`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+> **tapOk**\<`T`, `E`\>(`result`, `fn`): [`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 Execute a side-effect on success only.
 Calls fn with the value only if result is ok, returns the same result.
@@ -389,7 +389,7 @@ Calls fn with the value only if result is ok, returns the same result.
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The Result to tap
 
@@ -401,7 +401,7 @@ Side-effect function called with the value on success
 
 #### Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 The same Result for chaining
 
@@ -431,7 +431,7 @@ Extract the value or throw the error
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 #### Returns
 
@@ -457,7 +457,7 @@ Extract the value or return a default
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### defaultValue
 
@@ -487,7 +487,7 @@ Extract the value or compute a default from the error
 
 ##### result
 
-[`Result`](/api/core/src/type-aliases/result/)\<`T`, `E`\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<`T`, `E`\>
 
 ##### fn
 

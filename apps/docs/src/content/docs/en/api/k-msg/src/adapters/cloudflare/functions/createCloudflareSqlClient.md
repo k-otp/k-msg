@@ -5,7 +5,7 @@ prev: false
 title: "createCloudflareSqlClient"
 ---
 
-> **createCloudflareSqlClient**(`options`): [`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+> **createCloudflareSqlClient**(`options`): [`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L140)
 
@@ -19,11 +19,11 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:140](https
 
 #### dialect
 
-[`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+[`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 #### query
 
-\<`T`\>(`sql`, `params?`) => `Promise`\<[`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
+\<`T`\>(`sql`, `params?`) => `Promise`\<[`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
 
 #### transaction?
 
@@ -31,4 +31,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:140](https
 
 ## Returns
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)

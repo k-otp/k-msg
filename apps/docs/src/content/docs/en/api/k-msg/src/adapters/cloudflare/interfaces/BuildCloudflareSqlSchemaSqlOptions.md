@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:36](https:
 
 ### dialect
 
-> **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+> **dialect**: [`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L37)
 
@@ -67,7 +67,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:49](https:
 
 ### target?
 
-> `optional` **target**: [`CloudflareSqlSchemaTarget`](/api/k-msg/src/adapters/cloudflare/type-aliases/cloudflaresqlschematarget/)
+> `optional` **target**: [`CloudflareSqlSchemaTarget`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/cloudflaresqlschematarget/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L38)
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:38](https:
 
 ### trackingColumnMap?
 
-> `optional` **trackingColumnMap**: `Partial`\<[`DeliveryTrackingColumnMap`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingcolumnmap/)\>
+> `optional` **trackingColumnMap**: `Partial`\<[`DeliveryTrackingColumnMap`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingcolumnmap/)\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L40)
 
@@ -107,7 +107,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:39](https:
 
 ### trackingTypeStrategy?
 
-> `optional` **trackingTypeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
+> `optional` **trackingTypeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L41)
 
@@ -115,6 +115,6 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:41](https:
 
 ### typeStrategy?
 
-> `optional` **typeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
+> `optional` **typeStrategy**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L42)

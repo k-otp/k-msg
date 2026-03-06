@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:28](https://
 
 ### action
 
-> **action**: [`ActionType`](/api/channel/src/toolkit/enumerations/actiontype/)
+> **action**: [`ActionType`](/en/api/channel/src/toolkit/enumerations/actiontype/)
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L31)
 
@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:29](https://
 
 ### resource
 
-> **resource**: [`ResourceType`](/api/channel/src/toolkit/enumerations/resourcetype/)
+> **resource**: [`ResourceType`](/en/api/channel/src/toolkit/enumerations/resourcetype/)
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L30)
 
@@ -43,6 +43,6 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:30](https://
 
 ### scope
 
-> **scope**: [`PermissionScope`](/api/channel/src/toolkit/enumerations/permissionscope/)
+> **scope**: [`PermissionScope`](/en/api/channel/src/toolkit/enumerations/permissionscope/)
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L32)

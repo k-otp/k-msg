@@ -25,11 +25,11 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:62](htt
 
 ###### record
 
-[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
+[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
 
 ###### retentionClass
 
-[`DeliveryTrackingRetentionClass`](/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/)
+[`DeliveryTrackingRetentionClass`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/)
 
 ###### tenantId?
 
@@ -51,6 +51,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:60](htt
 
 ### tenantOverrideDays?
 
-> `optional` **tenantOverrideDays**: `Partial`\<`Record`\<[`DeliveryTrackingRetentionClass`](/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/), `number`\>\>
+> `optional` **tenantOverrideDays**: `Partial`\<`Record`\<[`DeliveryTrackingRetentionClass`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/), `number`\>\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L61)

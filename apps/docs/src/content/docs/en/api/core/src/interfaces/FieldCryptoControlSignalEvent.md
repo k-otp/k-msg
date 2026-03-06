@@ -51,7 +51,7 @@ Defined in: [packages/core/src/crypto/types.ts:109](https://github.com/k-otp/k-m
 
 ### scopeParts
 
-> **scopeParts**: [`FieldCryptoControlScope`](/api/core/src/interfaces/fieldcryptocontrolscope/)
+> **scopeParts**: [`FieldCryptoControlScope`](/en/api/core/src/interfaces/fieldcryptocontrolscope/)
 
 Defined in: [packages/core/src/crypto/types.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L110)
 
@@ -59,6 +59,6 @@ Defined in: [packages/core/src/crypto/types.ts:110](https://github.com/k-otp/k-m
 
 ### state
 
-> **state**: [`FieldCryptoCircuitState`](/api/core/src/type-aliases/fieldcryptocircuitstate/)
+> **state**: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/)
 
 Defined in: [packages/core/src/crypto/types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L107)

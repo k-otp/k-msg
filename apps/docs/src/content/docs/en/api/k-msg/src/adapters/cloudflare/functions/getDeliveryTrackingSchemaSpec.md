@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### options?
 
-[`DeliveryTrackingSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/) = `{}`
+[`DeliveryTrackingSchemaOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingschemaoptions/) = `{}`
 
 ## Returns
 

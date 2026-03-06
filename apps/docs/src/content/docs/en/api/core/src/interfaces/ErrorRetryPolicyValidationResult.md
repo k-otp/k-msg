@@ -11,7 +11,7 @@ Defined in: [packages/core/src/errors.ts:128](https://github.com/k-otp/k-msg/blo
 
 ### issues
 
-> **issues**: [`ErrorRetryPolicyIssue`](/api/core/src/interfaces/errorretrypolicyissue/)[]
+> **issues**: [`ErrorRetryPolicyIssue`](/en/api/core/src/interfaces/errorretrypolicyissue/)[]
 
 Defined in: [packages/core/src/errors.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L130)
 
@@ -19,6 +19,6 @@ Defined in: [packages/core/src/errors.ts:130](https://github.com/k-otp/k-msg/blo
 
 ### policy
 
-> **policy**: [`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/) \| `null`
+> **policy**: [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`
 
 Defined in: [packages/core/src/errors.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L129)

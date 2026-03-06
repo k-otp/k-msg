@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:62](https://github.com/
 
 ### insights
 
-> **insights**: [`InsightData`](/api/analytics/src/interfaces/insightdata/)[]
+> **insights**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L61)
 
@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/
 
 ### kpis
 
-> **kpis**: [`KPIData`](/api/analytics/src/interfaces/kpidata/)[]
+> **kpis**: [`KPIData`](/en/api/analytics/src/interfaces/kpidata/)[]
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L59)
 
@@ -59,6 +59,6 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:57](https://github.com/
 
 ### widgets
 
-> **widgets**: [`WidgetData`](/api/analytics/src/interfaces/widgetdata/)[]
+> **widgets**: [`WidgetData`](/en/api/analytics/src/interfaces/widgetdata/)[]
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L60)

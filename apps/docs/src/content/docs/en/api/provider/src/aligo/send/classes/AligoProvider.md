@@ -11,12 +11,12 @@ Aligo send/channel focused entrypoint.
 
 ## Extended by
 
-- [`AligoProvider`](/api/provider/src/aligo/classes/aligoprovider/)
+- [`AligoProvider`](/en/api/provider/src/aligo/classes/aligoprovider/)
 
 ## Implements
 
-- [`Provider`](/api/core/src/interfaces/provider/)
-- [`KakaoChannelProvider`](/api/core/src/interfaces/kakaochannelprovider/)
+- [`Provider`](/en/api/core/src/interfaces/provider/)
+- [`KakaoChannelProvider`](/en/api/core/src/interfaces/kakaochannelprovider/)
 
 ## Constructors
 
@@ -30,7 +30,7 @@ Defined in: [packages/provider/src/aligo/provider.send.ts:60](https://github.com
 
 ##### config
 
-[`AligoConfig`](/api/provider/src/aligo/interfaces/aligoconfig/)
+[`AligoConfig`](/en/api/provider/src/aligo/interfaces/aligoconfig/)
 
 #### Returns
 
@@ -55,7 +55,7 @@ Used for routing and logging.
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`id`](/api/core/src/interfaces/provider/#id)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`id`](/en/api/core/src/interfaces/provider/#id)
 
 ***
 
@@ -75,13 +75,13 @@ Human-readable name for display purposes.
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`name`](/api/core/src/interfaces/provider/#name)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`name`](/en/api/core/src/interfaces/provider/#name)
 
 ***
 
 ### supportedTypes
 
-> `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L40)
 
@@ -90,13 +90,13 @@ Messages of unsupported types will be rejected.
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`supportedTypes`](/api/core/src/interfaces/provider/#supportedtypes)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`supportedTypes`](/en/api/core/src/interfaces/provider/#supportedtypes)
 
 ## Methods
 
 ### addKakaoChannel()
 
-> **addKakaoChannel**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **addKakaoChannel**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L150)
 
@@ -124,17 +124,17 @@ Add a Kakao channel after authentication.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`KakaoChannelProvider`](/api/core/src/interfaces/kakaochannelprovider/).[`addKakaoChannel`](/api/core/src/interfaces/kakaochannelprovider/#addkakaochannel)
+[`KakaoChannelProvider`](/en/api/core/src/interfaces/kakaochannelprovider/).[`addKakaoChannel`](/en/api/core/src/interfaces/kakaochannelprovider/#addkakaochannel)
 
 ***
 
 ### getOnboardingSpec()
 
-> **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+> **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L52)
 
@@ -143,17 +143,17 @@ Used by tooling to guide provider configuration.
 
 #### Returns
 
-[`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+[`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`getOnboardingSpec`](/api/core/src/interfaces/provider/#getonboardingspec)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`getOnboardingSpec`](/en/api/core/src/interfaces/provider/#getonboardingspec)
 
 ***
 
 ### healthCheck()
 
-> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L85)
 
@@ -162,17 +162,17 @@ Used for health monitoring and circuit breaker decisions.
 
 #### Returns
 
-`Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+`Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`healthCheck`](/api/core/src/interfaces/provider/#healthcheck)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`healthCheck`](/en/api/core/src/interfaces/provider/#healthcheck)
 
 ***
 
 ### listKakaoChannelCategories()
 
-> **listKakaoChannelCategories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listKakaoChannelCategories**(): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L137)
 
@@ -180,17 +180,17 @@ List available channel categories for registration.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`KakaoChannelProvider`](/api/core/src/interfaces/kakaochannelprovider/).[`listKakaoChannelCategories`](/api/core/src/interfaces/kakaochannelprovider/#listkakaochannelcategories)
+[`KakaoChannelProvider`](/en/api/core/src/interfaces/kakaochannelprovider/).[`listKakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelprovider/#listkakaochannelcategories)
 
 ***
 
 ### listKakaoChannels()
 
-> **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L130)
 
@@ -210,17 +210,17 @@ List registered Kakao channels.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`KakaoChannelProvider`](/api/core/src/interfaces/kakaochannelprovider/).[`listKakaoChannels`](/api/core/src/interfaces/kakaochannelprovider/#listkakaochannels)
+[`KakaoChannelProvider`](/en/api/core/src/interfaces/kakaochannelprovider/).[`listKakaoChannels`](/en/api/core/src/interfaces/kakaochannelprovider/#listkakaochannels)
 
 ***
 
 ### requestKakaoChannelAuth()
 
-> **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L143)
 
@@ -240,17 +240,17 @@ Request authentication SMS for channel registration.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`KakaoChannelProvider`](/api/core/src/interfaces/kakaochannelprovider/).[`requestKakaoChannelAuth`](/api/core/src/interfaces/kakaochannelprovider/#requestkakaochannelauth)
+[`KakaoChannelProvider`](/en/api/core/src/interfaces/kakaochannelprovider/).[`requestKakaoChannelAuth`](/en/api/core/src/interfaces/kakaochannelprovider/#requestkakaochannelauth)
 
 ***
 
 ### send()
 
-> **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **send**(`options`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L124)
 
@@ -260,14 +260,14 @@ Send a message through this provider.
 
 ##### options
 
-[`SendOptions`](/api/core/src/type-aliases/sendoptions/)
+[`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Result with SendResult on success, KMsgError on failure.
 
 #### Implementation of
 
-[`Provider`](/api/core/src/interfaces/provider/).[`send`](/api/core/src/interfaces/provider/#send)
+[`Provider`](/en/api/core/src/interfaces/provider/).[`send`](/en/api/core/src/interfaces/provider/#send)

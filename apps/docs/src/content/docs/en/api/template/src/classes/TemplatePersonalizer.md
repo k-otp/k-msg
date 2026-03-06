@@ -19,7 +19,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:81](http
 
 ##### options?
 
-`Partial`\<[`TemplatePersonalizerOptions`](/api/template/src/interfaces/templatepersonalizeroptions/)\> = `{}`
+`Partial`\<[`TemplatePersonalizerOptions`](/en/api/template/src/interfaces/templatepersonalizeroptions/)\> = `{}`
 
 #### Returns
 
@@ -63,7 +63,7 @@ Preview replacement result without actually replacing
 
 ##### variables
 
-[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
+[`TemplateVariableMap`](/en/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 
@@ -85,7 +85,7 @@ Preview replacement result without actually replacing
 
 ### replace()
 
-> **replace**(`content`, `variables`): [`ReplacementResult`](/api/template/src/interfaces/replacementresult/)
+> **replace**(`content`, `variables`): [`ReplacementResult`](/en/api/template/src/interfaces/replacementresult/)
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L88)
 
@@ -99,11 +99,11 @@ Replace variables in content
 
 ##### variables
 
-[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
+[`TemplateVariableMap`](/en/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 
-[`ReplacementResult`](/api/template/src/interfaces/replacementresult/)
+[`ReplacementResult`](/en/api/template/src/interfaces/replacementresult/)
 
 ***
 
@@ -123,7 +123,7 @@ Validate that all required variables are provided
 
 ##### variables
 
-[`TemplateVariableMap`](/api/template/src/type-aliases/templatevariablemap/)
+[`TemplateVariableMap`](/en/api/template/src/type-aliases/templatevariablemap/)
 
 #### Returns
 
@@ -131,7 +131,7 @@ Validate that all required variables are provided
 
 ##### errors
 
-> **errors**: [`ReplacementError`](/api/template/src/interfaces/replacementerror/)[]
+> **errors**: [`ReplacementError`](/en/api/template/src/interfaces/replacementerror/)[]
 
 ##### isValid
 

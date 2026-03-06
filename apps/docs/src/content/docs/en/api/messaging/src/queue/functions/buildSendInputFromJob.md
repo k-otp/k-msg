@@ -5,7 +5,7 @@ prev: false
 title: "buildSendInputFromJob"
 ---
 
-> **buildSendInputFromJob**(`job`, `envelope`, `attempt`, `options?`): [`Result`](/api/core/src/type-aliases/result/)\<[`SendInput`](/api/core/src/type-aliases/sendinput/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
+> **buildSendInputFromJob**(`job`, `envelope`, `attempt`, `options?`): [`Result`](/en/api/core/src/type-aliases/result/)\<[`SendInput`](/en/api/core/src/type-aliases/sendinput/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L82)
 
@@ -13,11 +13,11 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:82](https://gith
 
 ### job
 
-[`SendInputJobPayload`](/api/messaging/src/queue/interfaces/sendinputjobpayload/)
+[`SendInputJobPayload`](/en/api/messaging/src/queue/interfaces/sendinputjobpayload/)
 
 ### envelope
 
-[`SendInputEnvelope`](/api/messaging/src/queue/interfaces/sendinputenvelope/)
+[`SendInputEnvelope`](/en/api/messaging/src/queue/interfaces/sendinputenvelope/)
 
 ### attempt
 
@@ -25,8 +25,8 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:82](https://gith
 
 ### options?
 
-[`BuildSendInputOptions`](/api/messaging/src/queue/interfaces/buildsendinputoptions/) = `{}`
+[`BuildSendInputOptions`](/en/api/messaging/src/queue/interfaces/buildsendinputoptions/) = `{}`
 
 ## Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<[`SendInput`](/api/core/src/type-aliases/sendinput/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendInput`](/en/api/core/src/type-aliases/sendinput/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>

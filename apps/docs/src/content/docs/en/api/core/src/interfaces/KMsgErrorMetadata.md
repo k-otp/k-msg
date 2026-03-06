@@ -9,7 +9,7 @@ Defined in: [packages/core/src/errors.ts:95](https://github.com/k-otp/k-msg/blob
 
 ## Extended by
 
-- [`FieldCryptoErrorMetadata`](/api/core/src/interfaces/fieldcryptoerrormetadata/)
+- [`FieldCryptoErrorMetadata`](/en/api/core/src/interfaces/fieldcryptoerrormetadata/)
 
 ## Properties
 

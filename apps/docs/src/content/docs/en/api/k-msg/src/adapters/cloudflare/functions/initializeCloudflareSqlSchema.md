@@ -13,11 +13,11 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:531](https
 
 ### client
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 ### options?
 
-[`InitializeCloudflareSqlSchemaOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/initializecloudflaresqlschemaoptions/) = `{}`
+[`InitializeCloudflareSqlSchemaOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/initializecloudflaresqlschemaoptions/) = `{}`
 
 ## Returns
 

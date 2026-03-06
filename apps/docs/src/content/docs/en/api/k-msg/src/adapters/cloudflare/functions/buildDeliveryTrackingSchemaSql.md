@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:449](https
 
 ### options
 
-[`BuildDeliveryTrackingSchemaSqlOptions`](/api/k-msg/src/adapters/cloudflare/interfaces/builddeliverytrackingschemasqloptions/)
+[`BuildDeliveryTrackingSchemaSqlOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/builddeliverytrackingschemasqloptions/)
 
 ## Returns
 

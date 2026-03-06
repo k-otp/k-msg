@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:154](https
 
 ### client
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 ### fn
 

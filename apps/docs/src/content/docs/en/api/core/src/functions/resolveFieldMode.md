@@ -5,7 +5,7 @@ prev: false
 title: "resolveFieldMode"
 ---
 
-> **resolveFieldMode**(`config`, `path`, `fallback`): [`FieldMode`](/api/core/src/type-aliases/fieldmode/)
+> **resolveFieldMode**(`config`, `path`, `fallback`): [`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)
 
 Defined in: [packages/core/src/crypto/policy.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L31)
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/policy.ts:31](https://github.com/k-otp/k-m
 
 ### config
 
-[`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+[`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 ### path
 
@@ -21,8 +21,8 @@ Defined in: [packages/core/src/crypto/policy.ts:31](https://github.com/k-otp/k-m
 
 ### fallback
 
-[`FieldMode`](/api/core/src/type-aliases/fieldmode/)
+[`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)
 
 ## Returns
 
-[`FieldMode`](/api/core/src/type-aliases/fieldmode/)
+[`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)

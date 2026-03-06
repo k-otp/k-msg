@@ -13,11 +13,11 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ### DEFAULT\_NON\_RETRYABLE\_ERROR\_CODES
 
-> **DEFAULT\_NON\_RETRYABLE\_ERROR\_CODES**: `ReadonlySet`\<[`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)\>
+> **DEFAULT\_NON\_RETRYABLE\_ERROR\_CODES**: `ReadonlySet`\<[`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)\>
 
 ### DEFAULT\_RETRYABLE\_ERROR\_CODES
 
-> **DEFAULT\_RETRYABLE\_ERROR\_CODES**: `ReadonlySet`\<[`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)\>
+> **DEFAULT\_RETRYABLE\_ERROR\_CODES**: `ReadonlySet`\<[`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)\>
 
 ### isUnknownStatus()
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ### classifyForRetry()
 
-> **classifyForRetry**(`error`, `policy?`): [`ProviderRetryHint`](/api/core/src/type-aliases/providerretryhint/)
+> **classifyForRetry**(`error`, `policy?`): [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
 #### Parameters
 
@@ -45,11 +45,11 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ##### policy?
 
-[`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/) = `{}`
+[`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) = `{}`
 
 #### Returns
 
-[`ProviderRetryHint`](/api/core/src/type-aliases/providerretryhint/)
+[`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
 ### isRetryable()
 
@@ -63,7 +63,7 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ##### policy?
 
-[`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/) = `{}`
+[`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) = `{}`
 
 #### Returns
 
@@ -77,11 +77,11 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ##### error
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 ##### policy?
 
-[`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/)
+[`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/)
 
 #### Returns
 
@@ -89,27 +89,27 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 ### toRetryMetadata()
 
-> **toRetryMetadata**(`error`): [`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/)
+> **toRetryMetadata**(`error`): [`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/)
 
 #### Parameters
 
 ##### error
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 #### Returns
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/)
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/)
 
 ### withAttempt()
 
-> **withAttempt**(`error`, `attempt`): [`KMsgError`](/api/core/src/classes/kmsgerror/)
+> **withAttempt**(`error`, `attempt`): [`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 #### Parameters
 
 ##### error
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 ##### attempt
 
@@ -117,4 +117,4 @@ Defined in: [packages/core/src/errors.ts:893](https://github.com/k-otp/k-msg/blo
 
 #### Returns
 
-[`KMsgError`](/api/core/src/classes/kmsgerror/)
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/)

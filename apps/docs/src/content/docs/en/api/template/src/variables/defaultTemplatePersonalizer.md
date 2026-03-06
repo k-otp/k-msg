@@ -5,7 +5,7 @@ prev: false
 title: "defaultTemplatePersonalizer"
 ---
 
-> `const` **defaultTemplatePersonalizer**: [`TemplatePersonalizer`](/api/template/src/classes/templatepersonalizer/)
+> `const` **defaultTemplatePersonalizer**: [`TemplatePersonalizer`](/en/api/template/src/classes/templatepersonalizer/)
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:732](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L732)
 

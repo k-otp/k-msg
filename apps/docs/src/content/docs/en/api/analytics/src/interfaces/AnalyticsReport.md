@@ -67,7 +67,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:47](https://github.
 
 ### metrics
 
-> **metrics**: [`ReportMetric`](/api/analytics/src/interfaces/reportmetric/)[]
+> **metrics**: [`ReportMetric`](/en/api/analytics/src/interfaces/reportmetric/)[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L55)
 

@@ -13,11 +13,11 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:67](https://
 
 ### db
 
-[`D1DatabaseLike`](/api/webhook/src/adapters/cloudflare/interfaces/d1databaselike/)
+[`D1DatabaseLike`](/en/api/webhook/src/adapters/cloudflare/interfaces/d1databaselike/)
 
 ### options?
 
-[`WebhookSchemaOptions`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/) = `{}`
+[`WebhookSchemaOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/) = `{}`
 
 ## Returns
 

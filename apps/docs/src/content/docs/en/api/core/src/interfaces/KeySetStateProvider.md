@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:13](https://github.com/k-o
 
 ### loadKeySet()
 
-> **loadKeySet**(`context`): `Promise`\<[`KeySetState`](/api/core/src/interfaces/keysetstate/)\>
+> **loadKeySet**(`context`): `Promise`\<[`KeySetState`](/en/api/core/src/interfaces/keysetstate/)\>
 
 Defined in: [packages/core/src/crypto/key-resolver.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-resolver.ts#L14)
 
@@ -19,8 +19,8 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:14](https://github.com/k-o
 
 ##### context
 
-[`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/)
+[`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)
 
 #### Returns
 
-`Promise`\<[`KeySetState`](/api/core/src/interfaces/keysetstate/)\>
+`Promise`\<[`KeySetState`](/en/api/core/src/interfaces/keysetstate/)\>

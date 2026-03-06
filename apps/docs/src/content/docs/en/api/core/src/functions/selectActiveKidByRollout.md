@@ -13,11 +13,11 @@ Defined in: [packages/core/src/crypto/rollout-policy.ts:99](https://github.com/k
 
 ### context
 
-[`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/)
+[`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)
 
 ### policy
 
-[`ActiveKidRolloutPolicy`](/api/core/src/interfaces/activekidrolloutpolicy/)
+[`ActiveKidRolloutPolicy`](/en/api/core/src/interfaces/activekidrolloutpolicy/)
 
 ### fallbackKid?
 

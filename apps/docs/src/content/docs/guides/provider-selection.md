@@ -127,7 +127,7 @@ const kmsg = new KMsg({
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
 });
 ```
@@ -155,7 +155,7 @@ const kmsg = new KMsg({
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "AUTH_OTP",
+  templateId: "AUTH_OTP",
   variables: { code: "123456" },
 });
 ```
@@ -198,7 +198,7 @@ await kmsg.send({ to: "01012345678", text: "SMS 메시지" });
 await kmsg.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "TEMPLATE_CODE",
+  templateId: "TEMPLATE_CODE",
   variables: { name: "홍길동" },
 });
 ```

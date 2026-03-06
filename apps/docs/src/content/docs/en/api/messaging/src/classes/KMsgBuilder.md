@@ -48,7 +48,7 @@ Adds a single provider to the builder.
 
 ##### provider
 
-[`Provider`](/api/core/src/interfaces/provider/)
+[`Provider`](/en/api/core/src/interfaces/provider/)
 
 The provider instance to add
 
@@ -78,7 +78,7 @@ Adds multiple providers to the builder.
 
 ##### providers
 
-...[`Provider`](/api/core/src/interfaces/provider/)[]
+...[`Provider`](/en/api/core/src/interfaces/provider/)[]
 
 The provider instances to add
 
@@ -101,7 +101,7 @@ builder.addProviders(
 
 ### build()
 
-> **build**(): [`KMsg`](/api/k-msg/src/classes/kmsg/)
+> **build**(): [`KMsg`](/en/api/k-msg/src/classes/kmsg/)
 
 Defined in: [packages/messaging/src/k-msg.ts:1536](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1536)
 
@@ -109,7 +109,7 @@ Builds and returns a new KMsg instance with the configured settings.
 
 #### Returns
 
-[`KMsg`](/api/k-msg/src/classes/kmsg/)
+[`KMsg`](/en/api/k-msg/src/classes/kmsg/)
 
 A new KMsg instance
 
@@ -172,7 +172,7 @@ Sets the lifecycle hooks.
 
 ##### hooks
 
-[`KMsgHooks`](/api/messaging/src/interfaces/kmsghooks/)
+[`KMsgHooks`](/en/api/messaging/src/interfaces/kmsghooks/)
 
 Hook functions for send lifecycle events
 
@@ -207,7 +207,7 @@ Sets the persistence configuration.
 
 Persistence strategy and repository
 
-\{ `repo`: [`MessageRepository`](/api/core/src/interfaces/messagerepository/); `strategy`: [`PersistenceStrategy`](/api/core/src/type-aliases/persistencestrategy/); \} | `undefined`
+\{ `repo`: [`MessageRepository`](/en/api/core/src/interfaces/messagerepository/); `strategy`: [`PersistenceStrategy`](/en/api/core/src/type-aliases/persistencestrategy/); \} | `undefined`
 
 #### Returns
 

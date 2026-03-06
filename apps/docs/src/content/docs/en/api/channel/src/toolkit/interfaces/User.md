@@ -51,7 +51,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:11](https://
 
 ### roles
 
-> **roles**: [`Role`](/api/channel/src/toolkit/interfaces/role/)[]
+> **roles**: [`Role`](/en/api/channel/src/toolkit/interfaces/role/)[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L12)
 

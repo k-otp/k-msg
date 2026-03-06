@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:67](https://githu
 
 ### record
 
-> **record**: [`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)
+> **record**: [`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L64)
 

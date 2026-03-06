@@ -9,7 +9,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/index.ts:22](https://githu
 
 ## Extends
 
-- [`WebhookSchemaOptions`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/)
+- [`WebhookSchemaOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/)
 
 ## Properties
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:8](https://g
 
 #### Inherited from
 
-[`WebhookSchemaOptions`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/).[`deliveryTableName`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/#deliverytablename)
+[`WebhookSchemaOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/).[`deliveryTableName`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/#deliverytablename)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:7](https://g
 
 #### Inherited from
 
-[`WebhookSchemaOptions`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/).[`endpointTableName`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/#endpointtablename)
+[`WebhookSchemaOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/).[`endpointTableName`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/#endpointtablename)
 
 ***
 

@@ -5,7 +5,7 @@ prev: false
 title: "SendInput"
 ---
 
-> **SendInput** = [`SendOptions`](/api/core/src/type-aliases/sendoptions/) \| [`SmsDefaultSendInput`](/api/core/src/type-aliases/smsdefaultsendinput/)
+> **SendInput** = [`SendOptions`](/en/api/core/src/type-aliases/sendoptions/) \| [`SmsDefaultSendInput`](/en/api/core/src/type-aliases/smsdefaultsendinput/)
 
 Defined in: [packages/core/src/types/message.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L361)
 

@@ -11,12 +11,12 @@ Aligo Provider package entrypoint
 
 ## Extends
 
-- [`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/)
+- [`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/)
 
 ## Implements
 
-- [`TemplateProvider`](/api/core/src/interfaces/templateprovider/)
-- [`TemplateInspectionProvider`](/api/core/src/interfaces/templateinspectionprovider/)
+- [`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/)
+- [`TemplateInspectionProvider`](/en/api/core/src/interfaces/templateinspectionprovider/)
 
 ## Constructors
 
@@ -30,7 +30,7 @@ Defined in: [packages/provider/src/aligo/provider.send.ts:60](https://github.com
 
 ##### config
 
-[`AligoConfig`](/api/provider/src/aligo/interfaces/aligoconfig/)
+[`AligoConfig`](/en/api/provider/src/aligo/interfaces/aligoconfig/)
 
 #### Returns
 
@@ -38,7 +38,7 @@ Defined in: [packages/provider/src/aligo/provider.send.ts:60](https://github.com
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`constructor`](/api/provider/src/aligo/send/classes/aligoprovider/#constructor)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`constructor`](/en/api/provider/src/aligo/send/classes/aligoprovider/#constructor)
 
 ## Properties
 
@@ -59,7 +59,7 @@ Used for routing and logging.
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`id`](/api/provider/src/aligo/send/classes/aligoprovider/#id)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`id`](/en/api/provider/src/aligo/send/classes/aligoprovider/#id)
 
 ***
 
@@ -79,13 +79,13 @@ Human-readable name for display purposes.
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`name`](/api/provider/src/aligo/send/classes/aligoprovider/#name)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`name`](/en/api/provider/src/aligo/send/classes/aligoprovider/#name)
 
 ***
 
 ### supportedTypes
 
-> `readonly` **supportedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L40)
 
@@ -94,13 +94,13 @@ Messages of unsupported types will be rejected.
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`supportedTypes`](/api/provider/src/aligo/send/classes/aligoprovider/#supportedtypes)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`supportedTypes`](/en/api/provider/src/aligo/send/classes/aligoprovider/#supportedtypes)
 
 ## Methods
 
 ### addKakaoChannel()
 
-> **addKakaoChannel**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **addKakaoChannel**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L150)
 
@@ -128,17 +128,17 @@ Add a Kakao channel after authentication.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`addKakaoChannel`](/api/provider/src/aligo/send/classes/aligoprovider/#addkakaochannel)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`addKakaoChannel`](/en/api/provider/src/aligo/send/classes/aligoprovider/#addkakaochannel)
 
 ***
 
 ### createTemplate()
 
-> **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L26)
 
@@ -148,25 +148,25 @@ Create a new template.
 
 ##### input
 
-[`TemplateCreateInput`](/api/core/src/type-aliases/templatecreateinput/)
+[`TemplateCreateInput`](/en/api/core/src/type-aliases/templatecreateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`createTemplate`](/api/core/src/interfaces/templateprovider/#createtemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`createTemplate`](/en/api/core/src/interfaces/templateprovider/#createtemplate)
 
 ***
 
 ### deleteTemplate()
 
-> **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L41)
 
@@ -180,21 +180,21 @@ Delete a template by code.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`deleteTemplate`](/api/core/src/interfaces/templateprovider/#deletetemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`deleteTemplate`](/en/api/core/src/interfaces/templateprovider/#deletetemplate)
 
 ***
 
 ### getOnboardingSpec()
 
-> **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+> **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L52)
 
@@ -203,17 +203,17 @@ Used by tooling to guide provider configuration.
 
 #### Returns
 
-[`ProviderOnboardingSpec`](/api/core/src/interfaces/provideronboardingspec/)
+[`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`getOnboardingSpec`](/api/provider/src/aligo/send/classes/aligoprovider/#getonboardingspec)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`getOnboardingSpec`](/en/api/provider/src/aligo/send/classes/aligoprovider/#getonboardingspec)
 
 ***
 
 ### getTemplate()
 
-> **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L48)
 
@@ -227,21 +227,21 @@ Get a template by code.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`getTemplate`](/api/core/src/interfaces/templateprovider/#gettemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`getTemplate`](/en/api/core/src/interfaces/templateprovider/#gettemplate)
 
 ***
 
 ### healthCheck()
 
-> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L85)
 
@@ -250,17 +250,17 @@ Used for health monitoring and circuit breaker decisions.
 
 #### Returns
 
-`Promise`\<[`ProviderHealthStatus`](/api/core/src/interfaces/providerhealthstatus/)\>
+`Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`healthCheck`](/api/provider/src/aligo/send/classes/aligoprovider/#healthcheck)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`healthCheck`](/en/api/provider/src/aligo/send/classes/aligoprovider/#healthcheck)
 
 ***
 
 ### listKakaoChannelCategories()
 
-> **listKakaoChannelCategories**(): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listKakaoChannelCategories**(): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L137)
 
@@ -268,17 +268,17 @@ List available channel categories for registration.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`listKakaoChannelCategories`](/api/provider/src/aligo/send/classes/aligoprovider/#listkakaochannelcategories)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`listKakaoChannelCategories`](/en/api/provider/src/aligo/send/classes/aligoprovider/#listkakaochannelcategories)
 
 ***
 
 ### listKakaoChannels()
 
-> **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L130)
 
@@ -298,17 +298,17 @@ List registered Kakao channels.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`listKakaoChannels`](/api/provider/src/aligo/send/classes/aligoprovider/#listkakaochannels)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`listKakaoChannels`](/en/api/provider/src/aligo/send/classes/aligoprovider/#listkakaochannels)
 
 ***
 
 ### listTemplates()
 
-> **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L55)
 
@@ -332,21 +332,21 @@ List templates with optional filtering and pagination.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`listTemplates`](/api/core/src/interfaces/templateprovider/#listtemplates)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`listTemplates`](/en/api/core/src/interfaces/templateprovider/#listtemplates)
 
 ***
 
 ### requestKakaoChannelAuth()
 
-> **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L143)
 
@@ -366,17 +366,17 @@ Request authentication SMS for channel registration.
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`requestKakaoChannelAuth`](/api/provider/src/aligo/send/classes/aligoprovider/#requestkakaochannelauth)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`requestKakaoChannelAuth`](/en/api/provider/src/aligo/send/classes/aligoprovider/#requestkakaochannelauth)
 
 ***
 
 ### requestTemplateInspection()
 
-> **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L62)
 
@@ -390,21 +390,21 @@ Request inspection for a template (submits for approval review).
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateInspectionProvider`](/api/core/src/interfaces/templateinspectionprovider/).[`requestTemplateInspection`](/api/core/src/interfaces/templateinspectionprovider/#requesttemplateinspection)
+[`TemplateInspectionProvider`](/en/api/core/src/interfaces/templateinspectionprovider/).[`requestTemplateInspection`](/en/api/core/src/interfaces/templateinspectionprovider/#requesttemplateinspection)
 
 ***
 
 ### send()
 
-> **send**(`options`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **send**(`options`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.send.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L124)
 
@@ -414,23 +414,23 @@ Send a message through this provider.
 
 ##### options
 
-[`SendOptions`](/api/core/src/type-aliases/sendoptions/)
+[`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`SendResult`](/api/core/src/interfaces/sendresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Result with SendResult on success, KMsgError on failure.
 
 #### Inherited from
 
-[`AligoProvider`](/api/provider/src/aligo/send/classes/aligoprovider/).[`send`](/api/provider/src/aligo/send/classes/aligoprovider/#send)
+[`AligoProvider`](/en/api/provider/src/aligo/send/classes/aligoprovider/).[`send`](/en/api/provider/src/aligo/send/classes/aligoprovider/#send)
 
 ***
 
 ### updateTemplate()
 
-> **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L33)
 
@@ -444,16 +444,16 @@ Update an existing template by code.
 
 ##### patch
 
-[`TemplateUpdateInput`](/api/core/src/type-aliases/templateupdateinput/)
+[`TemplateUpdateInput`](/en/api/core/src/type-aliases/templateupdateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`updateTemplate`](/api/core/src/interfaces/templateprovider/#updatetemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`updateTemplate`](/en/api/core/src/interfaces/templateprovider/#updatetemplate)

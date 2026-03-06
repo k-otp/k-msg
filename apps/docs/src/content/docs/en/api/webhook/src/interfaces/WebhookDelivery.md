@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:105](https://github.com
 
 ### attempts
 
-> **attempts**: [`WebhookAttempt`](/api/webhook/src/interfaces/webhookattempt/)[]
+> **attempts**: [`WebhookAttempt`](/en/api/webhook/src/interfaces/webhookattempt/)[]
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L118)
 
@@ -51,7 +51,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:108](https://github.com
 
 ### eventType?
 
-> `optional` **eventType**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)
+> `optional` **eventType**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L113)
 

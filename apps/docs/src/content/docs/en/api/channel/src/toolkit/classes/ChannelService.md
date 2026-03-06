@@ -47,7 +47,7 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:75](https:
 
 ### createChannel()
 
-> **createChannel**(`channel`): `Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)\>
+> **createChannel**(`channel`): `Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)\>
 
 Defined in: [packages/channel/src/toolkit/services/channel.service.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/services/channel.service.ts#L17)
 
@@ -55,11 +55,11 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:17](https:
 
 ##### channel
 
-`Omit`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
+`Omit`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
 
 #### Returns
 
-`Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)\>
+`Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)\>
 
 ***
 
@@ -83,7 +83,7 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:64](https:
 
 ### getChannel()
 
-> **getChannel**(`channelId`): `Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/) \| `null`\>
+> **getChannel**(`channelId`): `Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/) \| `null`\>
 
 Defined in: [packages/channel/src/toolkit/services/channel.service.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/services/channel.service.ts#L31)
 
@@ -95,7 +95,7 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:31](https:
 
 #### Returns
 
-`Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/) \| `null`\>
+`Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/) \| `null`\>
 
 ***
 
@@ -119,7 +119,7 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:96](https:
 
 ### listChannels()
 
-> **listChannels**(`providerId?`): `Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)[]\>
+> **listChannels**(`providerId?`): `Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)[]\>
 
 Defined in: [packages/channel/src/toolkit/services/channel.service.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/services/channel.service.ts#L35)
 
@@ -131,13 +131,13 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:35](https:
 
 #### Returns
 
-`Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)[]\>
+`Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)[]\>
 
 ***
 
 ### updateChannel()
 
-> **updateChannel**(`channelId`, `updates`): `Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)\>
+> **updateChannel**(`channelId`, `updates`): `Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)\>
 
 Defined in: [packages/channel/src/toolkit/services/channel.service.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/services/channel.service.ts#L45)
 
@@ -149,8 +149,8 @@ Defined in: [packages/channel/src/toolkit/services/channel.service.ts:45](https:
 
 ##### updates
 
-`Partial`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)\>
+`Partial`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)\>
 
 #### Returns
 
-`Promise`\<[`ChannelConfig`](/api/channel/src/toolkit/interfaces/channelconfig/)\>
+`Promise`\<[`ChannelConfig`](/en/api/channel/src/toolkit/interfaces/channelconfig/)\>

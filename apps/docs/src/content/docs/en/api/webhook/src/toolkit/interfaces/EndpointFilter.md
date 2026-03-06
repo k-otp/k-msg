@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/registry/types.ts:15](https://github.com/k-otp
 
 ### events?
 
-> `optional` **events**: [`WebhookEventType`](/api/webhook/src/enumerations/webhookeventtype/)[]
+> `optional` **events**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
 
 Defined in: [packages/webhook/src/registry/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L11)
 

@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:16](https://github
 
 ### formats
 
-> **formats**: [`ExportFormat`](/api/analytics/src/interfaces/exportformat/)[]
+> **formats**: [`ExportFormat`](/en/api/analytics/src/interfaces/exportformat/)[]
 
 Defined in: [packages/analytics/src/reports/export.manager.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L14)
 

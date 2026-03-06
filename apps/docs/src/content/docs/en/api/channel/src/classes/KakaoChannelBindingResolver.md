@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:71](
 
 ##### config
 
-[`KakaoChannelResolverConfig`](/api/channel/src/interfaces/kakaochannelresolverconfig/)
+[`KakaoChannelResolverConfig`](/en/api/channel/src/interfaces/kakaochannelresolverconfig/)
 
 #### Returns
 
@@ -31,7 +31,7 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:71](
 
 ### getAlias()
 
-> **getAlias**(`alias`): [`KakaoChannelAliasEntry`](/api/channel/src/interfaces/kakaochannelaliasentry/) \| `undefined`
+> **getAlias**(`alias`): [`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/) \| `undefined`
 
 Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:282](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L282)
 
@@ -43,13 +43,13 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:282]
 
 #### Returns
 
-[`KakaoChannelAliasEntry`](/api/channel/src/interfaces/kakaochannelaliasentry/) \| `undefined`
+[`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/) \| `undefined`
 
 ***
 
 ### list()
 
-> **list**(`params?`): [`KakaoChannelListItem`](/api/channel/src/interfaces/kakaochannellistitem/)[]
+> **list**(`params?`): [`KakaoChannelListItem`](/en/api/channel/src/interfaces/kakaochannellistitem/)[]
 
 Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L73)
 
@@ -63,13 +63,13 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:73](
 
 #### Returns
 
-[`KakaoChannelListItem`](/api/channel/src/interfaces/kakaochannellistitem/)[]
+[`KakaoChannelListItem`](/en/api/channel/src/interfaces/kakaochannellistitem/)[]
 
 ***
 
 ### resolve()
 
-> **resolve**(`input?`): [`ResolvedKakaoChannelBinding`](/api/channel/src/interfaces/resolvedkakaochannelbinding/)
+> **resolve**(`input?`): [`ResolvedKakaoChannelBinding`](/en/api/channel/src/interfaces/resolvedkakaochannelbinding/)
 
 Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L157)
 
@@ -77,8 +77,8 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:157]
 
 ##### input?
 
-[`KakaoChannelResolveInput`](/api/channel/src/interfaces/kakaochannelresolveinput/)
+[`KakaoChannelResolveInput`](/en/api/channel/src/interfaces/kakaochannelresolveinput/)
 
 #### Returns
 
-[`ResolvedKakaoChannelBinding`](/api/channel/src/interfaces/resolvedkakaochannelbinding/)
+[`ResolvedKakaoChannelBinding`](/en/api/channel/src/interfaces/resolvedkakaochannelbinding/)

@@ -35,6 +35,6 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:20](https://github.com/k-o
 
 ### provider
 
-> **provider**: [`KeySetStateProvider`](/api/core/src/interfaces/keysetstateprovider/)
+> **provider**: [`KeySetStateProvider`](/en/api/core/src/interfaces/keysetstateprovider/)
 
 Defined in: [packages/core/src/crypto/key-resolver.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-resolver.ts#L18)

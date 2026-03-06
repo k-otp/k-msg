@@ -5,7 +5,7 @@ prev: false
 title: "getRuntimeEnvSource"
 ---
 
-> **getRuntimeEnvSource**(): [`RuntimeEnvRecord`](/api/core/src/type-aliases/runtimeenvrecord/)
+> **getRuntimeEnvSource**(): [`RuntimeEnvRecord`](/en/api/core/src/type-aliases/runtimeenvrecord/)
 
 Defined in: [packages/core/src/runtime/env.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/runtime/env.ts#L19)
 
@@ -18,4 +18,4 @@ Priority:
 
 ## Returns
 
-[`RuntimeEnvRecord`](/api/core/src/type-aliases/runtimeenvrecord/)
+[`RuntimeEnvRecord`](/en/api/core/src/type-aliases/runtimeenvrecord/)

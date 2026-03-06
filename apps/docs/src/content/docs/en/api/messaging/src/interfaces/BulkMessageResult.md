@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:142](https://github
 
 ### batches
 
-> **batches**: [`BulkBatchResult`](/api/messaging/src/interfaces/bulkbatchresult/)[]
+> **batches**: [`BulkBatchResult`](/en/api/messaging/src/interfaces/bulkbatchresult/)[]
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L145)
 

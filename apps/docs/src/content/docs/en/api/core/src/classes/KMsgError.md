@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:296](https://github.com/k-otp/k-msg/blo
 
 ## Extended by
 
-- [`FieldCryptoError`](/api/core/src/classes/fieldcryptoerror/)
+- [`FieldCryptoError`](/en/api/core/src/classes/fieldcryptoerror/)
 
 ## Constructors
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/errors.ts:307](https://github.com/k-otp/k-msg/blo
 
 ##### code
 
-[`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+[`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 ##### message
 
@@ -39,7 +39,7 @@ Defined in: [packages/core/src/errors.ts:307](https://github.com/k-otp/k-msg/blo
 
 ##### metadata?
 
-[`KMsgErrorMetadata`](/api/core/src/interfaces/kmsgerrormetadata/) = `{}`
+[`KMsgErrorMetadata`](/en/api/core/src/interfaces/kmsgerrormetadata/) = `{}`
 
 #### Returns
 
@@ -83,7 +83,7 @@ Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blo
 
 ### code
 
-> `readonly` **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+> `readonly` **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 Defined in: [packages/core/src/errors.ts:297](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L297)
 
@@ -209,7 +209,7 @@ Falls back to the original message if no localized message exists.
 
 ##### locale?
 
-[`Locale`](/api/core/src/type-aliases/locale/) = `DEFAULT_LOCALE`
+[`Locale`](/en/api/core/src/type-aliases/locale/) = `DEFAULT_LOCALE`
 
 #### Returns
 
@@ -237,7 +237,7 @@ Defined in: [packages/core/src/errors.ts:350](https://github.com/k-otp/k-msg/blo
 
 ##### code
 
-> **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+> **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 ##### details
 

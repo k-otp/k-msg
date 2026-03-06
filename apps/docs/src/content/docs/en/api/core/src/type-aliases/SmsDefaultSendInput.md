@@ -5,7 +5,7 @@ prev: false
 title: "SmsDefaultSendInput"
 ---
 
-> **SmsDefaultSendInput** = `Omit`\<[`SmsSendOptions`](/api/core/src/interfaces/smssendoptions/), `"type"` \| `"text"`\> & `object`
+> **SmsDefaultSendInput** = `Omit`\<[`SmsSendOptions`](/en/api/core/src/interfaces/smssendoptions/), `"type"` \| `"text"`\> & `object`
 
 Defined in: [packages/core/src/types/message.ts:344](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L344)
 

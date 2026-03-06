@@ -51,7 +51,7 @@ Defined in: [packages/core/src/logger.ts:31](https://github.com/k-otp/k-msg/blob
 
 ### level
 
-> **level**: [`LogLevel`](/api/core/src/enumerations/loglevel/)
+> **level**: [`LogLevel`](/en/api/core/src/enumerations/loglevel/)
 
 Defined in: [packages/core/src/logger.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L28)
 

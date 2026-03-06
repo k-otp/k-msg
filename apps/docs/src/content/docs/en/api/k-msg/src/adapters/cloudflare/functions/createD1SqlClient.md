@@ -5,7 +5,7 @@ prev: false
 title: "createD1SqlClient"
 ---
 
-> **createD1SqlClient**(`db`): [`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+> **createD1SqlClient**(`db`): [`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L164)
 
@@ -13,8 +13,8 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:164](https
 
 ### db
 
-[`D1DatabaseLike`](/api/k-msg/src/adapters/cloudflare/interfaces/d1databaselike/)
+[`D1DatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/d1databaselike/)
 
 ## Returns
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)

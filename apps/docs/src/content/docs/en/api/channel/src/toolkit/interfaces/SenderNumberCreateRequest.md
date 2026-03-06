@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:153](https://github.com
 
 ### category
 
-> **category**: [`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
+> **category**: [`SenderNumberCategory`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L152)
 

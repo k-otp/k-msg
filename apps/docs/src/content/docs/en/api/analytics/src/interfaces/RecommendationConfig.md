@@ -43,6 +43,6 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:14](https:
 
 ### rules
 
-> **rules**: [`RecommendationRule`](/api/analytics/src/interfaces/recommendationrule/)[]
+> **rules**: [`RecommendationRule`](/en/api/analytics/src/interfaces/recommendationrule/)[]
 
 Defined in: [packages/analytics/src/insights/recommendation.engine.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L11)

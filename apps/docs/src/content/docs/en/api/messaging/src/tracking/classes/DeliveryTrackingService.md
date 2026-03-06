@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:86](https://git
 
 ##### config
 
-[`DeliveryTrackingServiceConfig`](/api/messaging/src/tracking/interfaces/deliverytrackingserviceconfig/)
+[`DeliveryTrackingServiceConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingserviceconfig/)
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:130](https://gi
 
 ### countBy()
 
-> **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
+> **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L234)
 
@@ -49,15 +49,15 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:234](https://gi
 
 ##### filter
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 ##### groupBy
 
-readonly [`DeliveryTrackingCountByField`](/api/messaging/src/tracking/type-aliases/deliverytrackingcountbyfield/)[]
+readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingcountbyfield/)[]
 
 #### Returns
 
-`Promise`\<[`DeliveryTrackingCountByRow`](/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
+`Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
 ***
 
@@ -71,7 +71,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:228](https://gi
 
 ##### filter
 
-[`DeliveryTrackingRecordFilter`](/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
+[`DeliveryTrackingRecordFilter`](/en/api/messaging/src/tracking/interfaces/deliverytrackingrecordfilter/)
 
 #### Returns
 
@@ -81,7 +81,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:228](https://gi
 
 ### getRecord()
 
-> **getRecord**(`messageId`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
+> **getRecord**(`messageId`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L215)
 
@@ -93,7 +93,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:215](https://gi
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
 ***
 
@@ -111,7 +111,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:111](https://gi
 
 ### listRecords()
 
-> **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+> **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 Defined in: [packages/messaging/src/delivery-tracking/service.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L220)
 
@@ -119,11 +119,11 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:220](https://gi
 
 ##### options
 
-[`DeliveryTrackingListOptions`](/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
+[`DeliveryTrackingListOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackinglistoptions/)
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
 ***
 
@@ -137,11 +137,11 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:135](https://gi
 
 ##### context
 
-[`HookContext`](/api/messaging/src/interfaces/hookcontext/)
+[`HookContext`](/en/api/messaging/src/interfaces/hookcontext/)
 
 ##### result
 
-[`SendResult`](/api/core/src/interfaces/sendresult/)
+[`SendResult`](/en/api/core/src/interfaces/sendresult/)
 
 #### Returns
 

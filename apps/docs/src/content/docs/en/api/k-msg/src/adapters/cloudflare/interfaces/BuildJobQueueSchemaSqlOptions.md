@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:30](https:
 
 ### dialect
 
-> **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+> **dialect**: [`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L31)
 

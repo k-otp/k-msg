@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:38](https://github.co
 
 ### attempts
 
-> **attempts**: [`RetryAttempt`](/api/k-msg/src/adapters/node/interfaces/retryattempt/)[]
+> **attempts**: [`RetryAttempt`](/en/api/k-msg/src/adapters/node/interfaces/retryattempt/)[]
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L43)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:44](https://github.co
 
 ### originalDeliveryReport
 
-> **originalDeliveryReport**: [`DeliveryReport`](/api/messaging/src/interfaces/deliveryreport/)
+> **originalDeliveryReport**: [`DeliveryReport`](/en/api/messaging/src/interfaces/deliveryreport/)
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L42)
 

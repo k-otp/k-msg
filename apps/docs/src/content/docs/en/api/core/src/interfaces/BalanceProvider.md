@@ -13,7 +13,7 @@ Interface for providers that support balance queries.
 
 ### getBalance()
 
-> **getBalance**(`query?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **getBalance**(`query?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/core/src/provider.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L185)
 
@@ -23,8 +23,8 @@ Query the remaining balance/points for the provider account.
 
 ##### query?
 
-[`BalanceQuery`](/api/core/src/interfaces/balancequery/)
+[`BalanceQuery`](/en/api/core/src/interfaces/balancequery/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`BalanceResult`](/api/core/src/interfaces/balanceresult/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>

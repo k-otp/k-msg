@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/sender/bulk.sender.ts:25](https://github.com
 
 ##### kmsg
 
-[`KMsg`](/api/k-msg/src/classes/kmsg/)
+[`KMsg`](/en/api/k-msg/src/classes/kmsg/)
 
 #### Returns
 
@@ -59,7 +59,7 @@ Defined in: [packages/messaging/src/sender/bulk.sender.ts:430](https://github.co
 
 ### getBulkStatus()
 
-> **getBulkStatus**(`requestId`): `Promise`\<[`BulkMessageResult`](/api/messaging/src/interfaces/bulkmessageresult/) \| `null`\>
+> **getBulkStatus**(`requestId`): `Promise`\<[`BulkMessageResult`](/en/api/messaging/src/interfaces/bulkmessageresult/) \| `null`\>
 
 Defined in: [packages/messaging/src/sender/bulk.sender.ts:359](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/sender/bulk.sender.ts#L359)
 
@@ -71,13 +71,13 @@ Defined in: [packages/messaging/src/sender/bulk.sender.ts:359](https://github.co
 
 #### Returns
 
-`Promise`\<[`BulkMessageResult`](/api/messaging/src/interfaces/bulkmessageresult/) \| `null`\>
+`Promise`\<[`BulkMessageResult`](/en/api/messaging/src/interfaces/bulkmessageresult/) \| `null`\>
 
 ***
 
 ### retryFailedBatch()
 
-> **retryFailedBatch**(`requestId`, `batchId`): `Promise`\<[`BulkBatchResult`](/api/messaging/src/interfaces/bulkbatchresult/) \| `null`\>
+> **retryFailedBatch**(`requestId`, `batchId`): `Promise`\<[`BulkBatchResult`](/en/api/messaging/src/interfaces/bulkbatchresult/) \| `null`\>
 
 Defined in: [packages/messaging/src/sender/bulk.sender.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/sender/bulk.sender.ts#L383)
 
@@ -93,13 +93,13 @@ Defined in: [packages/messaging/src/sender/bulk.sender.ts:383](https://github.co
 
 #### Returns
 
-`Promise`\<[`BulkBatchResult`](/api/messaging/src/interfaces/bulkbatchresult/) \| `null`\>
+`Promise`\<[`BulkBatchResult`](/en/api/messaging/src/interfaces/bulkbatchresult/) \| `null`\>
 
 ***
 
 ### sendBulk()
 
-> **sendBulk**(`request`): `Promise`\<[`BulkMessageResult`](/api/messaging/src/interfaces/bulkmessageresult/)\>
+> **sendBulk**(`request`): `Promise`\<[`BulkMessageResult`](/en/api/messaging/src/interfaces/bulkmessageresult/)\>
 
 Defined in: [packages/messaging/src/sender/bulk.sender.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/sender/bulk.sender.ts#L29)
 
@@ -107,8 +107,8 @@ Defined in: [packages/messaging/src/sender/bulk.sender.ts:29](https://github.com
 
 ##### request
 
-[`BulkMessageRequest`](/api/messaging/src/interfaces/bulkmessagerequest/)
+[`BulkMessageRequest`](/en/api/messaging/src/interfaces/bulkmessagerequest/)
 
 #### Returns
 
-`Promise`\<[`BulkMessageResult`](/api/messaging/src/interfaces/bulkmessageresult/)\>
+`Promise`\<[`BulkMessageResult`](/en/api/messaging/src/interfaces/bulkmessageresult/)\>

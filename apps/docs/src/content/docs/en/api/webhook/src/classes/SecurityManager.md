@@ -22,7 +22,7 @@ Defined in: [packages/webhook/src/security/security.manager.ts:22](https://githu
 
 ##### webhookConfig
 
-`Pick`\<[`WebhookConfig`](/api/webhook/src/interfaces/webhookconfig/), `"algorithm"` \| `"signatureHeader"` \| `"signaturePrefix"`\>
+`Pick`\<[`WebhookConfig`](/en/api/webhook/src/interfaces/webhookconfig/), `"algorithm"` \| `"signatureHeader"` \| `"signaturePrefix"`\>
 
 #### Returns
 

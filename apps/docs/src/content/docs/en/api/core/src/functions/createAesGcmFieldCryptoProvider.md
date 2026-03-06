@@ -5,7 +5,7 @@ prev: false
 title: "createAesGcmFieldCryptoProvider"
 ---
 
-> **createAesGcmFieldCryptoProvider**(`options`): [`FieldCryptoProvider`](/api/core/src/interfaces/fieldcryptoprovider/)
+> **createAesGcmFieldCryptoProvider**(`options`): [`FieldCryptoProvider`](/en/api/core/src/interfaces/fieldcryptoprovider/)
 
 Defined in: [packages/core/src/crypto/types.ts:263](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L263)
 
@@ -13,8 +13,8 @@ Defined in: [packages/core/src/crypto/types.ts:263](https://github.com/k-otp/k-m
 
 ### options
 
-[`AesGcmFieldCryptoProviderOptions`](/api/core/src/interfaces/aesgcmfieldcryptoprovideroptions/)
+[`AesGcmFieldCryptoProviderOptions`](/en/api/core/src/interfaces/aesgcmfieldcryptoprovideroptions/)
 
 ## Returns
 
-[`FieldCryptoProvider`](/api/core/src/interfaces/fieldcryptoprovider/)
+[`FieldCryptoProvider`](/en/api/core/src/interfaces/fieldcryptoprovider/)

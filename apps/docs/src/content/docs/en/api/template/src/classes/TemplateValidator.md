@@ -21,7 +21,7 @@ Defined in: [packages/template/src/parser/validator.ts:14](https://github.com/k-
 
 ### quickValidate()
 
-> `static` **quickValidate**(`template`): [`ValidationResult`](/api/template/src/interfaces/validationresult/)
+> `static` **quickValidate**(`template`): [`ValidationResult`](/en/api/template/src/interfaces/validationresult/)
 
 Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L206)
 
@@ -31,17 +31,17 @@ Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k
 
 ##### template
 
-`Partial`\<[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
 
 #### Returns
 
-[`ValidationResult`](/api/template/src/interfaces/validationresult/)
+[`ValidationResult`](/en/api/template/src/interfaces/validationresult/)
 
 ***
 
 ### validate()
 
-> `static` **validate**(`template`): [`ValidationResult`](/api/template/src/interfaces/validationresult/)
+> `static` **validate**(`template`): [`ValidationResult`](/en/api/template/src/interfaces/validationresult/)
 
 Defined in: [packages/template/src/parser/validator.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L18)
 
@@ -51,8 +51,8 @@ Defined in: [packages/template/src/parser/validator.ts:18](https://github.com/k-
 
 ##### template
 
-[`AlimTalkTemplate`](/api/template/src/interfaces/alimtalktemplate/)
+[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
 
 #### Returns
 
-[`ValidationResult`](/api/template/src/interfaces/validationresult/)
+[`ValidationResult`](/en/api/template/src/interfaces/validationresult/)

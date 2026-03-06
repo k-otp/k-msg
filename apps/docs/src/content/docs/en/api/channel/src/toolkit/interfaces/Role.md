@@ -51,7 +51,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:20](https://
 
 ### permissions
 
-> **permissions**: [`Permission`](/api/channel/src/toolkit/interfaces/permission/)[]
+> **permissions**: [`Permission`](/en/api/channel/src/toolkit/interfaces/permission/)[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L21)
 

@@ -11,6 +11,6 @@ Defined in: [packages/core/src/types/balance.ts:5](https://github.com/k-otp/k-ms
 
 ### channel?
 
-> `optional` **channel**: [`MessageType`](/api/core/src/type-aliases/messagetype/)
+> `optional` **channel**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/)
 
 Defined in: [packages/core/src/types/balance.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/balance.ts#L6)

@@ -5,7 +5,7 @@ prev: false
 title: "validateFieldCryptoConfig"
 ---
 
-> **validateFieldCryptoConfig**(`config`, `options?`): [`FieldCryptoPolicyValidationResult`](/api/core/src/interfaces/fieldcryptopolicyvalidationresult/)
+> **validateFieldCryptoConfig**(`config`, `options?`): [`FieldCryptoPolicyValidationResult`](/en/api/core/src/interfaces/fieldcryptopolicyvalidationresult/)
 
 Defined in: [packages/core/src/crypto/policy.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L47)
 
@@ -13,12 +13,12 @@ Defined in: [packages/core/src/crypto/policy.ts:47](https://github.com/k-otp/k-m
 
 ### config
 
-[`FieldCryptoConfig`](/api/core/src/interfaces/fieldcryptoconfig/)
+[`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 ### options?
 
-[`FieldCryptoPolicyOptions`](/api/core/src/interfaces/fieldcryptopolicyoptions/) = `{}`
+[`FieldCryptoPolicyOptions`](/en/api/core/src/interfaces/fieldcryptopolicyoptions/) = `{}`
 
 ## Returns
 
-[`FieldCryptoPolicyValidationResult`](/api/core/src/interfaces/fieldcryptopolicyvalidationresult/)
+[`FieldCryptoPolicyValidationResult`](/en/api/core/src/interfaces/fieldcryptopolicyvalidationresult/)

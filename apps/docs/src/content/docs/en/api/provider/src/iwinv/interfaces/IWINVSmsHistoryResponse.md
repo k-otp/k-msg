@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:194](https://github.com/
 
 ### list
 
-> **list**: [`IWINVSmsHistoryItem`](/api/provider/src/iwinv/interfaces/iwinvsmshistoryitem/)[]
+> **list**: [`IWINVSmsHistoryItem`](/en/api/provider/src/iwinv/interfaces/iwinvsmshistoryitem/)[]
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:198](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L198)
 

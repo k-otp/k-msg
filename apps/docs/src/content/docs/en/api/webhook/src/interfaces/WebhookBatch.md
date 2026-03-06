@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:143](https://github.com
 
 ### events
 
-> **events**: [`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]
+> **events**: [`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)\<`any`\>[]
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L144)
 

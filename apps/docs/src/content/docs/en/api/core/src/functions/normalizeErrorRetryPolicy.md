@@ -5,7 +5,7 @@ prev: false
 title: "normalizeErrorRetryPolicy"
 ---
 
-> **normalizeErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/) \| `null`
+> **normalizeErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`
 
 Defined in: [packages/core/src/errors.ts:588](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L588)
 
@@ -17,8 +17,8 @@ Defined in: [packages/core/src/errors.ts:588](https://github.com/k-otp/k-msg/blo
 
 ### options?
 
-[`ErrorRetryPolicyNormalizeOptions`](/api/core/src/interfaces/errorretrypolicynormalizeoptions/) = `{}`
+[`ErrorRetryPolicyNormalizeOptions`](/en/api/core/src/interfaces/errorretrypolicynormalizeoptions/) = `{}`
 
 ## Returns
 
-[`ErrorRetryPolicy`](/api/core/src/interfaces/errorretrypolicy/) \| `null`
+[`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`

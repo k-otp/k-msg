@@ -23,7 +23,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:35](https://github
 
 ##### config?
 
-`Partial`\<[`LoadBalancerConfig`](/api/webhook/src/toolkit/interfaces/loadbalancerconfig/)\> = `{}`
+`Partial`\<[`LoadBalancerConfig`](/en/api/webhook/src/toolkit/interfaces/loadbalancerconfig/)\> = `{}`
 
 #### Returns
 
@@ -273,7 +273,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:45](https://github
 
 ##### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 #### Returns
 
@@ -331,7 +331,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 ### selectEndpoint()
 
-> **selectEndpoint**(`endpoints`): `Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **selectEndpoint**(`endpoints`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L83)
 
@@ -341,11 +341,11 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github
 
 ##### endpoints
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)[]
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
 
 ***
 

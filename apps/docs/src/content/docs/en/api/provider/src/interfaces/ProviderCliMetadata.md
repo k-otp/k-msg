@@ -27,6 +27,6 @@ Defined in: [packages/provider/src/provider-cli-metadata.ts:5](https://github.co
 
 ### routingSeedTypes
 
-> **routingSeedTypes**: readonly [`MessageType`](/api/core/src/type-aliases/messagetype/)[]
+> **routingSeedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/provider/src/provider-cli-metadata.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/provider-cli-metadata.ts#L6)

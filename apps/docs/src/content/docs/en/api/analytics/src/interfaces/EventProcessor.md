@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:35](https://gi
 
 ##### event
 
-[`EventData`](/api/analytics/src/interfaces/eventdata/)
+[`EventData`](/en/api/analytics/src/interfaces/eventdata/)
 
 #### Returns
 
@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:35](https://gi
 
 ### process()
 
-> **process**(`event`): `Promise`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
+> **process**(`event`): `Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
 
 Defined in: [packages/analytics/src/collectors/event.collector.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L36)
 
@@ -37,8 +37,8 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:36](https://gi
 
 ##### event
 
-[`EventData`](/api/analytics/src/interfaces/eventdata/)
+[`EventData`](/en/api/analytics/src/interfaces/eventdata/)
 
 #### Returns
 
-`Promise`\<[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]\>
+`Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>

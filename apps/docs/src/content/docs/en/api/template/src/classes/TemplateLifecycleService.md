@@ -19,11 +19,11 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:35](htt
 
 ##### provider
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/)
 
 ##### inspectionProvider?
 
-[`TemplateInspectionProvider`](/api/core/src/interfaces/templateinspectionprovider/)
+[`TemplateInspectionProvider`](/en/api/core/src/interfaces/templateinspectionprovider/)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:35](htt
 
 ### create()
 
-> **create**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **create**(`input`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L45)
 
@@ -41,21 +41,21 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:45](htt
 
 ##### input
 
-[`TemplateCreateInput`](/api/core/src/type-aliases/templatecreateinput/)
+[`TemplateCreateInput`](/en/api/core/src/type-aliases/templatecreateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### delete()
 
-> **delete**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **delete**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L105)
 
@@ -67,17 +67,17 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:105](ht
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### get()
 
-> **get**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **get**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L121)
 
@@ -89,17 +89,17 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:121](ht
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### list()
 
-> **list**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **list**(`params?`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L137)
 
@@ -121,17 +121,17 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:137](ht
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### requestInspection()
 
-> **requestInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **requestInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L144)
 
@@ -143,17 +143,17 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:144](ht
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 ***
 
 ### update()
 
-> **update**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **update**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-lifecycle.service.ts#L69)
 
@@ -165,12 +165,12 @@ Defined in: [packages/template/src/runtime/template-lifecycle.service.ts:69](htt
 
 ##### patch
 
-[`TemplateUpdateInput`](/api/core/src/type-aliases/templateupdateinput/)
+[`TemplateUpdateInput`](/en/api/core/src/type-aliases/templateupdateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>

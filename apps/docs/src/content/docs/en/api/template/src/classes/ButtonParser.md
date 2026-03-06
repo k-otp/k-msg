@@ -21,7 +21,7 @@ Defined in: [packages/template/src/parser/button.parser.ts:3](https://github.com
 
 ### deserializeButtons()
 
-> `static` **deserializeButtons**(`buttonsJson`): [`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
+> `static` **deserializeButtons**(`buttonsJson`): [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 Defined in: [packages/template/src/parser/button.parser.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/button.parser.ts#L169)
 
@@ -35,7 +35,7 @@ JSON 문자열에서 버튼 배열로 역직렬화합니다
 
 #### Returns
 
-[`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
+[`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/template/src/parser/button.parser.ts:151](https://github.c
 
 ##### buttons
 
-[`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
+[`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 #### Returns
 
@@ -71,7 +71,7 @@ Defined in: [packages/template/src/parser/button.parser.ts:7](https://github.com
 
 ##### buttons
 
-[`TemplateButton`](/api/template/src/interfaces/templatebutton/)[]
+[`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 #### Returns
 

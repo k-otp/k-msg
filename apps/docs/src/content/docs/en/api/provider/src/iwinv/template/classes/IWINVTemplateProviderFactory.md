@@ -21,7 +21,7 @@ Defined in: [packages/provider/src/iwinv/template.ts:121](https://github.com/k-o
 
 ### create()
 
-> `static` **create**(`config`): [`IWINVTemplateProvider`](/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
+> `static` **create**(`config`): [`IWINVTemplateProvider`](/en/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
 
 Defined in: [packages/provider/src/iwinv/template.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L122)
 
@@ -29,20 +29,20 @@ Defined in: [packages/provider/src/iwinv/template.ts:122](https://github.com/k-o
 
 ##### config
 
-[`IWINVConfig`](/api/provider/src/iwinv/interfaces/iwinvconfig/)
+[`IWINVConfig`](/en/api/provider/src/iwinv/interfaces/iwinvconfig/)
 
 #### Returns
 
-[`IWINVTemplateProvider`](/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
+[`IWINVTemplateProvider`](/en/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
 
 ***
 
 ### createDefault()
 
-> `static` **createDefault**(): [`IWINVTemplateProvider`](/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
+> `static` **createDefault**(): [`IWINVTemplateProvider`](/en/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
 
 Defined in: [packages/provider/src/iwinv/template.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/template.ts#L126)
 
 #### Returns
 
-[`IWINVTemplateProvider`](/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)
+[`IWINVTemplateProvider`](/en/api/provider/src/iwinv/template/classes/iwinvtemplateprovider/)

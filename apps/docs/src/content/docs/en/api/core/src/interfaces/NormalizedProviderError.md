@@ -27,7 +27,7 @@ Defined in: [packages/core/src/errors.ts:165](https://github.com/k-otp/k-msg/blo
 
 ### classification
 
-> **classification**: [`ProviderRetryHint`](/api/core/src/type-aliases/providerretryhint/)
+> **classification**: [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
 Defined in: [packages/core/src/errors.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L159)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/errors.ts:159](https://github.com/k-otp/k-msg/blo
 
 ### code
 
-> **code**: [`KMsgErrorCode`](/api/core/src/enumerations/kmsgerrorcode/)
+> **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
 Defined in: [packages/core/src/errors.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L158)
 
@@ -83,6 +83,6 @@ Defined in: [packages/core/src/errors.ts:164](https://github.com/k-otp/k-msg/blo
 
 ### sources
 
-> **sources**: [`NormalizedProviderErrorSources`](/api/core/src/interfaces/normalizedprovidererrorsources/)
+> **sources**: [`NormalizedProviderErrorSources`](/en/api/core/src/interfaces/normalizedprovidererrorsources/)
 
 Defined in: [packages/core/src/errors.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L167)

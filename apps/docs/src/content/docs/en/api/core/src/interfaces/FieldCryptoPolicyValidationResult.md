@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/policy.ts:16](https://github.com/k-otp/k-m
 
 ### issues
 
-> **issues**: [`FieldCryptoPolicyValidationIssue`](/api/core/src/interfaces/fieldcryptopolicyvalidationissue/)[]
+> **issues**: [`FieldCryptoPolicyValidationIssue`](/en/api/core/src/interfaces/fieldcryptopolicyvalidationissue/)[]
 
 Defined in: [packages/core/src/crypto/policy.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L18)
 

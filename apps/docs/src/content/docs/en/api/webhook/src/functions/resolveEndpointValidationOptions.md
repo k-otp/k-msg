@@ -5,7 +5,7 @@ prev: false
 title: "resolveEndpointValidationOptions"
 ---
 
-> **resolveEndpointValidationOptions**(`security`): [`EndpointValidationOptions`](/api/webhook/src/interfaces/endpointvalidationoptions/)
+> **resolveEndpointValidationOptions**(`security`): [`EndpointValidationOptions`](/en/api/webhook/src/interfaces/endpointvalidationoptions/)
 
 Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L60)
 
@@ -13,8 +13,8 @@ Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:60](https://git
 
 ### security
 
-[`WebhookRuntimeSecurityOptions`](/api/webhook/src/interfaces/webhookruntimesecurityoptions/) | `undefined`
+[`WebhookRuntimeSecurityOptions`](/en/api/webhook/src/interfaces/webhookruntimesecurityoptions/) | `undefined`
 
 ## Returns
 
-[`EndpointValidationOptions`](/api/webhook/src/interfaces/endpointvalidationoptions/)
+[`EndpointValidationOptions`](/en/api/webhook/src/interfaces/endpointvalidationoptions/)

@@ -5,7 +5,7 @@ prev: false
 title: "getLatestFieldCryptoMigrationRun"
 ---
 
-> **getLatestFieldCryptoMigrationRun**(`client`, `trackingTableName`, `options?`): `Promise`\<[`FieldCryptoMigrationRunRecord`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/) \| `undefined`\>
+> **getLatestFieldCryptoMigrationRun**(`client`, `trackingTableName`, `options?`): `Promise`\<[`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/) \| `undefined`\>
 
 Defined in: [packages/messaging/src/migration/field-crypto/state.ts:275](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L275)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/state.ts:275](https:/
 
 ### client
 
-[`CloudflareSqlClient`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
+[`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
 ### trackingTableName
 
@@ -21,8 +21,8 @@ Defined in: [packages/messaging/src/migration/field-crypto/state.ts:275](https:/
 
 ### options?
 
-[`FieldCryptoMigrationStateTables`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/) = `{}`
+[`FieldCryptoMigrationStateTables`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatetables/) = `{}`
 
 ## Returns
 
-`Promise`\<[`FieldCryptoMigrationRunRecord`](/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/) \| `undefined`\>
+`Promise`\<[`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/) \| `undefined`\>

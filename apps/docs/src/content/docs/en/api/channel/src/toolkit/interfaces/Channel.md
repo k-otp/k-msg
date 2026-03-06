@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:4](https://github.com/k
 
 ### metadata
 
-> **metadata**: [`ChannelMetadata`](/api/channel/src/toolkit/interfaces/channelmetadata/)
+> **metadata**: [`ChannelMetadata`](/en/api/channel/src/toolkit/interfaces/channelmetadata/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L11)
 
@@ -59,7 +59,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:6](https://github.com/k
 
 ### senderNumbers
 
-> **senderNumbers**: [`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)[]
+> **senderNumbers**: [`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)[]
 
 Defined in: [packages/channel/src/types/channel.types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L10)
 
@@ -67,7 +67,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:10](https://github.com/
 
 ### status
 
-> **status**: [`ChannelStatus`](/api/channel/src/toolkit/enumerations/channelstatus/)
+> **status**: [`ChannelStatus`](/en/api/channel/src/toolkit/enumerations/channelstatus/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L8)
 
@@ -75,7 +75,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:8](https://github.com/k
 
 ### type
 
-> **type**: [`ChannelType`](/api/channel/src/toolkit/enumerations/channeltype/)
+> **type**: [`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L7)
 

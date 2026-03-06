@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:73](https://git
 
 ### options?
 
-[`EndpointValidationOptions`](/api/webhook/src/interfaces/endpointvalidationoptions/) = `DEFAULT_ENDPOINT_VALIDATION_OPTIONS`
+[`EndpointValidationOptions`](/en/api/webhook/src/interfaces/endpointvalidationoptions/) = `DEFAULT_ENDPOINT_VALIDATION_OPTIONS`
 
 ## Returns
 

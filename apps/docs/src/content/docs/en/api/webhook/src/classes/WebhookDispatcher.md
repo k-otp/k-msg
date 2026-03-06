@@ -19,11 +19,11 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:58](https://git
 
 ##### config
 
-[`WebhookConfig`](/api/webhook/src/interfaces/webhookconfig/)
+[`WebhookConfig`](/en/api/webhook/src/interfaces/webhookconfig/)
 
 ##### httpClient?
 
-[`HttpClient`](/api/webhook/src/interfaces/httpclient/)
+[`HttpClient`](/en/api/webhook/src/interfaces/httpclient/)
 
 #### Returns
 
@@ -33,7 +33,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:58](https://git
 
 ### dispatch()
 
-> **dispatch**(`event`, `endpoint`): `Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>
+> **dispatch**(`event`, `endpoint`): `Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)\>
 
 Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L65)
 
@@ -41,15 +41,15 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:65](https://git
 
 ##### event
 
-[`WebhookEvent`](/api/webhook/src/interfaces/webhookevent/)
+[`WebhookEvent`](/en/api/webhook/src/interfaces/webhookevent/)
 
 ##### endpoint
 
-[`WebhookEndpoint`](/api/webhook/src/interfaces/webhookendpoint/)
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
 
 #### Returns
 
-`Promise`\<[`WebhookDelivery`](/api/webhook/src/interfaces/webhookdelivery/)\>
+`Promise`\<[`WebhookDelivery`](/en/api/webhook/src/interfaces/webhookdelivery/)\>
 
 ***
 

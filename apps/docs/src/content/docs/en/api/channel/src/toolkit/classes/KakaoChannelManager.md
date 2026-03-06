@@ -39,7 +39,7 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:167](https://github.c
 
 ### createChannel()
 
-> **createChannel**(`request`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
+> **createChannel**(`request`): `Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)\>
 
 Defined in: [packages/channel/src/toolkit/kakao/channel.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L11)
 
@@ -47,11 +47,11 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:11](https://github.co
 
 ##### request
 
-[`ChannelCreateRequest`](/api/channel/src/toolkit/interfaces/channelcreaterequest/)
+[`ChannelCreateRequest`](/en/api/channel/src/toolkit/interfaces/channelcreaterequest/)
 
 #### Returns
 
-`Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
+`Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)\>
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:104](https://github.c
 
 ### getChannel()
 
-> **getChannel**(`channelId`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
+> **getChannel**(`channelId`): `Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
 
 Defined in: [packages/channel/src/toolkit/kakao/channel.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L77)
 
@@ -87,13 +87,13 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:77](https://github.co
 
 #### Returns
 
-`Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
+`Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/) \| `null`\>
 
 ***
 
 ### listChannels()
 
-> **listChannels**(`filters?`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)[]\>
+> **listChannels**(`filters?`): `Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)[]\>
 
 Defined in: [packages/channel/src/toolkit/kakao/channel.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L117)
 
@@ -103,15 +103,15 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:117](https://github.c
 
 ###### status?
 
-[`ChannelStatus`](/api/channel/src/toolkit/enumerations/channelstatus/)
+[`ChannelStatus`](/en/api/channel/src/toolkit/enumerations/channelstatus/)
 
 ###### type?
 
-[`ChannelType`](/api/channel/src/toolkit/enumerations/channeltype/)
+[`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/)
 
 #### Returns
 
-`Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)[]\>
+`Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)[]\>
 
 ***
 
@@ -157,7 +157,7 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:140](https://github.c
 
 ### updateChannel()
 
-> **updateChannel**(`channelId`, `updates`): `Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
+> **updateChannel**(`channelId`, `updates`): `Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)\>
 
 Defined in: [packages/channel/src/toolkit/kakao/channel.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/channel.ts#L81)
 
@@ -169,8 +169,8 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:81](https://github.co
 
 ##### updates
 
-`Partial`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
+`Partial`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)\>
 
 #### Returns
 
-`Promise`\<[`Channel`](/api/channel/src/toolkit/interfaces/channel/)\>
+`Promise`\<[`Channel`](/en/api/channel/src/toolkit/interfaces/channel/)\>

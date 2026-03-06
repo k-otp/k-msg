@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/hooks.ts:19](https://github.com/k-otp/k-msg/
 
 ### error?
 
-> `optional` **error**: [`KMsgError`](/api/core/src/classes/kmsgerror/)
+> `optional` **error**: [`KMsgError`](/en/api/core/src/classes/kmsgerror/)
 
 Defined in: [packages/messaging/src/hooks.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L22)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/hooks.ts:22](https://github.com/k-otp/k-msg/
 
 ### outcome
 
-> **outcome**: [`SendHookFinalOutcome`](/api/messaging/src/type-aliases/sendhookfinaloutcome/)
+> **outcome**: [`SendHookFinalOutcome`](/en/api/messaging/src/type-aliases/sendhookfinaloutcome/)
 
 Defined in: [packages/messaging/src/hooks.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L20)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/hooks.ts:20](https://github.com/k-otp/k-msg/
 
 ### result?
 
-> `optional` **result**: [`SendResult`](/api/core/src/interfaces/sendresult/)
+> `optional` **result**: [`SendResult`](/en/api/core/src/interfaces/sendresult/)
 
 Defined in: [packages/messaging/src/hooks.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L21)
 

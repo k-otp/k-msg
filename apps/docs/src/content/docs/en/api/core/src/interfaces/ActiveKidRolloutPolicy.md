@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/rollout-policy.ts:8](https://github.com/k-
 
 ### buckets
 
-> **buckets**: readonly [`ActiveKidRolloutBucket`](/api/core/src/interfaces/activekidrolloutbucket/)[]
+> **buckets**: readonly [`ActiveKidRolloutBucket`](/en/api/core/src/interfaces/activekidrolloutbucket/)[]
 
 Defined in: [packages/core/src/crypto/rollout-policy.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/rollout-policy.ts#L13)
 
@@ -42,7 +42,7 @@ Deterministic hash seed.
 
 ### stickyFields?
 
-> `optional` **stickyFields**: readonly keyof [`FieldCryptoKeyContext`](/api/core/src/interfaces/fieldcryptokeycontext/)[]
+> `optional` **stickyFields**: readonly keyof [`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)[]
 
 Defined in: [packages/core/src/crypto/rollout-policy.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/rollout-policy.ts#L21)
 

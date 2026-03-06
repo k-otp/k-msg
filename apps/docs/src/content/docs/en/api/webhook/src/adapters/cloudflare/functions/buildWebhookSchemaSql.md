@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:21](https://
 
 ### options?
 
-[`WebhookSchemaOptions`](/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/) = `{}`
+[`WebhookSchemaOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/webhookschemaoptions/) = `{}`
 
 ## Returns
 

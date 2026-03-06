@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:87](https://githu
 
 ##### context
 
-[`ApiFailoverClassificationContext`](/api/messaging/src/tracking/interfaces/apifailoverclassificationcontext/)
+[`ApiFailoverClassificationContext`](/en/api/messaging/src/tracking/interfaces/apifailoverclassificationcontext/)
 
 #### Returns
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:85](https://githu
 
 ### rulesByProviderId?
 
-> `optional` **rulesByProviderId**: `Record`\<`string`, [`DeliveryTrackingApiFailoverRule`](/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverrule/)\>
+> `optional` **rulesByProviderId**: `Record`\<`string`, [`DeliveryTrackingApiFailoverRule`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverrule/)\>
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L88)
 
@@ -45,6 +45,6 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:88](https://githu
 
 ### sender
 
-> **sender**: [`ApiFailoverSender`](/api/messaging/src/tracking/type-aliases/apifailoversender/)
+> **sender**: [`ApiFailoverSender`](/en/api/messaging/src/tracking/type-aliases/apifailoversender/)
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L86)

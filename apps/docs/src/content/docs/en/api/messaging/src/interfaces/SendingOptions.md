@@ -9,7 +9,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:32](https://github.
 
 ## Extended by
 
-- [`BulkSendingOptions`](/api/messaging/src/interfaces/bulksendingoptions/)
+- [`BulkSendingOptions`](/en/api/messaging/src/interfaces/bulksendingoptions/)
 
 ## Properties
 

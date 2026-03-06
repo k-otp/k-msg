@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/message.ts:193](https://github.com/k-otp/k-
 
 ### code
 
-> **code**: [`SendWarningCode`](/api/core/src/type-aliases/sendwarningcode/)
+> **code**: [`SendWarningCode`](/en/api/core/src/type-aliases/sendwarningcode/)
 
 Defined in: [packages/core/src/types/message.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L194)
 

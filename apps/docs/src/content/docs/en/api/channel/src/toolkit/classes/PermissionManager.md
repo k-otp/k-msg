@@ -79,7 +79,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:261](https:/
 
 ### checkPermission()
 
-> **checkPermission**(`check`): `Promise`\<[`PermissionResult`](/api/channel/src/toolkit/interfaces/permissionresult/)\>
+> **checkPermission**(`check`): `Promise`\<[`PermissionResult`](/en/api/channel/src/toolkit/interfaces/permissionresult/)\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:313](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L313)
 
@@ -87,17 +87,17 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:313](https:/
 
 ##### check
 
-[`PermissionCheck`](/api/channel/src/toolkit/interfaces/permissioncheck/)
+[`PermissionCheck`](/en/api/channel/src/toolkit/interfaces/permissioncheck/)
 
 #### Returns
 
-`Promise`\<[`PermissionResult`](/api/channel/src/toolkit/interfaces/permissionresult/)\>
+`Promise`\<[`PermissionResult`](/en/api/channel/src/toolkit/interfaces/permissionresult/)\>
 
 ***
 
 ### createRole()
 
-> **createRole**(`roleData`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
+> **createRole**(`roleData`): `Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L187)
 
@@ -105,17 +105,17 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:187](https:/
 
 ##### roleData
 
-`Omit`\<[`Role`](/api/channel/src/toolkit/interfaces/role/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
+`Omit`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
 
 #### Returns
 
-`Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
+`Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)\>
 
 ***
 
 ### createUser()
 
-> **createUser**(`userData`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
+> **createUser**(`userData`): `Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/)\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L116)
 
@@ -123,11 +123,11 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:116](https:/
 
 ##### userData
 
-`Omit`\<[`User`](/api/channel/src/toolkit/interfaces/user/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
+`Omit`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/), `"id"` \| `"createdAt"` \| `"updatedAt"`\>
 
 #### Returns
 
-`Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
+`Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/)\>
 
 ***
 
@@ -211,7 +211,7 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:71](https://gi
 
 ### getRole()
 
-> **getRole**(`roleId`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/) \| `null`\>
+> **getRole**(`roleId`): `Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/) \| `null`\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L205)
 
@@ -223,13 +223,13 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:205](https:/
 
 #### Returns
 
-`Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/) \| `null`\>
+`Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/) \| `null`\>
 
 ***
 
 ### getUser()
 
-> **getUser**(`userId`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/) \| `null`\>
+> **getUser**(`userId`): `Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/) \| `null`\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L138)
 
@@ -241,13 +241,13 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:138](https:/
 
 #### Returns
 
-`Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/) \| `null`\>
+`Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/) \| `null`\>
 
 ***
 
 ### getUserPermissions()
 
-> **getUserPermissions**(`userId`): `Promise`\<[`Permission`](/api/channel/src/toolkit/interfaces/permission/)[]\>
+> **getUserPermissions**(`userId`): `Promise`\<[`Permission`](/en/api/channel/src/toolkit/interfaces/permission/)[]\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L368)
 
@@ -259,13 +259,13 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:368](https:/
 
 #### Returns
 
-`Promise`\<[`Permission`](/api/channel/src/toolkit/interfaces/permission/)[]\>
+`Promise`\<[`Permission`](/en/api/channel/src/toolkit/interfaces/permission/)[]\>
 
 ***
 
 ### getUserRoles()
 
-> **getUserRoles**(`userId`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)[]\>
+> **getUserRoles**(`userId`): `Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)[]\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:389](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L389)
 
@@ -277,7 +277,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:389](https:/
 
 #### Returns
 
-`Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)[]\>
+`Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)[]\>
 
 ***
 
@@ -295,11 +295,11 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:329](https:/
 
 ##### resource
 
-[`ResourceType`](/api/channel/src/toolkit/enumerations/resourcetype/)
+[`ResourceType`](/en/api/channel/src/toolkit/enumerations/resourcetype/)
 
 ##### action
 
-[`ActionType`](/api/channel/src/toolkit/enumerations/actiontype/)
+[`ActionType`](/en/api/channel/src/toolkit/enumerations/actiontype/)
 
 ##### resourceId?
 
@@ -307,7 +307,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:329](https:/
 
 ##### context?
 
-[`AccessContext`](/api/channel/src/toolkit/interfaces/accesscontext/)
+[`AccessContext`](/en/api/channel/src/toolkit/interfaces/accesscontext/)
 
 #### Returns
 
@@ -339,19 +339,19 @@ Defined in: [packages/channel/src/toolkit/shared/event-emitter.ts:67](https://gi
 
 ### listRoles()
 
-> **listRoles**(): [`Role`](/api/channel/src/toolkit/interfaces/role/)[]
+> **listRoles**(): [`Role`](/en/api/channel/src/toolkit/interfaces/role/)[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:408](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L408)
 
 #### Returns
 
-[`Role`](/api/channel/src/toolkit/interfaces/role/)[]
+[`Role`](/en/api/channel/src/toolkit/interfaces/role/)[]
 
 ***
 
 ### listUsers()
 
-> **listUsers**(`filters?`): [`User`](/api/channel/src/toolkit/interfaces/user/)[]
+> **listUsers**(`filters?`): [`User`](/en/api/channel/src/toolkit/interfaces/user/)[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:394](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L394)
 
@@ -369,7 +369,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:394](https:/
 
 #### Returns
 
-[`User`](/api/channel/src/toolkit/interfaces/user/)[]
+[`User`](/en/api/channel/src/toolkit/interfaces/user/)[]
 
 ***
 
@@ -535,11 +535,11 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:347](https:/
 
 ##### resource
 
-[`ResourceType`](/api/channel/src/toolkit/enumerations/resourcetype/)
+[`ResourceType`](/en/api/channel/src/toolkit/enumerations/resourcetype/)
 
 ##### action
 
-[`ActionType`](/api/channel/src/toolkit/enumerations/actiontype/)
+[`ActionType`](/en/api/channel/src/toolkit/enumerations/actiontype/)
 
 ##### resourceId?
 
@@ -547,7 +547,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:347](https:/
 
 ##### context?
 
-[`AccessContext`](/api/channel/src/toolkit/interfaces/accesscontext/)
+[`AccessContext`](/en/api/channel/src/toolkit/interfaces/accesscontext/)
 
 #### Returns
 
@@ -557,7 +557,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:347](https:/
 
 ### updateRole()
 
-> **updateRole**(`roleId`, `updates`): `Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
+> **updateRole**(`roleId`, `updates`): `Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L209)
 
@@ -569,17 +569,17 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:209](https:/
 
 ##### updates
 
-`Partial`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
+`Partial`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)\>
 
 #### Returns
 
-`Promise`\<[`Role`](/api/channel/src/toolkit/interfaces/role/)\>
+`Promise`\<[`Role`](/en/api/channel/src/toolkit/interfaces/role/)\>
 
 ***
 
 ### updateUser()
 
-> **updateUser**(`userId`, `updates`): `Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
+> **updateUser**(`userId`, `updates`): `Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/)\>
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L142)
 
@@ -591,8 +591,8 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:142](https:/
 
 ##### updates
 
-`Partial`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
+`Partial`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/)\>
 
 #### Returns
 
-`Promise`\<[`User`](/api/channel/src/toolkit/interfaces/user/)\>
+`Promise`\<[`User`](/en/api/channel/src/toolkit/interfaces/user/)\>

@@ -65,6 +65,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:191](https://github
 
 ### type
 
-> **type**: [`MessageEventType`](/api/messaging/src/enumerations/messageeventtype/)
+> **type**: [`MessageEventType`](/en/api/messaging/src/enumerations/messageeventtype/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L190)

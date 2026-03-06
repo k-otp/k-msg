@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:31](https://github.com/k-otp/
 
 ### deliveryStore
 
-> **deliveryStore**: [`WebhookDeliveryStore`](/api/webhook/src/interfaces/webhookdeliverystore/)
+> **deliveryStore**: [`WebhookDeliveryStore`](/en/api/webhook/src/interfaces/webhookdeliverystore/)
 
 Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L33)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/
 
 ### endpointStore
 
-> **endpointStore**: [`WebhookEndpointStore`](/api/webhook/src/interfaces/webhookendpointstore/)
+> **endpointStore**: [`WebhookEndpointStore`](/en/api/webhook/src/interfaces/webhookendpointstore/)
 
 Defined in: [packages/webhook/src/runtime/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L32)
 

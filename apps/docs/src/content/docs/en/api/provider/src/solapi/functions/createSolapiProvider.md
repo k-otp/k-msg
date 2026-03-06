@@ -5,7 +5,7 @@ prev: false
 title: "createSolapiProvider"
 ---
 
-> **createSolapiProvider**(`config`): [`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+> **createSolapiProvider**(`config`): [`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)
 
 Defined in: [packages/provider/src/solapi/provider.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/solapi/provider.ts#L190)
 
@@ -15,8 +15,8 @@ SOLAPI Provider package entrypoint
 
 ### config
 
-[`SolapiConfig`](/api/provider/src/solapi/interfaces/solapiconfig/)
+[`SolapiConfig`](/en/api/provider/src/solapi/interfaces/solapiconfig/)
 
 ## Returns
 
-[`SolapiProvider`](/api/provider/src/solapi/classes/solapiprovider/)
+[`SolapiProvider`](/en/api/provider/src/solapi/classes/solapiprovider/)

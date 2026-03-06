@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:8](https://gith
 
 ### addSenderNumber()
 
-> **addSenderNumber**(`channelId`, `request`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
+> **addSenderNumber**(`channelId`, `request`): `Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
 Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L11)
 
@@ -33,11 +33,11 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:11](https://git
 
 ##### request
 
-[`SenderNumberCreateRequest`](/api/channel/src/toolkit/interfaces/sendernumbercreaterequest/)
+[`SenderNumberCreateRequest`](/en/api/channel/src/toolkit/interfaces/sendernumbercreaterequest/)
 
 #### Returns
 
-`Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
+`Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
 ***
 
@@ -83,7 +83,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:155](https://gi
 
 ### getSenderNumber()
 
-> **getSenderNumber**(`senderNumberId`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
+> **getSenderNumber**(`senderNumberId`): `Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
 
 Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L64)
 
@@ -95,13 +95,13 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:64](https://git
 
 #### Returns
 
-`Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
+`Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
 
 ***
 
 ### listSenderNumbers()
 
-> **listSenderNumbers**(`filters?`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)[]\>
+> **listSenderNumbers**(`filters?`): `Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)[]\>
 
 Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L68)
 
@@ -111,7 +111,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:68](https://git
 
 ###### category?
 
-[`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
+[`SenderNumberCategory`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
 ###### channelId?
 
@@ -119,7 +119,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:68](https://git
 
 ###### status?
 
-[`SenderNumberStatus`](/api/channel/src/toolkit/enumerations/sendernumberstatus/)
+[`SenderNumberStatus`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/)
 
 ###### verified?
 
@@ -127,7 +127,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:68](https://git
 
 #### Returns
 
-`Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)[]\>
+`Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)[]\>
 
 ***
 
@@ -151,7 +151,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:192](https://gi
 
 ### updateSenderNumber()
 
-> **updateSenderNumber**(`senderNumberId`, `updates`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
+> **updateSenderNumber**(`senderNumberId`, `updates`): `Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
 Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L108)
 
@@ -163,11 +163,11 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:108](https://gi
 
 ##### updates
 
-`Partial`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
+`Partial`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
 #### Returns
 
-`Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
+`Promise`\<[`SenderNumber`](/en/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
 ***
 

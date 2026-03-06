@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:8](https:/
 
 ### dialect
 
-> **dialect**: [`SqlDialect`](/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
+> **dialect**: [`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L9)
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:15](https:
 
 ### query()
 
-> **query**\<`T`\>(`sql`, `params?`): `Promise`\<[`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
+> **query**\<`T`\>(`sql`, `params?`): `Promise`\<[`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L10)
 
@@ -53,7 +53,7 @@ readonly `unknown`[]
 
 #### Returns
 
-`Promise`\<[`CloudflareSqlQueryResult`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
+`Promise`\<[`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>\>
 
 ***
 

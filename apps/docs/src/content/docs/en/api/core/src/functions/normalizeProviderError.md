@@ -5,7 +5,7 @@ prev: false
 title: "normalizeProviderError"
 ---
 
-> **normalizeProviderError**(`error`, `options?`): [`NormalizedProviderError`](/api/core/src/interfaces/normalizedprovidererror/)
+> **normalizeProviderError**(`error`, `options?`): [`NormalizedProviderError`](/en/api/core/src/interfaces/normalizedprovidererror/)
 
 Defined in: [packages/core/src/errors.ts:680](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L680)
 
@@ -17,8 +17,8 @@ Defined in: [packages/core/src/errors.ts:680](https://github.com/k-otp/k-msg/blo
 
 ### options?
 
-[`NormalizeProviderErrorOptions`](/api/core/src/interfaces/normalizeprovidererroroptions/) = `{}`
+[`NormalizeProviderErrorOptions`](/en/api/core/src/interfaces/normalizeprovidererroroptions/) = `{}`
 
 ## Returns
 
-[`NormalizedProviderError`](/api/core/src/interfaces/normalizedprovidererror/)
+[`NormalizedProviderError`](/en/api/core/src/interfaces/normalizedprovidererror/)

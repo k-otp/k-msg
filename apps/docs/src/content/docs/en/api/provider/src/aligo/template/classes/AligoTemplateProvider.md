@@ -11,8 +11,8 @@ Interface for providers that support AlimTalk template management.
 
 ## Implements
 
-- [`TemplateProvider`](/api/core/src/interfaces/templateprovider/)
-- [`TemplateInspectionProvider`](/api/core/src/interfaces/templateinspectionprovider/)
+- [`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/)
+- [`TemplateInspectionProvider`](/en/api/core/src/interfaces/templateinspectionprovider/)
 
 ## Constructors
 
@@ -26,7 +26,7 @@ Defined in: [packages/provider/src/aligo/provider.template.ts:32](https://github
 
 ##### config
 
-[`AligoConfig`](/api/provider/src/aligo/interfaces/aligoconfig/)
+[`AligoConfig`](/en/api/provider/src/aligo/interfaces/aligoconfig/)
 
 #### Returns
 
@@ -44,7 +44,7 @@ Defined in: [packages/provider/src/aligo/provider.template.ts:26](https://github
 
 ### createTemplate()
 
-> **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L57)
 
@@ -54,25 +54,25 @@ Create a new template.
 
 ##### input
 
-[`TemplateCreateInput`](/api/core/src/type-aliases/templatecreateinput/)
+[`TemplateCreateInput`](/en/api/core/src/type-aliases/templatecreateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`createTemplate`](/api/core/src/interfaces/templateprovider/#createtemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`createTemplate`](/en/api/core/src/interfaces/templateprovider/#createtemplate)
 
 ***
 
 ### deleteTemplate()
 
-> **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L72)
 
@@ -86,21 +86,21 @@ Delete a template by code.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`deleteTemplate`](/api/core/src/interfaces/templateprovider/#deletetemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`deleteTemplate`](/en/api/core/src/interfaces/templateprovider/#deletetemplate)
 
 ***
 
 ### getTemplate()
 
-> **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L79)
 
@@ -114,21 +114,21 @@ Get a template by code.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`getTemplate`](/api/core/src/interfaces/templateprovider/#gettemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`getTemplate`](/en/api/core/src/interfaces/templateprovider/#gettemplate)
 
 ***
 
 ### listTemplates()
 
-> **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L86)
 
@@ -152,21 +152,21 @@ List templates with optional filtering and pagination.
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`listTemplates`](/api/core/src/interfaces/templateprovider/#listtemplates)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`listTemplates`](/en/api/core/src/interfaces/templateprovider/#listtemplates)
 
 ***
 
 ### requestTemplateInspection()
 
-> **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L93)
 
@@ -180,21 +180,21 @@ Request inspection for a template (submits for approval review).
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateInspectionProvider`](/api/core/src/interfaces/templateinspectionprovider/).[`requestTemplateInspection`](/api/core/src/interfaces/templateinspectionprovider/#requesttemplateinspection)
+[`TemplateInspectionProvider`](/en/api/core/src/interfaces/templateinspectionprovider/).[`requestTemplateInspection`](/en/api/core/src/interfaces/templateinspectionprovider/#requesttemplateinspection)
 
 ***
 
 ### updateTemplate()
 
-> **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/aligo/provider.template.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.template.ts#L64)
 
@@ -208,16 +208,16 @@ Update an existing template by code.
 
 ##### patch
 
-[`TemplateUpdateInput`](/api/core/src/type-aliases/templateupdateinput/)
+[`TemplateUpdateInput`](/en/api/core/src/type-aliases/templateupdateinput/)
 
 ##### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 #### Implementation of
 
-[`TemplateProvider`](/api/core/src/interfaces/templateprovider/).[`updateTemplate`](/api/core/src/interfaces/templateprovider/#updatetemplate)
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`updateTemplate`](/en/api/core/src/interfaces/templateprovider/#updatetemplate)

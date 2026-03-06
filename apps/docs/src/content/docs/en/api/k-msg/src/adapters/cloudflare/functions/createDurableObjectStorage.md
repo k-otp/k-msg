@@ -5,7 +5,7 @@ prev: false
 title: "createDurableObjectStorage"
 ---
 
-> **createDurableObjectStorage**(`storage`): [`CloudflareObjectStorage`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
+> **createDurableObjectStorage**(`storage`): [`CloudflareObjectStorage`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L117)
 
@@ -13,8 +13,8 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:117](h
 
 ### storage
 
-[`CloudflareDurableObjectStorageLike`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
+[`CloudflareDurableObjectStorageLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaredurableobjectstoragelike/)
 
 ## Returns
 
-[`CloudflareObjectStorage`](/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
+[`CloudflareObjectStorage`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)

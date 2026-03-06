@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:12](https://git
 
 ##### config
 
-[`AnalyticsConfig`](/api/analytics/src/interfaces/analyticsconfig/)
+[`AnalyticsConfig`](/en/api/analytics/src/interfaces/analyticsconfig/)
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:167](https://gi
 
 ##### report
 
-[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)
+[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)
 
 #### Returns
 
@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:186](https://gi
 
 ##### report
 
-[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)
+[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)
 
 #### Returns
 
@@ -69,7 +69,7 @@ Defined in: [packages/analytics/src/services/report.generator.ts:186](https://gi
 
 ### generateCustomReport()
 
-> **generateCustomReport**(`name`, `dateRange`, `filters`, `metricTypes`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateCustomReport**(`name`, `dateRange`, `filters`, `metricTypes`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L142)
 
@@ -97,17 +97,17 @@ Defined in: [packages/analytics/src/services/report.generator.ts:142](https://gi
 
 ##### metricTypes
 
-[`MetricType`](/api/analytics/src/enumerations/metrictype/)[]
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[]
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 ***
 
 ### generateDailySummary()
 
-> **generateDailySummary**(`date`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateDailySummary**(`date`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L19)
 
@@ -121,13 +121,13 @@ Defined in: [packages/analytics/src/services/report.generator.ts:19](https://git
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 ***
 
 ### generateMonthlyReport()
 
-> **generateMonthlyReport**(`year`, `month`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateMonthlyReport**(`year`, `month`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L74)
 
@@ -145,13 +145,13 @@ Defined in: [packages/analytics/src/services/report.generator.ts:74](https://git
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 ***
 
 ### generateProviderReport()
 
-> **generateProviderReport**(`providerId`, `dateRange`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateProviderReport**(`providerId`, `dateRange`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L104)
 
@@ -175,13 +175,13 @@ Defined in: [packages/analytics/src/services/report.generator.ts:104](https://gi
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 ***
 
 ### generateTemplateUsageReport()
 
-> **generateTemplateUsageReport**(`dateRange`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateTemplateUsageReport**(`dateRange`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L123)
 
@@ -201,13 +201,13 @@ Defined in: [packages/analytics/src/services/report.generator.ts:123](https://gi
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 ***
 
 ### generateWeeklyReport()
 
-> **generateWeeklyReport**(`weekStartDate`): `Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+> **generateWeeklyReport**(`weekStartDate`): `Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>
 
 Defined in: [packages/analytics/src/services/report.generator.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/report.generator.ts#L48)
 
@@ -221,4 +221,4 @@ Defined in: [packages/analytics/src/services/report.generator.ts:48](https://git
 
 #### Returns
 
-`Promise`\<[`AnalyticsReport`](/api/analytics/src/interfaces/analyticsreport/)\>
+`Promise`\<[`AnalyticsReport`](/en/api/analytics/src/interfaces/analyticsreport/)\>

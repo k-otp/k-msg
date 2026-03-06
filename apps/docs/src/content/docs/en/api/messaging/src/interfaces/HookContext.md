@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/hooks.ts:4](https://github.com/k-otp/k-msg/b
 
 ### options
 
-> **options**: [`SendOptions`](/api/core/src/type-aliases/sendoptions/)
+> **options**: [`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)
 
 Defined in: [packages/messaging/src/hooks.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L5)
 

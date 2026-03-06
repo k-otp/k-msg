@@ -59,7 +59,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:76](https://github.com/k
 
 ### status
 
-> **status**: [`DeliveryStatus`](/api/core/src/type-aliases/deliverystatus/)
+> **status**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
 
 Defined in: [packages/core/src/types/delivery-status.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L73)
 

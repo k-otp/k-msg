@@ -11,7 +11,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.
 
 ### data
 
-> **data**: [`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+> **data**: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L100)
 
@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github
 
 ### insights?
 
-> `optional` **insights**: [`InsightData`](/api/analytics/src/interfaces/insightdata/)[]
+> `optional` **insights**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L106)
 
@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github
 
 ### query
 
-> **query**: [`AnalyticsQuery`](/api/analytics/src/interfaces/analyticsquery/)
+> **query**: [`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L99)
 

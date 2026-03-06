@@ -5,7 +5,7 @@ prev: false
 title: "createVaultTransitKeyResolver"
 ---
 
-> **createVaultTransitKeyResolver**(`options`): [`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+> **createVaultTransitKeyResolver**(`options`): [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L27)
 
@@ -13,8 +13,8 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:27](https://
 
 ### options
 
-[`VaultTransitKeyResolverOptions`](/api/core/src/interfaces/vaulttransitkeyresolveroptions/)
+[`VaultTransitKeyResolverOptions`](/en/api/core/src/interfaces/vaulttransitkeyresolveroptions/)
 
 ## Returns
 
-[`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+[`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)

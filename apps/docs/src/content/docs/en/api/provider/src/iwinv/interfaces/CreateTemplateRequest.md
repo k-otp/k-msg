@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:47](https://github.com/k
 
 ### buttons?
 
-> `optional` **buttons**: [`CreateTemplateButton`](/api/provider/src/iwinv/interfaces/createtemplatebutton/)[]
+> `optional` **buttons**: [`CreateTemplateButton`](/en/api/provider/src/iwinv/interfaces/createtemplatebutton/)[]
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L50)
 

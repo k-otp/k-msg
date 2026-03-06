@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:125](https://gith
 
 ### patch
 
-> **patch**: `Partial`\<[`TrackingRecord`](/api/messaging/src/tracking/interfaces/trackingrecord/)\>
+> **patch**: `Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L124)
 

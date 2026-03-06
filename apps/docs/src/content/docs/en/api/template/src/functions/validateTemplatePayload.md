@@ -5,7 +5,7 @@ prev: false
 title: "validateTemplatePayload"
 ---
 
-> **validateTemplatePayload**(`payload`, `options?`): [`Result`](/api/core/src/type-aliases/result/)\<[`NormalizedTemplatePayload`](/api/template/src/type-aliases/normalizedtemplatepayload/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
+> **validateTemplatePayload**(`payload`, `options?`): [`Result`](/en/api/core/src/type-aliases/result/)\<[`NormalizedTemplatePayload`](/en/api/template/src/type-aliases/normalizedtemplatepayload/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>
 
 Defined in: [packages/template/src/runtime/template-input.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L188)
 
@@ -17,8 +17,8 @@ Defined in: [packages/template/src/runtime/template-input.ts:188](https://github
 
 ### options?
 
-[`ValidateTemplatePayloadOptions`](/api/template/src/type-aliases/validatetemplatepayloadoptions/) = `{}`
+[`ValidateTemplatePayloadOptions`](/en/api/template/src/type-aliases/validatetemplatepayloadoptions/) = `{}`
 
 ## Returns
 
-[`Result`](/api/core/src/type-aliases/result/)\<[`NormalizedTemplatePayload`](/api/template/src/type-aliases/normalizedtemplatepayload/), [`KMsgError`](/api/core/src/classes/kmsgerror/)\>
+[`Result`](/en/api/core/src/type-aliases/result/)\<[`NormalizedTemplatePayload`](/en/api/template/src/type-aliases/normalizedtemplatepayload/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>

@@ -5,7 +5,7 @@ prev: false
 title: "createDeliveryTrackingHooks"
 ---
 
-> **createDeliveryTrackingHooks**(`service`, `options?`): [`KMsgHooks`](/api/messaging/src/interfaces/kmsghooks/)
+> **createDeliveryTrackingHooks**(`service`, `options?`): [`KMsgHooks`](/en/api/messaging/src/interfaces/kmsghooks/)
 
 Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/hooks.ts#L4)
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github
 
 ### service
 
-[`DeliveryTrackingService`](/api/messaging/src/tracking/classes/deliverytrackingservice/)
+[`DeliveryTrackingService`](/en/api/messaging/src/tracking/classes/deliverytrackingservice/)
 
 ### options?
 
@@ -35,4 +35,4 @@ Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github
 
 ## Returns
 
-[`KMsgHooks`](/api/messaging/src/interfaces/kmsghooks/)
+[`KMsgHooks`](/en/api/messaging/src/interfaces/kmsghooks/)

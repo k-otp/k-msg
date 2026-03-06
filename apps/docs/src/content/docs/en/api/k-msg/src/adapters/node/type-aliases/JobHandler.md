@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:41](https://github.co
 
 ### job
 
-[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>
+[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>
 
 ## Returns
 

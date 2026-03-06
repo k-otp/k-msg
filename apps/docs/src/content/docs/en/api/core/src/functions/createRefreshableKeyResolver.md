@@ -5,7 +5,7 @@ prev: false
 title: "createRefreshableKeyResolver"
 ---
 
-> **createRefreshableKeyResolver**(`options`): [`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+> **createRefreshableKeyResolver**(`options`): [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
 Defined in: [packages/core/src/crypto/key-resolver.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-resolver.ts#L79)
 
@@ -13,8 +13,8 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:79](https://github.com/k-o
 
 ### options
 
-[`RefreshableKeyResolverOptions`](/api/core/src/interfaces/refreshablekeyresolveroptions/)
+[`RefreshableKeyResolverOptions`](/en/api/core/src/interfaces/refreshablekeyresolveroptions/)
 
 ## Returns
 
-[`KeyResolver`](/api/core/src/interfaces/keyresolver/)
+[`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)

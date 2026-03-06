@@ -11,7 +11,7 @@ Specific processor for message jobs
 
 ## Extends
 
-- [`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/)
+- [`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/)
 
 ## Constructors
 
@@ -25,15 +25,15 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:359](https://github.c
 
 ##### provider
 
-[`Provider`](/api/core/src/interfaces/provider/)
+[`Provider`](/en/api/core/src/interfaces/provider/)
 
 ##### options?
 
-`Partial`\<[`JobProcessorOptions`](/api/k-msg/src/adapters/node/interfaces/jobprocessoroptions/)\> = `{}`
+`Partial`\<[`JobProcessorOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessoroptions/)\> = `{}`
 
 ##### jobQueue?
 
-[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`any`\>
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/)\<`any`\>
 
 #### Returns
 
@@ -41,7 +41,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:359](https://github.c
 
 #### Overrides
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`constructor`](/api/k-msg/src/adapters/node/classes/jobprocessor/#constructor)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`constructor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#constructor)
 
 ## Methods
 
@@ -93,7 +93,7 @@ Add a job to the queue
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`add`](/api/k-msg/src/adapters/node/classes/jobprocessor/#add)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`add`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#add)
 
 ***
 
@@ -119,7 +119,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`addListener`](/api/k-msg/src/adapters/node/classes/jobprocessor/#addlistener)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`addListener`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#addlistener)
 
 ***
 
@@ -137,7 +137,7 @@ Remove terminal jobs from queue without touching pending or processing jobs.
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`cleanup`](/api/k-msg/src/adapters/node/classes/jobprocessor/#cleanup)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`cleanup`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#cleanup)
 
 ***
 
@@ -163,13 +163,13 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`emit`](/api/k-msg/src/adapters/node/classes/jobprocessor/#emit)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`emit`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#emit)
 
 ***
 
 ### getJob()
 
-> **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
+> **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L208)
 
@@ -183,17 +183,17 @@ Get specific job by ID
 
 #### Returns
 
-`Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
+`Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getJob`](/api/k-msg/src/adapters/node/classes/jobprocessor/#getjob)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getJob`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#getjob)
 
 ***
 
 ### getMetrics()
 
-> **getMetrics**(): [`JobProcessorMetrics`](/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
+> **getMetrics**(): [`JobProcessorMetrics`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L166)
 
@@ -201,11 +201,11 @@ Get current metrics
 
 #### Returns
 
-[`JobProcessorMetrics`](/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
+[`JobProcessorMetrics`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getMetrics`](/api/k-msg/src/adapters/node/classes/jobprocessor/#getmetrics)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getMetrics`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#getmetrics)
 
 ***
 
@@ -223,7 +223,7 @@ Get queue status
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getQueueStatus`](/api/k-msg/src/adapters/node/classes/jobprocessor/#getqueuestatus)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`getQueueStatus`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#getqueuestatus)
 
 ***
 
@@ -249,7 +249,7 @@ Register a job handler
 
 ##### handler
 
-[`JobHandler`](/api/k-msg/src/adapters/node/type-aliases/jobhandler/)\<`T`\>
+[`JobHandler`](/en/api/k-msg/src/adapters/node/type-aliases/jobhandler/)\<`T`\>
 
 #### Returns
 
@@ -257,7 +257,7 @@ Register a job handler
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`handle`](/api/k-msg/src/adapters/node/classes/jobprocessor/#handle)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`handle`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#handle)
 
 ***
 
@@ -283,7 +283,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:20](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`off`](/api/k-msg/src/adapters/node/classes/jobprocessor/#off)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`off`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#off)
 
 ***
 
@@ -309,7 +309,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:9](https://github.co
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`on`](/api/k-msg/src/adapters/node/classes/jobprocessor/#on)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`on`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#on)
 
 ***
 
@@ -335,7 +335,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`once`](/api/k-msg/src/adapters/node/classes/jobprocessor/#once)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`once`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#once)
 
 ***
 
@@ -351,7 +351,7 @@ Add bulk messages to the processing queue
 
 ##### messageRequests
 
-[`MessageRequest`](/api/messaging/src/interfaces/messagerequest/)[]
+[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)[]
 
 ##### options?
 
@@ -385,7 +385,7 @@ Add a message to the processing queue
 
 ##### messageRequest
 
-[`MessageRequest`](/api/messaging/src/interfaces/messagerequest/)
+[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)
 
 ##### options?
 
@@ -425,7 +425,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeAllListeners`](/api/k-msg/src/adapters/node/classes/jobprocessor/#removealllisteners)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeAllListeners`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#removealllisteners)
 
 ***
 
@@ -449,7 +449,7 @@ Remove job from queue
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeJob`](/api/k-msg/src/adapters/node/classes/jobprocessor/#removejob)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeJob`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#removejob)
 
 ***
 
@@ -475,7 +475,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeListener`](/api/k-msg/src/adapters/node/classes/jobprocessor/#removelistener)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`removeListener`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#removelistener)
 
 ***
 
@@ -491,7 +491,7 @@ Schedule a message for future delivery
 
 ##### messageRequest
 
-[`MessageRequest`](/api/messaging/src/interfaces/messagerequest/)
+[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)
 
 ##### scheduledAt
 
@@ -523,7 +523,7 @@ Start processing jobs
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`start`](/api/k-msg/src/adapters/node/classes/jobprocessor/#start)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`start`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#start)
 
 ***
 
@@ -541,4 +541,4 @@ Stop processing jobs
 
 #### Inherited from
 
-[`JobProcessor`](/api/k-msg/src/adapters/node/classes/jobprocessor/).[`stop`](/api/k-msg/src/adapters/node/classes/jobprocessor/#stop)
+[`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`stop`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#stop)

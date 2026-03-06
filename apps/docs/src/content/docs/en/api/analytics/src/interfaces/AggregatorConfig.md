@@ -30,6 +30,6 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:31](https:/
 
 ### rules
 
-> **rules**: [`AggregationRule`](/api/analytics/src/interfaces/aggregationrule/)[]
+> **rules**: [`AggregationRule`](/en/api/analytics/src/interfaces/aggregationrule/)[]
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L29)

@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/onboarding.ts:52](https://github.com/k-otp/
 
 ### channelOnboarding
 
-> **channelOnboarding**: [`ProviderChannelOnboardingMode`](/api/core/src/type-aliases/providerchannelonboardingmode/)
+> **channelOnboarding**: [`ProviderChannelOnboardingMode`](/en/api/core/src/type-aliases/providerchannelonboardingmode/)
 
 Defined in: [packages/core/src/types/onboarding.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L55)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/types/onboarding.ts:55](https://github.com/k-otp/
 
 ### checks
 
-> **checks**: [`ProviderOnboardingCheckSpec`](/api/core/src/interfaces/provideronboardingcheckspec/)[]
+> **checks**: [`ProviderOnboardingCheckSpec`](/en/api/core/src/interfaces/provideronboardingcheckspec/)[]
 
 Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L60)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/
 
 ### liveTestSupport?
 
-> `optional` **liveTestSupport**: [`ProviderLiveTestSupport`](/api/core/src/type-aliases/providerlivetestsupport/)
+> `optional` **liveTestSupport**: [`ProviderLiveTestSupport`](/en/api/core/src/type-aliases/providerlivetestsupport/)
 
 Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L59)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/types/onboarding.ts:61](https://github.com/k-otp/
 
 ### plusIdInference
 
-> **plusIdInference**: [`ProviderPlusIdInferenceSupport`](/api/core/src/type-aliases/providerplusidinferencesupport/)
+> **plusIdInference**: [`ProviderPlusIdInferenceSupport`](/en/api/core/src/type-aliases/providerplusidinferencesupport/)
 
 Defined in: [packages/core/src/types/onboarding.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L58)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/types/onboarding.ts:58](https://github.com/k-otp/
 
 ### plusIdPolicy
 
-> **plusIdPolicy**: [`ProviderPlusIdPolicy`](/api/core/src/type-aliases/providerplusidpolicy/)
+> **plusIdPolicy**: [`ProviderPlusIdPolicy`](/en/api/core/src/type-aliases/providerplusidpolicy/)
 
 Defined in: [packages/core/src/types/onboarding.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L57)
 
@@ -75,6 +75,6 @@ Defined in: [packages/core/src/types/onboarding.ts:54](https://github.com/k-otp/
 
 ### templateLifecycleApi
 
-> **templateLifecycleApi**: [`ProviderTemplateLifecycleAvailability`](/api/core/src/type-aliases/providertemplatelifecycleavailability/)
+> **templateLifecycleApi**: [`ProviderTemplateLifecycleAvailability`](/en/api/core/src/type-aliases/providertemplatelifecycleavailability/)
 
 Defined in: [packages/core/src/types/onboarding.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L56)

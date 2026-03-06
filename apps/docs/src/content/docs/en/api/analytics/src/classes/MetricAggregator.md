@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:39](https:/
 
 ##### config
 
-[`AggregatorConfig`](/api/analytics/src/interfaces/aggregatorconfig/)
+[`AggregatorConfig`](/en/api/analytics/src/interfaces/aggregatorconfig/)
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:47](https:/
 
 ##### metric
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
 
 #### Returns
 
@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https:/
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 #### Returns
 
@@ -69,7 +69,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https:/
 
 ### aggregateByRules()
 
-> **aggregateByRules**(`metrics`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **aggregateByRules**(`metrics`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L74)
 
@@ -79,17 +79,17 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https:/
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### aggregateCustom()
 
-> **aggregateCustom**(`metrics`, `groupBy`, `aggregationType`, `filters?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **aggregateCustom**(`metrics`, `groupBy`, `aggregationType`, `filters?`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L94)
 
@@ -99,7 +99,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https:/
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### groupBy
 
@@ -115,13 +115,13 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https:/
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### aggregateSlidingWindow()
 
-> **aggregateSlidingWindow**(`metrics`, `windowSizeMs`, `stepMs`, `aggregationType`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **aggregateSlidingWindow**(`metrics`, `windowSizeMs`, `stepMs`, `aggregationType`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L210)
 
@@ -131,7 +131,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https:
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### windowSizeMs
 
@@ -147,13 +147,13 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https:
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### calculatePercentiles()
 
-> **calculatePercentiles**(`metrics`, `percentiles`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **calculatePercentiles**(`metrics`, `percentiles`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L173)
 
@@ -163,7 +163,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https:
 
 ##### metrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### percentiles
 
@@ -175,13 +175,13 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https:
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### calculateRates()
 
-> **calculateRates**(`numeratorMetrics`, `denominatorMetrics`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **calculateRates**(`numeratorMetrics`, `denominatorMetrics`, `groupBy?`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L127)
 
@@ -191,11 +191,11 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https:
 
 ##### numeratorMetrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### denominatorMetrics
 
-[`MetricData`](/api/analytics/src/interfaces/metricdata/)[]
+[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
 
 ##### groupBy?
 
@@ -203,13 +203,13 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https:
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 ***
 
 ### normalizeMetrics()
 
-> **normalizeMetrics**(`metrics`, `method`): `Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+> **normalizeMetrics**(`metrics`, `method`): `Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:252](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L252)
 
@@ -219,7 +219,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:252](https:
 
 ##### metrics
 
-[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]
+[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
 ##### method
 
@@ -227,4 +227,4 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:252](https:
 
 #### Returns
 
-`Promise`\<[`AggregatedMetric`](/api/analytics/src/interfaces/aggregatedmetric/)[]\>
+`Promise`\<[`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]\>

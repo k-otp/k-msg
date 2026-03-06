@@ -9,7 +9,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:6](https://g
 
 ## Extended by
 
-- [`CreateD1WebhookPersistenceOptions`](/api/webhook/src/adapters/cloudflare/interfaces/created1webhookpersistenceoptions/)
+- [`CreateD1WebhookPersistenceOptions`](/en/api/webhook/src/adapters/cloudflare/interfaces/created1webhookpersistenceoptions/)
 
 ## Properties
 

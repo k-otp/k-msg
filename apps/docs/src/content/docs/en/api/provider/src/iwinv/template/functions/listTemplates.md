@@ -5,7 +5,7 @@ prev: false
 title: "listTemplates"
 ---
 
-> **listTemplates**(`params`): `Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+> **listTemplates**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/provider/src/iwinv/iwinv.template.ts:404](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/iwinv.template.ts#L404)
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/iwinv/iwinv.template.ts:404](https://github.c
 
 #### ctx?
 
-[`TemplateContext`](/api/core/src/type-aliases/templatecontext/)
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
 
 #### providerId
 
@@ -43,4 +43,4 @@ Defined in: [packages/provider/src/iwinv/iwinv.template.ts:404](https://github.c
 
 ## Returns
 
-`Promise`\<[`Result`](/api/core/src/type-aliases/result/)\<[`Template`](/api/core/src/interfaces/template/)[], [`KMsgError`](/api/core/src/classes/kmsgerror/)\>\>
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
