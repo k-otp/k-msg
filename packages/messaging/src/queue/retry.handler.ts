@@ -42,12 +42,7 @@ export interface RetryQueueItem {
   originalDeliveryReport: DeliveryReport;
   attempts: RetryAttempt[];
   nextRetryAt: Date;
-  status:
-    | "pending"
-    | "processing"
-    | "succeeded"
-    | "exhausted"
-    | "cancelled";
+  status: "pending" | "processing" | "succeeded" | "exhausted" | "cancelled";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -285,7 +280,9 @@ export class MessageRetryHandler extends EventEmitter {
         messageId: item.messageId,
         phoneNumber: item.phoneNumber,
         attemptNumber:
-          item.originalDeliveryReport.attempts.length + item.attempts.length + 1,
+          item.originalDeliveryReport.attempts.length +
+          item.attempts.length +
+          1,
         scheduledAt: new Date(),
         provider:
           item.originalDeliveryReport.attempts[0]?.provider || "unknown",
@@ -329,11 +326,13 @@ export class MessageRetryHandler extends EventEmitter {
 
       const totalAttempts =
         item.originalDeliveryReport.attempts.length + item.attempts.length;
-      const shouldRetryByPolicy = totalAttempts < this.options.policy.maxAttempts;
+      const shouldRetryByPolicy =
+        totalAttempts < this.options.policy.maxAttempts;
       const shouldRetryByError =
         attempt === undefined
           ? false
-          : (this.options.shouldRetryError?.(retryError, item, attempt) ?? true);
+          : (this.options.shouldRetryError?.(retryError, item, attempt) ??
+            true);
       const shouldRetryAgain = shouldRetryByPolicy && shouldRetryByError;
 
       if (shouldRetryAgain) {
@@ -399,7 +398,9 @@ export class MessageRetryHandler extends EventEmitter {
   private async createRetryItem(
     deliveryReport: DeliveryReport,
   ): Promise<RetryQueueItem> {
-    const initialDelay = this.calculateNextDelay(deliveryReport.attempts.length);
+    const initialDelay = this.calculateNextDelay(
+      deliveryReport.attempts.length,
+    );
 
     return {
       id: `retry_${deliveryReport.messageId}_${Date.now()}`,

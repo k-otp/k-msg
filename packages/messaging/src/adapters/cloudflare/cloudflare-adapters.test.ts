@@ -20,8 +20,7 @@ import {
 
 type CapturedQuery = { sql: string; params: readonly unknown[] };
 
-const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function readRenderedDrizzleQuery(
   query: unknown,

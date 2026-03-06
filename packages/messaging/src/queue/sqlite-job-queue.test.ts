@@ -8,8 +8,7 @@ interface TestJobData {
   foo?: string;
 }
 
-const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("SQLiteJobQueue", () => {
   let queue: SQLiteJobQueue<TestJobData>;
