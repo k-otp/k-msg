@@ -15,15 +15,12 @@ import {
   // Classes
   KakaoChannelManager,
   KakaoSenderNumberManager,
-  NumberVerifier,
   PermissionManager,
   PermissionScope,
   ResourceType,
   SenderNumberCategory,
   SenderNumberStatus,
-  VerificationMethod,
   VerificationStatus,
-  VerificationType,
 } from "./toolkit";
 
 describe("KakaoChannelManager", () => {
@@ -96,11 +93,11 @@ describe("KakaoChannelManager", () => {
 
     await manager.suspendChannel(channel.id, "Policy violation");
     const suspendedChannel = await manager.getChannel(channel.id);
-    expect(suspendedChannel!.status).toBe(ChannelStatus.SUSPENDED);
+    expect(suspendedChannel?.status).toBe(ChannelStatus.SUSPENDED);
 
     await manager.reactivateChannel(channel.id);
     const reactivatedChannel = await manager.getChannel(channel.id);
-    expect(reactivatedChannel!.status).toBe(ChannelStatus.ACTIVE);
+    expect(reactivatedChannel?.status).toBe(ChannelStatus.ACTIVE);
   });
 
   test("should check channel health", async () => {
@@ -126,7 +123,7 @@ describe("KakaoChannelManager", () => {
 });
 
 describe("KakaoSenderNumberManager", () => {
-  test("should add and verify sender number", async () => {
+  test("should add sender number without issuing verification code", async () => {
     const manager = new KakaoSenderNumberManager();
 
     const senderNumber = await manager.addSenderNumber("channel-1", {
@@ -141,19 +138,10 @@ describe("KakaoSenderNumberManager", () => {
     });
 
     expect(senderNumber.phoneNumber).toBe("01012345678");
-    expect(senderNumber.status).toBe(SenderNumberStatus.VERIFYING);
-    expect(senderNumber.verificationCode).toBeDefined();
-
-    // Verify with correct code
-    const verified = await manager.verifySenderNumber(
-      senderNumber.id,
-      senderNumber.verificationCode!,
-    );
-    expect(verified).toBe(true);
-
-    const verifiedNumber = await manager.getSenderNumber(senderNumber.id);
-    expect(verifiedNumber!.status).toBe(SenderNumberStatus.VERIFIED);
-    expect(verifiedNumber!.verifiedAt).toBeDefined();
+    expect(senderNumber.status).toBe(SenderNumberStatus.PENDING);
+    expect(
+      "verificationCode" in (senderNumber as Record<string, unknown>),
+    ).toBe(false);
   });
 
   test("should reject invalid phone number format", async () => {
@@ -167,7 +155,7 @@ describe("KakaoSenderNumberManager", () => {
     ).rejects.toThrow("Invalid Korean phone number format");
   });
 
-  test("should handle verification code expiry", async () => {
+  test("should allow manual verification state updates", async () => {
     const manager = new KakaoSenderNumberManager();
 
     const senderNumber = await manager.addSenderNumber("channel-1", {
@@ -175,47 +163,63 @@ describe("KakaoSenderNumberManager", () => {
       category: SenderNumberCategory.BUSINESS,
     });
 
-    // Mock expired code by manually setting expiry
-    const verificationData = (manager as any).verificationCodes.get(
-      senderNumber.id,
-    );
-    if (verificationData) {
-      verificationData.expiresAt = new Date(Date.now() - 1000); // 1 second ago
-    }
-
-    await expect(
-      manager.verifySenderNumber(
-        senderNumber.id,
-        senderNumber.verificationCode!,
-      ),
-    ).rejects.toThrow("Verification code has expired");
-  });
-
-  test("should validate sender number for sending", async () => {
-    const manager = new KakaoSenderNumberManager();
-
-    const senderNumber = await manager.addSenderNumber("channel-1", {
-      phoneNumber: "01012345678",
-      category: SenderNumberCategory.BUSINESS,
-    });
-
-    // Before verification
     let validation = await manager.validateSenderNumberForSending(
       senderNumber.id,
     );
     expect(validation.isValid).toBe(false);
     expect(validation.errors).toContain(
-      "Sender number status is VERIFYING, must be verified",
+      "Sender number status is PENDING, must be verified",
     );
 
-    // After verification
-    await manager.verifySenderNumber(
-      senderNumber.id,
-      senderNumber.verificationCode!,
-    );
+    const verified = await manager.updateSenderNumber(senderNumber.id, {
+      status: SenderNumberStatus.VERIFIED,
+    });
+
+    expect(verified.status).toBe(SenderNumberStatus.VERIFIED);
+    expect(verified.verifiedAt).toBeDefined();
+
     validation = await manager.validateSenderNumberForSending(senderNumber.id);
     expect(validation.isValid).toBe(true);
     expect(validation.errors).toHaveLength(0);
+  });
+
+  test("should preserve verified sender state through block/unblock", async () => {
+    const manager = new KakaoSenderNumberManager();
+
+    const senderNumber = await manager.addSenderNumber("channel-1", {
+      phoneNumber: "01012345678",
+      category: SenderNumberCategory.BUSINESS,
+    });
+    const verifiedAt = new Date("2026-01-01T00:00:00.000Z");
+
+    await manager.updateSenderNumber(senderNumber.id, {
+      status: SenderNumberStatus.VERIFIED,
+      verifiedAt,
+    });
+
+    await manager.blockSenderNumber(senderNumber.id, "policy");
+    const blocked = await manager.getSenderNumber(senderNumber.id);
+    expect(blocked?.status).toBe(SenderNumberStatus.BLOCKED);
+
+    await manager.unblockSenderNumber(senderNumber.id);
+    const restored = await manager.getSenderNumber(senderNumber.id);
+    expect(restored?.status).toBe(SenderNumberStatus.VERIFIED);
+    expect(restored?.verifiedAt?.toISOString()).toBe(verifiedAt.toISOString());
+  });
+
+  test("should reject verifiedAt updates before a sender number is verified", async () => {
+    const manager = new KakaoSenderNumberManager();
+
+    const senderNumber = await manager.addSenderNumber("channel-1", {
+      phoneNumber: "01012345678",
+      category: SenderNumberCategory.BUSINESS,
+    });
+
+    await expect(
+      manager.updateSenderNumber(senderNumber.id, {
+        verifiedAt: new Date("2026-01-01T00:00:00.000Z"),
+      }),
+    ).rejects.toThrow("verifiedAt can only be set for verified sender numbers");
   });
 });
 
@@ -341,7 +345,7 @@ describe("ChannelCRUD", () => {
     expect(stats.channels.total).toBe(2);
     expect(stats.channels.byType[ChannelType.KAKAO_ALIMTALK]).toBe(1);
     expect(stats.channels.byType[ChannelType.SMS]).toBe(1);
-    expect(stats.channels.byProvider["kakao"]).toBe(1);
+    expect(stats.channels.byProvider.kakao).toBe(1);
     expect(stats.channels.byProvider["sms-provider"]).toBe(1);
   });
 });
@@ -436,7 +440,7 @@ describe("PermissionManager", () => {
     // Get super admin role
     const superAdminRole = await permissionManager.getRole("super-admin");
     expect(superAdminRole).toBeDefined();
-    expect(superAdminRole!.isSystem).toBe(true);
+    expect(superAdminRole?.isSystem).toBe(true);
 
     // Assign super admin role
     await permissionManager.assignRoleToUser(user.id, "super-admin");
@@ -609,232 +613,13 @@ describe("BusinessVerifier", () => {
   });
 });
 
-describe("NumberVerifier", () => {
-  // Mock SMS provider for testing
-  const mockSMSProvider = {
-    id: "mock-sms",
-    name: "Mock SMS Provider",
-    sendSMS: async (phoneNumber: string, message: string) => ({
-      messageId: `msg-${Date.now()}`,
-      status: "sent" as const,
-    }),
-  };
-
-  test("should start phone verification", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      codeExpiryMinutes: 5,
-    });
-
-    const request = await verifier.startVerification(
-      "sender-1",
-      "01012345678",
-      VerificationType.SMS,
-    );
-
-    expect(request.id).toBeDefined();
-    expect(request.phoneNumber).toBe("01012345678");
-    expect(request.verificationType).toBe(VerificationType.SMS);
-    expect(request.verificationCode).toMatch(/^\d{6}$/);
-    expect(request.attempts).toHaveLength(1);
-  });
-
-  test("should verify correct code", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-    });
-
-    const request = await verifier.startVerification("sender-1", "01012345678");
-
-    const result = await verifier.verifyCode(
-      request.id,
-      request.verificationCode,
-    );
-
-    expect(result.success).toBe(true);
-    expect(result.status).toBe("verified");
-  });
-
-  test("should reject incorrect code", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      maxAttempts: 3,
-    });
-
-    const request = await verifier.startVerification("sender-1", "01012345678");
-
-    const result = await verifier.verifyCode(request.id, "000000");
-
-    expect(result.success).toBe(false);
-    expect(result.status).toBe("failed");
-    expect(result.message).toContain("2 attempts remaining");
-  });
-
-  test("should block after max attempts", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      maxAttempts: 3,
-    });
-
-    const request = await verifier.startVerification("sender-1", "01012345678");
-
-    // First failed attempt
-    await verifier.verifyCode(request.id, "000000");
-
-    // Second failed attempt
-    await verifier.verifyCode(request.id, "111111");
-
-    // Third failed attempt should block
-    const result = await verifier.verifyCode(request.id, "222222");
-
-    expect(result.success).toBe(false);
-    expect(result.status).toBe("blocked");
-    expect(result.message).toContain("blocked");
-  });
-
-  test("should handle expired codes", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      codeExpiryMinutes: 0.01, // 0.6 seconds
-    });
-
-    const request = await verifier.startVerification("sender-1", "01012345678");
-
-    // Wait for expiry
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait longer for expiry
-
-    const result = await verifier.verifyCode(
-      request.id,
-      request.verificationCode,
-    );
-
-    expect(result.success).toBe(false);
-    expect(result.status).toBe("expired");
-  });
-
-  test("should reject invalid phone numbers", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-    });
-
-    await expect(
-      verifier.startVerification("sender-1", "123-456-7890"),
-    ).rejects.toThrow("Invalid phone number format");
-  });
-
-  test("should handle rate limiting", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      rateLimitMinutes: 1,
-    });
-
-    // First verification should succeed
-    await verifier.startVerification("sender-1", "01012345678");
-
-    // Second verification within rate limit should fail
-    await expect(
-      verifier.startVerification("sender-2", "01012345678"),
-    ).rejects.toThrow("Rate limit exceeded");
-  });
-
-  test("should not allow rate limit bypass via phone number formatting", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      rateLimitMinutes: 1,
-    });
-
-    await verifier.startVerification("sender-1", "010-1234-5678");
-
-    await expect(
-      verifier.startVerification("sender-2", "01012345678"),
-    ).rejects.toThrow("Rate limit exceeded");
-  });
-
-  test("should treat blocked numbers consistently regardless of formatting", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-      blockedNumbers: ["010-1234-5678"],
-    });
-
-    await expect(
-      verifier.startVerification("sender-1", "01012345678"),
-    ).rejects.toThrow("Phone number is blocked");
-  });
-
-  test("should not count send failures as user verification attempts", async () => {
-    const verifier = new NumberVerifier({
-      maxAttempts: 3,
-      smsProvider: {
-        id: "mock-sms-fail",
-        name: "Mock SMS Provider (Fail)",
-        sendSMS: async () => ({
-          messageId: "msg-fail",
-          status: "failed" as const,
-          error: "SMS sending failed",
-        }),
-      },
-      voiceProvider: {
-        id: "mock-voice",
-        name: "Mock Voice Provider",
-        makeCall: async () => ({
-          callId: "call-1",
-          status: "initiated" as const,
-        }),
-      },
-      enableVoiceFallback: true,
-    });
-
-    const request = await verifier.startVerification("sender-1", "01012345678");
-
-    // First invalid code should leave 2 attempts remaining (send failure must not consume attempts)
-    const result = await verifier.verifyCode(request.id, "000000");
-    expect(result.success).toBe(false);
-    expect(result.status).toBe("failed");
-    expect(result.message).toContain("2 attempts remaining");
-  });
-
-  test("should get verification statistics", async () => {
-    const verifier = new NumberVerifier({
-      smsProvider: mockSMSProvider,
-    });
-
-    // Create some test verifications
-    const request1 = await verifier.startVerification(
-      "sender-1",
-      "01012345678",
-    );
-    const request2 = await verifier.startVerification(
-      "sender-2",
-      "01087654321",
-    );
-
-    // Verify one
-    await verifier.verifyCode(request1.id, request1.verificationCode);
-
-    const stats = verifier.getVerificationStats();
-
-    expect(stats.total).toBe(2);
-    expect(stats.byStatus["verified"]).toBe(1);
-    expect(stats.byStatus["code_sent"]).toBe(1);
-    expect(stats.successRate).toBe(50);
-  });
-});
-
 describe("Integration Tests", () => {
   test("should work together in complete channel setup workflow", async () => {
     // Initialize all components
-    const channelManager = new KakaoChannelManager();
-    const senderManager = new KakaoSenderNumberManager();
+    const _channelManager = new KakaoChannelManager();
     const crud = new ChannelCRUD();
     const permissionManager = new PermissionManager();
     const businessVerifier = new BusinessVerifier();
-    const numberVerifier = new NumberVerifier({
-      smsProvider: {
-        id: "mock-sms",
-        name: "Mock SMS",
-        sendSMS: async () => ({ messageId: "msg-1", status: "sent" as const }),
-      },
-    });
 
     // 1. Create user and assign permissions
     const user = await permissionManager.createUser({
@@ -943,17 +728,17 @@ describe("Integration Tests", () => {
 
     expect(senderNumber.phoneNumber).toBe("01012345678");
 
-    // 6. Verify phone number
-    const phoneVerificationRequest = await numberVerifier.startVerification(
+    // 6. Mark sender number as verified through admin/manual state transition
+    const verifiedSenderNumber = await crud.updateSenderNumber(
       senderNumber.id,
-      "01012345678",
+      {
+        status: SenderNumberStatus.VERIFIED,
+        verifiedAt: new Date("2026-01-02T00:00:00.000Z"),
+      },
+      user.id,
     );
-
-    const phoneVerificationResult = await numberVerifier.verifyCode(
-      phoneVerificationRequest.id,
-      phoneVerificationRequest.verificationCode,
-    );
-    expect(phoneVerificationResult.success).toBe(true);
+    expect(verifiedSenderNumber.status).toBe(SenderNumberStatus.VERIFIED);
+    expect(verifiedSenderNumber.verifiedAt).toBeDefined();
 
     // 7. Check final state
     const finalChannel = await crud.getChannel(channel.id);
@@ -968,13 +753,11 @@ describe("Integration Tests", () => {
     const crudStats = crud.getStatistics();
     const permissionStats = await permissionManager.listUsers();
     const businessStats = businessVerifier.getVerificationStats();
-    const phoneStats = numberVerifier.getVerificationStats();
 
     expect(crudStats.channels.total).toBe(1);
     expect(crudStats.senderNumbers.total).toBe(1);
     expect(permissionStats.length).toBe(1);
     expect(businessStats.total).toBe(1);
-    expect(phoneStats.total).toBe(1);
-    expect(phoneStats.successRate).toBe(100);
+    expect(finalSenderNumber?.status).toBe(SenderNumberStatus.VERIFIED);
   });
 });

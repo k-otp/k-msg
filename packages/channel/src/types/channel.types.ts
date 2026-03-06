@@ -40,7 +40,6 @@ export interface SenderNumber {
   channelId?: string;
   phoneNumber: string;
   status: SenderNumberStatus;
-  verificationCode?: string;
   verifiedAt?: Date;
   category: SenderNumberCategory;
   metadata: {
@@ -256,14 +255,7 @@ export interface ChannelConfig {
   type: "alimtalk" | "sms" | "lms" | "friendtalk";
   providerId: string;
   active: boolean;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface ChannelVerificationResult {
-  success: boolean;
-  status: string;
-  verificationCode?: string;
-  error?: string;
 }

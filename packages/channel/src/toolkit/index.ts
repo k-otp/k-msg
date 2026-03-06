@@ -36,15 +36,3 @@ export {
   type DocumentValidationResult,
   type VerificationRequest,
 } from "./verification/business.verify";
-export {
-  NumberVerifier,
-  type NumberVerifierOptions,
-  type PhoneNumberInfo,
-  type PhoneVerificationRequest,
-  type PhoneVerificationStatus,
-  type SMSProvider,
-  type VerificationAttempt,
-  VerificationMethod,
-  VerificationType,
-  type VoiceProvider,
-} from "./verification/number.verify";

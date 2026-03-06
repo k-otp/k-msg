@@ -60,14 +60,15 @@ if (channels.isSuccess) {
 
 ## Toolkit API (`@k-msg/channel/toolkit`)
 
-In-memory channel/sender helpers are now toolkit-only exports:
+In-memory channel/admin helpers are now toolkit-only exports. They are local-state utilities for tests, demos, and admin tooling. They do not model provider-backed sender verification or OTP issuance:
 
 - `KakaoChannelManager`
 - `KakaoSenderNumberManager`
 - `ChannelCRUD`
 - `PermissionManager`
 - `ChannelService`
-- verification helpers and legacy channel types
+- `BusinessVerifier`
+- legacy channel types
 
 ```ts
 import { KakaoChannelManager } from "@k-msg/channel/toolkit";

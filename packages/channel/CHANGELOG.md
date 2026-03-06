@@ -1,5 +1,14 @@
 # @k-msg/channel
 
+## Unreleased
+
+### Breaking changes
+
+- remove toolkit phone-OTP verification helpers (`NumberVerifier`, sender verification-code flows, and `ChannelService.verifySenderNumber`) from the public surface
+- make `KakaoSenderNumberManager` a provider-neutral in-memory sender registry instead of a fake OTP workflow
+- remove `verificationCode` from public sender-number shapes
+- add `test:unit`/`typecheck` scripts so workspace-level validation includes `@k-msg/channel`
+
 ## 0.28.0 — 2026-02-28
 
 ### Minor changes
@@ -339,4 +348,3 @@
 ### Patch changes
 
 - [117d592](https://github.com/imjlk/k-msg/commit/117d59224e655dde1a599e8f694e421a12474a42) Bootstrap Sampo-driven release PR automation and Bun-based CI/CD. — Thanks @imjlk!
-

@@ -7,8 +7,6 @@ import {
 
 export class KakaoSenderNumberManager {
   private senderNumbers: Map<string, SenderNumber> = new Map();
-  private verificationCodes: Map<string, { code: string; expiresAt: Date }> =
-    new Map();
 
   async addSenderNumber(
     channelId: string,
@@ -44,9 +42,6 @@ export class KakaoSenderNumberManager {
 
     this.senderNumbers.set(senderNumberId, senderNumber);
 
-    // Initiate verification process
-    await this.initiateVerification(senderNumber);
-
     return senderNumber;
   }
 
@@ -64,103 +59,6 @@ export class KakaoSenderNumberManager {
     return Array.from(this.senderNumbers.values()).find(
       (sn) => sn.phoneNumber === phoneNumber,
     );
-  }
-
-  private async initiateVerification(
-    senderNumber: SenderNumber,
-  ): Promise<void> {
-    // Generate verification code
-    const verificationCode = this.generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-    // Store verification code
-    this.verificationCodes.set(senderNumber.id, {
-      code: verificationCode,
-      expiresAt,
-    });
-
-    // Update sender number status
-    senderNumber.status = SenderNumberStatus.VERIFYING;
-    senderNumber.verificationCode = verificationCode;
-    senderNumber.updatedAt = new Date();
-
-    // In a real implementation, send SMS to the phone number
-    // Do not console.log sensitive information in library code.
-
-    // Simulate SMS sending
-    await this.sendVerificationSMS(senderNumber.phoneNumber, verificationCode);
-  }
-
-  private async sendVerificationSMS(
-    phoneNumber: string,
-    code: string,
-  ): Promise<void> {
-    // In a real implementation, this would use an SMS provider
-    void phoneNumber;
-    void code;
-  }
-
-  async verifySenderNumber(
-    senderNumberId: string,
-    code: string,
-  ): Promise<boolean> {
-    const senderNumber = this.senderNumbers.get(senderNumberId);
-    if (!senderNumber) {
-      throw new Error("Sender number not found");
-    }
-
-    const verification = this.verificationCodes.get(senderNumberId);
-    if (!verification) {
-      throw new Error("No verification code found");
-    }
-
-    // Check if code is expired
-    if (new Date() > verification.expiresAt) {
-      throw new Error("Verification code has expired");
-    }
-
-    // Check if code matches
-    if (verification.code !== code) {
-      return false;
-    }
-
-    // Mark as verified
-    senderNumber.status = SenderNumberStatus.VERIFIED;
-    senderNumber.verifiedAt = new Date();
-    senderNumber.updatedAt = new Date();
-    delete senderNumber.verificationCode;
-
-    // Clean up verification code
-    this.verificationCodes.delete(senderNumberId);
-
-    return true;
-  }
-
-  async resendVerificationCode(senderNumberId: string): Promise<void> {
-    const senderNumber = this.senderNumbers.get(senderNumberId);
-    if (!senderNumber) {
-      throw new Error("Sender number not found");
-    }
-
-    if (senderNumber.status !== SenderNumberStatus.VERIFYING) {
-      throw new Error("Sender number is not in verifying status");
-    }
-
-    // Check rate limiting (prevent spam)
-    const lastVerification = this.verificationCodes.get(senderNumberId);
-    if (lastVerification) {
-      const timeSinceLastCode =
-        Date.now() - (lastVerification.expiresAt.getTime() - 5 * 60 * 1000);
-      if (timeSinceLastCode < 60 * 1000) {
-        // 1 minute cooldown
-        throw new Error(
-          "Please wait before requesting a new verification code",
-        );
-      }
-    }
-
-    // Generate new verification code
-    await this.initiateVerification(senderNumber);
   }
 
   async getSenderNumber(senderNumberId: string): Promise<SenderNumber | null> {
@@ -220,10 +118,36 @@ export class KakaoSenderNumberManager {
     const allowedUpdates = { ...updates };
     delete allowedUpdates.id;
     delete allowedUpdates.phoneNumber;
-    delete allowedUpdates.verifiedAt;
     delete allowedUpdates.createdAt;
 
-    Object.assign(senderNumber, allowedUpdates, { updatedAt: new Date() });
+    const hasStatusUpdate = allowedUpdates.status !== undefined;
+    const nextStatus = hasStatusUpdate
+      ? allowedUpdates.status
+      : senderNumber.status;
+    let nextVerifiedAt = senderNumber.verifiedAt;
+    const canSetVerifiedAt =
+      nextStatus === SenderNumberStatus.VERIFIED ||
+      senderNumber.status === SenderNumberStatus.VERIFIED ||
+      (senderNumber.status === SenderNumberStatus.BLOCKED &&
+        senderNumber.verifiedAt !== undefined);
+
+    if (allowedUpdates.verifiedAt !== undefined) {
+      if (!canSetVerifiedAt) {
+        throw new Error(
+          "verifiedAt can only be set for verified sender numbers",
+        );
+      }
+      nextVerifiedAt = allowedUpdates.verifiedAt;
+    } else if (nextStatus === SenderNumberStatus.VERIFIED) {
+      nextVerifiedAt = senderNumber.verifiedAt ?? new Date();
+    } else if (hasStatusUpdate && nextStatus !== SenderNumberStatus.BLOCKED) {
+      nextVerifiedAt = undefined;
+    }
+
+    Object.assign(senderNumber, allowedUpdates, {
+      verifiedAt: nextVerifiedAt,
+      updatedAt: new Date(),
+    });
 
     return senderNumber;
   }
@@ -240,7 +164,6 @@ export class KakaoSenderNumberManager {
     }
 
     this.senderNumbers.delete(senderNumberId);
-    this.verificationCodes.delete(senderNumberId);
 
     return true;
   }
@@ -321,30 +244,5 @@ export class KakaoSenderNumberManager {
 
   private generateSenderNumberId(): string {
     return `sn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private generateVerificationCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
-
-  // Cleanup expired verification codes
-  cleanup(): void {
-    const now = new Date();
-    for (const [id, verification] of this.verificationCodes) {
-      if (now > verification.expiresAt) {
-        this.verificationCodes.delete(id);
-
-        // Reset sender number status if verification expired
-        const senderNumber = this.senderNumbers.get(id);
-        if (
-          senderNumber &&
-          senderNumber.status === SenderNumberStatus.VERIFYING
-        ) {
-          senderNumber.status = SenderNumberStatus.PENDING;
-          delete senderNumber.verificationCode;
-          senderNumber.updatedAt = new Date();
-        }
-      }
-    }
   }
 }

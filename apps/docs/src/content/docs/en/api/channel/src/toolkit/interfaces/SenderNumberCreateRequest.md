@@ -5,7 +5,7 @@ prev: false
 title: "SenderNumberCreateRequest"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L161)
+Defined in: [packages/channel/src/types/channel.types.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L160)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:161](https://github.com
 
 > `optional` **businessInfo**: `object`
 
-Defined in: [packages/channel/src/types/channel.types.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L164)
+Defined in: [packages/channel/src/types/channel.types.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L163)
 
 #### businessName
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:164](https://github.com
 
 > **category**: [`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L163)
+Defined in: [packages/channel/src/types/channel.types.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L162)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:163](https://github.com
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L162)
+Defined in: [packages/channel/src/types/channel.types.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L161)

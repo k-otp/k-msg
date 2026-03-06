@@ -58,14 +58,15 @@ if (channels.isSuccess) {
 
 ## Toolkit API (`@k-msg/channel/toolkit`)
 
-기존 in-memory/관리 도구는 toolkit 서브패스로 분리되었습니다.
+기존 in-memory/관리 도구는 toolkit 서브패스로 분리되었습니다. 이 영역은 테스트/데모/관리용 로컬 상태 헬퍼이며, 실제 provider 기반 발신번호 검증이나 OTP 발급 흐름을 모델링하지 않습니다.
 
 - `KakaoChannelManager`
 - `KakaoSenderNumberManager`
 - `ChannelCRUD`
 - `PermissionManager`
 - `ChannelService`
-- 검증 유틸 및 레거시 channel 타입
+- `BusinessVerifier`
+- 레거시 channel 타입
 
 ```ts
 import { KakaoChannelManager } from "@k-msg/channel/toolkit";
