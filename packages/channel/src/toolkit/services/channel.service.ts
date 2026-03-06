@@ -1,8 +1,4 @@
-import type {
-  ChannelConfig,
-  ChannelVerificationResult,
-  SenderNumber,
-} from "../../types/channel.types";
+import type { ChannelConfig } from "../../types/channel.types";
 import { SenderNumberStatus } from "../../types/channel.types";
 
 // Define a service-specific SenderNumber interface that extends the types from channel.types
@@ -95,33 +91,6 @@ export class ChannelService {
 
     this.senderNumbers.set(phoneNumber, senderNumber);
     return senderNumber;
-  }
-
-  async verifySenderNumber(
-    phoneNumber: string,
-  ): Promise<ChannelVerificationResult> {
-    const senderNumber = this.senderNumbers.get(phoneNumber);
-    if (!senderNumber) {
-      return {
-        success: false,
-        status: "not_found",
-        error: "Sender number not found",
-      };
-    }
-
-    // 실제 검증 로직 (API 호출 등)
-    const verificationCode = Math.floor(Math.random() * 900000) + 100000;
-
-    senderNumber.verifiedAt = new Date();
-    senderNumber.status = SenderNumberStatus.VERIFIED;
-
-    this.senderNumbers.set(phoneNumber, senderNumber);
-
-    return {
-      success: true,
-      status: "verified",
-      verificationCode: verificationCode.toString(),
-    };
   }
 
   async getSenderNumbers(channelId?: string): Promise<ServiceSenderNumber[]> {
