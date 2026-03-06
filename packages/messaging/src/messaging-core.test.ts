@@ -22,8 +22,7 @@ import {
   MessageStatus,
 } from "./types/message.types";
 
-const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class InMemoryJobQueue<T> implements JobQueue<T> {
   private readonly jobs = new Map<string, Job<T>>();
