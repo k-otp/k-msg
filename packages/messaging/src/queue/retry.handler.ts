@@ -51,7 +51,6 @@ export interface RetryHandlerOptions {
   policy: RetryPolicy;
   checkInterval: number;
   maxQueueSize: number;
-  enablePersistence: boolean;
   execute: (attempt: RetryAttempt, item: RetryQueueItem) => Promise<unknown>;
   shouldRetryError?: (
     error: Error,

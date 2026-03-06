@@ -41,6 +41,28 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:27](
 
 ## Methods
 
+### cleanupTerminal()
+
+> **cleanupTerminal**(`statuses?`): `Promise`\<`number`\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L192)
+
+#### Parameters
+
+##### statuses?
+
+[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
+
+#### Returns
+
+`Promise`\<`number`\>
+
+#### Implementation of
+
+[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`cleanupTerminal`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#cleanupterminal)
+
+***
+
 ### clear()
 
 > **clear**(): `Promise`\<`void`\>

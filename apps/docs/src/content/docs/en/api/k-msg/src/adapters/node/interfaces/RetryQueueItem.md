@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:43](https://github.co
 
 > **createdAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L51)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L46)
 
 ***
 
@@ -77,4 +77,4 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:45](https://github.co
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L52)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L47)

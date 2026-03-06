@@ -320,6 +320,37 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     await this.client.query(`DELETE FROM ${this.tableRef()}`);
   }
 
+  async cleanupTerminal(
+    statuses: JobStatus[] = [JobStatus.COMPLETED, JobStatus.FAILED],
+  ): Promise<number> {
+    await this.init();
+
+    if (statuses.length === 0) {
+      return 0;
+    }
+
+    const statusPlaceholders = this.placeholders(statuses.length);
+    const whereIn = statusPlaceholders.join(", ");
+
+    const { rows } = await this.client.query<{ id?: string }>(
+      `SELECT ${this.quoteIdentifier("id")} FROM ${this.tableRef()}
+       WHERE ${this.quoteIdentifier("status")} IN (${whereIn})`,
+      statuses,
+    );
+
+    if (rows.length === 0) {
+      return 0;
+    }
+
+    await this.client.query(
+      `DELETE FROM ${this.tableRef()}
+       WHERE ${this.quoteIdentifier("status")} IN (${whereIn})`,
+      statuses,
+    );
+
+    return rows.length;
+  }
+
   async close(): Promise<void> {
     await this.client.close?.();
   }
