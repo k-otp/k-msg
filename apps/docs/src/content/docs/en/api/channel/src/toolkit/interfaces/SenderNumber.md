@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:34](https://github.com/
 
 > **category**: [`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L45)
+Defined in: [packages/channel/src/types/channel.types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L44)
 
 ***
 
@@ -32,7 +32,7 @@ Some managers (e.g. KakaoSenderNumberManager) are channel-scoped.
 
 > **createdAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L52)
+Defined in: [packages/channel/src/types/channel.types.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L51)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:35](https://github.com/
 
 > **metadata**: `object`
 
-Defined in: [packages/channel/src/types/channel.types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L46)
+Defined in: [packages/channel/src/types/channel.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L45)
 
 #### businessName?
 
@@ -88,15 +88,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:42](https://github.com/
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L53)
-
-***
-
-### verificationCode?
-
-> `optional` **verificationCode**: `string`
-
-Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L43)
+Defined in: [packages/channel/src/types/channel.types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L52)
 
 ***
 
@@ -104,4 +96,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/
 
 > `optional` **verifiedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L44)
+Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L43)

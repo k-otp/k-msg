@@ -23,7 +23,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:8](https://gith
 
 > **addSenderNumber**(`channelId`, `request`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L13)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L11)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:13](https://git
 
 > **blockSenderNumber**(`senderNumberId`, `reason`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L253)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L176)
 
 #### Parameters
 
@@ -63,23 +63,11 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:253](https://gi
 
 ***
 
-### cleanup()
-
-> **cleanup**(): `void`
-
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:331](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L331)
-
-#### Returns
-
-`void`
-
-***
-
 ### deleteSenderNumber()
 
 > **deleteSenderNumber**(`senderNumberId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:231](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L231)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L155)
 
 #### Parameters
 
@@ -97,7 +85,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:231](https://gi
 
 > **getSenderNumber**(`senderNumberId`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/) \| `null`\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L166)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L64)
 
 #### Parameters
 
@@ -115,7 +103,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:166](https://gi
 
 > **listSenderNumbers**(`filters?`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)[]\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L170)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L68)
 
 #### Parameters
 
@@ -143,29 +131,11 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:170](https://gi
 
 ***
 
-### resendVerificationCode()
-
-> **resendVerificationCode**(`senderNumberId`): `Promise`\<`void`\>
-
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L139)
-
-#### Parameters
-
-##### senderNumberId
-
-`string`
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
 ### unblockSenderNumber()
 
 > **unblockSenderNumber**(`senderNumberId`): `Promise`\<`void`\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:269](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L269)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L192)
 
 #### Parameters
 
@@ -183,7 +153,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:269](https://gi
 
 > **updateSenderNumber**(`senderNumberId`, `updates`): `Promise`\<[`SenderNumber`](/api/channel/src/toolkit/interfaces/sendernumber/)\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L210)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L108)
 
 #### Parameters
 
@@ -205,7 +175,7 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:210](https://gi
 
 > **validateSenderNumberForSending**(`senderNumberId`): `Promise`\<\{ `errors`: `string`[]; `isValid`: `boolean`; \}\>
 
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:286](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L286)
+Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L209)
 
 #### Parameters
 
@@ -216,25 +186,3 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:286](https://gi
 #### Returns
 
 `Promise`\<\{ `errors`: `string`[]; `isValid`: `boolean`; \}\>
-
-***
-
-### verifySenderNumber()
-
-> **verifySenderNumber**(`senderNumberId`, `code`): `Promise`\<`boolean`\>
-
-Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/kakao/sender-number.ts#L103)
-
-#### Parameters
-
-##### senderNumberId
-
-`string`
-
-##### code
-
-`string`
-
-#### Returns
-
-`Promise`\<`boolean`\>
