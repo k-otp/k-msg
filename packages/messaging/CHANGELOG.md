@@ -1,5 +1,23 @@
 # @k-msg/messaging
 
+## 0.29.1 — 2026-03-06
+
+### Patch changes
+
+- [5cd8774](https://github.com/k-otp/k-msg/commit/5cd87748dafe7f6cd18d5375244757e4d2167219) Clean up toolkit channel approval assumptions and make retry scheduling/execution explicit.
+  
+  - `@k-msg/channel`
+    - treat toolkit channels as already-approved local records instead of modeling fake provider approval states
+    - remove toolkit channel-level verification fields and the `KakaoChannelManager.completeVerification()` flow
+    - make `KakaoChannelManager` create active channels immediately and fix deleted-channel listing behavior
+  - `@k-msg/messaging`
+    - make `JobProcessor.retryDelays` actually reschedule queued retries through queue adapters
+    - change queue failure handling to use explicit retry scheduling metadata
+    - redesign `MessageRetryHandler` to require an `execute(attempt, item)` callback instead of simulating retries
+  
+  Note: these changes include public API and behavior changes, even though this changeset is intentionally classified as `patch`. — Thanks @imjlk!
+- Updated dependencies: core@0.29.1, template@0.29.1
+
 ## 0.29.0 — 2026-03-06
 
 ### Minor changes
