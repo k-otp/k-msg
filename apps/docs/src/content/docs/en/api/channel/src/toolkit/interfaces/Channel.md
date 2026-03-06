@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:3](https://github.com/k
 
 > **createdAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L13)
+Defined in: [packages/channel/src/types/channel.types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L12)
 
 ***
 
@@ -85,12 +85,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:7](https://github.com/k
 
 > **updatedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L14)
-
-***
-
-### verification
-
-> **verification**: [`ChannelVerification`](/api/channel/src/toolkit/interfaces/channelverification/)
-
-Defined in: [packages/channel/src/types/channel.types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L12)
+Defined in: [packages/channel/src/types/channel.types.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L13)

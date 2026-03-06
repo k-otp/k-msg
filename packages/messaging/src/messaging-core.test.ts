@@ -13,6 +13,7 @@ import {
 import {
   type Job,
   type JobQueue,
+  type JobRetryDirective,
   JobStatus,
 } from "./queue/job-queue.interface";
 import {
@@ -20,6 +21,8 @@ import {
   type MessageRequest,
   MessageStatus,
 } from "./types/message.types";
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class InMemoryJobQueue<T> implements JobQueue<T> {
   private readonly jobs = new Map<string, Job<T>>();
@@ -90,17 +93,18 @@ class InMemoryJobQueue<T> implements JobQueue<T> {
   async fail(
     jobId: string,
     error: string | Error,
-    shouldRetry = false,
+    retry: JobRetryDirective = { enabled: false },
   ): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job) return;
     const attempts = job.attempts + 1;
     const errorText = error instanceof Error ? error.message : error;
-    if (shouldRetry && attempts < job.maxAttempts) {
+    if (retry.enabled && attempts < job.maxAttempts) {
       this.jobs.set(jobId, {
         ...job,
         attempts,
         status: JobStatus.PENDING,
+        processAt: new Date(Date.now() + (retry.delayMs ?? 0)),
         error: errorText,
       });
       return;
@@ -203,7 +207,7 @@ describe("JobProcessor", () => {
     const _jobId = await processor.add("test-job", { message: "hello" });
 
     // Wait for processing
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await wait(300);
 
     expect(processedData).toEqual({ message: "hello" });
     expect(processor.getMetrics().processed).toBe(1);
@@ -237,10 +241,43 @@ describe("JobProcessor", () => {
     await processor.add("failing-job", { test: true });
 
     // Wait for retries
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await wait(500);
 
     expect(attempts).toBe(2);
     expect(processor.getMetrics().retried).toBe(1);
+
+    await processor.stop();
+  });
+
+  test("should apply configured retry delays before reprocessing", async () => {
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [80, 160],
+        maxRetries: 3,
+        pollInterval: 10,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
+
+    const attemptTimes: number[] = [];
+    processor.handle("delayed-retry-job", async () => {
+      attemptTimes.push(Date.now());
+      if (attemptTimes.length < 3) {
+        throw new Error("retry me");
+      }
+      return "ok";
+    });
+
+    processor.start();
+    await processor.add("delayed-retry-job", { value: true });
+
+    await wait(500);
+
+    expect(attemptTimes).toHaveLength(3);
+    expect(attemptTimes[1]! - attemptTimes[0]!).toBeGreaterThanOrEqual(60);
+    expect(attemptTimes[2]! - attemptTimes[1]!).toBeGreaterThanOrEqual(120);
 
     await processor.stop();
   });
@@ -284,7 +321,7 @@ describe("MessageJobProcessor", () => {
     const jobId = await processor.queueMessage(messageRequest);
 
     // Wait for processing
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await wait(300);
 
     expect(jobId).toBeDefined();
     expect(processor.getMetrics().processed).toBe(1);
@@ -315,7 +352,7 @@ describe("MessageJobProcessor", () => {
     const jobId = await processor.scheduleMessage(messageRequest, scheduledAt);
 
     // Wait for scheduled processing
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await wait(300);
 
     expect(jobId).toBeDefined();
 
@@ -338,6 +375,7 @@ describe("MessageRetryHandler", () => {
       checkInterval: 50,
       maxQueueSize: 100,
       enablePersistence: false,
+      execute: async () => ({ ok: true }),
     });
 
     const deliveryReport: DeliveryReport = {
@@ -378,6 +416,7 @@ describe("MessageRetryHandler", () => {
       checkInterval: 100,
       maxQueueSize: 100,
       enablePersistence: false,
+      execute: async () => ({ ok: true }),
     });
 
     const deliveryReport: DeliveryReport = {
@@ -401,6 +440,109 @@ describe("MessageRetryHandler", () => {
 
     const added = await retryHandler.addForRetry(deliveryReport);
     expect(added).toBe(false);
+  });
+
+  test("should mark retry items as succeeded when execute callback succeeds", async () => {
+    const executions: string[] = [];
+    const retryHandler = new MessageRetryHandler({
+      policy: {
+        maxAttempts: 3,
+        backoffMultiplier: 2,
+        initialDelay: 20,
+        maxDelay: 1000,
+        jitter: false,
+        retryableStatuses: [MessageStatus.FAILED],
+        retryableErrorCodes: ["NETWORK_TIMEOUT"],
+      },
+      checkInterval: 10,
+      maxQueueSize: 100,
+      enablePersistence: false,
+      execute: async (attempt) => {
+        executions.push(attempt.messageId);
+        return { delivered: true };
+      },
+    });
+
+    retryHandler.start();
+
+    await retryHandler.addForRetry({
+      messageId: "msg_003",
+      phoneNumber: "01012345678",
+      status: MessageStatus.FAILED,
+      attempts: [
+        {
+          attemptNumber: 1,
+          attemptedAt: new Date(),
+          status: MessageStatus.FAILED,
+          error: { code: "NETWORK_TIMEOUT", message: "Request timeout" },
+          provider: "test-provider",
+        },
+      ],
+      metadata: { templateId: "test_template" },
+    });
+
+    await wait(120);
+
+    const status = retryHandler.getRetryStatus("msg_003");
+    expect(executions).toEqual(["msg_003"]);
+    expect(status?.status).toBe("succeeded");
+
+    await retryHandler.stop();
+  });
+
+  test("should stop retrying immediately when shouldRetryError returns false", async () => {
+    const callbacks: string[] = [];
+    const retryHandler = new MessageRetryHandler({
+      policy: {
+        maxAttempts: 4,
+        backoffMultiplier: 2,
+        initialDelay: 20,
+        maxDelay: 1000,
+        jitter: false,
+        retryableStatuses: [MessageStatus.FAILED],
+        retryableErrorCodes: ["NETWORK_TIMEOUT"],
+      },
+      checkInterval: 10,
+      maxQueueSize: 100,
+      enablePersistence: false,
+      execute: async () => {
+        throw new Error("permanent failure");
+      },
+      shouldRetryError: () => false,
+      onRetryFailed: async () => {
+        callbacks.push("failed");
+      },
+      onRetryExhausted: async () => {
+        callbacks.push("exhausted");
+      },
+    });
+
+    retryHandler.start();
+
+    await retryHandler.addForRetry({
+      messageId: "msg_004",
+      phoneNumber: "01012345678",
+      status: MessageStatus.FAILED,
+      attempts: [
+        {
+          attemptNumber: 1,
+          attemptedAt: new Date(),
+          status: MessageStatus.FAILED,
+          error: { code: "NETWORK_TIMEOUT", message: "Request timeout" },
+          provider: "test-provider",
+        },
+      ],
+      metadata: { templateId: "test_template" },
+    });
+
+    await wait(120);
+
+    const status = retryHandler.getRetryStatus("msg_004");
+    expect(status?.status).toBe("exhausted");
+    expect(status?.attempts).toHaveLength(1);
+    expect(callbacks).toEqual(["failed", "exhausted"]);
+
+    await retryHandler.stop();
   });
 });
 

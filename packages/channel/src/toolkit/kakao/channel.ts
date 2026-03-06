@@ -3,7 +3,6 @@ import {
   type ChannelCreateRequest,
   ChannelStatus,
   ChannelType,
-  VerificationStatus,
 } from "../../types/channel.types";
 
 export class KakaoChannelManager {
@@ -20,7 +19,7 @@ export class KakaoChannelManager {
       name: request.name,
       provider: request.provider,
       type: request.type,
-      status: ChannelStatus.PENDING,
+      status: ChannelStatus.ACTIVE,
       profileKey: request.profileKey,
       senderNumbers: [],
       metadata: {
@@ -38,22 +37,11 @@ export class KakaoChannelManager {
           maxButtonCount: 5,
         },
       },
-      verification: {
-        status: request.businessInfo
-          ? VerificationStatus.PENDING
-          : VerificationStatus.NOT_REQUIRED,
-        documents: [],
-      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     this.channels.set(channelId, channel);
-
-    // Start verification process if business info is provided
-    if (request.businessInfo) {
-      await this.initiateBusinessVerification(channel);
-    }
 
     return channel;
   }
@@ -84,45 +72,6 @@ export class KakaoChannelManager {
     // Plus Friend ID should start with @ and contain only allowed characters
     const regex = /^@[a-zA-Z0-9_-]{3,30}$/;
     return regex.test(plusFriendId);
-  }
-
-  private async initiateBusinessVerification(channel: Channel): Promise<void> {
-    // In a real implementation, this would integrate with Kakao's verification API
-    // For now, we'll simulate the process
-
-    channel.verification.status = VerificationStatus.UNDER_REVIEW;
-    channel.status = ChannelStatus.VERIFYING;
-    channel.updatedAt = new Date();
-
-    // Simulate verification process (in real scenario, this would be handled by webhooks)
-    setTimeout(() => {
-      this.completeVerification(channel.id, true);
-    }, 5000); // 5 seconds for demo
-  }
-
-  async completeVerification(
-    channelId: string,
-    approved: boolean,
-    rejectionReason?: string,
-  ): Promise<void> {
-    const channel = this.channels.get(channelId);
-    if (!channel) {
-      throw new Error("Channel not found");
-    }
-
-    if (approved) {
-      channel.verification.status = VerificationStatus.VERIFIED;
-      channel.verification.verifiedAt = new Date();
-      channel.status = ChannelStatus.ACTIVE;
-    } else {
-      channel.verification.status = VerificationStatus.REJECTED;
-      channel.verification.rejectedAt = new Date();
-      channel.verification.rejectionReason =
-        rejectionReason || "Verification failed";
-      channel.status = ChannelStatus.SUSPENDED;
-    }
-
-    channel.updatedAt = new Date();
   }
 
   async getChannel(channelId: string): Promise<Channel | null> {
@@ -168,7 +117,6 @@ export class KakaoChannelManager {
   async listChannels(filters?: {
     status?: ChannelStatus;
     type?: ChannelType;
-    verified?: boolean;
   }): Promise<Channel[]> {
     let channels = Array.from(this.channels.values());
 
@@ -179,17 +127,13 @@ export class KakaoChannelManager {
       if (filters.type) {
         channels = channels.filter((c) => c.type === filters.type);
       }
-      if (filters.verified !== undefined) {
-        const verifiedStatus = filters.verified
-          ? VerificationStatus.VERIFIED
-          : VerificationStatus.PENDING;
-        channels = channels.filter(
-          (c) => c.verification.status === verifiedStatus,
-        );
-      }
     }
 
     // Exclude deleted channels unless specifically requested
+    if (filters?.status === ChannelStatus.DELETED) {
+      return channels;
+    }
+
     return channels.filter((c) => c.status !== ChannelStatus.DELETED);
   }
 
@@ -212,8 +156,8 @@ export class KakaoChannelManager {
       throw new Error("Channel not found");
     }
 
-    if (channel.verification.status !== VerificationStatus.VERIFIED) {
-      throw new Error("Channel must be verified before reactivation");
+    if (channel.status !== ChannelStatus.SUSPENDED) {
+      throw new Error("Channel is not suspended");
     }
 
     channel.status = ChannelStatus.ACTIVE;
@@ -236,14 +180,6 @@ export class KakaoChannelManager {
     // Check channel status
     if (channel.status !== ChannelStatus.ACTIVE) {
       issues.push(`Channel status is ${channel.status}`);
-    }
-
-    // Check verification status
-    if (
-      channel.verification.status !== VerificationStatus.VERIFIED &&
-      channel.verification.status !== VerificationStatus.NOT_REQUIRED
-    ) {
-      issues.push(`Channel verification is ${channel.verification.status}`);
     }
 
     // Check if channel has sender numbers

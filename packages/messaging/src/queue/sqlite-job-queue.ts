@@ -1,5 +1,10 @@
 import Database from "bun:sqlite";
-import { type Job, type JobQueue, JobStatus } from "./job-queue.interface";
+import {
+  type Job,
+  type JobQueue,
+  type JobRetryDirective,
+  JobStatus,
+} from "./job-queue.interface";
 
 interface SQLiteJobQueueOptions {
   dbPath?: string;
@@ -179,7 +184,7 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
   async fail(
     jobId: string,
     error: string | Error,
-    shouldRetry?: boolean,
+    retry: JobRetryDirective = { enabled: false },
   ): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : error;
     const now = Date.now();
@@ -191,16 +196,18 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
 
     const newAttempts = job.attempts + 1;
 
-    if (shouldRetry && newAttempts < job.maxAttempts) {
+    if (retry.enabled && newAttempts < job.maxAttempts) {
+      const processAt = now + (retry.delayMs ?? 0);
       const stmt = this.db.prepare(`
         UPDATE jobs
         SET status = 'pending',
             attempts = ?,
+            process_at = ?,
             error = ?
         WHERE id = ?
       `);
 
-      stmt.run(newAttempts, errorMessage, jobId);
+      stmt.run(newAttempts, processAt, errorMessage, jobId);
     } else {
       const stmt = this.db.prepare(`
         UPDATE jobs
