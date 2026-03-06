@@ -185,19 +185,19 @@ const trackingStore = createD1DeliveryTrackingStore(env.DB, {
 
 Migration, threat model, and retention guidance are documented in:
 
-- [`docs/security/field-crypto-v1.md`](./docs/security/field-crypto-v1.md)
-- [`docs/security/field-crypto-basics.md`](./docs/security/field-crypto-basics.md)
-- [`docs/security/key-rotation-playbook.md`](./docs/security/key-rotation-playbook.md)
-- [`docs/security/migration-cli-runbook.md`](./docs/security/migration-cli-runbook.md)
-- [`docs/security/crypto-control-signals.md`](./docs/security/crypto-control-signals.md)
-- [`docs/migration/field-crypto-migration.md`](./docs/migration/field-crypto-migration.md)
-- [`docs/compliance/kr-b2b-retention.md`](./docs/compliance/kr-b2b-retention.md)
+- [Security Policy](https://k-msg.and.guide/en/guides/security/)
+- [Security Glossary](https://k-msg.and.guide/en/guides/security/glossary/)
+- [Field Crypto v1](https://k-msg.and.guide/en/guides/security/field-crypto-v1/)
+- [Key Management and Rotation](https://k-msg.and.guide/en/guides/security/key-management-rotation/)
+- [Migration Orchestrator](https://k-msg.and.guide/en/guides/security/migration-orchestrator/)
+- [Auto Mitigation](https://k-msg.and.guide/en/guides/security/auto-mitigation/)
+- [Security Recipes](https://k-msg.and.guide/en/guides/security/recipes/)
+- [KR B2B Retention](https://k-msg.and.guide/en/guides/security/kr-b2b-retention/)
 
 If you are new to security terms, start here first:
 
-- Astro docs (KO): [`/guides/security/glossary/`](https://k-msg.and.guide/guides/security/glossary/) -> [`/guides/security/recipes/`](https://k-msg.and.guide/guides/security/recipes/)
-- Astro docs (EN): [`/en/guides/security/glossary/`](https://k-msg.and.guide/en/guides/security/glossary/) -> [`/en/guides/security/recipes/`](https://k-msg.and.guide/en/guides/security/recipes/)
-- Root docs (plain language): [`docs/security/field-crypto-basics.md`](./docs/security/field-crypto-basics.md)
+- English: [Security Glossary](https://k-msg.and.guide/en/guides/security/glossary/) -> [Security Recipes](https://k-msg.and.guide/en/guides/security/recipes/)
+- Korean: [보안 용어집](https://k-msg.and.guide/guides/security/glossary/) -> [보안 레시피](https://k-msg.and.guide/guides/security/recipes/)
 
 ## Project Roadmap
 

@@ -137,18 +137,19 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 
 관련 문서:
 
-- [`docs/security/field-crypto-basics_ko.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/field-crypto-basics_ko.md)
-- [`docs/security/field-crypto-v1.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/field-crypto-v1.md)
-- [`docs/security/key-rotation-playbook.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/key-rotation-playbook.md)
-- [`docs/security/migration-cli-runbook.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/migration-cli-runbook.md)
-- [`docs/security/crypto-control-signals.md`](https://github.com/k-otp/k-msg/blob/main/docs/security/crypto-control-signals.md)
-- [`docs/migration/field-crypto-migration.md`](https://github.com/k-otp/k-msg/blob/main/docs/migration/field-crypto-migration.md)
-- [`docs/compliance/kr-b2b-retention.md`](https://github.com/k-otp/k-msg/blob/main/docs/compliance/kr-b2b-retention.md)
+- [보안 정책 개요](https://k-msg.and.guide/guides/security/)
+- [보안 용어집](https://k-msg.and.guide/guides/security/glossary/)
+- [Field Crypto v1](https://k-msg.and.guide/guides/security/field-crypto-v1/)
+- [키 관리와 로테이션](https://k-msg.and.guide/guides/security/key-management-rotation/)
+- [마이그레이션 오케스트레이터](https://k-msg.and.guide/guides/security/migration-orchestrator/)
+- [자동 완화](https://k-msg.and.guide/guides/security/auto-mitigation/)
+- [보안 레시피](https://k-msg.and.guide/guides/security/recipes/)
+- [KR B2B 보관 정책](https://k-msg.and.guide/guides/security/kr-b2b-retention/)
 
 보안 용어가 낯설다면 아래 순서로 먼저 읽는 것을 권장합니다:
 
-- Astro docs(국문): [`/guides/security/glossary/`](https://k-msg.and.guide/guides/security/glossary/) -> [`/guides/security/recipes/`](https://k-msg.and.guide/guides/security/recipes/)
-- Astro docs(영문): [`/en/guides/security/glossary/`](https://k-msg.and.guide/en/guides/security/glossary/) -> [`/en/guides/security/recipes/`](https://k-msg.and.guide/en/guides/security/recipes/)
+- 국문: [보안 용어집](https://k-msg.and.guide/guides/security/glossary/) -> [보안 레시피](https://k-msg.and.guide/guides/security/recipes/)
+- 영문: [Security Glossary](https://k-msg.and.guide/en/guides/security/glossary/) -> [Security Recipes](https://k-msg.and.guide/en/guides/security/recipes/)
 
 ## 프로젝트 로드맵
 
