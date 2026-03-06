@@ -152,6 +152,23 @@ class InMemoryJobQueue<T> implements JobQueue<T> {
   async clear(): Promise<void> {
     this.jobs.clear();
   }
+
+  async cleanupTerminal(
+    statuses: JobStatus[] = [JobStatus.COMPLETED, JobStatus.FAILED],
+  ): Promise<number> {
+    const terminalStatuses = new Set(statuses);
+    let removed = 0;
+
+    for (const [jobId, job] of this.jobs) {
+      if (!terminalStatuses.has(job.status)) {
+        continue;
+      }
+      this.jobs.delete(jobId);
+      removed++;
+    }
+
+    return removed;
+  }
 }
 
 describe("JobProcessor", () => {
@@ -213,6 +230,36 @@ describe("JobProcessor", () => {
     expect(processor.getMetrics().processed).toBe(1);
 
     await processor.stop();
+  });
+
+  test("should fail missing handlers without leaving processing slots stuck", async () => {
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [100],
+        maxRetries: 1,
+        pollInterval: 20,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
+
+    processor.start();
+
+    const jobId = await processor.add("missing-handler", { message: "hello" });
+
+    await wait(100);
+
+    const job = await processor.getJob(jobId);
+    expect(job?.status).toBe(JobStatus.FAILED);
+    expect(processor.getMetrics().failed).toBe(1);
+
+    const stopResult = await Promise.race([
+      processor.stop().then(() => "stopped"),
+      wait(300).then(() => "timed-out"),
+    ]);
+
+    expect(stopResult).toBe("stopped");
   });
 
   test("should retry failed jobs", async () => {
@@ -278,6 +325,69 @@ describe("JobProcessor", () => {
     expect(attemptTimes).toHaveLength(3);
     expect(attemptTimes[1]! - attemptTimes[0]!).toBeGreaterThanOrEqual(60);
     expect(attemptTimes[2]! - attemptTimes[1]!).toBeGreaterThanOrEqual(120);
+
+    await processor.stop();
+  });
+
+  test("should keep queue size metrics in sync for queued jobs", async () => {
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [100],
+        maxRetries: 1,
+        pollInterval: 100,
+        enableMetrics: true,
+      },
+      new InMemoryJobQueue(),
+    );
+
+    const jobId = await processor.add("queued-only", { message: "hello" });
+    expect(processor.getMetrics().queueSize).toBe(1);
+
+    const removed = await processor.removeJob(jobId);
+    expect(removed).toBe(true);
+    expect(processor.getMetrics().queueSize).toBe(0);
+  });
+
+  test("should cleanup only terminal jobs", async () => {
+    const queue = new InMemoryJobQueue<{ keep?: boolean }>();
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [100],
+        maxRetries: 1,
+        pollInterval: 20,
+        enableMetrics: true,
+      },
+      queue,
+    );
+
+    processor.handle("complete-job", async () => "done");
+    processor.start();
+
+    const completedJobId = await processor.add("complete-job", {});
+    const delayedJobId = await processor.add(
+      "complete-job",
+      { keep: true },
+      { delay: 1000 },
+    );
+
+    await wait(120);
+
+    expect((await processor.getJob(completedJobId))?.status).toBe(
+      JobStatus.COMPLETED,
+    );
+    expect((await processor.getJob(delayedJobId))?.status).toBe(
+      JobStatus.PENDING,
+    );
+
+    const removed = await processor.cleanup();
+
+    expect(removed).toBe(1);
+    expect(await processor.getJob(completedJobId)).toBeUndefined();
+    expect((await processor.getJob(delayedJobId))?.status).toBe(
+      JobStatus.PENDING,
+    );
 
     await processor.stop();
   });
@@ -374,7 +484,6 @@ describe("MessageRetryHandler", () => {
       },
       checkInterval: 50,
       maxQueueSize: 100,
-      enablePersistence: false,
       execute: async () => ({ ok: true }),
     });
 
@@ -415,7 +524,6 @@ describe("MessageRetryHandler", () => {
       },
       checkInterval: 100,
       maxQueueSize: 100,
-      enablePersistence: false,
       execute: async () => ({ ok: true }),
     });
 
@@ -456,7 +564,6 @@ describe("MessageRetryHandler", () => {
       },
       checkInterval: 10,
       maxQueueSize: 100,
-      enablePersistence: false,
       execute: async (attempt) => {
         executions.push(attempt.messageId);
         return { delivered: true };
@@ -504,7 +611,6 @@ describe("MessageRetryHandler", () => {
       },
       checkInterval: 10,
       maxQueueSize: 100,
-      enablePersistence: false,
       execute: async () => {
         throw new Error("permanent failure");
       },

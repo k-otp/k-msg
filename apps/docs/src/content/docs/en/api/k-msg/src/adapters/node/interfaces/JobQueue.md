@@ -15,6 +15,24 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://git
 
 ## Methods
 
+### cleanupTerminal()?
+
+> `optional` **cleanupTerminal**(`statuses?`): `Promise`\<`number`\>
+
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L63)
+
+#### Parameters
+
+##### statuses?
+
+[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[]
+
+#### Returns
+
+`Promise`\<`number`\>
+
+***
+
 ### clear()
 
 > **clear**(): `Promise`\<`void`\>

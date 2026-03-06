@@ -122,7 +122,7 @@ export class JobProcessor extends EventEmitter {
       metadata: options.metadata,
     });
 
-    this.updateMetrics();
+    await this.refreshQueueMetrics();
     this.emit("job:added", job);
 
     return job.id;
@@ -187,14 +187,19 @@ export class JobProcessor extends EventEmitter {
   }
 
   /**
-   * Remove completed jobs from queue
+   * Remove terminal jobs from queue without touching pending or processing jobs.
    */
   async cleanup(): Promise<number> {
-    const initialSize = await this.queue.size();
-    await this.queue.clear();
-    this.updateMetrics();
+    if (!this.queue.cleanupTerminal) {
+      throw new Error(
+        "JobQueue must implement cleanupTerminal() to support JobProcessor.cleanup()",
+      );
+    }
 
-    return initialSize;
+    const removed = await this.queue.cleanupTerminal();
+    await this.refreshQueueMetrics();
+
+    return removed;
   }
 
   /**
@@ -210,7 +215,7 @@ export class JobProcessor extends EventEmitter {
   async removeJob(jobId: string): Promise<boolean> {
     const removed = await this.queue.remove(jobId);
     this.processing.delete(jobId);
-    this.updateMetrics();
+    await this.refreshQueueMetrics();
     return removed;
   }
 
@@ -244,11 +249,14 @@ export class JobProcessor extends EventEmitter {
   private async processJob(job: Job<any>): Promise<void> {
     const handler = this.handlers.get(job.type);
     if (!handler) {
+      this.processing.delete(job.id);
       await this.failJob(
         job.id,
         `No handler registered for job type: ${job.type}`,
         { enabled: false },
       );
+      this.metrics.lastProcessedAt = new Date();
+      await this.refreshQueueMetrics();
       return;
     }
 
@@ -301,7 +309,8 @@ export class JobProcessor extends EventEmitter {
       }
     }
 
-    this.updateMetrics();
+    this.metrics.lastProcessedAt = new Date();
+    await this.refreshQueueMetrics();
   }
 
   private async failJob(
@@ -327,8 +336,8 @@ export class JobProcessor extends EventEmitter {
     return this.options.retryDelays[delayIndex] ?? 0;
   }
 
-  private updateMetrics(): void {
-    this.metrics.lastProcessedAt = new Date();
+  private async refreshQueueMetrics(): Promise<void> {
+    this.metrics.queueSize = await this.queue.size();
   }
 
   private updateAverageProcessingTime(newTime: number): void {
