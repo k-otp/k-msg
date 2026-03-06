@@ -1,5 +1,17 @@
 # @k-msg/channel
 
+## 0.29.2 — 2026-03-06
+
+### Patch changes
+
+- [66ff954](https://github.com/k-otp/k-msg/commit/66ff954de69fe12fe0a27830b877eecddf14d422) Fix follow-up runtime issues in the channel toolkit and messaging queue helpers.
+  
+  - Prevent `JobProcessor` from leaving processing slots stuck when a job type has no registered handler.
+  - Make queue cleanup remove only terminal jobs instead of deleting pending work, and align queue-size metrics with the actual pending queue.
+  - Remove deleted channel sender-number orphans during `ChannelCRUD` cleanup.
+  - Remove the unused `MessageRetryHandler.enablePersistence` option and update the docs to match the real in-memory behavior. — Thanks @imjlk!
+- Updated dependencies: core@0.29.2
+
 ## 0.29.1 — 2026-03-06
 
 ### Patch changes
