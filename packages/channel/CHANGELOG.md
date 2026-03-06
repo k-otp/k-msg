@@ -1,6 +1,19 @@
 # @k-msg/channel
 
-## Unreleased
+## 0.29.0 — 2026-03-06
+
+### Minor changes
+
+- [008ad5d](https://github.com/k-otp/k-msg/commit/008ad5dc75f37950445787c1f00d5ea0a346c71b) Remove OTP-style verification helpers from `@k-msg/channel/toolkit`.
+  
+  - Remove `NumberVerifier` and related OTP verification types from the toolkit surface.
+  - Remove `ChannelService.verifySenderNumber()` and the public `ChannelVerificationResult` type.
+  - Make `KakaoSenderNumberManager` a local sender registry that relies on explicit status and `verifiedAt` transitions instead of fake OTP issuance.
+  - Remove `verificationCode` from public sender-number types and refresh the generated channel docs. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.29.0
 
 ### Breaking changes
 
