@@ -1,5 +1,15 @@
 # @k-msg/cli
 
+## 0.9.3 — 2026-03-06
+
+### Patch changes
+
+- [f8ccd45](https://github.com/k-otp/k-msg/commit/f8ccd457384935a1bc6ebbb681d5d5fca61c7728) Fix installer shell-init appends for files without a trailing newline.
+  
+  - Prevent `.zshrc`/`.bashrc` line concatenation when appending completion setup lines.
+  - Keep completion setup idempotent and safe for existing shell config files. — Thanks @imjlk!
+- Updated dependencies: channel@0.29.0, core@0.29.0, messaging@0.29.0, provider@0.29.0, template@0.29.0, k-msg@0.29.0
+
 ## 0.9.2 — 2026-03-01
 
 ### Patch changes
