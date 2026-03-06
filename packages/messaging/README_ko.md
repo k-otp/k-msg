@@ -44,6 +44,30 @@ bun add @k-msg/messaging @k-msg/core
   - 템플릿 개인화 관련: `@k-msg/template` (`TemplatePersonalizer`, `TemplateVariableUtils`, `defaultTemplatePersonalizer`)
 - `JobProcessor`/`MessageJobProcessor`는 이제 `jobQueue`를 반드시 주입해야 합니다.
 
+- `MessageRetryHandler`는 provider 기능 공백을 메우는 애플리케이션 레벨 retry orchestrator입니다. 실제 재전송은 호출자가 `execute(attempt, item)` 콜백으로 주입해야 하며, 핸들러는 retry 타이밍과 정책, 큐 상태만 관리합니다.
+
+```ts
+import { MessageRetryHandler } from "@k-msg/messaging/adapters/node";
+
+const retryHandler = new MessageRetryHandler({
+  policy: {
+    maxAttempts: 3,
+    backoffMultiplier: 2,
+    initialDelay: 5000,
+    maxDelay: 300000,
+    jitter: true,
+    retryableStatuses: ["FAILED"],
+    retryableErrorCodes: ["NETWORK_TIMEOUT"],
+  },
+  checkInterval: 1000,
+  maxQueueSize: 1000,
+  enablePersistence: false,
+  execute: async (attempt) => {
+    return await resendMessage(attempt.messageId);
+  },
+});
+```
+
 ## 기본 사용
 
 ```ts

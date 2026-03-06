@@ -5,7 +5,7 @@ prev: false
 title: "SenderNumberFilters"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L180)
+Defined in: [packages/channel/src/types/channel.types.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L169)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:180](https://github.com
 
 > `optional` **category**: [`SenderNumberCategory`](/api/channel/src/toolkit/enumerations/sendernumbercategory/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L183)
+Defined in: [packages/channel/src/types/channel.types.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L172)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:183](https://github.com
 
 > `optional` **channelId**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L181)
+Defined in: [packages/channel/src/types/channel.types.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L170)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:181](https://github.com
 
 > `optional` **status**: [`SenderNumberStatus`](/api/channel/src/toolkit/enumerations/sendernumberstatus/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L182)
+Defined in: [packages/channel/src/types/channel.types.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L171)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:182](https://github.com
 
 > `optional` **verified**: `boolean`
 
-Defined in: [packages/channel/src/types/channel.types.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L184)
+Defined in: [packages/channel/src/types/channel.types.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L173)

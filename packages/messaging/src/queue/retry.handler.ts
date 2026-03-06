@@ -2,7 +2,6 @@
  * Retry handler for failed message deliveries
  */
 
-import { RetryHandler as CoreRetryHandler } from "@k-msg/core";
 import { EventEmitter } from "../shared/event-emitter";
 import {
   type DeliveryReport,
@@ -43,7 +42,12 @@ export interface RetryQueueItem {
   originalDeliveryReport: DeliveryReport;
   attempts: RetryAttempt[];
   nextRetryAt: Date;
-  status: "pending" | "processing" | "exhausted" | "cancelled";
+  status:
+    | "pending"
+    | "processing"
+    | "succeeded"
+    | "exhausted"
+    | "cancelled";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +57,12 @@ export interface RetryHandlerOptions {
   checkInterval: number;
   maxQueueSize: number;
   enablePersistence: boolean;
+  execute: (attempt: RetryAttempt, item: RetryQueueItem) => Promise<unknown>;
+  shouldRetryError?: (
+    error: Error,
+    item: RetryQueueItem,
+    attempt: RetryAttempt,
+  ) => boolean;
   onRetryExhausted?: (item: RetryQueueItem) => Promise<void>;
   onRetrySuccess?: (item: RetryQueueItem, result: unknown) => Promise<void>;
   onRetryFailed?: (item: RetryQueueItem, error: Error) => Promise<void>;
@@ -78,8 +88,8 @@ export class MessageRetryHandler extends EventEmitter {
   private defaultPolicy: RetryPolicy = {
     maxAttempts: 3,
     backoffMultiplier: 2,
-    initialDelay: 5000, // 5 seconds
-    maxDelay: 300000, // 5 minutes
+    initialDelay: 5000,
+    maxDelay: 300000,
     jitter: true,
     retryableStatuses: [MessageStatus.FAILED],
     retryableErrorCodes: [
@@ -129,7 +139,6 @@ export class MessageRetryHandler extends EventEmitter {
       this.checkTimer = undefined;
     }
 
-    // Wait for active retries to complete
     while (this.processing.size > 0) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -141,26 +150,21 @@ export class MessageRetryHandler extends EventEmitter {
    * Add a failed delivery for retry
    */
   async addForRetry(deliveryReport: DeliveryReport): Promise<boolean> {
-    // Check if this message should be retried
     if (!this.shouldRetry(deliveryReport)) {
       return false;
     }
 
-    // Check if already in retry queue
     const existingItem = this.retryQueue.find(
       (item) => item.messageId === deliveryReport.messageId,
     );
 
     if (existingItem) {
-      // Update existing item
       return this.updateRetryItem(existingItem, deliveryReport);
     }
 
-    // Create new retry item
     const retryItem = await this.createRetryItem(deliveryReport);
 
     if (this.retryQueue.length >= this.options.maxQueueSize) {
-      // Remove oldest exhausted items to make space
       this.cleanupQueue();
 
       if (this.retryQueue.length >= this.options.maxQueueSize) {
@@ -186,15 +190,16 @@ export class MessageRetryHandler extends EventEmitter {
    * Cancel retry for a specific message
    */
   cancelRetry(messageId: string): boolean {
-    const item = this.retryQueue.find((item) => item.messageId === messageId);
-    if (item) {
-      item.status = "cancelled";
-      item.updatedAt = new Date();
-      this.updateMetrics();
-      this.emit("retry:cancelled", item);
-      return true;
+    const item = this.retryQueue.find((entry) => entry.messageId === messageId);
+    if (!item) {
+      return false;
     }
-    return false;
+
+    item.status = "cancelled";
+    item.updatedAt = new Date();
+    this.updateMetrics();
+    this.emit("retry:cancelled", item);
+    return true;
   }
 
   /**
@@ -219,7 +224,7 @@ export class MessageRetryHandler extends EventEmitter {
   }
 
   /**
-   * Clean up completed/exhausted retry items
+   * Clean up terminal retry items
    */
   cleanup(): number {
     const initialLength = this.retryQueue.length;
@@ -265,6 +270,8 @@ export class MessageRetryHandler extends EventEmitter {
     item.status = "processing";
     item.updatedAt = new Date();
 
+    let attempt: RetryAttempt | undefined;
+
     try {
       const originalMetadata = item.originalDeliveryReport.metadata;
       const templateId =
@@ -274,11 +281,11 @@ export class MessageRetryHandler extends EventEmitter {
       const variablesRaw = originalMetadata.variables;
       const variables = isObjectRecord(variablesRaw) ? variablesRaw : {};
 
-      // Create retry attempt
-      const attempt: RetryAttempt = {
+      attempt = {
         messageId: item.messageId,
         phoneNumber: item.phoneNumber,
-        attemptNumber: item.attempts.length + 1,
+        attemptNumber:
+          item.originalDeliveryReport.attempts.length + item.attempts.length + 1,
         scheduledAt: new Date(),
         provider:
           item.originalDeliveryReport.attempts[0]?.provider || "unknown",
@@ -289,7 +296,6 @@ export class MessageRetryHandler extends EventEmitter {
 
       item.attempts.push(attempt);
 
-      // Emit retry started event
       this.emit("retry:started", {
         type: MessageEventType.MESSAGE_QUEUED,
         timestamp: new Date(),
@@ -297,11 +303,10 @@ export class MessageRetryHandler extends EventEmitter {
         metadata: item.originalDeliveryReport.metadata,
       } as MessageEvent);
 
-      // Execute retry (this would integrate with actual message sender)
-      const result = await this.executeRetry(attempt);
+      const result = await this.options.execute(attempt, item);
 
-      // Retry succeeded
-      item.status = "exhausted"; // Mark as completed
+      item.status = "succeeded";
+      item.updatedAt = new Date();
       this.processing.delete(item.id);
       this.metrics.successfulRetries++;
       this.metrics.totalRetries++;
@@ -316,82 +321,62 @@ export class MessageRetryHandler extends EventEmitter {
         metadata: item.originalDeliveryReport.metadata,
       } as MessageEvent);
     } catch (error) {
+      const retryError =
+        error instanceof Error ? error : new Error(String(error));
       this.processing.delete(item.id);
       this.metrics.failedRetries++;
       this.metrics.totalRetries++;
 
-      const maxAttempts = this.options.policy.maxAttempts;
-      const shouldRetryAgain = item.attempts.length < maxAttempts;
+      const totalAttempts =
+        item.originalDeliveryReport.attempts.length + item.attempts.length;
+      const shouldRetryByPolicy = totalAttempts < this.options.policy.maxAttempts;
+      const shouldRetryByError =
+        attempt === undefined
+          ? false
+          : (this.options.shouldRetryError?.(retryError, item, attempt) ?? true);
+      const shouldRetryAgain = shouldRetryByPolicy && shouldRetryByError;
 
       if (shouldRetryAgain) {
-        // Schedule next retry
-        const nextDelay = this.calculateRetryDelay(item.attempts.length);
+        const nextDelay = this.calculateNextDelay(totalAttempts);
         item.nextRetryAt = new Date(Date.now() + nextDelay);
         item.status = "pending";
       } else {
-        // Retry exhausted
         item.status = "exhausted";
         this.metrics.exhaustedRetries++;
-
-        await this.options.onRetryExhausted?.(item);
-
-        this.emit("retry:exhausted", {
-          type: MessageEventType.MESSAGE_FAILED,
-          timestamp: new Date(),
-          data: { item, finalError: error },
-          metadata: item.originalDeliveryReport.metadata,
-        } as MessageEvent);
       }
 
       item.updatedAt = new Date();
       this.updateMetrics();
 
-      await this.options.onRetryFailed?.(item, error as Error);
+      await this.options.onRetryFailed?.(item, retryError);
 
       this.emit("retry:failed", {
         type: MessageEventType.MESSAGE_FAILED,
         timestamp: new Date(),
-        data: { item, error, willRetry: shouldRetryAgain },
+        data: { item, error: retryError, willRetry: shouldRetryAgain },
         metadata: item.originalDeliveryReport.metadata,
       } as MessageEvent);
-    }
-  }
 
-  private async executeRetry(attempt: RetryAttempt): Promise<unknown> {
-    // This would integrate with the actual message sender
-    // For now, simulate the retry operation
-    return CoreRetryHandler.execute(
-      async () => {
-        // Simulate message sending
-        if (Math.random() < 0.7) {
-          // 70% success rate for retries
-          return {
-            messageId: attempt.messageId,
-            status: "sent",
-            sentAt: new Date(),
-          };
-        } else {
-          throw new Error("Retry failed");
-        }
-      },
-      {
-        maxAttempts: 1, // We handle retries at a higher level
-        initialDelay: 0,
-        retryCondition: () => false, // No retries at this level
-      },
-    );
+      if (!shouldRetryAgain) {
+        await this.options.onRetryExhausted?.(item);
+
+        this.emit("retry:exhausted", {
+          type: MessageEventType.MESSAGE_FAILED,
+          timestamp: new Date(),
+          data: { item, finalError: retryError },
+          metadata: item.originalDeliveryReport.metadata,
+        } as MessageEvent);
+      }
+    }
   }
 
   private shouldRetry(deliveryReport: DeliveryReport): boolean {
     const { policy } = this.options;
 
-    // Check if status is retryable
     if (!policy.retryableStatuses.includes(deliveryReport.status)) {
       return false;
     }
 
-    // Check if error code is retryable
-    // First check top-level error, then latest attempt error
     let errorToCheck = deliveryReport.error;
     if (!errorToCheck && deliveryReport.attempts.length > 0) {
       const latestAttempt =
@@ -408,16 +393,13 @@ export class MessageRetryHandler extends EventEmitter {
       }
     }
 
-    // Check if attempts haven't been exhausted
     return deliveryReport.attempts.length < policy.maxAttempts;
   }
 
   private async createRetryItem(
     deliveryReport: DeliveryReport,
   ): Promise<RetryQueueItem> {
-    const initialDelay = this.calculateRetryDelay(
-      deliveryReport.attempts.length,
-    );
+    const initialDelay = this.calculateNextDelay(deliveryReport.attempts.length);
 
     return {
       id: `retry_${deliveryReport.messageId}_${Date.now()}`,
@@ -436,32 +418,40 @@ export class MessageRetryHandler extends EventEmitter {
     item: RetryQueueItem,
     deliveryReport: DeliveryReport,
   ): boolean {
-    if (item.status === "exhausted" || item.status === "cancelled") {
+    if (
+      item.status === "succeeded" ||
+      item.status === "exhausted" ||
+      item.status === "cancelled"
+    ) {
       return false;
     }
 
-    // Update the delivery report
     item.originalDeliveryReport = deliveryReport;
     item.updatedAt = new Date();
 
-    // Recalculate next retry time if needed
     if (item.status === "pending") {
-      const nextDelay = this.calculateRetryDelay(item.attempts.length);
+      const totalAttempts =
+        item.originalDeliveryReport.attempts.length + item.attempts.length;
+      const nextDelay = this.calculateNextDelay(totalAttempts);
       item.nextRetryAt = new Date(Date.now() + nextDelay);
     }
 
     return true;
   }
 
-  private calculateRetryDelay(attemptNumber: number): number {
+  private calculateNextDelay(totalAttemptsCompleted: number): number {
+    const attemptIndex = Math.max(0, totalAttemptsCompleted - 1);
+    return this.calculateRetryDelay(attemptIndex);
+  }
+
+  private calculateRetryDelay(attemptIndex: number): number {
     const { policy } = this.options;
 
-    let delay = policy.initialDelay * policy.backoffMultiplier ** attemptNumber;
+    let delay = policy.initialDelay * policy.backoffMultiplier ** attemptIndex;
     delay = Math.min(delay, policy.maxDelay);
 
-    // Add jitter if enabled
     if (policy.jitter) {
-      const jitterAmount = delay * 0.1; // 10% jitter
+      const jitterAmount = delay * 0.1;
       delay += (Math.random() - 0.5) * 2 * jitterAmount;
     }
 
@@ -469,13 +459,13 @@ export class MessageRetryHandler extends EventEmitter {
   }
 
   private cleanupQueue(): void {
-    const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
+    const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     this.retryQueue = this.retryQueue.filter(
       (item) =>
         item.status === "pending" ||
         item.status === "processing" ||
-        (item.status === "exhausted" && item.updatedAt > cutoffTime),
+        item.updatedAt > cutoffTime,
     );
   }
 
@@ -483,7 +473,6 @@ export class MessageRetryHandler extends EventEmitter {
     this.metrics.queueSize = this.retryQueue.length;
     this.metrics.lastRetryAt = new Date();
 
-    // Calculate average retry delay
     const pendingItems = this.retryQueue.filter(
       (item) => item.status === "pending",
     );
@@ -492,6 +481,9 @@ export class MessageRetryHandler extends EventEmitter {
         return sum + Math.max(0, item.nextRetryAt.getTime() - Date.now());
       }, 0);
       this.metrics.averageRetryDelay = totalDelay / pendingItems.length;
+      return;
     }
+
+    this.metrics.averageRetryDelay = 0;
   }
 }

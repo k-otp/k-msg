@@ -7,4 +7,4 @@ title: "ChannelCreateRequestType"
 
 > **ChannelCreateRequestType** = `z.infer`\<*typeof* [`ChannelCreateRequestSchema`](/api/channel/src/toolkit/variables/channelcreaterequestschema/)\>
 
-Defined in: [packages/channel/src/types/channel.types.ts:242](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L242)
+Defined in: [packages/channel/src/types/channel.types.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L230)

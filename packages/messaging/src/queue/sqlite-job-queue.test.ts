@@ -8,6 +8,9 @@ interface TestJobData {
   foo?: string;
 }
 
+const wait = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 describe("SQLiteJobQueue", () => {
   let queue: SQLiteJobQueue<TestJobData>;
   const dbPath = "test-queue.sqlite";
@@ -88,5 +91,33 @@ describe("SQLiteJobQueue", () => {
     const completedJob = await queue.getJob(dequeued.id);
     expect(completedJob?.status).toBe(JobStatus.COMPLETED);
     expect(completedJob?.completedAt).toBeDefined();
+  });
+
+  test("should reschedule retries using processAt delay", async () => {
+    const job = await queue.enqueue("retry-task", {});
+    const dequeued = await queue.dequeue();
+
+    if (!dequeued) throw new Error("Job not dequeued");
+
+    const beforeRetry = Date.now();
+    await queue.fail(dequeued.id, "temporary failure", {
+      enabled: true,
+      delayMs: 80,
+    });
+
+    const pendingJob = await queue.getJob(dequeued.id);
+    expect(pendingJob?.status).toBe(JobStatus.PENDING);
+    expect(pendingJob?.attempts).toBe(1);
+    expect(pendingJob?.processAt.getTime()).toBeGreaterThanOrEqual(
+      beforeRetry + 60,
+    );
+
+    const immediatelyReady = await queue.peek();
+    expect(immediatelyReady).toBeUndefined();
+
+    await wait(100);
+
+    const readyJob = await queue.peek();
+    expect(readyJob?.id).toBe(job.id);
   });
 });

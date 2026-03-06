@@ -23,6 +23,11 @@ export interface Job<T> {
   metadata: Record<string, any>;
 }
 
+export interface JobRetryDirective {
+  enabled: boolean;
+  delayMs?: number;
+}
+
 export interface JobQueue<T> {
   enqueue(
     type: string,
@@ -42,7 +47,7 @@ export interface JobQueue<T> {
   fail(
     jobId: string,
     error: string | Error,
-    shouldRetry?: boolean,
+    retry?: JobRetryDirective,
   ): Promise<void>;
 
   peek(): Promise<Job<T> | undefined>;

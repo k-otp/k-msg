@@ -1,4 +1,8 @@
-import type { Job, JobQueue } from "../../queue/job-queue.interface";
+import type {
+  Job,
+  JobQueue,
+  JobRetryDirective,
+} from "../../queue/job-queue.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
 import type { CloudflareObjectStorage } from "./object-storage";
 
@@ -103,7 +107,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   async fail(
     jobId: string,
     error: string | Error,
-    shouldRetry = false,
+    retry: JobRetryDirective = { enabled: false },
   ): Promise<void> {
     const job = await this.getJob(jobId);
     if (!job) throw new Error(`Job ${jobId} not found`);
@@ -111,11 +115,12 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     const attempts = job.attempts + 1;
     const message = error instanceof Error ? error.message : error;
 
-    if (shouldRetry && attempts < job.maxAttempts) {
+    if (retry.enabled && attempts < job.maxAttempts) {
       const retryJob: Job<T> = {
         ...job,
         attempts,
         status: JobStatus.PENDING,
+        processAt: new Date(Date.now() + (retry.delayMs ?? 0)),
         error: message,
       };
       await this.storage.put(

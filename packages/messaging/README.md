@@ -44,6 +44,30 @@ bun add @k-msg/messaging @k-msg/core
 
 `JobProcessor` and `MessageJobProcessor` now require explicit `jobQueue` injection.
 
+`MessageRetryHandler` is an application-level retry orchestrator for provider gaps. You must supply an `execute(attempt, item)` callback that performs the real resend logic, and the handler will only manage retry timing, policy, and queue state.
+
+```ts
+import { MessageRetryHandler } from "@k-msg/messaging/adapters/node";
+
+const retryHandler = new MessageRetryHandler({
+  policy: {
+    maxAttempts: 3,
+    backoffMultiplier: 2,
+    initialDelay: 5000,
+    maxDelay: 300000,
+    jitter: true,
+    retryableStatuses: ["FAILED"],
+    retryableErrorCodes: ["NETWORK_TIMEOUT"],
+  },
+  checkInterval: 1000,
+  maxQueueSize: 1000,
+  enablePersistence: false,
+  execute: async (attempt) => {
+    return await resendMessage(attempt.messageId);
+  },
+});
+```
+
 ## Quick Start
 
 ```ts

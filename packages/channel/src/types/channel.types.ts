@@ -9,7 +9,6 @@ export interface Channel {
   profileKey: string;
   senderNumbers: SenderNumber[];
   metadata: ChannelMetadata;
-  verification: ChannelVerification;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -95,15 +94,6 @@ export interface ChannelMetadata {
   };
 }
 
-export interface ChannelVerification {
-  status: VerificationStatus;
-  documents: VerificationDocument[];
-  verifiedAt?: Date;
-  rejectedAt?: Date;
-  rejectionReason?: string;
-  verifiedBy?: string;
-}
-
 export enum VerificationStatus {
   NOT_REQUIRED = "NOT_REQUIRED",
   PENDING = "PENDING",
@@ -172,7 +162,6 @@ export interface ChannelFilters {
   provider?: string;
   type?: ChannelType;
   status?: ChannelStatus;
-  verified?: boolean;
   createdAfter?: Date;
   createdBefore?: Date;
 }
@@ -227,7 +216,6 @@ export const ChannelFiltersSchema = z.object({
   provider: z.optional(z.string()),
   type: z.optional(z.nativeEnum(ChannelType)),
   status: z.optional(z.nativeEnum(ChannelStatus)),
-  verified: z.optional(z.boolean()),
   createdAfter: z.optional(z.date()),
   createdBefore: z.optional(z.date()),
 });

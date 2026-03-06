@@ -1,4 +1,8 @@
-import type { Job, JobQueue } from "../../queue/job-queue.interface";
+import type {
+  Job,
+  JobQueue,
+  JobRetryDirective,
+} from "../../queue/job-queue.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
 import type { CloudflareSqlClient } from "./sql-client";
 import { runCloudflareSqlTransaction } from "./sql-client";
@@ -208,7 +212,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
   async fail(
     jobId: string,
     error: string | Error,
-    shouldRetry?: boolean,
+    retry: JobRetryDirective = { enabled: false },
   ): Promise<void> {
     await this.init();
 
@@ -220,14 +224,21 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     const errorMessage = error instanceof Error ? error.message : error;
     const attempts = job.attempts + 1;
 
-    if (shouldRetry && attempts < job.maxAttempts) {
+    if (retry.enabled && attempts < job.maxAttempts) {
       await this.client.query(
         `UPDATE ${this.tableRef()}
          SET ${this.quoteIdentifier("status")} = ${this.placeholder(1)},
              ${this.quoteIdentifier("attempts")} = ${this.placeholder(2)},
-             ${this.quoteIdentifier("error")} = ${this.placeholder(3)}
-         WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(4)}`,
-        [JobStatus.PENDING, attempts, errorMessage, jobId],
+             ${this.quoteIdentifier("process_at")} = ${this.placeholder(3)},
+             ${this.quoteIdentifier("error")} = ${this.placeholder(4)}
+         WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(5)}`,
+        [
+          JobStatus.PENDING,
+          attempts,
+          Date.now() + (retry.delayMs ?? 0),
+          errorMessage,
+          jobId,
+        ],
       );
       return;
     }

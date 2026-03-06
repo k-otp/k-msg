@@ -5,7 +5,7 @@ prev: false
 title: "VerificationDocument"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L115)
+Defined in: [packages/channel/src/types/channel.types.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L105)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:115](https://github.com
 
 > **fileName**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L118)
+Defined in: [packages/channel/src/types/channel.types.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L108)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:118](https://github.com
 
 > **fileUrl**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L119)
+Defined in: [packages/channel/src/types/channel.types.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L109)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:119](https://github.com
 
 > **id**: `string`
 
-Defined in: [packages/channel/src/types/channel.types.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L116)
+Defined in: [packages/channel/src/types/channel.types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L106)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:116](https://github.com
 
 > **status**: [`DocumentStatus`](/api/channel/src/toolkit/enumerations/documentstatus/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L121)
+Defined in: [packages/channel/src/types/channel.types.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L111)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:121](https://github.com
 
 > **type**: [`DocumentType`](/api/channel/src/toolkit/enumerations/documenttype/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L117)
+Defined in: [packages/channel/src/types/channel.types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L107)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:117](https://github.com
 
 > **uploadedAt**: `Date`
 
-Defined in: [packages/channel/src/types/channel.types.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L120)
+Defined in: [packages/channel/src/types/channel.types.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L110)
