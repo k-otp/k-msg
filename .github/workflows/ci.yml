@@ -113,7 +113,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
