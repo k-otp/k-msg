@@ -37,6 +37,28 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:16](https://github
 
 ## Methods
 
+### cleanupTerminal()
+
+> **cleanupTerminal**(`statuses?`): `Promise`\<`number`\>
+
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L293)
+
+#### Parameters
+
+##### statuses?
+
+[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
+
+#### Returns
+
+`Promise`\<`number`\>
+
+#### Implementation of
+
+[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`cleanupTerminal`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#cleanupterminal)
+
+***
+
 ### clear()
 
 > **clear**(): `Promise`\<`void`\>
@@ -57,7 +79,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:289](https://githu
 
 > **close**(): `void`
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L293)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:314](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L314)
 
 #### Returns
 

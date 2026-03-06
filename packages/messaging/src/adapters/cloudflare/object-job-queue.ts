@@ -189,6 +189,24 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     }
   }
 
+  async cleanupTerminal(
+    statuses: JobStatus[] = [JobStatus.COMPLETED, JobStatus.FAILED],
+  ): Promise<number> {
+    if (statuses.length === 0) {
+      return 0;
+    }
+
+    const terminalStatuses = new Set(statuses);
+    const jobs = await this.readAllJobs();
+    const removable = jobs.filter((job) => terminalStatuses.has(job.status));
+
+    for (const job of removable) {
+      await this.storage.delete(this.jobKey(job.id));
+    }
+
+    return removable.length;
+  }
+
   private async readAllJobs(): Promise<Job<T>[]> {
     const keys = await this.storage.list(this.jobsPrefix());
     const jobs: Job<T>[] = [];

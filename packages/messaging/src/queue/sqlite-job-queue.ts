@@ -290,6 +290,27 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     this.db.exec("DELETE FROM jobs");
   }
 
+  async cleanupTerminal(
+    statuses: JobStatus[] = [JobStatus.COMPLETED, JobStatus.FAILED],
+  ): Promise<number> {
+    if (statuses.length === 0) {
+      return 0;
+    }
+
+    const placeholders = statuses.map(() => "?").join(", ");
+    const stmt = this.db.prepare(`
+      DELETE FROM jobs
+      WHERE status IN (${placeholders})
+    `);
+
+    stmt.run(...statuses);
+
+    const changes = this.db.query("SELECT changes() as changes").get() as {
+      changes: number;
+    };
+    return changes.changes;
+  }
+
   close(): void {
     this.db.close();
   }

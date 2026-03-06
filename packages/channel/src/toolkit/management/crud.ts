@@ -208,13 +208,7 @@ export class ChannelCRUD extends EventEmitter {
     } else {
       // Hard delete - remove from memory
       this.channels.delete(channelId);
-
-      // Also delete associated sender numbers
-      for (const [id, senderNumber] of this.senderNumbers) {
-        if (senderNumber.channelId === channelId) {
-          this.senderNumbers.delete(id);
-        }
-      }
+      this.removeSenderNumbersForChannel(channelId);
     }
 
     // Audit log
@@ -665,6 +659,7 @@ export class ChannelCRUD extends EventEmitter {
         channel.updatedAt < thirtyDaysAgo
       ) {
         this.channels.delete(id);
+        this.removeSenderNumbersForChannel(id);
         deletedChannels++;
       }
     }
@@ -715,6 +710,14 @@ export class ChannelCRUD extends EventEmitter {
     // Keep only last 10000 audit logs to prevent memory issues
     if (this.auditLogs.length > 10000) {
       this.auditLogs = this.auditLogs.slice(-10000);
+    }
+  }
+
+  private removeSenderNumbersForChannel(channelId: string): void {
+    for (const [id, senderNumber] of this.senderNumbers) {
+      if (senderNumber.channelId === channelId) {
+        this.senderNumbers.delete(id);
+      }
     }
   }
 

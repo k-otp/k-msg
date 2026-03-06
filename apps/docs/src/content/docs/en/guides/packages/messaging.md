@@ -61,7 +61,6 @@ const retryHandler = new MessageRetryHandler({
   },
   checkInterval: 1000,
   maxQueueSize: 1000,
-  enablePersistence: false,
   execute: async (attempt) => {
     return await resendMessage(attempt.messageId);
   },

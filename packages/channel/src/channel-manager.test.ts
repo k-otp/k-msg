@@ -346,6 +346,40 @@ describe("ChannelCRUD", () => {
     expect(actions).toEqual(["create", "delete", "update"]);
   });
 
+  test("should cleanup sender numbers when removing expired deleted channels", async () => {
+    const crud = new ChannelCRUD();
+
+    const channel = await crud.createChannel({
+      name: "정리 대상 채널",
+      type: ChannelType.KAKAO_ALIMTALK,
+      provider: "kakao",
+      profileKey: "cleanup-channel",
+    });
+
+    const senderNumber = await crud.createSenderNumber(channel.id, {
+      phoneNumber: "01012345678",
+      category: SenderNumberCategory.BUSINESS,
+    });
+
+    await crud.deleteChannel(channel.id, "user-1");
+
+    const deletedChannel = await crud.getChannel(channel.id);
+    if (!deletedChannel) {
+      throw new Error("Expected deleted channel to remain for soft delete");
+    }
+
+    deletedChannel.updatedAt = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+
+    const cleanupResult = crud.cleanup();
+
+    expect(cleanupResult.deletedChannels).toBe(1);
+    expect(await crud.getChannel(channel.id)).toBeNull();
+    expect(await crud.getSenderNumber(senderNumber.id)).toBeNull();
+    expect(
+      (await crud.listSenderNumbers({ channelId: channel.id })).data,
+    ).toHaveLength(0);
+  });
+
   test("should get statistics", async () => {
     const crud = new ChannelCRUD();
 

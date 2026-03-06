@@ -123,7 +123,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L192)
 
-Remove completed jobs from queue
+Remove terminal jobs from queue without touching pending or processing jobs.
 
 #### Returns
 
@@ -161,7 +161,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L203)
+Defined in: [packages/messaging/src/queue/job.processor.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L208)
 
 Get specific job by ID
 
@@ -339,7 +339,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeJob**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L210)
+Defined in: [packages/messaging/src/queue/job.processor.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L215)
 
 Remove job from queue
 

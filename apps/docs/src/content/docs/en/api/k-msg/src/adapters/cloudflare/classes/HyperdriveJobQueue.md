@@ -41,6 +41,28 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 ## Methods
 
+### cleanupTerminal()
+
+> **cleanupTerminal**(`statuses?`): `Promise`\<`number`\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:323](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L323)
+
+#### Parameters
+
+##### statuses?
+
+[`JobStatus`](/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
+
+#### Returns
+
+`Promise`\<`number`\>
+
+#### Implementation of
+
+[`JobQueue`](/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`cleanupTerminal`](/api/k-msg/src/adapters/node/interfaces/jobqueue/#cleanupterminal)
+
+***
+
 ### clear()
 
 > **clear**(): `Promise`\<`void`\>
@@ -61,7 +83,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:323](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L323)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:354](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L354)
 
 #### Returns
 
