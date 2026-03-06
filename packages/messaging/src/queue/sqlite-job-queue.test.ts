@@ -119,4 +119,25 @@ describe("SQLiteJobQueue", () => {
     const readyJob = await queue.peek();
     expect(readyJob?.id).toBe(job.id);
   });
+
+  test("should cleanup only terminal jobs", async () => {
+    const completed = await queue.enqueue("completed-task", {});
+    const failed = await queue.enqueue("failed-task", {});
+    const pending = await queue.enqueue("pending-task", {}, { delay: 1000 });
+
+    const completedDequeued = await queue.dequeue();
+    if (!completedDequeued) throw new Error("Completed job not dequeued");
+    await queue.complete(completedDequeued.id);
+
+    const failedDequeued = await queue.dequeue();
+    if (!failedDequeued) throw new Error("Failed job not dequeued");
+    await queue.fail(failedDequeued.id, "boom");
+
+    const removed = await queue.cleanupTerminal();
+
+    expect(removed).toBe(2);
+    expect(await queue.getJob(completed.id)).toBeUndefined();
+    expect(await queue.getJob(failed.id)).toBeUndefined();
+    expect((await queue.getJob(pending.id))?.status).toBe(JobStatus.PENDING);
+  });
 });

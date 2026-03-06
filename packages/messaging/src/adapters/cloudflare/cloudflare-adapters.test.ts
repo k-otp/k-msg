@@ -117,6 +117,14 @@ function createMemoryHyperdriveJobSqlClient(): {
         return { rows: row ? [row] : [] };
       }
 
+      if (/SELECT .*"id".*WHERE .*"status" IN/is.test(sql)) {
+        const statusSet = new Set(params.map((value) => String(value)));
+        const matchingRows = Array.from(rows.values())
+          .filter((row) => statusSet.has(String(row.status ?? "")))
+          .map((row) => ({ id: row.id }));
+        return { rows: matchingRows };
+      }
+
       if (/UPDATE .*SET .*"process_at".*WHERE .*"id" =/is.test(sql)) {
         const [status, attempts, processAt, error, jobId] = params;
         const row = rows.get(String(jobId));
@@ -132,6 +140,19 @@ function createMemoryHyperdriveJobSqlClient(): {
           error,
         });
         return { rows: [], rowCount: 1 };
+      }
+
+      if (/DELETE FROM .*WHERE .*"status" IN/is.test(sql)) {
+        const statusSet = new Set(params.map((value) => String(value)));
+        let removed = 0;
+        for (const [jobId, row] of rows) {
+          if (!statusSet.has(String(row.status ?? ""))) {
+            continue;
+          }
+          rows.delete(jobId);
+          removed++;
+        }
+        return { rows: [], rowCount: removed };
       }
 
       return { rows: [] };
@@ -408,6 +429,44 @@ describe("Cloudflare SQL adapters", () => {
     );
   });
 
+  test("HyperdriveJobQueue cleanupTerminal removes only completed and failed jobs", async () => {
+    const { client, rows } = createMemoryHyperdriveJobSqlClient();
+    const queue = new HyperdriveJobQueue<{ hello: string }>(client);
+
+    const completed = await queue.enqueue("completed", { hello: "done" });
+    const failed = await queue.enqueue("failed", { hello: "boom" });
+    const pending = await queue.enqueue(
+      "pending",
+      { hello: "keep" },
+      { delay: 1000 },
+    );
+
+    const completedRow = rows.get(completed.id);
+    const failedRow = rows.get(failed.id);
+    if (!completedRow || !failedRow) {
+      throw new Error("Expected test rows to exist");
+    }
+
+    rows.set(completed.id, {
+      ...completedRow,
+      status: "completed",
+      completed_at: Date.now(),
+    });
+    rows.set(failed.id, {
+      ...failedRow,
+      status: "failed",
+      failed_at: Date.now(),
+      error: "boom",
+    });
+
+    const removed = await queue.cleanupTerminal();
+
+    expect(removed).toBe(2);
+    expect(await queue.getJob(completed.id)).toBeUndefined();
+    expect(await queue.getJob(failed.id)).toBeUndefined();
+    expect((await queue.getJob(pending.id))?.status).toBe("pending");
+  });
+
   test("HyperdriveDeliveryTrackingStore retries init after init failure", async () => {
     let shouldFail = true;
     const client: CloudflareSqlClient = {
@@ -515,6 +574,25 @@ describe("Cloudflare object-store adapters", () => {
 
     const readyJob = await queue.peek();
     expect(readyJob?.id).toBe(job.id);
+  });
+
+  test("CloudflareObjectJobQueue cleanupTerminal removes only completed and failed jobs", async () => {
+    const storage = createMemoryObjectStorage();
+    const queue = new CloudflareObjectJobQueue<{ v: number }>(storage);
+
+    const completed = await queue.enqueue("completed", { v: 1 });
+    const failed = await queue.enqueue("failed", { v: 2 });
+    const pending = await queue.enqueue("pending", { v: 3 }, { delay: 1000 });
+
+    await queue.complete(completed.id);
+    await queue.fail(failed.id, "boom");
+
+    const removed = await queue.cleanupTerminal();
+
+    expect(removed).toBe(2);
+    expect(await queue.getJob(completed.id)).toBeUndefined();
+    expect(await queue.getJob(failed.id)).toBeUndefined();
+    expect((await queue.getJob(pending.id))?.status).toBe("pending");
   });
 });
 

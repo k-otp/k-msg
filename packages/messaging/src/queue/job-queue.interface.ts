@@ -59,4 +59,6 @@ export interface JobQueue<T> {
   remove(jobId: string): Promise<boolean>;
 
   clear(): Promise<void>;
+
+  cleanupTerminal?(statuses?: JobStatus[]): Promise<number>;
 }
