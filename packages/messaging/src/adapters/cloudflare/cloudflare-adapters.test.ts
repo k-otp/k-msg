@@ -20,6 +20,9 @@ import {
 
 type CapturedQuery = { sql: string; params: readonly unknown[] };
 
+const wait = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 function readRenderedDrizzleQuery(
   query: unknown,
 ): { sql: string; params: unknown[] } | undefined {
@@ -59,6 +62,84 @@ function createCapturingSqlClient(dialect: CloudflareSqlClient["dialect"]): {
     },
   };
   return { client, queries };
+}
+
+function createMemoryHyperdriveJobSqlClient(): {
+  client: CloudflareSqlClient;
+  rows: Map<string, Record<string, unknown>>;
+} {
+  const rows = new Map<string, Record<string, unknown>>();
+
+  const client: CloudflareSqlClient = {
+    dialect: "sqlite",
+    async query(sql, params = []) {
+      if (/CREATE TABLE|CREATE INDEX/i.test(sql)) {
+        return { rows: [] };
+      }
+
+      if (/INSERT INTO/i.test(sql)) {
+        const [
+          id,
+          type,
+          data,
+          status,
+          priority,
+          attempts,
+          maxAttempts,
+          delay,
+          createdAt,
+          processAt,
+          completedAt,
+          failedAt,
+          error,
+          metadata,
+        ] = params;
+        rows.set(String(id), {
+          id,
+          type,
+          data,
+          status,
+          priority,
+          attempts,
+          max_attempts: maxAttempts,
+          delay,
+          created_at: createdAt,
+          process_at: processAt,
+          completed_at: completedAt,
+          failed_at: failedAt,
+          error,
+          metadata,
+        });
+        return { rows: [], rowCount: 1 };
+      }
+
+      if (/SELECT \* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
+        const row = rows.get(String(params[0]));
+        return { rows: row ? [row] : [] };
+      }
+
+      if (/UPDATE .*SET .*"process_at".*WHERE .*"id" =/is.test(sql)) {
+        const [status, attempts, processAt, error, jobId] = params;
+        const row = rows.get(String(jobId));
+        if (!row) {
+          return { rows: [], rowCount: 0 };
+        }
+
+        rows.set(String(jobId), {
+          ...row,
+          status,
+          attempts,
+          process_at: processAt,
+          error,
+        });
+        return { rows: [], rowCount: 1 };
+      }
+
+      return { rows: [] };
+    },
+  };
+
+  return { client, rows };
 }
 
 function createMemoryObjectStorage() {
@@ -308,6 +389,26 @@ describe("Cloudflare SQL adapters", () => {
     expect(typeof size).toBe("number");
   });
 
+  test("HyperdriveJobQueue stores retry delay in process_at", async () => {
+    const { client } = createMemoryHyperdriveJobSqlClient();
+    const queue = new HyperdriveJobQueue<{ hello: string }>(client);
+
+    const job = await queue.enqueue("test", { hello: "world" });
+    const beforeRetry = Date.now();
+
+    await queue.fail(job.id, "temporary failure", {
+      enabled: true,
+      delayMs: 80,
+    });
+
+    const retriedJob = await queue.getJob(job.id);
+    expect(retriedJob?.status).toBe("pending");
+    expect(retriedJob?.attempts).toBe(1);
+    expect(retriedJob?.processAt.getTime()).toBeGreaterThanOrEqual(
+      beforeRetry + 60,
+    );
+  });
+
   test("HyperdriveDeliveryTrackingStore retries init after init failure", async () => {
     let shouldFail = true;
     const client: CloudflareSqlClient = {
@@ -387,6 +488,34 @@ describe("Cloudflare object-store adapters", () => {
 
     expect(job.id).toBeTruthy();
     expect(dequeued?.id).toBe(job.id);
+  });
+
+  test("CloudflareObjectJobQueue reschedules retries using processAt", async () => {
+    const storage = createMemoryObjectStorage();
+    const queue = new CloudflareObjectJobQueue<{ v: number }>(storage);
+
+    const job = await queue.enqueue("test", { v: 1 });
+    const beforeRetry = Date.now();
+
+    await queue.fail(job.id, "temporary failure", {
+      enabled: true,
+      delayMs: 80,
+    });
+
+    const pendingJob = await queue.getJob(job.id);
+    expect(pendingJob?.status).toBe("pending");
+    expect(pendingJob?.attempts).toBe(1);
+    expect(pendingJob?.processAt.getTime()).toBeGreaterThanOrEqual(
+      beforeRetry + 60,
+    );
+
+    const immediatelyReady = await queue.peek();
+    expect(immediatelyReady).toBeUndefined();
+
+    await wait(100);
+
+    const readyJob = await queue.peek();
+    expect(readyJob?.id).toBe(job.id);
   });
 });
 

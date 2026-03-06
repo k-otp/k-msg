@@ -5,7 +5,7 @@ prev: false
 title: "PaginatedResult"
 ---
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L27)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L26)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:27](https://github.
 
 > **data**: `T`[]
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L28)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L27)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:28](https://github.
 
 > **hasNext**: `boolean`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L33)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L32)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:33](https://github.
 
 > **hasPrev**: `boolean`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L34)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L33)
 
 ***
 
@@ -43,7 +43,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:34](https://github.
 
 > **limit**: `number`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L31)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L30)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:31](https://github.
 
 > **page**: `number`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L30)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L29)
 
 ***
 
@@ -59,7 +59,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:30](https://github.
 
 > **total**: `number`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L29)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L28)
 
 ***
 
@@ -67,4 +67,4 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:29](https://github.
 
 > **totalPages**: `number`
 
-Defined in: [packages/channel/src/toolkit/management/crud.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L32)
+Defined in: [packages/channel/src/toolkit/management/crud.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L31)

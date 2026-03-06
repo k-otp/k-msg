@@ -18,7 +18,7 @@ import {
   MessageStatus,
   type RecipientResult,
 } from "../types/message.types";
-import type { Job, JobQueue } from "./job-queue.interface";
+import type { Job, JobQueue, JobRetryDirective } from "./job-queue.interface";
 import { buildSendInputFromJob } from "./send-input.builder";
 
 export interface JobProcessorOptions {
@@ -247,7 +247,7 @@ export class JobProcessor extends EventEmitter {
       await this.failJob(
         job.id,
         `No handler registered for job type: ${job.type}`,
-        false,
+        { enabled: false },
       );
       return;
     }
@@ -280,14 +280,14 @@ export class JobProcessor extends EventEmitter {
       this.processing.delete(job.id);
       this.metrics.activeJobs--;
 
-      const shouldRetry = job.attempts < job.maxAttempts;
+      const shouldRetry = job.attempts + 1 < job.maxAttempts;
 
       if (shouldRetry) {
         const retryDelay = this.getRetryDelay(job.attempts);
         await this.failJob(
           job.id,
           error instanceof Error ? error.message : String(error),
-          true,
+          { enabled: true, delayMs: retryDelay },
         );
 
         this.metrics.retried++;
@@ -296,7 +296,7 @@ export class JobProcessor extends EventEmitter {
         await this.failJob(
           job.id,
           error instanceof Error ? error.message : String(error),
-          false,
+          { enabled: false },
         );
       }
     }
@@ -307,11 +307,11 @@ export class JobProcessor extends EventEmitter {
   private async failJob(
     jobId: string,
     error: string,
-    shouldRetry: boolean,
+    retry: JobRetryDirective,
   ): Promise<void> {
-    await this.queue.fail(jobId, error, shouldRetry);
+    await this.queue.fail(jobId, error, retry);
 
-    if (!shouldRetry) {
+    if (!retry.enabled) {
       this.metrics.failed++;
       this.metrics.processed++;
       this.emit("job:failed", { jobId, error });
@@ -319,14 +319,12 @@ export class JobProcessor extends EventEmitter {
   }
 
   private getRetryDelay(attempt: number): number {
-    const delayIndex = Math.min(
-      attempt - 1,
-      this.options.retryDelays.length - 1,
-    );
-    return (
-      this.options.retryDelays[delayIndex] ||
-      this.options.retryDelays[this.options.retryDelays.length - 1]
-    );
+    if (this.options.retryDelays.length === 0) {
+      return 0;
+    }
+
+    const delayIndex = Math.min(attempt, this.options.retryDelays.length - 1);
+    return this.options.retryDelays[delayIndex] ?? 0;
   }
 
   private updateMetrics(): void {

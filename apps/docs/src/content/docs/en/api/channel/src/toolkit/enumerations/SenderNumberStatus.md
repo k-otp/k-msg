@@ -5,7 +5,7 @@ prev: false
 title: "SenderNumberStatus"
 ---
 
-Defined in: [packages/channel/src/types/channel.types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L55)
+Defined in: [packages/channel/src/types/channel.types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L54)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:55](https://github.com/
 
 > **BLOCKED**: `"BLOCKED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L60)
+Defined in: [packages/channel/src/types/channel.types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L59)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:60](https://github.com/
 
 > **PENDING**: `"PENDING"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L56)
+Defined in: [packages/channel/src/types/channel.types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L55)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:56](https://github.com/
 
 > **REJECTED**: `"REJECTED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L59)
+Defined in: [packages/channel/src/types/channel.types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L58)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:59](https://github.com/
 
 > **VERIFIED**: `"VERIFIED"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L58)
+Defined in: [packages/channel/src/types/channel.types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L57)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/channel/src/types/channel.types.ts:58](https://github.com/
 
 > **VERIFYING**: `"VERIFYING"`
 
-Defined in: [packages/channel/src/types/channel.types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L57)
+Defined in: [packages/channel/src/types/channel.types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L56)

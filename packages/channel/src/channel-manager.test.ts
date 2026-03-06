@@ -51,8 +51,8 @@ describe("KakaoChannelManager", () => {
     expect(channel.id).toBeDefined();
     expect(channel.name).toBe("테스트 채널");
     expect(channel.type).toBe(ChannelType.KAKAO_ALIMTALK);
-    expect(channel.status).toBe(ChannelStatus.VERIFYING);
-    expect(channel.verification.status).toBe(VerificationStatus.UNDER_REVIEW);
+    expect(channel.status).toBe(ChannelStatus.ACTIVE);
+    expect("verification" in (channel as Record<string, unknown>)).toBe(false);
   });
 
   test("should validate Plus Friend ID format", async () => {
@@ -88,9 +88,6 @@ describe("KakaoChannelManager", () => {
       },
     });
 
-    // Complete verification first (required for reactivation)
-    await manager.completeVerification(channel.id, true);
-
     await manager.suspendChannel(channel.id, "Policy violation");
     const suspendedChannel = await manager.getChannel(channel.id);
     expect(suspendedChannel?.status).toBe(ChannelStatus.SUSPENDED);
@@ -116,9 +113,34 @@ describe("KakaoChannelManager", () => {
 
     const health = await manager.checkChannelHealth(channel.id);
 
-    expect(health.isHealthy).toBe(false); // Should be unhealthy due to pending status
-    expect(health.issues.length).toBeGreaterThan(0);
+    expect(health.isHealthy).toBe(true);
+    expect(health.issues).toHaveLength(0);
     expect(health.recommendations.length).toBeGreaterThan(0);
+  });
+
+  test("should list deleted channels when explicitly requested", async () => {
+    const manager = new KakaoChannelManager();
+
+    const channel = await manager.createChannel({
+      name: "삭제 대상 채널",
+      type: ChannelType.KAKAO_ALIMTALK,
+      provider: "kakao",
+      profileKey: "test-profile-key",
+      kakaoInfo: {
+        plusFriendId: "@deletedchannel",
+        brandName: "삭제 테스트 브랜드",
+      },
+    });
+
+    await manager.deleteChannel(channel.id);
+
+    const deletedChannels = await manager.listChannels({
+      status: ChannelStatus.DELETED,
+    });
+
+    expect(deletedChannels).toHaveLength(1);
+    expect(deletedChannels[0]?.id).toBe(channel.id);
+    expect(deletedChannels[0]?.status).toBe(ChannelStatus.DELETED);
   });
 });
 
