@@ -1,5 +1,5 @@
 ---
-npm/@k-msg/channel: major
+npm/@k-msg/channel: minor
 ---
 
 Remove OTP-style verification helpers from `@k-msg/channel/toolkit`.
