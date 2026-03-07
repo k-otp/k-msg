@@ -72,7 +72,9 @@ function extractEnglishGuideHrefs(markdown: string): string[] {
     if (href) hrefs.add(href);
   }
 
-  for (const match of markdown.matchAll(/href=["'](\/en\/guides\/[^"']+)["']/g)) {
+  for (const match of markdown.matchAll(
+    /href=["'](\/en\/guides\/[^"']+)["']/g,
+  )) {
     if (match[1]) hrefs.add(match[1]);
   }
 
@@ -92,7 +94,8 @@ function extractSidebarGuideIds(source: string): string[] {
 
 function formatMissing(title: string, items: MissingReference[]): string {
   const lines = items.map(
-    ({ ref, source }) => `- ${ref} (referenced from ${toPosix(path.relative(repoRoot, source))})`,
+    ({ ref, source }) =>
+      `- ${ref} (referenced from ${toPosix(path.relative(repoRoot, source))})`,
   );
   return `${title}\n${lines.join("\n")}`;
 }
