@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.29.3 — 2026-03-07
+
+### Patch changes
+
+- [94e38e9](https://github.com/k-otp/k-msg/commit/94e38e981d2f6ede91859814125cda54ad1af9a1) Improve docs release safety by failing CI when English docs navigation points to guide pages that do not actually exist. — Thanks @imjlk!
+
 ## 0.29.2 — 2026-03-06
 
 ### Patch changes
