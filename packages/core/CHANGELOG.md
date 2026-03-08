@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.29.4 — 2026-03-08
+
+### Patch changes
+
+- [91b7e11](https://github.com/k-otp/k-msg/commit/91b7e112852282ef762b234b08adea9a5b41fe91) Improve docs navigation by turning the package and example hub pages into task-oriented decision guides with quick-pick tables and recommended reading paths. — Thanks @imjlk!
+
 ## 0.29.3 — 2026-03-07
 
 ### Patch changes
