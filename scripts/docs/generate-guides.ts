@@ -357,6 +357,14 @@ function buildGuideIndex(params: {
       : isKo
         ? "예제 가이드"
         : "Example Guides";
+  const description =
+    section === "packages"
+      ? isKo
+        ? "프로젝트 성격에 따라 어떤 k-msg 패키지부터 읽고 설치할지 빠르게 고릅니다."
+        : "Quickly choose the right k-msg package entry point for your project."
+      : isKo
+        ? "런타임과 목적에 따라 어떤 starter example부터 보는 게 맞는지 고릅니다."
+        : "Choose the starter example that matches your runtime and delivery goal.";
 
   const intro =
     section === "packages"
@@ -401,8 +409,76 @@ function buildGuideIndex(params: {
             return `- [${example.dirName}](${urlRoot}/guides/examples/${example.dirName}/): ${summary}`;
           })
           .join("\n");
+  const quickPicks =
+    section === "packages"
+      ? isKo
+        ? `| 지금 필요한 것 | 먼저 볼 패키지 | 보통 같이 보는 것 |
+| --- | --- | --- |
+| 앱에서 바로 메시지를 보내고 싶음 | [k-msg](${urlRoot}/guides/packages/k-msg/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| Provider를 직접 구현하거나 저수준 제어가 필요함 | [@k-msg/core](${urlRoot}/guides/packages/core/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/), [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |
+| 큐, 배달 추적, 런타임 어댑터가 필요함 | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) | [k-msg](${urlRoot}/guides/packages/k-msg/), [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| 템플릿 파싱과 변수 치환이 중심임 | [@k-msg/template](${urlRoot}/guides/packages/template/) | [k-msg](${urlRoot}/guides/packages/k-msg/) |
+| 채널/발신번호 운영 도구를 만들고 싶음 | [@k-msg/channel](${urlRoot}/guides/packages/channel/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| 웹훅 런타임과 재시도 흐름이 필요함 | [@k-msg/webhook](${urlRoot}/guides/packages/webhook/) | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |
+| 배달 추적 데이터를 리포트로 보고 싶음 | [@k-msg/analytics](${urlRoot}/guides/packages/analytics/) | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |`
+        : `| What you need now | Start with | Usually paired with |
+| --- | --- | --- |
+| Send messages from an application | [k-msg](${urlRoot}/guides/packages/k-msg/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| Implement a custom provider or control low-level behavior | [@k-msg/core](${urlRoot}/guides/packages/core/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/), [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |
+| Queueing, delivery tracking, or runtime adapters | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) | [k-msg](${urlRoot}/guides/packages/k-msg/), [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| Heavy template parsing and interpolation | [@k-msg/template](${urlRoot}/guides/packages/template/) | [k-msg](${urlRoot}/guides/packages/k-msg/) |
+| Channel or sender-number admin tooling | [@k-msg/channel](${urlRoot}/guides/packages/channel/) | [@k-msg/provider](${urlRoot}/guides/packages/provider/) |
+| Webhook runtime and retry flows | [@k-msg/webhook](${urlRoot}/guides/packages/webhook/) | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |
+| Reporting on delivery tracking data | [@k-msg/analytics](${urlRoot}/guides/packages/analytics/) | [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) |`
+      : isKo
+        ? `| 목표 | 추천 예제 | 이 예제를 먼저 보면 좋은 경우 |
+| --- | --- | --- |
+| 가장 빨리 send-only 검증 | [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) | Node 서버에서 가장 단순한 성공 경로가 필요할 때 |
+| Bun 기반의 가벼운 API 서버 | [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) | Bun + Hono 조합으로 빠르게 시작할 때 |
+| Pages Functions에 send-only 배포 | [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) | Cloudflare Pages에 간단히 올릴 때 |
+| Workers에서 큐 처리 | [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) | Durable Objects 기반 비동기 처리 흐름이 필요할 때 |
+| Workers + D1 배달 추적 | [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) | Cloudflare에서 tracking 저장소까지 같이 보고 싶을 때 |
+| Pages + Hyperdrive 추적 | [hono-pages-tracking-hyperdrive](${urlRoot}/guides/examples/hono-pages-tracking-hyperdrive/) | Pages 런타임에서 Hyperdrive를 붙일 때 |
+| 웹훅 수신과 runtime 운영 | [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) | 이벤트 수집, 재시도, persistence까지 보고 싶을 때 |`
+        : `| Goal | Recommended example | Pick it first when |
+| --- | --- | --- |
+| Fastest send-only proof | [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) | You want the shortest path on Node |
+| Lightweight Bun API server | [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) | You are building with Bun + Hono |
+| Send-only deploy on Pages Functions | [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) | You want the simplest Cloudflare Pages entry point |
+| Queue processing on Workers | [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) | You need Durable Objects-based async processing |
+| Delivery tracking on Workers + D1 | [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) | You want Cloudflare-native tracking storage |
+| Delivery tracking on Pages + Hyperdrive | [hono-pages-tracking-hyperdrive](${urlRoot}/guides/examples/hono-pages-tracking-hyperdrive/) | You are staying on Pages but need Hyperdrive |
+| Webhook ingestion and runtime operations | [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) | You need event intake, retries, and persistence |`;
+  const readingPath =
+    section === "packages"
+      ? isKo
+        ? `- 대부분의 앱 팀: [패키지 선택 가이드](${urlRoot}/guides/package-selection/) -> [k-msg](${urlRoot}/guides/packages/k-msg/) -> [프로바이더 선택 가이드](${urlRoot}/guides/provider-selection/) -> [예제 가이드](${urlRoot}/guides/examples/)
+- 플랫폼/인프라 팀: [@k-msg/core](${urlRoot}/guides/packages/core/) -> [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) -> [@k-msg/provider](${urlRoot}/guides/packages/provider/)
+- 운영/백오피스 도구 팀: [@k-msg/channel](${urlRoot}/guides/packages/channel/) -> [@k-msg/webhook](${urlRoot}/guides/packages/webhook/) -> [@k-msg/analytics](${urlRoot}/guides/packages/analytics/)`
+        : `- Most application teams: [Package Selection](${urlRoot}/guides/package-selection/) -> [k-msg](${urlRoot}/guides/packages/k-msg/) -> [Provider Selection](${urlRoot}/guides/provider-selection/) -> [Examples](${urlRoot}/guides/examples/)
+- Platform or infrastructure teams: [@k-msg/core](${urlRoot}/guides/packages/core/) -> [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) -> [@k-msg/provider](${urlRoot}/guides/packages/provider/)
+- Admin or operations tooling teams: [@k-msg/channel](${urlRoot}/guides/packages/channel/) -> [@k-msg/webhook](${urlRoot}/guides/packages/webhook/) -> [@k-msg/analytics](${urlRoot}/guides/packages/analytics/)`
+      : isKo
+        ? `- 처음 보는 사용자: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) 또는 [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) 로 send-only 흐름을 먼저 확인
+- Cloudflare 배포가 목표면: [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) -> [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) -> [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
+- 웹훅 중심 시스템이면: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) 부터 보고 필요 시 [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) 를 함께 참고`
+        : `- New users: start with [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) or [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) to validate the send-only flow first
+- Cloudflare-focused teams: [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) -> [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) -> [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
+- Webhook-heavy systems: start with [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) and pair it with [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) when you also need delivery state`;
+  const quickPicksHeading = isKo ? "빠른 선택" : "Quick picks";
+  const readingPathHeading = isKo
+    ? "추천 읽는 순서"
+    : "Recommended reading path";
+  const directoryHeading =
+    section === "packages"
+      ? isKo
+        ? "패키지별 역할"
+        : "Package directory"
+      : isKo
+        ? "예제별 역할"
+        : "Example directory";
 
-  const content = `---\ntitle: ${title}\n---\n\n${intro}\n\n## ${isKo ? "목록" : "Directory"}\n\n${list}\n`;
+  const content = `---\ntitle: ${title}\ndescription: ${description}\n---\n\n${intro}\n\n## ${quickPicksHeading}\n\n${quickPicks}\n\n## ${readingPathHeading}\n\n${readingPath}\n\n## ${directoryHeading}\n\n${list}\n`;
 
   return {
     path: path.join(docsFsRoot(locale), "guides", section, "index.md"),
