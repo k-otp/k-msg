@@ -1,5 +1,6 @@
 ---
 title: 패키지 가이드
+description: 프로젝트 성격에 따라 어떤 k-msg 패키지부터 읽고 설치할지 빠르게 고릅니다.
 ---
 
 프로젝트에 맞는 패키지를 빠르게 고를 수 있도록 역할별로 정리한 허브입니다.
@@ -8,7 +9,25 @@ title: 패키지 가이드
 - 대부분의 사용자 시작점: [k-msg](/guides/packages/k-msg/)
 - 저수준 커스터마이징이 필요하면: [@k-msg/core](/guides/packages/core/)
 
-## 목록
+## 빠른 선택
+
+| 지금 필요한 것 | 먼저 볼 패키지 | 보통 같이 보는 것 |
+| --- | --- | --- |
+| 앱에서 바로 메시지를 보내고 싶음 | [k-msg](/guides/packages/k-msg/) | [@k-msg/provider](/guides/packages/provider/) |
+| Provider를 직접 구현하거나 저수준 제어가 필요함 | [@k-msg/core](/guides/packages/core/) | [@k-msg/provider](/guides/packages/provider/), [@k-msg/messaging](/guides/packages/messaging/) |
+| 큐, 배달 추적, 런타임 어댑터가 필요함 | [@k-msg/messaging](/guides/packages/messaging/) | [k-msg](/guides/packages/k-msg/), [@k-msg/provider](/guides/packages/provider/) |
+| 템플릿 파싱과 변수 치환이 중심임 | [@k-msg/template](/guides/packages/template/) | [k-msg](/guides/packages/k-msg/) |
+| 채널/발신번호 운영 도구를 만들고 싶음 | [@k-msg/channel](/guides/packages/channel/) | [@k-msg/provider](/guides/packages/provider/) |
+| 웹훅 런타임과 재시도 흐름이 필요함 | [@k-msg/webhook](/guides/packages/webhook/) | [@k-msg/messaging](/guides/packages/messaging/) |
+| 배달 추적 데이터를 리포트로 보고 싶음 | [@k-msg/analytics](/guides/packages/analytics/) | [@k-msg/messaging](/guides/packages/messaging/) |
+
+## 추천 읽는 순서
+
+- 대부분의 앱 팀: [패키지 선택 가이드](/guides/package-selection/) -> [k-msg](/guides/packages/k-msg/) -> [프로바이더 선택 가이드](/guides/provider-selection/) -> [예제 가이드](/guides/examples/)
+- 플랫폼/인프라 팀: [@k-msg/core](/guides/packages/core/) -> [@k-msg/messaging](/guides/packages/messaging/) -> [@k-msg/provider](/guides/packages/provider/)
+- 운영/백오피스 도구 팀: [@k-msg/channel](/guides/packages/channel/) -> [@k-msg/webhook](/guides/packages/webhook/) -> [@k-msg/analytics](/guides/packages/analytics/)
+
+## 패키지별 역할
 
 - [@k-msg/analytics](/guides/packages/analytics/): 배달 추적 데이터를 기반으로 통계와 리포트를 만듭니다.
 - [@k-msg/channel](/guides/packages/channel/): 프로바이더별 채널 lifecycle helper와 인메모리 toolkit helper를 제공합니다.
