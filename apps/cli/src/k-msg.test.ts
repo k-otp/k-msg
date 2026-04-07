@@ -1,9 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { expectCommand } from "@bunli/test";
-
-import { createKMsgCli } from "./cli/create";
 
 const CLI_ROOT = path.join(import.meta.dir, "..");
 const FIXTURE_CONFIG_URL = new URL(
@@ -78,92 +75,81 @@ async function runCli(
   error?: Error;
 }> {
   const start = performance.now();
-  const stdout: string[] = [];
-  const stderr: string[] = [];
-  let exitCodeFromExit: number | undefined;
-  let error: Error | undefined;
-
-  const originalLog = console.log;
-  const originalError = console.error;
-  const originalExit = process.exit;
-  const originalCwd = process.cwd();
-  const originalEnv = new Map<string, string | undefined>();
-  process.exitCode = 0;
-
-  const setEnv = (key: string, value: string | undefined) => {
-    if (!originalEnv.has(key)) {
-      originalEnv.set(key, process.env[key]);
-    }
-    if (value === undefined) {
-      delete process.env[key];
-      return;
-    }
-    process.env[key] = value;
-  };
-
-  for (const key of Object.keys(process.env)) {
-    if (isAIEnvKey(key)) {
-      setEnv(key, undefined);
-    }
-  }
-  for (const [key, value] of Object.entries(options?.env ?? {})) {
-    setEnv(key, value);
-  }
-
-  console.log = (...args) => stdout.push(args.join(" "));
-  console.error = (...args) => stderr.push(args.join(" "));
-  (process as unknown as { exit: (code?: number) => never }).exit = (
-    code?: number,
-  ): never => {
-    exitCodeFromExit = typeof code === "number" ? code : 0;
-    throw new Error(`Process exited with code ${exitCodeFromExit}`);
-  };
+  const env: Record<string, string> = {};
 
   try {
-    process.chdir(options?.cwd ?? CLI_ROOT);
-
-    const cli = await createKMsgCli();
-
-    await cli.run(argv);
-  } catch (e) {
-    const err = e instanceof Error ? e : new Error(String(e));
-    if (!err.message.startsWith("Process exited with code")) {
-      error = err;
-      stderr.push(err.message);
-      if (exitCodeFromExit === undefined) {
-        if (typeof process.exitCode !== "number" || process.exitCode === 0) {
-          process.exitCode = 1;
-        }
+    for (const [key, value] of Object.entries(process.env)) {
+      if (!isAIEnvKey(key) && typeof value === "string") {
+        env[key] = value;
       }
     }
-  } finally {
-    console.log = originalLog;
-    console.error = originalError;
-    process.exit = originalExit;
-    process.chdir(originalCwd);
-    for (const [key, value] of originalEnv.entries()) {
+
+    for (const [key, value] of Object.entries(options?.env ?? {})) {
       if (value === undefined) {
-        delete process.env[key];
+        delete env[key];
       } else {
-        process.env[key] = value;
+        env[key] = value;
       }
     }
+
+    const proc = Bun.spawn(
+      [process.execPath, path.join(CLI_ROOT, "src/k-msg.ts"), ...argv],
+      {
+        cwd: options?.cwd ?? CLI_ROOT,
+        env,
+        stdout: "pipe",
+        stderr: "pipe",
+      },
+    );
+
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ]);
+
+    return {
+      stdout,
+      stderr,
+      exitCode,
+      duration: performance.now() - start,
+    };
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error));
+
+    return {
+      stdout: "",
+      stderr: err.message,
+      exitCode: 1,
+      duration: performance.now() - start,
+      error: err,
+    };
   }
+}
 
-  const exitCode =
-    exitCodeFromExit ??
-    (typeof process.exitCode === "number" ? process.exitCode : 0);
-  const normalizedExitCode = exitCode === 1 ? 2 : exitCode;
-
-  // Avoid leaking exit codes between runs inside a single Bun test process.
-  process.exitCode = 0;
-
+function expectCommand(result: {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  duration: number;
+  error?: Error;
+}): {
+  toHaveExitCode(expected: number): void;
+  toHaveSucceeded(): void;
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+} {
   return {
-    stdout: stdout.join("\n"),
-    stderr: stderr.join("\n"),
-    exitCode: normalizedExitCode,
-    duration: performance.now() - start,
-    ...(error ? { error } : {}),
+    stdout: result.stdout,
+    stderr: result.stderr,
+    exitCode: result.exitCode,
+    toHaveExitCode(expected) {
+      expect(result.exitCode).toBe(expected);
+    },
+    toHaveSucceeded() {
+      expect(result.exitCode).toBe(0);
+    },
   };
 }
 

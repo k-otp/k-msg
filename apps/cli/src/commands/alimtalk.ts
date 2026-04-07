@@ -2,6 +2,7 @@ import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { MessageVariables, SendInput } from "@k-msg/core";
 import { z } from "zod";
 import {
+  booleanFlagOption,
   optConfig,
   optJson,
   optProvider,
@@ -114,7 +115,7 @@ const sendCmd = defineCommand({
     "scheduled-at": option(z.coerce.date().optional(), {
       description: "Schedule time (ISO string)",
     }),
-    failover: option(strictBooleanFlagSchema, {
+    failover: booleanFlagOption(strictBooleanFlagSchema, {
       description:
         "Enable SMS/LMS failover when recipient is not a KakaoTalk user (boolean: --failover, --failover true|false, --no-failover; default: false)",
     }),

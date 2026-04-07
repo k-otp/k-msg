@@ -11,7 +11,7 @@ import {
   retryFieldCryptoMigration,
 } from "@k-msg/messaging/adapters/cloudflare";
 import { z } from "zod";
-import { strictBooleanFlagSchema } from "../cli/options";
+import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
 
 const chunkSizeSchema = z.coerce.number().int().positive().max(100_000);
 const maxChunksSchema = z.coerce.number().int().positive().max(100_000);
@@ -197,7 +197,7 @@ const applyCmd = defineCommand({
       description:
         "Migration chunk state table (default: kmsg_crypto_migration_chunks)",
     }),
-    json: option(strictBooleanFlagSchema, {
+    json: booleanFlagOption(strictBooleanFlagSchema, {
       description: "Print machine-readable JSON output",
     }),
   },
