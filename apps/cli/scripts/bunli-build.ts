@@ -104,7 +104,9 @@ async function ensureRuntimePackage(
 ): Promise<void> {
   const packageDirName = target.runtimePackageName.split("/").pop();
   if (!packageDirName) {
-    throw new Error(`Invalid runtime package name: ${target.runtimePackageName}`);
+    throw new Error(
+      `Invalid runtime package name: ${target.runtimePackageName}`,
+    );
   }
 
   const packageDir = join(
@@ -143,13 +145,14 @@ async function ensureRuntimePackage(
 
   const tarball = pack.stdout.trim().split("\n").pop();
   if (!tarball) {
-    throw new Error(`npm pack did not produce a tarball for ${target.runtimePackageName}`);
+    throw new Error(
+      `npm pack did not produce a tarball for ${target.runtimePackageName}`,
+    );
   }
 
-  const unpack = await runCommand(
-    ["tar", "-xzf", tarball, "-C", tempRoot],
-    { cwd: tempRoot },
-  );
+  const unpack = await runCommand(["tar", "-xzf", tarball, "-C", tempRoot], {
+    cwd: tempRoot,
+  });
   if (unpack.exitCode !== 0) {
     throw new Error(
       `tar extract failed for ${target.runtimePackageName}\n${unpack.stderr || unpack.stdout}`,
@@ -165,7 +168,9 @@ async function ensureRuntimePackage(
   await removePath(tempRoot);
 }
 
-async function relaxRuntimePackageConstraints(packageDir: string): Promise<void> {
+async function relaxRuntimePackageConstraints(
+  packageDir: string,
+): Promise<void> {
   const packageJsonPath = join(packageDir, "package.json");
   const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
     os?: unknown;
@@ -183,7 +188,9 @@ async function relaxRuntimePackageConstraints(packageDir: string): Promise<void>
 }
 
 function readOptionValue(argv: string[], name: string): string | undefined {
-  const index = argv.findIndex((arg) => arg === name || arg.startsWith(`${name}=`));
+  const index = argv.findIndex(
+    (arg) => arg === name || arg.startsWith(`${name}=`),
+  );
   if (index === -1) return undefined;
 
   const current = argv[index];

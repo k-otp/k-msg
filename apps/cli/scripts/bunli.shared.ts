@@ -8,7 +8,9 @@ export const CLI_ROOT = path.resolve(import.meta.dir, "..");
 export const DIST_DIR = path.join(CLI_ROOT, "dist");
 export const GENERATED_PATH = path.join(CLI_ROOT, ".bunli", "commands.gen.ts");
 export const CLI_ENTRY = resolveFromCliRoot(
-  bunliConfig.build?.entry ?? "./src/k-msg.ts",
+  typeof bunliConfig.build?.entry === "string"
+    ? bunliConfig.build.entry
+    : (bunliConfig.build?.entry?.[0] ?? "./src/k-msg.ts"),
 );
 export const COMMANDS_DIR = resolveFromCliRoot(
   bunliConfig.commands?.directory ?? "./src/commands",
@@ -117,10 +119,8 @@ export async function runCommand(
     stderr?: "inherit" | "pipe";
   },
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-  const env = {
-    ...process.env,
-    ...(options?.env ?? {}),
-  };
+  const envSource = options?.env ?? process.env;
+  const env = { ...envSource };
 
   for (const [key, value] of Object.entries(env)) {
     if (value === undefined) {
