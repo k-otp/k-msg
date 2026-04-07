@@ -1,4 +1,4 @@
-import { option } from "@bunli/core";
+import { option, type StandardSchemaV1 } from "@bunli/core";
 import { z } from "zod";
 
 const strictBooleanInput = z.union([
@@ -14,17 +14,30 @@ const strictBooleanInput = z.union([
 export const strictBooleanFlagSchema = strictBooleanInput.default(false);
 export const strictBooleanOptionalFlagSchema = strictBooleanInput.optional();
 
+export function booleanFlagOption<TSchema extends StandardSchemaV1>(
+  schema: TSchema,
+  options: {
+    description?: string;
+    short?: string;
+  } = {},
+) {
+  return option(schema, {
+    ...options,
+    argumentKind: "flag",
+  });
+}
+
 export const optConfig = option(z.string().optional(), {
   description:
     "Path to k-msg config (default: $XDG_CONFIG_HOME/k-msg/k-msg.config.json or %APPDATA%\\k-msg\\k-msg.config.json; fallback: ./k-msg.config.json)",
 });
 
-export const optJson = option(strictBooleanOptionalFlagSchema, {
+export const optJson = booleanFlagOption(strictBooleanOptionalFlagSchema, {
   description:
     "Output JSON (boolean: --json, --json true|false, --no-json; default: false)",
 });
 
-export const optVerbose = option(strictBooleanFlagSchema, {
+export const optVerbose = booleanFlagOption(strictBooleanFlagSchema, {
   description:
     "Verbose logging (boolean: --verbose, --verbose true|false, --no-verbose; default: false)",
 });

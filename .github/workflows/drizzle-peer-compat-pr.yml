@@ -14,7 +14,7 @@ permissions:
   pull-requests: write
 
 env:
-  BUN_VERSION: "1.3.8"
+  BUN_VERSION: "1.3.10"
 
 jobs:
   update-drizzle-compat:

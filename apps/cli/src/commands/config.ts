@@ -7,7 +7,12 @@ import {
   providerConfigFieldSpecs,
 } from "@k-msg/provider";
 import { z } from "zod";
-import { optConfig, optJson, strictBooleanFlagSchema } from "../cli/options";
+import {
+  booleanFlagOption,
+  optConfig,
+  optJson,
+  strictBooleanFlagSchema,
+} from "../cli/options";
 import {
   isPromptCancelledError,
   type PromptApi,
@@ -565,7 +570,7 @@ const initCmd = defineCommand({
   description: "Initialize k-msg config",
   options: {
     config: optConfig,
-    force: option(strictBooleanFlagSchema, {
+    force: booleanFlagOption(strictBooleanFlagSchema, {
       description:
         "Overwrite if the file already exists (boolean: --force, --force true|false, --no-force; default: false)",
       short: "f",

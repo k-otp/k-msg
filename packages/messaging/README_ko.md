@@ -262,6 +262,6 @@ const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 
 <!-- drizzle-compat-matrix:start -->
 - `drizzle-orm@0.44.7`
-- `drizzle-orm@0.45.1`
+- `drizzle-orm@0.45.2`
 - `drizzle-orm@beta`
 <!-- drizzle-compat-matrix:end -->

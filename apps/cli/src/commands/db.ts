@@ -8,7 +8,7 @@ import {
   type SqlDialect,
 } from "@k-msg/messaging/adapters/cloudflare";
 import { z } from "zod";
-import { strictBooleanFlagSchema } from "../cli/options";
+import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
 import trackingMigrateCmd from "./db-tracking-migrate";
 
 const dialectSchema = z.enum(["postgres", "mysql", "sqlite"]);
@@ -138,7 +138,7 @@ const schemaGenerateCmd = defineCommand({
     "sql-file": option(z.string().min(1).optional(), {
       description: "SQL output file name (default: kmsg.schema.sql)",
     }),
-    force: option(strictBooleanFlagSchema, {
+    force: booleanFlagOption(strictBooleanFlagSchema, {
       description:
         "Overwrite existing files (boolean: --force, --force true|false, --no-force; default: false)",
     }),
