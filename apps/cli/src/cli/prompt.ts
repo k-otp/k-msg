@@ -33,7 +33,8 @@ export class PromptCancelledError extends Error {
 }
 
 function remapPromptCancellation(prompt: PromptApi, error: unknown): never {
-  if (error instanceof prompt.clack.PromptCancelledError) {
+  void prompt;
+  if (error instanceof Error && error.name === "PromptCancelledError") {
     throw new PromptCancelledError();
   }
   throw error;

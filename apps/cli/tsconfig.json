@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "bunli.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

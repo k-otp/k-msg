@@ -10,6 +10,8 @@ class BunliExit extends Error {
 }
 
 async function main(): Promise<void> {
+  const cliArgs = normalizeBuiltinFormatArgs(process.argv.slice(2));
+
   // Bunli currently uses `-v` as a built-in version flag and calls `process.exit(1)`
   // on validation/unknown-command errors. We intercept `process.exit` so we can map
   // those cases to our planned exit codes.
@@ -22,7 +24,7 @@ async function main(): Promise<void> {
 
   try {
     const cli = await createKMsgCli();
-    await cli.run(process.argv.slice(2));
+    await cli.run(cliArgs);
   } catch (error) {
     if (error instanceof BunliExit) {
       // Bunli uses exit(1) for input/usage errors; we standardize those to 2.
@@ -33,6 +35,35 @@ async function main(): Promise<void> {
   } finally {
     process.exit = originalExit;
   }
+}
+
+function normalizeBuiltinFormatArgs(argv: string[]): string[] {
+  const separatorIndex = argv.indexOf("--");
+  const commandArgs =
+    separatorIndex >= 0 ? argv.slice(0, separatorIndex) : argv;
+  const passthroughArgs = separatorIndex >= 0 ? argv.slice(separatorIndex) : [];
+
+  const hasExplicitFormat = commandArgs.some(
+    (arg, index) =>
+      arg === "--format" ||
+      arg.startsWith("--format=") ||
+      (arg === "-f" && index < commandArgs.length - 1),
+  );
+
+  if (hasExplicitFormat) {
+    return argv;
+  }
+
+  const requestsBuiltinHelpOrVersion = commandArgs.some(
+    (arg) =>
+      arg === "--help" || arg === "-h" || arg === "--version" || arg === "-v",
+  );
+
+  if (!requestsBuiltinHelpOrVersion) {
+    return argv;
+  }
+
+  return [...commandArgs, "--format", "toon", ...passthroughArgs];
 }
 
 await main();
