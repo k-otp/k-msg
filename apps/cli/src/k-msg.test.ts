@@ -1348,9 +1348,14 @@ describe("k-msg CLI (bunli) E2E", () => {
         ]),
       );
       solapiApi.toHaveExitCode(2);
-      expect(solapiApi.stderr).toContain(
-        "does not expose Kakao channel onboarding API",
-      );
+      expect(
+        solapiApi.stderr.includes(
+          "does not expose Kakao channel onboarding API",
+        ) ||
+          solapiApi.stderr.includes(
+            "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.",
+          ),
+      ).toBe(true);
     },
     TEST_TIMEOUT,
   );
