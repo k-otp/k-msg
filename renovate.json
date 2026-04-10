@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices", ":dependencyDashboard"],
+  "timezone": "Asia/Seoul",
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "prConcurrentLimit": 5,
+  "schedule": ["before 9am on the first day of the month"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on the first day of the month"],
+    "groupName": "monthly lock file maintenance"
+  },
+  "ignorePaths": ["**/node_modules/**", "examples/**"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["apps/docs/package.json"],
+      "groupName": "docs stack monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": [
+        "bunli",
+        "@bunli/core",
+        "@bunli/generator",
+        "@bunli/plugin-ai-detect",
+        "@bunli/plugin-completions",
+        "@bunli/test",
+        "@types/bun"
+      ],
+      "groupName": "bun toolchain monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+      "groupName": "major dependency updates"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "monthly dependency maintenance"
+    }
+  ]
+}
