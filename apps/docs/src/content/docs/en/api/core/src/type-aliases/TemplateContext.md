@@ -15,7 +15,7 @@ Context passed to template operations.
 
 ### kakaoChannelSenderKey?
 
-> `optional` **kakaoChannelSenderKey**: `string`
+> `optional` **kakaoChannelSenderKey?**: `string`
 
 Defined in: [packages/core/src/provider.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L71)
 

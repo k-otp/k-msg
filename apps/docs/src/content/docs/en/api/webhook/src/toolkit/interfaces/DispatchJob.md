@@ -59,7 +59,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:48](https://github.com/k-o
 
 ### nextRetryAt?
 
-> `optional` **nextRetryAt**: `Date`
+> `optional` **nextRetryAt?**: `Date`
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L49)
 

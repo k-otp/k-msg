@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:82](htt
 
 ### kid?
 
-> `optional` **kid**: `string`
+> `optional` **kid?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L86)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:86](htt
 
 ### messageId?
 
-> `optional` **messageId**: `string`
+> `optional` **messageId?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L89)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:83](htt
 
 ### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L85)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:88](htt
 
 ### tableName?
 
-> `optional` **tableName**: `string`
+> `optional` **tableName?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L87)
 
@@ -59,6 +59,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:87](htt
 
 ### tenantId?
 
-> `optional` **tenantId**: `string`
+> `optional` **tenantId?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L84)

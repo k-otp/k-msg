@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:105](https://github.com/
 
 ### endDate?
 
-> `optional` **endDate**: `string`
+> `optional` **endDate?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L110)
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:110](https://github.com/
 
 ### pageNum?
 
-> `optional` **pageNum**: `number`
+> `optional` **pageNum?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L106)
 
@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:106](https://github.com/
 
 ### pageSize?
 
-> `optional` **pageSize**: `number`
+> `optional` **pageSize?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L107)
 
@@ -35,7 +35,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:107](https://github.com/
 
 ### phone?
 
-> `optional` **phone**: `string`
+> `optional` **phone?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L112)
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:112](https://github.com/
 
 ### reserve?
 
-> `optional` **reserve**: `"Y"` \| `"N"`
+> `optional` **reserve?**: `"Y"` \| `"N"`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L108)
 
@@ -51,7 +51,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:108](https://github.com/
 
 ### seqNo?
 
-> `optional` **seqNo**: `number`
+> `optional` **seqNo?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L111)
 
@@ -59,6 +59,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:111](https://github.com/
 
 ### startDate?
 
-> `optional` **startDate**: `string`
+> `optional` **startDate?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L109)

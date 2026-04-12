@@ -205,9 +205,9 @@ Sets the persistence configuration.
 
 ##### persistence
 
-Persistence strategy and repository
+\{ `repo`: [`MessageRepository`](/en/api/core/src/interfaces/messagerepository/); `strategy`: [`PersistenceStrategy`](/en/api/core/src/type-aliases/persistencestrategy/); \} \| `undefined`
 
-\{ `repo`: [`MessageRepository`](/en/api/core/src/interfaces/messagerepository/); `strategy`: [`PersistenceStrategy`](/en/api/core/src/type-aliases/persistencestrategy/); \} | `undefined`
+Persistence strategy and repository
 
 #### Returns
 

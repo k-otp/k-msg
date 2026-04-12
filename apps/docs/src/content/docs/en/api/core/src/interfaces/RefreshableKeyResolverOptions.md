@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:17](https://github.com/k-o
 
 ### cacheTtlMs?
 
-> `optional` **cacheTtlMs**: `number`
+> `optional` **cacheTtlMs?**: `number`
 
 Defined in: [packages/core/src/crypto/key-resolver.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-resolver.ts#L19)
 
@@ -19,17 +19,17 @@ Defined in: [packages/core/src/crypto/key-resolver.ts:19](https://github.com/k-o
 
 ### fallback?
 
-> `optional` **fallback**: `object`
+> `optional` **fallback?**: `object`
 
 Defined in: [packages/core/src/crypto/key-resolver.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-resolver.ts#L20)
 
 #### activeKid?
 
-> `optional` **activeKid**: `string`
+> `optional` **activeKid?**: `string`
 
 #### decryptKids?
 
-> `optional` **decryptKids**: readonly `string`[]
+> `optional` **decryptKids?**: readonly `string`[]
 
 ***
 

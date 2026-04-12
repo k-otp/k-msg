@@ -19,7 +19,7 @@ Defined in: [packages/core/src/types/message.ts:194](https://github.com/k-otp/k-
 
 ### details?
 
-> `optional` **details**: `Record`\<`string`, `unknown`\>
+> `optional` **details?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/core/src/types/message.ts:196](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L196)
 

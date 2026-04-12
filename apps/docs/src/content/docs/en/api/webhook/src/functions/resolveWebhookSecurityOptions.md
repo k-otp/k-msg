@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:480](https:
 
 ### security
 
-[`WebhookRuntimeSecurityOptions`](/en/api/webhook/src/interfaces/webhookruntimesecurityoptions/) | `undefined`
+[`WebhookRuntimeSecurityOptions`](/en/api/webhook/src/interfaces/webhookruntimesecurityoptions/) \| `undefined`
 
 ## Returns
 

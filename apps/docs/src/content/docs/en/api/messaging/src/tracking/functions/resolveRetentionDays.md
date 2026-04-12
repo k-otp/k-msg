@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/retention.ts:29](https://g
 
 ### config
 
-[`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/) | `undefined`
+[`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/) \| `undefined`
 
 ### context
 

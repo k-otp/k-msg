@@ -11,29 +11,29 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:10](https://gi
 
 ### context?
 
-> `optional` **context**: `object`
+> `optional` **context?**: `object`
 
 Defined in: [packages/analytics/src/collectors/event.collector.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L16)
 
 #### ipAddress?
 
-> `optional` **ipAddress**: `string`
+> `optional` **ipAddress?**: `string`
 
 #### requestId?
 
-> `optional` **requestId**: `string`
+> `optional` **requestId?**: `string`
 
 #### sessionId?
 
-> `optional` **sessionId**: `string`
+> `optional` **sessionId?**: `string`
 
 #### userAgent?
 
-> `optional` **userAgent**: `string`
+> `optional` **userAgent?**: `string`
 
 #### userId?
 
-> `optional` **userId**: `string`
+> `optional` **userId?**: `string`
 
 ***
 

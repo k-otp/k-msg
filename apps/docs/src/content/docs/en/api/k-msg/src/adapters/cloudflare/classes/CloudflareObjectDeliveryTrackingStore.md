@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-delivery-tracking
 
 ##### options?
 
-`string` | `CloudflareObjectDeliveryTrackingStoreOptions`
+`string` \| `CloudflareObjectDeliveryTrackingStoreOptions`
 
 #### Returns
 

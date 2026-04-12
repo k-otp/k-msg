@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:43](https://github.com/
 
 ### channelId?
 
-> `optional` **channelId**: `string`
+> `optional` **channelId?**: `string`
 
 Defined in: [packages/channel/src/types/channel.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L39)
 
@@ -52,19 +52,19 @@ Defined in: [packages/channel/src/types/channel.types.ts:44](https://github.com/
 
 #### businessName?
 
-> `optional` **businessName**: `string`
+> `optional` **businessName?**: `string`
 
 #### businessRegistrationNumber?
 
-> `optional` **businessRegistrationNumber**: `string`
+> `optional` **businessRegistrationNumber?**: `string`
 
 #### contactEmail?
 
-> `optional` **contactEmail**: `string`
+> `optional` **contactEmail?**: `string`
 
 #### contactPerson?
 
-> `optional` **contactPerson**: `string`
+> `optional` **contactPerson?**: `string`
 
 ***
 
@@ -94,6 +94,6 @@ Defined in: [packages/channel/src/types/channel.types.ts:51](https://github.com/
 
 ### verifiedAt?
 
-> `optional` **verifiedAt**: `Date`
+> `optional` **verifiedAt?**: `Date`
 
 Defined in: [packages/channel/src/types/channel.types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L42)

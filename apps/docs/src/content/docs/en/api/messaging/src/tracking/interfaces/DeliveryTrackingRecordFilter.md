@@ -15,7 +15,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:13](htt
 
 ### from?
 
-> `optional` **from**: `string` \| `string`[]
+> `optional` **from?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L21)
 
@@ -23,7 +23,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:21](htt
 
 ### fromHash?
 
-> `optional` **fromHash**: `string` \| `string`[]
+> `optional` **fromHash?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L22)
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:22](htt
 
 ### messageId?
 
-> `optional` **messageId**: `string` \| `string`[]
+> `optional` **messageId?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L14)
 
@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:14](htt
 
 ### providerId?
 
-> `optional` **providerId**: `string` \| `string`[]
+> `optional` **providerId?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L15)
 
@@ -47,7 +47,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:15](htt
 
 ### providerMessageId?
 
-> `optional` **providerMessageId**: `string` \| `string`[]
+> `optional` **providerMessageId?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L16)
 
@@ -55,7 +55,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:16](htt
 
 ### requestedAtFrom?
 
-> `optional` **requestedAtFrom**: `Date`
+> `optional` **requestedAtFrom?**: `Date`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L23)
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:23](htt
 
 ### requestedAtTo?
 
-> `optional` **requestedAtTo**: `Date`
+> `optional` **requestedAtTo?**: `Date`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L24)
 
@@ -71,7 +71,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:24](htt
 
 ### status?
 
-> `optional` **status**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)[]
+> `optional` **status?**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/) \| [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L18)
 
@@ -79,7 +79,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:18](htt
 
 ### statusUpdatedAtFrom?
 
-> `optional` **statusUpdatedAtFrom**: `Date`
+> `optional` **statusUpdatedAtFrom?**: `Date`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L25)
 
@@ -87,7 +87,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:25](htt
 
 ### statusUpdatedAtTo?
 
-> `optional` **statusUpdatedAtTo**: `Date`
+> `optional` **statusUpdatedAtTo?**: `Date`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L26)
 
@@ -95,7 +95,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:26](htt
 
 ### to?
 
-> `optional` **to**: `string` \| `string`[]
+> `optional` **to?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L19)
 
@@ -103,7 +103,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:19](htt
 
 ### toHash?
 
-> `optional` **toHash**: `string` \| `string`[]
+> `optional` **toHash?**: `string` \| `string`[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L20)
 
@@ -111,6 +111,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:20](htt
 
 ### type?
 
-> `optional` **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
+> `optional` **type?**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/) \| [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L17)

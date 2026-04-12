@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:1](https://github.com/k-ot
 
 ### createdAt?
 
-> `optional` **createdAt**: `Date`
+> `optional` **createdAt?**: `Date`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L15)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:15](https://github.com/k-o
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L13)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:13](https://github.com/k-o
 
 ### plusId?
 
-> `optional` **plusId**: `string`
+> `optional` **plusId?**: `string`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L12)
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/types/kakao-channel.ts:2](https://github.com/k-ot
 
 ### raw?
 
-> `optional` **raw**: `unknown`
+> `optional` **raw?**: `unknown`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L17)
 
@@ -65,7 +65,7 @@ Provider-specific Kakao channel key.
 
 ### status?
 
-> `optional` **status**: `string`
+> `optional` **status?**: `string`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L14)
 
@@ -73,6 +73,6 @@ Defined in: [packages/core/src/types/kakao-channel.ts:14](https://github.com/k-o
 
 ### updatedAt?
 
-> `optional` **updatedAt**: `Date`
+> `optional` **updatedAt?**: `Date`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L16)

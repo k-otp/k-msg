@@ -187,7 +187,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:184](https://githu
 
 ##### error
 
-`string` | `Error`
+`string` \| `Error`
 
 ##### retry?
 

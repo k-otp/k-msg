@@ -19,7 +19,7 @@ Defined in: [packages/core/src/logger.ts:22](https://github.com/k-otp/k-msg/blob
 
 ### duration?
 
-> `optional` **duration**: `number`
+> `optional` **duration?**: `number`
 
 Defined in: [packages/core/src/logger.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L24)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/logger.ts:24](https://github.com/k-otp/k-msg/blob
 
 ### error?
 
-> `optional` **error**: `Error`
+> `optional` **error?**: `Error`
 
 Defined in: [packages/core/src/logger.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L23)
 

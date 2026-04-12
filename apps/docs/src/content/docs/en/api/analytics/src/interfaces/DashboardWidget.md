@@ -11,7 +11,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:25](https://github.com/
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L29)
 
@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:31](https://github.com/
 
 ### refreshInterval?
 
-> `optional` **refreshInterval**: `number`
+> `optional` **refreshInterval?**: `number`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L33)
 

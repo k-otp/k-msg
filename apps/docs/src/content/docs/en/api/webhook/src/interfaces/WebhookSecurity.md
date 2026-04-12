@@ -27,6 +27,6 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:137](https://github.com
 
 ### prefix?
 
-> `optional` **prefix**: `string`
+> `optional` **prefix?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L138)

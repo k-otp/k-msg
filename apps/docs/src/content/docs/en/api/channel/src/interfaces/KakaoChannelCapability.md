@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/runtime/types.ts:86](https://github.com/k-otp/
 
 ### providerType?
 
-> `optional` **providerType**: `string`
+> `optional` **providerType?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L87)
 

@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:127](https://github
 
 ### metadata?
 
-> `optional` **metadata**: `Record`\<`string`, `unknown`\>
+> `optional` **metadata?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L130)
 

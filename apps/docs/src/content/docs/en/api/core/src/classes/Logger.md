@@ -165,11 +165,7 @@ Defined in: [packages/core/src/logger.ts:260](https://github.com/k-otp/k-msg/blo
 
 #### Returns
 
-> (): `void`
-
-##### Returns
-
-`void`
+() => `void`
 
 ***
 

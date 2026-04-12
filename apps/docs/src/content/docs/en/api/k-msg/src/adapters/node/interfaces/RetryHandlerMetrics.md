@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:68](https://github.co
 
 ### lastRetryAt?
 
-> `optional` **lastRetryAt**: `Date`
+> `optional` **lastRetryAt?**: `Date`
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L72)
 

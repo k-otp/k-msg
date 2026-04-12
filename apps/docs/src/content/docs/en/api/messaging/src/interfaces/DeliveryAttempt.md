@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:105](https://github
 
 ### error?
 
-> `optional` **error**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
+> `optional` **error?**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L108)
 

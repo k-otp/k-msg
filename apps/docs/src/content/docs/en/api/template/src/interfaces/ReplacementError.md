@@ -19,7 +19,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:52](http
 
 ### position?
 
-> `optional` **position**: `object`
+> `optional` **position?**: `object`
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L54)
 
@@ -43,6 +43,6 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:47](http
 
 ### variable?
 
-> `optional` **variable**: `string`
+> `optional` **variable?**: `string`
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L53)

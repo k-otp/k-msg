@@ -49,7 +49,7 @@ Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-m
 
 ### attempt?
 
-> `readonly` `optional` **attempt**: `number`
+> `readonly` `optional` **attempt?**: `number`
 
 Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L304)
 
@@ -61,9 +61,9 @@ Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blo
 
 ### cause?
 
-> `optional` **cause**: `unknown`
+> `optional` **cause?**: `unknown`
 
-Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib.es2022.error.d.ts:26
+Defined in: node\_modules/.bun/typescript@6.0.2/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 The cause of the error.
 
@@ -75,7 +75,7 @@ The cause of the error.
 
 ### causeChain?
 
-> `readonly` `optional` **causeChain**: `unknown`[]
+> `readonly` `optional` **causeChain?**: `unknown`[]
 
 Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L305)
 
@@ -99,7 +99,7 @@ Defined in: [packages/core/src/errors.ts:297](https://github.com/k-otp/k-msg/blo
 
 ### details?
 
-> `readonly` `optional` **details**: `Record`\<`string`, `unknown`\>
+> `readonly` `optional` **details?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/core/src/errors.ts:298](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L298)
 
@@ -111,7 +111,7 @@ Defined in: [packages/core/src/errors.ts:298](https://github.com/k-otp/k-msg/blo
 
 ### failMode?
 
-> `readonly` `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
+> `readonly` `optional` **failMode?**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/errors.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L35)
 
@@ -119,7 +119,7 @@ Defined in: [packages/core/src/crypto/errors.ts:35](https://github.com/k-otp/k-m
 
 ### fieldPath?
 
-> `readonly` `optional` **fieldPath**: `string`
+> `readonly` `optional` **fieldPath?**: `string`
 
 Defined in: [packages/core/src/crypto/errors.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L34)
 
@@ -127,7 +127,7 @@ Defined in: [packages/core/src/crypto/errors.ts:34](https://github.com/k-otp/k-m
 
 ### httpStatus?
 
-> `readonly` `optional` **httpStatus**: `number`
+> `readonly` `optional` **httpStatus?**: `number`
 
 Defined in: [packages/core/src/errors.ts:301](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L301)
 
@@ -149,7 +149,7 @@ Defined in: [packages/core/src/crypto/errors.ts:33](https://github.com/k-otp/k-m
 
 > **message**: `string`
 
-Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1077
+Defined in: node\_modules/.bun/typescript@6.0.2/node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
@@ -161,7 +161,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 > **name**: `string`
 
-Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1076
+Defined in: node\_modules/.bun/typescript@6.0.2/node\_modules/typescript/lib/lib.es5.d.ts:1074
 
 #### Inherited from
 
@@ -171,7 +171,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 ### openFallback?
 
-> `readonly` `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `readonly` `optional` **openFallback?**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/errors.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L36)
 
@@ -179,7 +179,7 @@ Defined in: [packages/core/src/crypto/errors.ts:36](https://github.com/k-otp/k-m
 
 ### providerErrorCode?
 
-> `readonly` `optional` **providerErrorCode**: `string`
+> `readonly` `optional` **providerErrorCode?**: `string`
 
 Defined in: [packages/core/src/errors.ts:299](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L299)
 
@@ -191,7 +191,7 @@ Defined in: [packages/core/src/errors.ts:299](https://github.com/k-otp/k-msg/blo
 
 ### providerErrorText?
 
-> `readonly` `optional` **providerErrorText**: `string`
+> `readonly` `optional` **providerErrorText?**: `string`
 
 Defined in: [packages/core/src/errors.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L300)
 
@@ -203,7 +203,7 @@ Defined in: [packages/core/src/errors.ts:300](https://github.com/k-otp/k-msg/blo
 
 ### requestId?
 
-> `readonly` `optional` **requestId**: `string`
+> `readonly` `optional` **requestId?**: `string`
 
 Defined in: [packages/core/src/errors.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L302)
 
@@ -215,7 +215,7 @@ Defined in: [packages/core/src/errors.ts:302](https://github.com/k-otp/k-msg/blo
 
 ### retryAfterMs?
 
-> `readonly` `optional` **retryAfterMs**: `number`
+> `readonly` `optional` **retryAfterMs?**: `number`
 
 Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L303)
 
@@ -227,9 +227,9 @@ Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blo
 
 ### stack?
 
-> `optional` **stack**: `string`
+> `optional` **stack?**: `string`
 
-Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1078
+Defined in: node\_modules/.bun/typescript@6.0.2/node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 
@@ -241,7 +241,7 @@ Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib
 
 > `static` **stackTraceLimit**: `number`
 
-Defined in: node\_modules/.bun/@types+node@22.19.17/node\_modules/@types/node/globals.d.ts:68
+Defined in: node\_modules/.bun/@types+node@25.6.0/node\_modules/@types/node/globals.d.ts:67
 
 The `Error.stackTraceLimit` property specifies the number of stack frames
 collected by a stack trace (whether generated by `new Error().stack` or
@@ -263,7 +263,7 @@ not capture any frames.
 
 > **getLocalizedMessage**(`locale?`): `string`
 
-Defined in: [packages/core/src/errors.ts:342](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L342)
+Defined in: [packages/core/src/errors.ts:351](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L351)
 
 Returns a localized error message based on the provided locale.
 Falls back to Korean (default) if locale is not provided.
@@ -367,7 +367,7 @@ Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-m
 
 > `static` **captureStackTrace**(`targetObject`, `constructorOpt?`): `void`
 
-Defined in: node\_modules/.bun/@types+node@22.19.17/node\_modules/@types/node/globals.d.ts:52
+Defined in: node\_modules/.bun/@types+node@25.6.0/node\_modules/@types/node/globals.d.ts:51
 
 Creates a `.stack` property on `targetObject`, which when accessed returns
 a string representing the location in the code at which
@@ -435,7 +435,7 @@ a();
 
 > `static` **captureStackTrace**(`targetObject`, `constructorOpt?`): `void`
 
-Defined in: node\_modules/.bun/bun-types@1.3.11/node\_modules/bun-types/globals.d.ts:1042
+Defined in: node\_modules/.bun/bun-types@1.3.12/node\_modules/bun-types/globals.d.ts:1042
 
 Create .stack property on a target object
 
@@ -465,7 +465,7 @@ Create .stack property on a target object
 
 > `static` **isError**(`error`): `error is Error`
 
-Defined in: node\_modules/.bun/typescript@5.9.3/node\_modules/typescript/lib/lib.esnext.error.d.ts:23
+Defined in: node\_modules/.bun/typescript@6.0.2/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
 
 Indicates whether the argument provided is a built-in Error instance or not.
 
@@ -487,7 +487,7 @@ Indicates whether the argument provided is a built-in Error instance or not.
 
 > `static` **isError**(`value`): `value is Error`
 
-Defined in: node\_modules/.bun/bun-types@1.3.11/node\_modules/bun-types/globals.d.ts:1037
+Defined in: node\_modules/.bun/bun-types@1.3.12/node\_modules/bun-types/globals.d.ts:1037
 
 Check if a value is an instance of Error
 
@@ -515,7 +515,7 @@ True if the value is an instance of Error, false otherwise
 
 > `static` **prepareStackTrace**(`err`, `stackTraces`): `any`
 
-Defined in: node\_modules/.bun/@types+node@22.19.17/node\_modules/@types/node/globals.d.ts:56
+Defined in: node\_modules/.bun/@types+node@25.6.0/node\_modules/@types/node/globals.d.ts:55
 
 #### Parameters
 

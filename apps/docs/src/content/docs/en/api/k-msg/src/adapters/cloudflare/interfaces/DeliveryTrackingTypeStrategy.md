@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### id?
 
-> `optional` **id**: `DeliveryTrackingIdType`
+> `optional` **id?**: `DeliveryTrackingIdType`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L86)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### json?
 
-> `optional` **json**: `DeliveryTrackingJsonType`
+> `optional` **json?**: `DeliveryTrackingJsonType`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L89)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### messageId?
 
-> `optional` **messageId**: `DeliveryTrackingMessageIdType`
+> `optional` **messageId?**: `DeliveryTrackingMessageIdType`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L85)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### shortText?
 
-> `optional` **shortText**: `DeliveryTrackingShortTextType`
+> `optional` **shortText?**: `DeliveryTrackingShortTextType`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L87)
 
@@ -43,6 +43,6 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ### timestamp?
 
-> `optional` **timestamp**: `DeliveryTrackingTimestampType`
+> `optional` **timestamp?**: `DeliveryTrackingTimestampType`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L88)

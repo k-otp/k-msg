@@ -27,6 +27,6 @@ Defined in: [packages/core/src/types/kakao-channel.ts:22](https://github.com/k-o
 
 ### parentCode?
 
-> `optional` **parentCode**: `string`
+> `optional` **parentCode?**: `string`
 
 Defined in: [packages/core/src/types/kakao-channel.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/kakao-channel.ts#L23)

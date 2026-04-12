@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:50](https://github.
 
 ### changes?
 
-> `optional` **changes**: `object`
+> `optional` **changes?**: `object`
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L60)
 
@@ -59,7 +59,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:47](https://github.
 
 ### metadata?
 
-> `optional` **metadata**: `Record`\<`string`, `any`\>
+> `optional` **metadata?**: `Record`\<`string`, `any`\>
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L64)
 
@@ -75,6 +75,6 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:59](https://github.
 
 ### userId?
 
-> `optional` **userId**: `string`
+> `optional` **userId?**: `string`
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L58)

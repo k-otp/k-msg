@@ -35,7 +35,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 ### signature?
 
-> `optional` **signature**: `string`
+> `optional` **signature?**: `string`
 
 Defined in: [packages/analytics/src/collectors/webhook.collector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L15)
 

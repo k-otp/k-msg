@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:73](https://github.com/k
 
 ### pageNum?
 
-> `optional` **pageNum**: `string`
+> `optional` **pageNum?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L74)
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:74](https://github.com/k
 
 ### pageSize?
 
-> `optional` **pageSize**: `string`
+> `optional` **pageSize?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L75)
 
@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:75](https://github.com/k
 
 ### templateCode?
 
-> `optional` **templateCode**: `string`
+> `optional` **templateCode?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L76)
 
@@ -35,7 +35,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:76](https://github.com/k
 
 ### templateName?
 
-> `optional` **templateName**: `string`
+> `optional` **templateName?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L77)
 
@@ -43,6 +43,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:77](https://github.com/k
 
 ### templateStatus?
 
-> `optional` **templateStatus**: `"Y"` \| `"I"` \| `"R"`
+> `optional` **templateStatus?**: `"Y"` \| `"I"` \| `"R"`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L78)

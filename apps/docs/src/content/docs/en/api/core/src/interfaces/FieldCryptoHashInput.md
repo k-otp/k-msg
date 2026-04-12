@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/types.ts:59](https://github.com/k-otp/k-ms
 
 ### kid?
 
-> `optional` **kid**: `string`
+> `optional` **kid?**: `string`
 
 Defined in: [packages/core/src/crypto/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L62)
 

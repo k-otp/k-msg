@@ -9,13 +9,13 @@ Defined in: [packages/channel/src/runtime/types.ts:97](https://github.com/k-otp/
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 ## Properties
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L101)
 
@@ -23,7 +23,7 @@ Defined in: [packages/channel/src/runtime/types.ts:101](https://github.com/k-otp
 
 ### plusId?
 
-> `optional` **plusId**: `string`
+> `optional` **plusId?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L100)
 
@@ -39,6 +39,6 @@ Defined in: [packages/channel/src/runtime/types.ts:98](https://github.com/k-otp/
 
 ### senderKey?
 
-> `optional` **senderKey**: `string`
+> `optional` **senderKey?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L99)

@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/onboarding.ts:29](https://github.com/k-otp/
 
 ### capabilityMethods?
 
-> `optional` **capabilityMethods**: `string`[]
+> `optional` **capabilityMethods?**: `string`[]
 
 Defined in: [packages/core/src/types/onboarding.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L45)
 
@@ -22,7 +22,7 @@ Used when kind === "capability".
 
 ### configKeys?
 
-> `optional` **configKeys**: `string`[]
+> `optional` **configKeys?**: `string`[]
 
 Defined in: [packages/core/src/types/onboarding.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L40)
 
@@ -33,7 +33,7 @@ Used when kind === "config".
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/core/src/types/onboarding.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L32)
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/types/onboarding.ts:33](https://github.com/k-otp/
 
 ### probeOperation?
 
-> `optional` **probeOperation**: [`ProviderOnboardingProbeOperation`](/en/api/core/src/type-aliases/provideronboardingprobeoperation/)
+> `optional` **probeOperation?**: [`ProviderOnboardingProbeOperation`](/en/api/core/src/type-aliases/provideronboardingprobeoperation/)
 
 Defined in: [packages/core/src/types/onboarding.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L49)
 

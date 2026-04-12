@@ -5,7 +5,7 @@ prev: false
 title: "ExportResult"
 ---
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L34)
+Defined in: [packages/analytics/src/reports/export.manager.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L35)
 
 ## Properties
 
@@ -13,23 +13,23 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:34](https://github
 
 > **createdAt**: `Date`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L40)
+Defined in: [packages/analytics/src/reports/export.manager.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L41)
 
 ***
 
 ### downloadUrl?
 
-> `optional` **downloadUrl**: `string`
+> `optional` **downloadUrl?**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L41)
+Defined in: [packages/analytics/src/reports/export.manager.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L42)
 
 ***
 
 ### expiresAt?
 
-> `optional` **expiresAt**: `Date`
+> `optional` **expiresAt?**: `Date`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L42)
+Defined in: [packages/analytics/src/reports/export.manager.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L43)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:42](https://github
 
 > **fileName**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L37)
+Defined in: [packages/analytics/src/reports/export.manager.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L38)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:37](https://github
 
 > **filePath**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L38)
+Defined in: [packages/analytics/src/reports/export.manager.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L39)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:38](https://github
 
 > **fileSize**: `number`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L39)
+Defined in: [packages/analytics/src/reports/export.manager.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L40)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:39](https://github
 
 > **format**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L36)
+Defined in: [packages/analytics/src/reports/export.manager.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L37)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:36](https://github
 
 > **id**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L35)
+Defined in: [packages/analytics/src/reports/export.manager.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L36)

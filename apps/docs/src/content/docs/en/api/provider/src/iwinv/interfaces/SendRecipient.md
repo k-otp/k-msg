@@ -19,6 +19,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:34](https://github.com/k
 
 ### templateParam?
 
-> `optional` **templateParam**: `string`[]
+> `optional` **templateParam?**: `string`[]
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L35)

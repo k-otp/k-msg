@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/types.ts:29](https://github.com/k-otp/k-ms
 
 ### decryptKids?
 
-> `optional` **decryptKids**: readonly `string`[]
+> `optional` **decryptKids?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L30)
 
@@ -27,6 +27,6 @@ Defined in: [packages/core/src/crypto/types.ts:30](https://github.com/k-otp/k-ms
 
 ### refreshedAt?
 
-> `optional` **refreshedAt**: `number`
+> `optional` **refreshedAt?**: `number`
 
 Defined in: [packages/core/src/crypto/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L31)

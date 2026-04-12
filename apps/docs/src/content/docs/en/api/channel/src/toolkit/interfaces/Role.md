@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:24](https://
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L22)
 

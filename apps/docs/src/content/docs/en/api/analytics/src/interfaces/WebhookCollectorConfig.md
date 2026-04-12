@@ -43,7 +43,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:24](https://
 
 ### secretKey?
 
-> `optional` **secretKey**: `string`
+> `optional` **secretKey?**: `string`
 
 Defined in: [packages/analytics/src/collectors/webhook.collector.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L21)
 

@@ -9,48 +9,34 @@ title: "MessageBinaryInput"
 
 Defined in: [packages/core/src/types/message.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L101)
 
-## Type Declaration
+## Union Members
+
+### Type Literal
 
 \{ `contentType?`: `string`; `filename?`: `string`; `ref`: `string`; \}
 
-### contentType?
+#### contentType?
 
-> `optional` **contentType**: `string`
+> `optional` **contentType?**: `string`
 
-### filename?
+#### filename?
 
-> `optional` **filename**: `string`
+> `optional` **filename?**: `string`
 
-### ref
+#### ref
 
 > **ref**: `string`
 
 URL or file path (provider-dependent).
 
+***
+
+### Type Literal
+
 \{ `bytes`: `Uint8Array`; `contentType?`: `string`; `filename?`: `string`; \}
 
-### bytes
+***
 
-> **bytes**: `Uint8Array`
-
-### contentType?
-
-> `optional` **contentType**: `string`
-
-### filename?
-
-> `optional` **filename**: `string`
+### Type Literal
 
 \{ `blob`: `Blob`; `contentType?`: `string`; `filename?`: `string`; \}
-
-### blob
-
-> **blob**: `Blob`
-
-### contentType?
-
-> `optional` **contentType**: `string`
-
-### filename?
-
-> `optional` **filename**: `string`

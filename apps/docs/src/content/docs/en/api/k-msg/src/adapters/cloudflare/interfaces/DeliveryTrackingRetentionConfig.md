@@ -9,9 +9,9 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:59](htt
 
 ## Properties
 
-### contractOverrideResolver()?
+### contractOverrideResolver?
 
-> `optional` **contractOverrideResolver**: (`context`) => `number` \| `Promise`\<`number` \| `undefined`\> \| `undefined`
+> `optional` **contractOverrideResolver?**: (`context`) => `number` \| `Promise`\<`number` \| `undefined`\> \| `undefined`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L62)
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:62](htt
 
 ### preset?
 
-> `optional` **preset**: `"kr-b2b-baseline"`
+> `optional` **preset?**: `"kr-b2b-baseline"`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L60)
 
@@ -51,6 +51,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:60](htt
 
 ### tenantOverrideDays?
 
-> `optional` **tenantOverrideDays**: `Partial`\<`Record`\<[`DeliveryTrackingRetentionClass`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/), `number`\>\>
+> `optional` **tenantOverrideDays?**: `Partial`\<`Record`\<[`DeliveryTrackingRetentionClass`](/en/api/messaging/src/tracking/type-aliases/deliverytrackingretentionclass/), `number`\>\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L61)

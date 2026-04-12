@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:158](https://github
 
 ### completedAt?
 
-> `optional` **completedAt**: `Date`
+> `optional` **completedAt?**: `Date`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L162)
 

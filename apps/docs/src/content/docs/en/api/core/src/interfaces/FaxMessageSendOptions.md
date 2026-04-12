@@ -23,7 +23,7 @@ Defined in: [packages/core/src/types/message.ts:306](https://github.com/k-otp/k-
 
 ### from?
 
-> `optional` **from**: `string`
+> `optional` **from?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L146)
 
@@ -37,7 +37,7 @@ Sender number / sender id. Optional at KMsg layer; providers may require it.
 
 ### messageId?
 
-> `optional` **messageId**: `string`
+> `optional` **messageId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L133)
 
@@ -52,7 +52,7 @@ Providers must echo this value back in SendResult.messageId.
 
 ### options?
 
-> `optional` **options**: `object`
+> `optional` **options?**: `object`
 
 Defined in: [packages/core/src/types/message.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L150)
 
@@ -60,18 +60,18 @@ Common delivery options understood by multiple providers.
 
 #### country?
 
-> `optional` **country**: `string`
+> `optional` **country?**: `string`
 
 Country code for providers that support it (e.g. SOLAPI).
 Examples: "82", "+82".
 
 #### customFields?
 
-> `optional` **customFields**: `Record`\<`string`, `string`\>
+> `optional` **customFields?**: `Record`\<`string`, `string`\>
 
 #### scheduledAt?
 
-> `optional` **scheduledAt**: `Date`
+> `optional` **scheduledAt?**: `Date`
 
 #### Inherited from
 
@@ -81,7 +81,7 @@ Examples: "82", "+82".
 
 ### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L137)
 
@@ -95,7 +95,7 @@ Optional routing hint to force a specific provider by id.
 
 ### providerOptions?
 
-> `optional` **providerOptions**: `Record`\<`string`, `unknown`\>
+> `optional` **providerOptions?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/core/src/types/message.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L162)
 

@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/provider-cli-metadata.ts:4](https://github.co
 
 ### defaultKakaoSenderKey?
 
-> `optional` **defaultKakaoSenderKey**: `string`
+> `optional` **defaultKakaoSenderKey?**: `string`
 
 Defined in: [packages/provider/src/provider-cli-metadata.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/provider-cli-metadata.ts#L7)
 

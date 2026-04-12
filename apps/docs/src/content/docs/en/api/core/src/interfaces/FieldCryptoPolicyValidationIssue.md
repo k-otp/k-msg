@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/policy.ts:4](https://github.com/k-otp/k-ms
 
 ### hint?
 
-> `optional` **hint**: `string`
+> `optional` **hint?**: `string`
 
 Defined in: [packages/core/src/crypto/policy.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L8)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/policy.ts:5](https://github.com/k-otp/k-ms
 
 ### path?
 
-> `optional` **path**: `string`
+> `optional` **path?**: `string`
 
 Defined in: [packages/core/src/crypto/policy.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L7)
 

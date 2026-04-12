@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/types.ts:116](https://github.com/k-otp/k-m
 
 ### kid?
 
-> `optional` **kid**: `string`
+> `optional` **kid?**: `string`
 
 Defined in: [packages/core/src/crypto/types.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L119)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/types.ts:117](https://github.com/k-otp/k-m
 
 ### tags?
 
-> `optional` **tags**: `Record`\<`string`, `string` \| `number` \| `boolean` \| `undefined`\>
+> `optional` **tags?**: `Record`\<`string`, `string` \| `number` \| `boolean` \| `undefined`\>
 
 Defined in: [packages/core/src/crypto/types.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L120)
 
@@ -35,6 +35,6 @@ Defined in: [packages/core/src/crypto/types.ts:120](https://github.com/k-otp/k-m
 
 ### value?
 
-> `optional` **value**: `number`
+> `optional` **value?**: `number`
 
 Defined in: [packages/core/src/crypto/types.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L118)

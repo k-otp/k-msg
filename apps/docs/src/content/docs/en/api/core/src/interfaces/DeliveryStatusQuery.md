@@ -27,7 +27,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:66](https://github.com/k
 
 ### scheduledAt?
 
-> `optional` **scheduledAt**: `Date`
+> `optional` **scheduledAt?**: `Date`
 
 Defined in: [packages/core/src/types/delivery-status.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L67)
 

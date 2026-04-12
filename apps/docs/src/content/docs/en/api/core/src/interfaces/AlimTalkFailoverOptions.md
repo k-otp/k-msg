@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/message.ts:180](https://github.com/k-otp/k-
 
 ### enabled?
 
-> `optional` **enabled**: `boolean`
+> `optional` **enabled?**: `boolean`
 
 Defined in: [packages/core/src/types/message.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L181)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/types/message.ts:181](https://github.com/k-otp/k-
 
 ### fallbackChannel?
 
-> `optional` **fallbackChannel**: `"sms"` \| `"lms"`
+> `optional` **fallbackChannel?**: `"sms"` \| `"lms"`
 
 Defined in: [packages/core/src/types/message.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L182)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/types/message.ts:182](https://github.com/k-otp/k-
 
 ### fallbackContent?
 
-> `optional` **fallbackContent**: `string`
+> `optional` **fallbackContent?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L183)
 
@@ -35,6 +35,6 @@ Defined in: [packages/core/src/types/message.ts:183](https://github.com/k-otp/k-
 
 ### fallbackTitle?
 
-> `optional` **fallbackTitle**: `string`
+> `optional` **fallbackTitle?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L184)

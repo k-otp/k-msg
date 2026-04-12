@@ -179,7 +179,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:107]
 
 ##### error
 
-`string` | `Error`
+`string` \| `Error`
 
 ##### retry?
 

@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:15](https://
 
 ### chunksTableName?
 
-> `optional` **chunksTableName**: `string`
+> `optional` **chunksTableName?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)
 
@@ -25,6 +25,6 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://
 
 ### runsTableName?
 
-> `optional` **runsTableName**: `string`
+> `optional` **runsTableName?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L16)

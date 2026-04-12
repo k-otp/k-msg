@@ -9,13 +9,13 @@ Defined in: [packages/core/src/types/message.ts:212](https://github.com/k-otp/k-
 
 ## Indexable
 
-\[`key`: `string`\]: `any`
+> \[`key`: `string`\]: `any`
 
 ## Properties
 
 ### counselorNumber?
 
-> `optional` **counselorNumber**: `string`
+> `optional` **counselorNumber?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:217](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L217)
 
@@ -23,7 +23,7 @@ Defined in: [packages/core/src/types/message.ts:217](https://github.com/k-otp/k-
 
 ### headerMessage?
 
-> `optional` **headerMessage**: `string`
+> `optional` **headerMessage?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:214](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L214)
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/types/message.ts:214](https://github.com/k-otp/k-
 
 ### replyRange?
 
-> `optional` **replyRange**: `2` \| `1` \| `8` \| `4` \| `3` \| `5` \| `7` \| `6` \| `9`
+> `optional` **replyRange?**: `2` \| `1` \| `8` \| `4` \| `3` \| `5` \| `7` \| `6` \| `9`
 
 Defined in: [packages/core/src/types/message.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L216)
 
@@ -39,7 +39,7 @@ Defined in: [packages/core/src/types/message.ts:216](https://github.com/k-otp/k-
 
 ### tailMessage?
 
-> `optional` **tailMessage**: `string`
+> `optional` **tailMessage?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L215)
 
@@ -47,6 +47,6 @@ Defined in: [packages/core/src/types/message.ts:215](https://github.com/k-otp/k-
 
 ### voiceType?
 
-> `optional` **voiceType**: `"FEMALE"` \| `"MALE"`
+> `optional` **voiceType?**: `"FEMALE"` \| `"MALE"`
 
 Defined in: [packages/core/src/types/message.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L213)

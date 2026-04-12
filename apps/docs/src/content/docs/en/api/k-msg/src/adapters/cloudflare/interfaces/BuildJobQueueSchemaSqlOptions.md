@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:31](https:
 
 ### includeIndexes?
 
-> `optional` **includeIndexes**: `boolean`
+> `optional` **includeIndexes?**: `boolean`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L33)
 
@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:33](https:
 
 ### tableName?
 
-> `optional` **tableName**: `string`
+> `optional` **tableName?**: `string`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L32)

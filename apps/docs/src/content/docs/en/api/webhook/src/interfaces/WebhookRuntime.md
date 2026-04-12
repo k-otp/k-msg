@@ -151,7 +151,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:85](https://github.com/k-otp/
 
 ##### input
 
-`string` | [`WebhookRuntimeTestPayload`](/en/api/webhook/src/interfaces/webhookruntimetestpayload/)
+`string` \| [`WebhookRuntimeTestPayload`](/en/api/webhook/src/interfaces/webhookruntimetestpayload/)
 
 #### Returns
 

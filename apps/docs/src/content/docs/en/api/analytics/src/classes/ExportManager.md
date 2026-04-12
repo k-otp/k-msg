@@ -5,7 +5,7 @@ prev: false
 title: "ExportManager"
 ---
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L76)
+Defined in: [packages/analytics/src/reports/export.manager.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L77)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:76](https://github
 
 > **new ExportManager**(`config?`): `ExportManager`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L91)
+Defined in: [packages/analytics/src/reports/export.manager.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L92)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:91](https://github
 
 > **deleteExport**(`exportId`): `boolean`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:271](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L271)
+Defined in: [packages/analytics/src/reports/export.manager.ts:272](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L272)
 
 내보내기 삭제
 
@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:271](https://githu
 
 > **exportInsights**(`insights`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L203)
+Defined in: [packages/analytics/src/reports/export.manager.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L204)
 
 인사이트 데이터 내보내기
 
@@ -79,7 +79,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:203](https://githu
 
 > **exportMetrics**(`metrics`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L160)
+Defined in: [packages/analytics/src/reports/export.manager.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L161)
 
 메트릭 데이터 내보내기
 
@@ -107,7 +107,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:160](https://githu
 
 > **exportReport**(`report`, `format`, `options?`): `Promise`\<[`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)\>
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L98)
+Defined in: [packages/analytics/src/reports/export.manager.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L99)
 
 분석 보고서 내보내기
 
@@ -135,7 +135,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:98](https://github
 
 > **getExportStatus**(`exportId`): [`ExportResult`](/en/api/analytics/src/interfaces/exportresult/) \| `null`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L253)
+Defined in: [packages/analytics/src/reports/export.manager.ts:254](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L254)
 
 내보내기 상태 조회
 
@@ -155,7 +155,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:253](https://githu
 
 > **listExports**(`limit?`): [`ExportResult`](/en/api/analytics/src/interfaces/exportresult/)[]
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L260)
+Defined in: [packages/analytics/src/reports/export.manager.ts:261](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L261)
 
 내보내기 목록 조회
 

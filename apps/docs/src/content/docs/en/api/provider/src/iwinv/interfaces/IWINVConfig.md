@@ -21,7 +21,7 @@ IWINV AlimTalk API key (used for AUTH header).
 
 ### debug?
 
-> `optional` **debug**: `boolean`
+> `optional` **debug?**: `boolean`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:237](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L237)
 
@@ -29,7 +29,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:237](https://github.com/
 
 ### extraHeaders?
 
-> `optional` **extraHeaders**: `Record`\<`string`, `string`\>
+> `optional` **extraHeaders?**: `Record`\<`string`, `string`\>
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L230)
 
@@ -40,7 +40,7 @@ Use with care: overriding AUTH/secret can break requests.
 
 ### ipAlertWebhookUrl?
 
-> `optional` **ipAlertWebhookUrl**: `string`
+> `optional` **ipAlertWebhookUrl?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L233)
 
@@ -48,7 +48,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:233](https://github.com/
 
 ### ipRetryCount?
 
-> `optional` **ipRetryCount**: `number`
+> `optional` **ipRetryCount?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:231](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L231)
 
@@ -56,15 +56,15 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:231](https://github.com/
 
 ### ipRetryDelayMs?
 
-> `optional` **ipRetryDelayMs**: `number`
+> `optional` **ipRetryDelayMs?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:232](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L232)
 
 ***
 
-### onIpRestrictionAlert()?
+### onIpRestrictionAlert?
 
-> `optional` **onIpRestrictionAlert**: (`payload`) => `void` \| `Promise`\<`void`\>
+> `optional` **onIpRestrictionAlert?**: (`payload`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L234)
 
@@ -82,7 +82,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/
 
 ### sendEndpoint?
 
-> `optional` **sendEndpoint**: `string`
+> `optional` **sendEndpoint?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L220)
 
@@ -90,7 +90,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:220](https://github.com/
 
 ### senderNumber?
 
-> `optional` **senderNumber**: `string`
+> `optional` **senderNumber?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L218)
 
@@ -98,7 +98,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:218](https://github.com/
 
 ### smsApiKey?
 
-> `optional` **smsApiKey**: `string`
+> `optional` **smsApiKey?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:211](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L211)
 
@@ -106,7 +106,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:211](https://github.com/
 
 ### smsAuthKey?
 
-> `optional` **smsAuthKey**: `string`
+> `optional` **smsAuthKey?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:212](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L212)
 
@@ -114,7 +114,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:212](https://github.com/
 
 ### smsCompanyId?
 
-> `optional` **smsCompanyId**: `string`
+> `optional` **smsCompanyId?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:217](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L217)
 
@@ -125,7 +125,7 @@ SMS v2 전송 내역 조회시 필요한 조직(업체) 발송 아이디.
 
 ### smsSenderNumber?
 
-> `optional` **smsSenderNumber**: `string`
+> `optional` **smsSenderNumber?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:219](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L219)
 
@@ -133,7 +133,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:219](https://github.com/
 
 ### xForwardedFor?
 
-> `optional` **xForwardedFor**: `string`
+> `optional` **xForwardedFor?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:225](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L225)
 

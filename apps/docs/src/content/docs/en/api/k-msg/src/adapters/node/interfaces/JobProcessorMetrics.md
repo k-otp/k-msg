@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:46](https://github.co
 
 ### lastProcessedAt?
 
-> `optional` **lastProcessedAt**: `Date`
+> `optional` **lastProcessedAt?**: `Date`
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L51)
 

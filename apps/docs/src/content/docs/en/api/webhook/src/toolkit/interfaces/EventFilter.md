@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/registry/types.ts:32](https://github.com/k-otp
 
 ### channelId?
 
-> `optional` **channelId**: `string`[]
+> `optional` **channelId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L35)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/registry/types.ts:35](https://github.com/k-otp
 
 ### createdAfter?
 
-> `optional` **createdAfter**: `Date`
+> `optional` **createdAfter?**: `Date`
 
 Defined in: [packages/webhook/src/registry/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L40)
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/registry/types.ts:40](https://github.com/k-otp
 
 ### createdBefore?
 
-> `optional` **createdBefore**: `Date`
+> `optional` **createdBefore?**: `Date`
 
 Defined in: [packages/webhook/src/registry/types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L41)
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/registry/types.ts:41](https://github.com/k-otp
 
 ### messageId?
 
-> `optional` **messageId**: `string`[]
+> `optional` **messageId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L37)
 
@@ -43,7 +43,7 @@ Defined in: [packages/webhook/src/registry/types.ts:37](https://github.com/k-otp
 
 ### organizationId?
 
-> `optional` **organizationId**: `string`[]
+> `optional` **organizationId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L39)
 
@@ -51,7 +51,7 @@ Defined in: [packages/webhook/src/registry/types.ts:39](https://github.com/k-otp
 
 ### providerId?
 
-> `optional` **providerId**: `string`[]
+> `optional` **providerId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L34)
 
@@ -59,7 +59,7 @@ Defined in: [packages/webhook/src/registry/types.ts:34](https://github.com/k-otp
 
 ### templateId?
 
-> `optional` **templateId**: `string`[]
+> `optional` **templateId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L36)
 
@@ -67,7 +67,7 @@ Defined in: [packages/webhook/src/registry/types.ts:36](https://github.com/k-otp
 
 ### type?
 
-> `optional` **type**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
+> `optional` **type?**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
 
 Defined in: [packages/webhook/src/registry/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L33)
 
@@ -75,6 +75,6 @@ Defined in: [packages/webhook/src/registry/types.ts:33](https://github.com/k-otp
 
 ### userId?
 
-> `optional` **userId**: `string`[]
+> `optional` **userId?**: `string`[]
 
 Defined in: [packages/webhook/src/registry/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L38)

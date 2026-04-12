@@ -22,7 +22,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:11](https:/
 
 ### conditions?
 
-> `optional` **conditions**: `object`[]
+> `optional` **conditions?**: `object`[]
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L20)
 
@@ -58,6 +58,6 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:10](https:/
 
 ### percentile?
 
-> `optional` **percentile**: `number`
+> `optional` **percentile?**: `number`
 
 Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/metric.aggregator.ts#L25)

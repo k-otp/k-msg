@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:62](ht
 
 ### metadata?
 
-> `optional` **metadata**: `Record`\<`string`, `any`\>
+> `optional` **metadata?**: `Record`\<`string`, `any`\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L63)
 

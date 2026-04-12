@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:24](https://github.co
 
 ### circuitBreaker?
 
-> `optional` **circuitBreaker**: `object`
+> `optional` **circuitBreaker?**: `object`
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L34)
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:28](https://github.co
 
 ### rateLimiter?
 
-> `optional` **rateLimiter**: `object`
+> `optional` **rateLimiter?**: `object`
 
 Defined in: [packages/messaging/src/queue/job.processor.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L30)
 

@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/registry/types.ts:69](https://github.com/k-otp
 
 ### sortBy?
 
-> `optional` **sortBy**: `string`
+> `optional` **sortBy?**: `string`
 
 Defined in: [packages/webhook/src/registry/types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L71)
 
@@ -35,6 +35,6 @@ Defined in: [packages/webhook/src/registry/types.ts:71](https://github.com/k-otp
 
 ### sortOrder?
 
-> `optional` **sortOrder**: `"asc"` \| `"desc"`
+> `optional` **sortOrder?**: `"asc"` \| `"desc"`
 
 Defined in: [packages/webhook/src/registry/types.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L72)

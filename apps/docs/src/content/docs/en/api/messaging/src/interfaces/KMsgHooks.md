@@ -9,9 +9,9 @@ Defined in: [packages/messaging/src/hooks.ts:26](https://github.com/k-otp/k-msg/
 
 ## Properties
 
-### onBeforeSend()?
+### onBeforeSend?
 
-> `optional` **onBeforeSend**: (`context`) => `void` \| `Promise`\<`void`\>
+> `optional` **onBeforeSend?**: (`context`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L27)
 
@@ -27,9 +27,9 @@ Defined in: [packages/messaging/src/hooks.ts:27](https://github.com/k-otp/k-msg/
 
 ***
 
-### onError()?
+### onError?
 
-> `optional` **onError**: (`context`, `error`) => `void` \| `Promise`\<`void`\>
+> `optional` **onError?**: (`context`, `error`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L32)
 
@@ -49,9 +49,9 @@ Defined in: [packages/messaging/src/hooks.ts:32](https://github.com/k-otp/k-msg/
 
 ***
 
-### onFinal()?
+### onFinal?
 
-> `optional` **onFinal**: (`context`, `state`) => `void` \| `Promise`\<`void`\>
+> `optional` **onFinal?**: (`context`, `state`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L42)
 
@@ -71,9 +71,9 @@ Defined in: [packages/messaging/src/hooks.ts:42](https://github.com/k-otp/k-msg/
 
 ***
 
-### onQueued()?
+### onQueued?
 
-> `optional` **onQueued**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
+> `optional` **onQueued?**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L33)
 
@@ -93,9 +93,9 @@ Defined in: [packages/messaging/src/hooks.ts:33](https://github.com/k-otp/k-msg/
 
 ***
 
-### onRetryScheduled()?
+### onRetryScheduled?
 
-> `optional` **onRetryScheduled**: (`context`, `error`, `metadata`) => `void` \| `Promise`\<`void`\>
+> `optional` **onRetryScheduled?**: (`context`, `error`, `metadata`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L34)
 
@@ -125,9 +125,9 @@ Defined in: [packages/messaging/src/hooks.ts:34](https://github.com/k-otp/k-msg/
 
 ***
 
-### onSuccess()?
+### onSuccess?
 
-> `optional` **onSuccess**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
+> `optional` **onSuccess?**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/hooks.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L28)
 

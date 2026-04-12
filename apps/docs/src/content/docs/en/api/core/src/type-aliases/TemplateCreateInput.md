@@ -15,7 +15,7 @@ Input for creating a new AlimTalk template.
 
 ### buttons?
 
-> `optional` **buttons**: `unknown`[]
+> `optional` **buttons?**: `unknown`[]
 
 Defined in: [packages/core/src/provider.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L54)
 
@@ -25,7 +25,7 @@ Button configurations.
 
 ### category?
 
-> `optional` **category**: `string`
+> `optional` **category?**: `string`
 
 Defined in: [packages/core/src/provider.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L52)
 
@@ -55,7 +55,7 @@ Human-readable template name.
 
 ### variables?
 
-> `optional` **variables**: `string`[]
+> `optional` **variables?**: `string`[]
 
 Defined in: [packages/core/src/provider.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L56)
 

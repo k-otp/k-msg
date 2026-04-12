@@ -11,7 +11,7 @@ Defined in: [packages/core/src/errors.ts:157](https://github.com/k-otp/k-msg/blo
 
 ### attempt?
 
-> `optional` **attempt**: `number`
+> `optional` **attempt?**: `number`
 
 Defined in: [packages/core/src/errors.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L166)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/errors.ts:166](https://github.com/k-otp/k-msg/blo
 
 ### causeChain?
 
-> `optional` **causeChain**: `unknown`[]
+> `optional` **causeChain?**: `unknown`[]
 
 Defined in: [packages/core/src/errors.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L165)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/errors.ts:158](https://github.com/k-otp/k-msg/blo
 
 ### httpStatus?
 
-> `optional` **httpStatus**: `number`
+> `optional` **httpStatus?**: `number`
 
 Defined in: [packages/core/src/errors.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L162)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/errors.ts:162](https://github.com/k-otp/k-msg/blo
 
 ### providerErrorCode?
 
-> `optional` **providerErrorCode**: `string`
+> `optional` **providerErrorCode?**: `string`
 
 Defined in: [packages/core/src/errors.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L160)
 
@@ -59,7 +59,7 @@ Defined in: [packages/core/src/errors.ts:160](https://github.com/k-otp/k-msg/blo
 
 ### providerErrorText?
 
-> `optional` **providerErrorText**: `string`
+> `optional` **providerErrorText?**: `string`
 
 Defined in: [packages/core/src/errors.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L161)
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/errors.ts:161](https://github.com/k-otp/k-msg/blo
 
 ### requestId?
 
-> `optional` **requestId**: `string`
+> `optional` **requestId?**: `string`
 
 Defined in: [packages/core/src/errors.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L163)
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/errors.ts:163](https://github.com/k-otp/k-msg/blo
 
 ### retryAfterMs?
 
-> `optional` **retryAfterMs**: `number`
+> `optional` **retryAfterMs?**: `number`
 
 Defined in: [packages/core/src/errors.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L164)
 

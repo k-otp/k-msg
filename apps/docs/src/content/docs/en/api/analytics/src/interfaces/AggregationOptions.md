@@ -30,6 +30,6 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:20](ht
 
 ### timezone?
 
-> `optional` **timezone**: `string`
+> `optional` **timezone?**: `string`
 
 Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/aggregators/time-series.aggregator.ts#L21)

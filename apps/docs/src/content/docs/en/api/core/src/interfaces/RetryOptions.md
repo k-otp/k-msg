@@ -11,7 +11,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:7](https://github.com
 
 ### backoffMultiplier?
 
-> `optional` **backoffMultiplier**: `number`
+> `optional` **backoffMultiplier?**: `number`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L11)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:11](https://github.co
 
 ### initialDelay?
 
-> `optional` **initialDelay**: `number`
+> `optional` **initialDelay?**: `number`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L9)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:9](https://github.com
 
 ### jitter?
 
-> `optional` **jitter**: `boolean`
+> `optional` **jitter?**: `boolean`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L12)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:12](https://github.co
 
 ### maxAttempts?
 
-> `optional` **maxAttempts**: `number`
+> `optional` **maxAttempts?**: `number`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L8)
 
@@ -43,15 +43,15 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:8](https://github.com
 
 ### maxDelay?
 
-> `optional` **maxDelay**: `number`
+> `optional` **maxDelay?**: `number`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L10)
 
 ***
 
-### onRetry()?
+### onRetry?
 
-> `optional` **onRetry**: (`error`, `attempt`) => `void`
+> `optional` **onRetry?**: (`error`, `attempt`) => `void`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L14)
 
@@ -71,9 +71,9 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:14](https://github.co
 
 ***
 
-### retryCondition()?
+### retryCondition?
 
-> `optional` **retryCondition**: (`error`, `attempt`) => `boolean`
+> `optional` **retryCondition?**: (`error`, `attempt`) => `boolean`
 
 Defined in: [packages/core/src/resilience/retry-handler.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/retry-handler.ts#L13)
 

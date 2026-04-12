@@ -11,7 +11,7 @@ Defined in: [packages/template/src/types/template.types.ts:29](https://github.co
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/template/src/types/template.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L35)
 
@@ -19,7 +19,7 @@ Defined in: [packages/template/src/types/template.types.ts:35](https://github.co
 
 ### example?
 
-> `optional` **example**: `string`
+> `optional` **example?**: `string`
 
 Defined in: [packages/template/src/types/template.types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L36)
 
@@ -27,7 +27,7 @@ Defined in: [packages/template/src/types/template.types.ts:36](https://github.co
 
 ### format?
 
-> `optional` **format**: `string`
+> `optional` **format?**: `string`
 
 Defined in: [packages/template/src/types/template.types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L34)
 
@@ -35,7 +35,7 @@ Defined in: [packages/template/src/types/template.types.ts:34](https://github.co
 
 ### maxLength?
 
-> `optional` **maxLength**: `number`
+> `optional` **maxLength?**: `number`
 
 Defined in: [packages/template/src/types/template.types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L33)
 

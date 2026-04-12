@@ -9,4 +9,4 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:22](https://github.
 
 ## Indexable
 
-\[`key`: `string`\]: `string` \| `number` \| `Date`
+> \[`key`: `string`\]: `string` \| `number` \| `Date`

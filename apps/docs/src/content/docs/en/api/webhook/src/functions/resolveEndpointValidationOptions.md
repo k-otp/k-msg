@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:60](https://git
 
 ### security
 
-[`WebhookRuntimeSecurityOptions`](/en/api/webhook/src/interfaces/webhookruntimesecurityoptions/) | `undefined`
+[`WebhookRuntimeSecurityOptions`](/en/api/webhook/src/interfaces/webhookruntimesecurityoptions/) \| `undefined`
 
 ## Returns
 

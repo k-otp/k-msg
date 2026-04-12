@@ -15,7 +15,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:78](https://
 
 ### chunksTableName?
 
-> `optional` **chunksTableName**: `string`
+> `optional` **chunksTableName?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://
 
 ### fieldCryptoSchema?
 
-> `optional` **fieldCryptoSchema**: `DeliveryTrackingFieldCryptoSchemaOptions`
+> `optional` **fieldCryptoSchema?**: `DeliveryTrackingFieldCryptoSchemaOptions`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L83)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:83](https://
 
 ### maxChunks?
 
-> `optional` **maxChunks**: `number`
+> `optional` **maxChunks?**: `number`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L82)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:80](https://
 
 ### runsTableName?
 
-> `optional` **runsTableName**: `string`
+> `optional` **runsTableName?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L16)
 
@@ -63,6 +63,6 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://
 
 ### trackingTableName?
 
-> `optional` **trackingTableName**: `string`
+> `optional` **trackingTableName?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L81)

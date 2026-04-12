@@ -75,7 +75,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:241](https://github.com/
 
 ### templateCode?
 
-> `optional` **templateCode**: `string`
+> `optional` **templateCode?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L245)
 

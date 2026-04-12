@@ -13,7 +13,7 @@ Defined in: [packages/template/src/runtime/template-input.ts:13](https://github.
 
 ### requireContent?
 
-> `optional` **requireContent**: `boolean`
+> `optional` **requireContent?**: `boolean`
 
 Defined in: [packages/template/src/runtime/template-input.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L15)
 
@@ -21,6 +21,6 @@ Defined in: [packages/template/src/runtime/template-input.ts:15](https://github.
 
 ### requireName?
 
-> `optional` **requireName**: `boolean`
+> `optional` **requireName?**: `boolean`
 
 Defined in: [packages/template/src/runtime/template-input.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L14)

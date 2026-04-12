@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:1](https://github.com/k-
 
 ### alimtalkBaseUrl?
 
-> `optional` **alimtalkBaseUrl**: `string`
+> `optional` **alimtalkBaseUrl?**: `string`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L9)
 
@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:2](https://github.com/k-
 
 ### debug?
 
-> `optional` **debug**: `boolean`
+> `optional` **debug?**: `boolean`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L7)
 
@@ -35,7 +35,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:7](https://github.com/k-
 
 ### friendtalkEndpoint?
 
-> `optional` **friendtalkEndpoint**: `string`
+> `optional` **friendtalkEndpoint?**: `string`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L10)
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:10](https://github.com/k
 
 ### sender?
 
-> `optional` **sender**: `string`
+> `optional` **sender?**: `string`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L5)
 
@@ -51,7 +51,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:5](https://github.com/k-
 
 ### senderKey?
 
-> `optional` **senderKey**: `string`
+> `optional` **senderKey?**: `string`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L4)
 
@@ -59,7 +59,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:4](https://github.com/k-
 
 ### smsBaseUrl?
 
-> `optional` **smsBaseUrl**: `string`
+> `optional` **smsBaseUrl?**: `string`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L8)
 
@@ -67,7 +67,7 @@ Defined in: [packages/provider/src/aligo/types/aligo.ts:8](https://github.com/k-
 
 ### testMode?
 
-> `optional` **testMode**: `boolean`
+> `optional` **testMode?**: `boolean`
 
 Defined in: [packages/provider/src/aligo/types/aligo.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/types/aligo.ts#L6)
 

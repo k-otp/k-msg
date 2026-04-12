@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:110](ht
 
 ### controller?
 
-> `optional` **controller**: [`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
+> `optional` **controller?**: [`DeliveryTrackingCryptoController`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcryptocontroller/)
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L116)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:116](ht
 
 ### cooldownMs?
 
-> `optional` **cooldownMs**: `number`
+> `optional` **cooldownMs?**: `number`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L115)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:115](ht
 
 ### enabled?
 
-> `optional` **enabled**: `boolean`
+> `optional` **enabled?**: `boolean`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L111)
 
@@ -35,15 +35,15 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:111](ht
 
 ### failureThreshold?
 
-> `optional` **failureThreshold**: `number`
+> `optional` **failureThreshold?**: `number`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L113)
 
 ***
 
-### onStateChange()?
+### onStateChange?
 
-> `optional` **onStateChange**: (`event`) => `void` \| `Promise`\<`void`\>
+> `optional` **onStateChange?**: (`event`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L117)
 
@@ -59,9 +59,9 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:117](ht
 
 ***
 
-### runbookTrigger()?
+### runbookTrigger?
 
-> `optional` **runbookTrigger**: (`event`) => `void` \| `Promise`\<`void`\>
+> `optional` **runbookTrigger?**: (`event`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L120)
 
@@ -79,7 +79,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:120](ht
 
 ### scopeBy?
 
-> `optional` **scopeBy**: `"tenant_provider_kid"` \| `"tenant_provider"`
+> `optional` **scopeBy?**: `"tenant_provider_kid"` \| `"tenant_provider"`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L112)
 
@@ -87,6 +87,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:112](ht
 
 ### windowMs?
 
-> `optional` **windowMs**: `number`
+> `optional` **windowMs?**: `number`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:114](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L114)

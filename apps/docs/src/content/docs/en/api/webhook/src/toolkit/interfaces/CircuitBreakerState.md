@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:55](https://github.com/k-o
 
 ### lastFailureTime?
 
-> `optional` **lastFailureTime**: `Date`
+> `optional` **lastFailureTime?**: `Date`
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L56)
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:56](https://github.com/k-o
 
 ### nextRetryTime?
 
-> `optional` **nextRetryTime**: `Date`
+> `optional` **nextRetryTime?**: `Date`
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L57)
 

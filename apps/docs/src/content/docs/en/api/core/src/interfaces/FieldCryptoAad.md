@@ -9,4 +9,4 @@ Defined in: [packages/core/src/crypto/types.ts:15](https://github.com/k-otp/k-ms
 
 ## Indexable
 
-\[`key`: `string`\]: `string`
+> \[`key`: `string`\]: `string`

@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:29](https://github.com/k-o
 
 ### diskPath?
 
-> `optional` **diskPath**: `string`
+> `optional` **diskPath?**: `string`
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L27)
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:27](https://github.com/k-o
 
 ### fileAdapter?
 
-> `optional` **fileAdapter**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
+> `optional` **fileAdapter?**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L28)
 

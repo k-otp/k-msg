@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:75](https://github.
 
 ### expectedValue?
 
-> `optional` **expectedValue**: `number`
+> `optional` **expectedValue?**: `number`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L77)
 
@@ -75,7 +75,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:74](https://github.
 
 ### recommendations?
 
-> `optional` **recommendations**: `string`[]
+> `optional` **recommendations?**: `string`[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L80)
 

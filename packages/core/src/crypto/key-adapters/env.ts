@@ -34,12 +34,13 @@ function parseKids(raw: string | undefined, delimiter: string): string[] {
 export function createEnvKeyResolver(
   options: EnvKeyResolverOptions = {},
 ): KeyResolver {
-  const envSource =
-    options.env ??
-    ((typeof process !== "undefined" ? process.env : {}) as Record<
-      string,
-      string | undefined
-    >);
+  const processEnv = (
+    globalThis as {
+      process?: { env?: Record<string, string | undefined> };
+    }
+  ).process?.env;
+  const envSource: Record<string, string | undefined> =
+    options.env ?? processEnv ?? {};
   const delimiter = normalize(options.delimiter) ?? ",";
   const activeKidEnv = options.activeKidEnv ?? "KMSG_ACTIVE_KID";
   const decryptKidsEnv = options.decryptKidsEnv ?? "KMSG_DECRYPT_KIDS";

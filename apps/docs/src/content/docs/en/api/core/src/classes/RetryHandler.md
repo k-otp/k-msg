@@ -49,17 +49,7 @@ Defined in: [packages/core/src/resilience/retry-handler.ts:69](https://github.co
 
 #### Returns
 
-> (...`args`): `Promise`\<`R`\>
-
-##### Parameters
-
-###### args
-
-...`T`
-
-##### Returns
-
-`Promise`\<`R`\>
+(...`args`) => `Promise`\<`R`\>
 
 ***
 

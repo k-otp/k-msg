@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:3](https://github.com/k
 
 ### algorithm?
 
-> `optional` **algorithm**: `"sha256"` \| `"sha1"`
+> `optional` **algorithm?**: `"sha256"` \| `"sha1"`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L17)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:17](https://github.com/
 
 ### backoffMultiplier?
 
-> `optional` **backoffMultiplier**: `number`
+> `optional` **backoffMultiplier?**: `number`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L8)
 
@@ -59,7 +59,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:15](https://github.com/
 
 ### jitter?
 
-> `optional` **jitter**: `boolean`
+> `optional` **jitter?**: `boolean`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L9)
 
@@ -67,7 +67,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:9](https://github.com/k
 
 ### maxDelayMs?
 
-> `optional` **maxDelayMs**: `number`
+> `optional` **maxDelayMs?**: `number`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L7)
 
@@ -91,7 +91,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:6](https://github.com/k
 
 ### secretKey?
 
-> `optional` **secretKey**: `string`
+> `optional` **secretKey?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L16)
 
@@ -99,7 +99,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:16](https://github.com/
 
 ### signatureHeader?
 
-> `optional` **signatureHeader**: `string`
+> `optional` **signatureHeader?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L18)
 
@@ -107,7 +107,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:18](https://github.com/
 
 ### signaturePrefix?
 
-> `optional` **signaturePrefix**: `string`
+> `optional` **signaturePrefix?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L19)
 

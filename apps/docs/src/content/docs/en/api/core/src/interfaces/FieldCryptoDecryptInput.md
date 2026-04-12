@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/types.ts:54](https://github.com/k-otp/k-ms
 
 ### candidateKids?
 
-> `optional` **candidateKids**: readonly `string`[]
+> `optional` **candidateKids?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L56)
 

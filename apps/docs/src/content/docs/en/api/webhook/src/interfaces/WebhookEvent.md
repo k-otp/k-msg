@@ -39,35 +39,35 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:67](https://github.com/
 
 #### channelId?
 
-> `optional` **channelId**: `string`
+> `optional` **channelId?**: `string`
 
 #### correlationId?
 
-> `optional` **correlationId**: `string`
+> `optional` **correlationId?**: `string`
 
 #### messageId?
 
-> `optional` **messageId**: `string`
+> `optional` **messageId?**: `string`
 
 #### organizationId?
 
-> `optional` **organizationId**: `string`
+> `optional` **organizationId?**: `string`
 
 #### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 #### retryCount?
 
-> `optional` **retryCount**: `number`
+> `optional` **retryCount?**: `number`
 
 #### templateId?
 
-> `optional` **templateId**: `string`
+> `optional` **templateId?**: `string`
 
 #### userId?
 
-> `optional` **userId**: `string`
+> `optional` **userId?**: `string`
 
 ***
 

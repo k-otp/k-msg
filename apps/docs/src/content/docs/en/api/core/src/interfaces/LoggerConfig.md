@@ -11,7 +11,7 @@ Defined in: [packages/core/src/logger.ts:27](https://github.com/k-otp/k-msg/blob
 
 ### enableColors?
 
-> `optional` **enableColors**: `boolean`
+> `optional` **enableColors?**: `boolean`
 
 Defined in: [packages/core/src/logger.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L35)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/logger.ts:29](https://github.com/k-otp/k-msg/blob
 
 ### enableFile?
 
-> `optional` **enableFile**: `boolean`
+> `optional` **enableFile?**: `boolean`
 
 Defined in: [packages/core/src/logger.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L30)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/logger.ts:30](https://github.com/k-otp/k-msg/blob
 
 ### enableJson?
 
-> `optional` **enableJson**: `boolean`
+> `optional` **enableJson?**: `boolean`
 
 Defined in: [packages/core/src/logger.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L34)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/logger.ts:34](https://github.com/k-otp/k-msg/blob
 
 ### filePath?
 
-> `optional` **filePath**: `string`
+> `optional` **filePath?**: `string`
 
 Defined in: [packages/core/src/logger.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L31)
 
@@ -59,7 +59,7 @@ Defined in: [packages/core/src/logger.ts:28](https://github.com/k-otp/k-msg/blob
 
 ### maxFiles?
 
-> `optional` **maxFiles**: `number`
+> `optional` **maxFiles?**: `number`
 
 Defined in: [packages/core/src/logger.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L33)
 
@@ -67,6 +67,6 @@ Defined in: [packages/core/src/logger.ts:33](https://github.com/k-otp/k-msg/blob
 
 ### maxFileSize?
 
-> `optional` **maxFileSize**: `number`
+> `optional` **maxFileSize?**: `number`
 
 Defined in: [packages/core/src/logger.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L32)

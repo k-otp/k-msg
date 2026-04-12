@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:20](https://github.
 
 ### sortBy?
 
-> `optional` **sortBy**: `string`
+> `optional` **sortBy?**: `string`
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L22)
 
@@ -35,6 +35,6 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:22](https://github.
 
 ### sortOrder?
 
-> `optional` **sortOrder**: `"asc"` \| `"desc"`
+> `optional` **sortOrder?**: `"asc"` \| `"desc"`
 
 Defined in: [packages/channel/src/toolkit/management/crud.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/crud.ts#L23)

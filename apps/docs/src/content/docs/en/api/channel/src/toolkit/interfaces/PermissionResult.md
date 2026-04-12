@@ -35,6 +35,6 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:97](https://
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L96)

@@ -11,7 +11,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:25](https://git
 
 ### limit?
 
-> `optional` **limit**: `number`
+> `optional` **limit?**: `number`
 
 Defined in: [packages/template/src/registry/template.registry.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L27)
 
@@ -19,7 +19,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:27](https://git
 
 ### page?
 
-> `optional` **page**: `number`
+> `optional` **page?**: `number`
 
 Defined in: [packages/template/src/registry/template.registry.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L26)
 
@@ -27,7 +27,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:26](https://git
 
 ### sortBy?
 
-> `optional` **sortBy**: `"code"` \| `"name"` \| `"createdAt"` \| `"updatedAt"` \| `"usage"`
+> `optional` **sortBy?**: `"code"` \| `"name"` \| `"createdAt"` \| `"updatedAt"` \| `"usage"`
 
 Defined in: [packages/template/src/registry/template.registry.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L28)
 
@@ -35,6 +35,6 @@ Defined in: [packages/template/src/registry/template.registry.ts:28](https://git
 
 ### sortOrder?
 
-> `optional` **sortOrder**: `"asc"` \| `"desc"`
+> `optional` **sortOrder?**: `"asc"` \| `"desc"`
 
 Defined in: [packages/template/src/registry/template.registry.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L29)

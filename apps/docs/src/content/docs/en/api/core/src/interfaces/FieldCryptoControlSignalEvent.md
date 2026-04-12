@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/types.ts:112](https://github.com/k-otp/k-m
 
 ### errorClass?
 
-> `optional` **errorClass**: `string`
+> `optional` **errorClass?**: `string`
 
 Defined in: [packages/core/src/crypto/types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L113)
 
