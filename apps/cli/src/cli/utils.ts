@@ -1,12 +1,8 @@
 import { KMsgError, KMsgErrorCode, type SendWarning } from "@k-msg/core";
 
 type AIContext = {
-  env?: {
-    isAIAgent?: boolean;
-  };
-  store?: {
-    isAIAgent?: boolean;
-  };
+  env?: object;
+  store?: object;
 };
 
 export class CapabilityNotSupportedError extends Error {
@@ -50,7 +46,22 @@ export function shouldUseJsonOutput(
   if (explicitJsonFlag === false) {
     return false;
   }
-  return context?.env?.isAIAgent === true || context?.store?.isAIAgent === true;
+  return (
+    readBooleanContextFlag(context?.env, "isAIAgent") ||
+    readBooleanContextFlag(context?.store, "isAIAgent")
+  );
+}
+
+function readBooleanContextFlag(
+  record: object | undefined,
+  key: string,
+): boolean {
+  return (
+    typeof record === "object" &&
+    record !== null &&
+    key in record &&
+    (record as Record<string, unknown>)[key] === true
+  );
 }
 
 export function printError(error: unknown, asJson: boolean): void {
