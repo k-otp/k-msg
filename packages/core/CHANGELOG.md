@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.29.6 — 2026-04-12
+
+### Patch changes
+
+- [7b4ea44](https://github.com/k-otp/k-msg/commit/7b4ea4473233ba19989b5c18b6472e3234ba8ce9) Add TypeScript 6 and Node 25 type support across the workspace, update docs/Typedoc configs for TS6 compatibility, and refresh GitHub Actions workflow pins to current major versions. — Thanks @imjlk!
+
 ## 0.29.5 — 2026-04-12
 
 ### Patch changes
