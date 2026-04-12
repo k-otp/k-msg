@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:57](https://
 
 ### endMessageId?
 
-> `optional` **endMessageId**: `string`
+> `optional` **endMessageId?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L62)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:62](https://
 
 ### endRequestedAt?
 
-> `optional` **endRequestedAt**: `number`
+> `optional` **endRequestedAt?**: `number`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L61)
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:61](https://
 
 ### lastError?
 
-> `optional` **lastError**: `string`
+> `optional` **lastError?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L66)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:66](https://
 
 ### messageIds?
 
-> `optional` **messageIds**: readonly `string`[]
+> `optional` **messageIds?**: readonly `string`[]
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L65)
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:63](https://
 
 ### startMessageId?
 
-> `optional` **startMessageId**: `string`
+> `optional` **startMessageId?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L60)
 
@@ -83,7 +83,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:60](https://
 
 ### startRequestedAt?
 
-> `optional` **startRequestedAt**: `number`
+> `optional` **startRequestedAt?**: `number`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L59)
 

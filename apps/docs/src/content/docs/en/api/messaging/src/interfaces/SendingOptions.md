@@ -15,7 +15,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:32](https://github.
 
 ### deduplication?
 
-> `optional` **deduplication**: `object`
+> `optional` **deduplication?**: `object`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L41)
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:41](https://github.
 
 ### failover?
 
-> `optional` **failover**: `object`
+> `optional` **failover?**: `object`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L35)
 
@@ -41,21 +41,21 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.
 
 #### fallbackChannel?
 
-> `optional` **fallbackChannel**: `"sms"` \| `"lms"`
+> `optional` **fallbackChannel?**: `"sms"` \| `"lms"`
 
 #### fallbackContent?
 
-> `optional` **fallbackContent**: `string`
+> `optional` **fallbackContent?**: `string`
 
 #### fallbackTitle?
 
-> `optional` **fallbackTitle**: `string`
+> `optional` **fallbackTitle?**: `string`
 
 ***
 
 ### priority?
 
-> `optional` **priority**: `"high"` \| `"normal"` \| `"low"`
+> `optional` **priority?**: `"high"` \| `"normal"` \| `"low"`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L33)
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.
 
 ### tracking?
 
-> `optional` **tracking**: `object`
+> `optional` **tracking?**: `object`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L45)
 
@@ -73,12 +73,12 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:45](https://github.
 
 #### webhookUrl?
 
-> `optional` **webhookUrl**: `string`
+> `optional` **webhookUrl?**: `string`
 
 ***
 
 ### ttl?
 
-> `optional` **ttl**: `number`
+> `optional` **ttl?**: `number`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L34)

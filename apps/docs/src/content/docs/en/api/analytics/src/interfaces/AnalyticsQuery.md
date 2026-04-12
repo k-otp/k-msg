@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:86](https://github.
 
 ### filters?
 
-> `optional` **filters**: `Record`\<`string`, `any`\>
+> `optional` **filters?**: `Record`\<`string`, `any`\>
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L91)
 
@@ -35,7 +35,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:91](https://github.
 
 ### groupBy?
 
-> `optional` **groupBy**: `string`[]
+> `optional` **groupBy?**: `string`[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L92)
 
@@ -43,7 +43,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:92](https://github.
 
 ### interval?
 
-> `optional` **interval**: `"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
+> `optional` **interval?**: `"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L90)
 
@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:90](https://github.
 
 ### limit?
 
-> `optional` **limit**: `number`
+> `optional` **limit?**: `number`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L94)
 
@@ -67,7 +67,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:85](https://github.
 
 ### offset?
 
-> `optional` **offset**: `number`
+> `optional` **offset?**: `number`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L95)
 
@@ -75,7 +75,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:95](https://github.
 
 ### orderBy?
 
-> `optional` **orderBy**: `object`[]
+> `optional` **orderBy?**: `object`[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L93)
 

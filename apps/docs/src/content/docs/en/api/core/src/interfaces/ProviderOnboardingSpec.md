@@ -27,7 +27,7 @@ Defined in: [packages/core/src/types/onboarding.ts:60](https://github.com/k-otp/
 
 ### liveTestSupport?
 
-> `optional` **liveTestSupport**: [`ProviderLiveTestSupport`](/en/api/core/src/type-aliases/providerlivetestsupport/)
+> `optional` **liveTestSupport?**: [`ProviderLiveTestSupport`](/en/api/core/src/type-aliases/providerlivetestsupport/)
 
 Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L59)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/types/onboarding.ts:59](https://github.com/k-otp/
 
 ### notes?
 
-> `optional` **notes**: `string`[]
+> `optional` **notes?**: `string`[]
 
 Defined in: [packages/core/src/types/onboarding.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L61)
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/types/onboarding.ts:53](https://github.com/k-otp/
 
 ### providerName?
 
-> `optional` **providerName**: `string`
+> `optional` **providerName?**: `string`
 
 Defined in: [packages/core/src/types/onboarding.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/onboarding.ts#L54)
 

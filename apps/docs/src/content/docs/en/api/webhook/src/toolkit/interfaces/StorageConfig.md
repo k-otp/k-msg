@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/registry/types.ts:44](https://github.com/k-otp
 
 ### connectionString?
 
-> `optional` **connectionString**: `string`
+> `optional` **connectionString?**: `string`
 
 Defined in: [packages/webhook/src/registry/types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L54)
 
@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/registry/types.ts:54](https://github.com/k-otp
 
 ### enableCompression?
 
-> `optional` **enableCompression**: `boolean`
+> `optional` **enableCompression?**: `boolean`
 
 Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L50)
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/registry/types.ts:50](https://github.com/k-otp
 
 ### fieldCrypto?
 
-> `optional` **fieldCrypto**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
+> `optional` **fieldCrypto?**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
 Defined in: [packages/webhook/src/registry/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L65)
 
@@ -37,7 +37,7 @@ Field-level crypto policy for endpoint secret and delivery payload.
 
 ### fileAdapter?
 
-> `optional` **fileAdapter**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
+> `optional` **fileAdapter?**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
 Defined in: [packages/webhook/src/registry/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L49)
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/registry/types.ts:49](https://github.com/k-otp
 
 ### filePath?
 
-> `optional` **filePath**: `string`
+> `optional` **filePath?**: `string`
 
 Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L48)
 
@@ -53,7 +53,7 @@ Defined in: [packages/webhook/src/registry/types.ts:48](https://github.com/k-otp
 
 ### maxFileSize?
 
-> `optional` **maxFileSize**: `number`
+> `optional` **maxFileSize?**: `number`
 
 Defined in: [packages/webhook/src/registry/types.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L51)
 
@@ -61,7 +61,7 @@ Defined in: [packages/webhook/src/registry/types.ts:51](https://github.com/k-otp
 
 ### maxMemoryUsage?
 
-> `optional` **maxMemoryUsage**: `number`
+> `optional` **maxMemoryUsage?**: `number`
 
 Defined in: [packages/webhook/src/registry/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L58)
 
@@ -69,7 +69,7 @@ Defined in: [packages/webhook/src/registry/types.ts:58](https://github.com/k-otp
 
 ### retentionDays?
 
-> `optional` **retentionDays**: `number`
+> `optional` **retentionDays?**: `number`
 
 Defined in: [packages/webhook/src/registry/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L61)
 
@@ -77,7 +77,7 @@ Defined in: [packages/webhook/src/registry/types.ts:61](https://github.com/k-otp
 
 ### tableName?
 
-> `optional` **tableName**: `string`
+> `optional` **tableName?**: `string`
 
 Defined in: [packages/webhook/src/registry/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/types.ts#L55)
 

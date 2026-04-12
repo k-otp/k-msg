@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:161](https://github.com
 
 ### createdAfter?
 
-> `optional` **createdAfter**: `Date`
+> `optional` **createdAfter?**: `Date`
 
 Defined in: [packages/channel/src/types/channel.types.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L165)
 
@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:165](https://github.com
 
 ### createdBefore?
 
-> `optional` **createdBefore**: `Date`
+> `optional` **createdBefore?**: `Date`
 
 Defined in: [packages/channel/src/types/channel.types.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L166)
 
@@ -27,7 +27,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:166](https://github.com
 
 ### provider?
 
-> `optional` **provider**: `string`
+> `optional` **provider?**: `string`
 
 Defined in: [packages/channel/src/types/channel.types.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L162)
 
@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:162](https://github.com
 
 ### status?
 
-> `optional` **status**: [`ChannelStatus`](/en/api/channel/src/toolkit/enumerations/channelstatus/)
+> `optional` **status?**: [`ChannelStatus`](/en/api/channel/src/toolkit/enumerations/channelstatus/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L164)
 
@@ -43,6 +43,6 @@ Defined in: [packages/channel/src/types/channel.types.ts:164](https://github.com
 
 ### type?
 
-> `optional` **type**: [`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/)
+> `optional` **type?**: [`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/)
 
 Defined in: [packages/channel/src/types/channel.types.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L163)

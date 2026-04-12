@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:25](https://gith
 
 ### correlationId?
 
-> `optional` **correlationId**: `string`
+> `optional` **correlationId?**: `string`
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L27)
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:27](https://gith
 
 ### providerOptions?
 
-> `optional` **providerOptions**: `Record`\<`string`, `unknown`\>
+> `optional` **providerOptions?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L28)
 
@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/queue/send-input.builder.ts:28](https://gith
 
 ### requestId?
 
-> `optional` **requestId**: `string`
+> `optional` **requestId?**: `string`
 
 Defined in: [packages/messaging/src/queue/send-input.builder.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/send-input.builder.ts#L26)

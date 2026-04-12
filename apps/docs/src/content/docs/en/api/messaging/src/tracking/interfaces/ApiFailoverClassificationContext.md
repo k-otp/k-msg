@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:63](https://githu
 
 ### raw?
 
-> `optional` **raw**: `unknown`
+> `optional` **raw?**: `unknown`
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L67)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:64](https://githu
 
 ### statusCode?
 
-> `optional` **statusCode**: `string`
+> `optional` **statusCode?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L65)
 
@@ -35,6 +35,6 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://githu
 
 ### statusMessage?
 
-> `optional` **statusMessage**: `string`
+> `optional` **statusMessage?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L66)

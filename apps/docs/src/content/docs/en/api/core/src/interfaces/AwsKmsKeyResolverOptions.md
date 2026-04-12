@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:16](https://github
 
 ### cacheTtlMs?
 
-> `optional` **cacheTtlMs**: `number`
+> `optional` **cacheTtlMs?**: `number`
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L20)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:17](https://github
 
 ### fallbackActiveKid?
 
-> `optional` **fallbackActiveKid**: `string`
+> `optional` **fallbackActiveKid?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L21)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:21](https://github
 
 ### fallbackDecryptKids?
 
-> `optional` **fallbackDecryptKids**: readonly `string`[]
+> `optional` **fallbackDecryptKids?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L22)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:22](https://github
 
 ### keyAlias?
 
-> `optional` **keyAlias**: `string`
+> `optional` **keyAlias?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L18)
 
@@ -51,6 +51,6 @@ Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:18](https://github
 
 ### region?
 
-> `optional` **region**: `string`
+> `optional` **region?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/aws-kms.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/aws-kms.ts#L19)

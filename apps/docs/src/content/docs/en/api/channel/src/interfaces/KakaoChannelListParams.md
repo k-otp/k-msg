@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/runtime/types.ts:42](https://github.com/k-otp/
 
 ### plusId?
 
-> `optional` **plusId**: `string`
+> `optional` **plusId?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L43)
 
@@ -19,6 +19,6 @@ Defined in: [packages/channel/src/runtime/types.ts:43](https://github.com/k-otp/
 
 ### senderKey?
 
-> `optional` **senderKey**: `string`
+> `optional` **senderKey?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L44)

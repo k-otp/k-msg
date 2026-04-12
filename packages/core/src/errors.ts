@@ -329,8 +329,17 @@ export class KMsgError extends Error {
       this.causeChain = [metadata.causeChain];
     }
 
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, KMsgError);
+    const captureStackTrace = (
+      Error as ErrorConstructor & {
+        captureStackTrace?: (
+          targetObject: object,
+          constructorOpt?: abstract new (...args: never[]) => unknown,
+        ) => void;
+      }
+    ).captureStackTrace;
+
+    if (captureStackTrace) {
+      captureStackTrace(this, KMsgError);
     }
   }
 

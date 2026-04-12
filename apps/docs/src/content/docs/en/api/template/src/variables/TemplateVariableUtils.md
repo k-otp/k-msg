@@ -13,7 +13,7 @@ Utility functions
 
 ## Type Declaration
 
-### extractVariables()
+### extractVariables
 
 > **extractVariables**: (`content`) => `string`[]
 
@@ -29,7 +29,7 @@ Extract all variables from content
 
 `string`[]
 
-### personalize()
+### personalize
 
 > **personalize**: (`content`, `recipients`) => `object`[]
 
@@ -49,7 +49,7 @@ Create personalized content for multiple recipients
 
 `object`[]
 
-### replace()
+### replace
 
 > **replace**: (`content`, `variables`) => `string`
 
@@ -69,7 +69,7 @@ Replace variables in content
 
 `string`
 
-### validate()
+### validate
 
 > **validate**: (`content`, `variables`) => `boolean`
 

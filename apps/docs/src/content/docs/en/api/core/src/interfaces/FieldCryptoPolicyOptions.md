@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/policy.ts:11](https://github.com/k-otp/k-m
 
 ### compatPlainColumns?
 
-> `optional` **compatPlainColumns**: `boolean`
+> `optional` **compatPlainColumns?**: `boolean`
 
 Defined in: [packages/core/src/crypto/policy.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L13)
 
@@ -19,6 +19,6 @@ Defined in: [packages/core/src/crypto/policy.ts:13](https://github.com/k-otp/k-m
 
 ### secureMode?
 
-> `optional` **secureMode**: `boolean`
+> `optional` **secureMode?**: `boolean`
 
 Defined in: [packages/core/src/crypto/policy.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L12)

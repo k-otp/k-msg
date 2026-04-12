@@ -14,7 +14,7 @@ Templates must be approved by Kakao before use.
 
 ### buttons?
 
-> `optional` **buttons**: `unknown`[]
+> `optional` **buttons?**: `unknown`[]
 
 Defined in: [packages/core/src/provider.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L34)
 
@@ -24,7 +24,7 @@ Button configurations attached to the template.
 
 ### category?
 
-> `optional` **category**: `string`
+> `optional` **category?**: `string`
 
 Defined in: [packages/core/src/provider.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L30)
 
@@ -104,7 +104,7 @@ When the template was last updated.
 
 ### variables?
 
-> `optional` **variables**: `string`[]
+> `optional` **variables?**: `string`[]
 
 Defined in: [packages/core/src/provider.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L36)
 

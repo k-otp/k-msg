@@ -25,9 +25,9 @@ Defined in: [packages/core/src/resilience/bulk-operation.ts:11](https://github.c
 
 ***
 
-### onProgress()?
+### onProgress?
 
-> `optional` **onProgress**: (`completed`, `total`, `failed`) => `void`
+> `optional` **onProgress?**: (`completed`, `total`, `failed`) => `void`
 
 Defined in: [packages/core/src/resilience/bulk-operation.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/bulk-operation.ts#L12)
 

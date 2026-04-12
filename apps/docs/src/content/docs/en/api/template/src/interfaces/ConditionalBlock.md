@@ -27,6 +27,6 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:59](http
 
 ### elseContent?
 
-> `optional` **elseContent**: `string`
+> `optional` **elseContent?**: `string`
 
 Defined in: [packages/template/src/personalization/variable.replacer.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L60)

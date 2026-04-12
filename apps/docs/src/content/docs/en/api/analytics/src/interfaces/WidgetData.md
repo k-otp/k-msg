@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:82](https://github.com/
 
 ### error?
 
-> `optional` **error**: `string`
+> `optional` **error?**: `string`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L84)
 

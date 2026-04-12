@@ -22,7 +22,7 @@ Example: [{ kid: "k-2026-02", percentage: 25 }]
 
 ### defaultKid?
 
-> `optional` **defaultKid**: `string`
+> `optional` **defaultKid?**: `string`
 
 Defined in: [packages/core/src/crypto/rollout-policy.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/rollout-policy.ts#L25)
 
@@ -32,7 +32,7 @@ Fallback kid when no bucket matches.
 
 ### seed?
 
-> `optional` **seed**: `string`
+> `optional` **seed?**: `string`
 
 Defined in: [packages/core/src/crypto/rollout-policy.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/rollout-policy.ts#L17)
 
@@ -42,7 +42,7 @@ Deterministic hash seed.
 
 ### stickyFields?
 
-> `optional` **stickyFields**: readonly keyof [`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)[]
+> `optional` **stickyFields?**: readonly keyof [`FieldCryptoKeyContext`](/en/api/core/src/interfaces/fieldcryptokeycontext/)[]
 
 Defined in: [packages/core/src/crypto/rollout-policy.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/rollout-policy.ts#L21)
 

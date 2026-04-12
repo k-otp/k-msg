@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:89](https://
 
 ### context?
 
-> `optional` **context**: [`AccessContext`](/en/api/channel/src/toolkit/interfaces/accesscontext/)
+> `optional` **context?**: [`AccessContext`](/en/api/channel/src/toolkit/interfaces/accesscontext/)
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L91)
 
@@ -35,7 +35,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:88](https://
 
 ### resourceId?
 
-> `optional` **resourceId**: `string`
+> `optional` **resourceId?**: `string`
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L90)
 

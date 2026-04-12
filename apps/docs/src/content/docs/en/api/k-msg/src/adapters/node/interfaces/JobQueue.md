@@ -133,7 +133,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:47](https://git
 
 ##### error
 
-`string` | `Error`
+`string` \| `Error`
 
 ##### retry?
 

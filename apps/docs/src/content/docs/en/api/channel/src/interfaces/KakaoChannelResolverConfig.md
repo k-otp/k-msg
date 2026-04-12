@@ -9,13 +9,13 @@ Defined in: [packages/channel/src/runtime/types.ts:112](https://github.com/k-otp
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 ## Properties
 
 ### aliases?
 
-> `optional` **aliases**: `object`
+> `optional` **aliases?**: `object`
 
 Defined in: [packages/channel/src/runtime/types.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L126)
 
@@ -25,13 +25,13 @@ Defined in: [packages/channel/src/runtime/types.ts:126](https://github.com/k-otp
 
 #### kakaoChannels?
 
-> `optional` **kakaoChannels**: `Record`\<`string`, [`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/)\>
+> `optional` **kakaoChannels?**: `Record`\<`string`, [`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/)\>
 
 ***
 
 ### defaults?
 
-> `optional` **defaults**: `object`
+> `optional` **defaults?**: `object`
 
 Defined in: [packages/channel/src/runtime/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L117)
 
@@ -41,7 +41,7 @@ Defined in: [packages/channel/src/runtime/types.ts:117](https://github.com/k-otp
 
 #### kakao?
 
-> `optional` **kakao**: `object`
+> `optional` **kakao?**: `object`
 
 ##### Index Signature
 
@@ -49,21 +49,21 @@ Defined in: [packages/channel/src/runtime/types.ts:117](https://github.com/k-otp
 
 ##### kakao.channel?
 
-> `optional` **channel**: `string`
+> `optional` **channel?**: `string`
 
 ##### kakao.plusId?
 
-> `optional` **plusId**: `string`
+> `optional` **plusId?**: `string`
 
 ##### kakao.senderKey?
 
-> `optional` **senderKey**: `string`
+> `optional` **senderKey?**: `string`
 
 ***
 
 ### providers?
 
-> `optional` **providers**: [`KakaoProviderConfigEntry`](/en/api/channel/src/interfaces/kakaoproviderconfigentry/)[]
+> `optional` **providers?**: [`KakaoProviderConfigEntry`](/en/api/channel/src/interfaces/kakaoproviderconfigentry/)[]
 
 Defined in: [packages/channel/src/runtime/types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L130)
 
@@ -71,7 +71,7 @@ Defined in: [packages/channel/src/runtime/types.ts:130](https://github.com/k-otp
 
 ### routing?
 
-> `optional` **routing**: `object`
+> `optional` **routing?**: `object`
 
 Defined in: [packages/channel/src/runtime/types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L113)
 
@@ -81,4 +81,4 @@ Defined in: [packages/channel/src/runtime/types.ts:113](https://github.com/k-otp
 
 #### defaultProviderId?
 
-> `optional` **defaultProviderId**: `string`
+> `optional` **defaultProviderId?**: `string`

@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/config-fields.ts:7](https://github.com/k-otp/
 
 ### defaultValue?
 
-> `optional` **defaultValue**: `string`
+> `optional` **defaultValue?**: `string`
 
 Defined in: [packages/provider/src/config-fields.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/config-fields.ts#L11)
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/config-fields.ts:11](https://github.com/k-otp
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/provider/src/config-fields.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/config-fields.ts#L10)
 
@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/config-fields.ts:10](https://github.com/k-otp
 
 ### required?
 
-> `optional` **required**: `boolean`
+> `optional` **required?**: `boolean`
 
 Defined in: [packages/provider/src/config-fields.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/config-fields.ts#L9)
 

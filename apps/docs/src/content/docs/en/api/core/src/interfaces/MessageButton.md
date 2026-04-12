@@ -29,7 +29,7 @@ Provider-dependent. Common values: "WL" (web link), "AL" (app link), ...
 
 ### urlMobile?
 
-> `optional` **urlMobile**: `string`
+> `optional` **urlMobile?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L98)
 
@@ -37,6 +37,6 @@ Defined in: [packages/core/src/types/message.ts:98](https://github.com/k-otp/k-m
 
 ### urlPc?
 
-> `optional` **urlPc**: `string`
+> `optional` **urlPc?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L97)

@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:17](https://
 
 ### cacheTtlMs?
 
-> `optional` **cacheTtlMs**: `number`
+> `optional` **cacheTtlMs?**: `number`
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L22)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:18](https://
 
 ### fallbackActiveKid?
 
-> `optional` **fallbackActiveKid**: `string`
+> `optional` **fallbackActiveKid?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L23)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:23](https://
 
 ### fallbackDecryptKids?
 
-> `optional` **fallbackDecryptKids**: readonly `string`[]
+> `optional` **fallbackDecryptKids?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L24)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:24](https://
 
 ### keyName?
 
-> `optional` **keyName**: `string`
+> `optional` **keyName?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L20)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:20](https://
 
 ### mountPath?
 
-> `optional` **mountPath**: `string`
+> `optional` **mountPath?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L19)
 
@@ -59,6 +59,6 @@ Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:19](https://
 
 ### namespace?
 
-> `optional` **namespace**: `string`
+> `optional` **namespace?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/vault-transit.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/vault-transit.ts#L21)

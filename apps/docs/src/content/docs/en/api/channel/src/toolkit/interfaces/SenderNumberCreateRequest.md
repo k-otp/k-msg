@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:150](https://github.com
 
 ### businessInfo?
 
-> `optional` **businessInfo**: `object`
+> `optional` **businessInfo?**: `object`
 
 Defined in: [packages/channel/src/types/channel.types.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L153)
 

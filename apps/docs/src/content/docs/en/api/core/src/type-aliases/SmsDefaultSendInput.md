@@ -16,16 +16,16 @@ Used for developer convenience when sending simple SMS messages.
 
 ### content?
 
-> `optional` **content**: `string`
+> `optional` **content?**: `string`
 
 Alias for `text`.
 
 ### text?
 
-> `optional` **text**: `string`
+> `optional` **text?**: `string`
 
 SMS text. If omitted, `content` is used.
 
 ### type?
 
-> `optional` **type**: `undefined`
+> `optional` **type?**: `undefined`

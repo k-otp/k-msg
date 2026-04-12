@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:24](https://github.
 
 ### metadata?
 
-> `optional` **metadata**: `Record`\<`string`, `any`\>
+> `optional` **metadata?**: `Record`\<`string`, `any`\>
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L29)
 

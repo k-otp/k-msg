@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@k-msg/webhook": ["../../packages/webhook/src/index.ts"],
       "@k-msg/webhook/*": ["../../packages/webhook/src/*"]

@@ -19,6 +19,6 @@ Defined in: [packages/messaging/src/hooks.ts:13](https://github.com/k-otp/k-msg/
 
 ### retryAfterMs?
 
-> `optional` **retryAfterMs**: `number`
+> `optional` **retryAfterMs?**: `number`
 
 Defined in: [packages/messaging/src/hooks.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L14)

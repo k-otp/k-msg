@@ -27,7 +27,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:44](https://git
 
 ### createdBy?
 
-> `optional` **createdBy**: `string`
+> `optional` **createdBy?**: `string`
 
 Defined in: [packages/template/src/registry/template.registry.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L45)
 

@@ -11,7 +11,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:60](https://github.
 
 ### breakdown?
 
-> `optional` **breakdown**: `Record`\<`string`, `number`\>
+> `optional` **breakdown?**: `Record`\<`string`, `number`\>
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L65)
 
@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:65](https://github.
 
 ### change?
 
-> `optional` **change**: `number`
+> `optional` **change?**: `number`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L63)
 
@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:63](https://github.
 
 ### trend?
 
-> `optional` **trend**: `"up"` \| `"down"` \| `"stable"`
+> `optional` **trend?**: `"up"` \| `"down"` \| `"stable"`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L64)
 

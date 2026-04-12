@@ -16,7 +16,7 @@ Defined in: [packages/channel/src/runtime/types.ts:22](https://github.com/k-otp/
 
 ### alias?
 
-> `optional` **alias**: `string`
+> `optional` **alias?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L23)
 
@@ -24,7 +24,7 @@ Defined in: [packages/channel/src/runtime/types.ts:23](https://github.com/k-otp/
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L27)
 
@@ -32,7 +32,7 @@ Defined in: [packages/channel/src/runtime/types.ts:27](https://github.com/k-otp/
 
 ### plusId?
 
-> `optional` **plusId**: `string`
+> `optional` **plusId?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L26)
 
@@ -40,7 +40,7 @@ Defined in: [packages/channel/src/runtime/types.ts:26](https://github.com/k-otp/
 
 ### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L24)
 
@@ -48,6 +48,6 @@ Defined in: [packages/channel/src/runtime/types.ts:24](https://github.com/k-otp/
 
 ### senderKey?
 
-> `optional` **senderKey**: `string`
+> `optional` **senderKey?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L25)

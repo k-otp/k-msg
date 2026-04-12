@@ -25,7 +25,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://git
 
 ### completedAt?
 
-> `optional` **completedAt**: `Date`
+> `optional` **completedAt?**: `Date`
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L20)
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://git
 
 ### error?
 
-> `optional` **error**: `string`
+> `optional` **error?**: `string`
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L22)
 
@@ -65,7 +65,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://git
 
 ### failedAt?
 
-> `optional` **failedAt**: `Date`
+> `optional` **failedAt?**: `Date`
 
 Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L21)
 

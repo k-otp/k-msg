@@ -11,7 +11,7 @@ Defined in: [packages/template/src/types/template.types.ts:50](https://github.co
 
 ### buttons?
 
-> `optional` **buttons**: [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
+> `optional` **buttons?**: [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 Defined in: [packages/template/src/types/template.types.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L56)
 
@@ -57,7 +57,7 @@ Defined in: [packages/template/src/types/template.types.ts:60](https://github.co
 
 #### approvedAt?
 
-> `optional` **approvedAt**: `Date`
+> `optional` **approvedAt?**: `Date`
 
 #### createdAt
 
@@ -65,11 +65,11 @@ Defined in: [packages/template/src/types/template.types.ts:60](https://github.co
 
 #### rejectedAt?
 
-> `optional` **rejectedAt**: `Date`
+> `optional` **rejectedAt?**: `Date`
 
 #### rejectionReason?
 
-> `optional` **rejectionReason**: `string`
+> `optional` **rejectionReason?**: `string`
 
 #### updatedAt
 
@@ -119,6 +119,6 @@ Defined in: [packages/template/src/types/template.types.ts:58](https://github.co
 
 ### variables?
 
-> `optional` **variables**: [`TemplateVariable`](/en/api/template/src/interfaces/templatevariable/)[]
+> `optional` **variables?**: [`TemplateVariable`](/en/api/template/src/interfaces/templatevariable/)[]
 
 Defined in: [packages/template/src/types/template.types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/template/src/types/template.types.ts#L55)

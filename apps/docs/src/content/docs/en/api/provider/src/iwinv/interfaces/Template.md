@@ -59,7 +59,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:64](https://github.com/k
 
 ### templateStatusComments?
 
-> `optional` **templateStatusComments**: `string`
+> `optional` **templateStatusComments?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L68)
 
@@ -67,6 +67,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:68](https://github.com/k
 
 ### templateStatusMsg?
 
-> `optional` **templateStatusMsg**: `string`
+> `optional` **templateStatusMsg?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L67)

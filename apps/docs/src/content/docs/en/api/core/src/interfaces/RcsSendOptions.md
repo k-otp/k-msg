@@ -9,13 +9,13 @@ Defined in: [packages/core/src/types/message.ts:229](https://github.com/k-otp/k-
 
 ## Indexable
 
-\[`key`: `string`\]: `any`
+> \[`key`: `string`\]: `any`
 
 ## Properties
 
 ### additionalBody?
 
-> `optional` **additionalBody**: `object`
+> `optional` **additionalBody?**: `object`
 
 Defined in: [packages/core/src/types/message.ts:241](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L241)
 
@@ -25,25 +25,25 @@ Defined in: [packages/core/src/types/message.ts:241](https://github.com/k-otp/k-
 
 #### buttons?
 
-> `optional` **buttons**: `unknown`[]
+> `optional` **buttons?**: `unknown`[]
 
 #### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 #### imageId?
 
-> `optional` **imageId**: `string`
+> `optional` **imageId?**: `string`
 
 #### title?
 
-> `optional` **title**: `string`
+> `optional` **title?**: `string`
 
 ***
 
 ### brandId?
 
-> `optional` **brandId**: `string`
+> `optional` **brandId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L230)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/types/message.ts:230](https://github.com/k-otp/k-
 
 ### buttons?
 
-> `optional` **buttons**: `unknown`[]
+> `optional` **buttons?**: `unknown`[]
 
 Defined in: [packages/core/src/types/message.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L240)
 
@@ -59,7 +59,7 @@ Defined in: [packages/core/src/types/message.ts:240](https://github.com/k-otp/k-
 
 ### commercialType?
 
-> `optional` **commercialType**: `boolean`
+> `optional` **commercialType?**: `boolean`
 
 Defined in: [packages/core/src/types/message.ts:238](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L238)
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/types/message.ts:238](https://github.com/k-otp/k-
 
 ### copyAllowed?
 
-> `optional` **copyAllowed**: `boolean`
+> `optional` **copyAllowed?**: `boolean`
 
 Defined in: [packages/core/src/types/message.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L235)
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/types/message.ts:235](https://github.com/k-otp/k-
 
 ### disableSms?
 
-> `optional` **disableSms**: `boolean`
+> `optional` **disableSms?**: `boolean`
 
 Defined in: [packages/core/src/types/message.ts:239](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L239)
 
@@ -83,7 +83,7 @@ Defined in: [packages/core/src/types/message.ts:239](https://github.com/k-otp/k-
 
 ### mmsType?
 
-> `optional` **mmsType**: `"M3"` \| `"S3"` \| `"M4"` \| `"S4"` \| `"M5"` \| `"S5"` \| `"M6"` \| `"S6"`
+> `optional` **mmsType?**: `"M3"` \| `"S3"` \| `"M4"` \| `"S4"` \| `"M5"` \| `"S5"` \| `"M6"` \| `"S6"`
 
 Defined in: [packages/core/src/types/message.ts:237](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L237)
 
@@ -91,7 +91,7 @@ Defined in: [packages/core/src/types/message.ts:237](https://github.com/k-otp/k-
 
 ### templateId?
 
-> `optional` **templateId**: `string`
+> `optional` **templateId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L234)
 
@@ -101,6 +101,6 @@ Override template identifier for RCS_*TPL types.
 
 ### variables?
 
-> `optional` **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
+> `optional` **variables?**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
 Defined in: [packages/core/src/types/message.ts:236](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L236)

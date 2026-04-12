@@ -11,7 +11,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:53](https://github.com/k
 
 ### linkAnd?
 
-> `optional` **linkAnd**: `string`
+> `optional` **linkAnd?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L59)
 
@@ -19,7 +19,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:59](https://github.com/k
 
 ### linkIos?
 
-> `optional` **linkIos**: `string`
+> `optional` **linkIos?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L58)
 
@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:58](https://github.com/k
 
 ### linkMo?
 
-> `optional` **linkMo**: `string`
+> `optional` **linkMo?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L56)
 
@@ -35,7 +35,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:56](https://github.com/k
 
 ### linkPc?
 
-> `optional` **linkPc**: `string`
+> `optional` **linkPc?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L57)
 

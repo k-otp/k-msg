@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/types.ts:79](https://github.com/k-otp/k-ms
 
 ### aadFields?
 
-> `optional` **aadFields**: readonly `string`[]
+> `optional` **aadFields?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L85)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/types.ts:85](https://github.com/k-otp/k-ms
 
 ### enabled?
 
-> `optional` **enabled**: `boolean`
+> `optional` **enabled?**: `boolean`
 
 Defined in: [packages/core/src/crypto/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L80)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/types.ts:80](https://github.com/k-otp/k-ms
 
 ### failMode?
 
-> `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
+> `optional` **failMode?**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L82)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-ms
 
 ### keyResolver?
 
-> `optional` **keyResolver**: [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
+> `optional` **keyResolver?**: [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
 Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L86)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-ms
 
 ### openFallback?
 
-> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `optional` **openFallback?**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L83)
 
@@ -67,6 +67,6 @@ Defined in: [packages/core/src/crypto/types.ts:87](https://github.com/k-otp/k-ms
 
 ### unsafeAllowPlaintextStorage?
 
-> `optional` **unsafeAllowPlaintextStorage**: `boolean`
+> `optional` **unsafeAllowPlaintextStorage?**: `boolean`
 
 Defined in: [packages/core/src/crypto/types.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L84)

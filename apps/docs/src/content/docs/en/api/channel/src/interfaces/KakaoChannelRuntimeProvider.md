@@ -9,9 +9,9 @@ Defined in: [packages/channel/src/runtime/types.ts:59](https://github.com/k-otp/
 
 ## Properties
 
-### addKakaoChannel()?
+### addKakaoChannel?
 
-> `optional` **addKakaoChannel**: (`params`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+> `optional` **addKakaoChannel?**: (`params`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L71)
 
@@ -27,9 +27,9 @@ Defined in: [packages/channel/src/runtime/types.ts:71](https://github.com/k-otp/
 
 ***
 
-### getOnboardingSpec()?
+### getOnboardingSpec?
 
-> `optional` **getOnboardingSpec**: () => [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
+> `optional` **getOnboardingSpec?**: () => [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
 Defined in: [packages/channel/src/runtime/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L61)
 
@@ -47,9 +47,9 @@ Defined in: [packages/channel/src/runtime/types.ts:60](https://github.com/k-otp/
 
 ***
 
-### listKakaoChannelCategories()?
+### listKakaoChannelCategories?
 
-> `optional` **listKakaoChannelCategories**: () => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+> `optional` **listKakaoChannelCategories?**: () => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L65)
 
@@ -59,9 +59,9 @@ Defined in: [packages/channel/src/runtime/types.ts:65](https://github.com/k-otp/
 
 ***
 
-### listKakaoChannels()?
+### listKakaoChannels?
 
-> `optional` **listKakaoChannels**: (`params?`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+> `optional` **listKakaoChannels?**: (`params?`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L62)
 
@@ -77,9 +77,9 @@ Defined in: [packages/channel/src/runtime/types.ts:62](https://github.com/k-otp/
 
 ***
 
-### requestKakaoChannelAuth()?
+### requestKakaoChannelAuth?
 
-> `optional` **requestKakaoChannelAuth**: (`params`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+> `optional` **requestKakaoChannelAuth?**: (`params`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
 Defined in: [packages/channel/src/runtime/types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L68)
 

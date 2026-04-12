@@ -34,7 +34,7 @@ Identifier of the provider that handled this message.
 
 ### providerMessageId?
 
-> `optional` **providerMessageId**: `string`
+> `optional` **providerMessageId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:379](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L379)
 
@@ -44,7 +44,7 @@ Provider-specific message identifier for tracking.
 
 ### raw?
 
-> `optional` **raw**: `unknown`
+> `optional` **raw?**: `unknown`
 
 Defined in: [packages/core/src/types/message.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L399)
 
@@ -84,7 +84,7 @@ The message type that was sent.
 
 ### warnings?
 
-> `optional` **warnings**: [`SendWarning`](/en/api/core/src/interfaces/sendwarning/)[]
+> `optional` **warnings?**: [`SendWarning`](/en/api/core/src/interfaces/sendwarning/)[]
 
 Defined in: [packages/core/src/types/message.ts:395](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L395)
 

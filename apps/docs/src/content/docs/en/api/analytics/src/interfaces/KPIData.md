@@ -11,7 +11,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:65](https://github.com/
 
 ### change?
 
-> `optional` **change**: `number`
+> `optional` **change?**: `number`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L70)
 
@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:70](https://github.com/
 
 ### changePercent?
 
-> `optional` **changePercent**: `number`
+> `optional` **changePercent?**: `number`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L71)
 
@@ -43,7 +43,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:67](https://github.com/
 
 ### previousValue?
 
-> `optional` **previousValue**: `number`
+> `optional` **previousValue?**: `number`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L69)
 
@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:75](https://github.com/
 
 ### target?
 
-> `optional` **target**: `number`
+> `optional` **target?**: `number`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L74)
 
@@ -75,7 +75,7 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:72](https://github.com/
 
 ### unit?
 
-> `optional` **unit**: `string`
+> `optional` **unit?**: `string`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L73)
 

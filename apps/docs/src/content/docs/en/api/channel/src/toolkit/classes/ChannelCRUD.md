@@ -237,7 +237,7 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:573](https://github
 
 ##### entityType?
 
-`"senderNumber"` | `"channel"`
+`"senderNumber"` \| `"channel"`
 
 ##### entityId?
 

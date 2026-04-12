@@ -39,19 +39,19 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:193](https://github
 
 #### correlationId?
 
-> `optional` **correlationId**: `string`
+> `optional` **correlationId?**: `string`
 
 #### organizationId?
 
-> `optional` **organizationId**: `string`
+> `optional` **organizationId?**: `string`
 
 #### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 #### userId?
 
-> `optional` **userId**: `string`
+> `optional` **userId?**: `string`
 
 ***
 

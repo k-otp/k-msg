@@ -13,8 +13,8 @@ Defined in: [packages/webhook/src/runtime/types.ts:49](https://github.com/k-otp/
 
 ### id?
 
-> `optional` **id**: `string`
+> `optional` **id?**: `string`
 
 ### status?
 
-> `optional` **status**: [`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\[`"status"`\]
+> `optional` **status?**: [`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)\[`"status"`\]
