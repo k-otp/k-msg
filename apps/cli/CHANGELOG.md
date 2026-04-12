@@ -1,5 +1,13 @@
 # @k-msg/cli
 
+## 0.9.8 — 2026-04-12
+
+### Patch changes
+
+- [c3aeb65](https://github.com/k-otp/k-msg/commit/c3aeb6525eed6859c6bc3a614fb5751ece1f4989) Refresh the Bun/Bunli toolchain baselines, update the CLI for Bunli 0.9, and keep completion/build workflows working without depending on the broken upstream `bunli` executable path. — Thanks @imjlk!
+- [9ababe0](https://github.com/k-otp/k-msg/commit/9ababe0f7cbe72f4e6bfff21b243707888d2fc06) Upgrade the CLI to the Bunli 0.9.1 toolchain, preserve strict boolean and empty-string argument handling, and add fullscreen interactive TUI flows for `k-msg config init` and `k-msg config provider add`. — Thanks @imjlk!
+- Updated dependencies: channel@0.29.5, core@0.29.5, messaging@0.29.5, provider@0.29.5, template@0.29.5, k-msg@0.29.5
+
 ## 0.9.7 — 2026-03-08
 
 ### Patch changes
