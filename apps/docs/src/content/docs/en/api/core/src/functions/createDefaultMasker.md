@@ -21,14 +21,4 @@ Defined in: [packages/core/src/crypto/types.ts:239](https://github.com/k-otp/k-m
 
 ## Returns
 
-> (`value`): `string`
-
-### Parameters
-
-#### value
-
-`string`
-
-### Returns
-
-`string`
+(`value`) => `string`

@@ -11,7 +11,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 ## Type Declaration
 
-### child()
+### child
 
 > **child**: (`context`) => [`Logger`](/en/api/core/src/classes/logger/)
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 [`Logger`](/en/api/core/src/classes/logger/)
 
-### debug()
+### debug
 
 > **debug**: (`message`, `context?`) => `void`
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 `void`
 
-### error()
+### error
 
 > **error**: (`message`, `context?`, `error?`) => `void`
 
@@ -65,7 +65,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 `void`
 
-### info()
+### info
 
 > **info**: (`message`, `context?`) => `void`
 
@@ -83,7 +83,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 `void`
 
-### measure()
+### measure
 
 > **measure**: \<`T`\>(`operation`, `fn`, `context?`) => `Promise`\<`T`\>
 
@@ -111,7 +111,7 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 `Promise`\<`T`\>
 
-### time()
+### time
 
 > **time**: (`label`) => () => `void`
 
@@ -123,13 +123,9 @@ Defined in: [packages/core/src/logger.ts:319](https://github.com/k-otp/k-msg/blo
 
 #### Returns
 
-> (): `void`
+() => `void`
 
-##### Returns
-
-`void`
-
-### warn()
+### warn
 
 > **warn**: (`message`, `context?`, `error?`) => `void`
 

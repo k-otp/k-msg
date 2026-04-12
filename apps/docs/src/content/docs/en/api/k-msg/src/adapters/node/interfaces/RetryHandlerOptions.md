@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:52](https://github.co
 
 ***
 
-### execute()
+### execute
 
 > **execute**: (`attempt`, `item`) => `Promise`\<`unknown`\>
 
@@ -47,9 +47,9 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:53](https://github.co
 
 ***
 
-### onRetryExhausted()?
+### onRetryExhausted?
 
-> `optional` **onRetryExhausted**: (`item`) => `Promise`\<`void`\>
+> `optional` **onRetryExhausted?**: (`item`) => `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L60)
 
@@ -65,9 +65,9 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:60](https://github.co
 
 ***
 
-### onRetryFailed()?
+### onRetryFailed?
 
-> `optional` **onRetryFailed**: (`item`, `error`) => `Promise`\<`void`\>
+> `optional` **onRetryFailed?**: (`item`, `error`) => `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L62)
 
@@ -87,9 +87,9 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.co
 
 ***
 
-### onRetrySuccess()?
+### onRetrySuccess?
 
-> `optional` **onRetrySuccess**: (`item`, `result`) => `Promise`\<`void`\>
+> `optional` **onRetrySuccess?**: (`item`, `result`) => `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L61)
 
@@ -117,9 +117,9 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.co
 
 ***
 
-### shouldRetryError()?
+### shouldRetryError?
 
-> `optional` **shouldRetryError**: (`error`, `item`, `attempt`) => `boolean`
+> `optional` **shouldRetryError?**: (`error`, `item`, `attempt`) => `boolean`
 
 Defined in: [packages/messaging/src/queue/retry.handler.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L55)
 

@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/management/permissions.ts:31](https://
 
 ### conditions?
 
-> `optional` **conditions**: `PermissionCondition`[]
+> `optional` **conditions?**: `PermissionCondition`[]
 
 Defined in: [packages/channel/src/toolkit/management/permissions.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/management/permissions.ts#L33)
 

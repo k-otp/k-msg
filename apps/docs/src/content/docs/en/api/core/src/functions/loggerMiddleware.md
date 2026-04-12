@@ -17,18 +17,4 @@ Defined in: [packages/core/src/logger.ts:335](https://github.com/k-otp/k-msg/blo
 
 ## Returns
 
-> (`c`, `next`): `Promise`\<`void`\>
-
-### Parameters
-
-#### c
-
-`any`
-
-#### next
-
-`any`
-
-### Returns
-
-`Promise`\<`void`\>
+(`c`, `next`) => `Promise`\<`void`\>

@@ -15,7 +15,7 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:6](https://g
 
 ### deliveryTableName?
 
-> `optional` **deliveryTableName**: `string`
+> `optional` **deliveryTableName?**: `string`
 
 Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L8)
 
@@ -23,6 +23,6 @@ Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:8](https://g
 
 ### endpointTableName?
 
-> `optional` **endpointTableName**: `string`
+> `optional` **endpointTableName?**: `string`
 
 Defined in: [packages/webhook/src/adapters/cloudflare/sql-schema.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/adapters/cloudflare/sql-schema.ts#L7)

@@ -5,23 +5,23 @@ prev: false
 title: "ExportFormat"
 ---
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L28)
+Defined in: [packages/analytics/src/reports/export.manager.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L29)
 
 ## Properties
 
 ### options?
 
-> `optional` **options**: `Record`\<`string`, `any`\>
+> `optional` **options?**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L30)
+Defined in: [packages/analytics/src/reports/export.manager.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L31)
 
 ***
 
 ### template?
 
-> `optional` **template**: `string`
+> `optional` **template?**: `string`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L31)
+Defined in: [packages/analytics/src/reports/export.manager.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L32)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:31](https://github
 
 > **type**: `"json"` \| `"csv"` \| `"pdf"` \| `"excel"` \| `"xml"`
 
-Defined in: [packages/analytics/src/reports/export.manager.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L29)
+Defined in: [packages/analytics/src/reports/export.manager.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/export.manager.ts#L30)

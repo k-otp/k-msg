@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:37](https://git
 
 ### context?
 
-> `optional` **context**: `object`
+> `optional` **context?**: `object`
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L40)
 

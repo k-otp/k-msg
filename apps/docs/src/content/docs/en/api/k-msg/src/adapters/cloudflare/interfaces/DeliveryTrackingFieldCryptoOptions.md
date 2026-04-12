@@ -19,15 +19,15 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:71](htt
 
 ### controlSignal?
 
-> `optional` **controlSignal**: [`DeliveryTrackingFieldCryptoControlSignalOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/)
+> `optional` **controlSignal?**: [`DeliveryTrackingFieldCryptoControlSignalOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackingfieldcryptocontrolsignaloptions/)
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L79)
 
 ***
 
-### metrics()?
+### metrics?
 
-> `optional` **metrics**: (`event`) => `void` \| `Promise`\<`void`\>
+> `optional` **metrics?**: (`event`) => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L73)
 
@@ -45,6 +45,6 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:73](htt
 
 ### tenantId?
 
-> `optional` **tenantId**: `string`
+> `optional` **tenantId?**: `string`
 
 Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L72)

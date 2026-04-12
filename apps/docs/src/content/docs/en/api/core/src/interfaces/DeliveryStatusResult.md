@@ -11,7 +11,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:70](https://github.com/k
 
 ### deliveredAt?
 
-> `optional` **deliveredAt**: `Date`
+> `optional` **deliveredAt?**: `Date`
 
 Defined in: [packages/core/src/types/delivery-status.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L77)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:77](https://github.com/k
 
 ### failedAt?
 
-> `optional` **failedAt**: `Date`
+> `optional` **failedAt?**: `Date`
 
 Defined in: [packages/core/src/types/delivery-status.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L78)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:72](https://github.com/k
 
 ### raw?
 
-> `optional` **raw**: `unknown`
+> `optional` **raw?**: `unknown`
 
 Defined in: [packages/core/src/types/delivery-status.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L79)
 
@@ -51,7 +51,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:79](https://github.com/k
 
 ### sentAt?
 
-> `optional` **sentAt**: `Date`
+> `optional` **sentAt?**: `Date`
 
 Defined in: [packages/core/src/types/delivery-status.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L76)
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/types/delivery-status.ts:73](https://github.com/k
 
 ### statusCode?
 
-> `optional` **statusCode**: `string`
+> `optional` **statusCode?**: `string`
 
 Defined in: [packages/core/src/types/delivery-status.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L74)
 
@@ -75,6 +75,6 @@ Defined in: [packages/core/src/types/delivery-status.ts:74](https://github.com/k
 
 ### statusMessage?
 
-> `optional` **statusMessage**: `string`
+> `optional` **statusMessage?**: `string`
 
 Defined in: [packages/core/src/types/delivery-status.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/delivery-status.ts#L75)

@@ -59,7 +59,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:191](https://github.com/
 
 ### sendStatus?
 
-> `optional` **sendStatus**: `string`
+> `optional` **sendStatus?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L188)
 
@@ -67,7 +67,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:188](https://github.com/
 
 ### sendStatusCode?
 
-> `optional` **sendStatusCode**: `string`
+> `optional` **sendStatusCode?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L189)
 
@@ -75,6 +75,6 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:189](https://github.com/
 
 ### sendStatusMsg?
 
-> `optional` **sendStatusMsg**: `string`
+> `optional` **sendStatusMsg?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L190)

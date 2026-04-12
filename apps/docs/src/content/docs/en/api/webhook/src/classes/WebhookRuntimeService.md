@@ -205,7 +205,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:182](https:
 
 ##### input
 
-`string` | [`WebhookRuntimeTestPayload`](/en/api/webhook/src/interfaces/webhookruntimetestpayload/)
+`string` \| [`WebhookRuntimeTestPayload`](/en/api/webhook/src/interfaces/webhookruntimetestpayload/)
 
 #### Returns
 

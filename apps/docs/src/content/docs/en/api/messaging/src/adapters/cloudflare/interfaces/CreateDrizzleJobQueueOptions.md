@@ -13,9 +13,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:155](https://gi
 
 ## Properties
 
-### close()?
+### close?
 
-> `optional` **close**: () => `void` \| `Promise`\<`void`\>
+> `optional` **close?**: () => `void` \| `Promise`\<`void`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L51)
 
@@ -53,9 +53,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 
 ***
 
-### mapTransactionDb()?
+### mapTransactionDb?
 
-> `optional` **mapTransactionDb**: (`value`) => [`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
+> `optional` **mapTransactionDb?**: (`value`) => [`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L50)
 
@@ -75,9 +75,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:50](https:
 
 ***
 
-### normalizeResult()?
+### normalizeResult?
 
-> `optional` **normalizeResult**: \<`T`\>(`input`) => [`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
+> `optional` **normalizeResult?**: \<`T`\>(`input`) => [`CloudflareSqlQueryResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlqueryresult/)\<`T`\>
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L45)
 
@@ -113,9 +113,9 @@ readonly `unknown`[]
 
 ***
 
-### renderQuery()?
+### renderQuery?
 
-> `optional` **renderQuery**: (`input`) => `unknown`
+> `optional` **renderQuery?**: (`input`) => `unknown`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L40)
 
@@ -147,6 +147,6 @@ readonly `unknown`[]
 
 ### tableName?
 
-> `optional` **tableName**: `string`
+> `optional` **tableName?**: `string`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L157)

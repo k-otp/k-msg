@@ -19,7 +19,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:126](https://github.com
 
 ### error?
 
-> `optional` **error**: `string`
+> `optional` **error?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L131)
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:131](https://github.com
 
 ### httpStatus?
 
-> `optional` **httpStatus**: `number`
+> `optional` **httpStatus?**: `number`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L128)
 
@@ -43,7 +43,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:132](https://github.com
 
 ### responseBody?
 
-> `optional` **responseBody**: `string`
+> `optional` **responseBody?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L129)
 
@@ -51,7 +51,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:129](https://github.com
 
 ### responseHeaders?
 
-> `optional` **responseHeaders**: `Record`\<`string`, `string`\>
+> `optional` **responseHeaders?**: `Record`\<`string`, `string`\>
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L130)
 

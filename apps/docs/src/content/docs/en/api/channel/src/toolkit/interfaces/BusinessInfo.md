@@ -77,7 +77,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:28](ht
 
 #### website?
 
-> `optional` **website**: `string`
+> `optional` **website?**: `string`
 
 ***
 

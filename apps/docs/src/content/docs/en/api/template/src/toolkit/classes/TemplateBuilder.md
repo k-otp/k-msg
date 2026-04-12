@@ -395,7 +395,7 @@ Add a variable definition
 
 ##### type?
 
-`"string"` | `"number"` | `"date"` | `"custom"`
+`"string"` \| `"number"` \| `"date"` \| `"custom"`
 
 ##### required?
 

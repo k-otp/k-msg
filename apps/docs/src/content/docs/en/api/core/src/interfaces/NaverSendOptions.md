@@ -9,13 +9,13 @@ Defined in: [packages/core/src/types/message.ts:199](https://github.com/k-otp/k-
 
 ## Indexable
 
-\[`key`: `string`\]: `any`
+> \[`key`: `string`\]: `any`
 
 ## Properties
 
 ### buttons?
 
-> `optional` **buttons**: `unknown`[]
+> `optional` **buttons?**: `unknown`[]
 
 Defined in: [packages/core/src/types/message.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L207)
 
@@ -23,7 +23,7 @@ Defined in: [packages/core/src/types/message.ts:207](https://github.com/k-otp/k-
 
 ### disableSms?
 
-> `optional` **disableSms**: `boolean`
+> `optional` **disableSms?**: `boolean`
 
 Defined in: [packages/core/src/types/message.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L205)
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/types/message.ts:205](https://github.com/k-otp/k-
 
 ### talkId?
 
-> `optional` **talkId**: `string`
+> `optional` **talkId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:200](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L200)
 
@@ -39,7 +39,7 @@ Defined in: [packages/core/src/types/message.ts:200](https://github.com/k-otp/k-
 
 ### templateId?
 
-> `optional` **templateId**: `string`
+> `optional` **templateId?**: `string`
 
 Defined in: [packages/core/src/types/message.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L204)
 
@@ -49,6 +49,6 @@ Override the template identifier for NSA (provider-specific).
 
 ### variables?
 
-> `optional` **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
+> `optional` **variables?**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
 Defined in: [packages/core/src/types/message.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L206)

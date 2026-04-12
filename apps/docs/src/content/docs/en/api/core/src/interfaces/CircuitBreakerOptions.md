@@ -17,9 +17,9 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:8](https://github.c
 
 ***
 
-### onClose()?
+### onClose?
 
-> `optional` **onClose**: () => `void`
+> `optional` **onClose?**: () => `void`
 
 Defined in: [packages/core/src/resilience/circuit-breaker.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L13)
 
@@ -29,9 +29,9 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:13](https://github.
 
 ***
 
-### onHalfOpen()?
+### onHalfOpen?
 
-> `optional` **onHalfOpen**: () => `void`
+> `optional` **onHalfOpen?**: () => `void`
 
 Defined in: [packages/core/src/resilience/circuit-breaker.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L12)
 
@@ -41,9 +41,9 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:12](https://github.
 
 ***
 
-### onOpen()?
+### onOpen?
 
-> `optional` **onOpen**: () => `void`
+> `optional` **onOpen?**: () => `void`
 
 Defined in: [packages/core/src/resilience/circuit-breaker.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L11)
 

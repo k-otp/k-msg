@@ -19,7 +19,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github
 
 ### insights?
 
-> `optional` **insights**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
+> `optional` **insights?**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L106)
 

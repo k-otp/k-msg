@@ -9,13 +9,13 @@ Defined in: [packages/core/src/types/message.ts:222](https://github.com/k-otp/k-
 
 ## Indexable
 
-\[`key`: `string`\]: `any`
+> \[`key`: `string`\]: `any`
 
 ## Properties
 
 ### fileIds?
 
-> `optional` **fileIds**: `string`[]
+> `optional` **fileIds?**: `string`[]
 
 Defined in: [packages/core/src/types/message.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L223)
 
@@ -23,6 +23,6 @@ Defined in: [packages/core/src/types/message.ts:223](https://github.com/k-otp/k-
 
 ### fileUrls?
 
-> `optional` **fileUrls**: `string`[]
+> `optional` **fileUrls?**: `string`[]
 
 Defined in: [packages/core/src/types/message.ts:224](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L224)

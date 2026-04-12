@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:99](https://github.com/
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L84)
 
@@ -43,27 +43,27 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:86](https://github.com/
 
 ### filters?
 
-> `optional` **filters**: `object`
+> `optional` **filters?**: `object`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L94)
 
 #### channelId?
 
-> `optional` **channelId**: `string`[]
+> `optional` **channelId?**: `string`[]
 
 #### providerId?
 
-> `optional` **providerId**: `string`[]
+> `optional` **providerId?**: `string`[]
 
 #### templateId?
 
-> `optional` **templateId**: `string`[]
+> `optional` **templateId?**: `string`[]
 
 ***
 
 ### headers?
 
-> `optional` **headers**: `Record`\<`string`, `string`\>
+> `optional` **headers?**: `Record`\<`string`, `string`\>
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L87)
 
@@ -79,7 +79,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:81](https://github.com/
 
 ### lastTriggeredAt?
 
-> `optional` **lastTriggeredAt**: `Date`
+> `optional` **lastTriggeredAt?**: `Date`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L101)
 
@@ -87,7 +87,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:101](https://github.com
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L83)
 
@@ -95,7 +95,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:83](https://github.com/
 
 ### retryConfig?
 
-> `optional` **retryConfig**: `object`
+> `optional` **retryConfig?**: `object`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L89)
 
@@ -115,7 +115,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:89](https://github.com/
 
 ### secret?
 
-> `optional` **secret**: `string`
+> `optional` **secret?**: `string`
 
 Defined in: [packages/webhook/src/types/webhook.types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L88)
 

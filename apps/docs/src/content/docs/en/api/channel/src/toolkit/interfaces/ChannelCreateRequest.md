@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:129](https://github.com
 
 ### businessInfo?
 
-> `optional` **businessInfo**: `object`
+> `optional` **businessInfo?**: `object`
 
 Defined in: [packages/channel/src/types/channel.types.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L134)
 
@@ -43,7 +43,7 @@ Defined in: [packages/channel/src/types/channel.types.ts:134](https://github.com
 
 ### kakaoInfo?
 
-> `optional` **kakaoInfo**: `object`
+> `optional` **kakaoInfo?**: `object`
 
 Defined in: [packages/channel/src/types/channel.types.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L142)
 
@@ -53,11 +53,11 @@ Defined in: [packages/channel/src/types/channel.types.ts:142](https://github.com
 
 #### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 #### logoUrl?
 
-> `optional` **logoUrl**: `string`
+> `optional` **logoUrl?**: `string`
 
 #### plusFriendId
 

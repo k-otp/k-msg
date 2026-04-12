@@ -43,21 +43,21 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:83](ht
 
 ### externalAPIConfig?
 
-> `optional` **externalAPIConfig**: `object`
+> `optional` **externalAPIConfig?**: `object`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L84)
 
 #### addressVerificationAPI?
 
-> `optional` **addressVerificationAPI**: `string`
+> `optional` **addressVerificationAPI?**: `string`
 
 #### businessRegistryAPI?
 
-> `optional` **businessRegistryAPI**: `string`
+> `optional` **businessRegistryAPI?**: `string`
 
 #### documentOCRAPI?
 
-> `optional` **documentOCRAPI**: `string`
+> `optional` **documentOCRAPI?**: `string`
 
 ***
 

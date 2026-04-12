@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:50](https://
 
 ### cursorMessageId?
 
-> `optional` **cursorMessageId**: `string`
+> `optional` **cursorMessageId?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L49)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:49](https://
 
 ### cursorRequestedAt?
 
-> `optional` **cursorRequestedAt**: `number`
+> `optional` **cursorRequestedAt?**: `number`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L48)
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:47](https://
 
 ### lastError?
 
-> `optional` **lastError**: `string`
+> `optional` **lastError?**: `string`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L52)
 

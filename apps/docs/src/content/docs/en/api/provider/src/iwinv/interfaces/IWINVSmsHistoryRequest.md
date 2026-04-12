@@ -27,7 +27,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:175](https://github.com/
 
 ### pageNum?
 
-> `optional` **pageNum**: `number`
+> `optional` **pageNum?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L177)
 
@@ -35,7 +35,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:177](https://github.com/
 
 ### pageSize?
 
-> `optional` **pageSize**: `number`
+> `optional` **pageSize?**: `number`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L178)
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:178](https://github.com/
 
 ### phone?
 
-> `optional` **phone**: `string`
+> `optional` **phone?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L179)
 
@@ -51,7 +51,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:179](https://github.com/
 
 ### requestNo?
 
-> `optional` **requestNo**: `string`
+> `optional` **requestNo?**: `string`
 
 Defined in: [packages/provider/src/iwinv/types/iwinv.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L176)
 

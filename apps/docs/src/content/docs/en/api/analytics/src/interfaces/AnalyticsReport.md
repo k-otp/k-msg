@@ -27,7 +27,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:50](https://github.
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
 Defined in: [packages/analytics/src/types/analytics.types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L49)
 

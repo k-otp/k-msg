@@ -3,6 +3,7 @@
  * 다양한 형식으로 데이터 내보내기
  */
 
+import { Buffer } from "node:buffer";
 import { logger } from "@k-msg/core";
 import type {
   AggregatedMetric,

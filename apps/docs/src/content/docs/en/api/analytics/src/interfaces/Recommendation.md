@@ -81,7 +81,7 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:68](https:
 
 #### estimatedROI?
 
-> `optional` **estimatedROI**: `number`
+> `optional` **estimatedROI?**: `number`
 
 #### ruleIds
 
@@ -127,6 +127,6 @@ Defined in: [packages/analytics/src/insights/recommendation.engine.ts:59](https:
 
 ### validUntil?
 
-> `optional` **validUntil**: `Date`
+> `optional` **validUntil?**: `Date`
 
 Defined in: [packages/analytics/src/insights/recommendation.engine.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/recommendation.engine.ts#L67)

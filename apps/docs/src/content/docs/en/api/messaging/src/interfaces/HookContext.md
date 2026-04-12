@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/hooks.ts:3](https://github.com/k-otp/k-msg/b
 
 ### attempt?
 
-> `optional` **attempt**: `number`
+> `optional` **attempt?**: `number`
 
 Defined in: [packages/messaging/src/hooks.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L9)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/hooks.ts:5](https://github.com/k-otp/k-msg/b
 
 ### providerId?
 
-> `optional` **providerId**: `string`
+> `optional` **providerId?**: `string`
 
 Defined in: [packages/messaging/src/hooks.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L7)
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/hooks.ts:7](https://github.com/k-otp/k-msg/b
 
 ### requestId?
 
-> `optional` **requestId**: `string`
+> `optional` **requestId?**: `string`
 
 Defined in: [packages/messaging/src/hooks.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L8)
 

@@ -9,13 +9,13 @@ Defined in: [packages/channel/src/runtime/types.ts:105](https://github.com/k-otp
 
 ## Indexable
 
-\[`key`: `string`\]: `unknown`
+> \[`key`: `string`\]: `unknown`
 
 ## Properties
 
 ### config?
 
-> `optional` **config**: `Record`\<`string`, `unknown`\>
+> `optional` **config?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/channel/src/runtime/types.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L108)
 
@@ -31,6 +31,6 @@ Defined in: [packages/channel/src/runtime/types.ts:106](https://github.com/k-otp
 
 ### type?
 
-> `optional` **type**: `string`
+> `optional` **type?**: `string`
 
 Defined in: [packages/channel/src/runtime/types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/types.ts#L107)

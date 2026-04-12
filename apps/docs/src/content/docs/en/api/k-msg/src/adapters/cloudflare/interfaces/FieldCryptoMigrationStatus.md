@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:98](https://
 
 ### run?
 
-> `optional` **run**: [`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/)
+> `optional` **run?**: [`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/)
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L97)
 
@@ -47,6 +47,6 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:97](https://
 
 ### updatedAt?
 
-> `optional` **updatedAt**: `number`
+> `optional` **updatedAt?**: `number`
 
 Defined in: [packages/messaging/src/migration/field-crypto/types.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L105)

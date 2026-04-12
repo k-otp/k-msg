@@ -11,7 +11,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:41](ht
 
 ### autoVerificationResults?
 
-> `optional` **autoVerificationResults**: [`AutoVerificationResult`](/en/api/channel/src/toolkit/interfaces/autoverificationresult/)[]
+> `optional` **autoVerificationResults?**: [`AutoVerificationResult`](/en/api/channel/src/toolkit/interfaces/autoverificationresult/)[]
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L51)
 
@@ -51,7 +51,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:42](ht
 
 ### reviewedAt?
 
-> `optional` **reviewedAt**: `Date`
+> `optional` **reviewedAt?**: `Date`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L48)
 
@@ -59,7 +59,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:48](ht
 
 ### reviewedBy?
 
-> `optional` **reviewedBy**: `string`
+> `optional` **reviewedBy?**: `string`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L49)
 
@@ -67,7 +67,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:49](ht
 
 ### reviewNotes?
 
-> `optional` **reviewNotes**: `string`
+> `optional` **reviewNotes?**: `string`
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L50)
 

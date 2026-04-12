@@ -13,7 +13,7 @@ Defined in: [packages/template/src/runtime/template-input.ts:18](https://github.
 
 ### buttons?
 
-> `optional` **buttons**: [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
+> `optional` **buttons?**: [`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)[]
 
 Defined in: [packages/template/src/runtime/template-input.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L21)
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/runtime/template-input.ts:21](https://github.
 
 ### content?
 
-> `optional` **content**: `string`
+> `optional` **content?**: `string`
 
 Defined in: [packages/template/src/runtime/template-input.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L20)
 
@@ -29,6 +29,6 @@ Defined in: [packages/template/src/runtime/template-input.ts:20](https://github.
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [packages/template/src/runtime/template-input.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/template/src/runtime/template-input.ts#L19)

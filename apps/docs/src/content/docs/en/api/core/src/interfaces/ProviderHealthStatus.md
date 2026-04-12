@@ -13,7 +13,7 @@ Health check result from a provider.
 
 ### data?
 
-> `optional` **data**: `Record`\<`string`, `unknown`\>
+> `optional` **data?**: `Record`\<`string`, `unknown`\>
 
 Defined in: [packages/core/src/provider.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L175)
 
@@ -43,7 +43,7 @@ List of issues if not healthy.
 
 ### latencyMs?
 
-> `optional` **latencyMs**: `number`
+> `optional` **latencyMs?**: `number`
 
 Defined in: [packages/core/src/provider.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L173)
 

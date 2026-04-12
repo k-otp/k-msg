@@ -9,9 +9,9 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:84](https://githu
 
 ## Properties
 
-### classifyNonKakaoUser()?
+### classifyNonKakaoUser?
 
-> `optional` **classifyNonKakaoUser**: (`context`) => `boolean`
+> `optional` **classifyNonKakaoUser?**: (`context`) => `boolean`
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L87)
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:87](https://githu
 
 ### enabled?
 
-> `optional` **enabled**: `boolean`
+> `optional` **enabled?**: `boolean`
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L85)
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:85](https://githu
 
 ### rulesByProviderId?
 
-> `optional` **rulesByProviderId**: `Record`\<`string`, [`DeliveryTrackingApiFailoverRule`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverrule/)\>
+> `optional` **rulesByProviderId?**: `Record`\<`string`, [`DeliveryTrackingApiFailoverRule`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverrule/)\>
 
 Defined in: [packages/messaging/src/delivery-tracking/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L88)
 

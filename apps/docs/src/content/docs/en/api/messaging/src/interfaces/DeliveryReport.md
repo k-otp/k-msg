@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:100](https://github
 
 ### clickedAt?
 
-> `optional` **clickedAt**: `Date`
+> `optional` **clickedAt?**: `Date`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L97)
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:97](https://github.
 
 ### deliveredAt?
 
-> `optional` **deliveredAt**: `Date`
+> `optional` **deliveredAt?**: `Date`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L96)
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:96](https://github.
 
 ### error?
 
-> `optional` **error**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
+> `optional` **error?**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L99)
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:99](https://github.
 
 ### failedAt?
 
-> `optional` **failedAt**: `Date`
+> `optional` **failedAt?**: `Date`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L98)
 
@@ -75,7 +75,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:93](https://github.
 
 ### sentAt?
 
-> `optional` **sentAt**: `Date`
+> `optional` **sentAt?**: `Date`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L95)
 

@@ -15,7 +15,7 @@ Defined in: [packages/core/src/crypto/errors.ts:26](https://github.com/k-otp/k-m
 
 ### attempt?
 
-> `optional` **attempt**: `number`
+> `optional` **attempt?**: `number`
 
 Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L101)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blo
 
 ### causeChain?
 
-> `optional` **causeChain**: `unknown`[]
+> `optional` **causeChain?**: `unknown`[]
 
 Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L102)
 
@@ -39,7 +39,7 @@ Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blo
 
 ### failMode?
 
-> `optional` **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
+> `optional` **failMode?**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
 Defined in: [packages/core/src/crypto/errors.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L28)
 
@@ -47,7 +47,7 @@ Defined in: [packages/core/src/crypto/errors.ts:28](https://github.com/k-otp/k-m
 
 ### fieldPath?
 
-> `optional` **fieldPath**: `string`
+> `optional` **fieldPath?**: `string`
 
 Defined in: [packages/core/src/crypto/errors.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L27)
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/crypto/errors.ts:27](https://github.com/k-otp/k-m
 
 ### httpStatus?
 
-> `optional` **httpStatus**: `number`
+> `optional` **httpStatus?**: `number`
 
 Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L98)
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob
 
 ### openFallback?
 
-> `optional` **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
+> `optional` **openFallback?**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
 Defined in: [packages/core/src/crypto/errors.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L29)
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/crypto/errors.ts:29](https://github.com/k-otp/k-m
 
 ### providerErrorCode?
 
-> `optional` **providerErrorCode**: `string`
+> `optional` **providerErrorCode?**: `string`
 
 Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L96)
 
@@ -87,7 +87,7 @@ Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob
 
 ### providerErrorText?
 
-> `optional` **providerErrorText**: `string`
+> `optional` **providerErrorText?**: `string`
 
 Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L97)
 
@@ -99,7 +99,7 @@ Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob
 
 ### requestId?
 
-> `optional` **requestId**: `string`
+> `optional` **requestId?**: `string`
 
 Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L99)
 
@@ -111,7 +111,7 @@ Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob
 
 ### retryAfterMs?
 
-> `optional` **retryAfterMs**: `number`
+> `optional` **retryAfterMs?**: `number`
 
 Defined in: [packages/core/src/errors.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L100)
 

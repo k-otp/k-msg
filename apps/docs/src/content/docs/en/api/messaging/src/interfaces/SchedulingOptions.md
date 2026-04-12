@@ -11,7 +11,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:26](https://github.
 
 ### retryCount?
 
-> `optional` **retryCount**: `number`
+> `optional` **retryCount?**: `number`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L29)
 
@@ -27,6 +27,6 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:27](https://github.
 
 ### timezone?
 
-> `optional` **timezone**: `string`
+> `optional` **timezone?**: `string`
 
 Defined in: [packages/messaging/src/types/message.runtime.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L28)

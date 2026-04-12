@@ -27,7 +27,7 @@ Defined in: [packages/template/src/registry/template.registry.ts:60](https://git
 
 ### lastUsed?
 
-> `optional` **lastUsed**: `Date`
+> `optional` **lastUsed?**: `Date`
 
 Defined in: [packages/template/src/registry/template.registry.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L61)
 

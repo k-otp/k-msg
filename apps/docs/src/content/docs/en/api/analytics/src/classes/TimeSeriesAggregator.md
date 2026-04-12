@@ -43,7 +43,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](ht
 
 ##### interval
 
-`"minute"` | `"hour"` | `"day"` | `"week"` | `"month"`
+`"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
 
 ##### options?
 
@@ -123,7 +123,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:156](h
 
 ##### targetInterval
 
-`"minute"` | `"hour"` | `"day"` | `"week"` | `"month"`
+`"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
 
 #### Returns
 

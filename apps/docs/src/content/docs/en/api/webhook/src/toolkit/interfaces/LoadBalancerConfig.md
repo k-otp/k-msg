@@ -35,6 +35,6 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:34](https://github.com/k-o
 
 ### weights?
 
-> `optional` **weights**: `Record`\<`string`, `number`\>
+> `optional` **weights?**: `Record`\<`string`, `number`\>
 
 Defined in: [packages/webhook/src/dispatcher/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L37)

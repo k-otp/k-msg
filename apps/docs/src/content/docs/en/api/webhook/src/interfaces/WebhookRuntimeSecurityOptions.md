@@ -11,7 +11,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:38](https://github.com/k-otp/
 
 ### allowHttpForLocalhost?
 
-> `optional` **allowHttpForLocalhost**: `boolean`
+> `optional` **allowHttpForLocalhost?**: `boolean`
 
 Defined in: [packages/webhook/src/runtime/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L40)
 
@@ -19,6 +19,6 @@ Defined in: [packages/webhook/src/runtime/types.ts:40](https://github.com/k-otp/
 
 ### allowPrivateHosts?
 
-> `optional` **allowPrivateHosts**: `boolean`
+> `optional` **allowPrivateHosts?**: `boolean`
 
 Defined in: [packages/webhook/src/runtime/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L39)

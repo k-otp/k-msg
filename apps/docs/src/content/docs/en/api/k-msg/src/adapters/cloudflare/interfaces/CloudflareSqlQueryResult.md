@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:3](https:/
 
 ### rowCount?
 
-> `optional` **rowCount**: `number`
+> `optional` **rowCount?**: `number`
 
 Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L5)
 

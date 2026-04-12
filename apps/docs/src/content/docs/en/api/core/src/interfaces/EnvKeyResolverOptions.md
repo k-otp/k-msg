@@ -11,7 +11,7 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:4](https://github.com/
 
 ### activeKidEnv?
 
-> `optional` **activeKidEnv**: `string`
+> `optional` **activeKidEnv?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L6)
 
@@ -19,7 +19,7 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:6](https://github.com/
 
 ### decryptKidsEnv?
 
-> `optional` **decryptKidsEnv**: `string`
+> `optional` **decryptKidsEnv?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L7)
 
@@ -27,7 +27,7 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:7](https://github.com/
 
 ### delimiter?
 
-> `optional` **delimiter**: `string`
+> `optional` **delimiter?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L10)
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:10](https://github.com
 
 ### env?
 
-> `optional` **env**: `Record`\<`string`, `string` \| `undefined`\>
+> `optional` **env?**: `Record`\<`string`, `string` \| `undefined`\>
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L5)
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:5](https://github.com/
 
 ### fallbackActiveKid?
 
-> `optional` **fallbackActiveKid**: `string`
+> `optional` **fallbackActiveKid?**: `string`
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L8)
 
@@ -51,6 +51,6 @@ Defined in: [packages/core/src/crypto/key-adapters/env.ts:8](https://github.com/
 
 ### fallbackDecryptKids?
 
-> `optional` **fallbackDecryptKids**: readonly `string`[]
+> `optional` **fallbackDecryptKids?**: readonly `string`[]
 
 Defined in: [packages/core/src/crypto/key-adapters/env.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-adapters/env.ts#L9)

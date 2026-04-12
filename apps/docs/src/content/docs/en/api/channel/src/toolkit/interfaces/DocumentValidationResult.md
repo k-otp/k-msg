@@ -19,7 +19,7 @@ Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:68](ht
 
 ### extractedData?
 
-> `optional` **extractedData**: `Record`\<`string`, `any`\>
+> `optional` **extractedData?**: `Record`\<`string`, `any`\>
 
 Defined in: [packages/channel/src/toolkit/verification/business.verify.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/toolkit/verification/business.verify.ts#L69)
 
