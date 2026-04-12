@@ -1,5 +1,12 @@
 # @k-msg/messaging
 
+## 0.29.5 — 2026-04-12
+
+### Patch changes
+
+- [c3aeb65](https://github.com/k-otp/k-msg/commit/c3aeb6525eed6859c6bc3a614fb5751ece1f4989) Refresh the Bun/Bunli toolchain baselines, update the CLI for Bunli 0.9, and keep completion/build workflows working without depending on the broken upstream `bunli` executable path. — Thanks @imjlk!
+- Updated dependencies: core@0.29.5, template@0.29.5
+
 ## 0.29.4 — 2026-03-08
 
 ### Patch changes
