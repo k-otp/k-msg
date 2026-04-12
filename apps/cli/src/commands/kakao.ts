@@ -18,6 +18,7 @@ import {
   validateTemplatePayload,
 } from "@k-msg/template";
 import { z } from "zod";
+import { restoreExplicitEmptyString } from "../cli/argv";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,
@@ -406,7 +407,7 @@ const channelBindingDeleteCmd = defineCommand({
       const alias = flags.alias.trim();
       const raw = await loadKMsgConfig(flags.config);
       const aliases = raw.config.aliases?.kakaoChannels;
-      if (!aliases || !aliases[alias]) {
+      if (!aliases?.[alias]) {
         throw new Error(`kakao channel alias not found: ${alias}`);
       }
 
@@ -857,15 +858,17 @@ const templateCreateCmd = defineCommand({
         senderKey: flags["sender-key"],
       });
 
-      const parsedButtons = parseTemplateButtons(flags.buttons);
+      const parsedButtons = parseTemplateButtons(
+        restoreExplicitEmptyString(flags.buttons),
+      );
       if (parsedButtons.isFailure) {
         throw parsedButtons.error;
       }
 
       const payloadValidation = validateTemplatePayload(
         {
-          name: flags.name,
-          content: flags.content,
+          name: restoreExplicitEmptyString(flags.name),
+          content: restoreExplicitEmptyString(flags.content),
           buttons: parsedButtons.value,
         },
         {
@@ -967,15 +970,17 @@ const templateUpdateCmd = defineCommand({
       });
 
       const patch: TemplateUpdateInput = {};
-      const parsedButtons = parseTemplateButtons(flags.buttons);
+      const parsedButtons = parseTemplateButtons(
+        restoreExplicitEmptyString(flags.buttons),
+      );
       if (parsedButtons.isFailure) {
         throw parsedButtons.error;
       }
 
       const payloadValidation = validateTemplatePayload(
         {
-          name: flags.name,
-          content: flags.content,
+          name: restoreExplicitEmptyString(flags.name),
+          content: restoreExplicitEmptyString(flags.content),
           buttons: parsedButtons.value,
         },
         {

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  BUN_VERSION: "1.3.10"
+  BUN_VERSION: "1.3.11"
 
 jobs:
   bundle-size:

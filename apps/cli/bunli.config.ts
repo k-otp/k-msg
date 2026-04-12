@@ -1,8 +1,8 @@
-import { defineConfig } from "@bunli/core";
+import { type BunliConfigInput, defineConfig } from "@bunli/core";
 
 import pkg from "./package.json";
 
-export default defineConfig({
+const bunliConfig: BunliConfigInput = defineConfig({
   name: "k-msg",
   version: typeof pkg.version === "string" ? pkg.version : "0.0.0",
   description: "k-msg CLI",
@@ -17,3 +17,5 @@ export default defineConfig({
     compress: true,
   },
 });
+
+export default bunliConfig;
