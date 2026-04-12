@@ -103,15 +103,18 @@ Schema URLs:
 Initialize config:
 
 ```bash
-# default: interactive wizard (TTY)
+# default: interactive wizard (TTY opens the fullscreen TUI)
 k-msg config init
 
 # force full template (also auto-used in non-interactive environments)
 k-msg config init --template full
 
 # add providers incrementally
+# interactive TTY: opens the alternate-buffer TUI
 k-msg config provider add
 k-msg config provider add iwinv
+
+# non-interactive environments still fall back to the prompt/validation path
 ```
 
 ### `env:` substitution
@@ -165,8 +168,8 @@ Required values by provider/channel:
 
 ## Commands
 
-- `k-msg config init|show|validate`
-- `k-msg config provider add [type]`
+- `k-msg config init|show|validate` (`init` opens the fullscreen config form in interactive TTYs)
+- `k-msg config provider add [type]` (interactive TTY opens the fullscreen provider form)
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`

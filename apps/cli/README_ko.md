@@ -103,15 +103,18 @@ k-msg providers list --config /path/to/k-msg.config.json
 설정 초기화:
 
 ```bash
-# 기본: interactive wizard (TTY)
+# 기본: interactive wizard (TTY에서는 fullscreen TUI 실행)
 k-msg config init
 
 # full 템플릿 강제 (non-interactive 환경에서는 자동 적용)
 k-msg config init --template full
 
 # provider를 단계적으로 추가
+# interactive TTY에서는 alternate-buffer TUI가 열립니다
 k-msg config provider add
 k-msg config provider add iwinv
+
+# non-interactive 환경에서는 기존 prompt/validation 경로로 fallback 됩니다
 ```
 
 ### `env:` 치환
@@ -165,8 +168,8 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 
 ## 명령어
 
-- `k-msg config init|show|validate`
-- `k-msg config provider add [type]`
+- `k-msg config init|show|validate` (`init`은 interactive TTY에서 fullscreen config form 실행)
+- `k-msg config provider add [type]` (interactive TTY에서는 fullscreen provider form 실행)
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
