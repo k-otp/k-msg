@@ -1,5 +1,11 @@
 # @k-msg/cli
 
+## 0.9.9 — 2026-04-12
+
+### Patch changes
+
+- Updated dependencies: channel@0.29.6, core@0.29.6, messaging@0.29.6, provider@0.29.6, template@0.29.6, k-msg@0.29.6
+
 ## 0.9.8 — 2026-04-12
 
 ### Patch changes
