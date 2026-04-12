@@ -1,5 +1,11 @@
 # @k-msg/core
 
+## 0.29.5 — 2026-04-12
+
+### Patch changes
+
+- [56734ef](https://github.com/k-otp/k-msg/commit/56734ef3a3dffb3b8e63e792376f661d6f66731f) Refresh the Bun baseline to 1.3.11, update docs tooling patch releases, and prepare the repository for monthly automated dependency maintenance. — Thanks @imjlk!
+
 ## 0.29.4 — 2026-03-08
 
 ### Patch changes
