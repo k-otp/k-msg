@@ -14,7 +14,11 @@ import {
 } from "./command-contract";
 import { listPublicRootCommands, listRootCommands } from "./command-registry";
 import { createReadlinePrompt } from "./prompt-runtime";
-import { exitCodeForError, printError } from "./utils";
+import {
+  exitCodeForError,
+  printError,
+  shouldUseJsonOutput,
+} from "./utils";
 
 const CLI_NAME = "k-msg";
 const CLI_VERSION =
@@ -100,10 +104,20 @@ export async function runCommandDispatcher(
     return;
   }
 
+  const context = {
+    env: {
+      isAIAgent: detectAIAgent(process.env),
+    },
+    store: {
+      isAIAgent: detectAIAgent(process.env),
+    },
+  } as const;
+
+  let parsed: ParsedCommandInput | undefined;
   let prompt: PromptApi | undefined;
 
   try {
-    const parsed = parseCommandInput(command, resolution.remaining);
+    parsed = parseCommandInput(command, resolution.remaining);
     if (parsed.helpRequested) {
       printHelp(command, resolution.path);
       return;
@@ -116,14 +130,7 @@ export async function runCommandDispatcher(
     const spinner = createSpinnerFactory(terminal);
 
     await command.handler({
-      context: {
-        env: {
-          isAIAgent: detectAIAgent(process.env),
-        },
-        store: {
-          isAIAgent: detectAIAgent(process.env),
-        },
-      },
+      context,
       flags: parsed.flags as never,
       positional: parsed.positional,
       prompt,
@@ -136,7 +143,9 @@ export async function runCommandDispatcher(
       process.exitCode = 2;
       return;
     }
-    printError(error, false);
+    const explicitJsonFlag =
+      typeof parsed?.flags.json === "boolean" ? parsed.flags.json : undefined;
+    printError(error, shouldUseJsonOutput(explicitJsonFlag, context));
     process.exitCode = exitCodeForError(error);
     return;
   } finally {

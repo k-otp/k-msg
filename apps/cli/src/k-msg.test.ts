@@ -444,6 +444,29 @@ describe("k-msg CLI E2E", () => {
       );
       missing.toHaveExitCode(2);
       expect(missing.stderr).toContain("Config file not found:");
+
+      const missingJson = expectCommand(
+        await runCli([
+          "config",
+          "show",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+          "--json",
+          "true",
+        ]),
+      );
+      missingJson.toHaveExitCode(2);
+      const missingJsonParsed = JSON.parse(missingJson.stdout) as Record<
+        string,
+        unknown
+      >;
+      expect(missingJsonParsed.ok).toBe(false);
+      const missingJsonError = missingJsonParsed.error as Record<
+        string,
+        unknown
+      >;
+      expect(missingJsonError.message).toBeString();
+      expect(String(missingJsonError.message)).toContain("Config file not found:");
     },
     TEST_TIMEOUT,
   );
