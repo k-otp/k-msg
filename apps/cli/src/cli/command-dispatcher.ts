@@ -33,17 +33,13 @@ type ResolutionResult = {
 
 type ParsedCommandInput = {
   flags: Record<string, unknown>;
+  helpRequested: boolean;
   positional: string[];
 };
 
 export async function runCommandDispatcher(
   argv = process.argv.slice(2),
 ): Promise<void> {
-  if (requestsVersion(argv)) {
-    console.log(`${CLI_NAME} v${CLI_VERSION}`);
-    return;
-  }
-
   const resolution = resolveCommandPath(argv, listRootCommands());
   if (resolution.unknownCommand) {
     console.error(`Unknown command: ${resolution.unknownCommand}`);
@@ -51,11 +47,12 @@ export async function runCommandDispatcher(
     return;
   }
 
-  if (
-    requestsHelp(resolution.remaining) ||
-    (!resolution.command && !resolution.group)
-  ) {
-    printHelp(resolution.command ?? resolution.group, resolution.path);
+  if (!resolution.command && !resolution.group) {
+    if (requestsVersion(resolution.remaining)) {
+      console.log(`${CLI_NAME} v${CLI_VERSION}`);
+      return;
+    }
+    printHelp(undefined, []);
     return;
   }
 
@@ -71,14 +68,21 @@ export async function runCommandDispatcher(
     return;
   }
 
-  const terminal = detectTerminal();
-  const prompt: PromptApi = terminal.isInteractive
-    ? createReadlinePrompt()
-    : createNoopPrompt();
-  const spinner = createSpinnerFactory(terminal);
+  let prompt: PromptApi | undefined;
 
   try {
     const parsed = parseCommandInput(command, resolution.remaining);
+    if (parsed.helpRequested) {
+      printHelp(command, resolution.path);
+      return;
+    }
+
+    const terminal = detectTerminal();
+    prompt = terminal.isInteractive
+      ? createReadlinePrompt()
+      : createNoopPrompt();
+    const spinner = createSpinnerFactory(terminal);
+
     await command.handler({
       context: {
         env: {
@@ -102,7 +106,7 @@ export async function runCommandDispatcher(
     }
     throw error;
   } finally {
-    prompt.close?.();
+    prompt?.close?.();
   }
 }
 
@@ -245,6 +249,7 @@ function parseCommandInput(
   argv: string[],
 ): ParsedCommandInput {
   const rawFlags = new Map<string, unknown>();
+  let helpRequested = false;
   const positional: string[] = [];
   const longOptionMap = new Map<string, CliOptionDefinition>(
     Object.entries(command.options) as Array<[string, CliOptionDefinition]>,
@@ -265,6 +270,7 @@ function parseCommandInput(
       break;
     }
     if (token === "--help" || token === "-h") {
+      helpRequested = true;
       continue;
     }
 
@@ -279,7 +285,12 @@ function parseCommandInput(
     }
 
     if (token.startsWith("--")) {
-      const [rawName, inlineValue] = token.slice(2).split("=", 2);
+      const rawToken = token.slice(2);
+      const separatorIndex = rawToken.indexOf("=");
+      const rawName =
+        separatorIndex === -1 ? rawToken : rawToken.slice(0, separatorIndex);
+      const inlineValue =
+        separatorIndex === -1 ? undefined : rawToken.slice(separatorIndex + 1);
       const definition = longOptionMap.get(rawName);
       if (!definition) {
         throw new CliUsageError(`Unknown option: --${rawName}`);
@@ -345,6 +356,10 @@ function parseCommandInput(
     positional.push(token);
   }
 
+  if (helpRequested) {
+    return { flags: {}, helpRequested, positional };
+  }
+
   const flags: Record<string, unknown> = {};
 
   for (const [name, definition] of Object.entries(command.options) as Array<
@@ -363,7 +378,7 @@ function parseCommandInput(
     flags[name] = parsed.data;
   }
 
-  return { flags, positional };
+  return { flags, helpRequested, positional };
 }
 
 function requestsVersion(argv: string[]): boolean {
@@ -372,10 +387,6 @@ function requestsVersion(argv: string[]): boolean {
   }
 
   return argv.some((arg) => arg === "--version" || arg === "-v");
-}
-
-function requestsHelp(argv: string[]): boolean {
-  return argv.some((arg) => arg === "--help" || arg === "-h");
 }
 
 function detectTerminal(): CliTerminal {

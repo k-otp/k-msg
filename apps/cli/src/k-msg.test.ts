@@ -167,6 +167,13 @@ describe("k-msg CLI E2E", () => {
       const ver = expectCommand(await runCli(["--version"]));
       ver.toHaveExitCode(0);
       expect(ver.stdout).toContain("k-msg v");
+
+      const commandHelp = expectCommand(
+        await runCli(["sms", "send", "--help"]),
+      );
+      commandHelp.toHaveExitCode(0);
+      expect(commandHelp.stdout).toContain("Send SMS/LMS/MMS");
+      expect(commandHelp.stdout).toContain("--text <value>");
     },
     TEST_TIMEOUT,
   );
@@ -629,6 +636,21 @@ describe("k-msg CLI E2E", () => {
       smsResult.toHaveSucceeded();
       expect(smsResult.stdout).toContain("OK");
 
+      const smsLiteralHelpText = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "--help",
+        ]),
+      );
+      smsLiteralHelpText.toHaveSucceeded();
+      expect(smsLiteralHelpText.stdout).toContain("OK");
+
       const alimtalkResult = expectCommand(
         await runCli([
           "alimtalk",
@@ -714,6 +736,17 @@ describe("k-msg CLI E2E", () => {
       );
       advanced.toHaveSucceeded();
       expect(advanced.stdout).toContain("OK");
+
+      const advancedInlineInput = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          '--input={"to":"01012345678","text":"advanced=a=b"}',
+        ]),
+      );
+      advancedInlineInput.toHaveSucceeded();
+      expect(advancedInlineInput.stdout).toContain("OK");
 
       const dryRunSingle = expectCommand(
         await runCli([
