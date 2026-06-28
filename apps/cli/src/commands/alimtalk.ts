@@ -30,10 +30,7 @@ import {
   pickAlimTalkProvider,
 } from "./send-interactive";
 
-function requireFlag(
-  value: string | undefined,
-  label: string,
-): string {
+function requireFlag(value: string | undefined, label: string): string {
   if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }
@@ -143,7 +140,10 @@ const sendCmd = defineCommand({
             const fallbackChannel = flags["fallback-channel"];
             const fallbackContent = flags["fallback-content"];
             const fallbackTitle = flags["fallback-title"];
-            const resolvedProvider = pickAlimTalkProvider(runtime, flags.provider);
+            const resolvedProvider = pickAlimTalkProvider(
+              runtime,
+              flags.provider,
+            );
             const failoverEnabled =
               flags.failover ||
               fallbackChannel !== undefined ||

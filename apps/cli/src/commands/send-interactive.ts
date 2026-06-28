@@ -7,9 +7,9 @@ import { CapabilityNotSupportedError, parseJson } from "../cli/utils";
 import type { KMsgCliConfig } from "../config/schema";
 import type { ProviderWithCapabilities } from "../providers/registry";
 import {
+  type Runtime,
   resolveKakaoChannelPlusId,
   resolveKakaoChannelSenderKey,
-  type Runtime,
 } from "../runtime";
 
 const INTERACTIVE_PROVIDER_MANUAL = "__manual__";

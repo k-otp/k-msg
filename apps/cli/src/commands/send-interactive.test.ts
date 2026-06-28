@@ -107,7 +107,12 @@ function createRuntime(configOverrides?: Record<string, unknown>): Runtime {
     {
       id: "solapi",
       name: "SOLAPI",
-      supportedTypes: ["ALIMTALK", "SMS", "LMS", "MMS"] as readonly MessageType[],
+      supportedTypes: [
+        "ALIMTALK",
+        "SMS",
+        "LMS",
+        "MMS",
+      ] as readonly MessageType[],
       async healthCheck() {
         return { healthy: true, issues: [] };
       },
@@ -128,7 +133,12 @@ function createRuntime(configOverrides?: Record<string, unknown>): Runtime {
     {
       id: "aligo",
       name: "Aligo",
-      supportedTypes: ["ALIMTALK", "SMS", "LMS", "MMS"] as readonly MessageType[],
+      supportedTypes: [
+        "ALIMTALK",
+        "SMS",
+        "LMS",
+        "MMS",
+      ] as readonly MessageType[],
       async healthCheck() {
         return { healthy: true, issues: [] };
       },
@@ -153,7 +163,9 @@ function createRuntime(configOverrides?: Record<string, unknown>): Runtime {
     configPath: "/tmp/k-msg.config.json",
     kmsg: {} as Runtime["kmsg"],
     providers,
-    providersById: new Map(providers.map((provider) => [provider.id, provider])),
+    providersById: new Map(
+      providers.map((provider) => [provider.id, provider]),
+    ),
   };
 }
 
@@ -209,13 +221,7 @@ describe("interactive send helpers", () => {
 
   test("prefers Kakao channel aliases before manual senderKey/plusId prompts", async () => {
     const prompt = new FakePrompt({
-      textAnswers: [
-        "01012345678",
-        "TPL_001",
-        '{"name":"Jane"}',
-        "",
-        "",
-      ],
+      textAnswers: ["01012345678", "TPL_001", '{"name":"Jane"}', "", ""],
       selectAnswers: ["aligo", "main"],
     });
 
@@ -265,7 +271,9 @@ describe("interactive send helpers", () => {
 
     expect(
       prompt.texts.some((message) =>
-        message.includes("Kakao plusId (required for solapi preflight/send readiness)"),
+        message.includes(
+          "Kakao plusId (required for solapi preflight/send readiness)",
+        ),
       ),
     ).toBe(true);
     expect(input.kakao).toEqual({
