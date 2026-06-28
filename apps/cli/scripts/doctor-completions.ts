@@ -5,7 +5,7 @@ const baseEnv = sanitizedCliEnv();
 
 const shellChecks = [
   { shell: "bash", marker: "# bash completion for k-msg" },
-  { shell: "zsh", marker: "# zsh completion for k-msg" },
+  { shell: "zsh", marker: "#compdef k-msg" },
   { shell: "fish", marker: "complete -c k-msg" },
   { shell: "powershell", marker: "Register-ArgumentCompleter" },
 ] as const;
@@ -30,9 +30,15 @@ if (!rootCompletion.stdout.trimEnd().endsWith(":4")) {
 
 if (strict) {
   const aliasCheck = await runCli(["completions", "zsh"]);
-  if (!aliasCheck.stdout.includes("compdef")) {
+  const [firstLine] = aliasCheck.stdout.split(/\r?\n/, 1);
+  if (firstLine !== "#compdef k-msg") {
     throw new Error(
-      "zsh completion output is missing the compdef registration",
+      "zsh completion output must keep the #compdef k-msg header for installer alias patching",
+    );
+  }
+  if (!aliasCheck.stdout.includes("compdef _k-msg k-msg")) {
+    throw new Error(
+      "zsh completion output is missing the primary compdef registration",
     );
   }
 }

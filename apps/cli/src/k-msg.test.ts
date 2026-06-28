@@ -153,6 +153,14 @@ function expectCommand(result: {
   };
 }
 
+function parseCompletionValues(stdout: string): string[] {
+  return stdout
+    .trim()
+    .split(/\r?\n/)
+    .filter((line) => line.length > 0 && !line.startsWith(":"))
+    .map((line) => line.split("\t", 1)[0] ?? line);
+}
+
 describe("k-msg CLI E2E", () => {
   test(
     "help/version",
@@ -160,6 +168,8 @@ describe("k-msg CLI E2E", () => {
       const help = expectCommand(await runCli(["--help"]));
       help.toHaveExitCode(0);
       expect(help.stdout.toLowerCase()).toContain("k-msg");
+      expect(help.stdout).toContain("complete");
+      expect(help.stdout).toContain("completions");
       expect(help.stdout).toContain("config");
       expect(help.stdout).toContain("db");
       expect(help.stdout).toContain("providers");
@@ -168,12 +178,24 @@ describe("k-msg CLI E2E", () => {
       ver.toHaveExitCode(0);
       expect(ver.stdout).toContain("k-msg v");
 
+      const bogus = expectCommand(await runCli(["--bogus"]));
+      bogus.toHaveExitCode(2);
+      expect(bogus.stderr).toContain("Unknown option: --bogus");
+
       const commandHelp = expectCommand(
         await runCli(["sms", "send", "--help"]),
       );
       commandHelp.toHaveExitCode(0);
       expect(commandHelp.stdout).toContain("Send SMS/LMS/MMS");
       expect(commandHelp.stdout).toContain("--text <value>");
+
+      const completionHelp = expectCommand(
+        await runCli(["completions", "--help"]),
+      );
+      completionHelp.toHaveExitCode(0);
+      expect(completionHelp.stdout).toContain(
+        "Generate shell completion script",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -360,13 +382,25 @@ describe("k-msg CLI E2E", () => {
         await runCli(["completions", "zsh"], { cwd }),
       );
       script.toHaveSucceeded();
-      expect(script.stdout).toContain("# zsh completion for k-msg");
+      expect(script.stdout).toContain("#compdef k-msg");
 
       const protocol = expectCommand(
         await runCli(["complete", "--", ""], { cwd }),
       );
       protocol.toHaveSucceeded();
       expect(protocol.stdout).not.toContain(":1");
+      const rootValues = parseCompletionValues(protocol.stdout);
+      expect(rootValues).toContain("providers");
+      expect(rootValues).toContain("completions");
+
+      const nestedProtocol = expectCommand(
+        await runCli(["complete", "--", "providers", ""], { cwd }),
+      );
+      nestedProtocol.toHaveSucceeded();
+      const nestedValues = parseCompletionValues(nestedProtocol.stdout);
+      expect(nestedValues).toContain("list");
+      expect(nestedValues).toContain("health");
+      expect(nestedValues).toContain("doctor");
     },
     TEST_TIMEOUT,
   );
@@ -650,6 +684,36 @@ describe("k-msg CLI E2E", () => {
       );
       smsLiteralHelpText.toHaveSucceeded();
       expect(smsLiteralHelpText.stdout).toContain("OK");
+
+      const smsShortHelpValue = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "-h",
+        ]),
+      );
+      smsShortHelpValue.toHaveSucceeded();
+      expect(smsShortHelpValue.stdout).toContain("OK");
+
+      const smsShortVersionValue = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "-v",
+        ]),
+      );
+      smsShortVersionValue.toHaveSucceeded();
+      expect(smsShortVersionValue.stdout).toContain("OK");
 
       const alimtalkResult = expectCommand(
         await runCli([

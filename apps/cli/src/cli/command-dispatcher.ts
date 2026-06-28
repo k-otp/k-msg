@@ -12,7 +12,7 @@ import {
   isCliGroup,
   type PromptApi,
 } from "./command-contract";
-import { listRootCommands } from "./command-registry";
+import { listPublicRootCommands, listRootCommands } from "./command-registry";
 import { createReadlinePrompt } from "./prompt-runtime";
 
 const CLI_NAME = "k-msg";
@@ -50,6 +50,19 @@ export async function runCommandDispatcher(
   if (!resolution.command && !resolution.group) {
     if (requestsVersion(resolution.remaining)) {
       console.log(`${CLI_NAME} v${CLI_VERSION}`);
+      return;
+    }
+    if (
+      requestsHelp(resolution.remaining) ||
+      resolution.remaining.length === 0
+    ) {
+      printHelp(undefined, []);
+      return;
+    }
+    const [unknownOption] = resolution.remaining;
+    if (unknownOption?.startsWith("-")) {
+      console.error(`Unknown option: ${unknownOption}`);
+      process.exitCode = 2;
       return;
     }
     printHelp(undefined, []);
@@ -116,7 +129,7 @@ export type CompletionEntry = {
 };
 
 export function listCompletionEntries(): CompletionEntry[] {
-  return listRootCommands().map((node) => ({
+  return listPublicRootCommands().map((node) => ({
     description: node.description,
     value: node.name,
   }));
@@ -134,7 +147,7 @@ export function printHelp(node: CliNode | undefined, path: string[]): void {
     lines.push(`  ${CLI_NAME} <command> [options]`);
     lines.push("");
     lines.push("Commands:");
-    for (const child of listRootCommands()) {
+    for (const child of listPublicRootCommands()) {
       lines.push(`  ${child.name.padEnd(12)} ${child.description}`);
     }
     lines.push("");
@@ -387,6 +400,10 @@ function requestsVersion(argv: string[]): boolean {
   }
 
   return argv.some((arg) => arg === "--version" || arg === "-v");
+}
+
+function requestsHelp(argv: string[]): boolean {
+  return argv.some((arg) => arg === "--help" || arg === "-h");
 }
 
 function detectTerminal(): CliTerminal {
