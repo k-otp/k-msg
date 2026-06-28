@@ -1,6 +1,6 @@
 # k-msg CLI (`apps/cli`)
 
-This CLI is built with [Bunli](https://bunli.dev/) and uses the unified `k-msg` package (KMsg + Providers).
+This CLI uses the unified `k-msg` package (KMsg + Providers) and a prompt-first runtime for interactive setup flows.
 
 ## Install (curl only)
 
@@ -29,10 +29,10 @@ It resolves shell init files by context:
 ## Run (local/dev)
 
 ```bash
-# Generate command types
+# Prepare CLI runtime metadata
 bun run --cwd apps/cli generate
 
-# Validate completion metadata graph (strict)
+# Validate shell completion output (strict)
 bun run --cwd apps/cli doctor:completions
 
 # Build native binary
@@ -103,18 +103,18 @@ Schema URLs:
 Initialize config:
 
 ```bash
-# default: interactive wizard (TTY opens the fullscreen TUI)
+# default: interactive wizard (TTY uses prompt-based setup)
 k-msg config init
 
 # force full template (also auto-used in non-interactive environments)
 k-msg config init --template full
 
 # add providers incrementally
-# interactive TTY: opens the alternate-buffer TUI
+# interactive TTY: runs prompt-based setup
 k-msg config provider add
 k-msg config provider add iwinv
 
-# non-interactive environments still fall back to the prompt/validation path
+# non-interactive environments stay on the validation/template path
 ```
 
 ### `env:` substitution
@@ -168,8 +168,8 @@ Required values by provider/channel:
 
 ## Commands
 
-- `k-msg config init|show|validate` (`init` opens the fullscreen config form in interactive TTYs)
-- `k-msg config provider add [type]` (interactive TTY opens the fullscreen provider form)
+- `k-msg config init|show|validate` (`init` uses prompt-based setup in interactive TTYs)
+- `k-msg config provider add [type]` (interactive TTY uses prompt-based provider setup)
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
@@ -384,7 +384,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
 ## Output / Exit Codes
 
 - `--json`: print machine-readable JSON
-- AI environments (Bunli `@bunli/plugin-ai-detect`): JSON output is auto-enabled
+- AI environments: JSON output is auto-enabled
   when an agent is detected (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX_CI` /
   `CODEX_SHELL` / `CODEX_THREAD_ID`, `MCP_SERVER_NAME` / `MCP_SESSION_ID` /
   `MCP_TOOL_NAME`)

@@ -158,7 +158,7 @@ resolve_bash_login_file() {
 }
 
 setup_zsh_completion() {
-  local install_path shell_name zfunc_dir completion_file zshrc_line zshrc_file
+  local install_path shell_name zfunc_dir completion_file zshrc_line zshrc_file first_line
   install_path="$1"
   shell_name="$2"
   zfunc_dir="${HOME}/.zfunc"
@@ -168,11 +168,20 @@ setup_zsh_completion() {
 
   mkdir -p "$zfunc_dir"
   "$install_path" completions zsh >"$completion_file"
-  if head -n 1 "$completion_file" | grep -Fqx "#compdef ${CLI_NAME}"; then
+  first_line="$(head -n 1 "$completion_file")"
+  if printf '%s\n' "$first_line" | grep -Fqx "#compdef ${CLI_NAME}"; then
     awk -v cli="$CLI_NAME" -v alias="$CLI_ALIAS" '
       NR == 1 {
         print "#compdef " cli " " alias
         next
+      }
+      { print }
+    ' "$completion_file" >"${completion_file}.tmp"
+    mv "${completion_file}.tmp" "$completion_file"
+  elif printf '%s\n' "$first_line" | grep -Fqx "# zsh completion for ${CLI_NAME}"; then
+    awk -v cli="$CLI_NAME" -v alias="$CLI_ALIAS" '
+      NR == 1 {
+        print "#compdef " cli " " alias
       }
       { print }
     ' "$completion_file" >"${completion_file}.tmp"

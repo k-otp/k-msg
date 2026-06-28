@@ -1,4 +1,3 @@
-import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   KakaoChannelBindingResolver,
   KakaoChannelCapabilityService,
@@ -19,6 +18,7 @@ import {
 } from "@k-msg/template";
 import { z } from "zod";
 import { restoreExplicitEmptyString } from "../cli/argv";
+import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   CapabilityNotSupportedError,

@@ -1,6 +1,5 @@
 import { access, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   buildCloudflareSqlSchemaSql,
   type CloudflareSqlSchemaTarget,
@@ -8,6 +7,7 @@ import {
   type SqlDialect,
 } from "@k-msg/messaging/adapters/cloudflare";
 import { z } from "zod";
+import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
 import trackingMigrateCmd from "./db-tracking-migrate";
 
