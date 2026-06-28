@@ -1,4 +1,4 @@
-import type { ZodTypeAny, infer as InferZod } from "zod";
+import type { infer as InferZod, ZodTypeAny } from "zod";
 
 export type OptionKind = "flag" | "value";
 
@@ -63,9 +63,10 @@ export interface CliRuntimeContext {
   store?: Record<string, unknown>;
 }
 
-type InferOptionValue<TOption> = TOption extends CliOptionDefinition<infer TSchema>
-  ? InferZod<TSchema>
-  : never;
+type InferOptionValue<TOption> =
+  TOption extends CliOptionDefinition<infer TSchema>
+    ? InferZod<TSchema>
+    : never;
 
 export type InferCommandFlags<TOptions extends CliOptionsShape | undefined> =
   TOptions extends CliOptionsShape
@@ -85,7 +86,9 @@ export interface CliHandlerArgs<
   terminal: CliTerminal;
 }
 
-export interface CliCommandDefinition<TOptions extends CliOptionsShape = CliOptionsShape> {
+export interface CliCommandDefinition<
+  TOptions extends CliOptionsShape = CliOptionsShape,
+> {
   description: string;
   handler: (args: CliHandlerArgs<TOptions>) => Promise<void> | void;
   kind: "command";
@@ -116,9 +119,7 @@ export function option<TSchema extends ZodTypeAny>(
 
 export function defineCommand<const TOptions extends CliOptionsShape>(input: {
   description: string;
-  handler: (
-    args: CliHandlerArgs<TOptions>,
-  ) => Promise<void> | void;
+  handler: (args: CliHandlerArgs<TOptions>) => Promise<void> | void;
   name: string;
   options?: TOptions;
 }): CliCommandDefinition<TOptions> {

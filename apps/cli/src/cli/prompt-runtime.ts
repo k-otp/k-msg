@@ -100,7 +100,9 @@ export function createReadlinePromptWithInterface(
       },
     ) {
       if (!Array.isArray(options.options) || options.options.length === 0) {
-        throw new Error(`select() requires at least one option for prompt: ${message}`);
+        throw new Error(
+          `select() requires at least one option for prompt: ${message}`,
+        );
       }
 
       const resolvedDefaultIndex = resolveDefaultIndex(
@@ -187,8 +189,7 @@ function normalizePromptToken(value: string): string {
 }
 
 function formatTextPrompt(message: string, defaultValue: string): string {
-  const suffix =
-    defaultValue.length > 0 ? ` [default: ${defaultValue}]` : "";
+  const suffix = defaultValue.length > 0 ? ` [default: ${defaultValue}]` : "";
   return `${message}${suffix}: `;
 }
 
@@ -211,7 +212,9 @@ function resolveDefaultIndex<T>(
     return 0;
   }
 
-  const matchIndex = options.findIndex((option) => option.value === defaultValue);
+  const matchIndex = options.findIndex(
+    (option) => option.value === defaultValue,
+  );
   return matchIndex >= 0 ? matchIndex : 0;
 }
 
@@ -265,7 +268,8 @@ function resolvePromptSelection<T>(
     const normalizedLabel = normalizePromptToken(String(option.label));
     const normalizedValue = normalizePromptToken(String(option.value));
     return (
-      normalizedAnswer === normalizedLabel || normalizedAnswer === normalizedValue
+      normalizedAnswer === normalizedLabel ||
+      normalizedAnswer === normalizedValue
     );
   });
 }

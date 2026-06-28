@@ -1,16 +1,16 @@
 import packageJson from "../../package.json";
 import {
-  isCliCommand,
-  isCliGroup,
   type CliCommandDefinition,
   type CliGroupDefinition,
   type CliNode,
   type CliOptionDefinition,
   type CliOptionsShape,
-  type PromptApi,
   type CliSpinnerFactory,
   type CliSpinnerHandle,
   type CliTerminal,
+  isCliCommand,
+  isCliGroup,
+  type PromptApi,
 } from "./command-contract";
 import { listRootCommands } from "./command-registry";
 import { createReadlinePrompt } from "./prompt-runtime";
@@ -51,7 +51,10 @@ export async function runCommandDispatcher(
     return;
   }
 
-  if (requestsHelp(resolution.remaining) || (!resolution.command && !resolution.group)) {
+  if (
+    requestsHelp(resolution.remaining) ||
+    (!resolution.command && !resolution.group)
+  ) {
     printHelp(resolution.command ?? resolution.group, resolution.path);
     return;
   }
@@ -177,13 +180,19 @@ export function printHelp(node: CliNode | undefined, path: string[]): void {
 
 function formatOptionHelp(options: CliOptionsShape): string[] {
   return Object.entries(options).map(([name, definition]) => {
-    const long = definition.argumentKind === "flag" ? `--${name}` : `--${name} <value>`;
-    const prefix = definition.short ? `-${definition.short}, ${long}` : `    ${long}`;
+    const long =
+      definition.argumentKind === "flag" ? `--${name}` : `--${name} <value>`;
+    const prefix = definition.short
+      ? `-${definition.short}, ${long}`
+      : `    ${long}`;
     return `  ${prefix.padEnd(28)} ${definition.description ?? ""}`.trimEnd();
   });
 }
 
-function resolveCommandPath(argv: string[], nodes: CliNode[]): ResolutionResult {
+function resolveCommandPath(
+  argv: string[],
+  nodes: CliNode[],
+): ResolutionResult {
   const tokens = [...argv];
   const path: string[] = [];
   let currentNodes = nodes;
@@ -292,7 +301,9 @@ function parseCommandInput(
       }
 
       const value =
-        inlineValue !== undefined ? inlineValue : argv[index + 1] ?? undefined;
+        inlineValue !== undefined
+          ? inlineValue
+          : (argv[index + 1] ?? undefined);
       if (value === undefined) {
         throw new CliUsageError(`Missing value for option: --${rawName}`);
       }
@@ -336,9 +347,9 @@ function parseCommandInput(
 
   const flags: Record<string, unknown> = {};
 
-  for (const [name, definition] of Object.entries(
-    command.options,
-  ) as Array<[string, CliOptionDefinition]>) {
+  for (const [name, definition] of Object.entries(command.options) as Array<
+    [string, CliOptionDefinition]
+  >) {
     const value = rawFlags.has(name) ? rawFlags.get(name) : undefined;
     const parsed = definition.schema.safeParse(value);
     if (!parsed.success) {
@@ -466,14 +477,20 @@ class ConsoleSpinner implements CliSpinnerHandle {
 function createNoopPrompt(): PromptApi {
   return {
     async confirm() {
-      throw new CliUsageError("Interactive prompt is unavailable in this terminal.");
+      throw new CliUsageError(
+        "Interactive prompt is unavailable in this terminal.",
+      );
     },
     close() {},
     async select() {
-      throw new CliUsageError("Interactive prompt is unavailable in this terminal.");
+      throw new CliUsageError(
+        "Interactive prompt is unavailable in this terminal.",
+      );
     },
     async text() {
-      throw new CliUsageError("Interactive prompt is unavailable in this terminal.");
+      throw new CliUsageError(
+        "Interactive prompt is unavailable in this terminal.",
+      );
     },
   };
 }

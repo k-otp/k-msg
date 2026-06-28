@@ -22,6 +22,8 @@ describe("CLI runtime policy", () => {
     expect(dependencies["@bunli/tui"]).toBeUndefined();
     expect(dependencies.bunli).toBeUndefined();
     expect(dependencies["@opentui/core-darwin-arm64"]).toBeUndefined();
-    expect(fs.existsSync(path.join(packageRoot, "bunli.config.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(packageRoot, "bunli.config.ts"))).toBe(
+      false,
+    );
   });
 });

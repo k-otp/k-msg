@@ -31,7 +31,9 @@ if (!rootCompletion.stdout.trimEnd().endsWith(":4")) {
 if (strict) {
   const aliasCheck = await runCli(["completions", "zsh"]);
   if (!aliasCheck.stdout.includes("compdef")) {
-    throw new Error("zsh completion output is missing the compdef registration");
+    throw new Error(
+      "zsh completion output is missing the compdef registration",
+    );
   }
 }
 
