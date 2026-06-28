@@ -1,8 +1,6 @@
 import readline from "node:readline";
 import type { PromptApi, PromptSelectOption } from "./command-contract";
 
-type ValidateInput = (value: string) => boolean | string;
-
 type PromptQuestion = (query: string) => Promise<string>;
 
 type ReadlineQuestionAdapter = {

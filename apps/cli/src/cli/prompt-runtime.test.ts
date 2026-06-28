@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { EventEmitter } from "node:events";
 import {
-  PromptCancelledError,
   createReadlinePromptWithInterface,
+  PromptCancelledError,
 } from "./prompt-runtime";
 
 class FakeReadline extends EventEmitter {

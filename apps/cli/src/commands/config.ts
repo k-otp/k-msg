@@ -713,7 +713,9 @@ const providerAddCmd = defineCommand({
 
       const shouldSetDefault = await promptConfirm(prompt, {
         message: "Set as default provider?",
-        defaultValue: shouldDefaultNewProviderAsDefault(config.providers.length),
+        defaultValue: shouldDefaultNewProviderAsDefault(
+          config.providers.length,
+        ),
       });
       const saved = await saveProviderFromEntry({
         configPath: flags.config,

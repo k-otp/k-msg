@@ -291,7 +291,7 @@ function parseCommandInput(
   const shortOptionMap = new Map(
     (Object.entries(command.options) as Array<[string, CliOptionDefinition]>)
       .filter(([, definition]) => typeof definition.short === "string")
-      .map(([name, definition]) => [definition.short!, name] as const),
+      .map(([name, definition]) => [definition.short ?? "", name] as const),
   );
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -311,7 +311,7 @@ function parseCommandInput(
     if (token.startsWith("--no-")) {
       const optionName = token.slice("--no-".length);
       const definition = longOptionMap.get(optionName);
-      if (!definition || definition.argumentKind !== "flag") {
+      if (definition?.argumentKind !== "flag") {
         throw new CliUsageError(`Unknown option: ${token}`);
       }
       rawFlags.set(optionName, false);
