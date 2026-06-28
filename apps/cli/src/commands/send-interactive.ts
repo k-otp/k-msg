@@ -117,19 +117,23 @@ export async function buildInteractiveSmsInput(input: {
 
   const to =
     normalizeRequiredText(draft.to) ??
-    (await promptText(prompt, {
-      message: "Recipient phone number",
-      validate: (value) =>
-        value.trim().length > 0 ? true : "Recipient phone number is required",
-    })).trim();
+    (
+      await promptText(prompt, {
+        message: "Recipient phone number",
+        validate: (value) =>
+          value.trim().length > 0 ? true : "Recipient phone number is required",
+      })
+    ).trim();
 
   const text =
     normalizeRequiredText(draft.text) ??
-    (await promptText(prompt, {
-      message: "Message text",
-      validate: (value) =>
-        value.trim().length > 0 ? true : "Message text is required",
-    })).trim();
+    (
+      await promptText(prompt, {
+        message: "Message text",
+        validate: (value) =>
+          value.trim().length > 0 ? true : "Message text is required",
+      })
+    ).trim();
 
   const from =
     normalizeOptionalText(draft.from) ??
@@ -172,19 +176,23 @@ export async function buildInteractiveAlimTalkInput(input: {
 
   const to =
     normalizeRequiredText(draft.to) ??
-    (await promptText(prompt, {
-      message: "Recipient phone number",
-      validate: (value) =>
-        value.trim().length > 0 ? true : "Recipient phone number is required",
-    })).trim();
+    (
+      await promptText(prompt, {
+        message: "Recipient phone number",
+        validate: (value) =>
+          value.trim().length > 0 ? true : "Recipient phone number is required",
+      })
+    ).trim();
 
   const templateId =
     normalizeRequiredText(draft.templateId) ??
-    (await promptText(prompt, {
-      message: "Template ID",
-      validate: (value) =>
-        value.trim().length > 0 ? true : "Template ID is required",
-    })).trim();
+    (
+      await promptText(prompt, {
+        message: "Template ID",
+        validate: (value) =>
+          value.trim().length > 0 ? true : "Template ID is required",
+      })
+    ).trim();
 
   const variables =
     draft.vars ??
@@ -286,8 +294,9 @@ function buildSenderPromptMessage(
 }
 
 function buildSenderKeyPromptMessage(providerId: string): string {
-  const configHint = providerCliMetadata[providerId as keyof typeof providerCliMetadata]
-    ?.defaultKakaoSenderKey;
+  const configHint =
+    providerCliMetadata[providerId as keyof typeof providerCliMetadata]
+      ?.defaultKakaoSenderKey;
   return configHint
     ? `Kakao senderKey/profileId (optional, config hint: ${configHint})`
     : "Kakao senderKey/profileId (optional)";
@@ -406,19 +415,23 @@ async function promptKakaoAlias(input: {
   if (aliases.length === 0) return undefined;
 
   const defaultAlias = getDefaultKakaoAlias(input.config, input.providerId);
-  const selected = await promptSelect(input.prompt, "Select Kakao channel alias", {
-    options: [
-      ...aliases.map((item) => ({
-        label: item.label,
-        value: item.alias,
-      })),
-      {
-        label: "Manual senderKey / plusId entry",
-        value: INTERACTIVE_PROVIDER_MANUAL,
-      },
-    ],
-    default: defaultAlias,
-  });
+  const selected = await promptSelect(
+    input.prompt,
+    "Select Kakao channel alias",
+    {
+      options: [
+        ...aliases.map((item) => ({
+          label: item.label,
+          value: item.alias,
+        })),
+        {
+          label: "Manual senderKey / plusId entry",
+          value: INTERACTIVE_PROVIDER_MANUAL,
+        },
+      ],
+      default: defaultAlias,
+    },
+  );
 
   return selected === INTERACTIVE_PROVIDER_MANUAL ? undefined : selected;
 }
@@ -432,7 +445,12 @@ function listKakaoAliases(
     .filter(([, value]) => value?.providerId === providerId)
     .map(([alias, value]) => ({
       alias,
-      label: formatKakaoAliasLabel(alias, value?.name, value?.senderKey, value?.plusId),
+      label: formatKakaoAliasLabel(
+        alias,
+        value?.name,
+        value?.senderKey,
+        value?.plusId,
+      ),
     }));
 }
 
@@ -508,7 +526,9 @@ function pickProviderForTypes(
     }
   }
 
-  const match = runtime.providers.find((provider) => supportsAnyType(provider, types));
+  const match = runtime.providers.find((provider) =>
+    supportsAnyType(provider, types),
+  );
   if (match) return match;
 
   throw new CapabilityNotSupportedError(
@@ -520,7 +540,9 @@ function getProvidersForTypes(
   runtime: Runtime,
   types: readonly MessageType[],
 ): ProviderWithCapabilities[] {
-  return runtime.providers.filter((provider) => supportsAnyType(provider, types));
+  return runtime.providers.filter((provider) =>
+    supportsAnyType(provider, types),
+  );
 }
 
 function getDefaultProviderId(
@@ -547,13 +569,15 @@ function getDefaultProviderId(
     }
   }
 
-  return runtime.providers.find((provider) => supportsAnyType(provider, types))?.id;
+  return runtime.providers.find((provider) => supportsAnyType(provider, types))
+    ?.id;
 }
 
 function normalizeRouteIds(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.filter(
-      (item): item is string => typeof item === "string" && item.trim().length > 0,
+      (item): item is string =>
+        typeof item === "string" && item.trim().length > 0,
     );
   }
   return typeof value === "string" && value.trim().length > 0 ? [value] : [];

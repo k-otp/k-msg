@@ -1,15 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { ProviderOnboardingSpec } from "@k-msg/core";
-import {
-  runAlimTalkPreflight,
-  runProviderDoctor,
-} from "./onboarding";
+import { runAlimTalkPreflight, runProviderDoctor } from "./onboarding";
 import type { ProviderWithCapabilities } from "./providers/registry";
 import type { Runtime } from "./runtime";
 
-function createRuntime(
-  configOverrides?: Record<string, unknown>,
-): Runtime {
+function createRuntime(configOverrides?: Record<string, unknown>): Runtime {
   return {
     config: {
       version: 1,
@@ -120,7 +115,9 @@ describe("onboarding guidance", () => {
           value: {
             id: "TPL_001",
           },
-        } as Awaited<ReturnType<NonNullable<ProviderWithCapabilities["getTemplate"]>>>;
+        } as Awaited<
+          ReturnType<NonNullable<ProviderWithCapabilities["getTemplate"]>>
+        >;
       },
       getOnboardingSpec() {
         return {
@@ -137,10 +134,7 @@ describe("onboarding guidance", () => {
         return {
           isSuccess: true,
           isFailure: false,
-          value: [
-            { plusId: "@one" },
-            { plusId: "@two" },
-          ],
+          value: [{ plusId: "@one" }, { plusId: "@two" }],
         } as Awaited<
           ReturnType<NonNullable<ProviderWithCapabilities["listKakaoChannels"]>>
         >;

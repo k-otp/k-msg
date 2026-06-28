@@ -21,10 +21,7 @@ import {
   ensureInteractiveSendAllowed,
 } from "./send-interactive";
 
-function requireFlag(
-  value: string | undefined,
-  label: string,
-): string {
+function requireFlag(value: string | undefined, label: string): string {
   if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }

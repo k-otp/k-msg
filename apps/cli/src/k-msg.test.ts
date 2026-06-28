@@ -852,13 +852,7 @@ describe("k-msg CLI E2E", () => {
       const configPath = await createTempConfig();
 
       const smsInteractiveRequiresTty = expectCommand(
-        await runCli([
-          "sms",
-          "send",
-          "--config",
-          configPath,
-          "--interactive",
-        ]),
+        await runCli(["sms", "send", "--config", configPath, "--interactive"]),
       );
       smsInteractiveRequiresTty.toHaveExitCode(2);
       expect(smsInteractiveRequiresTty.stderr).toContain(

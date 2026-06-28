@@ -226,7 +226,8 @@ function getPlusIdGuidance(
   switch (reasonCode) {
     case "sender_key_missing":
       return {
-        reason: "plusId inference could not start because senderKey/profileId was not resolved.",
+        reason:
+          "plusId inference could not start because senderKey/profileId was not resolved.",
         nextAction:
           "Pass --sender-key, choose a Kakao channel alias, or configure a provider/default senderKey first.",
       };
@@ -308,7 +309,8 @@ function getSmsSenderGuidance(
   }
 
   return {
-    reason: "SMS/LMS fallback sender config is missing, so sends will depend on per-command --from values.",
+    reason:
+      "SMS/LMS fallback sender config is missing, so sends will depend on per-command --from values.",
     nextAction:
       providerKind === "aligo"
         ? "Set aligo.config.sender (prefer env:ALIGO_SENDER) or pass --from on send."
@@ -365,7 +367,8 @@ function getGenericCheckGuidance(
     if (check.status === "pass") {
       return {
         reason: `${providerName} responded successfully to the readiness probe.`,
-        nextAction: "Use the same credentials and routing context for live preflight/send.",
+        nextAction:
+          "Use the same credentials and routing context for live preflight/send.",
       };
     }
     if (check.status === "skip") {
@@ -669,7 +672,8 @@ async function inferPlusId(params: {
   const fn = (provider as unknown as KakaoChannelProvider).listKakaoChannels;
   if (typeof fn !== "function") {
     return {
-      message: "plusId inference is unavailable because listKakaoChannels is not exposed",
+      message:
+        "plusId inference is unavailable because listKakaoChannels is not exposed",
       reasonCode: "capability_unavailable",
     };
   }
