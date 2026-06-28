@@ -433,6 +433,17 @@ describe("k-msg CLI E2E", () => {
       shown.toHaveSucceeded();
       expect(shown.stdout).toContain("Config:");
       expect(shown.stdout).toContain("Providers:");
+
+      const missing = expectCommand(
+        await runCli([
+          "config",
+          "validate",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+        ]),
+      );
+      missing.toHaveExitCode(2);
+      expect(missing.stderr).toContain("Config file not found:");
     },
     TEST_TIMEOUT,
   );

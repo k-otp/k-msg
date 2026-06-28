@@ -8,6 +8,9 @@ type PromptQuestion = (query: string) => Promise<string>;
 type ReadlineQuestionAdapter = {
   close(): void;
   question(query: string, callback: (answer: string) => void): void;
+  off?(event: "close" | "SIGINT", listener: () => void): void;
+  once?(event: "close" | "SIGINT", listener: () => void): void;
+  removeListener?(event: "close" | "SIGINT", listener: () => void): void;
 };
 
 type PromptOutput = {
@@ -42,8 +45,33 @@ export function createReadlinePromptWithInterface(
 ): PromptApi {
   const { errorLine, printLine } = resolvePromptOutput(output);
   const askQuestion: PromptQuestion = (query) =>
-    new Promise<string>((resolve) => {
-      rl.question(query, resolve);
+    new Promise<string>((resolve, reject) => {
+      let settled = false;
+      const cleanup = () => {
+        if (typeof rl.off === "function") {
+          rl.off("close", onCancel);
+          rl.off("SIGINT", onCancel);
+          return;
+        }
+        rl.removeListener?.("close", onCancel);
+        rl.removeListener?.("SIGINT", onCancel);
+      };
+      const onCancel = () => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(new PromptCancelledError());
+      };
+      const onAnswer = (answer: string) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve(answer);
+      };
+
+      rl.once?.("close", onCancel);
+      rl.once?.("SIGINT", onCancel);
+      rl.question(query, onAnswer);
     });
 
   return {

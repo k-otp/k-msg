@@ -42,6 +42,12 @@ function canPromptInTerminal(terminal: {
   return terminal.isInteractive && !terminal.isCI;
 }
 
+export function shouldDefaultNewProviderAsDefault(
+  existingProviderCount: number,
+): boolean {
+  return existingProviderCount === 0;
+}
+
 function reportPromptCancellation(): void {
   console.error("Prompt cancelled.");
 }
@@ -707,7 +713,7 @@ const providerAddCmd = defineCommand({
 
       const shouldSetDefault = await promptConfirm(prompt, {
         message: "Set as default provider?",
-        defaultValue: config.providers.length === 1,
+        defaultValue: shouldDefaultNewProviderAsDefault(config.providers.length),
       });
       const saved = await saveProviderFromEntry({
         configPath: flags.config,
