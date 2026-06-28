@@ -127,8 +127,8 @@ If the env var is missing/empty, commands that need runtime providers will fail 
 When you are unsure which values must be prepared before send, use this checklist:
 
 1. Configure provider credentials with `env:` references.
-2. Run `k-msg providers doctor` to verify account/config readiness.
-3. For AlimTalk, run `k-msg alimtalk preflight` with the provider/template/channel you will use.
+2. Run `k-msg providers doctor` to verify account/config readiness and read the provider-specific `reason` / `next` checklist lines.
+3. For AlimTalk, run `k-msg alimtalk preflight` with the provider/template/channel you will use, then follow any `reason` / `next` guidance before live sends.
 4. Send only after preflight passes.
 
 Credential examples:
@@ -166,13 +166,24 @@ Required values by provider/channel:
 | `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/channel alias or `solapi.config.kakaoPfId`) | For preflight policy checks, set `plusId` via `--plus-id` or channel/default alias |
 | `mock` | all | none | minimal message fields (`to`, `text` or `template-id`/`vars`) | Local test provider |
 
+### Provider onboarding expectations
+
+CLI readiness checks describe the vendor prerequisite path. They do **not** create or manage a generic channel approval state.
+
+| Provider | Vendor prerequisite path | What CLI checks | Recommended next command |
+| --- | --- | --- | --- |
+| `iwinv` | Manual console approval | config keys, manual evidence record, template probe, sender fallback config | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+| `aligo` | API-backed Kakao channel path | config keys, channel/template capabilities, Kakao list probe, plusId inference guidance | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+| `solapi` | External vendor metadata + explicit binding | config keys, explicit plusId expectations, template probe result when available | `k-msg providers doctor` -> `k-msg alimtalk preflight --plus-id <plusId>` |
+| `mock` | Local fixture only | basic capability checks and seed template path | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+
 ## Commands
 
 - `k-msg config init|show|validate` (`init` uses prompt-based setup in interactive TTYs)
 - `k-msg config provider add [type]` (interactive TTY uses prompt-based provider setup)
 - `k-msg providers list|health|doctor`
-- `k-msg sms send`
-- `k-msg alimtalk preflight|send`
+- `k-msg sms send [--interactive]`
+- `k-msg alimtalk preflight|send [--interactive]`
 - `k-msg completions <bash|zsh|fish|powershell>`
 - `k-msg send --input <json> | --file <path> | --stdin` (advanced/raw JSON only)
 - `k-msg db schema print|generate`
@@ -252,8 +263,9 @@ k-msg alimtalk send --provider iwinv --template-id TPL_001 --to 01012345678 --va
 
 Notes:
 
-- For IWINV, Kakao channel onboarding is manual in vendor console. Keep the manual ack in config updated.
+- For IWINV, Kakao channel onboarding is manual in vendor console. Keep the manual evidence record in config updated.
 - For providers with `required_if_no_inference`, preflight fails when `plusId` is missing and inference cannot resolve it.
+- `providers doctor` and `alimtalk preflight` print `reason:` and `next:` lines so the failing prerequisite and follow-up action are visible in text mode.
 
 ## Send
 
@@ -262,6 +274,14 @@ Notes:
 ```bash
 k-msg sms send --to 01012345678 --text "hello"
 ```
+
+Interactive prompt flow for missing fields:
+
+```bash
+k-msg sms send --interactive
+```
+
+`--interactive` is opt-in, requires a TTY, and fills only missing fields. It does not change the raw JSON `k-msg send` contract.
 
 ### AlimTalk
 
@@ -275,6 +295,14 @@ k-msg alimtalk send \
   --channel main \
   --plus-id @my_channel
 ```
+
+Interactive prompt flow for missing fields:
+
+```bash
+k-msg alimtalk send --interactive
+```
+
+The interactive path prefers Kakao channel aliases first and only asks for manual `senderKey` / `plusId` input when alias/default bindings do not resolve them.
 
 Failover options:
 
@@ -303,6 +331,7 @@ k-msg alimtalk preflight \
 ```
 
 `preflight` runs onboarding checks (manual/config/capability/api probes) and template lookup before send.
+Use it as an explicit readiness gate; `alimtalk send --interactive` does not auto-run preflight for you.
 
 ### Advanced JSON send
 
@@ -398,7 +427,8 @@ k-msg kakao template request --template-id TPL_001 --channel main
 
 ## Manual Check Config Example
 
-`k-msg.config.json` can store manual onboarding evidence used by `doctor/preflight`:
+`k-msg.config.json` can store manual onboarding evidence used by `doctor/preflight`.
+These records are notes/evidence for external vendor steps, not a CLI-managed approval state:
 
 ```json
 {

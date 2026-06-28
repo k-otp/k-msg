@@ -192,6 +192,14 @@ describe("k-msg CLI E2E", () => {
       commandHelp.toHaveExitCode(0);
       expect(commandHelp.stdout).toContain("Send SMS/LMS/MMS");
       expect(commandHelp.stdout).toContain("--text <value>");
+      expect(commandHelp.stdout).toContain("--interactive");
+
+      const alimtalkHelp = expectCommand(
+        await runCli(["alimtalk", "send", "--help"]),
+      );
+      alimtalkHelp.toHaveExitCode(0);
+      expect(alimtalkHelp.stdout).toContain("Send AlimTalk");
+      expect(alimtalkHelp.stdout).toContain("--interactive");
 
       const completionHelp = expectCommand(
         await runCli(["completions", "--help"]),
@@ -556,6 +564,9 @@ describe("k-msg CLI E2E", () => {
       );
       doctor.toHaveSucceeded();
       expect(doctor.stdout).toContain("mock");
+      expect(doctor.stdout).toContain("prerequisites: vendorPath=");
+      expect(doctor.stdout).toContain("reason:");
+      expect(doctor.stdout).toContain("next:");
 
       const preflight = expectCommand(
         await runCli([
@@ -572,6 +583,8 @@ describe("k-msg CLI E2E", () => {
       preflight.toHaveSucceeded();
       expect(preflight.stdout).toContain("preflight");
       expect(preflight.stdout).toContain("template_exists_probe");
+      expect(preflight.stdout).toContain("reason:");
+      expect(preflight.stdout).toContain("next:");
     },
     TEST_TIMEOUT,
   );
@@ -610,6 +623,7 @@ describe("k-msg CLI E2E", () => {
       expect(doctor.stdout).toContain(
         "SMS/LMS sender is not configured (set iwinv.config.senderNumber or iwinv.config.smsSenderNumber)",
       );
+      expect(doctor.stdout).toContain("fallback sender config is missing");
     },
     TEST_TIMEOUT,
   );
@@ -675,6 +689,125 @@ describe("k-msg CLI E2E", () => {
         );
         preflight.toHaveExitCode(2);
         expect(preflight.stdout).toContain("channel_registered_in_console");
+        expect(preflight.stdout).toContain("vendor console prerequisite");
+        expect(preflight.stdout).toContain(
+          "onboarding.manualChecks.iwinv.channel_registered_in_console.done=true",
+        );
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "doctor/preflight JSON includes guidance fields",
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () =>
+        new Response(
+          JSON.stringify({
+            code: 200,
+            message: "ok",
+            totalCount: 1,
+            list: [
+              {
+                templateId: "TPL_1",
+                templateName: "name",
+                templateContent: "content",
+                status: "Y",
+                createDate: "2026-02-16 10:00:00",
+              },
+            ],
+          }),
+          { status: 200 },
+        )) as unknown as typeof fetch;
+
+      try {
+        const configPath = await createTempConfigFromObject({
+          version: 1,
+          providers: [
+            {
+              type: "iwinv",
+              id: "iwinv",
+              config: {
+                apiKey: "api-key",
+              },
+            },
+          ],
+          routing: { defaultProviderId: "iwinv", strategy: "first" },
+          onboarding: {
+            manualChecks: {
+              iwinv: {
+                channel_registered_in_console: {
+                  done: false,
+                },
+              },
+            },
+          },
+        });
+
+        const doctor = expectCommand(
+          await runCli([
+            "providers",
+            "doctor",
+            "--config",
+            configPath,
+            "--json",
+            "true",
+          ]),
+        );
+        doctor.toHaveExitCode(2);
+        const doctorPayload = JSON.parse(doctor.stdout) as {
+          results: Array<{
+            checks: Array<{
+              id: string;
+              nextAction?: string;
+              reason?: string;
+            }>;
+          }>;
+        };
+        const doctorManual = doctorPayload.results[0]?.checks.find(
+          (check) => check.id === "channel_registered_in_console",
+        );
+        expect(doctorManual?.reason).toContain("vendor console prerequisite");
+        expect(doctorManual?.nextAction).toContain(
+          "onboarding.manualChecks.iwinv.channel_registered_in_console.done=true",
+        );
+
+        const preflight = expectCommand(
+          await runCli([
+            "alimtalk",
+            "preflight",
+            "--config",
+            configPath,
+            "--provider",
+            "iwinv",
+            "--template-id",
+            "TPL_1",
+            "--json",
+            "true",
+          ]),
+        );
+        preflight.toHaveExitCode(2);
+        const preflightPayload = JSON.parse(preflight.stdout) as {
+          result: {
+            checks: Array<{
+              id: string;
+              nextAction?: string;
+              reason?: string;
+            }>;
+          };
+        };
+        const preflightManual = preflightPayload.result.checks.find(
+          (check) => check.id === "channel_registered_in_console",
+        );
+        expect(preflightManual?.reason).toContain(
+          "vendor console prerequisite",
+        );
+        expect(preflightManual?.nextAction).toContain(
+          "onboarding.manualChecks.iwinv.channel_registered_in_console.done=true",
+        );
       } finally {
         globalThis.fetch = originalFetch;
       }
@@ -717,6 +850,34 @@ describe("k-msg CLI E2E", () => {
     "sms/alimtalk/advanced send",
     async () => {
       const configPath = await createTempConfig();
+
+      const smsInteractiveRequiresTty = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--interactive",
+        ]),
+      );
+      smsInteractiveRequiresTty.toHaveExitCode(2);
+      expect(smsInteractiveRequiresTty.stderr).toContain(
+        "k-msg sms send --interactive requires an interactive terminal",
+      );
+
+      const alimtalkInteractiveRequiresTty = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--interactive",
+        ]),
+      );
+      alimtalkInteractiveRequiresTty.toHaveExitCode(2);
+      expect(alimtalkInteractiveRequiresTty.stderr).toContain(
+        "k-msg alimtalk send --interactive requires an interactive terminal",
+      );
 
       const smsResult = expectCommand(
         await runCli([

@@ -29,7 +29,10 @@ For CLI:
 
 - `k-msg providers doctor` and `k-msg alimtalk preflight` include the manual check id
   `channel_registered_in_console`.
-- Keep this check state in `k-msg.config.json` under `onboarding.manualChecks.iwinv`.
+- Keep an evidence record for this step in `k-msg.config.json` under
+  `onboarding.manualChecks.iwinv`.
+- That record is not a CLI-managed approval state; it is a note/evidence trail for
+  the external IWINV console prerequisite.
 
 ## Channel Endpoints and Headers
 

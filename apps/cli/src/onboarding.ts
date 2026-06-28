@@ -21,6 +21,8 @@ export interface OnboardingCheckResult {
   severity: ProviderOnboardingSeverity;
   status: OnboardingCheckStatus;
   message: string;
+  nextAction?: string;
+  reason?: string;
   details?: Record<string, unknown>;
 }
 
@@ -41,6 +43,20 @@ export interface AlimTalkPreflightResult {
   inferredPlusId?: string;
   ok: boolean;
 }
+
+type PlusIdInferenceFailureCode =
+  | "ambiguous_candidates"
+  | "capability_unavailable"
+  | "no_candidate"
+  | "provider_error"
+  | "sender_key_missing";
+
+type PlusIdInferenceResult =
+  | { plusId: string }
+  | {
+      message: string;
+      reasonCode: PlusIdInferenceFailureCode;
+    };
 
 function supportsScope(
   check: { scopes: ProviderOnboardingScope[] },
@@ -112,6 +128,285 @@ function hasNonEmptyString(value: unknown): boolean {
 
 function isBlockerFailure(check: OnboardingCheckResult): boolean {
   return check.severity === "blocker" && check.status === "fail";
+}
+
+function withGuidance(input: {
+  check: OnboardingCheckResult;
+  providerId: string;
+  providerName: string;
+  scope: ProviderOnboardingScope;
+  spec?: ProviderOnboardingSpec;
+}): OnboardingCheckResult {
+  const { check, providerId, providerName, scope, spec } = input;
+  const providerKind = spec?.providerId ?? providerId;
+  const guidance =
+    check.id === "health_check"
+      ? getHealthCheckGuidance(check, providerName)
+      : check.id === "channel_registered_in_console"
+        ? getManualChannelGuidance(check, providerName, providerKind)
+        : check.id === "plus_id_policy"
+          ? getPlusIdGuidance(check, providerName, providerKind)
+          : check.id === "template_exists_probe"
+            ? getTemplateProbeGuidance(check, providerName, scope)
+            : check.id === "sms_lms_sender_config"
+              ? getSmsSenderGuidance(check, providerKind)
+              : getGenericCheckGuidance(check, providerName, providerKind);
+
+  return guidance ? { ...check, ...guidance } : check;
+}
+
+function getHealthCheckGuidance(
+  check: OnboardingCheckResult,
+  providerName: string,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
+  if (check.status === "pass") {
+    return {
+      reason: `${providerName} runtime health probe completed successfully.`,
+      nextAction: "Continue with provider-specific readiness checks below.",
+    };
+  }
+
+  return {
+    reason: `${providerName} healthCheck reported an unhealthy runtime or upstream dependency path.`,
+    nextAction:
+      "Verify credentials, network/IP allowlists, and vendor service status before retrying doctor or send.",
+  };
+}
+
+function getManualChannelGuidance(
+  check: OnboardingCheckResult,
+  providerName: string,
+  providerKind: string,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
+  const basePath = `onboarding.manualChecks.${providerKind}.channel_registered_in_console`;
+  if (check.status === "pass") {
+    return {
+      reason: `${providerName} requires a vendor-side channel approval step, and a manual evidence record is already stored.`,
+      nextAction: `Keep ${basePath} note/evidence current when the vendor console approval changes.`,
+    };
+  }
+
+  return {
+    reason: `${providerName} still depends on a vendor console prerequisite outside the CLI runtime.`,
+    nextAction: `Finish the vendor console approval, then set ${basePath}.done=true and store note/evidence.`,
+  };
+}
+
+function getPlusIdGuidance(
+  check: OnboardingCheckResult,
+  providerName: string,
+  providerKind: string,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
+  const reasonCode = check.details?.reasonCode;
+
+  if (check.status === "pass" && check.message.includes("optional")) {
+    return {
+      reason: `${providerName} does not require plusId for this send path.`,
+      nextAction:
+        "You can still persist plusId in a Kakao channel alias when you want deterministic routing.",
+    };
+  }
+
+  if (check.status === "pass" && check.message.includes("inferred")) {
+    return {
+      reason: `${providerName} returned a single plusId candidate for the current senderKey.`,
+      nextAction:
+        "Persist that plusId in aliases/defaults if you want to avoid future inference ambiguity.",
+    };
+  }
+
+  if (check.status === "pass") {
+    return {
+      reason: `${providerName} received an explicit plusId for this preflight.`,
+      nextAction:
+        "Re-use the same plusId through a channel alias or defaults when this route is stable.",
+    };
+  }
+
+  switch (reasonCode) {
+    case "sender_key_missing":
+      return {
+        reason: "plusId inference could not start because senderKey/profileId was not resolved.",
+        nextAction:
+          "Pass --sender-key, choose a Kakao channel alias, or configure a provider/default senderKey first.",
+      };
+    case "no_candidate":
+      return {
+        reason: `${providerName} returned no plusId candidate for the resolved senderKey.`,
+        nextAction:
+          "Confirm the approved Kakao channel exists for that senderKey, or set --plus-id / alias.plusId explicitly.",
+      };
+    case "ambiguous_candidates":
+      return {
+        reason: `${providerName} returned multiple plusId candidates for the resolved senderKey.`,
+        nextAction:
+          "Set --plus-id explicitly or create a provider-scoped Kakao channel alias with senderKey and plusId.",
+      };
+    case "capability_unavailable":
+      return {
+        reason: `${providerName} does not expose plusId inference for this integration.`,
+        nextAction:
+          "Set --plus-id directly or persist plusId in defaults/aliases before re-running preflight.",
+      };
+    case "provider_error":
+      return {
+        reason: `${providerName} failed while probing plusId candidates from provider data.`,
+        nextAction:
+          "Check provider credentials and channel visibility, then retry preflight or set plusId explicitly.",
+      };
+    default:
+      return {
+        reason: `${providerName} requires an explicit plusId on this path because inference is unavailable or unresolved.`,
+        nextAction:
+          providerKind === "solapi"
+            ? "Set --plus-id or configure aliases/defaults.kakao.plusId together with the pfId/profileId binding."
+            : "Set --plus-id or configure a Kakao channel alias/default plusId before retrying.",
+      };
+  }
+}
+
+function getTemplateProbeGuidance(
+  check: OnboardingCheckResult,
+  providerName: string,
+  scope: ProviderOnboardingScope,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
+  if (check.status === "pass") {
+    return {
+      reason: `${providerName} confirmed that the target template is reachable with the current provider context.`,
+      nextAction:
+        scope === "preflight"
+          ? "You can proceed to send once the remaining blocker checks are green."
+          : "Use preflight/send with the same template context when you are ready to deliver messages.",
+    };
+  }
+
+  if (check.status === "skip") {
+    return {
+      reason: `${providerName} does not expose a template lookup capability through this integration.`,
+      nextAction:
+        "Validate the template through vendor console/API outside the CLI before sending live traffic.",
+    };
+  }
+
+  return {
+    reason: `${providerName} could not confirm template accessibility for the requested template ID.`,
+    nextAction:
+      "Verify template ID, senderKey/profileId context, and vendor approval state, then re-run preflight.",
+  };
+}
+
+function getSmsSenderGuidance(
+  check: OnboardingCheckResult,
+  providerKind: string,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
+  if (check.status === "pass") {
+    return {
+      reason: "A provider-level SMS/LMS sender fallback is already configured.",
+      nextAction:
+        "You can still override the sender per command with --from when an explicit callback number is needed.",
+    };
+  }
+
+  return {
+    reason: "SMS/LMS fallback sender config is missing, so sends will depend on per-command --from values.",
+    nextAction:
+      providerKind === "aligo"
+        ? "Set aligo.config.sender (prefer env:ALIGO_SENDER) or pass --from on send."
+        : "Set iwinv.config.senderNumber or iwinv.config.smsSenderNumber, or pass --from on send.",
+  };
+}
+
+function getGenericCheckGuidance(
+  check: OnboardingCheckResult,
+  providerName: string,
+  providerKind: string,
+): Pick<OnboardingCheckResult, "nextAction" | "reason"> | undefined {
+  if (check.kind === "config") {
+    const missing = Array.isArray(check.details?.missing)
+      ? (check.details?.missing as string[])
+      : [];
+    if (check.status === "pass") {
+      return {
+        reason: `${providerName} has the config keys required for this readiness check.`,
+        nextAction:
+          "Keep those values in env:-backed config entries so doctor and preflight stay reproducible across environments.",
+      };
+    }
+    return {
+      reason: `${providerName} is missing required config input for this readiness check.`,
+      nextAction:
+        missing.length > 0
+          ? `Populate ${missing.join(", ")} for ${providerKind}, preferably through env: references, then re-run doctor/preflight.`
+          : `Fill the required ${providerKind} config values, preferably through env: references, then re-run doctor/preflight.`,
+    };
+  }
+
+  if (check.kind === "capability") {
+    const missing = Array.isArray(check.details?.missing)
+      ? (check.details?.missing as string[])
+      : [];
+    if (check.status === "pass") {
+      return {
+        reason: `${providerName} exposes the provider capabilities needed for this workflow.`,
+        nextAction:
+          "Proceed with API probes or send flows that depend on those capabilities.",
+      };
+    }
+    return {
+      reason: `${providerName} does not expose every capability this workflow expects.`,
+      nextAction:
+        missing.length > 0
+          ? `Missing capabilities: ${missing.join(", ")}. Fall back to the vendor manual path or upgrade the provider integration before relying on this flow.`
+          : "Fall back to the vendor manual path or upgrade the provider integration before relying on this flow.",
+    };
+  }
+
+  if (check.kind === "api_probe") {
+    if (check.status === "pass") {
+      return {
+        reason: `${providerName} responded successfully to the readiness probe.`,
+        nextAction: "Use the same credentials and routing context for live preflight/send.",
+      };
+    }
+    if (check.status === "skip") {
+      return {
+        reason: `${providerName} does not expose this probe capability in the current integration.`,
+        nextAction:
+          "Rely on vendor console/API validation outside the CLI for this prerequisite.",
+      };
+    }
+    return {
+      reason: `${providerName} failed a provider-side readiness probe.`,
+      nextAction:
+        "Check credentials, IP allowlists, account state, and vendor-side resource visibility before retrying.",
+    };
+  }
+
+  return undefined;
+}
+
+export function formatOnboardingCheckLines(
+  check: OnboardingCheckResult,
+  indent = "",
+): string[] {
+  const marker =
+    check.status === "pass"
+      ? "PASS"
+      : check.status === "fail"
+        ? "FAIL"
+        : "SKIP";
+  const lines = [
+    `${indent}[${marker}] (${check.severity}) ${check.id}: ${check.message}`,
+  ];
+
+  if (check.reason) {
+    lines.push(`${indent}  reason: ${check.reason}`);
+  }
+  if (check.nextAction) {
+    lines.push(`${indent}  next: ${check.nextAction}`);
+  }
+
+  return lines;
 }
 
 function evaluateSmsSenderCheck(params: {
@@ -369,21 +664,30 @@ async function evaluateSpecChecks(params: {
 async function inferPlusId(params: {
   provider: ProviderWithCapabilities;
   senderKey?: string;
-}): Promise<{ plusId?: string; reason?: string }> {
+}): Promise<PlusIdInferenceResult> {
   const { provider, senderKey } = params;
   const fn = (provider as unknown as KakaoChannelProvider).listKakaoChannels;
   if (typeof fn !== "function") {
-    return { reason: "listKakaoChannels capability is unavailable" };
+    return {
+      message: "plusId inference is unavailable because listKakaoChannels is not exposed",
+      reasonCode: "capability_unavailable",
+    };
   }
   const senderKeyTrimmed =
     typeof senderKey === "string" ? senderKey.trim() : "";
   if (senderKeyTrimmed.length === 0) {
-    return { reason: "senderKey is required to infer plusId" };
+    return {
+      message: "senderKey is required to infer plusId",
+      reasonCode: "sender_key_missing",
+    };
   }
 
   const result = await fn.call(provider, { senderKey: senderKeyTrimmed });
   if (result.isFailure) {
-    return { reason: result.error.message };
+    return {
+      message: result.error.message,
+      reasonCode: "provider_error",
+    };
   }
 
   const candidates = result.value.filter((channel) =>
@@ -391,14 +695,21 @@ async function inferPlusId(params: {
   );
   if (candidates.length !== 1) {
     return {
-      reason:
+      message:
         candidates.length === 0
           ? "no plusId found for senderKey"
           : "multiple plusId candidates found for senderKey",
+      reasonCode:
+        candidates.length === 0 ? "no_candidate" : "ambiguous_candidates",
     };
   }
   const candidate = candidates[0];
-  return candidate?.plusId ? { plusId: candidate.plusId } : {};
+  return candidate?.plusId
+    ? { plusId: candidate.plusId }
+    : {
+        message: "no plusId found for senderKey",
+        reasonCode: "no_candidate",
+      };
 }
 
 export async function runProviderDoctor(input: {
@@ -460,12 +771,21 @@ export async function runProviderDoctor(input: {
   }
 
   const ok = !checks.some(isBlockerFailure);
+  const enrichedChecks = checks.map((check) =>
+    withGuidance({
+      check,
+      providerId: provider.id,
+      providerName: provider.name,
+      scope: "doctor",
+      spec,
+    }),
+  );
 
   return {
     providerId: provider.id,
     providerName: provider.name,
     spec,
-    checks,
+    checks: enrichedChecks,
     healthy: health.healthy,
     ok,
   };
@@ -532,8 +852,8 @@ export async function runAlimTalkPreflight(input: {
       });
     } else if (spec.plusIdInference === "supported") {
       const inferred = await inferPlusId({ provider, senderKey });
-      if (hasNonEmptyString(inferred.plusId)) {
-        inferredPlusId = inferred.plusId?.trim();
+      if ("plusId" in inferred) {
+        inferredPlusId = inferred.plusId.trim();
         checks.push({
           id: "plus_id_policy",
           title: "plusId policy",
@@ -550,8 +870,11 @@ export async function runAlimTalkPreflight(input: {
           severity: "blocker",
           status: "fail",
           message:
-            inferred.reason ??
+            inferred.message ??
             "plusId is required when inference does not resolve a single channel",
+          details: {
+            reasonCode: inferred.reasonCode,
+          },
         });
       }
     } else {
@@ -611,12 +934,21 @@ export async function runAlimTalkPreflight(input: {
   }
 
   const ok = !checks.some(isBlockerFailure);
+  const enrichedChecks = checks.map((check) =>
+    withGuidance({
+      check,
+      providerId: provider.id,
+      providerName: provider.name,
+      scope: "preflight",
+      spec,
+    }),
+  );
 
   return {
     providerId: provider.id,
     providerName: provider.name,
     spec,
-    checks,
+    checks: enrichedChecks,
     ...(inferredPlusId ? { inferredPlusId } : {}),
     ok,
   };
