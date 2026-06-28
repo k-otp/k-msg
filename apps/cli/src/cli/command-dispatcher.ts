@@ -14,11 +14,7 @@ import {
 } from "./command-contract";
 import { listPublicRootCommands, listRootCommands } from "./command-registry";
 import { createReadlinePrompt } from "./prompt-runtime";
-import {
-  exitCodeForError,
-  printError,
-  shouldUseJsonOutput,
-} from "./utils";
+import { exitCodeForError, printError, shouldUseJsonOutput } from "./utils";
 
 const CLI_NAME = "k-msg";
 const CLI_VERSION =

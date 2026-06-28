@@ -466,7 +466,9 @@ describe("k-msg CLI E2E", () => {
         unknown
       >;
       expect(missingJsonError.message).toBeString();
-      expect(String(missingJsonError.message)).toContain("Config file not found:");
+      expect(String(missingJsonError.message)).toContain(
+        "Config file not found:",
+      );
     },
     TEST_TIMEOUT,
   );
