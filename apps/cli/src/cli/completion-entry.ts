@@ -50,8 +50,32 @@ function normalizeCompletionArgv(argv: string[]): string[] {
   return command === "completions" ? ["complete", ...rest] : argv;
 }
 
+function isSupportedCompletionShell(
+  value: string,
+): value is (typeof SHELL_NAMES)[number] {
+  return SHELL_NAMES.includes(value as (typeof SHELL_NAMES)[number]);
+}
+
 function isCompletionProtocolArgv(argv: string[]): boolean {
   return argv[0] === "complete" && argv.includes("--");
+}
+
+function validateCompletionShellArg(argv: string[]): string | undefined {
+  const shell = argv[1];
+  if (
+    shell === undefined ||
+    shell === "--" ||
+    shell === "--help" ||
+    shell === "-h" ||
+    shell === "--version" ||
+    shell === "-v"
+  ) {
+    return undefined;
+  }
+
+  return isSupportedCompletionShell(shell)
+    ? undefined
+    : `Unsupported completion shell: ${shell} (supported: ${SHELL_NAMES.join(", ")})`;
 }
 
 function printCompletionProtocol(argv: string[]): void {
@@ -198,6 +222,13 @@ export async function runCliEntrypoint(
 
   if (isCompletionProtocolArgv(argv)) {
     printCompletionProtocol(argv);
+    return;
+  }
+
+  const shellValidationError = validateCompletionShellArg(argv);
+  if (shellValidationError) {
+    console.error(shellValidationError);
+    process.exitCode = 2;
     return;
   }
 

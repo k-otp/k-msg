@@ -182,6 +182,10 @@ describe("k-msg CLI E2E", () => {
       bogus.toHaveExitCode(2);
       expect(bogus.stderr).toContain("Unknown option: --bogus");
 
+      const groupBogus = expectCommand(await runCli(["providers", "--bogus"]));
+      groupBogus.toHaveExitCode(2);
+      expect(groupBogus.stderr).toContain("Unknown option: --bogus");
+
       const commandHelp = expectCommand(
         await runCli(["sms", "send", "--help"]),
       );
@@ -195,6 +199,14 @@ describe("k-msg CLI E2E", () => {
       completionHelp.toHaveExitCode(0);
       expect(completionHelp.stdout).toContain(
         "Generate shell completion script",
+      );
+
+      const unsupportedCompletionShell = expectCommand(
+        await runCli(["completions", "elvish"]),
+      );
+      unsupportedCompletionShell.toHaveExitCode(2);
+      expect(unsupportedCompletionShell.stderr).toContain(
+        "Unsupported completion shell: elvish",
       );
     },
     TEST_TIMEOUT,
@@ -459,6 +471,21 @@ describe("k-msg CLI E2E", () => {
       );
       added.toHaveExitCode(2);
       expect(added.stderr).toContain("requires an interactive terminal");
+
+      const addedWithType = expectCommand(
+        await runCli([
+          "config",
+          "provider",
+          "add",
+          "--config",
+          targetPath,
+          "iwinv",
+        ]),
+      );
+      addedWithType.toHaveExitCode(2);
+      expect(addedWithType.stderr).toContain(
+        "requires an interactive terminal",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -917,6 +944,12 @@ describe("k-msg CLI E2E", () => {
       expect(`${dryRunInvalid.stdout}\n${dryRunInvalid.stderr}`).toContain(
         "Invalid option 'dry-run'",
       );
+
+      const providersExtraArg = expectCommand(
+        await runCli(["providers", "list", "--config", configPath, "health"]),
+      );
+      providersExtraArg.toHaveExitCode(2);
+      expect(providersExtraArg.stderr).toContain("Unexpected argument: health");
 
       const jsonPresence = expectCommand(
         await runCli(["providers", "list", "--config", configPath, "--json"]),

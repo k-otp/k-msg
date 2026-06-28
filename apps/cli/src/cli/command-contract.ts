@@ -92,6 +92,7 @@ export interface CliCommandDefinition<
   description: string;
   handler: (args: CliHandlerArgs<TOptions>) => Promise<void> | void;
   kind: "command";
+  maxPositionals: number;
   name: string;
   options: TOptions;
 }
@@ -120,6 +121,7 @@ export function option<TSchema extends ZodTypeAny>(
 export function defineCommand<const TOptions extends CliOptionsShape>(input: {
   description: string;
   handler: (args: CliHandlerArgs<TOptions>) => Promise<void> | void;
+  maxPositionals?: number;
   name: string;
   options?: TOptions;
 }): CliCommandDefinition<TOptions> {
@@ -127,6 +129,7 @@ export function defineCommand<const TOptions extends CliOptionsShape>(input: {
     description: input.description,
     handler: input.handler,
     kind: "command",
+    maxPositionals: input.maxPositionals ?? 0,
     name: input.name,
     options: (input.options ?? {}) as TOptions,
   };

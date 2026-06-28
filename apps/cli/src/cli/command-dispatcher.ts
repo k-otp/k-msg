@@ -70,7 +70,25 @@ export async function runCommandDispatcher(
   }
 
   if (resolution.group && !resolution.command) {
-    printHelp(resolution.group, resolution.path);
+    if (
+      resolution.remaining.length === 0 ||
+      requestsHelp(resolution.remaining)
+    ) {
+      printHelp(resolution.group, resolution.path);
+      return;
+    }
+    if (requestsVersion(resolution.remaining)) {
+      console.log(`${CLI_NAME} v${CLI_VERSION}`);
+      return;
+    }
+    const [unknownOption] = resolution.remaining;
+    if (unknownOption?.startsWith("-")) {
+      console.error(`Unknown option: ${unknownOption}`);
+      process.exitCode = 2;
+      return;
+    }
+    console.error(`Unknown command: ${unknownOption}`);
+    process.exitCode = 2;
     return;
   }
 
@@ -371,6 +389,13 @@ function parseCommandInput(
 
   if (helpRequested) {
     return { flags: {}, helpRequested, positional };
+  }
+
+  if (positional.length > command.maxPositionals) {
+    const unexpected = positional[command.maxPositionals];
+    throw new CliUsageError(
+      `Unexpected argument: ${unexpected ?? positional.at(-1) ?? ""}`,
+    );
   }
 
   const flags: Record<string, unknown> = {};

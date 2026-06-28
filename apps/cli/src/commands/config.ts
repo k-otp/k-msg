@@ -669,6 +669,7 @@ const initCmd = defineCommand({
 const providerAddCmd = defineCommand({
   name: "add",
   description: "Add a provider entry via prompts",
+  maxPositionals: 1,
   options: {
     config: optConfig,
   },
