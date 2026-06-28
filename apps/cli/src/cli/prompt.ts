@@ -1,4 +1,13 @@
-import type { HandlerArgs } from "@bunli/core";
+export type { PromptApi } from "./command-contract";
+
+import type { PromptApi } from "./command-contract";
+
+export {
+  createReadlinePrompt,
+  createReadlinePromptWithInterface,
+  isPromptCancelledError,
+  PromptCancelledError,
+} from "./prompt-runtime";
 
 type PromptOptions = {
   message: string;
@@ -23,54 +32,23 @@ type SelectOptions<T> = {
   default?: T;
 };
 
-export type PromptApi = HandlerArgs["prompt"];
-
-export class PromptCancelledError extends Error {
-  constructor() {
-    super("Prompt cancelled.");
-    this.name = "PromptCancelledError";
-  }
-}
-
-function remapPromptCancellation(prompt: PromptApi, error: unknown): never {
-  void prompt;
-  if (error instanceof Error && error.name === "PromptCancelledError") {
-    throw new PromptCancelledError();
-  }
-  throw error;
-}
-
-export function isPromptCancelledError(
-  error: unknown,
-): error is PromptCancelledError {
-  return error instanceof PromptCancelledError;
-}
-
 export async function promptText(
   prompt: PromptApi,
   options: PromptOptions,
 ): Promise<string> {
-  try {
-    return await prompt.text(options.message, {
-      default: options.defaultValue,
-      validate: options.validate,
-    });
-  } catch (error) {
-    remapPromptCancellation(prompt, error);
-  }
+  return await prompt.text(options.message, {
+    default: options.defaultValue,
+    validate: options.validate,
+  });
 }
 
 export async function promptConfirm(
   prompt: PromptApi,
   options: ConfirmOptions,
 ): Promise<boolean> {
-  try {
-    return await prompt.confirm(options.message, {
-      default: options.defaultValue,
-    });
-  } catch (error) {
-    remapPromptCancellation(prompt, error);
-  }
+  return await prompt.confirm(options.message, {
+    default: options.defaultValue,
+  });
 }
 
 export async function promptSelect<T>(
@@ -78,9 +56,5 @@ export async function promptSelect<T>(
   message: string,
   options: SelectOptions<T>,
 ): Promise<T> {
-  try {
-    return await prompt.select(message, options);
-  } catch (error) {
-    remapPromptCancellation(prompt, error);
-  }
+  return await prompt.select(message, options);
 }

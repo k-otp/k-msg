@@ -1,7 +1,6 @@
 import { Database } from "bun:sqlite";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { defineCommand, defineGroup, option } from "@bunli/core";
 import {
   applyFieldCryptoMigration,
   type CloudflareSqlClient,
@@ -11,6 +10,7 @@ import {
   retryFieldCryptoMigration,
 } from "@k-msg/messaging/adapters/cloudflare";
 import { z } from "zod";
+import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
 
 const chunkSizeSchema = z.coerce.number().int().positive().max(100_000);

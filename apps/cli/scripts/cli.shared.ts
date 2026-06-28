@@ -1,62 +1,42 @@
 import { access, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { Generator } from "@bunli/generator";
-
-import bunliConfig from "../bunli.config";
 
 export const CLI_ROOT = path.resolve(import.meta.dir, "..");
 export const DIST_DIR = path.join(CLI_ROOT, "dist");
-export const GENERATED_PATH = path.join(CLI_ROOT, ".bunli", "commands.gen.ts");
-export const CLI_ENTRY = resolveFromCliRoot(
-  typeof bunliConfig.build?.entry === "string"
-    ? bunliConfig.build.entry
-    : (bunliConfig.build?.entry?.[0] ?? "./src/k-msg.ts"),
-);
-export const COMMANDS_DIR = resolveFromCliRoot(
-  bunliConfig.commands?.directory ?? "./src/commands",
-);
-export const CLI_NAME =
-  typeof bunliConfig.name === "string" && bunliConfig.name.length > 0
-    ? bunliConfig.name
-    : "k-msg";
+export const CLI_ENTRY = path.join(CLI_ROOT, "src", "k-msg.ts");
+export const CLI_NAME = "k-msg";
 
 export type CliBuildTarget = {
   archiveName: string;
-  bunTarget: string;
   binaryName: string;
-  runtimePackageName: string;
+  bunTarget: string;
 };
 
 const TARGETS: Record<string, CliBuildTarget> = {
   "darwin-arm64": {
     archiveName: "darwin-arm64",
-    bunTarget: "bun-darwin-arm64",
     binaryName: CLI_NAME,
-    runtimePackageName: "@opentui/core-darwin-arm64",
+    bunTarget: "bun-darwin-arm64",
   },
   "darwin-x64": {
     archiveName: "darwin-x64",
-    bunTarget: "bun-darwin-x64",
     binaryName: CLI_NAME,
-    runtimePackageName: "@opentui/core-darwin-x64",
+    bunTarget: "bun-darwin-x64",
   },
   "linux-arm64": {
     archiveName: "linux-arm64",
-    bunTarget: "bun-linux-arm64",
     binaryName: CLI_NAME,
-    runtimePackageName: "@opentui/core-linux-arm64",
+    bunTarget: "bun-linux-arm64",
   },
   "linux-x64": {
     archiveName: "linux-x64",
-    bunTarget: "bun-linux-x64",
     binaryName: CLI_NAME,
-    runtimePackageName: "@opentui/core-linux-x64",
+    bunTarget: "bun-linux-x64",
   },
   "windows-x64": {
     archiveName: "windows-x64",
-    bunTarget: "bun-windows-x64",
     binaryName: `${CLI_NAME}.exe`,
-    runtimePackageName: "@opentui/core-win32-x64",
+    bunTarget: "bun-windows-x64",
   },
 };
 
@@ -67,18 +47,6 @@ export const ALL_BUILD_TARGETS = [
   TARGETS["linux-x64"],
   TARGETS["windows-x64"],
 ] as const;
-
-export async function runGenerator(): Promise<void> {
-  const generator = new Generator({
-    entry: CLI_ENTRY,
-    directory: COMMANDS_DIR,
-    outputFile: GENERATED_PATH,
-  });
-  const result = await generator.run();
-  if (result.status === "error") {
-    throw result.error;
-  }
-}
 
 export function getHostBuildTarget(): CliBuildTarget {
   const platform = process.platform;
@@ -98,7 +66,7 @@ export async function ensureDistDir(): Promise<void> {
 }
 
 export async function removePath(targetPath: string): Promise<void> {
-  await rm(targetPath, { recursive: true, force: true });
+  await rm(targetPath, { force: true, recursive: true });
 }
 
 export async function pathExists(targetPath: string): Promise<boolean> {
@@ -115,10 +83,10 @@ export async function runCommand(
   options?: {
     cwd?: string;
     env?: Record<string, string | undefined>;
-    stdout?: "inherit" | "pipe";
     stderr?: "inherit" | "pipe";
+    stdout?: "inherit" | "pipe";
   },
-): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+): Promise<{ exitCode: number; stderr: string; stdout: string }> {
   const envSource = options?.env ?? process.env;
   const env = { ...envSource };
 
@@ -131,8 +99,8 @@ export async function runCommand(
   const proc = Bun.spawn(cmd, {
     cwd: options?.cwd ?? CLI_ROOT,
     env,
-    stdout: options?.stdout ?? "pipe",
     stderr: options?.stderr ?? "pipe",
+    stdout: options?.stdout ?? "pipe",
   });
 
   const [stdout, stderr, exitCode] = await Promise.all([
@@ -141,7 +109,11 @@ export async function runCommand(
     proc.exited,
   ]);
 
-  return { exitCode, stdout, stderr };
+  return {
+    exitCode,
+    stderr,
+    stdout,
+  };
 }
 
 export function sanitizedCliEnv(
@@ -159,8 +131,4 @@ export function sanitizedCliEnv(
     }
   }
   return env as Record<string, string>;
-}
-
-function resolveFromCliRoot(relativePath: string): string {
-  return path.resolve(CLI_ROOT, relativePath);
 }

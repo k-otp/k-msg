@@ -1,5 +1,5 @@
-import { option, type StandardSchemaV1 } from "@bunli/core";
 import { z } from "zod";
+import { type CliOptionDefinition, option } from "./command-contract";
 
 const strictBooleanInput = z.union([
   z.boolean(),
@@ -14,13 +14,13 @@ const strictBooleanInput = z.union([
 export const strictBooleanFlagSchema = strictBooleanInput.default(false);
 export const strictBooleanOptionalFlagSchema = strictBooleanInput.optional();
 
-export function booleanFlagOption<TSchema extends StandardSchemaV1>(
+export function booleanFlagOption<TSchema extends z.ZodTypeAny>(
   schema: TSchema,
   options: {
     description?: string;
     short?: string;
   } = {},
-) {
+): CliOptionDefinition<TSchema> {
   return option(schema, {
     ...options,
     argumentKind: "flag",

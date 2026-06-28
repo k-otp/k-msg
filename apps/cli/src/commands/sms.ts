@@ -1,6 +1,6 @@
-import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { SendInput } from "@k-msg/core";
 import { z } from "zod";
+import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import {
   exitCodeForError,

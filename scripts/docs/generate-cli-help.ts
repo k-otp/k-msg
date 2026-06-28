@@ -1,12 +1,10 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
-const cliDir = path.join(repoRoot, "apps/cli");
 const checkMode = process.argv.includes("--check");
 const outputPath = path.join(repoRoot, "apps/docs/src/generated/cli/help.md");
 const cliEntry = path.join(repoRoot, "apps/cli/src/k-msg.ts");
-const generatedCommandsPath = path.join(cliDir, ".bunli/commands.gen.ts");
 
 const targets: string[][] = [
   ["--help"],
@@ -17,31 +15,6 @@ const targets: string[][] = [
   ["send", "--help"],
   ["sms", "--help"],
 ];
-
-async function ensureGeneratedCommands(): Promise<void> {
-  try {
-    await access(generatedCommandsPath);
-    return;
-  } catch {
-    // fall through and generate commands
-  }
-
-  const proc = Bun.spawn(["bun", "run", "generate"], {
-    cwd: cliDir,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-
-  const [exitCode, stdout, stderr] = await Promise.all([
-    proc.exited,
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-  ]);
-
-  if (exitCode !== 0) {
-    throw new Error(`Failed to generate Bunli commands: ${stderr || stdout}`);
-  }
-}
 
 async function runCommand(args: string[]): Promise<string> {
   const cmd = ["bun", cliEntry, ...args];
@@ -67,8 +40,6 @@ async function runCommand(args: string[]): Promise<string> {
 }
 
 async function renderHelpMarkdown(): Promise<string> {
-  await ensureGeneratedCommands();
-
   const sections: string[] = [
     "## CLI Help",
     "",

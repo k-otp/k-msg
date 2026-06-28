@@ -153,13 +153,23 @@ function expectCommand(result: {
   };
 }
 
-describe("k-msg CLI (bunli) E2E", () => {
+function parseCompletionValues(stdout: string): string[] {
+  return stdout
+    .trim()
+    .split(/\r?\n/)
+    .filter((line) => line.length > 0 && !line.startsWith(":"))
+    .map((line) => line.split("\t", 1)[0] ?? line);
+}
+
+describe("k-msg CLI E2E", () => {
   test(
     "help/version",
     async () => {
       const help = expectCommand(await runCli(["--help"]));
       help.toHaveExitCode(0);
       expect(help.stdout.toLowerCase()).toContain("k-msg");
+      expect(help.stdout).toContain("complete");
+      expect(help.stdout).toContain("completions");
       expect(help.stdout).toContain("config");
       expect(help.stdout).toContain("db");
       expect(help.stdout).toContain("providers");
@@ -167,6 +177,37 @@ describe("k-msg CLI (bunli) E2E", () => {
       const ver = expectCommand(await runCli(["--version"]));
       ver.toHaveExitCode(0);
       expect(ver.stdout).toContain("k-msg v");
+
+      const bogus = expectCommand(await runCli(["--bogus"]));
+      bogus.toHaveExitCode(2);
+      expect(bogus.stderr).toContain("Unknown option: --bogus");
+
+      const groupBogus = expectCommand(await runCli(["providers", "--bogus"]));
+      groupBogus.toHaveExitCode(2);
+      expect(groupBogus.stderr).toContain("Unknown option: --bogus");
+
+      const commandHelp = expectCommand(
+        await runCli(["sms", "send", "--help"]),
+      );
+      commandHelp.toHaveExitCode(0);
+      expect(commandHelp.stdout).toContain("Send SMS/LMS/MMS");
+      expect(commandHelp.stdout).toContain("--text <value>");
+
+      const completionHelp = expectCommand(
+        await runCli(["completions", "--help"]),
+      );
+      completionHelp.toHaveExitCode(0);
+      expect(completionHelp.stdout).toContain(
+        "Generate shell completion script",
+      );
+
+      const unsupportedCompletionShell = expectCommand(
+        await runCli(["completions", "elvish"]),
+      );
+      unsupportedCompletionShell.toHaveExitCode(2);
+      expect(unsupportedCompletionShell.stderr).toContain(
+        "Unsupported completion shell: elvish",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -334,7 +375,7 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
-    "runs from cwd without bunli config",
+    "runs from cwd without command-generation config",
     async () => {
       const cwd = await createTempCwd();
       const help = expectCommand(await runCli(["--help"], { cwd }));
@@ -353,13 +394,25 @@ describe("k-msg CLI (bunli) E2E", () => {
         await runCli(["completions", "zsh"], { cwd }),
       );
       script.toHaveSucceeded();
-      expect(script.stdout).toContain("# zsh completion for k-msg");
+      expect(script.stdout).toContain("#compdef k-msg");
 
       const protocol = expectCommand(
         await runCli(["complete", "--", ""], { cwd }),
       );
       protocol.toHaveSucceeded();
       expect(protocol.stdout).not.toContain(":1");
+      const rootValues = parseCompletionValues(protocol.stdout);
+      expect(rootValues).toContain("providers");
+      expect(rootValues).toContain("completions");
+
+      const nestedProtocol = expectCommand(
+        await runCli(["complete", "--", "providers", ""], { cwd }),
+      );
+      nestedProtocol.toHaveSucceeded();
+      const nestedValues = parseCompletionValues(nestedProtocol.stdout);
+      expect(nestedValues).toContain("list");
+      expect(nestedValues).toContain("health");
+      expect(nestedValues).toContain("doctor");
     },
     TEST_TIMEOUT,
   );
@@ -380,6 +433,42 @@ describe("k-msg CLI (bunli) E2E", () => {
       shown.toHaveSucceeded();
       expect(shown.stdout).toContain("Config:");
       expect(shown.stdout).toContain("Providers:");
+
+      const missing = expectCommand(
+        await runCli([
+          "config",
+          "validate",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+        ]),
+      );
+      missing.toHaveExitCode(2);
+      expect(missing.stderr).toContain("Config file not found:");
+
+      const missingJson = expectCommand(
+        await runCli([
+          "config",
+          "show",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+          "--json",
+          "true",
+        ]),
+      );
+      missingJson.toHaveExitCode(2);
+      const missingJsonParsed = JSON.parse(missingJson.stdout) as Record<
+        string,
+        unknown
+      >;
+      expect(missingJsonParsed.ok).toBe(false);
+      const missingJsonError = missingJsonParsed.error as Record<
+        string,
+        unknown
+      >;
+      expect(missingJsonError.message).toBeString();
+      expect(String(missingJsonError.message)).toContain(
+        "Config file not found:",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -418,6 +507,21 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       added.toHaveExitCode(2);
       expect(added.stderr).toContain("requires an interactive terminal");
+
+      const addedWithType = expectCommand(
+        await runCli([
+          "config",
+          "provider",
+          "add",
+          "--config",
+          targetPath,
+          "iwinv",
+        ]),
+      );
+      addedWithType.toHaveExitCode(2);
+      expect(addedWithType.stderr).toContain(
+        "requires an interactive terminal",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -629,6 +733,51 @@ describe("k-msg CLI (bunli) E2E", () => {
       smsResult.toHaveSucceeded();
       expect(smsResult.stdout).toContain("OK");
 
+      const smsLiteralHelpText = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "--help",
+        ]),
+      );
+      smsLiteralHelpText.toHaveSucceeded();
+      expect(smsLiteralHelpText.stdout).toContain("OK");
+
+      const smsShortHelpValue = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "-h",
+        ]),
+      );
+      smsShortHelpValue.toHaveSucceeded();
+      expect(smsShortHelpValue.stdout).toContain("OK");
+
+      const smsShortVersionValue = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "-v",
+        ]),
+      );
+      smsShortVersionValue.toHaveSucceeded();
+      expect(smsShortVersionValue.stdout).toContain("OK");
+
       const alimtalkResult = expectCommand(
         await runCli([
           "alimtalk",
@@ -714,6 +863,17 @@ describe("k-msg CLI (bunli) E2E", () => {
       );
       advanced.toHaveSucceeded();
       expect(advanced.stdout).toContain("OK");
+
+      const advancedInlineInput = expectCommand(
+        await runCli([
+          "send",
+          "--config",
+          configPath,
+          '--input={"to":"01012345678","text":"advanced=a=b"}',
+        ]),
+      );
+      advancedInlineInput.toHaveSucceeded();
+      expect(advancedInlineInput.stdout).toContain("OK");
 
       const dryRunSingle = expectCommand(
         await runCli([
@@ -820,6 +980,12 @@ describe("k-msg CLI (bunli) E2E", () => {
       expect(`${dryRunInvalid.stdout}\n${dryRunInvalid.stderr}`).toContain(
         "Invalid option 'dry-run'",
       );
+
+      const providersExtraArg = expectCommand(
+        await runCli(["providers", "list", "--config", configPath, "health"]),
+      );
+      providersExtraArg.toHaveExitCode(2);
+      expect(providersExtraArg.stderr).toContain("Unexpected argument: health");
 
       const jsonPresence = expectCommand(
         await runCli(["providers", "list", "--config", configPath, "--json"]),

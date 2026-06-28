@@ -1,17 +1,7 @@
-import {
-  CLI_ROOT,
-  GENERATED_PATH,
-  pathExists,
-  runCommand,
-  sanitizedCliEnv,
-} from "./bunli.shared";
+import { CLI_ROOT, runCommand, sanitizedCliEnv } from "./cli.shared";
 
 const strict = Bun.argv.includes("--strict");
 const baseEnv = sanitizedCliEnv();
-
-if (!(await pathExists(GENERATED_PATH))) {
-  throw new Error(`Missing generated command metadata: ${GENERATED_PATH}`);
-}
 
 const shellChecks = [
   { shell: "bash", marker: "# bash completion for k-msg" },
@@ -34,28 +24,31 @@ const rootCompletion = await runCli(["complete", "--", ""]);
 if (rootCompletion.exitCode !== 0) {
   throw new Error(`completion protocol failed\n${rootCompletion.stderr}`);
 }
-if (!rootCompletion.stdout.includes("providers\tProvider utilities")) {
-  throw new Error("completion protocol is missing expected command entries");
-}
 if (!rootCompletion.stdout.trimEnd().endsWith(":4")) {
   throw new Error("completion protocol is missing a shell directive suffix");
 }
 
 if (strict) {
   const aliasCheck = await runCli(["completions", "zsh"]);
+  const [firstLine] = aliasCheck.stdout.split(/\r?\n/, 1);
+  if (firstLine !== "#compdef k-msg") {
+    throw new Error(
+      "zsh completion output must keep the #compdef k-msg header for installer alias patching",
+    );
+  }
   if (!aliasCheck.stdout.includes("compdef _k-msg k-msg")) {
     throw new Error(
-      "zsh completion output is missing the compdef registration",
+      "zsh completion output is missing the primary compdef registration",
     );
   }
 }
 
-console.log("✓ Completion metadata and shell scripts look healthy");
+console.log("✓ Completion scripts and entry metadata look healthy");
 
 async function runCli(argv: string[]): Promise<{
   exitCode: number;
-  stdout: string;
   stderr: string;
+  stdout: string;
 }> {
   return runCommand([process.execPath, "src/k-msg.ts", ...argv], {
     cwd: CLI_ROOT,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { runCommand } from "./bunli.shared";
+import { runCommand } from "./cli.shared";
 
 describe("runCommand", () => {
   test("uses the provided env as the final child environment", async () => {
@@ -11,8 +11,8 @@ describe("runCommand", () => {
       ],
       {
         env: {
-          PATH: process.env.PATH,
           HOME: process.env.HOME,
+          PATH: process.env.PATH,
         },
       },
     );

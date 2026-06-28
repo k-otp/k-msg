@@ -1,7 +1,7 @@
 import path from "node:path";
-import { defineCommand, option } from "@bunli/core";
 import type { SendInput } from "@k-msg/core";
 import { z } from "zod";
+import { defineCommand, option } from "../cli/command-contract";
 import {
   booleanFlagOption,
   optConfig,
