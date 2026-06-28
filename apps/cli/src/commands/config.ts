@@ -1,4 +1,3 @@
-import { defineCommand, defineGroup, option } from "@bunli/core";
 import type { MessageType } from "@k-msg/core";
 import {
   type ProviderConfigFieldSpec,
@@ -6,8 +5,8 @@ import {
   providerCliMetadata,
   providerConfigFieldSpecs,
 } from "@k-msg/provider";
-import { createElement } from "react";
 import { z } from "zod";
+import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import {
   booleanFlagOption,
   optConfig,
@@ -26,15 +25,6 @@ import { CONFIG_SCHEMA_LATEST_URL } from "../config/constants";
 import { loadKMsgConfig, resolveConfigPathForWrite } from "../config/load";
 import { saveKMsgConfig } from "../config/save";
 import { type KMsgCliConfig, providerTypeSchema } from "../config/schema";
-import type { AlternateBufferCompletionPayload } from "../ui/alternate-buffer-lifecycle";
-import {
-  ConfigInitFlow,
-  type ConfigInitFlowValues,
-} from "../ui/config-init-flow";
-import {
-  ConfigProviderAddFlow,
-  type ProviderAddFlowValues,
-} from "../ui/config-provider-add-flow";
 
 type ProviderEntry = KMsgCliConfig["providers"][number];
 type ProviderType = ProviderTypeWithConfig;
@@ -449,27 +439,6 @@ function nextProviderId(type: ProviderType, existingIds: Set<string>): string {
   return `${type}-${suffix}`;
 }
 
-function buildProviderConfigFromValues(
-  type: ProviderType,
-  values: Record<string, unknown>,
-): Record<string, unknown> {
-  const config: Record<string, unknown> = {};
-
-  for (const [key] of providerFieldEntries(type)) {
-    const raw = values[key];
-    if (typeof raw !== "string") {
-      continue;
-    }
-
-    const trimmed = raw.trim();
-    if (trimmed.length > 0) {
-      config[key] = trimmed;
-    }
-  }
-
-  return config;
-}
-
 async function saveProviderFromEntry(input: {
   configPath: string | undefined;
   includeRouting: boolean;
@@ -504,35 +473,6 @@ async function saveProviderFromEntry(input: {
     providerCount: config.providers.length,
     plaintextCredentials,
     result,
-  };
-}
-
-function createProviderAddCompletion(input: {
-  plaintextCredentials: PlaintextCredentialLocation[];
-  providerCount: number;
-  providerId: string;
-  providerType: ProviderType;
-  result: "added" | "replaced";
-  targetPath: string;
-}): AlternateBufferCompletionPayload {
-  return {
-    title: `Provider ${input.providerId} ${input.result}`,
-    summaryLines: [
-      `Type: ${input.providerType}`,
-      `Config: ${input.targetPath}`,
-      `Providers configured: ${input.providerCount}`,
-    ],
-    nextSteps: [
-      "k-msg providers doctor",
-      `k-msg config show --config ${input.targetPath}`,
-    ],
-    warningLines:
-      input.plaintextCredentials.length > 0
-        ? input.plaintextCredentials.map(
-            (warning) =>
-              `${warning.providerId}.${warning.keyPath} stores a plain-text secret. Prefer env:VAR_NAME references.`,
-          )
-        : undefined,
   };
 }
 
@@ -625,62 +565,6 @@ async function promptProviderEntry(
   };
 }
 
-function buildProviderAddInitialValues(input: {
-  requestedType?: ProviderType;
-}): Partial<ProviderAddFlowValues> {
-  const type = input.requestedType ?? "iwinv";
-
-  return {
-    type,
-    id: type,
-    includeRouting: true,
-    setDefault: false,
-  };
-}
-
-function createInteractiveTemplateConfigFromProviderTypes(
-  selectedTypes: ProviderType[],
-): KMsgCliConfig {
-  const config = createConfigSkeleton();
-
-  for (const type of selectedTypes) {
-    upsertProvider(config, {
-      type,
-      id: type,
-      config: buildProviderConfigWithDefaults(type),
-    });
-  }
-
-  syncRoutingForAllProviders(config);
-  applySharedConfigDefaults(config);
-
-  return config;
-}
-
-function createConfigInitCompletion(input: {
-  plaintextCredentials: PlaintextCredentialLocation[];
-  providerCount: number;
-  targetPath: string;
-  templateMode: "interactive" | "full";
-}): AlternateBufferCompletionPayload {
-  return {
-    title: "Config initialized",
-    summaryLines: [
-      `Template mode: ${input.templateMode}`,
-      `Config: ${input.targetPath}`,
-      `Providers configured: ${input.providerCount}`,
-    ],
-    nextSteps: ["k-msg config show", "k-msg providers doctor"],
-    warningLines:
-      input.plaintextCredentials.length > 0
-        ? input.plaintextCredentials.map(
-            (warning) =>
-              `${warning.providerId}.${warning.keyPath} stores a plain-text secret. Prefer env:VAR_NAME references.`,
-          )
-        : undefined,
-  };
-}
-
 async function buildInteractiveTemplateConfig(
   prompt: PromptApi,
 ): Promise<KMsgCliConfig> {
@@ -731,60 +615,6 @@ const initCmd = defineCommand({
     template: option(z.enum(["interactive", "full"]).default("interactive"), {
       description: "Template mode (interactive|full)",
     }),
-  },
-  render: (args) =>
-    createElement(ConfigInitFlow, {
-      initialValues: {
-        force: args.flags.force,
-        providers: ["iwinv"],
-        template: args.flags.template,
-      },
-      onSubmit: async (values: ConfigInitFlowValues) => {
-        const targetPath = await resolveConfigPathForWrite(args.flags.config);
-        if (!values.force && (await Bun.file(targetPath).exists())) {
-          throw new Error(`Config already exists: ${targetPath}`);
-        }
-
-        const providerTypesFromForm = values.providers
-          .map((value) => parseProviderType(value))
-          .filter((value): value is ProviderType => value !== undefined);
-
-        if (
-          values.template === "interactive" &&
-          providerTypesFromForm.length === 0
-        ) {
-          throw new Error("Select at least one provider for interactive mode");
-        }
-
-        const config =
-          values.template === "full"
-            ? createFullTemplateConfig()
-            : createInteractiveTemplateConfigFromProviderTypes(
-                providerTypesFromForm,
-              );
-
-        applySharedConfigDefaults(config);
-        const plaintextCredentials =
-          collectPlaintextCredentialLocations(config);
-        await saveKMsgConfig(targetPath, config);
-
-        return createConfigInitCompletion({
-          plaintextCredentials,
-          providerCount: config.providers.length,
-          targetPath,
-          templateMode: values.template,
-        });
-      },
-      providerOptions: providerTypes.map((type) => ({
-        label: providerCliMetadata[type].label,
-        description: `${providerCliMetadata[type].routingSeedTypes.join(", ")} support`,
-        value: type,
-      })),
-    }),
-  tui: {
-    renderer: {
-      bufferMode: "alternate",
-    },
   },
   handler: async ({ flags, terminal, prompt }) => {
     try {
@@ -841,66 +671,6 @@ const providerAddCmd = defineCommand({
   description: "Add a provider entry via prompts",
   options: {
     config: optConfig,
-  },
-  render: (args) => {
-    const requestedTypeRaw = args.positional[0];
-    const requestedType = parseProviderType(requestedTypeRaw);
-    if (typeof requestedTypeRaw === "string" && !requestedType) {
-      throw new Error(
-        `Unknown provider type: ${requestedTypeRaw} (supported: ${providerTypeSchema.options.join(", ")})`,
-      );
-    }
-
-    return createElement(ConfigProviderAddFlow, {
-      initialValues: buildProviderAddInitialValues({
-        requestedType,
-      }),
-      onSubmit: async (values: ProviderAddFlowValues) => {
-        const type = parseProviderType(
-          typeof values.type === "string" ? values.type : undefined,
-        );
-        if (!type) {
-          throw new Error(
-            `Unknown provider type: ${String(values.type)} (supported: ${providerTypeSchema.options.join(", ")})`,
-          );
-        }
-
-        const id = typeof values.id === "string" ? values.id.trim() : "";
-        if (id.length === 0) {
-          throw new Error("Provider id is required");
-        }
-
-        const provider: ProviderEntry = {
-          type,
-          id,
-          config: buildProviderConfigFromValues(type, values),
-        };
-
-        const saved = await saveProviderFromEntry({
-          configPath: args.flags.config,
-          includeRouting: values.includeRouting !== false,
-          provider,
-          setDefault: values.setDefault === true,
-        });
-
-        return createProviderAddCompletion({
-          ...saved,
-          providerId: provider.id,
-          providerType: provider.type,
-        });
-      },
-      providerFieldSpecs: providerConfigFieldSpecs,
-      providerTypeOptions: providerTypes.map((type) => ({
-        label: providerCliMetadata[type].label,
-        description: `${providerCliMetadata[type].routingSeedTypes.join(", ")} support`,
-        value: type,
-      })),
-    });
-  },
-  tui: {
-    renderer: {
-      bufferMode: "alternate",
-    },
   },
   handler: async ({ flags, positional, terminal, prompt }) => {
     if (!canPromptInTerminal(terminal)) {

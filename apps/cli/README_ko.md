@@ -1,6 +1,6 @@
 # k-msg CLI (`apps/cli`)
 
-이 CLI는 [Bunli](https://bunli.dev/)로 작성되었고, 통합 `k-msg` 패키지(KMsg + Providers)를 사용합니다.
+이 CLI는 통합 `k-msg` 패키지(KMsg + Providers)를 사용하며, interactive 설정 흐름은 prompt 기반 런타임으로 동작합니다.
 
 ## 설치 (curl 단일 경로)
 
@@ -29,10 +29,10 @@ k-msg --help
 ## 실행 (local/dev)
 
 ```bash
-# 커맨드 타입 생성
+# CLI 런타임 메타데이터 준비
 bun run --cwd apps/cli generate
 
-# completion metadata 그래프 검증 (strict)
+# shell completion 출력 검증 (strict)
 bun run --cwd apps/cli doctor:completions
 
 # 네이티브 바이너리 빌드
@@ -103,18 +103,18 @@ k-msg providers list --config /path/to/k-msg.config.json
 설정 초기화:
 
 ```bash
-# 기본: interactive wizard (TTY에서는 fullscreen TUI 실행)
+# 기본: interactive wizard (TTY에서는 prompt 기반 설정 실행)
 k-msg config init
 
 # full 템플릿 강제 (non-interactive 환경에서는 자동 적용)
 k-msg config init --template full
 
 # provider를 단계적으로 추가
-# interactive TTY에서는 alternate-buffer TUI가 열립니다
+# interactive TTY에서는 prompt 기반 설정이 실행됩니다
 k-msg config provider add
 k-msg config provider add iwinv
 
-# non-interactive 환경에서는 기존 prompt/validation 경로로 fallback 됩니다
+# non-interactive 환경에서는 validation/template 경로를 유지합니다
 ```
 
 ### `env:` 치환
@@ -168,8 +168,8 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 
 ## 명령어
 
-- `k-msg config init|show|validate` (`init`은 interactive TTY에서 fullscreen config form 실행)
-- `k-msg config provider add [type]` (interactive TTY에서는 fullscreen provider form 실행)
+- `k-msg config init|show|validate` (`init`은 interactive TTY에서 prompt 기반 설정 실행)
+- `k-msg config provider add [type]` (interactive TTY에서는 prompt 기반 provider 설정 실행)
 - `k-msg providers list|health|doctor`
 - `k-msg sms send`
 - `k-msg alimtalk preflight|send`
@@ -385,7 +385,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
 ## 출력 / 종료 코드
 
 - `--json`: 기계 판독 가능한 JSON 출력
-- AI 환경(Bunli `@bunli/plugin-ai-detect`): 에이전트가 감지되면 JSON 출력이 자동 활성화됩니다
+- AI 환경: 에이전트가 감지되면 JSON 출력이 자동 활성화됩니다
   (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX_CI` /
   `CODEX_SHELL` / `CODEX_THREAD_ID`, `MCP_SERVER_NAME` / `MCP_SESSION_ID` /
   `MCP_TOOL_NAME`)

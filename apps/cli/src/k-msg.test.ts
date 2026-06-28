@@ -153,7 +153,7 @@ function expectCommand(result: {
   };
 }
 
-describe("k-msg CLI (bunli) E2E", () => {
+describe("k-msg CLI E2E", () => {
   test(
     "help/version",
     async () => {
@@ -334,7 +334,7 @@ describe("k-msg CLI (bunli) E2E", () => {
   );
 
   test(
-    "runs from cwd without bunli config",
+    "runs from cwd without command-generation config",
     async () => {
       const cwd = await createTempCwd();
       const help = expectCommand(await runCli(["--help"], { cwd }));

@@ -77,10 +77,6 @@
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },
-  "overrides": {
-    "@bunli/core": "0.9.1",
-    "@bunli/runtime": "0.3.2"
-  },
   "keywords": [
     "korea",
     "messaging",
