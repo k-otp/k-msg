@@ -150,9 +150,10 @@ function appendAliasName(names: string, alias: string): string {
   return [...tokens, alias].join(" ");
 }
 
-function patchCompletionScriptForAliases(
-  argv: string[],
-): { postlude?: string; prelude?: string } {
+function patchCompletionScriptForAliases(argv: string[]): {
+  postlude?: string;
+  prelude?: string;
+} {
   const command = argv[0];
   if (command !== "completions") {
     return {};

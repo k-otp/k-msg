@@ -449,14 +449,17 @@ describe("k-msg CLI E2E", () => {
       expect(nestedValues).toContain("doctor");
 
       const globalConfigProtocol = expectCommand(
-        await runCli([
-          "complete",
-          "--",
-          "--config",
-          path.join(cwd, "k-msg.config.json"),
-          "providers",
-          "",
-        ], { cwd }),
+        await runCli(
+          [
+            "complete",
+            "--",
+            "--config",
+            path.join(cwd, "k-msg.config.json"),
+            "providers",
+            "",
+          ],
+          { cwd },
+        ),
       );
       globalConfigProtocol.toHaveSucceeded();
       const globalConfigValues = parseCompletionValues(
