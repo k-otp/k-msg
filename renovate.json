@@ -25,15 +25,17 @@
     {
       "matchManagers": ["npm"],
       "matchPackageNames": [
-        "bunli",
-        "@bunli/core",
-        "@bunli/generator",
-        "@bunli/plugin-ai-detect",
-        "@bunli/plugin-completions",
-        "@bunli/test",
+        "gunshi",
+        "@gunshi/plugin-completion",
         "@types/bun"
       ],
-      "groupName": "bun toolchain monthly"
+      "groupName": "cli toolchain monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["typescript"],
+      "matchFileNames": ["apps/cli/package.json", "package.json"],
+      "groupName": "cli toolchain monthly"
     },
     {
       "matchManagers": ["npm"],
