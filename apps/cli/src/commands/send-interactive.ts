@@ -1,4 +1,8 @@
-import type { MessageType, MessageVariables } from "@k-msg/core";
+import type {
+  AlimTalkFailoverOptions,
+  MessageType,
+  MessageVariables,
+} from "@k-msg/core";
 import { providerCliMetadata } from "@k-msg/provider";
 import { z } from "zod";
 import type { CliTerminal, PromptApi } from "../cli/command-contract";
@@ -23,10 +27,12 @@ export interface InteractiveSmsDraft {
   scheduledAt?: Date;
   text?: string;
   to?: string;
+  type?: "SMS" | "LMS" | "MMS";
 }
 
 export interface InteractiveAlimTalkDraft {
   channel?: string;
+  failover?: AlimTalkFailoverOptions;
   from?: string;
   plusId?: string;
   provider?: string;
@@ -45,9 +51,11 @@ export interface InteractiveSmsInput {
   providerId: string;
   text: string;
   to: string;
+  type?: "SMS" | "LMS" | "MMS";
 }
 
 export interface InteractiveAlimTalkInput {
+  failover?: AlimTalkFailoverOptions;
   from?: string;
   kakao?: {
     plusId?: string;
@@ -154,6 +162,7 @@ export async function buildInteractiveSmsInput(input: {
     providerId: provider.id,
     to,
     text,
+    ...(draft.type ? { type: draft.type } : {}),
     ...(from ? { from } : {}),
     ...(scheduledAt ? { options: { scheduledAt } } : {}),
   };
@@ -271,6 +280,7 @@ export async function buildInteractiveAlimTalkInput(input: {
     to,
     templateId,
     variables,
+    ...(draft.failover ? { failover: draft.failover } : {}),
     ...(from ? { from } : {}),
     ...(scheduledAt ? { options: { scheduledAt } } : {}),
     ...(senderKey || plusId

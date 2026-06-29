@@ -75,6 +75,7 @@ const sendCmd = defineCommand({
               scheduledAt,
               text: flags.text,
               to: flags.to,
+              type: flags.type,
             },
             prompt,
             runtime,

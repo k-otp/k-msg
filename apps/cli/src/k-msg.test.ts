@@ -950,6 +950,23 @@ describe("k-msg CLI E2E", () => {
       alimtalkResult.toHaveSucceeded();
       expect(alimtalkResult.stdout).toContain("OK ALIMTALK");
 
+      const alimtalkMissingVars = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-id",
+          "MOCK_TPL_SEED",
+        ]),
+      );
+      alimtalkMissingVars.toHaveExitCode(2);
+      expect(alimtalkMissingVars.stderr).toContain(
+        "Variables JSON is required",
+      );
+
       const alimtalkFailover = expectCommand(
         await runCli([
           "alimtalk",

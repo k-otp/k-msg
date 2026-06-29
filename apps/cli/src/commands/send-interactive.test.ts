@@ -201,6 +201,7 @@ describe("interactive send helpers", () => {
         provider: "solapi",
         scheduledAt: new Date("2026-06-29T10:00:00+09:00"),
         to: "01012345678",
+        type: "MMS",
       },
       prompt,
       runtime: createRuntime(),
@@ -216,6 +217,54 @@ describe("interactive send helpers", () => {
       providerId: "solapi",
       text: "hello from prompt",
       to: "01012345678",
+      type: "MMS",
+    });
+  });
+
+  test("preserves failover fields for interactive AlimTalk sends", async () => {
+    const prompt = new FakePrompt();
+
+    const input = await buildInteractiveAlimTalkInput({
+      draft: {
+        channel: "main",
+        failover: {
+          enabled: true,
+          fallbackChannel: "lms",
+          fallbackContent: "fallback text",
+          fallbackTitle: "fallback title",
+        },
+        from: "029302266",
+        provider: "aligo",
+        scheduledAt: new Date("2026-06-29T10:00:00+09:00"),
+        templateId: "TPL_001",
+        to: "01012345678",
+        vars: { name: "Jane" },
+      },
+      prompt,
+      runtime: createRuntime(),
+    });
+
+    expect(prompt.selects).toHaveLength(0);
+    expect(prompt.texts).toHaveLength(0);
+    expect(input).toEqual({
+      failover: {
+        enabled: true,
+        fallbackChannel: "lms",
+        fallbackContent: "fallback text",
+        fallbackTitle: "fallback title",
+      },
+      from: "029302266",
+      kakao: {
+        plusId: "@brand-main",
+        profileId: "ALIGO_PROFILE",
+      },
+      options: {
+        scheduledAt: new Date("2026-06-29T10:00:00+09:00"),
+      },
+      providerId: "aligo",
+      templateId: "TPL_001",
+      to: "01012345678",
+      variables: { name: "Jane" },
     });
   });
 

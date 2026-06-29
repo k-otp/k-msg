@@ -37,6 +37,44 @@ function requireFlag(value: string | undefined, label: string): string {
   throw new Error(`${label} is required`);
 }
 
+function requireVariables(
+  value: MessageVariables | undefined,
+): MessageVariables {
+  if (value !== undefined) {
+    return value;
+  }
+  throw new Error("Variables JSON is required");
+}
+
+function buildFailoverInput(flags: {
+  failover: boolean;
+  fallbackChannel?: "sms" | "lms";
+  fallbackContent?: string;
+  fallbackTitle?: string;
+}):
+  | {
+      enabled: true;
+      fallbackChannel?: "sms" | "lms";
+      fallbackContent?: string;
+      fallbackTitle?: string;
+    }
+  | undefined {
+  const { failover, fallbackChannel, fallbackContent, fallbackTitle } = flags;
+  const enabled =
+    failover ||
+    fallbackChannel !== undefined ||
+    fallbackContent !== undefined ||
+    fallbackTitle !== undefined;
+  if (!enabled) return undefined;
+
+  return {
+    enabled: true,
+    ...(fallbackChannel ? { fallbackChannel } : {}),
+    ...(typeof fallbackContent === "string" ? { fallbackContent } : {}),
+    ...(typeof fallbackTitle === "string" ? { fallbackTitle } : {}),
+  };
+}
+
 const sendCmd = defineCommand({
   name: "send",
   description: "Send AlimTalk",
@@ -116,12 +154,19 @@ const sendCmd = defineCommand({
 
       const runtime = await loadRuntime(flags.config);
       const scheduledAt = flags["scheduled-at"];
+      const failover = buildFailoverInput({
+        failover: flags.failover,
+        fallbackChannel: flags["fallback-channel"],
+        fallbackContent: flags["fallback-content"],
+        fallbackTitle: flags["fallback-title"],
+      });
       const input: SendInput = flags.interactive
         ? {
             type: "ALIMTALK",
             ...(await buildInteractiveAlimTalkInput({
               draft: {
                 channel: flags.channel,
+                failover,
                 from: flags.from,
                 plusId: flags["plus-id"],
                 provider: flags.provider,
@@ -136,19 +181,10 @@ const sendCmd = defineCommand({
             })),
           }
         : (() => {
-            const rawVars = flags.vars;
-            const fallbackChannel = flags["fallback-channel"];
-            const fallbackContent = flags["fallback-content"];
-            const fallbackTitle = flags["fallback-title"];
             const resolvedProvider = pickAlimTalkProvider(
               runtime,
               flags.provider,
             );
-            const failoverEnabled =
-              flags.failover ||
-              fallbackChannel !== undefined ||
-              fallbackContent !== undefined ||
-              fallbackTitle !== undefined;
 
             const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
               providerId: resolvedProvider.id,
@@ -170,24 +206,13 @@ const sendCmd = defineCommand({
               to: requireFlag(flags.to, "Recipient phone number"),
               from: flags.from,
               templateId: requireFlag(flags["template-id"], "Template ID"),
-              variables: rawVars as MessageVariables,
+              variables: requireVariables(
+                flags.vars as MessageVariables | undefined,
+              ),
               ...(Object.keys(kakao).length > 0 ? { kakao } : {}),
               ...(flags.provider ? { providerId: flags.provider } : {}),
               ...(scheduledAt ? { options: { scheduledAt } } : {}),
-              ...(failoverEnabled
-                ? {
-                    failover: {
-                      enabled: true,
-                      ...(fallbackChannel ? { fallbackChannel } : {}),
-                      ...(typeof fallbackContent === "string"
-                        ? { fallbackContent }
-                        : {}),
-                      ...(typeof fallbackTitle === "string"
-                        ? { fallbackTitle }
-                        : {}),
-                    },
-                  }
-                : {}),
+              ...(failover ? { failover } : {}),
             };
           })();
 

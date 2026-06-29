@@ -47,6 +47,7 @@
     "clean": "bun run --filter='./packages/*' clean",
     "prepublishOnly": "bun run build",
     "cli": "bun --cwd apps/cli --",
+    "pr:watch": "bun run scripts/automation/watch-pr.ts",
     "deps:outdated:core": "for d in . apps/cli packages/*; do [ -f \"$d/package.json\" ] || continue; echo \"\\n===== $d =====\"; (cd \"$d\" && bun outdated || true); done",
     "deps:outdated:examples": "for d in examples/*; do [ -f \"$d/package.json\" ] || continue; echo \"\\n===== $d =====\"; (cd \"$d\" && bun outdated || true); done",
     "version:patch": "bun pm version patch",
