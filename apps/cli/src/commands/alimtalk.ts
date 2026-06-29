@@ -279,14 +279,15 @@ const preflightCmd = defineCommand({
   handler: async ({ flags, context }) => {
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
-      const runtime = await loadRuntime(flags.config);
-      const provider = pickAlimTalkProvider(runtime, flags.provider);
       const templateId = flags["template-id"];
       if (typeof templateId !== "string" || templateId.trim().length === 0) {
         throw new Error(
           "--template-id is required (pass a Kakao template code)",
         );
       }
+
+      const runtime = await loadRuntime(flags.config);
+      const provider = pickAlimTalkProvider(runtime, flags.provider);
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
         providerId: provider.id,
         channelAlias: flags.channel,

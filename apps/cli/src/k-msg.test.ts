@@ -421,7 +421,7 @@ describe("k-msg CLI E2E", () => {
         await runCli(["completions", "zsh"], { cwd }),
       );
       script.toHaveSucceeded();
-      expect(script.stdout).toContain("#compdef k-msg");
+      expect(script.stdout).toContain("#compdef k-msg kmsg");
       expect(script.stdout).toContain("compdef _k-msg kmsg");
 
       const bashScript = expectCommand(
@@ -447,6 +447,24 @@ describe("k-msg CLI E2E", () => {
       expect(nestedValues).toContain("list");
       expect(nestedValues).toContain("health");
       expect(nestedValues).toContain("doctor");
+
+      const globalConfigProtocol = expectCommand(
+        await runCli([
+          "complete",
+          "--",
+          "--config",
+          path.join(cwd, "k-msg.config.json"),
+          "providers",
+          "",
+        ], { cwd }),
+      );
+      globalConfigProtocol.toHaveSucceeded();
+      const globalConfigValues = parseCompletionValues(
+        globalConfigProtocol.stdout,
+      );
+      expect(globalConfigValues).toContain("list");
+      expect(globalConfigValues).toContain("health");
+      expect(globalConfigValues).toContain("doctor");
     },
     TEST_TIMEOUT,
   );
@@ -744,6 +762,19 @@ describe("k-msg CLI E2E", () => {
       );
       missingTemplateId.toHaveExitCode(2);
       expect(missingTemplateId.stderr).toContain(
+        "--template-id is required (pass a Kakao template code)",
+      );
+
+      const missingTemplateIdWithoutConfig = expectCommand(
+        await runCli([
+          "alimtalk",
+          "preflight",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+        ]),
+      );
+      missingTemplateIdWithoutConfig.toHaveExitCode(2);
+      expect(missingTemplateIdWithoutConfig.stderr).toContain(
         "--template-id is required (pass a Kakao template code)",
       );
     },

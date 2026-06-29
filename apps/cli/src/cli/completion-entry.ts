@@ -139,27 +139,85 @@ function printCompletionCommandHelp(command: "complete" | "completions"): void {
   );
 }
 
-function patchCompletionScriptForAliases(argv: string[]): string | undefined {
+function appendAliasName(names: string, alias: string): string {
+  const tokens = names
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+  if (tokens.includes(alias)) {
+    return tokens.join(" ");
+  }
+  return [...tokens, alias].join(" ");
+}
+
+function patchCompletionScriptForAliases(
+  argv: string[],
+): { postlude?: string; prelude?: string } {
   const command = argv[0];
   if (command !== "completions") {
-    return undefined;
+    return {};
   }
 
   const shell = argv[1];
   if (shell === "bash") {
-    return "complete -F __k_msg_complete kmsg";
+    return { postlude: "complete -F __k_msg_complete kmsg\n" };
   }
 
   if (shell === "zsh") {
-    return "compdef _k-msg kmsg";
+    return {
+      prelude: `#compdef ${appendAliasName("k-msg", "kmsg")}\n`,
+      postlude: "compdef _k-msg kmsg\n",
+    };
   }
 
-  return undefined;
+  return {};
+}
+
+function normalizeCompletionContext(words: string[]): {
+  blocked: boolean;
+  current: string;
+  path: string[];
+} {
+  const current = words.at(-1) ?? "";
+  const rawPath = words.length > 0 ? words.slice(0, -1) : [];
+  const path: string[] = [];
+
+  for (let index = 0; index < rawPath.length; index += 1) {
+    const token = rawPath[index];
+    if (!token) {
+      continue;
+    }
+
+    if (path.length > 0 || !token.startsWith("-")) {
+      path.push(...rawPath.slice(index));
+      break;
+    }
+
+    if (token === "--config") {
+      const value = rawPath[index + 1];
+      if (value === undefined) {
+        return { blocked: true, current, path: [] };
+      }
+      index += 1;
+      continue;
+    }
+
+    if (token.startsWith("--config=")) {
+      continue;
+    }
+
+    path.push(...rawPath.slice(index));
+    break;
+  }
+
+  return { blocked: false, current, path };
 }
 
 function resolveCompletionEntries(words: string[]): CompletionEntry[] {
-  const current = words.at(-1) ?? "";
-  const path = words.length > 0 ? words.slice(0, -1) : [];
+  const { blocked, current, path } = normalizeCompletionContext(words);
+  if (blocked) {
+    return [];
+  }
 
   if (path[0] === "completions") {
     return filterCompletionEntries(SHELL_COMPLETION_ENTRIES, current);
@@ -314,7 +372,12 @@ export async function runCliEntrypoint(
     return;
   }
 
-  const rendered = await cli(normalizeCompletionArgv(argv), completionCommand, {
+  const { prelude, postlude } = patchCompletionScriptForAliases(argv);
+  if (prelude) {
+    process.stdout.write(prelude);
+  }
+
+  await cli(normalizeCompletionArgv(argv), completionCommand, {
     fallbackToEntry: true,
     name: "k-msg",
     plugins: [completion()],
@@ -323,16 +386,7 @@ export async function runCliEntrypoint(
       typeof packageJson.version === "string" ? packageJson.version : "0.0.0",
   });
 
-  if (typeof rendered === "string" && rendered.length > 0) {
-    process.stdout.write(rendered.endsWith("\n") ? rendered : `${rendered}\n`);
-  }
-
-  const aliasRegistration = patchCompletionScriptForAliases(argv);
-  if (aliasRegistration) {
-    process.stdout.write(
-      aliasRegistration.endsWith("\n")
-        ? aliasRegistration
-        : `${aliasRegistration}\n`,
-    );
+  if (postlude) {
+    process.stdout.write(postlude);
   }
 }
