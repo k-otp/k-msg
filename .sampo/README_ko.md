@@ -18,34 +18,21 @@
 
 changeset 파일은 `.sampo/changesets/*.md`에 저장됩니다.
 
-## Release PR 생성 정책 (`AUTO_RELEASE_PR`)
+## Release PR 운영 정책
 
-자동 release PR 생성은 저장소 변수로 제어합니다.
+release workflow는 아래 두 조건이 모두 맞으면 `sampo/release` PR을 자동으로 생성하거나 갱신합니다.
 
-- `AUTO_RELEASE_PR=false` (기본): `sampo/release` PR 자동 생성 안 함
-- `AUTO_RELEASE_PR=true`: pending changeset이 있을 때 release PR 자동 생성 허용
-
-워크플로우 조건:
-
-- `vars.AUTO_RELEASE_PR == 'true'`
 - `has_changesets == true`
 - `should_publish != true`
 
 `should_publish`는 `scripts/publish-oidc.sh --check`에서 npm registry 상태로 계산됩니다.
 
-## 여러 PR을 묶어서 한 번에 릴리즈하는 권장 흐름
+즉, 기능 PR마다 changeset을 계속 포함해도 되고, `main` 머지 후 release PR은 workflow가 상시 관리합니다.
 
-1. 일반 기능 PR 머지 기간에는 `AUTO_RELEASE_PR=false` 유지
-2. 묶음의 마지막 PR 머지 직전에 `AUTO_RELEASE_PR=true`
-3. 마지막 PR을 `main`에 머지해서 release PR 생성
-4. release PR 생성 확인 후 다시 `AUTO_RELEASE_PR=false`
+## 선택 사항: GitHub App
 
-### 명령어
+PR 단계에서 changeset 누락 알림까지 받고 싶다면 Sampo GitHub App을 설치할 수 있습니다.
 
-```bash
-# 마지막 PR 머지 직전에 활성화
-gh variable set AUTO_RELEASE_PR -b "true" -R k-otp/k-msg
+- <https://github.com/apps/sampo-s-bot>
 
-# release PR 생성 후 비활성화
-gh variable set AUTO_RELEASE_PR -b "false" -R k-otp/k-msg
-```
+이 App은 changeset 누락만 알려주고, `sampo/release` PR 생성/갱신은 계속 release workflow가 담당합니다.
