@@ -4,6 +4,7 @@ import {
   BadRequestError,
   ClientError,
   DefaultError,
+  MessageNotReceivedError,
   NetworkError,
   ServerError,
 } from "solapi";
@@ -24,6 +25,17 @@ export function mapSolapiError(error: unknown, providerId: string): KMsgError {
     return new KMsgError(KMsgErrorCode.INVALID_REQUEST, error.message, {
       providerId,
       validationErrors: record.validationErrors,
+    });
+  }
+
+  if (error instanceof MessageNotReceivedError) {
+    return new KMsgError(KMsgErrorCode.PROVIDER_ERROR, error.message, {
+      providerId,
+      failedMessageList: Array.isArray(record.failedMessageList)
+        ? record.failedMessageList
+        : undefined,
+      totalCount:
+        typeof record.totalCount === "number" ? record.totalCount : undefined,
     });
   }
 

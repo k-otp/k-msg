@@ -19,6 +19,7 @@ import {
 import type {
   SolapiSdkClient,
   SolapiSendOneMessage,
+  SolapiSendRequestConfig,
 } from "./solapi.internal.types";
 import type { SolapiConfig } from "./types/solapi";
 
@@ -50,9 +51,7 @@ export function adaptSolapiSendResult(params: {
   warnings?: SendResult["warnings"];
 }): SendResult {
   const { options, response, providerId, warnings } = params;
-  const record = isObjectRecord(response) ? response : {};
-  const providerMessageId =
-    typeof record.messageId === "string" ? record.messageId : undefined;
+  const providerMessageId = extractSolapiProviderMessageId(response);
 
   return {
     messageId: options.messageId || crypto.randomUUID(),
@@ -75,7 +74,6 @@ export async function buildSolapiSendOneMessage(params: {
   const { options, providerId, config, client } = params;
 
   const type = toSolapiMessageType(options);
-  const scheduledAt = options.options?.scheduledAt;
   const senderNumber =
     typeof options.from === "string" && options.from.length > 0
       ? options.from
@@ -107,10 +105,6 @@ export async function buildSolapiSendOneMessage(params: {
     if (Object.keys(customFields).length > 0) {
       base.customFields = customFields;
     }
-  }
-
-  if (scheduledAt) {
-    base.scheduledDate = scheduledAt;
   }
 
   const requiresFrom =
@@ -628,7 +622,28 @@ export async function sendWithSolapi(params: {
     config,
     client,
   });
-  const response = await client.sendOne(message, config.appId);
+  const scheduledDate = resolveSolapiScheduledDate(options);
+
+  let response: unknown;
+  if (typeof client.sendOne === "function") {
+    response = await client.sendOne(
+      scheduledDate
+        ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
+        : message,
+      config.appId,
+    );
+  } else if (typeof client.send === "function") {
+    response = await client.send(
+      message,
+      buildSolapiSendRequestConfig(config, scheduledDate),
+    );
+  } else {
+    throw new KMsgError(
+      KMsgErrorCode.PROVIDER_ERROR,
+      "SOLAPI SDK client does not expose a compatible send method",
+      { providerId },
+    );
+  }
 
   return ok(
     adaptSolapiSendResult({
@@ -638,4 +653,50 @@ export async function sendWithSolapi(params: {
       warnings,
     }),
   );
+}
+
+function resolveSolapiScheduledDate(options: SendOptions): string | undefined {
+  const scheduledAt = (options.options as { scheduledAt?: unknown } | undefined)
+    ?.scheduledAt;
+  if (scheduledAt instanceof Date) {
+    return Number.isNaN(scheduledAt.getTime())
+      ? undefined
+      : scheduledAt.toISOString();
+  }
+  return typeof scheduledAt === "string" && scheduledAt.length > 0
+    ? scheduledAt
+    : undefined;
+}
+
+function buildSolapiSendRequestConfig(
+  config: SolapiConfig,
+  scheduledDate?: string,
+): SolapiSendRequestConfig {
+  return {
+    showMessageList: true,
+    ...(config.appId ? { appId: config.appId } : {}),
+    ...(scheduledDate ? { scheduledDate } : {}),
+  };
+}
+
+function extractSolapiProviderMessageId(response: unknown): string | undefined {
+  const record = isObjectRecord(response) ? response : {};
+
+  if (typeof record.messageId === "string" && record.messageId.length > 0) {
+    return record.messageId;
+  }
+
+  const messageList = record.messageList;
+  if (!Array.isArray(messageList)) {
+    return undefined;
+  }
+
+  for (const item of messageList) {
+    if (!isObjectRecord(item)) continue;
+    if (typeof item.messageId === "string" && item.messageId.length > 0) {
+      return item.messageId;
+    }
+  }
+
+  return undefined;
 }
