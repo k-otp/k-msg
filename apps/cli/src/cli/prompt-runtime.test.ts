@@ -35,4 +35,37 @@ describe("prompt runtime", () => {
 
     await expect(pending).rejects.toBeInstanceOf(PromptCancelledError);
   });
+
+  test("renders select value metadata on a dedicated hint line", async () => {
+    const rl = new FakeReadline();
+    const lines: string[] = [];
+    const prompt = createReadlinePromptWithInterface(rl, {
+      printLine: (line) => lines.push(line),
+    });
+
+    const pending = prompt.select("Select provider type", {
+      default: "mock",
+      options: [
+        {
+          label: "Mock (local test)",
+          value: "mock",
+        },
+        {
+          hint: "senderKey=ALIGO_PROFILE | plusId=@brand-main",
+          label: "main (Main)",
+          value: "main",
+        },
+      ],
+    });
+
+    rl.callback?.("");
+
+    await expect(pending).resolves.toBe("mock");
+    expect(lines).toContain("  1. Mock (local test) (default)");
+    expect(lines).toContain("     value: mock");
+    expect(lines).not.toContain("  1. Mock (local test) [mock] (default)");
+    expect(lines).toContain(
+      "     senderKey=ALIGO_PROFILE | plusId=@brand-main | value: main",
+    );
+  });
 });

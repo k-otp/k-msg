@@ -111,6 +111,7 @@ export function resolveKakaoChannelSenderKey(
     channelAlias?: string;
     senderKey?: string;
     plusId?: string;
+    strictAlias?: boolean;
   },
 ): string | undefined {
   return resolveKakaoChannelBinding(config, {
@@ -118,6 +119,7 @@ export function resolveKakaoChannelSenderKey(
     channelAlias: input?.channelAlias,
     senderKey: input?.senderKey,
     plusId: input?.plusId,
+    strictAlias: input?.strictAlias,
   }).senderKey;
 }
 
@@ -128,6 +130,7 @@ export function resolveKakaoChannelPlusId(
     channelAlias?: string;
     senderKey?: string;
     plusId?: string;
+    strictAlias?: boolean;
   },
 ): string | undefined {
   return resolveKakaoChannelBinding(config, {
@@ -135,6 +138,7 @@ export function resolveKakaoChannelPlusId(
     channelAlias: input?.channelAlias,
     senderKey: input?.senderKey,
     plusId: input?.plusId,
+    strictAlias: input?.strictAlias,
   }).plusId;
 }
 
@@ -147,7 +151,7 @@ export async function loadRuntime(configPath?: string): Promise<Runtime> {
     throw new Error(
       `Failed to resolve env vars for config (${loadedRaw.path}): ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }. Set the missing env vars, remove the blocked provider entry, or re-run 'k-msg config init --template mock-only' for a local smoke-test config.`,
     );
   }
 

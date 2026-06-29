@@ -190,11 +190,17 @@ const sendCmd = defineCommand({
               providerId: resolvedProvider.id,
               channelAlias: flags.channel,
               senderKey: flags["sender-key"],
+              strictAlias:
+                typeof flags.channel === "string" &&
+                flags.channel.trim().length > 0,
             });
             const plusId = resolveKakaoChannelPlusId(runtime.config, {
               providerId: resolvedProvider.id,
               channelAlias: flags.channel,
               plusId: flags["plus-id"],
+              strictAlias:
+                typeof flags.channel === "string" &&
+                flags.channel.trim().length > 0,
             });
             const kakao = {
               ...(senderKey ? { profileId: senderKey } : {}),
@@ -266,24 +272,35 @@ const preflightCmd = defineCommand({
     "plus-id": option(z.string().optional(), {
       description: "Kakao channel plusId override",
     }),
-    "template-id": option(z.string().min(1), {
-      description: "Template ID to validate",
+    "template-id": option(z.string().min(1).optional(), {
+      description: "Template ID to validate (required)",
     }),
   },
   handler: async ({ flags, context }) => {
     const asJson = shouldUseJsonOutput(flags.json, context);
     try {
+      const templateId = flags["template-id"];
+      if (typeof templateId !== "string" || templateId.trim().length === 0) {
+        throw new Error(
+          "--template-id is required (pass a Kakao template code)",
+        );
+      }
+
       const runtime = await loadRuntime(flags.config);
       const provider = pickAlimTalkProvider(runtime, flags.provider);
       const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
         providerId: provider.id,
         channelAlias: flags.channel,
         senderKey: flags["sender-key"],
+        strictAlias:
+          typeof flags.channel === "string" && flags.channel.trim().length > 0,
       });
       const plusId = resolveKakaoChannelPlusId(runtime.config, {
         providerId: provider.id,
         channelAlias: flags.channel,
         plusId: flags["plus-id"],
+        strictAlias:
+          typeof flags.channel === "string" && flags.channel.trim().length > 0,
       });
 
       const preflight = await runAlimTalkPreflight({
@@ -291,7 +308,7 @@ const preflightCmd = defineCommand({
         provider,
         senderKey,
         plusId,
-        templateId: flags["template-id"],
+        templateId,
       });
 
       if (asJson) {

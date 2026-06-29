@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
   id-token: write
@@ -15,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUN_VERSION: "1.3.11"
+  BUN_VERSION: "1.3.13"
   NODE_VERSION: "24"
 
 jobs:
@@ -94,6 +95,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger CI for release PR branch
+        if: ${{ steps.sampo.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin sampo/release >/dev/null 2>&1; then
+            gh workflow run ci.yml --ref sampo/release
+          else
+            echo "sampo/release branch not found; skipping CI dispatch."
+          fi
 
       # Sampo may update versions/changelogs in the working tree while preparing the release PR.
       # To ensure publishing uses the exact merged `main` commit, we re-checkout at `github.sha`

@@ -171,6 +171,7 @@ describe("k-msg CLI E2E", () => {
       expect(help.stdout).toContain("complete");
       expect(help.stdout).toContain("completions");
       expect(help.stdout).toContain("config");
+      expect(help.stdout).toContain("--config <value>");
       expect(help.stdout).toContain("db");
       expect(help.stdout).toContain("providers");
 
@@ -200,14 +201,32 @@ describe("k-msg CLI E2E", () => {
       alimtalkHelp.toHaveExitCode(0);
       expect(alimtalkHelp.stdout).toContain("Send AlimTalk");
       expect(alimtalkHelp.stdout).toContain("--interactive");
+      expect(alimtalkHelp.stdout).toContain("-v, --version");
+
+      const groupVersion = expectCommand(await runCli(["providers", "-v"]));
+      groupVersion.toHaveExitCode(0);
+      expect(groupVersion.stdout).toContain("k-msg v");
+
+      const commandVersion = expectCommand(await runCli(["sms", "send", "-v"]));
+      commandVersion.toHaveExitCode(0);
+      expect(commandVersion.stdout).toContain("k-msg v");
 
       const completionHelp = expectCommand(
         await runCli(["completions", "--help"]),
       );
       completionHelp.toHaveExitCode(0);
       expect(completionHelp.stdout).toContain(
-        "Generate shell completion script",
+        "Generate shell completion scripts",
       );
+      expect(completionHelp.stdout).toContain("k-msg completions <shell>");
+      expect(completionHelp.stdout).toContain("bash, zsh, fish, powershell");
+
+      const completeHelp = expectCommand(await runCli(["complete", "--help"]));
+      completeHelp.toHaveExitCode(0);
+      expect(completeHelp.stdout).toContain(
+        "Completion protocol callback for shell integration",
+      );
+      expect(completeHelp.stdout).toContain("k-msg complete -- <words...>");
 
       const unsupportedCompletionShell = expectCommand(
         await runCli(["completions", "elvish"]),
@@ -402,7 +421,14 @@ describe("k-msg CLI E2E", () => {
         await runCli(["completions", "zsh"], { cwd }),
       );
       script.toHaveSucceeded();
-      expect(script.stdout).toContain("#compdef k-msg");
+      expect(script.stdout).toContain("#compdef k-msg kmsg");
+      expect(script.stdout).toContain("compdef _k-msg kmsg");
+
+      const bashScript = expectCommand(
+        await runCli(["completions", "bash"], { cwd }),
+      );
+      bashScript.toHaveSucceeded();
+      expect(bashScript.stdout).toContain("complete -F __k_msg_complete kmsg");
 
       const protocol = expectCommand(
         await runCli(["complete", "--", ""], { cwd }),
@@ -421,6 +447,27 @@ describe("k-msg CLI E2E", () => {
       expect(nestedValues).toContain("list");
       expect(nestedValues).toContain("health");
       expect(nestedValues).toContain("doctor");
+
+      const globalConfigProtocol = expectCommand(
+        await runCli(
+          [
+            "complete",
+            "--",
+            "--config",
+            path.join(cwd, "k-msg.config.json"),
+            "providers",
+            "",
+          ],
+          { cwd },
+        ),
+      );
+      globalConfigProtocol.toHaveSucceeded();
+      const globalConfigValues = parseCompletionValues(
+        globalConfigProtocol.stdout,
+      );
+      expect(globalConfigValues).toContain("list");
+      expect(globalConfigValues).toContain("health");
+      expect(globalConfigValues).toContain("doctor");
     },
     TEST_TIMEOUT,
   );
@@ -442,6 +489,21 @@ describe("k-msg CLI E2E", () => {
       expect(shown.stdout).toContain("Config:");
       expect(shown.stdout).toContain("Providers:");
 
+      const validatedJson = expectCommand(
+        await runCli(["config", "validate", "--config", configPath, "--json"]),
+      );
+      validatedJson.toHaveSucceeded();
+      const validatedJsonParsed = JSON.parse(validatedJson.stdout) as {
+        ok: boolean;
+        result: {
+          path: string;
+          providerIds: string[];
+        };
+      };
+      expect(validatedJsonParsed.ok).toBe(true);
+      expect(validatedJsonParsed.result.path).toBe(configPath);
+      expect(validatedJsonParsed.result.providerIds).toContain("mock");
+
       const missing = expectCommand(
         await runCli([
           "config",
@@ -452,6 +514,7 @@ describe("k-msg CLI E2E", () => {
       );
       missing.toHaveExitCode(2);
       expect(missing.stderr).toContain("Config file not found:");
+      expect(missing.stderr).toContain("Run 'k-msg config init' to create one");
 
       const missingJson = expectCommand(
         await runCli([
@@ -482,7 +545,7 @@ describe("k-msg CLI E2E", () => {
   );
 
   test(
-    "config init uses full template in non-interactive mode",
+    "config init uses mock-only template in non-interactive mode by default",
     async () => {
       const targetPath = await createTempConfigPath();
       const initialized = expectCommand(
@@ -490,6 +553,7 @@ describe("k-msg CLI E2E", () => {
       );
       initialized.toHaveSucceeded();
       expect(initialized.stdout).toContain(targetPath);
+      expect(initialized.stdout).toContain("template=mock-only");
 
       const parsed = JSON.parse(await Bun.file(targetPath).text()) as Record<
         string,
@@ -499,9 +563,102 @@ describe("k-msg CLI E2E", () => {
         "https://raw.githubusercontent.com/k-otp/k-msg/main/apps/cli/schemas/k-msg.config.schema.json",
       );
       expect(Array.isArray(parsed.providers)).toBe(true);
-      expect((parsed.providers as unknown[]).length).toBeGreaterThan(0);
+      expect((parsed.providers as unknown[]).length).toBe(1);
+      const firstProvider = (
+        parsed.providers as Array<Record<string, unknown>>
+      )[0];
+      expect(firstProvider?.type).toBe("mock");
       const defaults = parsed.defaults as Record<string, unknown> | undefined;
       expect(defaults?.from).toBeUndefined();
+      const kakaoDefaults = defaults?.kakao as
+        | Record<string, unknown>
+        | undefined;
+      expect(kakaoDefaults?.channel).toBe("seed");
+
+      const doctor = expectCommand(
+        await runCli(["providers", "doctor", "--config", targetPath]),
+      );
+      doctor.toHaveSucceeded();
+      expect(doctor.stdout).toContain("OK mock:");
+
+      const smsSend = expectCommand(
+        await runCli([
+          "sms",
+          "send",
+          "--config",
+          targetPath,
+          "--to",
+          "01012345678",
+          "--text",
+          "hello",
+        ]),
+      );
+      smsSend.toHaveSucceeded();
+      expect(smsSend.stdout).toContain("OK");
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "config init supports explicit full template in non-interactive mode",
+    async () => {
+      const targetPath = await createTempConfigPath();
+      const initialized = expectCommand(
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          targetPath,
+          "--template",
+          "full",
+        ]),
+      );
+      initialized.toHaveSucceeded();
+      expect(initialized.stdout).toContain(
+        "set the required provider env vars",
+      );
+
+      const parsed = JSON.parse(await Bun.file(targetPath).text()) as Record<
+        string,
+        unknown
+      >;
+      expect(Array.isArray(parsed.providers)).toBe(true);
+      expect((parsed.providers as unknown[]).length).toBeGreaterThan(1);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "config init rejects explicit interactive template without a TTY",
+    async () => {
+      const targetPath = await createTempConfigPath();
+      const initialized = expectCommand(
+        await runCli([
+          "config",
+          "init",
+          "--config",
+          targetPath,
+          "--template",
+          "interactive",
+        ]),
+      );
+      initialized.toHaveExitCode(2);
+      expect(initialized.stderr).toContain(
+        "config init --template interactive requires an interactive terminal",
+      );
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "global --config works before the command path",
+    async () => {
+      const configPath = await createTempConfig();
+      const listed = expectCommand(
+        await runCli(["--config", configPath, "providers", "list"]),
+      );
+      listed.toHaveSucceeded();
+      expect(listed.stdout).toContain("mock:");
     },
     TEST_TIMEOUT,
   );
@@ -585,6 +742,44 @@ describe("k-msg CLI E2E", () => {
       expect(preflight.stdout).toContain("template_exists_probe");
       expect(preflight.stdout).toContain("reason:");
       expect(preflight.stdout).toContain("next:");
+
+      const invalidChannel = expectCommand(
+        await runCli([
+          "alimtalk",
+          "preflight",
+          "--config",
+          configPath,
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--channel",
+          "missing",
+        ]),
+      );
+      invalidChannel.toHaveExitCode(2);
+      expect(invalidChannel.stderr).toContain(
+        "Unknown kakao channel alias: missing",
+      );
+
+      const missingTemplateId = expectCommand(
+        await runCli(["alimtalk", "preflight", "--config", configPath]),
+      );
+      missingTemplateId.toHaveExitCode(2);
+      expect(missingTemplateId.stderr).toContain(
+        "--template-id is required (pass a Kakao template code)",
+      );
+
+      const missingTemplateIdWithoutConfig = expectCommand(
+        await runCli([
+          "alimtalk",
+          "preflight",
+          "--config",
+          path.join(await createTempCwd(), "missing.config.json"),
+        ]),
+      );
+      missingTemplateIdWithoutConfig.toHaveExitCode(2);
+      expect(missingTemplateIdWithoutConfig.stderr).toContain(
+        "--template-id is required (pass a Kakao template code)",
+      );
     },
     TEST_TIMEOUT,
   );
@@ -949,6 +1144,27 @@ describe("k-msg CLI E2E", () => {
       );
       alimtalkResult.toHaveSucceeded();
       expect(alimtalkResult.stdout).toContain("OK ALIMTALK");
+
+      const alimtalkInvalidChannel = expectCommand(
+        await runCli([
+          "alimtalk",
+          "send",
+          "--config",
+          configPath,
+          "--to",
+          "01012345678",
+          "--template-id",
+          "MOCK_TPL_SEED",
+          "--vars",
+          '{"name":"Jane"}',
+          "--channel",
+          "missing",
+        ]),
+      );
+      alimtalkInvalidChannel.toHaveExitCode(2);
+      expect(alimtalkInvalidChannel.stderr).toContain(
+        "Unknown kakao channel alias: missing",
+      );
 
       const alimtalkMissingVars = expectCommand(
         await runCli([
