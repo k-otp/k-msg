@@ -72,6 +72,7 @@ export interface InteractiveAlimTalkInput {
 
 type KakaoAliasOption = {
   alias: string;
+  hint?: string;
   label: string;
 };
 
@@ -374,7 +375,8 @@ async function promptProviderSelection(input: {
 
   const selected = await promptSelect(input.prompt, input.message, {
     options: input.providers.map((provider) => ({
-      label: `${provider.id} (${provider.name})`,
+      hint: `id: ${provider.id}`,
+      label: provider.name,
       value: provider.id,
     })),
     default: input.defaultProviderId,
@@ -448,6 +450,7 @@ async function promptKakaoAlias(input: {
     {
       options: [
         ...aliases.map((item) => ({
+          hint: item.hint,
           label: item.label,
           value: item.alias,
         })),
@@ -474,29 +477,29 @@ function listKakaoAliases(
     .filter(([, value]) => value?.providerId === providerId)
     .map(([alias, value]) => ({
       alias,
-      label: formatKakaoAliasLabel(
-        alias,
-        value?.name,
-        value?.senderKey,
-        value?.plusId,
-      ),
+      hint: formatKakaoAliasHint(value?.senderKey, value?.plusId),
+      label: formatKakaoAliasLabel(alias, value?.name),
     }));
 }
 
-function formatKakaoAliasLabel(
-  alias: string,
-  name?: string,
+function formatKakaoAliasLabel(alias: string, name?: string): string {
+  const parts = [alias, name ? `(${name})` : undefined].filter(
+    (value): value is string => typeof value === "string",
+  );
+
+  return parts.join(" ");
+}
+
+function formatKakaoAliasHint(
   senderKey?: string,
   plusId?: string,
-): string {
+): string | undefined {
   const parts = [
-    alias,
-    name ? `(${name})` : undefined,
     senderKey ? `senderKey=${senderKey}` : undefined,
     plusId ? `plusId=${plusId}` : undefined,
   ].filter((value): value is string => typeof value === "string");
 
-  return parts.join(" ");
+  return parts.length > 0 ? parts.join(" | ") : undefined;
 }
 
 function getDefaultKakaoAlias(

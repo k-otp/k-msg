@@ -50,6 +50,14 @@ function normalizeCompletionArgv(argv: string[]): string[] {
   return command === "completions" ? ["complete", ...rest] : argv;
 }
 
+function isHelpRequest(argv: string[]): boolean {
+  return argv.includes("--help") || argv.includes("-h");
+}
+
+function isVersionRequest(argv: string[]): boolean {
+  return argv.includes("--version") || argv.includes("-v");
+}
+
 function isSupportedCompletionShell(
   value: string,
 ): value is (typeof SHELL_NAMES)[number] {
@@ -91,6 +99,62 @@ function printCompletionProtocol(argv: string[]): void {
     );
   }
   console.log(":4");
+}
+
+function printCompletionCommandHelp(command: "complete" | "completions"): void {
+  if (command === "completions") {
+    console.log(
+      [
+        "Generate shell completion scripts",
+        "",
+        "Usage:",
+        "  k-msg completions <shell>",
+        "",
+        "Arguments:",
+        `  <shell>             One of: ${SHELL_NAMES.join(", ")}`,
+        "",
+        "Built-ins:",
+        "  -h, --help          Show help",
+        "  -v, --version       Show version",
+      ].join("\n"),
+    );
+    return;
+  }
+
+  console.log(
+    [
+      "Completion protocol callback for shell integration",
+      "",
+      "Usage:",
+      "  k-msg complete -- <words...>",
+      "",
+      "Notes:",
+      "  This command is used by generated shell completion scripts.",
+      "  Everything after `--` is treated as completion input.",
+      "",
+      "Built-ins:",
+      "  -h, --help          Show help",
+      "  -v, --version       Show version",
+    ].join("\n"),
+  );
+}
+
+function patchCompletionScriptForAliases(argv: string[]): string | undefined {
+  const command = argv[0];
+  if (command !== "completions") {
+    return undefined;
+  }
+
+  const shell = argv[1];
+  if (shell === "bash") {
+    return "complete -F __k_msg_complete kmsg";
+  }
+
+  if (shell === "zsh") {
+    return "compdef _k-msg kmsg";
+  }
+
+  return undefined;
 }
 
 function resolveCompletionEntries(words: string[]): CompletionEntry[] {
@@ -225,6 +289,24 @@ export async function runCliEntrypoint(
     return;
   }
 
+  const command = argv[0];
+  if (command === "complete" || command === "completions") {
+    if (isVersionRequest(argv)) {
+      console.log(
+        `k-msg v${
+          typeof packageJson.version === "string"
+            ? packageJson.version
+            : "0.0.0"
+        }`,
+      );
+      return;
+    }
+    if (isHelpRequest(argv)) {
+      printCompletionCommandHelp(command);
+      return;
+    }
+  }
+
   const shellValidationError = validateCompletionShellArg(argv);
   if (shellValidationError) {
     console.error(shellValidationError);
@@ -240,7 +322,17 @@ export async function runCliEntrypoint(
     version:
       typeof packageJson.version === "string" ? packageJson.version : "0.0.0",
   });
+
   if (typeof rendered === "string" && rendered.length > 0) {
-    console.log(rendered);
+    process.stdout.write(rendered.endsWith("\n") ? rendered : `${rendered}\n`);
+  }
+
+  const aliasRegistration = patchCompletionScriptForAliases(argv);
+  if (aliasRegistration) {
+    process.stdout.write(
+      aliasRegistration.endsWith("\n")
+        ? aliasRegistration
+        : `${aliasRegistration}\n`,
+    );
   }
 }
