@@ -103,6 +103,67 @@ describe("onboarding guidance", () => {
     expect(sender?.nextAction).toContain("iwinv.config.senderNumber");
   });
 
+  test("manual prerequisite guidance uses the configured provider id", async () => {
+    const provider = createProvider({
+      id: "iwinv2",
+      name: "IWINV Messaging Provider",
+      supportedTypes: ["ALIMTALK", "SMS", "LMS", "MMS"],
+      getOnboardingSpec() {
+        return {
+          providerId: "iwinv",
+          providerName: "IWINV Messaging Provider",
+          channelOnboarding: "manual",
+          templateLifecycleApi: "available",
+          plusIdPolicy: "optional",
+          plusIdInference: "unsupported",
+          checks: [
+            {
+              id: "channel_registered_in_console",
+              title: "Kakao channel is registered in IWINV console",
+              kind: "manual",
+              severity: "blocker",
+              scopes: ["doctor"],
+            },
+          ],
+        };
+      },
+    });
+
+    const result = await runProviderDoctor({
+      provider,
+      runtime: createRuntime({
+        providers: [
+          {
+            type: "iwinv",
+            id: "iwinv2",
+            config: {
+              apiKey: "env:IWINV_API_KEY",
+            },
+          },
+        ],
+        onboarding: {
+          manualChecks: {
+            iwinv2: {
+              channel_registered_in_console: {
+                done: false,
+              },
+            },
+          },
+        },
+      }),
+    });
+
+    const manual = result.checks.find(
+      (check) => check.id === "channel_registered_in_console",
+    );
+    expect(manual?.nextAction).toContain(
+      "onboarding.manualChecks.iwinv2.channel_registered_in_console.done=true",
+    );
+    expect(manual?.nextAction).not.toContain(
+      "onboarding.manualChecks.iwinv.channel_registered_in_console.done=true",
+    );
+  });
+
   test("alimtalk preflight annotates ambiguous plusId inference", async () => {
     const provider = createProvider({
       id: "aligo",

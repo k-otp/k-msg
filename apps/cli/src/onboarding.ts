@@ -143,7 +143,7 @@ function withGuidance(input: {
     check.id === "health_check"
       ? getHealthCheckGuidance(check, providerName)
       : check.id === "channel_registered_in_console"
-        ? getManualChannelGuidance(check, providerName, providerKind)
+        ? getManualChannelGuidance(check, providerName, providerId)
         : check.id === "plus_id_policy"
           ? getPlusIdGuidance(check, providerName, providerKind)
           : check.id === "template_exists_probe"

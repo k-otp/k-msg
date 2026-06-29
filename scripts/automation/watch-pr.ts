@@ -97,6 +97,14 @@ type CombinedStatusResponse = {
   }>;
 };
 
+type GithubRestPage<T> = {
+  body: T;
+  nextUrl?: string;
+};
+
+type CheckRunItem = NonNullable<CheckRunsResponse["check_runs"]>[number];
+type StatusItem = NonNullable<CombinedStatusResponse["statuses"]>[number];
+
 function parseArgs(argv: string[]): Args {
   const out: Partial<Args> = {
     intervalMinutes: 10,
@@ -258,7 +266,23 @@ async function githubGraphql<T>(
   return payload.data;
 }
 
-async function githubRest<T>(token: string, url: string): Promise<T> {
+function parseNextLink(value: string | null): string | undefined {
+  if (!value) return undefined;
+
+  for (const part of value.split(",")) {
+    const match = /<([^>]+)>;\s*rel="([^"]+)"/.exec(part.trim());
+    if (match?.[2] === "next") {
+      return match[1];
+    }
+  }
+
+  return undefined;
+}
+
+async function githubRestPage<T>(
+  token: string,
+  url: string,
+): Promise<GithubRestPage<T>> {
   const response = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
@@ -274,7 +298,27 @@ async function githubRest<T>(token: string, url: string): Promise<T> {
     );
   }
 
-  return (await response.json()) as T;
+  return {
+    body: (await response.json()) as T,
+    nextUrl: parseNextLink(response.headers.get("link")),
+  };
+}
+
+async function collectPaginatedItems<TResponse, TItem>(input: {
+  pickItems: (body: TResponse) => TItem[];
+  token: string;
+  url: string;
+}): Promise<TItem[]> {
+  const items: TItem[] = [];
+  let nextUrl: string | undefined = input.url;
+
+  while (nextUrl) {
+    const page = await githubRestPage<TResponse>(input.token, nextUrl);
+    items.push(...input.pickItems(page.body));
+    nextUrl = page.nextUrl;
+  }
+
+  return items;
 }
 
 async function postIssueComment(input: {
@@ -446,29 +490,84 @@ async function collectReviews(input: {
   };
 }
 
-function toCheckSummaryList(
-  checkRuns: CheckRunsResponse,
-  statuses: CombinedStatusResponse,
-): CheckSummary[] {
-  const fromCheckRuns =
-    checkRuns.check_runs?.map((checkRun) => ({
-      conclusion: checkRun.conclusion,
-      kind: "check-run" as const,
-      name: checkRun.name,
-      status: checkRun.status,
-      url: checkRun.details_url ?? checkRun.html_url ?? undefined,
-    })) ?? [];
+function toCheckSummaryList(input: {
+  checkRuns: NonNullable<CheckRunsResponse["check_runs"]>;
+  statuses: NonNullable<CombinedStatusResponse["statuses"]>;
+}): CheckSummary[] {
+  const fromCheckRuns = input.checkRuns.map((checkRun) => ({
+    conclusion: checkRun.conclusion,
+    kind: "check-run" as const,
+    name: checkRun.name,
+    status: checkRun.status,
+    url: checkRun.details_url ?? checkRun.html_url ?? undefined,
+  }));
 
-  const fromStatuses =
-    statuses.statuses?.map((status) => ({
-      conclusion: undefined,
-      kind: "status-context" as const,
-      name: status.context,
-      status: status.state,
-      url: status.target_url ?? undefined,
-    })) ?? [];
+  const fromStatuses = input.statuses.map((status) => ({
+    conclusion: undefined,
+    kind: "status-context" as const,
+    name: status.context,
+    status: status.state,
+    url: status.target_url ?? undefined,
+  }));
 
   return [...fromCheckRuns, ...fromStatuses];
+}
+
+async function collectCheckRuns(input: {
+  headSha: string;
+  owner: string;
+  repo: string;
+  token: string;
+}): Promise<NonNullable<CheckRunsResponse["check_runs"]>> {
+  return await collectPaginatedItems<CheckRunsResponse, CheckRunItem>({
+    token: input.token,
+    url: `https://api.github.com/repos/${input.owner}/${input.repo}/commits/${input.headSha}/check-runs?per_page=100`,
+    pickItems: (body) => body.check_runs ?? [],
+  });
+}
+
+async function collectStatuses(input: {
+  headSha: string;
+  owner: string;
+  repo: string;
+  token: string;
+}): Promise<NonNullable<CombinedStatusResponse["statuses"]>> {
+  return await collectPaginatedItems<CombinedStatusResponse, StatusItem>({
+    token: input.token,
+    url: `https://api.github.com/repos/${input.owner}/${input.repo}/commits/${input.headSha}/status?per_page=100`,
+    pickItems: (body) => body.statuses ?? [],
+  });
+}
+
+async function collectSnapshot(input: {
+  owner: string;
+  prNumber: number;
+  repo: string;
+  token: string;
+}): Promise<Snapshot> {
+  const reviews = await collectReviews(input);
+  const [checkRuns, statuses] = await Promise.all([
+    collectCheckRuns({
+      headSha: reviews.headSha,
+      owner: input.owner,
+      repo: input.repo,
+      token: input.token,
+    }),
+    collectStatuses({
+      headSha: reviews.headSha,
+      owner: input.owner,
+      repo: input.repo,
+      token: input.token,
+    }),
+  ]);
+
+  const checks = toCheckSummaryList({ checkRuns, statuses });
+
+  return {
+    ...reviews,
+    failingChecks: checks.filter(isFailingCheck),
+    pendingChecks: checks.filter(isPendingCheck),
+  };
 }
 
 function isFailingCheck(check: CheckSummary): boolean {
@@ -492,33 +591,6 @@ function isPendingCheck(check: CheckSummary): boolean {
     return check.status === "pending";
   }
   return check.status !== "completed";
-}
-
-async function collectSnapshot(input: {
-  owner: string;
-  prNumber: number;
-  repo: string;
-  token: string;
-}): Promise<Snapshot> {
-  const reviews = await collectReviews(input);
-  const [checkRuns, statuses] = await Promise.all([
-    githubRest<CheckRunsResponse>(
-      input.token,
-      `https://api.github.com/repos/${input.owner}/${input.repo}/commits/${reviews.headSha}/check-runs?per_page=100`,
-    ),
-    githubRest<CombinedStatusResponse>(
-      input.token,
-      `https://api.github.com/repos/${input.owner}/${input.repo}/commits/${reviews.headSha}/status?per_page=100`,
-    ),
-  ]);
-
-  const checks = toCheckSummaryList(checkRuns, statuses);
-
-  return {
-    ...reviews,
-    failingChecks: checks.filter(isFailingCheck),
-    pendingChecks: checks.filter(isPendingCheck),
-  };
 }
 
 function buildSnapshotKey(snapshot: Snapshot): string {

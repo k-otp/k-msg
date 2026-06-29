@@ -169,6 +169,75 @@ function createRuntime(configOverrides?: Record<string, unknown>): Runtime {
   };
 }
 
+function createSmsRoutingRuntime(): Runtime {
+  const providers: ProviderWithCapabilities[] = [
+    {
+      id: "cheap-sms",
+      name: "Cheap SMS",
+      supportedTypes: ["SMS"] as readonly MessageType[],
+      async healthCheck() {
+        return { healthy: true, issues: [] };
+      },
+      async send() {
+        throw new Error("not used");
+      },
+    },
+    {
+      id: "rich-lms",
+      name: "Rich LMS",
+      supportedTypes: ["LMS", "MMS"] as readonly MessageType[],
+      async healthCheck() {
+        return { healthy: true, issues: [] };
+      },
+      async send() {
+        throw new Error("not used");
+      },
+    },
+    {
+      id: "backup-lms",
+      name: "Backup LMS",
+      supportedTypes: ["LMS", "MMS"] as readonly MessageType[],
+      async healthCheck() {
+        return { healthy: true, issues: [] };
+      },
+      async send() {
+        throw new Error("not used");
+      },
+    },
+  ];
+
+  return {
+    config: {
+      version: 1,
+      providers: [
+        { type: "solapi", id: "cheap-sms", config: {} },
+        { type: "solapi", id: "rich-lms", config: {} },
+        { type: "solapi", id: "backup-lms", config: {} },
+      ],
+      routing: {
+        defaultProviderId: "cheap-sms",
+        strategy: "first",
+        byType: {
+          SMS: ["cheap-sms"],
+          LMS: ["rich-lms", "backup-lms"],
+          MMS: ["rich-lms", "backup-lms"],
+        },
+      },
+      defaults: {
+        sms: {
+          autoLmsBytes: 90,
+        },
+      },
+    } as Runtime["config"],
+    configPath: "/tmp/k-msg-routing.config.json",
+    kmsg: {} as Runtime["kmsg"],
+    providers,
+    providersById: new Map(
+      providers.map((provider) => [provider.id, provider]),
+    ),
+  };
+}
+
 describe("interactive send helpers", () => {
   test("guards interactive mode against non-interactive terminals and explicit JSON", () => {
     expect(() =>
@@ -219,6 +288,43 @@ describe("interactive send helpers", () => {
       to: "01012345678",
       type: "MMS",
     });
+  });
+
+  test("preserves explicit SMS text whitespace in interactive mode", async () => {
+    const prompt = new FakePrompt({
+      textAnswers: ["", ""],
+    });
+
+    const input = await buildInteractiveSmsInput({
+      draft: {
+        provider: "solapi",
+        text: "  padded message  ",
+        to: "01012345678",
+      },
+      prompt,
+      runtime: createRuntime(),
+    });
+
+    expect(input.text).toBe("  padded message  ");
+    expect(input.type).toBe("SMS");
+  });
+
+  test("selects SMS provider using the resolved message type", async () => {
+    const prompt = new FakePrompt({
+      textAnswers: ["01012345678", "x".repeat(100), "", ""],
+    });
+
+    const input = await buildInteractiveSmsInput({
+      draft: {},
+      prompt,
+      runtime: createSmsRoutingRuntime(),
+    });
+
+    expect(prompt.selects).toHaveLength(1);
+    expect(prompt.selects[0]?.message).toBe("Select LMS provider");
+    expect(prompt.selects[0]?.default).toBe("rich-lms");
+    expect(input.providerId).toBe("rich-lms");
+    expect(input.type).toBe("LMS");
   });
 
   test("preserves failover fields for interactive AlimTalk sends", async () => {
@@ -328,6 +434,35 @@ describe("interactive send helpers", () => {
     expect(input.kakao).toEqual({
       plusId: "@solapi-brand",
       profileId: "SOLAPI_PROFILE",
+    });
+  });
+
+  test("manual Kakao selection bypasses default aliases", async () => {
+    const prompt = new FakePrompt({
+      textAnswers: [
+        "01012345678",
+        "TPL_001",
+        '{"name":"Jane"}',
+        "",
+        "",
+        "MANUAL_PROFILE",
+      ],
+      selectAnswers: ["__manual__"],
+    });
+
+    const input = await buildInteractiveAlimTalkInput({
+      draft: {
+        provider: "aligo",
+      },
+      prompt,
+      runtime: createRuntime(),
+    });
+
+    expect(
+      prompt.texts.some((message) => message.includes("senderKey/profileId")),
+    ).toBe(true);
+    expect(input.kakao).toEqual({
+      profileId: "MANUAL_PROFILE",
     });
   });
 });

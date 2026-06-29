@@ -75,6 +75,11 @@ type KakaoAliasOption = {
   label: string;
 };
 
+type KakaoAliasSelection =
+  | { mode: "alias"; alias: string }
+  | { mode: "manual" }
+  | { mode: "skip" };
+
 export function ensureInteractiveSendAllowed(input: {
   commandPath: string;
   interactive: boolean;
@@ -114,14 +119,6 @@ export async function buildInteractiveSmsInput(input: {
   runtime: Runtime;
 }): Promise<InteractiveSmsInput> {
   const { draft, prompt, runtime } = input;
-  const provider = draft.provider
-    ? pickSmsProvider(runtime, draft.provider)
-    : await promptProviderSelection({
-        defaultProviderId: getDefaultProviderId(runtime, smsProviderTypes),
-        message: "Select SMS/LMS provider",
-        prompt,
-        providers: getProvidersForTypes(runtime, smsProviderTypes),
-      });
 
   const to =
     normalizeRequiredText(draft.to) ??
@@ -134,14 +131,26 @@ export async function buildInteractiveSmsInput(input: {
     ).trim();
 
   const text =
-    normalizeRequiredText(draft.text) ??
-    (
-      await promptText(prompt, {
-        message: "Message text",
-        validate: (value) =>
-          value.trim().length > 0 ? true : "Message text is required",
-      })
-    ).trim();
+    preserveRequiredText(draft.text) ??
+    (await promptText(prompt, {
+      message: "Message text",
+      validate: (value) =>
+        value.trim().length > 0 ? true : "Message text is required",
+    }));
+
+  const resolvedType = resolveInteractiveSmsType(
+    runtime.config,
+    text,
+    draft.type,
+  );
+  const provider = draft.provider
+    ? pickProviderForTypes(runtime, [resolvedType], draft.provider)
+    : await promptProviderSelection({
+        defaultProviderId: getDefaultProviderId(runtime, [resolvedType]),
+        message: `Select ${resolvedType} provider`,
+        prompt,
+        providers: getProvidersForTypes(runtime, [resolvedType]),
+      });
 
   const from =
     normalizeOptionalText(draft.from) ??
@@ -162,7 +171,7 @@ export async function buildInteractiveSmsInput(input: {
     providerId: provider.id,
     to,
     text,
-    ...(draft.type ? { type: draft.type } : {}),
+    type: resolvedType,
     ...(from ? { from } : {}),
     ...(scheduledAt ? { options: { scheduledAt } } : {}),
   };
@@ -222,29 +231,37 @@ export async function buildInteractiveAlimTalkInput(input: {
     draft.scheduledAt ??
     (await promptOptionalDate(prompt, "Schedule time (ISO, optional)"));
 
+  const explicitChannel = normalizeOptionalText(draft.channel);
+  const channelSelection = explicitChannel
+    ? ({ mode: "alias", alias: explicitChannel } as const)
+    : await promptKakaoAlias({
+        config: runtime.config,
+        prompt,
+        providerId: provider.id,
+        skipPrompt:
+          normalizeOptionalText(draft.senderKey) !== undefined ||
+          normalizeOptionalText(draft.plusId) !== undefined,
+      });
   const channel =
-    normalizeOptionalText(draft.channel) ??
-    (await promptKakaoAlias({
-      config: runtime.config,
-      prompt,
-      providerId: provider.id,
-      skipPrompt:
-        normalizeOptionalText(draft.senderKey) !== undefined ||
-        normalizeOptionalText(draft.plusId) !== undefined,
-    }));
+    channelSelection.mode === "alias" ? channelSelection.alias : undefined;
+  const manualKakaoSelection = channelSelection.mode === "manual";
 
-  let senderKey = resolveKakaoChannelSenderKey(runtime.config, {
-    providerId: provider.id,
-    channelAlias: channel,
-    senderKey: draft.senderKey,
-    plusId: draft.plusId,
-  });
-  let plusId = resolveKakaoChannelPlusId(runtime.config, {
-    providerId: provider.id,
-    channelAlias: channel,
-    senderKey: draft.senderKey,
-    plusId: draft.plusId,
-  });
+  let senderKey = manualKakaoSelection
+    ? normalizeOptionalText(draft.senderKey)
+    : resolveKakaoChannelSenderKey(runtime.config, {
+        providerId: provider.id,
+        channelAlias: channel,
+        senderKey: draft.senderKey,
+        plusId: draft.plusId,
+      });
+  let plusId = manualKakaoSelection
+    ? normalizeOptionalText(draft.plusId)
+    : resolveKakaoChannelPlusId(runtime.config, {
+        providerId: provider.id,
+        channelAlias: channel,
+        senderKey: draft.senderKey,
+        plusId: draft.plusId,
+      });
 
   if (!senderKey) {
     senderKey = normalizeOptionalText(
@@ -254,7 +271,7 @@ export async function buildInteractiveAlimTalkInput(input: {
     );
   }
 
-  if (!plusId) {
+  if (!plusId && !manualKakaoSelection) {
     plusId = resolveKakaoChannelPlusId(runtime.config, {
       providerId: provider.id,
       channelAlias: channel,
@@ -419,10 +436,10 @@ async function promptKakaoAlias(input: {
   prompt: PromptApi;
   providerId: string;
   skipPrompt: boolean;
-}): Promise<string | undefined> {
-  if (input.skipPrompt) return undefined;
+}): Promise<KakaoAliasSelection> {
+  if (input.skipPrompt) return { mode: "skip" };
   const aliases = listKakaoAliases(input.config, input.providerId);
-  if (aliases.length === 0) return undefined;
+  if (aliases.length === 0) return { mode: "skip" };
 
   const defaultAlias = getDefaultKakaoAlias(input.config, input.providerId);
   const selected = await promptSelect(
@@ -443,7 +460,9 @@ async function promptKakaoAlias(input: {
     },
   );
 
-  return selected === INTERACTIVE_PROVIDER_MANUAL ? undefined : selected;
+  return selected === INTERACTIVE_PROVIDER_MANUAL
+    ? { mode: "manual" }
+    : { mode: "alias", alias: selected };
 }
 
 function listKakaoAliases(
@@ -608,6 +627,34 @@ function normalizeOptionalText(value: string | undefined): string | undefined {
 
 function normalizeRequiredText(value: string | undefined): string | undefined {
   return normalizeOptionalText(value);
+}
+
+function preserveRequiredText(value: string | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  return value.trim().length > 0 ? value : undefined;
+}
+
+function resolveInteractiveSmsType(
+  config: KMsgCliConfig,
+  text: string,
+  explicitType: "SMS" | "LMS" | "MMS" | undefined,
+): "SMS" | "LMS" | "MMS" {
+  if (explicitType) return explicitType;
+  return estimateSmsBytes(text) > getAutoLmsThreshold(config) ? "LMS" : "SMS";
+}
+
+function getAutoLmsThreshold(config: KMsgCliConfig): number {
+  const threshold = config.defaults?.sms?.autoLmsBytes;
+  return typeof threshold === "number" && threshold > 0 ? threshold : 90;
+}
+
+function estimateSmsBytes(text: string): number {
+  let bytes = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    bytes += code <= 0x7f ? 1 : 2;
+  }
+  return bytes;
 }
 
 function isValidDateValue(value: string): boolean {
