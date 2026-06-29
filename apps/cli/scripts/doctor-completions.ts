@@ -31,14 +31,19 @@ if (!rootCompletion.stdout.trimEnd().endsWith(":4")) {
 if (strict) {
   const aliasCheck = await runCli(["completions", "zsh"]);
   const [firstLine] = aliasCheck.stdout.split(/\r?\n/, 1);
-  if (firstLine !== "#compdef k-msg") {
+  if (firstLine !== "#compdef k-msg kmsg") {
     throw new Error(
-      "zsh completion output must keep the #compdef k-msg header for installer alias patching",
+      "zsh completion output must register both k-msg and kmsg in the #compdef header",
     );
   }
   if (!aliasCheck.stdout.includes("compdef _k-msg k-msg")) {
     throw new Error(
       "zsh completion output is missing the primary compdef registration",
+    );
+  }
+  if (!aliasCheck.stdout.includes("compdef _k-msg kmsg")) {
+    throw new Error(
+      "zsh completion output is missing the kmsg alias compdef registration",
     );
   }
 }
