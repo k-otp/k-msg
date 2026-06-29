@@ -344,7 +344,7 @@ import { createD1DeliveryTrackingStore } from "k-msg/adapters/cloudflare";
 
 ## SOLAPI 사용 시 추가 설치
 
-SOLAPI Provider를 사용하는 경우 `solapi` 패키지가 peer dependency로 필요합니다.
+SOLAPI Provider를 사용하는 경우 `solapi` 패키지를 앱에 별도로 설치해야 합니다. 최신 라인을 권장하며 `@k-msg/provider`는 v5/v6 peer 범위를 함께 지원합니다.
 
 ```bash
 bun add solapi

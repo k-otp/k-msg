@@ -1,10 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { SolapiProvider, type SolapiSdkClient } from "./provider";
+import { MessageNotReceivedError } from "solapi";
+import { SolapiProvider } from "./provider";
+import type {
+  SolapiSdkClient,
+  SolapiSendOneMessage,
+  SolapiSendRequestConfig,
+} from "./solapi.internal.types";
 import type { SolapiConfig } from "./types/solapi";
 
-function createStubClient() {
-  type SendOneRequest = Parameters<SolapiSdkClient["sendOne"]>[0];
-  type SendOneResponse = Awaited<ReturnType<SolapiSdkClient["sendOne"]>>;
+function createStubClient(mode: "v5" | "v6" = "v5") {
+  type SendOneResponse = Awaited<
+    ReturnType<NonNullable<SolapiSdkClient["sendOne"]>>
+  >;
+  type SendResponse = Awaited<ReturnType<NonNullable<SolapiSdkClient["send"]>>>;
   type UploadFileResponse = Awaited<ReturnType<SolapiSdkClient["uploadFile"]>>;
   type GetBalanceResponse = Awaited<ReturnType<SolapiSdkClient["getBalance"]>>;
   type GetMessagesResponse = Awaited<
@@ -13,6 +21,10 @@ function createStubClient() {
 
   const calls: {
     sendOne: Array<{ message: Record<string, unknown>; appId?: string }>;
+    send: Array<{
+      message: Record<string, unknown>;
+      requestConfig?: Record<string, unknown>;
+    }>;
     uploadFile: Array<{
       filePath: string;
       fileType: string;
@@ -23,6 +35,7 @@ function createStubClient() {
     getBalance: Array<void>;
   } = {
     sendOne: [],
+    send: [],
     uploadFile: [],
     getMessages: [],
     getBalance: [],
@@ -35,16 +48,15 @@ function createStubClient() {
     balance: 0,
     point: 0,
   } as unknown as GetBalanceResponse;
+  let sendOneResponse: SendOneResponse = {
+    messageId: "msg_1",
+  } as unknown as SendOneResponse;
+  let sendResponse: SendResponse = {
+    messageList: [{ messageId: "msg_v6_1", statusCode: "2000" }],
+  } as unknown as SendResponse;
   let getBalanceError: unknown = null;
 
   const client: SolapiSdkClient = {
-    sendOne: async (message: SendOneRequest, appId?: string) => {
-      calls.sendOne.push({
-        message: message as unknown as Record<string, unknown>,
-        appId,
-      });
-      return { messageId: "msg_1" } as unknown as SendOneResponse;
-    },
     uploadFile: async (
       filePath: string,
       fileType: string,
@@ -71,9 +83,34 @@ function createStubClient() {
     },
   };
 
+  if (mode === "v5") {
+    client.sendOne = async (message: SolapiSendOneMessage, appId?: string) => {
+      calls.sendOne.push({
+        message: message as unknown as Record<string, unknown>,
+        appId,
+      });
+      return sendOneResponse;
+    };
+  } else {
+    client.send = async (message, requestConfig?: SolapiSendRequestConfig) => {
+      calls.send.push({
+        message: message as unknown as Record<string, unknown>,
+        requestConfig:
+          (requestConfig as Record<string, unknown> | undefined) ?? undefined,
+      });
+      return sendResponse;
+    };
+  }
+
   return {
     client,
     calls,
+    setSendOneResponse: (value: unknown) => {
+      sendOneResponse = value as SendOneResponse;
+    },
+    setSendResponse: (value: unknown) => {
+      sendResponse = value as SendResponse;
+    },
     setGetMessagesResponse: (value: unknown) => {
       getMessagesResponse = value as GetMessagesResponse;
     },
@@ -87,7 +124,7 @@ function createStubClient() {
 }
 
 describe("SolapiProvider (SendOptions-based)", () => {
-  test("sends SMS via sendOne() with defaultFrom fallback", async () => {
+  test("sends SMS via v5 sendOne() with defaultFrom fallback", async () => {
     const { client, calls } = createStubClient();
     const provider = new SolapiProvider(
       {
@@ -112,6 +149,169 @@ describe("SolapiProvider (SendOptions-based)", () => {
     expect(calls.sendOne[0]?.message?.to).toBe("01012345678");
     expect(calls.sendOne[0]?.message?.from).toBe("01000000000");
     expect(calls.sendOne[0]?.message?.text).toBe("hello");
+  });
+
+  test("sends SMS via v6 send() with requestConfig and providerMessageId", async () => {
+    const { client, calls } = createStubClient("v6");
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        appId: "app_1",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.send).toHaveLength(1);
+    expect(calls.sendOne).toHaveLength(0);
+    expect(calls.send[0]?.message?.type).toBe("SMS");
+    expect(calls.send[0]?.requestConfig).toEqual({
+      appId: "app_1",
+      showMessageList: true,
+    });
+    if (result.isSuccess) {
+      expect(result.value.providerMessageId).toBe("msg_v6_1");
+    }
+  });
+
+  test("uses requestConfig.scheduledDate for v6 send()", async () => {
+    const { client, calls } = createStubClient("v6");
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const scheduledAt = new Date("2026-01-01T00:00:00.000Z");
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+      options: { scheduledAt },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.send).toHaveLength(1);
+    expect(calls.send[0]?.requestConfig).toEqual({
+      scheduledDate: scheduledAt.toISOString(),
+      showMessageList: true,
+    });
+    expect(calls.send[0]?.message?.scheduledDate).toBeUndefined();
+  });
+
+  test("keeps scheduledDate on v5 sendOne() payloads", async () => {
+    const { client, calls } = createStubClient("v5");
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const scheduledAt = new Date("2026-01-01T00:00:00.000Z");
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+      options: { scheduledAt },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.sendOne).toHaveLength(1);
+    expect(calls.sendOne[0]?.message?.scheduledDate).toBe(
+      scheduledAt.toISOString(),
+    );
+  });
+
+  test("prefers sendOne when the client exposes both sendOne() and send()", async () => {
+    const { client, calls } = createStubClient("v5");
+    client.send = async () => {
+      calls.send.push({ message: { type: "SMS" } });
+      return { messageList: [{ messageId: "msg_v6_1" }] };
+    };
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.sendOne).toHaveLength(1);
+    expect(calls.send).toHaveLength(0);
+  });
+
+  test("maps MessageNotReceivedError details from v6 send()", async () => {
+    const { client } = createStubClient("v6");
+    client.send = async () => {
+      throw new MessageNotReceivedError({
+        failedMessageList: [
+          {
+            accountId: "acct_1",
+            from: "01000000000",
+            statusCode: "3000",
+            statusMessage: "invalid sender",
+            to: "01012345678",
+            type: "SMS",
+          },
+        ],
+        totalCount: 1,
+      });
+    };
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("PROVIDER_ERROR");
+      expect(result.error.details?.totalCount).toBe(1);
+      expect(Array.isArray(result.error.details?.failedMessageList)).toBe(true);
+    }
   });
 
   test("sends ALIMTALK as ATA with kakaoOptions (pfId/templateId/variables)", async () => {

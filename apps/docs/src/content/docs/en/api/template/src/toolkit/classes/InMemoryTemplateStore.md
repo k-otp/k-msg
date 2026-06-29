@@ -41,7 +41,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https:
 
 > **deleteTemplate**(`templateId`): `Promise`\<`void`\>
 
-Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L65)
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L70)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https
 
 > **renderTemplate**(`templateId`, `variables`): `Promise`\<`string`\>
 
-Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L69)
+Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L74)
 
 #### Parameters
 
