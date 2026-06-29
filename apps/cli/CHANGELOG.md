@@ -1,5 +1,11 @@
 # @k-msg/cli
 
+## 0.9.11 — 2026-06-29
+
+### Patch changes
+
+- [0fd984f](https://github.com/k-otp/k-msg/commit/0fd984fde13ff79e289cf30ac9b157acd906f20d) Improve CLI first-run onboarding and completion UX by fixing npm checksum installs, promoting global config usage, tightening Kakao alias validation, and clarifying interactive config flows. — Thanks @imjlk!
+
 ## 0.9.10 — 2026-06-29
 
 ### Patch changes
