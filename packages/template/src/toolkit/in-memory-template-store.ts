@@ -49,12 +49,17 @@ export class InMemoryTemplateStore {
       throw new Error(`Template ${templateId} not found`);
     }
 
+    const nextUpdatedAt = new Date();
+    if (nextUpdatedAt.getTime() <= template.metadata.updatedAt.getTime()) {
+      nextUpdatedAt.setTime(template.metadata.updatedAt.getTime() + 1);
+    }
+
     const updatedTemplate = {
       ...template,
       ...updates,
       metadata: {
         ...template.metadata,
-        updatedAt: new Date(),
+        updatedAt: nextUpdatedAt,
       },
     };
 
