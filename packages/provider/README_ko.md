@@ -12,7 +12,7 @@ npm install @k-msg/provider @k-msg/core
 bun add @k-msg/provider @k-msg/core
 ```
 
-SOLAPI provider를 사용할 경우, 앱에서 `solapi`를 별도로 설치해야 합니다:
+SOLAPI provider를 사용할 경우, 앱에서 최신 `solapi`를 별도로 설치하세요. `@k-msg/provider`는 현재 v6 라인과 이전 v5 peer 범위를 함께 지원합니다:
 
 ```bash
 npm install solapi

@@ -31,7 +31,7 @@
         "@types/node": "catalog:",
         "gunshi": "0.35.1",
         "k-msg": "workspace:*",
-        "solapi": "^5.5.4",
+        "solapi": "^6.0.1",
         "typescript": "catalog:",
         "zod": "catalog:",
       },
@@ -138,11 +138,11 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
-        "solapi": "^5.5.4",
+        "solapi": "^6.0.1",
         "typescript": "catalog:",
       },
       "peerDependencies": {
-        "solapi": "^5.5.4",
+        "solapi": "^5.5.4 || ^6.0.0",
       },
       "optionalPeers": [
         "solapi",
@@ -1099,7 +1099,7 @@
 
     "smol-toml": ["smol-toml@1.6.1", "", {}, "sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg=="],
 
-    "solapi": ["solapi@5.5.4", "", { "dependencies": { "date-fns": "^4.1.0", "effect": "^3.19.14" } }, "sha512-mtjarjA5C6XG60ZelOg7wwj4ScysIro8wv6vXjCEwTYns2uRiy4mu6C1oMCZl51Jw79U0E2oU6ssksuqgpcTzg=="],
+    "solapi": ["solapi@6.0.1", "", { "dependencies": { "date-fns": "^4.1.0", "effect": "^3.21.0" } }, "sha512-rn2vz47fQc4UqXeraZuB0tuiRjUEvYqtaLq4c8jFmG2y+27IvJHaXoj63VkSGpwQ8e+Jx2rah1mUIVqJkhSlCg=="],
 
     "source-map": ["source-map@0.7.6", "", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
 
