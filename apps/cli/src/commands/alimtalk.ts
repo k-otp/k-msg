@@ -8,67 +8,71 @@ import {
   optProvider,
   strictBooleanFlagSchema,
 } from "../cli/options";
+import { isPromptCancelledError } from "../cli/prompt";
 import {
-  CapabilityNotSupportedError,
   exitCodeForError,
   printError,
   printWarnings,
   shouldUseJsonOutput,
 } from "../cli/utils";
-import { runAlimTalkPreflight } from "../onboarding";
+import {
+  formatOnboardingCheckLines,
+  runAlimTalkPreflight,
+} from "../onboarding";
 import {
   loadRuntime,
-  type Runtime,
   resolveKakaoChannelPlusId,
   resolveKakaoChannelSenderKey,
 } from "../runtime";
+import {
+  buildInteractiveAlimTalkInput,
+  ensureInteractiveSendAllowed,
+  pickAlimTalkProvider,
+} from "./send-interactive";
 
-function pickAlimTalkProvider(
-  runtime: Runtime,
-  requestedProviderId?: string,
-): Runtime["providers"][number] {
-  if (requestedProviderId) {
-    const provider = runtime.providersById.get(requestedProviderId);
-    if (!provider) {
-      throw new Error(`Unknown provider id: ${requestedProviderId}`);
-    }
-    if (!provider.supportedTypes.includes("ALIMTALK")) {
-      throw new CapabilityNotSupportedError(
-        `Provider '${requestedProviderId}' does not support ALIMTALK`,
-      );
-    }
-    return provider;
+function requireFlag(value: string | undefined, label: string): string {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
   }
+  throw new Error(`${label} is required`);
+}
 
-  const routeByType = runtime.config.routing?.byType?.ALIMTALK;
-  if (Array.isArray(routeByType)) {
-    const first = routeByType
-      .map((id) => runtime.providersById.get(id))
-      .find((provider) => provider?.supportedTypes.includes("ALIMTALK"));
-    if (first) return first;
-  } else if (typeof routeByType === "string" && routeByType.length > 0) {
-    const provider = runtime.providersById.get(routeByType);
-    if (provider?.supportedTypes.includes("ALIMTALK")) {
-      return provider;
-    }
+function requireVariables(
+  value: MessageVariables | undefined,
+): MessageVariables {
+  if (value !== undefined) {
+    return value;
   }
+  throw new Error("Variables JSON is required");
+}
 
-  const defaultProviderId = runtime.config.routing?.defaultProviderId;
-  if (typeof defaultProviderId === "string" && defaultProviderId.length > 0) {
-    const provider = runtime.providersById.get(defaultProviderId);
-    if (provider?.supportedTypes.includes("ALIMTALK")) {
-      return provider;
+function buildFailoverInput(flags: {
+  failover: boolean;
+  fallbackChannel?: "sms" | "lms";
+  fallbackContent?: string;
+  fallbackTitle?: string;
+}):
+  | {
+      enabled: true;
+      fallbackChannel?: "sms" | "lms";
+      fallbackContent?: string;
+      fallbackTitle?: string;
     }
-  }
+  | undefined {
+  const { failover, fallbackChannel, fallbackContent, fallbackTitle } = flags;
+  const enabled =
+    failover ||
+    fallbackChannel !== undefined ||
+    fallbackContent !== undefined ||
+    fallbackTitle !== undefined;
+  if (!enabled) return undefined;
 
-  const supported = runtime.providers.find((provider) =>
-    provider.supportedTypes.includes("ALIMTALK"),
-  );
-  if (supported) return supported;
-
-  throw new CapabilityNotSupportedError(
-    "No configured provider supports ALIMTALK",
-  );
+  return {
+    enabled: true,
+    ...(fallbackChannel ? { fallbackChannel } : {}),
+    ...(typeof fallbackContent === "string" ? { fallbackContent } : {}),
+    ...(typeof fallbackTitle === "string" ? { fallbackTitle } : {}),
+  };
 }
 
 const sendCmd = defineCommand({
@@ -78,9 +82,15 @@ const sendCmd = defineCommand({
     config: optConfig,
     json: optJson,
     provider: optProvider,
-    to: option(z.string().min(1), { description: "Recipient phone number" }),
+    interactive: booleanFlagOption(strictBooleanFlagSchema, {
+      description:
+        "Prompt for missing send fields in an interactive terminal (boolean: --interactive, --interactive true|false, --no-interactive; default: false)",
+    }),
+    to: option(z.string().min(1).optional(), {
+      description: "Recipient phone number",
+    }),
     from: option(z.string().optional(), { description: "Sender number" }),
-    "template-id": option(z.string().min(1), {
+    "template-id": option(z.string().min(1).optional(), {
       description: "Template ID",
     }),
     vars: option(
@@ -100,7 +110,8 @@ const sendCmd = defineCommand({
             return z.NEVER;
           }
         })
-        .pipe(z.record(z.string(), z.unknown())),
+        .pipe(z.record(z.string(), z.unknown()))
+        .optional(),
       { description: "Variables as JSON object" },
     ),
     channel: option(z.string().optional(), {
@@ -129,59 +140,81 @@ const sendCmd = defineCommand({
       description: "Fallback LMS title",
     }),
   },
-  handler: async ({ flags, context }) => {
-    const asJson = shouldUseJsonOutput(flags.json, context);
+  handler: async ({ flags, context, prompt, terminal }) => {
+    const asJson = flags.interactive
+      ? false
+      : shouldUseJsonOutput(flags.json, context);
     try {
+      ensureInteractiveSendAllowed({
+        commandPath: "k-msg alimtalk send",
+        interactive: flags.interactive,
+        json: flags.json,
+        terminal,
+      });
+
       const runtime = await loadRuntime(flags.config);
       const scheduledAt = flags["scheduled-at"];
-      const rawVars = flags.vars;
-      const fallbackChannel = flags["fallback-channel"];
-      const fallbackContent = flags["fallback-content"];
-      const fallbackTitle = flags["fallback-title"];
-      const resolvedProvider = pickAlimTalkProvider(runtime, flags.provider);
-      const failoverEnabled =
-        flags.failover ||
-        fallbackChannel !== undefined ||
-        fallbackContent !== undefined ||
-        fallbackTitle !== undefined;
-
-      const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
-        providerId: resolvedProvider.id,
-        channelAlias: flags.channel,
-        senderKey: flags["sender-key"],
+      const failover = buildFailoverInput({
+        failover: flags.failover,
+        fallbackChannel: flags["fallback-channel"],
+        fallbackContent: flags["fallback-content"],
+        fallbackTitle: flags["fallback-title"],
       });
-      const plusId = resolveKakaoChannelPlusId(runtime.config, {
-        providerId: resolvedProvider.id,
-        channelAlias: flags.channel,
-        plusId: flags["plus-id"],
-      });
-      const kakao = {
-        ...(senderKey ? { profileId: senderKey } : {}),
-        ...(plusId ? { plusId } : {}),
-      };
-
-      const input: SendInput = {
-        type: "ALIMTALK",
-        to: flags.to,
-        from: flags.from,
-        templateId: flags["template-id"],
-        variables: rawVars as MessageVariables,
-        ...(Object.keys(kakao).length > 0 ? { kakao } : {}),
-        ...(flags.provider ? { providerId: flags.provider } : {}),
-        ...(scheduledAt ? { options: { scheduledAt } } : {}),
-        ...(failoverEnabled
-          ? {
-              failover: {
-                enabled: true,
-                ...(fallbackChannel ? { fallbackChannel } : {}),
-                ...(typeof fallbackContent === "string"
-                  ? { fallbackContent }
-                  : {}),
-                ...(typeof fallbackTitle === "string" ? { fallbackTitle } : {}),
+      const input: SendInput = flags.interactive
+        ? {
+            type: "ALIMTALK",
+            ...(await buildInteractiveAlimTalkInput({
+              draft: {
+                channel: flags.channel,
+                failover,
+                from: flags.from,
+                plusId: flags["plus-id"],
+                provider: flags.provider,
+                scheduledAt,
+                senderKey: flags["sender-key"],
+                templateId: flags["template-id"],
+                to: flags.to,
+                vars: flags.vars as MessageVariables | undefined,
               },
-            }
-          : {}),
-      };
+              prompt,
+              runtime,
+            })),
+          }
+        : (() => {
+            const resolvedProvider = pickAlimTalkProvider(
+              runtime,
+              flags.provider,
+            );
+
+            const senderKey = resolveKakaoChannelSenderKey(runtime.config, {
+              providerId: resolvedProvider.id,
+              channelAlias: flags.channel,
+              senderKey: flags["sender-key"],
+            });
+            const plusId = resolveKakaoChannelPlusId(runtime.config, {
+              providerId: resolvedProvider.id,
+              channelAlias: flags.channel,
+              plusId: flags["plus-id"],
+            });
+            const kakao = {
+              ...(senderKey ? { profileId: senderKey } : {}),
+              ...(plusId ? { plusId } : {}),
+            };
+
+            return {
+              type: "ALIMTALK",
+              to: requireFlag(flags.to, "Recipient phone number"),
+              from: flags.from,
+              templateId: requireFlag(flags["template-id"], "Template ID"),
+              variables: requireVariables(
+                flags.vars as MessageVariables | undefined,
+              ),
+              ...(Object.keys(kakao).length > 0 ? { kakao } : {}),
+              ...(flags.provider ? { providerId: flags.provider } : {}),
+              ...(scheduledAt ? { options: { scheduledAt } } : {}),
+              ...(failover ? { failover } : {}),
+            };
+          })();
 
       const result = await runtime.kmsg.send(input);
       if (result.isFailure) {
@@ -206,6 +239,11 @@ const sendCmd = defineCommand({
       }
       printWarnings(result.value.warnings);
     } catch (error) {
+      if (isPromptCancelledError(error)) {
+        console.error("Prompt cancelled.");
+        process.exitCode = 2;
+        return;
+      }
       printError(error, asJson);
       process.exitCode = exitCodeForError(error);
     }
@@ -276,15 +314,9 @@ const preflightCmd = defineCommand({
         console.log(`inferredPlusId=${preflight.inferredPlusId}`);
       }
       for (const check of preflight.checks) {
-        const marker =
-          check.status === "pass"
-            ? "PASS"
-            : check.status === "fail"
-              ? "FAIL"
-              : "SKIP";
-        console.log(
-          `[${marker}] (${check.severity}) ${check.id}: ${check.message}`,
-        );
+        for (const line of formatOnboardingCheckLines(check)) {
+          console.log(line);
+        }
       }
 
       if (!preflight.ok) {

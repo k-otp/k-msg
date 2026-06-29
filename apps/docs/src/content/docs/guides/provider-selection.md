@@ -329,6 +329,25 @@ ALIGO_SENDER=01000000000             # 발신번호
 ALIGO_SENDER_KEY=your_sender_key     # 카카오 사용 시
 ```
 
+## 온보딩 기대치와 CLI 흐름
+
+CLI의 provider readiness는 generic channel verification state가 아니라, 벤더 prerequisite path를 기준으로 표현됩니다.
+
+| Provider | 벤더 prerequisite path | CLI가 기대하는 값/증빙 | 실무 메모 |
+| --- | --- | --- | --- |
+| `iwinv` | 벤더 콘솔 수동 승인 | config 값, `onboarding.manualChecks.iwinv` evidence, template probe | Kakao 승인 절차를 콘솔에서 별도로 관리할 수 있을 때 적합 |
+| `aligo` | API 기반 Kakao channel path | config 값, Kakao channel probe, template probe, plusId inference guidance | Kakao 관련 API 가시성이 더 필요할 때 적합 |
+| `solapi` | 외부 메타데이터 + explicit binding | config 값, explicit `pfId/profileId`, inference 불가 시 explicit `plusId` | Kakao 온보딩 API보다 채널 범위가 더 중요할 때 적합 |
+
+권장 CLI 순서:
+
+1. `k-msg config init` 또는 `k-msg config provider add`
+2. `k-msg providers doctor`
+3. `k-msg alimtalk preflight --provider <id> --template-id <code> ...`
+4. `k-msg alimtalk send --interactive` 또는 `k-msg sms send --interactive`
+
+interactive send는 누락된 입력만 채워주는 경로입니다. `preflight`를 대체하지 않으며, raw JSON용 `k-msg send`는 automation 중심 명령으로 그대로 유지됩니다.
+
 ## 요약
 
 | 상황 | 추천 Provider |

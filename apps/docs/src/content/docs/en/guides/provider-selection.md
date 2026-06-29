@@ -107,6 +107,25 @@ Before you commit to a provider, answer these questions:
 - Is one provider enough, or do you want channel-based routing?
 - Which onboarding model fits your team: simple setup or richer provider-specific flows?
 
+## Onboarding expectations and CLI flow
+
+Provider readiness in the CLI is modeled as a vendor prerequisite path, not as a generic channel verification state.
+
+| Provider | Vendor prerequisite path | What the CLI expects | Practical note |
+| --- | --- | --- | --- |
+| `iwinv` | manual console approval | config values, manual evidence under `onboarding.manualChecks.iwinv`, template probe | good when your team can handle console-based Kakao approval separately |
+| `aligo` | API-backed Kakao channel path | config values, Kakao channel probe, template probe, plusId inference guidance | good when you want more API-visible Kakao operations |
+| `solapi` | external metadata + explicit binding | config values, explicit `pfId/profileId`, explicit `plusId` when inference is unavailable | good when broad channel coverage matters more than Kakao onboarding APIs |
+
+Recommended CLI sequence:
+
+1. `k-msg config init` or `k-msg config provider add`
+2. `k-msg providers doctor`
+3. `k-msg alimtalk preflight --provider <id> --template-id <code> ...`
+4. `k-msg alimtalk send --interactive` or `k-msg sms send --interactive`
+
+The interactive send commands only fill missing input fields. They do not replace `preflight`, and the raw JSON `k-msg send` command remains automation-oriented.
+
 ## Next steps
 
 - [Message Type Guide](/en/guides/message-types/) to decide which channels matter most

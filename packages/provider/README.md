@@ -54,6 +54,11 @@ Runtime access:
 - Each built-in provider exposes `getOnboardingSpec()`.
 - Registry helpers are exported: `getProviderOnboardingSpec`, `listProviderOnboardingSpecs`, `providerOnboardingSpecs`.
 
+Interpretation notes:
+
+- `channel onboarding` here describes the vendor prerequisite path (`manual`, `api`, `none`), not a toolkit-managed approval state.
+- When the CLI stores `onboarding.manualChecks`, it is recording operator evidence/notes for external vendor steps rather than becoming the approval source of truth.
+
 ## ALIMTALK failover responsibilities
 
 `failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.

@@ -127,8 +127,8 @@ k-msg config provider add iwinv
 발송 전에 어떤 값을 준비해야 하는지 헷갈릴 때는 아래 순서로 확인하세요.
 
 1. provider credential을 `env:` 참조로 설정합니다.
-2. `k-msg providers doctor`로 계정/설정 준비 상태를 점검합니다.
-3. AlimTalk는 실제 발송 전에 `k-msg alimtalk preflight`를 실행합니다.
+2. `k-msg providers doctor`로 계정/설정 준비 상태를 점검하고, provider별 `reason` / `next` checklist를 확인합니다.
+3. AlimTalk는 실제 발송 전에 `k-msg alimtalk preflight`를 실행하고, 출력된 `reason` / `next` guidance를 정리한 뒤 진행합니다.
 4. preflight 통과 후 `send`를 실행합니다.
 
 환경 변수 예시:
@@ -166,13 +166,24 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 | `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/채널 alias 또는 `solapi.config.kakaoPfId`) | preflight 정책 점검용 `plusId`는 `--plus-id` 또는 channel/default alias로 지정 |
 | `mock` | 전체 | 없음 | 최소 메시지 필드 (`to`, `text` 또는 `template-id`/`vars`) | 로컬 테스트용 provider |
 
+### 프로바이더 온보딩 기대치
+
+CLI readiness check는 벤더 prerequisite path를 설명합니다. generic channel approval 상태를 CLI가 생성하거나 관리하지는 않습니다.
+
+| Provider | 벤더 prerequisite path | CLI가 점검하는 항목 | 권장 다음 명령 |
+| --- | --- | --- | --- |
+| `iwinv` | 벤더 콘솔 수동 승인 | config 키, manual evidence record, 템플릿 probe, sender fallback config | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+| `aligo` | API 기반 Kakao channel path | config 키, channel/template capability, Kakao list probe, plusId inference guidance | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+| `solapi` | 외부 벤더 메타데이터 + explicit binding | config 키, explicit plusId 기대치, 가능한 범위의 template probe | `k-msg providers doctor` -> `k-msg alimtalk preflight --plus-id <plusId>` |
+| `mock` | 로컬 fixture 전용 | 기본 capability check와 seed template 경로 | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
+
 ## 명령어
 
 - `k-msg config init|show|validate` (`init`은 interactive TTY에서 prompt 기반 설정 실행)
 - `k-msg config provider add [type]` (interactive TTY에서는 prompt 기반 provider 설정 실행)
 - `k-msg providers list|health|doctor`
-- `k-msg sms send`
-- `k-msg alimtalk preflight|send`
+- `k-msg sms send [--interactive]`
+- `k-msg alimtalk preflight|send [--interactive]`
 - `k-msg completions <bash|zsh|fish|powershell>`
 - `k-msg send --input <json> | --file <path> | --stdin` (고급/Raw JSON 전용)
 - `k-msg db schema print|generate`
@@ -252,8 +263,9 @@ k-msg alimtalk send --provider iwinv --template-id TPL_001 --to 01012345678 --va
 
 참고:
 
-- iwinv는 카카오 채널 온보딩이 벤더 콘솔 수동 절차이므로 config의 manual 체크 상태를 유지해야 합니다.
+- iwinv는 카카오 채널 온보딩이 벤더 콘솔 수동 절차이므로 config의 manual evidence record를 유지해야 합니다.
 - `required_if_no_inference` 정책 provider는 `plusId` 미입력 + 추론 불가 조합이면 preflight가 실패합니다.
+- `providers doctor`와 `alimtalk preflight`는 텍스트 모드에서도 `reason:` / `next:`를 출력해 실패 원인과 다음 액션이 바로 보이게 합니다.
 
 ## Send
 
@@ -262,6 +274,14 @@ k-msg alimtalk send --provider iwinv --template-id TPL_001 --to 01012345678 --va
 ```bash
 k-msg sms send --to 01012345678 --text "hello"
 ```
+
+누락된 필드를 prompt로 채우는 interactive 경로:
+
+```bash
+k-msg sms send --interactive
+```
+
+`--interactive`는 opt-in이며 TTY가 필요합니다. raw JSON용 `k-msg send` 계약은 그대로 유지됩니다.
 
 ### AlimTalk
 
@@ -275,6 +295,14 @@ k-msg alimtalk send \
   --channel main \
   --plus-id @my_channel
 ```
+
+누락된 필드를 prompt로 채우는 interactive 경로:
+
+```bash
+k-msg alimtalk send --interactive
+```
+
+interactive 경로는 먼저 Kakao channel alias를 우선 사용하고, alias/default binding으로 해결되지 않을 때만 `senderKey` / `plusId`를 추가로 묻습니다.
 
 Failover 옵션:
 
@@ -304,6 +332,7 @@ k-msg alimtalk preflight \
 ```
 
 `preflight`는 발송 전에 onboarding check(수동/설정/capability/api probe)와 템플릿 조회를 검증합니다.
+명시적 readiness gate로 사용하세요. `alimtalk send --interactive`가 preflight를 자동 실행하지는 않습니다.
 
 ### 고급 JSON 전송
 
@@ -400,6 +429,7 @@ k-msg kakao template request --template-id TPL_001 --channel main
 ## Manual 체크 설정 예시
 
 `k-msg.config.json`에 수동 온보딩 증빙을 저장해 `doctor/preflight`에서 사용합니다.
+이 값은 외부 벤더 절차에 대한 note/evidence이며, CLI가 관리하는 approval state가 아닙니다.
 
 ```json
 {

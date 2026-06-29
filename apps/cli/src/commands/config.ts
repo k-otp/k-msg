@@ -423,6 +423,47 @@ function printConfigSavedSummary(input: {
   }
 }
 
+function getProviderSetupChecklist(provider: ProviderEntry): string[] {
+  switch (provider.type) {
+    case "iwinv":
+      return [
+        "Finish Kakao channel registration/approval in the IWINV console.",
+        `Record the manual evidence under onboarding.manualChecks.${provider.type}.channel_registered_in_console.`,
+        `Run \`k-msg providers doctor --config <path>\` for provider ${provider.id}.`,
+        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id <code> --channel <alias>\` before live sends.`,
+      ];
+    case "aligo":
+      return [
+        "Confirm senderKey/channel access in the vendor account and keep config values in env:-backed fields.",
+        `Run \`k-msg providers doctor --config <path>\` for provider ${provider.id}.`,
+        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id <code> --channel <alias>\` to validate template access and plusId guidance.`,
+      ];
+    case "solapi":
+      return [
+        "Prepare pfId/profileId and plusId bindings for the approved Kakao channel path.",
+        `Run \`k-msg providers doctor --config <path>\` for provider ${provider.id}.`,
+        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id <code> --plus-id <plusId>\` before live sends.`,
+      ];
+    case "mock":
+      return [
+        "Use the mock provider for local send/payload validation only.",
+        `Run \`k-msg providers doctor --config <path>\` for provider ${provider.id}.`,
+        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id MOCK_TPL_SEED --channel seed\` when validating the Kakao send path locally.`,
+      ];
+  }
+}
+
+function printProviderSetupChecklist(provider: ProviderEntry): void {
+  const steps = getProviderSetupChecklist(provider);
+  if (steps.length === 0) return;
+
+  console.log("");
+  console.log(`Provider next steps (${provider.id} / ${provider.type}):`);
+  for (const step of steps) {
+    console.log(`  - ${step}`);
+  }
+}
+
 function upsertProvider(
   config: KMsgCliConfig,
   provider: ProviderEntry,
@@ -724,6 +765,7 @@ const providerAddCmd = defineCommand({
         setDefault: shouldSetDefault,
       });
       printConfigSavedSummary(saved);
+      printProviderSetupChecklist(provider);
       console.log(`Provider ${provider.id} ${saved.result}`);
     } catch (error) {
       if (isPromptCancelledError(error)) {

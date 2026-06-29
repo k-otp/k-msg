@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { optConfig, optJson, optProvider } from "../cli/options";
 import { printError, shouldUseJsonOutput } from "../cli/utils";
-import { runProviderDoctor } from "../onboarding";
+import { formatOnboardingCheckLines, runProviderDoctor } from "../onboarding";
 import { loadRuntime } from "../runtime";
 
 const messageTypes = [...KMSG_MESSAGE_TYPES] as [MessageType, ...MessageType[]];
@@ -163,19 +163,13 @@ const doctorCmd = defineCommand({
         );
         if (result.spec) {
           console.log(
-            `  onboarding: channel=${result.spec.channelOnboarding}, templateApi=${result.spec.templateLifecycleApi}, plusIdPolicy=${result.spec.plusIdPolicy}, live=${result.spec.liveTestSupport ?? "unknown"}`,
+            `  prerequisites: vendorPath=${result.spec.channelOnboarding}, templateApi=${result.spec.templateLifecycleApi}, plusIdPolicy=${result.spec.plusIdPolicy}, live=${result.spec.liveTestSupport ?? "unknown"}`,
           );
         }
         for (const check of result.checks) {
-          const marker =
-            check.status === "pass"
-              ? "PASS"
-              : check.status === "fail"
-                ? "FAIL"
-                : "SKIP";
-          console.log(
-            `  [${marker}] (${check.severity}) ${check.id}: ${check.message}`,
-          );
+          for (const line of formatOnboardingCheckLines(check, "  ")) {
+            console.log(line);
+          }
         }
       }
 
