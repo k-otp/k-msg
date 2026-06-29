@@ -1,5 +1,12 @@
 # @k-msg/provider
 
+## 0.29.7 — 2026-06-29
+
+### Patch changes
+
+- [45882cc](https://github.com/k-otp/k-msg/commit/45882cc6a49b333cfc577baab033ab936c5dc254) Broaden SOLAPI peer compatibility to cover the v6 SDK line, prefer the newer `send()` path when available while keeping v5 `sendOne()` compatibility, and refresh install guidance to recommend the latest `solapi` package. — Thanks @imjlk!
+- Updated dependencies: core@0.29.7, template@0.29.7
+
 ## 0.29.6 — 2026-04-12
 
 ### Patch changes
