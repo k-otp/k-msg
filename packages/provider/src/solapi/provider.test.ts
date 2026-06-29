@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { MessageNotReceivedError } from "solapi";
 import { SolapiProvider } from "./provider";
 import type {
   SolapiSdkClient,
@@ -196,18 +197,18 @@ describe("SolapiProvider (SendOptions-based)", () => {
       client,
     );
 
-    const scheduledDate = "2026-01-01T00:00:00.000Z";
+    const scheduledAt = new Date("2026-01-01T00:00:00.000Z");
     const result = await provider.send({
       type: "SMS",
       to: "01012345678",
       text: "hello",
-      options: { scheduledAt: scheduledDate },
+      options: { scheduledAt },
     });
 
     expect(result.isSuccess).toBe(true);
     expect(calls.send).toHaveLength(1);
     expect(calls.send[0]?.requestConfig).toEqual({
-      scheduledDate,
+      scheduledDate: scheduledAt.toISOString(),
       showMessageList: true,
     });
     expect(calls.send[0]?.message?.scheduledDate).toBeUndefined();
@@ -226,17 +227,91 @@ describe("SolapiProvider (SendOptions-based)", () => {
       client,
     );
 
-    const scheduledDate = "2026-01-01T00:00:00.000Z";
+    const scheduledAt = new Date("2026-01-01T00:00:00.000Z");
     const result = await provider.send({
       type: "SMS",
       to: "01012345678",
       text: "hello",
-      options: { scheduledAt: scheduledDate },
+      options: { scheduledAt },
     });
 
     expect(result.isSuccess).toBe(true);
     expect(calls.sendOne).toHaveLength(1);
-    expect(calls.sendOne[0]?.message?.scheduledDate).toBe(scheduledDate);
+    expect(calls.sendOne[0]?.message?.scheduledDate).toBe(
+      scheduledAt.toISOString(),
+    );
+  });
+
+  test("prefers sendOne when the client exposes both sendOne() and send()", async () => {
+    const { client, calls } = createStubClient("v5");
+    client.send = async () => {
+      calls.send.push({ message: { type: "SMS" } });
+      return { messageList: [{ messageId: "msg_v6_1" }] };
+    };
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.sendOne).toHaveLength(1);
+    expect(calls.send).toHaveLength(0);
+  });
+
+  test("maps MessageNotReceivedError details from v6 send()", async () => {
+    const { client } = createStubClient("v6");
+    client.send = async () => {
+      throw new MessageNotReceivedError({
+        failedMessageList: [
+          {
+            accountId: "acct_1",
+            from: "01000000000",
+            statusCode: "3000",
+            statusMessage: "invalid sender",
+            to: "01012345678",
+            type: "SMS",
+          },
+        ],
+        totalCount: 1,
+      });
+    };
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("PROVIDER_ERROR");
+      expect(result.error.details?.totalCount).toBe(1);
+      expect(Array.isArray(result.error.details?.failedMessageList)).toBe(true);
+    }
   });
 
   test("sends ALIMTALK as ATA with kakaoOptions (pfId/templateId/variables)", async () => {

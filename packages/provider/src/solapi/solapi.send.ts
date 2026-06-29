@@ -625,17 +625,17 @@ export async function sendWithSolapi(params: {
   const scheduledDate = resolveSolapiScheduledDate(options);
 
   let response: unknown;
-  if (typeof client.send === "function") {
-    response = await client.send(
-      message,
-      buildSolapiSendRequestConfig(config, scheduledDate),
-    );
-  } else if (typeof client.sendOne === "function") {
+  if (typeof client.sendOne === "function") {
     response = await client.sendOne(
       scheduledDate
         ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
         : message,
       config.appId,
+    );
+  } else if (typeof client.send === "function") {
+    response = await client.send(
+      message,
+      buildSolapiSendRequestConfig(config, scheduledDate),
     );
   } else {
     throw new KMsgError(
@@ -658,6 +658,11 @@ export async function sendWithSolapi(params: {
 function resolveSolapiScheduledDate(options: SendOptions): string | undefined {
   const scheduledAt = (options.options as { scheduledAt?: unknown } | undefined)
     ?.scheduledAt;
+  if (scheduledAt instanceof Date) {
+    return Number.isNaN(scheduledAt.getTime())
+      ? undefined
+      : scheduledAt.toISOString();
+  }
   return typeof scheduledAt === "string" && scheduledAt.length > 0
     ? scheduledAt
     : undefined;
