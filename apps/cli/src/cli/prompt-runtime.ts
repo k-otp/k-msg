@@ -261,18 +261,30 @@ function renderSelectPrompt<T>(
   options.forEach((option, index) => {
     const defaultMarker = index === defaultIndex ? " (default)" : "";
     const disabledMarker = option.disabled ? " [disabled]" : "";
-    const valueLabel =
-      normalizePromptToken(String(option.label)) ===
-      normalizePromptToken(String(option.value))
-        ? ""
-        : ` [${String(option.value)}]`;
     printLine(
-      `  ${index + 1}. ${option.label}${valueLabel}${defaultMarker}${disabledMarker}`,
+      `  ${index + 1}. ${option.label}${defaultMarker}${disabledMarker}`,
     );
-    if (option.hint) {
-      printLine(`     ${option.hint}`);
+    const hint = buildSelectHint(option);
+    if (hint) {
+      printLine(`     ${hint}`);
     }
   });
+}
+
+function buildSelectHint<T>(option: PromptSelectOption<T>): string | undefined {
+  const hintParts: string[] = [];
+
+  if (option.hint) {
+    hintParts.push(option.hint);
+  }
+
+  const label = normalizePromptToken(String(option.label));
+  const value = normalizePromptToken(String(option.value));
+  if (label !== value) {
+    hintParts.push(`value: ${String(option.value)}`);
+  }
+
+  return hintParts.length > 0 ? hintParts.join(" | ") : undefined;
 }
 
 function isPromptHelpToken(answer: string): boolean {

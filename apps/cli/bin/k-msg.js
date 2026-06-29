@@ -135,6 +135,10 @@ function parseChecksums(text) {
     if (!m) continue;
     const [, sum, file] = m;
     out.set(file, sum);
+    const normalizedFile = file.replace(/^\.\/+/, "");
+    if (normalizedFile !== file) {
+      out.set(normalizedFile, sum);
+    }
   }
   return out;
 }

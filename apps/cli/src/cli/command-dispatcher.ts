@@ -13,6 +13,7 @@ import {
   type PromptApi,
 } from "./command-contract";
 import { listPublicRootCommands, listRootCommands } from "./command-registry";
+import { optConfig } from "./options";
 import { createReadlinePrompt } from "./prompt-runtime";
 import { exitCodeForError, printError, shouldUseJsonOutput } from "./utils";
 
@@ -25,7 +26,7 @@ const CLI_DESCRIPTION =
     : "k-msg CLI";
 
 type ResolutionResult = {
-  command?: CliCommandDefinition<any>;
+  command?: CliCommandDefinition;
   group?: CliGroupDefinition;
   path: string[];
   remaining: string[];
@@ -38,10 +39,31 @@ type ParsedCommandInput = {
   positional: string[];
 };
 
+type GlobalCommandInput = {
+  flags: {
+    config?: string;
+  };
+  remaining: string[];
+};
+
 export async function runCommandDispatcher(
   argv = process.argv.slice(2),
 ): Promise<void> {
-  const resolution = resolveCommandPath(argv, listRootCommands());
+  let globalInput: GlobalCommandInput;
+  try {
+    globalInput = extractGlobalCommandInput(argv);
+  } catch (error) {
+    if (error instanceof CliUsageError) {
+      console.error(error.message);
+      process.exitCode = 2;
+      return;
+    }
+    throw error;
+  }
+  const resolution = resolveCommandPath(
+    globalInput.remaining,
+    listRootCommands(),
+  );
   if (resolution.unknownCommand) {
     console.error(`Unknown command: ${resolution.unknownCommand}`);
     process.exitCode = 2;
@@ -72,6 +94,13 @@ export async function runCommandDispatcher(
 
   if (resolution.group && !resolution.command) {
     if (
+      resolution.remaining.length === 1 &&
+      requestsVersion(resolution.remaining)
+    ) {
+      console.log(`${CLI_NAME} v${CLI_VERSION}`);
+      return;
+    }
+    if (
       resolution.remaining.length === 0 ||
       requestsHelp(resolution.remaining)
     ) {
@@ -100,6 +129,14 @@ export async function runCommandDispatcher(
     return;
   }
 
+  if (
+    resolution.remaining.length === 1 &&
+    requestsVersion(resolution.remaining)
+  ) {
+    console.log(`${CLI_NAME} v${CLI_VERSION}`);
+    return;
+  }
+
   const context = {
     env: {
       isAIAgent: detectAIAgent(process.env),
@@ -114,6 +151,7 @@ export async function runCommandDispatcher(
 
   try {
     parsed = parseCommandInput(command, resolution.remaining);
+    parsed.flags = mergeGlobalFlags(command, parsed.flags, globalInput.flags);
     if (parsed.helpRequested) {
       printHelp(command, resolution.path);
       return;
@@ -178,6 +216,9 @@ export function printHelp(node: CliNode | undefined, path: string[]): void {
     }
     lines.push("");
     lines.push("Global options:");
+    lines.push(
+      `  --config <value>  ${optConfig.description ?? "Path to k-msg config"}`,
+    );
     lines.push("  -h, --help     Show help");
     lines.push("  -v, --version  Show version");
     console.log(lines.join("\n"));
@@ -214,9 +255,7 @@ export function printHelp(node: CliNode | undefined, path: string[]): void {
   lines.push("");
   lines.push("Built-ins:");
   lines.push("  -h, --help     Show help");
-  if (path.length === 0) {
-    lines.push("  -v, --version  Show version");
-  }
+  lines.push("  -v, --version  Show version");
 
   console.log(lines.join("\n"));
 }
@@ -240,7 +279,7 @@ function resolveCommandPath(
   const path: string[] = [];
   let currentNodes = nodes;
   let lastGroup: CliGroupDefinition | undefined;
-  let command: CliCommandDefinition<any> | undefined;
+  let command: CliCommandDefinition | undefined;
 
   while (tokens.length > 0) {
     const token = tokens[0];
@@ -284,7 +323,7 @@ function resolveCommandPath(
 }
 
 function parseCommandInput(
-  command: CliCommandDefinition<any>,
+  command: CliCommandDefinition,
   argv: string[],
 ): ParsedCommandInput {
   const rawFlags = new Map<string, unknown>();
@@ -437,6 +476,55 @@ function requestsVersion(argv: string[]): boolean {
 
 function requestsHelp(argv: string[]): boolean {
   return argv.some((arg) => arg === "--help" || arg === "-h");
+}
+
+function extractGlobalCommandInput(argv: string[]): GlobalCommandInput {
+  const remaining = [...argv];
+  const flags: GlobalCommandInput["flags"] = {};
+
+  while (remaining.length > 0) {
+    const token = remaining[0];
+    if (!token?.startsWith("-")) {
+      break;
+    }
+    if (token === "--" || token === "--help" || token === "-h") {
+      break;
+    }
+    if (token === "--version" || token === "-v") {
+      break;
+    }
+
+    if (token === "--config") {
+      const value = remaining[1];
+      if (value === undefined) {
+        throw new CliUsageError("Missing value for option: --config");
+      }
+      flags.config = value;
+      remaining.splice(0, 2);
+      continue;
+    }
+
+    if (token.startsWith("--config=")) {
+      flags.config = token.slice("--config=".length);
+      remaining.shift();
+      continue;
+    }
+
+    break;
+  }
+
+  return { flags, remaining };
+}
+
+function mergeGlobalFlags(
+  command: CliCommandDefinition,
+  flags: Record<string, unknown>,
+  globalFlags: GlobalCommandInput["flags"],
+): Record<string, unknown> {
+  if ("config" in command.options && flags.config === undefined) {
+    flags.config = globalFlags.config;
+  }
+  return flags;
 }
 
 function detectTerminal(): CliTerminal {

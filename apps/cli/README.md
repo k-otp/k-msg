@@ -88,10 +88,11 @@ Default config path:
 Override:
 
 ```bash
+k-msg --config /path/to/k-msg.config.json providers list
 k-msg providers list --config /path/to/k-msg.config.json
 ```
 
-Note: `--config` is a subcommand option in the current CLI (for example: `providers`, `sms`, `alimtalk`).
+`--config` can be passed either before the command path or as a command-local option.
 
 Example file: `apps/cli/k-msg.config.example.json`
 
@@ -103,10 +104,13 @@ Schema URLs:
 Initialize config:
 
 ```bash
-# default: interactive wizard (TTY uses prompt-based setup)
+# default: interactive wizard on a TTY, mock-only template in non-interactive shells
 k-msg config init
 
-# force full template (also auto-used in non-interactive environments)
+# force a local mock-only starter config
+k-msg config init --template mock-only
+
+# force the full multi-provider template
 k-msg config init --template full
 
 # add providers incrementally
@@ -114,13 +118,15 @@ k-msg config init --template full
 k-msg config provider add
 k-msg config provider add iwinv
 
-# non-interactive environments stay on the validation/template path
+# explicit interactive mode requires a TTY
+k-msg config init --template interactive
 ```
 
 ### `env:` substitution
 
 Any string value like `"env:NAME"` is replaced with the `NAME` environment variable at runtime.
-If the env var is missing/empty, commands that need runtime providers will fail with exit code `2`.
+If the env var is missing/empty, commands that need that provider will fail with exit code `2`.
+For a first local smoke test, prefer `k-msg config init --template mock-only`.
 
 ### Provider send value guide
 

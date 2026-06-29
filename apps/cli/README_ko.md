@@ -88,10 +88,11 @@ autoload -Uz compinit && compinit
 덮어쓰기:
 
 ```bash
+k-msg --config /path/to/k-msg.config.json providers list
 k-msg providers list --config /path/to/k-msg.config.json
 ```
 
-참고: 현재 CLI에서는 `--config`가 상위 명령 옵션이 아니라 하위 명령 옵션(예: `providers`, `sms`, `alimtalk`)입니다.
+`--config`는 명령 경로 앞이나 개별 명령 옵션 위치 어디서든 사용할 수 있습니다.
 
 예시 파일: `apps/cli/k-msg.config.example.json`
 
@@ -103,10 +104,13 @@ k-msg providers list --config /path/to/k-msg.config.json
 설정 초기화:
 
 ```bash
-# 기본: interactive wizard (TTY에서는 prompt 기반 설정 실행)
+# 기본: TTY에서는 interactive wizard, non-interactive 셸에서는 mock-only 템플릿
 k-msg config init
 
-# full 템플릿 강제 (non-interactive 환경에서는 자동 적용)
+# 로컬 smoke test용 mock-only 템플릿 강제
+k-msg config init --template mock-only
+
+# full 멀티-provider 템플릿 강제
 k-msg config init --template full
 
 # provider를 단계적으로 추가
@@ -114,13 +118,15 @@ k-msg config init --template full
 k-msg config provider add
 k-msg config provider add iwinv
 
-# non-interactive 환경에서는 validation/template 경로를 유지합니다
+# explicit interactive 모드는 TTY가 필요합니다
+k-msg config init --template interactive
 ```
 
 ### `env:` 치환
 
 `"env:NAME"` 형태 문자열은 런타임에 `NAME` 환경 변수 값으로 치환됩니다.
-환경 변수가 없거나 비어 있으면, 런타임 provider가 필요한 명령은 종료 코드 `2`로 실패합니다.
+환경 변수가 없거나 비어 있으면, 해당 provider를 실제로 여는 명령은 종료 코드 `2`로 실패합니다.
+처음 로컬 smoke test를 여는 목적이라면 `k-msg config init --template mock-only`를 권장합니다.
 
 ### 프로바이더 발송 값 준비 가이드
 

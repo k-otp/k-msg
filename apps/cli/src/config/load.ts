@@ -209,7 +209,9 @@ export async function loadKMsgConfig(
   const resolved = await resolveConfigPathForRead(configPath);
   const file = Bun.file(resolved);
   if (!(await file.exists())) {
-    throw new Error(`Config file not found: ${resolved}`);
+    throw new Error(
+      `Config file not found: ${resolved}. Run 'k-msg config init' to create one, or pass --config with a valid path.`,
+    );
   }
 
   const raw = await file.text();

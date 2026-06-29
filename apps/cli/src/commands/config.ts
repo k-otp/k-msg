@@ -399,15 +399,28 @@ function collectPlaintextCredentialLocations(
 }
 
 function printConfigSavedSummary(input: {
+  hasProviderEnvRefs: boolean;
+  nextStepMode: "mock-ready" | "provider-env";
   targetPath: string;
   providerCount: number;
   plaintextCredentials: PlaintextCredentialLocation[];
 }): void {
   console.log(`Config saved: ${input.targetPath}`);
   console.log(`Providers configured: ${input.providerCount}`);
-  console.log(
-    "Next: run `k-msg providers doctor` to verify provider readiness.",
-  );
+  if (input.nextStepMode === "mock-ready") {
+    console.log(
+      "Next: run `k-msg providers doctor` to verify provider readiness.",
+    );
+  } else {
+    console.log(
+      "Next: review the generated env: placeholders, set the required provider env vars, then run `k-msg providers doctor`.",
+    );
+  }
+  if (input.hasProviderEnvRefs) {
+    console.log(
+      "Note: this config includes env:-backed provider credentials. Commands that instantiate those providers need the referenced env vars.",
+    );
+  }
 
   if (input.plaintextCredentials.length > 0) {
     console.log("");
@@ -421,6 +434,14 @@ function printConfigSavedSummary(input: {
       "Recommendation: use `env:VAR_NAME` references (example: `env:ALIGO_API_KEY`).",
     );
   }
+}
+
+function hasProviderEnvReferences(config: KMsgCliConfig): boolean {
+  return config.providers.some((provider) =>
+    Object.values(provider.config as Record<string, unknown>).some(
+      (value) => typeof value === "string" && value.trim().startsWith("env:"),
+    ),
+  );
 }
 
 function getProviderSetupChecklist(provider: ProviderEntry): string[] {
@@ -565,7 +586,7 @@ async function promptProviderType(
       label: providerCliMetadata[type].label,
       value: type,
     })),
-    default: "iwinv",
+    default: "mock",
   });
 }
 
@@ -637,6 +658,45 @@ async function buildInteractiveTemplateConfig(
   return config;
 }
 
+function createMockOnlyTemplateConfig(): KMsgCliConfig {
+  return {
+    $schema: CONFIG_SCHEMA_LATEST_URL,
+    version: 1,
+    providers: [
+      {
+        type: "mock",
+        id: "mock",
+        config: {},
+      },
+    ],
+    routing: {
+      defaultProviderId: "mock",
+      strategy: "first",
+      byType: buildFullTemplateRoutingByType([
+        {
+          type: "mock",
+          id: "mock",
+          config: {},
+        },
+      ]),
+    },
+    defaults: {
+      sms: { autoLmsBytes: 90 },
+      kakao: { channel: "seed", plusId: "@mock" },
+    },
+    aliases: {
+      kakaoChannels: {
+        seed: {
+          providerId: "mock",
+          plusId: "@mock",
+          senderKey: "mock-sender-seed",
+          name: "Mock Seed Channel",
+        },
+      },
+    },
+  };
+}
+
 async function loadConfigOrSkeleton(
   targetPath: string,
 ): Promise<KMsgCliConfig> {
@@ -659,19 +719,28 @@ const initCmd = defineCommand({
         "Overwrite if the file already exists (boolean: --force, --force true|false, --no-force; default: false)",
       short: "f",
     }),
-    template: option(z.enum(["interactive", "full"]).default("interactive"), {
-      description: "Template mode (interactive|full)",
+    template: option(z.enum(["interactive", "full", "mock-only"]).optional(), {
+      description: "Template mode (interactive|full|mock-only)",
     }),
   },
   handler: async ({ flags, terminal, prompt }) => {
     try {
       const targetPath = await resolveConfigPathForWrite(flags.config);
 
-      let templateMode: "interactive" | "full" = flags.template;
+      const requestedTemplate = flags.template;
+      let templateMode: "interactive" | "full" | "mock-only" =
+        requestedTemplate ?? "interactive";
       if (templateMode === "interactive" && !canPromptInTerminal(terminal)) {
-        templateMode = "full";
+        if (requestedTemplate === "interactive") {
+          console.error(
+            "config init --template interactive requires an interactive terminal. Use --template mock-only or --template full instead.",
+          );
+          process.exitCode = 2;
+          return;
+        }
+        templateMode = "mock-only";
         console.log(
-          "Non-interactive environment detected. Using template=full.",
+          "Non-interactive environment detected. Using template=mock-only.",
         );
       }
 
@@ -683,7 +752,9 @@ const initCmd = defineCommand({
           });
           if (!ok) return;
         } else {
-          console.error(`Config already exists: ${targetPath}`);
+          console.error(
+            `Config already exists: ${targetPath}. Use --force to overwrite, or edit the file directly.`,
+          );
           process.exitCode = 2;
           return;
         }
@@ -692,12 +763,18 @@ const initCmd = defineCommand({
       const config =
         templateMode === "interactive"
           ? await buildInteractiveTemplateConfig(prompt)
-          : createFullTemplateConfig();
+          : templateMode === "full"
+            ? createFullTemplateConfig()
+            : createMockOnlyTemplateConfig();
 
       applySharedConfigDefaults(config);
       const plaintextCredentials = collectPlaintextCredentialLocations(config);
       await saveKMsgConfig(targetPath, config);
       printConfigSavedSummary({
+        hasProviderEnvRefs: hasProviderEnvReferences(config),
+        nextStepMode: hasProviderEnvReferences(config)
+          ? "provider-env"
+          : "mock-ready",
         targetPath,
         providerCount: config.providers.length,
         plaintextCredentials,
@@ -764,7 +841,14 @@ const providerAddCmd = defineCommand({
         provider,
         setDefault: shouldSetDefault,
       });
-      printConfigSavedSummary(saved);
+      const current = await loadKMsgConfig(saved.targetPath);
+      printConfigSavedSummary({
+        ...saved,
+        hasProviderEnvRefs: hasProviderEnvReferences(current.config),
+        nextStepMode: hasProviderEnvReferences(current.config)
+          ? "provider-env"
+          : "mock-ready",
+      });
       printProviderSetupChecklist(provider);
       console.log(`Provider ${provider.id} ${saved.result}`);
     } catch (error) {
@@ -819,9 +903,29 @@ const validateCmd = defineCommand({
   description: "Validate configuration file",
   options: {
     config: optConfig,
+    json: optJson,
   },
-  handler: async ({ flags }) => {
+  handler: async ({ flags, context }) => {
+    const asJson = shouldUseJsonOutput(flags.json, context);
     const loaded = await loadKMsgConfig(flags.config);
+    if (asJson) {
+      console.log(
+        JSON.stringify(
+          {
+            ok: true,
+            result: {
+              path: loaded.path,
+              providerIds: loaded.config.providers.map(
+                (provider) => provider.id,
+              ),
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
     console.log(`OK: ${loaded.path}`);
   },
 });
