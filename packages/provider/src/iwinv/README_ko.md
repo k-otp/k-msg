@@ -29,7 +29,8 @@ CLI 기준:
 
 - `k-msg providers doctor`, `k-msg alimtalk preflight`에서
   `channel_registered_in_console` manual 체크를 평가합니다.
-- 체크 상태는 `k-msg.config.json`의 `onboarding.manualChecks.iwinv`에 유지하세요.
+- 이 단계의 증빙/메모는 `k-msg.config.json`의 `onboarding.manualChecks.iwinv`에 유지하세요.
+- 이 값은 CLI가 관리하는 approval state가 아니라, 외부 IWINV 콘솔 prerequisite에 대한 note/evidence입니다.
 
 ## 채널별 엔드포인트 / 헤더
 

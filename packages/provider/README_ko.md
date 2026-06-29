@@ -54,6 +54,11 @@ import 경로:
 - 각 built-in provider는 `getOnboardingSpec()`를 노출합니다.
 - 레지스트리 헬퍼: `getProviderOnboardingSpec`, `listProviderOnboardingSpecs`, `providerOnboardingSpecs`.
 
+해석 기준:
+
+- 여기서의 `채널 온보딩`은 vendor prerequisite path(`manual`, `api`, `none`)를 뜻하며, toolkit이 관리하는 approval state를 의미하지 않습니다.
+- CLI가 `onboarding.manualChecks`를 저장하는 경우도 외부 벤더 절차에 대한 operator evidence/note를 기록하는 용도입니다.
+
 ## ALIMTALK failover 책임 범위
 
 ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider별 native 매핑은 다릅니다.
