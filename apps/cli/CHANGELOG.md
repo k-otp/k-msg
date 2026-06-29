@@ -1,5 +1,13 @@
 # @k-msg/cli
 
+## 0.9.10 — 2026-06-29
+
+### Patch changes
+
+- [a07acba](https://github.com/k-otp/k-msg/commit/a07acba136eef659aa6eaf5d77ee802149fb2970) Reset the CLI runtime around an internal command dispatcher and prompt-first interactive flows, remove generated command scaffolding and fullscreen UI dependencies, and keep shell completion/help behavior on the supported public command surface. — Thanks @imjlk!
+- [28d929f](https://github.com/k-otp/k-msg/commit/28d929fc4541c576c6c6d2ea25f61d06edcecb25) Add opt-in interactive `sms send` / `alimtalk send` flows for filling missing fields, refresh provider doctor and AlimTalk preflight output with provider-specific `reason` / `next` guidance, and reposition manual onboarding checks as operator evidence for vendor prerequisites rather than CLI-managed approval state. — Thanks @imjlk!
+- Updated dependencies: channel@0.29.7, core@0.29.7, messaging@0.29.7, provider@0.29.7, template@0.29.7, k-msg@0.29.7
+
 ## 0.9.9 — 2026-04-12
 
 ### Patch changes

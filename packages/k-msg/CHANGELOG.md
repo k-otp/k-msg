@@ -1,5 +1,12 @@
 # k-msg
 
+## 0.29.7 — 2026-06-29
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+- Updated dependencies: core@0.29.7, messaging@0.29.7
+
 ## 0.29.6 — 2026-04-12
 
 ### Patch changes
