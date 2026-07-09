@@ -6,7 +6,7 @@ The goal is narrower than a full toolchain migration:
 
 1. Verify whether package and CLI TypeScript surfaces compile under TS7 today.
 2. Measure whether the isolated `ttsc` lane gives useful local or CI feedback speed.
-3. Capture what still blocks a workspace-wide upgrade from the current `tsc` + Biome + TypeDoc setup.
+3. Capture what still blocks a workspace-wide upgrade from the current `tsc` + Biome + API Extractor setup.
 
 ## Current Position
 
@@ -16,7 +16,7 @@ That is enough to keep the lane around, but not enough to replace the default ro
 The main reasons are:
 
 - the root lane still does more work than a pure `--noEmit` pass
-- docs still depend on `typedoc` + `starlight-typedoc`
+- default declaration/build tooling is still anchored to the main workspace compiler line
 - Biome still covers a broader file surface than a TS-only compiler lint path
 
 ## Commands
@@ -82,8 +82,8 @@ The isolated lane intentionally covers:
 - `apps/cli`
 - `apps/docs-hono`
 
-It intentionally does not try to validate the docs stack under TypeScript 7 yet.
-The legacy `apps/docs` Astro/Starlight runtime remains outside the lane until it is retired, but the new Hono docs runtime is now part of the TS7 validation surface.
+It intentionally does not typecheck the source-content workspace under `apps/docs`, because that directory now holds Markdown, generated inputs, and snippet sources rather than an executable site app.
+The Hono docs runtime is part of the TS7 validation surface.
 
 ## What The Numbers Mean
 
@@ -123,15 +123,15 @@ The evaluation lane already gives three useful signals:
 
 ## Why The Workspace Should Not Flip Yet
 
-### Docs are still the hard blocker
+### The default compiler line is still the hard blocker
 
-`apps/docs` currently depends on:
+The docs runtime itself is no longer blocked on Astro/TypeDoc, but the workspace default compiler is still responsible for:
 
-- `typedoc`
-- `typedoc-plugin-markdown`
-- `starlight-typedoc`
+- declaration emit for publishable packages
+- API Extractor compatibility in the checked-in toolchain
+- any remaining downstream tool assumptions tied to the default compiler version
 
-That path is still tied to TypeDoc compatibility, and the current TypeDoc line in this repo does not yet advertise TypeScript 7 support.
+That means the repository can keep using TS7 as a strong secondary lane today, while the default compiler path is promoted more deliberately.
 
 ### Biome still covers the broader repo surface
 
@@ -148,13 +148,13 @@ So a future TS7 promotion does not imply removing Biome.
 The current comparison is still useful, but the commands do different work.
 That means the speedup should be interpreted as “promising enough to keep evaluating,” not as final justification for replacing the root lane.
 
-## TypeDoc Alternatives
+## API Docs Pipeline Notes
 
-If the docs stack remains the long-term blocker, there are realistic alternatives, but none are a drop-in swap for the current site.
+The old TypeDoc/Starlight path has been removed from the active docs runtime. The relevant question now is how confidently the repository can move the maintained API docs pipeline onto the default TS7 compiler line.
 
 ### 1. API Extractor + API Documenter
 
-This is the strongest replacement candidate if the goal is a stricter, publishable API reference pipeline.
+This is the current pipeline, and it remains the strongest fit for published package contracts.
 
 Pros:
 
@@ -164,9 +164,8 @@ Pros:
 
 Tradeoffs:
 
-- not a direct replacement for `starlight-typedoc`
-- would require a new ingestion pipeline into the Astro/Starlight site
-- would likely change how localized API docs are generated and synced
+- still depends on programmatic compiler/tooling compatibility
+- needs validation before the root compiler line moves to TS7
 
 ### 2. Custom compiler-driven generation
 
@@ -176,20 +175,19 @@ Tradeoffs:
 
 - highest maintenance cost
 - most custom code to own
-- hardest path to justify while the current TypeDoc pipeline still works on TS6
+- hardest path to justify while the current API Extractor pipeline is serviceable
 
-### 3. Stay on TypeDoc until TS7 support lands
+### 3. Keep the default compiler on the stable line a bit longer
 
-This remains the lowest migration-cost path.
+This remains the lowest-risk promotion path.
 
 It preserves:
 
 - the existing docs site integration
-- `typedoc.entrypoints.json` flow
-- current locale sync behavior
+- the current API Extractor flow
+- the checked-in docs generation behavior
 
-If the repo wants TS7 everywhere before TypeDoc catches up, `API Extractor + API Documenter` is the most credible fallback to evaluate first.
-That path now fits the Hono docs direction because the new docs runtime can ingest generated Markdown directly.
+If the repo wants TS7 everywhere, the next step is to validate the current API Extractor toolchain and package emit flow against the promoted compiler line rather than re-opening the docs runtime architecture.
 
 ## Recommendation
 
@@ -197,8 +195,8 @@ Current recommendation:
 
 1. Keep the isolated TS7 validation lane.
 2. Keep Biome as the repo-wide formatter/linter.
-3. Use `ttsc-graph` as an optional exploration tool, not as a required contributor dependency.
-4. Revisit a workspace-wide TS7 promotion only after the docs compatibility path is clear.
+3. Use `ttsc-graph` as a supported exploration tool for architecture and runtime-flow questions.
+4. Revisit a workspace-wide TS7 promotion only after declaration emit and API Extractor compatibility are clear.
 
 In short: the repository is ready for continued TS7 evaluation, but not yet ready for a default-lane switch.
 

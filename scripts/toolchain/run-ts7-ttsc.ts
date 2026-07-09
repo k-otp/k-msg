@@ -60,7 +60,7 @@ try {
     `Running isolated ttsc lane with TypeScript ${toolchainVersions.typescript} and ttsc ${toolchainVersions.ttsc}`,
   );
   console.log(
-    "Legacy apps/docs stays outside this lane, but the Hono docs runtime is included as a TS7 validation target.",
+    "The plain-Markdown source workspace under apps/docs stays outside this lane, while the Hono docs runtime is included as a TS7 validation target.",
   );
 
   await ensureRunner({ force: forceInstall });

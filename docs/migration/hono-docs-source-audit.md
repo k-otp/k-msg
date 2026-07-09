@@ -74,5 +74,5 @@ This audit checks the current docs source tree for Astro/Starlight/MDX-specific 
 ## Migration Interpretation
 
 - The current docs source tree is plain-Markdown compatible for the Hono pipeline.
-- Remaining migration work is now about retiring legacy Astro/Starlight runtime files and duplicated build wiring, not rewriting page content.
+- No source-level blockers remain for the Hono docs runtime.
 
