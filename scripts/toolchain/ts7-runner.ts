@@ -50,6 +50,10 @@ export const ttscTargets = [
     label: "CLI typecheck",
     tsconfig: "apps/cli/tsconfig.json",
   },
+  {
+    label: "docs-hono typecheck",
+    tsconfig: "apps/docs-hono/tsconfig.json",
+  },
 ] as const;
 
 type SpawnStream = "ignore" | "inherit" | "pipe";
