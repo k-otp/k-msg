@@ -6,8 +6,8 @@ This audit checks the current docs source tree for Astro/Starlight/MDX-specific 
 
 ## Summary
 
-- Total files scanned: 1374
-- Files compatible with plain Markdown rendering today: 1374
+- Total files scanned: 76
+- Files compatible with plain Markdown rendering today: 76
 - Files requiring migration work before Hono SSG can render them directly: 0
 
 ## Blocking Construct Counts
@@ -28,48 +28,48 @@ This audit checks the current docs source tree for Astro/Starlight/MDX-specific 
 
 ## Plain Markdown-Compatible Files
 
-- `apps/docs/src/content/docs/api/README.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/AnalyticsService.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/AnomalyDetector.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/DashboardGenerator.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/DeliveryTrackingAnalyticsService.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/EventCollector.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/ExportManager.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/InsightEngine.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/MetricAggregator.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/MetricsCollector.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/RecommendationEngine.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/ReportGenerator.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/TimeSeriesAggregator.md`
-- `apps/docs/src/content/docs/api/analytics/src/classes/WebhookCollector.md`
-- `apps/docs/src/content/docs/api/analytics/src/enumerations/MetricType.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AggregatedMetric.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AggregationOptions.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AggregationRule.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AggregatorConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnalyticsConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnalyticsQuery.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnalyticsReport.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnalyticsResult.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/Anomaly.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnomalyAlgorithm.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/AnomalyDetectionConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/DashboardConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/DashboardData.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/DashboardWidget.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/EventCollectorConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/EventData.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/EventProcessor.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/ExportConfig.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/ExportFormat.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/ExportResult.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/InsightData.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/KPIData.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/MetricData.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/Recommendation.md`
-- `apps/docs/src/content/docs/api/analytics/src/interfaces/RecommendationConfig.md`
+- `apps/docs/src/content/docs/cli.md`
+- `apps/docs/src/content/docs/en/cli.md`
+- `apps/docs/src/content/docs/en/guides/examples/express-node-send-only.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-bun-send-only.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-pages-send-only.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-pages-tracking-hyperdrive.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-worker-queue-do.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-worker-tracking-d1.md`
+- `apps/docs/src/content/docs/en/guides/examples/hono-worker-webhook-d1.md`
+- `apps/docs/src/content/docs/en/guides/examples/index.md`
+- `apps/docs/src/content/docs/en/guides/getting-started.md`
+- `apps/docs/src/content/docs/en/guides/message-types.md`
+- `apps/docs/src/content/docs/en/guides/overview.md`
+- `apps/docs/src/content/docs/en/guides/package-selection.md`
+- `apps/docs/src/content/docs/en/guides/packages/analytics.md`
+- `apps/docs/src/content/docs/en/guides/packages/channel.md`
+- `apps/docs/src/content/docs/en/guides/packages/core.md`
+- `apps/docs/src/content/docs/en/guides/packages/index.md`
+- `apps/docs/src/content/docs/en/guides/packages/k-msg.md`
+- `apps/docs/src/content/docs/en/guides/packages/messaging.md`
+- `apps/docs/src/content/docs/en/guides/packages/provider.md`
+- `apps/docs/src/content/docs/en/guides/packages/template.md`
+- `apps/docs/src/content/docs/en/guides/packages/webhook.md`
+- `apps/docs/src/content/docs/en/guides/provider-selection.md`
+- `apps/docs/src/content/docs/en/guides/security/auto-mitigation.md`
+- `apps/docs/src/content/docs/en/guides/security/field-crypto-v1.md`
+- `apps/docs/src/content/docs/en/guides/security/glossary.md`
+- `apps/docs/src/content/docs/en/guides/security/index.md`
+- `apps/docs/src/content/docs/en/guides/security/key-management-rotation.md`
+- `apps/docs/src/content/docs/en/guides/security/kr-b2b-retention.md`
+- `apps/docs/src/content/docs/en/guides/security/migration-orchestrator.md`
+- `apps/docs/src/content/docs/en/guides/security/recipes.md`
+- `apps/docs/src/content/docs/en/guides/troubleshooting.md`
+- `apps/docs/src/content/docs/en/guides/use-cases/index.md`
+- `apps/docs/src/content/docs/en/guides/use-cases/marketing-message.md`
+- `apps/docs/src/content/docs/en/guides/use-cases/order-notification.md`
+- `apps/docs/src/content/docs/en/guides/use-cases/otp-verification.md`
+- `apps/docs/src/content/docs/en/index.md`
+- `apps/docs/src/content/docs/en/snippets.md`
+- `apps/docs/src/content/docs/guides/examples/express-node-send-only.md`
 
-- ...and 1334 more
+- ...and 36 more
 
 ## Migration Interpretation
 

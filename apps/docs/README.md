@@ -33,11 +33,14 @@ Generated files:
 
 - `apps/docs/src/content/docs/guides/**` (Korean root locale)
 - `apps/docs/src/content/docs/en/guides/**`
-- `apps/docs/src/content/docs/api/**` (root locale API source)
-- `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
 - `apps/docs/api-sources.json`
+
+Generated runtime output outside this workspace:
+
+- `apps/docs-hono/content/docs/api/**`
+- `apps/docs-hono/content/docs/en/api/**`
 
 Rules:
 
@@ -97,8 +100,8 @@ Flow:
 
 1. `scripts/docs/collect-entrypoints.ts` builds `apps/docs/api-sources.json` from package `exports`
 2. `scripts/docs/generate-api-extractor-docs.ts` runs API Extractor and API Documenter against that inventory
-3. Generated source pages land in `apps/docs/src/content/docs/api/**` and `apps/docs/src/content/docs/en/api/**`
-4. `scripts/docs/export-hono-content.ts` copies the normalized Markdown into the Hono app content tree
+3. Generated API pages land in `apps/docs-hono/content/docs/api/**` and `apps/docs-hono/content/docs/en/api/**`
+4. `scripts/docs/export-hono-content.ts` copies the normalized Markdown source pages into the Hono app content tree
 5. Source links remain anchored to the repository paths recorded in the inventory
 
 ## 5. Contributor Workflow

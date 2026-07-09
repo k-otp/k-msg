@@ -31,11 +31,14 @@
 
 - `apps/docs/src/content/docs/guides/**` (한국어 루트 로케일)
 - `apps/docs/src/content/docs/en/guides/**`
-- `apps/docs/src/content/docs/api/**` (루트 로케일 API 원본)
-- `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
 - `apps/docs/api-sources.json`
+
+이 워크스페이스 밖에서 생성되는 런타임 출력:
+
+- `apps/docs-hono/content/docs/api/**`
+- `apps/docs-hono/content/docs/en/api/**`
 
 규칙:
 
@@ -96,8 +99,8 @@
 
 1. `scripts/docs/collect-entrypoints.ts`가 package `exports` 기준으로 `apps/docs/api-sources.json` 생성
 2. `scripts/docs/generate-api-extractor-docs.ts`가 해당 inventory를 기준으로 API Extractor / API Documenter 실행
-3. 생성 결과는 `apps/docs/src/content/docs/api/**` 및 `apps/docs/src/content/docs/en/api/**`에 기록
-4. `scripts/docs/export-hono-content.ts`가 정규화된 Markdown을 Hono 앱 콘텐츠 트리로 복사
+3. 생성 결과는 `apps/docs-hono/content/docs/api/**` 및 `apps/docs-hono/content/docs/en/api/**`에 기록
+4. `scripts/docs/export-hono-content.ts`가 정규화된 Markdown 소스 페이지를 Hono 앱 콘텐츠 트리로 복사
 5. source link는 inventory에 기록된 repo 경로를 기준으로 유지
 
 ## 5. 작업 절차 (기여자 기준)
