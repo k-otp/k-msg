@@ -311,6 +311,14 @@ function rewriteMarkdownLinks(
   );
 }
 
+function normalizeTypeScriptStdlibReferences(markdown: string): string {
+  return markdown.replace(
+    /Defined in: node\\_modules\/\.bun\/typescript@[^/]+\/node\\_modules\/typescript\/lib\/([^:\n]+):(\d+)/g,
+    (_match, libPath: string, line: string) =>
+      `Defined in: \`typescript/lib/${libPath}:${line}\``,
+  );
+}
+
 async function listMarkdownFiles(dirPath: string): Promise<string[]> {
   const entries = await readdir(dirPath, { withFileTypes: true });
   return entries
@@ -352,7 +360,9 @@ async function copyMarkdownFolder(params: {
     for (const [filePath, outputPage] of resolvedPages) {
       const raw = await readFile(filePath, "utf8");
       const stripped = stripGeneratedHeader(raw);
-      const rewritten = rewriteMarkdownLinks(stripped, linkMap);
+      const rewritten = normalizeTypeScriptStdlibReferences(
+        rewriteMarkdownLinks(stripped, linkMap),
+      );
       const title = headingFromMarkdown(rewritten) ?? undefined;
       const localeDir = locale === "en" ? path.join("en", "api") : "api";
       const targetPath = path.join(

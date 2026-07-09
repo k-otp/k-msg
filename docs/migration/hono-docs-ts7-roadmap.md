@@ -130,13 +130,13 @@ Status: complete.
 
 - Keep validating packages and CLI with the isolated TS7/`ttsc` lane.
 - Keep the Hono docs runtime in that lane.
-- Avoid broad mechanical TypeScript 7 promotion until declaration emit and remaining tooling compatibility are validated.
+- Keep tightening TS7-era config compatibility issues as they surface in examples and auxiliary tsconfigs.
 
 ### After Hono cutover
 
-- Move root `typescript` to TS7.
+- Root `typescript` is now on TS7.
 - Evaluate whether any remaining programmatic tools still need a temporary TypeScript 6 compatibility package.
-- Prefer `ttsc --noEmit` for default type validation.
+- Decide whether `ttsc --noEmit` should stay a fast secondary lane or take over any default validation steps.
 - Keep `tsc` only where declaration output or packaging still depends on it.
 
 ### `ttsc-graph`
@@ -162,4 +162,4 @@ The migration is considered complete when all of the following are true:
 - `TypeDoc`, `starlight-typedoc`, and `@astrojs/starlight` are no longer required by the docs build path.
 - Root docs build/check commands no longer depend on Astro.
 - The new docs site preserves core navigation, locale split, CLI docs, API docs, sitemap, analytics, and search.
-- TypeScript 7 plus `ttsc` are part of the normal workspace validation path, not just an isolated experiment.
+- TypeScript 7 is the default workspace compiler, and `ttsc` plus `ttsc-graph` remain supported repository tools.
