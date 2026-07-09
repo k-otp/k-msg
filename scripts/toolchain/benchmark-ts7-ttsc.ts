@@ -257,7 +257,7 @@ ${renderTable("Setup And Exploration Costs", otherRows)}
 
 - \`Relative\` is only meant for the validation-lane comparison and uses \`bun run typecheck\` as the baseline.
 - The root lane includes the current package \`build:types\` flow plus CLI generation before \`tsc --noEmit\`.
-- The isolated TS7 lane is a pure \`--noEmit\` pass over selected package and CLI tsconfigs.
+- The isolated TS7 lane is a pure \`--noEmit\` pass over selected package, CLI, and docs-hono tsconfigs.
 - The graph dump measures analysis startup cost for \`ttsc-graph\`, not a CI-quality replacement for typecheck.
 - Absolute numbers depend on machine state; the checked-in value is mainly useful as a repeatable reference point for this repository.
 `;

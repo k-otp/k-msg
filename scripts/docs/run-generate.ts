@@ -10,6 +10,7 @@ const generators = [
   "scripts/docs/generate-schema-docs.ts",
   "scripts/docs/generate-guides.ts",
   "scripts/docs/export-hono-content.ts",
+  "scripts/docs/generate-api-extractor-docs.ts",
 ];
 
 const selectedGenerators = checkMode
@@ -17,7 +18,8 @@ const selectedGenerators = checkMode
       (script) =>
         script !== "scripts/docs/generate-cli-help.ts" &&
         script !== "scripts/docs/generate-schema-docs.ts" &&
-        script !== "scripts/docs/export-hono-content.ts",
+        script !== "scripts/docs/export-hono-content.ts" &&
+        script !== "scripts/docs/generate-api-extractor-docs.ts",
     )
   : generators;
 
