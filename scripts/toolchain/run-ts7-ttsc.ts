@@ -92,7 +92,17 @@ async function ensureRunner({ force }: { force: boolean }): Promise<void> {
   let currentManifest: null | string = null;
   try {
     currentManifest = await readFile(runnerManifestPath, "utf8");
-  } catch {
+  } catch (error) {
+    const errorCode =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      typeof error.code === "string"
+        ? error.code
+        : null;
+    if (errorCode !== "ENOENT") {
+      throw error;
+    }
     currentManifest = null;
   }
 
@@ -143,13 +153,8 @@ async function runTarget(target: (typeof targets)[number]): Promise<void> {
 }
 
 async function cleanRunner(): Promise<void> {
-  try {
-    await rm(runnerDir, { force: true, recursive: true });
-    console.log(`Removed ${path.relative(repoRoot, runnerDir) || runnerDir}`);
-  } catch (error) {
-    console.error("[ttsc-ts7] Failed to clean runner directory:", error);
-    throw error;
-  }
+  await rm(runnerDir, { force: true, recursive: true });
+  console.log(`Removed ${path.relative(repoRoot, runnerDir) || runnerDir}`);
 }
 
 try {
