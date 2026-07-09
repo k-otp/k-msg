@@ -9,7 +9,7 @@ export const VariableMapSchema = z.record(
 export const RecipientSchema = z.object({
   phoneNumber: z.string().check(z.regex(/^[0-9]{10,11}$/)),
   variables: z.optional(VariableMapSchema),
-  metadata: z.optional(z.record(z.string(), z.any())),
+  metadata: z.optional(z.record(z.string(), z.unknown())),
 });
 
 export const SchedulingOptionsSchema = z.object({
@@ -59,7 +59,7 @@ export const MessageRequestSchema = z.object({
 export const MessageErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
-  details: z.optional(z.record(z.string(), z.any())),
+  details: z.optional(z.record(z.string(), z.unknown())),
 });
 
 export const RecipientResultSchema = z.object({
@@ -67,7 +67,7 @@ export const RecipientResultSchema = z.object({
   messageId: z.optional(z.string()),
   status: z.nativeEnum(MessageStatus),
   error: z.optional(MessageErrorSchema),
-  metadata: z.optional(z.record(z.string(), z.any())),
+  metadata: z.optional(z.record(z.string(), z.unknown())),
 });
 
 export const MessageResultSchema = z.object({
