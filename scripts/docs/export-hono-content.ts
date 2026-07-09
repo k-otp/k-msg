@@ -24,6 +24,10 @@ async function walkMarkdownFiles(
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
+      const relative = toPosix(path.relative(sourceContentRoot, fullPath));
+      if (relative === "api" || relative === "en/api") {
+        continue;
+      }
       await walkMarkdownFiles(fullPath, output);
       continue;
     }

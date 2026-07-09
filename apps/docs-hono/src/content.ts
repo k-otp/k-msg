@@ -141,5 +141,5 @@ export function sourceEditUrl(sourcePath: string): string {
 }
 
 export function renderPreviewBanner(sourcePath: string): string {
-  return `<p class="preview-note">This page is rendered by the parallel Hono SSG docs app from <code>${escapeHtml(sourcePath)}</code>.</p>`;
+  return `<p class="preview-note">This page is rendered by the Hono SSG docs app from <code>${escapeHtml(sourcePath)}</code>.</p>`;
 }

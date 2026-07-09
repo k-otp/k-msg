@@ -1,10 +1,11 @@
 # docs-hono
 
-Parallel Hono SSG docs app for the `k-msg` repository.
+Hono SSG docs app for the `k-msg` repository.
 
 Current purpose:
 
-- prove the docs site can be rendered from framework-neutral Markdown inputs
+- render the docs site from framework-neutral Markdown inputs
+- ingest generated API reference pages from the API Extractor pipeline
 - keep the output static so Cloudflare Pages can deploy it directly
 - remove the Astro/Starlight/TypeDoc runtime from the critical path for TypeScript 7 adoption
 

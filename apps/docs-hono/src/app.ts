@@ -27,7 +27,7 @@ for (const page of pages) {
 
 app.notFound((c) =>
   c.html(
-    "<!doctype html><html><body><h1>Not found</h1><p>The parallel Hono docs preview could not find this page.</p></body></html>",
+    "<!doctype html><html><body><h1>Not found</h1><p>The Hono docs build could not find this page.</p></body></html>",
     404,
   ),
 );
