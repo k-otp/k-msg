@@ -58,80 +58,6 @@ export enum WebhookEventType {
   THRESHOLD_EXCEEDED = "analytics.threshold_exceeded",
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: event payload shape is caller-defined
-export interface WebhookEvent<T = any> {
-  id: string;
-  type: WebhookEventType;
-  timestamp: Date;
-  data: T;
-  metadata: {
-    providerId?: string;
-    channelId?: string;
-    templateId?: string;
-    messageId?: string;
-    userId?: string;
-    organizationId?: string;
-    correlationId?: string;
-    retryCount?: number;
-  };
-  version: string; // API 버전
-}
-
-export interface WebhookEndpoint {
-  id: string;
-  url: string;
-  name?: string;
-  description?: string;
-  active: boolean;
-  events: WebhookEventType[];
-  headers?: Record<string, string>;
-  secret?: string;
-  retryConfig?: {
-    maxRetries: number;
-    retryDelayMs: number;
-    backoffMultiplier: number;
-  };
-  filters?: {
-    providerId?: string[];
-    channelId?: string[];
-    templateId?: string[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  lastTriggeredAt?: Date;
-  status: "active" | "inactive" | "error" | "suspended";
-}
-
-export interface WebhookDelivery {
-  id: string;
-  endpointId: string;
-  eventId: string;
-  /**
-   * Optional event type for filtering/stats.
-   * (Helpful because `payload` is a JSON string and timestamps need revival when parsed.)
-   */
-  eventType?: WebhookEventType;
-  url: string;
-  httpMethod: "POST" | "PUT" | "PATCH";
-  headers: Record<string, string>;
-  payload: string; // JSON stringified
-  attempts: WebhookAttempt[];
-  status: "pending" | "success" | "failed" | "exhausted";
-  createdAt: Date;
-  completedAt?: Date;
-  nextRetryAt?: Date;
-}
-
-export interface WebhookAttempt {
-  attemptNumber: number;
-  timestamp: Date;
-  httpStatus?: number;
-  responseBody?: string;
-  responseHeaders?: Record<string, string>;
-  error?: string;
-  latencyMs: number;
-}
-
 export interface WebhookSecurity {
   algorithm: "sha256" | "sha1";
   header: string; // 예: 'X-Webhook-Signature'
@@ -172,10 +98,42 @@ export interface WebhookTestResult {
   testedAt: Date;
 }
 
-// Zod Schemas
+const WebhookEventMetadataSchema = z.object({
+  providerId: z.optional(z.string()),
+  channelId: z.optional(z.string()),
+  templateId: z.optional(z.string()),
+  messageId: z.optional(z.string()),
+  userId: z.optional(z.string()),
+  organizationId: z.optional(z.string()),
+  correlationId: z.optional(z.string()),
+  retryCount: z.optional(z.number()),
+});
+
+const WebhookRetryConfigSchema = z.object({
+  maxRetries: z.number().check(z.minimum(0), z.maximum(10)),
+  retryDelayMs: z.number().check(z.minimum(1000)),
+  backoffMultiplier: z.number().check(z.minimum(1), z.maximum(5)),
+});
+
+const WebhookFiltersSchema = z.object({
+  providerId: z.optional(z.array(z.string())),
+  channelId: z.optional(z.array(z.string())),
+  templateId: z.optional(z.array(z.string())),
+});
+
+export const WebhookAttemptSchema = z.object({
+  attemptNumber: z.number(),
+  timestamp: z.date(),
+  httpStatus: z.optional(z.number()),
+  responseBody: z.optional(z.string()),
+  responseHeaders: z.optional(z.record(z.string(), z.string())),
+  error: z.optional(z.string()),
+  latencyMs: z.number(),
+});
+
 export const WebhookEventSchema = z.object({
   id: z.string(),
-  type: z.string(),
+  type: z.nativeEnum(WebhookEventType),
   timestamp: z.pipe(
     z.transform((value) => {
       if (value instanceof Date) return value;
@@ -187,16 +145,7 @@ export const WebhookEventSchema = z.object({
     z.date(),
   ),
   data: z.any(),
-  metadata: z.object({
-    providerId: z.optional(z.string()),
-    channelId: z.optional(z.string()),
-    templateId: z.optional(z.string()),
-    messageId: z.optional(z.string()),
-    userId: z.optional(z.string()),
-    organizationId: z.optional(z.string()),
-    correlationId: z.optional(z.string()),
-    retryCount: z.optional(z.number()),
-  }),
+  metadata: WebhookEventMetadataSchema,
   version: z.string(),
 });
 
@@ -206,23 +155,11 @@ export const WebhookEndpointSchema = z.object({
   name: z.optional(z.string()),
   description: z.optional(z.string()),
   active: z.boolean(),
-  events: z.array(z.string()),
+  events: z.array(z.nativeEnum(WebhookEventType)),
   headers: z.optional(z.record(z.string(), z.string())),
   secret: z.optional(z.string()),
-  retryConfig: z.optional(
-    z.object({
-      maxRetries: z.number().check(z.minimum(0), z.maximum(10)),
-      retryDelayMs: z.number().check(z.minimum(1000)),
-      backoffMultiplier: z.number().check(z.minimum(1), z.maximum(5)),
-    }),
-  ),
-  filters: z.optional(
-    z.object({
-      providerId: z.optional(z.array(z.string())),
-      channelId: z.optional(z.array(z.string())),
-      templateId: z.optional(z.array(z.string())),
-    }),
-  ),
+  retryConfig: z.optional(WebhookRetryConfigSchema),
+  filters: z.optional(WebhookFiltersSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
   lastTriggeredAt: z.optional(z.date()),
@@ -233,28 +170,25 @@ export const WebhookDeliverySchema = z.object({
   id: z.string(),
   endpointId: z.string(),
   eventId: z.string(),
-  eventType: z.optional(z.string()),
+  eventType: z.optional(z.nativeEnum(WebhookEventType)),
   url: z.url(),
   httpMethod: z.enum(["POST", "PUT", "PATCH"]),
   headers: z.record(z.string(), z.string()),
   payload: z.string(),
-  attempts: z.array(
-    z.object({
-      attemptNumber: z.number(),
-      timestamp: z.date(),
-      httpStatus: z.optional(z.number()),
-      responseBody: z.optional(z.string()),
-      responseHeaders: z.optional(z.record(z.string(), z.string())),
-      error: z.optional(z.string()),
-      latencyMs: z.number(),
-    }),
-  ),
+  attempts: z.array(WebhookAttemptSchema),
   status: z.enum(["pending", "success", "failed", "exhausted"]),
   createdAt: z.date(),
   completedAt: z.optional(z.date()),
   nextRetryAt: z.optional(z.date()),
 });
 
+// biome-ignore lint/suspicious/noExplicitAny: event payload shape is caller-defined
+export type WebhookEvent<T = any> = Omit<WebhookEventData, "data"> & {
+  data: T;
+};
+export type WebhookEndpoint = z.infer<typeof WebhookEndpointSchema>;
+export type WebhookAttempt = z.infer<typeof WebhookAttemptSchema>;
+export type WebhookDelivery = z.infer<typeof WebhookDeliverySchema>;
 export type WebhookEventData = z.infer<typeof WebhookEventSchema>;
-export type WebhookEndpointData = z.infer<typeof WebhookEndpointSchema>;
-export type WebhookDeliveryData = z.infer<typeof WebhookDeliverySchema>;
+export type WebhookEndpointData = WebhookEndpoint;
+export type WebhookDeliveryData = WebhookDelivery;

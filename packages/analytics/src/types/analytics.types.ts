@@ -20,15 +20,6 @@ export enum MetricType {
   CLICK_RATE = "click_rate",
 }
 
-export interface MetricData {
-  id: string;
-  type: MetricType;
-  timestamp: Date;
-  value: number;
-  dimensions: Record<string, string>; // provider, channel, template_id 등
-  metadata?: Record<string, any>;
-}
-
 export interface AggregatedMetric {
   type: MetricType;
   interval: "minute" | "hour" | "day" | "week" | "month";
@@ -51,6 +42,7 @@ export interface AnalyticsReport {
     start: Date;
     end: Date;
   };
+  // biome-ignore lint/suspicious/noExplicitAny: preserve the published report filter contract
   filters: Record<string, any>;
   metrics: ReportMetric[];
   generatedAt: Date;
@@ -65,36 +57,6 @@ export interface ReportMetric {
   breakdown?: Record<string, number>; // 세부 분석
 }
 
-export interface InsightData {
-  id: string;
-  type: "anomaly" | "trend" | "recommendation";
-  title: string;
-  description: string;
-  severity: "low" | "medium" | "high" | "critical";
-  metric: MetricType;
-  dimensions: Record<string, string>;
-  value: number;
-  expectedValue?: number;
-  confidence: number; // 0-1
-  actionable: boolean;
-  recommendations?: string[];
-  detectedAt: Date;
-}
-
-export interface AnalyticsQuery {
-  metrics: MetricType[];
-  dateRange: {
-    start: Date;
-    end: Date;
-  };
-  interval?: "minute" | "hour" | "day" | "week" | "month";
-  filters?: Record<string, any>;
-  groupBy?: string[];
-  orderBy?: { field: string; direction: "asc" | "desc" }[];
-  limit?: number;
-  offset?: number;
-}
-
 export interface AnalyticsResult {
   query: AnalyticsQuery;
   data: AggregatedMetric[];
@@ -106,7 +68,24 @@ export interface AnalyticsResult {
   insights?: InsightData[];
 }
 
-// Zod Schemas
+const AnalyticsIntervalSchema = z.enum([
+  "minute",
+  "hour",
+  "day",
+  "week",
+  "month",
+]);
+
+const AnalyticsDateRangeSchema = z.object({
+  start: z.date(),
+  end: z.date(),
+});
+
+const AnalyticsOrderBySchema = z.object({
+  field: z.string(),
+  direction: z.enum(["asc", "desc"]),
+});
+
 export const MetricDataSchema = z.object({
   id: z.string(),
   type: z.nativeEnum(MetricType),
@@ -118,21 +97,11 @@ export const MetricDataSchema = z.object({
 
 export const AnalyticsQuerySchema = z.object({
   metrics: z.array(z.nativeEnum(MetricType)),
-  dateRange: z.object({
-    start: z.date(),
-    end: z.date(),
-  }),
-  interval: z.optional(z.enum(["minute", "hour", "day", "week", "month"])),
+  dateRange: AnalyticsDateRangeSchema,
+  interval: z.optional(AnalyticsIntervalSchema),
   filters: z.optional(z.record(z.string(), z.any())),
   groupBy: z.optional(z.array(z.string())),
-  orderBy: z.optional(
-    z.array(
-      z.object({
-        field: z.string(),
-        direction: z.enum(["asc", "desc"]),
-      }),
-    ),
-  ),
+  orderBy: z.optional(z.array(AnalyticsOrderBySchema)),
   limit: z.optional(z.number().check(z.minimum(1), z.maximum(10000))),
   offset: z.optional(z.number().check(z.minimum(0))),
 });
@@ -153,6 +122,11 @@ export const InsightDataSchema = z.object({
   detectedAt: z.date(),
 });
 
-export type MetricDataType = z.infer<typeof MetricDataSchema>;
-export type AnalyticsQueryType = z.infer<typeof AnalyticsQuerySchema>;
-export type InsightDataType = z.infer<typeof InsightDataSchema>;
+export type MetricData = z.infer<typeof MetricDataSchema>;
+export type AnalyticsQuery = z.infer<typeof AnalyticsQuerySchema>;
+export type InsightData = z.infer<typeof InsightDataSchema>;
+
+// Legacy alias exports kept stable while the schemas become the source of truth.
+export type MetricDataType = MetricData;
+export type AnalyticsQueryType = AnalyticsQuery;
+export type InsightDataType = InsightData;
