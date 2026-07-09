@@ -146,7 +146,7 @@ async function measureRootTypecheck(): Promise<BenchmarkRecord> {
   return {
     category: "validation",
     command: "bun run typecheck",
-    notes: "Current workspace default lane",
+    notes: "Current workspace default TS7 lane",
     result: measurement.exitCode === 0 ? "pass" : "fail",
     seconds: measurement.seconds,
     title: "Root default typecheck",
@@ -165,7 +165,7 @@ async function measureTtscTypecheck(): Promise<BenchmarkRecord> {
   return {
     category: "validation",
     command: "bun run typecheck:ttsc:ts7",
-    notes: "Warm isolated TS7/ttsc lane",
+    notes: "Warm isolated ttsc noEmit lane on TS7",
     result: measurement.exitCode === 0 ? "pass" : "fail",
     seconds: measurement.seconds,
     title: "TS7/ttsc validation lane",
@@ -281,7 +281,7 @@ function renderReport(records: BenchmarkRecord[]): string {
 
 Generated on ${formatLocalTimestamp(new Date())} from the repository root with:
 
-- workspace baseline: current root \`typecheck\` lane
+- workspace baseline: current root \`typecheck\` lane on TS7
 - isolated runner: \`ttsc@${toolchainVersions.ttsc}\`
 - graph tool: \`@ttsc/graph@${toolchainVersions.ttscGraph}\`
 
@@ -294,8 +294,8 @@ ${renderTable("Setup And Exploration Costs", otherRows)}
 ## Reading The Snapshot
 
 - \`Relative\` is only meant for the validation-lane comparison and uses \`bun run typecheck\` as the baseline.
-- The root lane includes the current package \`build:types\` flow plus CLI generation before \`tsc --noEmit\`.
-- The isolated TS7 lane is a pure \`--noEmit\` pass over selected package, CLI, and docs-hono tsconfigs.
+- The root lane now uses the default TS7 compiler and includes the current package \`build:types\` flow plus CLI generation before \`tsc --noEmit\`.
+- The isolated TS7 lane remains a pure \`--noEmit\` pass over selected package, CLI, and docs-hono tsconfigs.
 - The docs rows separate API reference generation cost from the full Hono static-site build cost.
 - The graph dump measures analysis startup cost for \`ttsc-graph\`, not a CI-quality replacement for typecheck.
 - Absolute numbers depend on machine state; the checked-in value is mainly useful as a repeatable reference point for this repository.

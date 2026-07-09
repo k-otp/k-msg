@@ -1,8 +1,7 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "7.0",
     "noEmit": true,
     "module": "Preserve",
     "moduleResolution": "bundler",
