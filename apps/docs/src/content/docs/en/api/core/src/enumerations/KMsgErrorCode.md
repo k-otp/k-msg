@@ -1,0 +1,136 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "KMsgErrorCode"
+---
+
+Defined in: [packages/core/src/errors.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L3)
+
+## Enumeration Members
+
+### AUTHENTICATION\_FAILED
+
+> **AUTHENTICATION\_FAILED**: `"AUTHENTICATION_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L5)
+
+***
+
+### CRYPTO\_CONFIG\_ERROR
+
+> **CRYPTO\_CONFIG\_ERROR**: `"CRYPTO_CONFIG_ERROR"`
+
+Defined in: [packages/core/src/errors.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L14)
+
+***
+
+### CRYPTO\_DECRYPT\_FAILED
+
+> **CRYPTO\_DECRYPT\_FAILED**: `"CRYPTO_DECRYPT_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
+
+***
+
+### CRYPTO\_ENCRYPT\_FAILED
+
+> **CRYPTO\_ENCRYPT\_FAILED**: `"CRYPTO_ENCRYPT_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
+
+***
+
+### CRYPTO\_HASH\_FAILED
+
+> **CRYPTO\_HASH\_FAILED**: `"CRYPTO_HASH_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)
+
+***
+
+### CRYPTO\_POLICY\_VIOLATION
+
+> **CRYPTO\_POLICY\_VIOLATION**: `"CRYPTO_POLICY_VIOLATION"`
+
+Defined in: [packages/core/src/errors.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L18)
+
+***
+
+### INSUFFICIENT\_BALANCE
+
+> **INSUFFICIENT\_BALANCE**: `"INSUFFICIENT_BALANCE"`
+
+Defined in: [packages/core/src/errors.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L6)
+
+***
+
+### INVALID\_REQUEST
+
+> **INVALID\_REQUEST**: `"INVALID_REQUEST"`
+
+Defined in: [packages/core/src/errors.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L4)
+
+***
+
+### MESSAGE\_SEND\_FAILED
+
+> **MESSAGE\_SEND\_FAILED**: `"MESSAGE_SEND_FAILED"`
+
+Defined in: [packages/core/src/errors.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L13)
+
+***
+
+### NETWORK\_ERROR
+
+> **NETWORK\_ERROR**: `"NETWORK_ERROR"`
+
+Defined in: [packages/core/src/errors.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L9)
+
+***
+
+### NETWORK\_SERVICE\_UNAVAILABLE
+
+> **NETWORK\_SERVICE\_UNAVAILABLE**: `"NETWORK_SERVICE_UNAVAILABLE"`
+
+Defined in: [packages/core/src/errors.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L11)
+
+***
+
+### NETWORK\_TIMEOUT
+
+> **NETWORK\_TIMEOUT**: `"NETWORK_TIMEOUT"`
+
+Defined in: [packages/core/src/errors.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L10)
+
+***
+
+### PROVIDER\_ERROR
+
+> **PROVIDER\_ERROR**: `"PROVIDER_ERROR"`
+
+Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L12)
+
+***
+
+### RATE\_LIMIT\_EXCEEDED
+
+> **RATE\_LIMIT\_EXCEEDED**: `"RATE_LIMIT_EXCEEDED"`
+
+Defined in: [packages/core/src/errors.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L8)
+
+***
+
+### TEMPLATE\_NOT\_FOUND
+
+> **TEMPLATE\_NOT\_FOUND**: `"TEMPLATE_NOT_FOUND"`
+
+Defined in: [packages/core/src/errors.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L7)
+
+***
+
+### UNKNOWN\_ERROR
+
+> **UNKNOWN\_ERROR**: `"UNKNOWN_ERROR"`
+
+Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)

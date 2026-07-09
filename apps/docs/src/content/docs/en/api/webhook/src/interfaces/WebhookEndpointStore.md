@@ -1,0 +1,96 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "WebhookEndpointStore"
+---
+
+Defined in: [packages/webhook/src/runtime/types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L18)
+
+## Methods
+
+### add()
+
+> **add**(`endpoint`): `Promise`\<`void`\>
+
+Defined in: [packages/webhook/src/runtime/types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L19)
+
+#### Parameters
+
+##### endpoint
+
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### get()
+
+> **get**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+
+Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L22)
+
+#### Parameters
+
+##### endpointId
+
+`string`
+
+#### Returns
+
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+
+***
+
+### list()
+
+> **list**(): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+
+Defined in: [packages/webhook/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L23)
+
+#### Returns
+
+`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+
+***
+
+### remove()
+
+> **remove**(`endpointId`): `Promise`\<`void`\>
+
+Defined in: [packages/webhook/src/runtime/types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L21)
+
+#### Parameters
+
+##### endpointId
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### update()
+
+> **update**(`endpointId`, `endpoint`): `Promise`\<`void`\>
+
+Defined in: [packages/webhook/src/runtime/types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L20)
+
+#### Parameters
+
+##### endpointId
+
+`string`
+
+##### endpoint
+
+[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
+
+#### Returns
+
+`Promise`\<`void`\>

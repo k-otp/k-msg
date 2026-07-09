@@ -1,0 +1,363 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "IWINVProvider"
+---
+
+Defined in: [packages/provider/src/iwinv/provider.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L20)
+
+Interface for providers that support AlimTalk template management.
+
+## Extends
+
+- [`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
+
+## Implements
+
+- [`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/)
+
+## Constructors
+
+### Constructor
+
+> **new IWINVProvider**(`config`): `IWINVProvider`
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L85)
+
+#### Parameters
+
+##### config
+
+[`IWINVConfig`](/en/api/provider/src/iwinv/interfaces/iwinvconfig/)
+
+#### Returns
+
+`IWINVProvider`
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`constructor`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#constructor)
+
+## Properties
+
+### id
+
+> `readonly` **id**: `"iwinv"` = `"iwinv"`
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L67)
+
+Unique identifier for this provider instance.
+Used for routing and logging.
+
+#### Example
+
+```ts
+"solapi"
+```
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`id`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#id)
+
+***
+
+### name
+
+> `readonly` **name**: `"IWINV Messaging Provider"` = `"IWINV Messaging Provider"`
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L68)
+
+Human-readable name for display purposes.
+
+#### Example
+
+```ts
+"SOLAPI"
+```
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`name`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#name)
+
+***
+
+### supportedTypes
+
+> `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L69)
+
+Message types this provider supports.
+Messages of unsupported types will be rejected.
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`supportedTypes`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#supportedtypes)
+
+## Methods
+
+### createTemplate()
+
+> **createTemplate**(`input`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L24)
+
+Create a new template.
+
+#### Parameters
+
+##### input
+
+[`TemplateCreateInput`](/en/api/core/src/type-aliases/templatecreateinput/)
+
+##### \_ctx?
+
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`createTemplate`](/en/api/core/src/interfaces/templateprovider/#createtemplate)
+
+***
+
+### deleteTemplate()
+
+> **deleteTemplate**(`code`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L49)
+
+Delete a template by code.
+
+#### Parameters
+
+##### code
+
+`string`
+
+##### \_ctx?
+
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`deleteTemplate`](/en/api/core/src/interfaces/templateprovider/#deletetemplate)
+
+***
+
+### getBalance()
+
+> **getBalance**(`query?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L207)
+
+Query the remaining balance/points for the provider account.
+
+#### Parameters
+
+##### query?
+
+[`BalanceQuery`](/en/api/core/src/interfaces/balancequery/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`getBalance`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#getbalance)
+
+***
+
+### getDeliveryStatus()
+
+> **getDeliveryStatus**(`query`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L178)
+
+Query delivery status for a previously sent message.
+Optional capability - not all providers support this.
+
+#### Parameters
+
+##### query
+
+[`DeliveryStatusQuery`](/en/api/core/src/interfaces/deliverystatusquery/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`getDeliveryStatus`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#getdeliverystatus)
+
+***
+
+### getOnboardingSpec()
+
+> **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L73)
+
+Get the onboarding specification for this provider.
+Used by tooling to guide provider configuration.
+
+#### Returns
+
+[`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`getOnboardingSpec`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#getonboardingspec)
+
+***
+
+### getTemplate()
+
+> **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L60)
+
+Get a template by code.
+
+#### Parameters
+
+##### code
+
+`string`
+
+##### ctx?
+
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`getTemplate`](/en/api/core/src/interfaces/templateprovider/#gettemplate)
+
+***
+
+### healthCheck()
+
+> **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L110)
+
+Check if the provider is operational.
+Used for health monitoring and circuit breaker decisions.
+
+#### Returns
+
+`Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`healthCheck`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#healthcheck)
+
+***
+
+### listTemplates()
+
+> **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L72)
+
+List templates with optional filtering and pagination.
+
+#### Parameters
+
+##### params?
+
+###### limit?
+
+`number`
+
+###### page?
+
+`number`
+
+###### status?
+
+`string`
+
+##### ctx?
+
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`listTemplates`](/en/api/core/src/interfaces/templateprovider/#listtemplates)
+
+***
+
+### send()
+
+> **send**(`options`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.send.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L145)
+
+Send a message through this provider.
+
+#### Parameters
+
+##### options
+
+[`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Result with SendResult on success, KMsgError on failure.
+
+#### Inherited from
+
+[`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/).[`send`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/#send)
+
+***
+
+### updateTemplate()
+
+> **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/iwinv/provider.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.ts#L35)
+
+Update an existing template by code.
+
+#### Parameters
+
+##### code
+
+`string`
+
+##### patch
+
+[`TemplateUpdateInput`](/en/api/core/src/type-aliases/templateupdateinput/)
+
+##### ctx?
+
+[`TemplateContext`](/en/api/core/src/type-aliases/templatecontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`TemplateProvider`](/en/api/core/src/interfaces/templateprovider/).[`updateTemplate`](/en/api/core/src/interfaces/templateprovider/#updatetemplate)

@@ -8,19 +8,14 @@ const generators = [
   "scripts/docs/generate-cli-help.ts",
   "scripts/docs/sync-tracking-schema-docs.ts",
   "scripts/docs/generate-schema-docs.ts",
-  "scripts/docs/generate-static-pages.ts",
   "scripts/docs/generate-guides.ts",
-  "scripts/docs/export-hono-content.ts",
-  "scripts/docs/generate-api-extractor-docs.ts",
 ];
 
 const selectedGenerators = checkMode
   ? generators.filter(
       (script) =>
         script !== "scripts/docs/generate-cli-help.ts" &&
-        script !== "scripts/docs/generate-schema-docs.ts" &&
-        script !== "scripts/docs/export-hono-content.ts" &&
-        script !== "scripts/docs/generate-api-extractor-docs.ts",
+        script !== "scripts/docs/generate-schema-docs.ts",
     )
   : generators;
 

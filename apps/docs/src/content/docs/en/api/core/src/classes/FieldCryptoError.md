@@ -1,0 +1,540 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "FieldCryptoError"
+---
+
+Defined in: [packages/core/src/crypto/errors.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L32)
+
+## Extends
+
+- [`KMsgError`](/en/api/core/src/classes/kmsgerror/)
+
+## Constructors
+
+### Constructor
+
+> **new FieldCryptoError**(`kind`, `message`, `details?`, `metadata?`): `FieldCryptoError`
+
+Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L38)
+
+#### Parameters
+
+##### kind
+
+[`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
+
+##### message
+
+`string`
+
+##### details?
+
+`Record`\<`string`, `unknown`\>
+
+##### metadata?
+
+[`FieldCryptoErrorMetadata`](/en/api/core/src/interfaces/fieldcryptoerrormetadata/) = `{}`
+
+#### Returns
+
+`FieldCryptoError`
+
+#### Overrides
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`constructor`](/en/api/core/src/classes/kmsgerror/#constructor)
+
+## Properties
+
+### attempt?
+
+> `readonly` `optional` **attempt?**: `number`
+
+Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L304)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`attempt`](/en/api/core/src/classes/kmsgerror/#attempt)
+
+***
+
+### cause?
+
+> `optional` **cause?**: `unknown`
+
+Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+
+The cause of the error.
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`cause`](/en/api/core/src/classes/kmsgerror/#cause)
+
+***
+
+### causeChain?
+
+> `readonly` `optional` **causeChain?**: `unknown`[]
+
+Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L305)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`causeChain`](/en/api/core/src/classes/kmsgerror/#causechain)
+
+***
+
+### code
+
+> `readonly` **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
+
+Defined in: [packages/core/src/errors.ts:297](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L297)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`code`](/en/api/core/src/classes/kmsgerror/#code)
+
+***
+
+### details?
+
+> `readonly` `optional` **details?**: `Record`\<`string`, `unknown`\>
+
+Defined in: [packages/core/src/errors.ts:298](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L298)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`details`](/en/api/core/src/classes/kmsgerror/#details)
+
+***
+
+### failMode?
+
+> `readonly` `optional` **failMode?**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
+
+Defined in: [packages/core/src/crypto/errors.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L35)
+
+***
+
+### fieldPath?
+
+> `readonly` `optional` **fieldPath?**: `string`
+
+Defined in: [packages/core/src/crypto/errors.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L34)
+
+***
+
+### httpStatus?
+
+> `readonly` `optional` **httpStatus?**: `number`
+
+Defined in: [packages/core/src/errors.ts:301](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L301)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`httpStatus`](/en/api/core/src/classes/kmsgerror/#httpstatus)
+
+***
+
+### kind
+
+> `readonly` **kind**: [`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
+
+Defined in: [packages/core/src/crypto/errors.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L33)
+
+***
+
+### message
+
+> **message**: `string`
+
+Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib.es5.d.ts:1075
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`message`](/en/api/core/src/classes/kmsgerror/#message)
+
+***
+
+### name
+
+> **name**: `string`
+
+Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib.es5.d.ts:1074
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`name`](/en/api/core/src/classes/kmsgerror/#name)
+
+***
+
+### openFallback?
+
+> `readonly` `optional` **openFallback?**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
+
+Defined in: [packages/core/src/crypto/errors.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L36)
+
+***
+
+### providerErrorCode?
+
+> `readonly` `optional` **providerErrorCode?**: `string`
+
+Defined in: [packages/core/src/errors.ts:299](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L299)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`providerErrorCode`](/en/api/core/src/classes/kmsgerror/#providererrorcode)
+
+***
+
+### providerErrorText?
+
+> `readonly` `optional` **providerErrorText?**: `string`
+
+Defined in: [packages/core/src/errors.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L300)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`providerErrorText`](/en/api/core/src/classes/kmsgerror/#providererrortext)
+
+***
+
+### requestId?
+
+> `readonly` `optional` **requestId?**: `string`
+
+Defined in: [packages/core/src/errors.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L302)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`requestId`](/en/api/core/src/classes/kmsgerror/#requestid)
+
+***
+
+### retryAfterMs?
+
+> `readonly` `optional` **retryAfterMs?**: `number`
+
+Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L303)
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`retryAfterMs`](/en/api/core/src/classes/kmsgerror/#retryafterms)
+
+***
+
+### stack?
+
+> `optional` **stack?**: `string`
+
+Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib.es5.d.ts:1076
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`stack`](/en/api/core/src/classes/kmsgerror/#stack)
+
+***
+
+### stackTraceLimit
+
+> `static` **stackTraceLimit**: `number`
+
+Defined in: node\_modules/.bun/@types+node@26.0.1/node\_modules/@types/node/globals.d.ts:67
+
+The `Error.stackTraceLimit` property specifies the number of stack frames
+collected by a stack trace (whether generated by `new Error().stack` or
+`Error.captureStackTrace(obj)`).
+
+The default value is `10` but may be set to any valid JavaScript number. Changes
+will affect any stack trace captured _after_ the value has been changed.
+
+If set to a non-number value, or set to a negative number, stack traces will
+not capture any frames.
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`stackTraceLimit`](/en/api/core/src/classes/kmsgerror/#stacktracelimit)
+
+## Methods
+
+### getLocalizedMessage()
+
+> **getLocalizedMessage**(`locale?`): `string`
+
+Defined in: [packages/core/src/errors.ts:351](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L351)
+
+Returns a localized error message based on the provided locale.
+Falls back to Korean (default) if locale is not provided.
+Falls back to the original message if no localized message exists.
+
+#### Parameters
+
+##### locale?
+
+[`Locale`](/en/api/core/src/type-aliases/locale/) = `DEFAULT_LOCALE`
+
+#### Returns
+
+`string`
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`getLocalizedMessage`](/en/api/core/src/classes/kmsgerror/#getlocalizedmessage)
+
+***
+
+### toJSON()
+
+> **toJSON**(): `object`
+
+Defined in: [packages/core/src/crypto/errors.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/errors.ts#L53)
+
+#### Returns
+
+`object`
+
+##### attempt
+
+> **attempt**: `number` \| `undefined`
+
+##### causeChain
+
+> **causeChain**: `unknown`[] \| `undefined`
+
+##### code
+
+> **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
+
+##### details
+
+> **details**: `Record`\<`string`, `unknown`\> \| `undefined`
+
+##### failMode
+
+> **failMode**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/) \| `undefined`
+
+##### fieldPath
+
+> **fieldPath**: `string` \| `undefined`
+
+##### httpStatus
+
+> **httpStatus**: `number` \| `undefined`
+
+##### kind
+
+> **kind**: [`FieldCryptoErrorKind`](/en/api/core/src/type-aliases/fieldcryptoerrorkind/)
+
+##### message
+
+> **message**: `string`
+
+##### name
+
+> **name**: `string`
+
+##### openFallback
+
+> **openFallback**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/) \| `undefined`
+
+##### providerErrorCode
+
+> **providerErrorCode**: `string` \| `undefined`
+
+##### providerErrorText
+
+> **providerErrorText**: `string` \| `undefined`
+
+##### requestId
+
+> **requestId**: `string` \| `undefined`
+
+##### retryAfterMs
+
+> **retryAfterMs**: `number` \| `undefined`
+
+#### Overrides
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`toJSON`](/en/api/core/src/classes/kmsgerror/#tojson)
+
+***
+
+### captureStackTrace()
+
+#### Call Signature
+
+> `static` **captureStackTrace**(`targetObject`, `constructorOpt?`): `void`
+
+Defined in: node\_modules/.bun/@types+node@26.0.1/node\_modules/@types/node/globals.d.ts:51
+
+Creates a `.stack` property on `targetObject`, which when accessed returns
+a string representing the location in the code at which
+`Error.captureStackTrace()` was called.
+
+```js
+const myObject = {};
+Error.captureStackTrace(myObject);
+myObject.stack;  // Similar to `new Error().stack`
+```
+
+The first line of the trace will be prefixed with
+`${myObject.name}: ${myObject.message}`.
+
+The optional `constructorOpt` argument accepts a function. If given, all frames
+above `constructorOpt`, including `constructorOpt`, will be omitted from the
+generated stack trace.
+
+The `constructorOpt` argument is useful for hiding implementation
+details of error generation from the user. For instance:
+
+```js
+function a() {
+  b();
+}
+
+function b() {
+  c();
+}
+
+function c() {
+  // Create an error without stack trace to avoid calculating the stack trace twice.
+  const { stackTraceLimit } = Error;
+  Error.stackTraceLimit = 0;
+  const error = new Error();
+  Error.stackTraceLimit = stackTraceLimit;
+
+  // Capture the stack trace above function b
+  Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+  throw error;
+}
+
+a();
+```
+
+##### Parameters
+
+###### targetObject
+
+`object`
+
+###### constructorOpt?
+
+`Function`
+
+##### Returns
+
+`void`
+
+##### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/en/api/core/src/classes/kmsgerror/#capturestacktrace)
+
+#### Call Signature
+
+> `static` **captureStackTrace**(`targetObject`, `constructorOpt?`): `void`
+
+Defined in: node\_modules/.bun/bun-types@1.3.14/node\_modules/bun-types/globals.d.ts:1042
+
+Create .stack property on a target object
+
+##### Parameters
+
+###### targetObject
+
+`object`
+
+###### constructorOpt?
+
+`Function`
+
+##### Returns
+
+`void`
+
+##### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`captureStackTrace`](/en/api/core/src/classes/kmsgerror/#capturestacktrace)
+
+***
+
+### isError()
+
+#### Call Signature
+
+> `static` **isError**(`error`): `error is Error`
+
+Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib.esnext.error.d.ts:21
+
+Indicates whether the argument provided is a built-in Error instance or not.
+
+##### Parameters
+
+###### error
+
+`unknown`
+
+##### Returns
+
+`error is Error`
+
+##### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`isError`](/en/api/core/src/classes/kmsgerror/#iserror)
+
+#### Call Signature
+
+> `static` **isError**(`value`): `value is Error`
+
+Defined in: node\_modules/.bun/bun-types@1.3.14/node\_modules/bun-types/globals.d.ts:1037
+
+Check if a value is an instance of Error
+
+##### Parameters
+
+###### value
+
+`unknown`
+
+The value to check
+
+##### Returns
+
+`value is Error`
+
+True if the value is an instance of Error, false otherwise
+
+##### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`isError`](/en/api/core/src/classes/kmsgerror/#iserror)
+
+***
+
+### prepareStackTrace()
+
+> `static` **prepareStackTrace**(`err`, `stackTraces`): `any`
+
+Defined in: node\_modules/.bun/@types+node@26.0.1/node\_modules/@types/node/globals.d.ts:55
+
+#### Parameters
+
+##### err
+
+`Error`
+
+##### stackTraces
+
+`CallSite`[]
+
+#### Returns
+
+`any`
+
+#### See
+
+https://v8.dev/docs/stack-trace-api#customizing-stack-traces
+
+#### Inherited from
+
+[`KMsgError`](/en/api/core/src/classes/kmsgerror/).[`prepareStackTrace`](/en/api/core/src/classes/kmsgerror/#preparestacktrace)

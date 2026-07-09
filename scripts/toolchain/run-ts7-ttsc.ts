@@ -16,7 +16,7 @@ function hasFlag(name: string): boolean {
 function printHelp(): void {
   console.log(`Usage: bun run typecheck:ttsc:ts7 [options]
 
-Runs the isolated TypeScript 7 validation lane against package, CLI, and docs-hono tsconfigs.
+Runs the isolated TypeScript 7 validation lane against package and CLI tsconfigs.
 
 Options:
   --install-only   Prepare the cached runner and exit
@@ -60,7 +60,7 @@ try {
     `Running isolated ttsc lane with TypeScript ${toolchainVersions.typescript} and ttsc ${toolchainVersions.ttsc}`,
   );
   console.log(
-    "The plain-Markdown source workspace under apps/docs stays outside this lane, while the Hono docs runtime is included as a TS7 validation target.",
+    "The Astro/Starlight docs workspace stays on its local TypeScript 6 toolchain and is validated by docs:check.",
   );
 
   await ensureRunner({ force: forceInstall });
