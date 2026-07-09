@@ -10,7 +10,7 @@ import {
 } from "./ts7-runner";
 
 type BenchmarkRecord = {
-  category: "setup" | "validation" | "exploration";
+  category: "docs" | "setup" | "validation" | "exploration";
   command: string;
   notes: string;
   result: "pass" | "fail";
@@ -207,6 +207,41 @@ async function measureGraphDump(): Promise<BenchmarkRecord> {
   };
 }
 
+async function measureApiDocsGeneration(): Promise<BenchmarkRecord> {
+  const measurement = await measureCommand(
+    ["bun", "run", "scripts/docs/generate-api-extractor-docs.ts"],
+    {
+      command: "bun run scripts/docs/generate-api-extractor-docs.ts",
+    },
+  );
+
+  return {
+    category: "docs",
+    command: "bun run scripts/docs/generate-api-extractor-docs.ts",
+    notes:
+      "Build types plus API Extractor/API Documenter generation for docs-hono API content",
+    result: "pass",
+    seconds: measurement.seconds,
+    title: "API docs generation",
+  };
+}
+
+async function measureHonoDocsBuild(): Promise<BenchmarkRecord> {
+  const measurement = await measureCommand(["bun", "run", "docs-hono:build"], {
+    command: "bun run docs-hono:build",
+  });
+
+  return {
+    category: "docs",
+    command: "bun run docs-hono:build",
+    notes:
+      "End-to-end Hono docs build including neutral content export and API reference generation",
+    result: "pass",
+    seconds: measurement.seconds,
+    title: "Hono docs build",
+  };
+}
+
 function renderTable(
   title: string,
   rows: BenchmarkRecord[],
@@ -234,8 +269,9 @@ function renderReport(records: BenchmarkRecord[]): string {
   const validationRows = records.filter(
     (record) => record.category === "validation",
   );
+  const docsRows = records.filter((record) => record.category === "docs");
   const otherRows = records.filter(
-    (record) => record.category !== "validation",
+    (record) => record.category !== "validation" && record.category !== "docs",
   );
   const baselineSeconds =
     validationRows.find((record) => record.command === "bun run typecheck")
@@ -251,6 +287,8 @@ Generated on ${formatLocalTimestamp(new Date())} from the repository root with:
 
 ${renderTable("Validation Lanes", validationRows, baselineSeconds)}
 
+${renderTable("Docs Pipeline Costs", docsRows)}
+
 ${renderTable("Setup And Exploration Costs", otherRows)}
 
 ## Reading The Snapshot
@@ -258,6 +296,7 @@ ${renderTable("Setup And Exploration Costs", otherRows)}
 - \`Relative\` is only meant for the validation-lane comparison and uses \`bun run typecheck\` as the baseline.
 - The root lane includes the current package \`build:types\` flow plus CLI generation before \`tsc --noEmit\`.
 - The isolated TS7 lane is a pure \`--noEmit\` pass over selected package, CLI, and docs-hono tsconfigs.
+- The docs rows separate API reference generation cost from the full Hono static-site build cost.
 - The graph dump measures analysis startup cost for \`ttsc-graph\`, not a CI-quality replacement for typecheck.
 - Absolute numbers depend on machine state; the checked-in value is mainly useful as a repeatable reference point for this repository.
 `;
@@ -271,6 +310,8 @@ async function main(): Promise<void> {
     await measureRunnerInstall(),
     await measureRootTypecheck(),
     await measureTtscTypecheck(),
+    await measureApiDocsGeneration(),
+    await measureHonoDocsBuild(),
     await measureGraphDump(),
   ];
 
