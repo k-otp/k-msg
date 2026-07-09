@@ -42,7 +42,8 @@ export interface AnalyticsReport {
     start: Date;
     end: Date;
   };
-  filters: Record<string, unknown>;
+  // biome-ignore lint/suspicious/noExplicitAny: preserve the published report filter contract
+  filters: Record<string, any>;
   metrics: ReportMetric[];
   generatedAt: Date;
   format: "json" | "csv" | "pdf";
