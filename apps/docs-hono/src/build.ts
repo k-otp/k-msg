@@ -1,6 +1,8 @@
 import path from "node:path";
 import { toSSG } from "hono/bun";
-import app from "./app";
+
+process.env.NODE_ENV ??= "production";
+const { default: app } = await import("./app");
 
 const outputDir = path.join(import.meta.dir, "..", "dist");
 const result = await toSSG(app, {

@@ -1,4 +1,5 @@
-import app from "./app";
+process.env.NODE_ENV ??= "development";
+const { default: app } = await import("./app");
 
 const port = Number(process.env.PORT ?? 4322);
 

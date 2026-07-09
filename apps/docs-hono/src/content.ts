@@ -16,9 +16,12 @@ export type DocsPage = {
 };
 
 const repoRoot = path.resolve(import.meta.dir, "../../..");
+const docsAppRoot = path.join(repoRoot, "apps/docs");
 const docsContentRoot = path.join(repoRoot, "apps/docs/src/content/docs");
-const repoUrl = process.env.DOCS_REPO_URL ?? "https://github.com/k-otp/k-msg";
-const repoBranch = process.env.DOCS_REPO_BRANCH ?? "main";
+const repoUrl = (
+  process.env.DOCS_REPO_URL ?? "https://github.com/k-otp/k-msg"
+).replace(/\/+$/, "");
+const repoBranch = encodeURIComponent(process.env.DOCS_REPO_BRANCH ?? "main");
 
 function toPosix(value: string): string {
   return value.replaceAll(path.sep, "/");
@@ -47,7 +50,7 @@ function parseFrontmatter(markdown: string): {
   body: string;
   frontmatter: Frontmatter;
 } {
-  const match = markdown.match(/^---\n([\s\S]*?)\n---\n*/);
+  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n*/);
   if (!match) {
     return { body: markdown, frontmatter: {} };
   }
@@ -91,6 +94,19 @@ function extractDefaultImports(
 
 function stripTopLevelImports(markdown: string): string {
   return markdown.replace(/^import\s.+$/gm, "").trimStart();
+}
+
+function assertReadableImportPath(
+  resolvedPath: string,
+  importedSource: string,
+  filePath: string,
+): void {
+  const normalized = path.resolve(resolvedPath);
+  if (!normalized.startsWith(docsAppRoot)) {
+    throw new Error(
+      `Import "${importedSource}" in ${filePath} resolves outside the docs app root`,
+    );
+  }
 }
 
 function replaceLinkButtons(markdown: string): string {
@@ -144,6 +160,7 @@ async function preprocessMarkdown(
   for (const imported of imports) {
     if (imported.source.endsWith(".md")) {
       const resolvedPath = path.join(path.dirname(filePath), imported.source);
+      assertReadableImportPath(resolvedPath, imported.source, filePath);
       let importedMarkdown: string;
       try {
         importedMarkdown = await readFile(resolvedPath, "utf8");
@@ -160,6 +177,7 @@ async function preprocessMarkdown(
     if (imported.source.endsWith("?raw")) {
       const rawSource = imported.source.replace(/\?raw$/, "");
       const resolvedPath = path.join(path.dirname(filePath), rawSource);
+      assertReadableImportPath(resolvedPath, imported.source, filePath);
       let content: string;
       try {
         content = await readFile(resolvedPath, "utf8");
@@ -237,7 +255,7 @@ export async function loadDocsPages(): Promise<DocsPage[]> {
 }
 
 export function sourceEditUrl(sourcePath: string): string {
-  return `${repoUrl}/blob/${repoBranch}/${sourcePath}`;
+  return `${repoUrl}/blob/${repoBranch}/${encodeURI(sourcePath)}`;
 }
 
 export function renderPreviewBanner(sourcePath: string): string {
