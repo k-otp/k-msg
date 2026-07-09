@@ -19,8 +19,8 @@
     },
     {
       "matchManagers": ["npm"],
-      "matchFileNames": ["apps/docs/package.json"],
-      "groupName": "docs stack monthly"
+      "matchFileNames": ["apps/docs-hono/package.json"],
+      "groupName": "docs site monthly"
     },
     {
       "matchManagers": ["npm"],

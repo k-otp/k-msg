@@ -21,7 +21,6 @@ type PackageJson = {
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const docsDir = path.join(repoRoot, "apps/docs");
 const inventoryPath = path.join(docsDir, "api-sources.json");
-const typedocOutputPath = path.join(docsDir, "typedoc.entrypoints.json");
 const checkMode = process.argv.includes("--check");
 
 const targetPackages: PackageMeta[] = [
@@ -137,45 +136,26 @@ async function readOptionalFile(filePath: string): Promise<string> {
 async function main(): Promise<void> {
   const apiSources = await collectApiSources();
   const inventoryNext = `${JSON.stringify(apiSources, null, 2)}\n`;
-  const typedocNext = `${JSON.stringify(
-    [...new Set(apiSources.map((entry) => entry.docsRelativePath))].sort(),
-    null,
-    2,
-  )}\n`;
 
   const currentInventory = await readOptionalFile(inventoryPath);
-  const currentTypedoc = await readOptionalFile(typedocOutputPath);
 
   if (checkMode) {
-    let stale = false;
-
     if (currentInventory !== inventoryNext) {
       console.error(`api sources out of date: ${inventoryPath}`);
-      stale = true;
-    }
-    if (currentTypedoc !== typedocNext) {
-      console.error(`typedoc entrypoints out of date: ${typedocOutputPath}`);
-      stale = true;
-    }
-    if (stale) {
       process.exit(1);
     }
     console.log(`ok: ${inventoryPath}`);
-    console.log(`ok: ${typedocOutputPath}`);
     return;
   }
 
-  if (currentInventory === inventoryNext && currentTypedoc === typedocNext) {
+  if (currentInventory === inventoryNext) {
     console.log(`unchanged: ${inventoryPath}`);
-    console.log(`unchanged: ${typedocOutputPath}`);
     return;
   }
 
   await mkdir(path.dirname(inventoryPath), { recursive: true });
   await writeFile(inventoryPath, inventoryNext, "utf8");
-  await writeFile(typedocOutputPath, typedocNext, "utf8");
   console.log(`generated: ${inventoryPath}`);
-  console.log(`generated: ${typedocOutputPath}`);
 }
 
 await main();
