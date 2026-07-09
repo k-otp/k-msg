@@ -74,8 +74,10 @@ The isolated lane intentionally covers:
 - `packages/webhook`
 - `packages/k-msg`
 - `apps/cli`
+- `apps/docs-hono`
 
 It intentionally does not try to validate the docs stack under TypeScript 7 yet.
+The legacy `apps/docs` Astro/Starlight runtime remains outside the lane until it is retired, but the new Hono docs runtime is now part of the TS7 validation surface.
 
 ## What The Numbers Mean
 
