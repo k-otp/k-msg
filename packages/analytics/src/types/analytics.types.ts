@@ -42,7 +42,7 @@ export interface AnalyticsReport {
     start: Date;
     end: Date;
   };
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   metrics: ReportMetric[];
   generatedAt: Date;
   format: "json" | "csv" | "pdf";

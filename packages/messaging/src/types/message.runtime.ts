@@ -5,13 +5,15 @@ type VariableMapSchema = typeof import("./message.schema").VariableMapSchema;
 type RecipientSchema = typeof import("./message.schema").RecipientSchema;
 type SchedulingOptionsSchema =
   typeof import("./message.schema").SchedulingOptionsSchema;
-type SendingOptionsSchema = typeof import("./message.schema").SendingOptionsSchema;
+type SendingOptionsSchema =
+  typeof import("./message.schema").SendingOptionsSchema;
 type MessageRequestSchema =
   typeof import("./message.schema").MessageRequestSchema;
 type MessageErrorSchema = typeof import("./message.schema").MessageErrorSchema;
 type RecipientResultSchema =
   typeof import("./message.schema").RecipientResultSchema;
-type MessageResultSchema = typeof import("./message.schema").MessageResultSchema;
+type MessageResultSchema =
+  typeof import("./message.schema").MessageResultSchema;
 
 export interface BatchSendResult {
   total: number;
