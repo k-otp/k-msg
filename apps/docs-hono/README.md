@@ -11,13 +11,13 @@ Current purpose:
 Local commands:
 
 ```bash
-bun run --cwd apps/docs-hono dev
-bun run --cwd apps/docs-hono build
+bun run docs-hono:dev
+bun run docs-hono:build
 bun run --cwd apps/docs-hono typecheck
 ```
 
 Cloudflare Pages target settings for this app:
 
-- Root directory: `apps/docs-hono`
-- Build command: `bun install --frozen-lockfile && bun run build`
-- Build output directory: `dist`
+- Root directory: repository root
+- Build command: `bun install --frozen-lockfile && bun run docs-hono:build`
+- Build output directory: `apps/docs-hono/dist`
