@@ -220,7 +220,7 @@ function buildIndexPage(params: {
 - 패키지 선택: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
 - Provider 선택: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
 - 트러블슈팅: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
-- API 문서: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
+- API 문서: [${urlRoot}/api/](${urlRoot}/api/)
 - CLI 문서: [${urlRoot}/cli/](${urlRoot}/cli/)
 - 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)`
     : `- Overview: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
@@ -228,7 +228,7 @@ function buildIndexPage(params: {
 - Package Selection: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
 - Provider Selection: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
 - Troubleshooting: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
-- API docs: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
+- API docs: [${urlRoot}/api/](${urlRoot}/api/)
 - CLI docs: [${urlRoot}/cli/](${urlRoot}/cli/)
 - Code snippets: [${urlRoot}/snippets/](${urlRoot}/snippets/)`;
   const packageHeading = isKo ? "## 패키지 가이드" : "## Package Guides";
