@@ -9,13 +9,15 @@ const generators = [
   "scripts/docs/sync-tracking-schema-docs.ts",
   "scripts/docs/generate-schema-docs.ts",
   "scripts/docs/generate-guides.ts",
+  "scripts/docs/export-hono-content.ts",
 ];
 
 const selectedGenerators = checkMode
   ? generators.filter(
       (script) =>
         script !== "scripts/docs/generate-cli-help.ts" &&
-        script !== "scripts/docs/generate-schema-docs.ts",
+        script !== "scripts/docs/generate-schema-docs.ts" &&
+        script !== "scripts/docs/export-hono-content.ts",
     )
   : generators;
 

@@ -4,6 +4,7 @@ import { escapeHtml } from "./utils";
 
 type Frontmatter = {
   description?: string;
+  sourcePath?: string;
   title?: string;
 };
 
@@ -16,8 +17,7 @@ export type DocsPage = {
 };
 
 const repoRoot = path.resolve(import.meta.dir, "../../..");
-const docsAppRoot = path.join(repoRoot, "apps/docs");
-const docsContentRoot = path.join(repoRoot, "apps/docs/src/content/docs");
+const docsContentRoot = path.join(repoRoot, "apps/docs-hono/content/docs");
 const repoUrl = (
   process.env.DOCS_REPO_URL ?? "https://github.com/k-otp/k-msg"
 ).replace(/\/+$/, "");
@@ -72,132 +72,15 @@ function parseFrontmatter(markdown: string): {
     if (key === "description") {
       frontmatter.description = value;
     }
+    if (key === "sourcePath") {
+      frontmatter.sourcePath = value;
+    }
   }
 
   return {
     body: markdown.slice(match[0].length),
     frontmatter,
   };
-}
-
-function extractDefaultImports(
-  markdown: string,
-): Array<{ name: string; source: string }> {
-  const matches = markdown.matchAll(
-    /^import\s+([A-Za-z0-9_]+)\s+from\s+["']([^"']+)["'];?\s*$/gm,
-  );
-  return [...matches].map((match) => ({
-    name: match[1] ?? "",
-    source: match[2] ?? "",
-  }));
-}
-
-function stripTopLevelImports(markdown: string): string {
-  return markdown.replace(/^import\s.+$/gm, "").trimStart();
-}
-
-function assertReadableImportPath(
-  resolvedPath: string,
-  importedSource: string,
-  filePath: string,
-): void {
-  const normalized = path.resolve(resolvedPath);
-  if (!normalized.startsWith(docsAppRoot)) {
-    throw new Error(
-      `Import "${importedSource}" in ${filePath} resolves outside the docs app root`,
-    );
-  }
-}
-
-function replaceLinkButtons(markdown: string): string {
-  return markdown.replace(
-    /<LinkButton\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/LinkButton>/g,
-    (_, href: string, label: string) => `[${label.trim()}](${href})`,
-  );
-}
-
-function replaceRawCodeBlocks(
-  markdown: string,
-  rawImports: Map<string, { content: string; source: string }>,
-): string {
-  return markdown.replace(
-    /<Code\s+code=\{([A-Za-z0-9_]+)\}\s+lang="([^"]+)"\s*\/>/g,
-    (match, name: string, lang: string) => {
-      const rawImport = rawImports.get(name);
-      if (!rawImport) {
-        return match;
-      }
-
-      return `\n\`\`\`${lang}\n${rawImport.content.trimEnd()}\n\`\`\`\n`;
-    },
-  );
-}
-
-function replaceMarkdownImports(
-  markdown: string,
-  markdownImports: Map<string, string>,
-): string {
-  let next = markdown;
-
-  for (const [name, importedMarkdown] of markdownImports.entries()) {
-    const selfClosing = new RegExp(`<${name}\\s*/>`, "g");
-    const wrapped = new RegExp(`<${name}>[\\s\\S]*?</${name}>`, "g");
-    next = next.replace(selfClosing, importedMarkdown);
-    next = next.replace(wrapped, importedMarkdown);
-  }
-
-  return next;
-}
-
-async function preprocessMarkdown(
-  markdown: string,
-  filePath: string,
-): Promise<string> {
-  const imports = extractDefaultImports(markdown);
-  const markdownImports = new Map<string, string>();
-  const rawImports = new Map<string, { content: string; source: string }>();
-
-  for (const imported of imports) {
-    if (imported.source.endsWith(".md")) {
-      const resolvedPath = path.join(path.dirname(filePath), imported.source);
-      assertReadableImportPath(resolvedPath, imported.source, filePath);
-      let importedMarkdown: string;
-      try {
-        importedMarkdown = await readFile(resolvedPath, "utf8");
-      } catch (error) {
-        throw new Error(
-          `Failed to read markdown import "${imported.source}" referenced in ${filePath}: ${String(error)}`,
-        );
-      }
-      const { body } = parseFrontmatter(importedMarkdown);
-      markdownImports.set(imported.name, body.trim());
-      continue;
-    }
-
-    if (imported.source.endsWith("?raw")) {
-      const rawSource = imported.source.replace(/\?raw$/, "");
-      const resolvedPath = path.join(path.dirname(filePath), rawSource);
-      assertReadableImportPath(resolvedPath, imported.source, filePath);
-      let content: string;
-      try {
-        content = await readFile(resolvedPath, "utf8");
-      } catch (error) {
-        throw new Error(
-          `Failed to read raw import "${imported.source}" referenced in ${filePath}: ${String(error)}`,
-        );
-      }
-      rawImports.set(imported.name, {
-        content,
-        source: resolvedPath,
-      });
-    }
-  }
-
-  let next = stripTopLevelImports(markdown);
-  next = replaceLinkButtons(next);
-  next = replaceMarkdownImports(next, markdownImports);
-  next = replaceRawCodeBlocks(next, rawImports);
-  return next;
 }
 
 function routeFromFile(filePath: string): string {
@@ -235,17 +118,16 @@ export async function loadDocsPages(): Promise<DocsPage[]> {
 
   const pages = await Promise.all(
     files.sort().map(async (filePath) => {
-      const sourcePath = toPosix(path.relative(repoRoot, filePath));
+      const generatedPath = toPosix(path.relative(repoRoot, filePath));
       const rawMarkdown = await readFile(filePath, "utf8");
       const { body, frontmatter } = parseFrontmatter(rawMarkdown);
-      const processedBody = await preprocessMarkdown(body, filePath);
       const route = routeFromFile(filePath);
 
       return {
-        body: processedBody.trim(),
+        body: body.trim(),
         description: frontmatter.description,
         route,
-        sourcePath,
+        sourcePath: frontmatter.sourcePath ?? generatedPath,
         title: frontmatter.title ?? titleFromRoute(route),
       } satisfies DocsPage;
     }),
