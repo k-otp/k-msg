@@ -1,5 +1,7 @@
 ---
+npm/@k-msg/channel: patch
 npm/@k-msg/analytics: patch
+npm/@k-msg/messaging: patch
 npm/@k-msg/template: patch
 npm/@k-msg/webhook: patch
 ---

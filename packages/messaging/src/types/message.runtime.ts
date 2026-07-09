@@ -1,76 +1,31 @@
 import type { KMsgError, Result, RetryOptions, SendResult } from "@k-msg/core";
+import type * as zt from "zod/mini";
+
+type VariableMapSchema = typeof import("./message.schema").VariableMapSchema;
+type RecipientSchema = typeof import("./message.schema").RecipientSchema;
+type SchedulingOptionsSchema =
+  typeof import("./message.schema").SchedulingOptionsSchema;
+type SendingOptionsSchema = typeof import("./message.schema").SendingOptionsSchema;
+type MessageRequestSchema =
+  typeof import("./message.schema").MessageRequestSchema;
+type MessageErrorSchema = typeof import("./message.schema").MessageErrorSchema;
+type RecipientResultSchema =
+  typeof import("./message.schema").RecipientResultSchema;
+type MessageResultSchema = typeof import("./message.schema").MessageResultSchema;
 
 export interface BatchSendResult {
   total: number;
   results: Array<Result<SendResult, KMsgError>>;
 }
 
-export interface MessageRequest {
-  templateId: string;
-  recipients: Recipient[];
-  variables: VariableMap;
-  scheduling?: SchedulingOptions;
-  options?: SendingOptions;
-}
-
-export interface Recipient {
-  phoneNumber: string;
-  variables?: VariableMap;
-  metadata?: Record<string, unknown>;
-}
-
-export interface VariableMap {
-  [key: string]: string | number | Date;
-}
-
-export interface SchedulingOptions {
-  scheduledAt: Date;
-  timezone?: string;
-  retryCount?: number;
-}
-
-export interface SendingOptions {
-  priority?: "high" | "normal" | "low";
-  ttl?: number;
-  failover?: {
-    enabled: boolean;
-    fallbackChannel?: "sms" | "lms";
-    fallbackContent?: string;
-    fallbackTitle?: string;
-  };
-  deduplication?: {
-    enabled: boolean;
-    window: number;
-  };
-  tracking?: {
-    enabled: boolean;
-    webhookUrl?: string;
-  };
-}
-
-export interface MessageResult {
-  requestId: string;
-  results: RecipientResult[];
-  summary: {
-    total: number;
-    queued: number;
-    sent: number;
-    failed: number;
-  };
-  metadata: {
-    createdAt: Date;
-    provider: string;
-    templateId: string;
-  };
-}
-
-export interface RecipientResult {
-  phoneNumber: string;
-  messageId?: string;
-  status: MessageStatus;
-  error?: MessageError;
-  metadata?: Record<string, unknown>;
-}
+export type VariableMap = zt.output<VariableMapSchema>;
+export type Recipient = zt.input<RecipientSchema>;
+export type SchedulingOptions = zt.input<SchedulingOptionsSchema>;
+export type SendingOptions = zt.input<SendingOptionsSchema>;
+export type MessageRequest = zt.input<MessageRequestSchema>;
+export type MessageError = zt.output<MessageErrorSchema>;
+export type RecipientResult = zt.output<RecipientResultSchema>;
+export type MessageResult = zt.output<MessageResultSchema>;
 
 export enum MessageStatus {
   QUEUED = "QUEUED",
@@ -80,12 +35,6 @@ export enum MessageStatus {
   FAILED = "FAILED",
   CLICKED = "CLICKED",
   CANCELLED = "CANCELLED",
-}
-
-export interface MessageError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
 }
 
 export interface DeliveryReport {
