@@ -34,6 +34,7 @@
 - `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
+- `apps/docs/api-sources.json`
 - `apps/docs/typedoc.entrypoints.json`
 
 규칙:
@@ -47,7 +48,8 @@
 `bun run docs:generate`는 아래 순서로 실행됩니다.
 
 1. `scripts/docs/collect-entrypoints.ts`
-- 패키지 `exports`를 읽어 TypeDoc 엔트리포인트 자동 수집
+- 패키지 `exports`를 읽어 tool-neutral API source inventory를 만들고, 그 결과로 TypeDoc 엔트리포인트를 생성
+- 출력: `apps/docs/api-sources.json`
 - 출력: `apps/docs/typedoc.entrypoints.json`
 
 2. `scripts/docs/generate-cli-help.ts`
