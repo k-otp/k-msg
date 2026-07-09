@@ -23,10 +23,10 @@ Run from repository root:
 
 Manually maintained files:
 
-- `apps/docs/src/content/docs/cli.mdx`
-- `apps/docs/src/content/docs/en/cli.mdx`
-- `apps/docs/src/content/docs/snippets.mdx`
-- `apps/docs/src/content/docs/en/snippets.mdx`
+- `apps/docs/src/content/docs/cli.md`
+- `apps/docs/src/content/docs/en/cli.md`
+- `apps/docs/src/content/docs/snippets.md`
+- `apps/docs/src/content/docs/en/snippets.md`
 - `apps/docs/snippets/**` (code example source)
 
 Generated files:

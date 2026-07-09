@@ -77,7 +77,7 @@
     "docs:check:sitemap-lastmod": "bun run scripts/docs/check-sitemap-lastmod.ts",
     "docs:build": "bun run docs:prepare:git-history && bun run docs-hono:build",
     "docs:snippets:typecheck": "bun x tsc -p apps/docs/snippets/tsconfig.json --noEmit",
-    "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/run-generate.ts --check && bun run scripts/docs/check-en-guide-coverage.ts && bun run scripts/docs/generate-cli-help.ts && bun run scripts/docs/generate-schema-docs.ts && bun run docs:snippets:typecheck && bun run docs-hono:check && bun run docs:check:sitemap-lastmod",
+    "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/generate-cli-help.ts && bun run scripts/docs/generate-schema-docs.ts && bun run scripts/docs/run-generate.ts --check && bun run scripts/docs/check-en-guide-coverage.ts && bun run docs:snippets:typecheck && bun run docs-hono:check && bun run docs:check:sitemap-lastmod",
     "docs-hono:prepare": "bun run docs:generate",
     "docs-hono:build": "bun run docs-hono:prepare && bun run --cwd apps/docs-hono build",
     "docs-hono:check": "bun run docs-hono:typecheck && bun run docs-hono:build",

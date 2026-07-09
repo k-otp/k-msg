@@ -8,6 +8,7 @@ const generators = [
   "scripts/docs/generate-cli-help.ts",
   "scripts/docs/sync-tracking-schema-docs.ts",
   "scripts/docs/generate-schema-docs.ts",
+  "scripts/docs/generate-static-pages.ts",
   "scripts/docs/generate-guides.ts",
   "scripts/docs/export-hono-content.ts",
   "scripts/docs/generate-api-extractor-docs.ts",

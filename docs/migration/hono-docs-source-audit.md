@@ -7,31 +7,24 @@ This audit checks the current docs source tree for Astro/Starlight/MDX-specific 
 ## Summary
 
 - Total files scanned: 1374
-- Files compatible with plain Markdown rendering today: 1366
-- Files requiring migration work before Hono SSG can render them directly: 8
+- Files compatible with plain Markdown rendering today: 1374
+- Files requiring migration work before Hono SSG can render them directly: 0
 
 ## Blocking Construct Counts
 
 | Finding | Files |
 | --- | ---: |
-| Uses Astro-specific modules | 4 |
+| Uses Astro-specific modules | 0 |
 | Uses `.astro` component references | 0 |
-| Contains ESM imports/exports | 6 |
-| Contains JSX-style component tags | 8 |
-| Uses Starlight components or loaders | 4 |
+| Contains ESM imports/exports | 0 |
+| Contains JSX-style component tags | 0 |
+| Uses Starlight components or loaders | 0 |
 
 ## Files Requiring Rewrite
 
 | File | Findings |
 | --- | --- |
-| `apps/docs/src/content/docs/api/core/src/variables/Result.md` | Contains JSX-style component tags |
-| `apps/docs/src/content/docs/cli.mdx` | Contains JSX-style component tags, Contains ESM imports/exports that need rewrite |
-| `apps/docs/src/content/docs/en/api/core/src/variables/Result.md` | Contains JSX-style component tags |
-| `apps/docs/src/content/docs/en/cli.mdx` | Contains JSX-style component tags, Contains ESM imports/exports that need rewrite |
-| `apps/docs/src/content/docs/en/index.mdx` | Imports Astro-specific modules, Contains JSX-style component tags, Contains ESM imports/exports that need rewrite, Uses Starlight components or loaders |
-| `apps/docs/src/content/docs/en/snippets.mdx` | Imports Astro-specific modules, Contains JSX-style component tags, Contains ESM imports/exports that need rewrite, Uses Starlight components or loaders |
-| `apps/docs/src/content/docs/index.mdx` | Imports Astro-specific modules, Contains JSX-style component tags, Contains ESM imports/exports that need rewrite, Uses Starlight components or loaders |
-| `apps/docs/src/content/docs/snippets.mdx` | Imports Astro-specific modules, Contains JSX-style component tags, Contains ESM imports/exports that need rewrite, Uses Starlight components or loaders |
+| None | None |
 
 ## Plain Markdown-Compatible Files
 
@@ -76,11 +69,10 @@ This audit checks the current docs source tree for Astro/Starlight/MDX-specific 
 - `apps/docs/src/content/docs/api/analytics/src/interfaces/Recommendation.md`
 - `apps/docs/src/content/docs/api/analytics/src/interfaces/RecommendationConfig.md`
 
-- ...and 1326 more
+- ...and 1334 more
 
 ## Migration Interpretation
 
-- Files in the "rewrite" table need either Markdown normalization or custom rendering components before the Astro docs app can be retired.
-- Files in the compatible list can move first into the Hono pipeline with minimal risk.
-- The highest-value rewrite targets are the top-level landing pages and snippet pages because they currently depend on Starlight-only components.
+- The current docs source tree is plain-Markdown compatible for the Hono pipeline.
+- Remaining migration work is now about retiring legacy Astro/Starlight runtime files and duplicated build wiring, not rewriting page content.
 

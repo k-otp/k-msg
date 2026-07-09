@@ -3,9 +3,7 @@ title: k-msg Docs
 description: k-msg docs
 ---
 
-import { LinkButton } from "@astrojs/starlight/components";
-
-<LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">View on GitHub</LinkButton>
+<a href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">View on GitHub</a>
 
 - Overview: [/en/guides/overview/](/en/guides/overview/)
 - Getting Started: [/en/guides/getting-started/](/en/guides/getting-started/)
