@@ -1,7 +1,7 @@
 import MarkdownIt from "markdown-it";
 import type { DocsPage } from "./content";
 import { renderPreviewBanner, sourceEditUrl } from "./content";
-import { escapeHtml } from "./utils";
+import { escapeHtml, escapeScriptString } from "./utils";
 
 const md = new MarkdownIt({
   breaks: true,
@@ -10,24 +10,32 @@ const md = new MarkdownIt({
   typographer: true,
 });
 
+const analyticsEnabled = process.env.NODE_ENV === "production";
 const gaMeasurementId = process.env.GA_MEASUREMENT_ID ?? "G-2924TMM32H";
 const clarityProjectId = process.env.CLARITY_PROJECT_ID ?? "vlennjsv6z";
 
 function analyticsScripts(): string {
+  if (!analyticsEnabled) {
+    return "";
+  }
+
+  const safeGaMeasurementId = escapeScriptString(gaMeasurementId);
+  const safeClarityProjectId = escapeScriptString(clarityProjectId);
+
   return `
-    <script defer src="https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}"></script>
+    <script defer src="https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId)}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ dataLayer.push(arguments); }
       gtag('js', new Date());
-      gtag('config', '${gaMeasurementId}');
+      gtag('config', '${safeGaMeasurementId}');
     </script>
     <script>
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/" + i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "${clarityProjectId}");
+      })(window, document, "clarity", "script", "${safeClarityProjectId}");
     </script>
   `;
 }
@@ -223,7 +231,7 @@ export function renderPage(page: DocsPage): string {
         <aside class="meta">
           <p><strong>Source</strong></p>
           <p><code>${escapeHtml(page.sourcePath)}</code></p>
-          <p><a href="${escapeHtml(sourceEditUrl(page.sourcePath))}" target="_blank" rel="noreferrer">View on GitHub</a></p>
+          <p><a href="${escapeHtml(sourceEditUrl(page.sourcePath))}" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
         </aside>
         <article class="article">
           ${renderPreviewBanner(page.sourcePath)}
