@@ -26,52 +26,21 @@ export enum TemplateStatus {
   DISABLED = "DISABLED", // 비활성화
 }
 
-export interface TemplateVariable {
-  name: string; // 변수명 (#{name} 형식)
-  type: "string" | "number" | "date" | "custom";
-  required: boolean;
-  maxLength?: number;
-  format?: string; // 날짜 포맷 등
-  description?: string;
-  example?: string;
-}
+const TemplateUsageStatsSchema = z.object({
+  sent: z.number().check(z.minimum(0)),
+  delivered: z.number().check(z.minimum(0)),
+  failed: z.number().check(z.minimum(0)),
+});
 
-export interface TemplateButton {
-  type: "WL" | "AL" | "DS" | "BK" | "MD";
-  name: string;
-  linkMobile?: string;
-  linkPc?: string;
-  linkIos?: string;
-  linkAndroid?: string;
-  schemeIos?: string;
-  schemeAndroid?: string;
-}
+const TemplateMetadataSchema = z.object({
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  approvedAt: z.optional(z.date()),
+  rejectedAt: z.optional(z.date()),
+  rejectionReason: z.optional(z.string()),
+  usage: TemplateUsageStatsSchema,
+});
 
-export interface AlimTalkTemplate {
-  id: string;
-  code: string; // 프로바이더 템플릿 코드
-  name: string;
-  content: string; // #{변수} 포함 내용
-  variables?: TemplateVariable[]; // 변수 정의 (선택적)
-  buttons?: TemplateButton[]; // 버튼 정의
-  category: TemplateCategory; // 인증, 알림, 프로모션 등
-  status: TemplateStatus; // 승인, 검수중, 반려
-  provider: string; // 프로바이더 ID
-  metadata: {
-    createdAt: Date;
-    updatedAt: Date;
-    approvedAt?: Date;
-    rejectedAt?: Date;
-    rejectionReason?: string;
-    usage: {
-      sent: number;
-      delivered: number;
-      failed: number;
-    };
-  };
-}
-
-// Zod schemas
 export const TemplateVariableSchema = z.object({
   name: z.string().check(z.minLength(1)),
   type: z.enum(["string", "number", "date", "custom"]),
@@ -98,25 +67,19 @@ export const AlimTalkTemplateSchema = z.object({
   code: z.string(),
   name: z.string().check(z.minLength(1)),
   content: z.string().check(z.minLength(1)),
-  variables: z.array(TemplateVariableSchema),
+  variables: z.optional(z.array(TemplateVariableSchema)),
   buttons: z.optional(z.array(TemplateButtonSchema)),
   category: z.nativeEnum(TemplateCategory),
   status: z.nativeEnum(TemplateStatus),
   provider: z.string(),
-  metadata: z.object({
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    approvedAt: z.optional(z.date()),
-    rejectedAt: z.optional(z.date()),
-    rejectionReason: z.optional(z.string()),
-    usage: z.object({
-      sent: z.number().check(z.minimum(0)),
-      delivered: z.number().check(z.minimum(0)),
-      failed: z.number().check(z.minimum(0)),
-    }),
-  }),
+  metadata: TemplateMetadataSchema,
 });
 
-export type AlimTalkTemplateType = z.infer<typeof AlimTalkTemplateSchema>;
-export type TemplateVariableType = z.infer<typeof TemplateVariableSchema>;
-export type TemplateButtonType = z.infer<typeof TemplateButtonSchema>;
+export type TemplateVariable = z.infer<typeof TemplateVariableSchema>;
+export type TemplateButton = z.infer<typeof TemplateButtonSchema>;
+export type AlimTalkTemplate = z.infer<typeof AlimTalkTemplateSchema>;
+
+// Legacy alias exports kept stable while the schemas become the source of truth.
+export type AlimTalkTemplateType = AlimTalkTemplate;
+export type TemplateVariableType = TemplateVariable;
+export type TemplateButtonType = TemplateButton;
