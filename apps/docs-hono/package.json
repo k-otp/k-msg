@@ -1,0 +1,21 @@
+{
+  "name": "@k-msg/docs-hono",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "bun run src/build.ts",
+    "dev": "bun run src/dev.ts",
+    "preview": "bunx serve dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "catalog:",
+    "markdown-it": "^14.1.1"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

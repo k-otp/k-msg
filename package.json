@@ -77,6 +77,10 @@
     "docs:check:sitemap-lastmod": "bun run scripts/docs/check-sitemap-lastmod.ts",
     "docs:build": "bun run docs:prepare:git-history && bun run docs:generate && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap",
     "docs:check": "bun run --cwd apps/cli schema:check && bun run scripts/docs/run-generate.ts --check && bun run scripts/docs/check-en-guide-coverage.ts && bun run scripts/docs/generate-cli-help.ts && bun run scripts/docs/generate-schema-docs.ts && bun run --cwd apps/docs snippets:typecheck && bun run --cwd apps/docs check && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap && bun run docs:check:sitemap-lastmod",
+    "docs-hono:build": "bun run --cwd apps/docs-hono build",
+    "docs-hono:dev": "bun run --cwd apps/docs-hono dev",
+    "docs-hono:preview": "bun run --cwd apps/docs-hono preview",
+    "docs-hono:typecheck": "bun run --cwd apps/docs-hono typecheck",
     "docs:version:snapshot": "bun run scripts/docs/version-snapshot.ts"
   },
   "peerDependencies": {
