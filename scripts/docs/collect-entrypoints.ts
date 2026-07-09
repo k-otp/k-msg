@@ -6,13 +6,22 @@ type PackageMeta = {
   name: string;
 };
 
+type ApiSourceEntry = {
+  docsRelativePath: string;
+  exportKey: string;
+  packageDir: string;
+  packageName: string;
+  repoRelativePath: string;
+};
+
 type PackageJson = {
   exports?: Record<string, unknown> | string;
 };
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const docsDir = path.join(repoRoot, "apps/docs");
-const outputPath = path.join(docsDir, "typedoc.entrypoints.json");
+const inventoryPath = path.join(docsDir, "api-sources.json");
+const typedocOutputPath = path.join(docsDir, "typedoc.entrypoints.json");
 const checkMode = process.argv.includes("--check");
 
 const targetPackages: PackageMeta[] = [
@@ -65,8 +74,8 @@ function pickExportPath(value: unknown): string | null {
   return null;
 }
 
-async function collectEntryPoints(): Promise<string[]> {
-  const entries = new Set<string>();
+async function collectApiSources(): Promise<ApiSourceEntry[]> {
+  const entries = new Map<string, ApiSourceEntry>();
 
   for (const pkg of targetPackages) {
     const packageJsonPath = path.join(repoRoot, pkg.dir, "package.json");
@@ -82,7 +91,7 @@ async function collectEntryPoints(): Promise<string[]> {
         ? [[".", packageJson.exports] as const]
         : Object.entries(packageJson.exports);
 
-    for (const [, exportValue] of exportEntries) {
+    for (const [exportKey, exportValue] of exportEntries) {
       const selectedPath = pickExportPath(exportValue);
       if (!selectedPath) {
         continue;
@@ -93,43 +102,80 @@ async function collectEntryPoints(): Promise<string[]> {
       const relativeToDocs = path
         .relative(docsDir, absoluteTsPath)
         .replaceAll(path.sep, "/");
+      const docsRelativePath = relativeToDocs.startsWith(".")
+        ? relativeToDocs
+        : `./${relativeToDocs}`;
+      const repoRelativePath = path
+        .relative(repoRoot, absoluteTsPath)
+        .replaceAll(path.sep, "/");
 
-      entries.add(
-        relativeToDocs.startsWith(".") ? relativeToDocs : `./${relativeToDocs}`,
-      );
+      entries.set(`${pkg.name}:${exportKey}`, {
+        docsRelativePath,
+        exportKey,
+        packageDir: pkg.dir,
+        packageName: pkg.name,
+        repoRelativePath,
+      });
     }
   }
 
-  return Array.from(entries).sort();
+  return [...entries.values()].sort((a, b) =>
+    `${a.packageName}:${a.exportKey}`.localeCompare(
+      `${b.packageName}:${b.exportKey}`,
+    ),
+  );
+}
+
+async function readOptionalFile(filePath: string): Promise<string> {
+  try {
+    return await readFile(filePath, "utf8");
+  } catch {
+    return "";
+  }
 }
 
 async function main(): Promise<void> {
-  const next = `${JSON.stringify(await collectEntryPoints(), null, 2)}\n`;
+  const apiSources = await collectApiSources();
+  const inventoryNext = `${JSON.stringify(apiSources, null, 2)}\n`;
+  const typedocNext = `${JSON.stringify(
+    [...new Set(apiSources.map((entry) => entry.docsRelativePath))].sort(),
+    null,
+    2,
+  )}\n`;
 
-  let current = "";
-  try {
-    current = await readFile(outputPath, "utf8");
-  } catch {
-    current = "";
-  }
+  const currentInventory = await readOptionalFile(inventoryPath);
+  const currentTypedoc = await readOptionalFile(typedocOutputPath);
 
   if (checkMode) {
-    if (current !== next) {
-      console.error(`typedoc entrypoints out of date: ${outputPath}`);
+    let stale = false;
+
+    if (currentInventory !== inventoryNext) {
+      console.error(`api sources out of date: ${inventoryPath}`);
+      stale = true;
+    }
+    if (currentTypedoc !== typedocNext) {
+      console.error(`typedoc entrypoints out of date: ${typedocOutputPath}`);
+      stale = true;
+    }
+    if (stale) {
       process.exit(1);
     }
-    console.log(`ok: ${outputPath}`);
+    console.log(`ok: ${inventoryPath}`);
+    console.log(`ok: ${typedocOutputPath}`);
     return;
   }
 
-  if (current === next) {
-    console.log(`unchanged: ${outputPath}`);
+  if (currentInventory === inventoryNext && currentTypedoc === typedocNext) {
+    console.log(`unchanged: ${inventoryPath}`);
+    console.log(`unchanged: ${typedocOutputPath}`);
     return;
   }
 
-  await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, next, "utf8");
-  console.log(`generated: ${outputPath}`);
+  await mkdir(path.dirname(inventoryPath), { recursive: true });
+  await writeFile(inventoryPath, inventoryNext, "utf8");
+  await writeFile(typedocOutputPath, typedocNext, "utf8");
+  console.log(`generated: ${inventoryPath}`);
+  console.log(`generated: ${typedocOutputPath}`);
 }
 
 await main();

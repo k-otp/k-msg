@@ -1,0 +1,219 @@
+[
+  {
+    "docsRelativePath": "../../packages/analytics/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/analytics",
+    "packageName": "@k-msg/analytics",
+    "repoRelativePath": "packages/analytics/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/channel/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/channel",
+    "packageName": "@k-msg/channel",
+    "repoRelativePath": "packages/channel/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/channel/src/toolkit/index.ts",
+    "exportKey": "./toolkit",
+    "packageDir": "packages/channel",
+    "packageName": "@k-msg/channel",
+    "repoRelativePath": "packages/channel/src/toolkit/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/core/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/core",
+    "packageName": "@k-msg/core",
+    "repoRelativePath": "packages/core/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/adapters/bun/index.ts",
+    "exportKey": "./adapters/bun",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/adapters/bun/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/adapters/cloudflare/index.ts",
+    "exportKey": "./adapters/cloudflare",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/adapters/cloudflare/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/adapters/node/index.ts",
+    "exportKey": "./adapters/node",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/adapters/node/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/queue/index.ts",
+    "exportKey": "./queue",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/queue/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/sender/index.ts",
+    "exportKey": "./sender",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/sender/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/messaging/src/tracking/index.ts",
+    "exportKey": "./tracking",
+    "packageDir": "packages/messaging",
+    "packageName": "@k-msg/messaging",
+    "repoRelativePath": "packages/messaging/src/tracking/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/aligo/index.ts",
+    "exportKey": "./aligo",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/aligo/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/aligo/send.ts",
+    "exportKey": "./aligo/send",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/aligo/send.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/aligo/template.ts",
+    "exportKey": "./aligo/template",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/aligo/template.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/iwinv/index.ts",
+    "exportKey": "./iwinv",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/iwinv/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/iwinv/send.ts",
+    "exportKey": "./iwinv/send",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/iwinv/send.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/iwinv/template.ts",
+    "exportKey": "./iwinv/template",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/iwinv/template.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/provider/src/solapi/index.ts",
+    "exportKey": "./solapi",
+    "packageDir": "packages/provider",
+    "packageName": "@k-msg/provider",
+    "repoRelativePath": "packages/provider/src/solapi/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/template/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/template",
+    "packageName": "@k-msg/template",
+    "repoRelativePath": "packages/template/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/template/src/lifecycle/index.ts",
+    "exportKey": "./lifecycle",
+    "packageDir": "packages/template",
+    "packageName": "@k-msg/template",
+    "repoRelativePath": "packages/template/src/lifecycle/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/template/src/send/index.ts",
+    "exportKey": "./send",
+    "packageDir": "packages/template",
+    "packageName": "@k-msg/template",
+    "repoRelativePath": "packages/template/src/send/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/template/src/toolkit/index.ts",
+    "exportKey": "./toolkit",
+    "packageDir": "packages/template",
+    "packageName": "@k-msg/template",
+    "repoRelativePath": "packages/template/src/toolkit/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/webhook/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/webhook",
+    "packageName": "@k-msg/webhook",
+    "repoRelativePath": "packages/webhook/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/webhook/src/adapters/cloudflare/index.ts",
+    "exportKey": "./adapters/cloudflare",
+    "packageDir": "packages/webhook",
+    "packageName": "@k-msg/webhook",
+    "repoRelativePath": "packages/webhook/src/adapters/cloudflare/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/webhook/src/toolkit/index.ts",
+    "exportKey": "./toolkit",
+    "packageDir": "packages/webhook",
+    "packageName": "@k-msg/webhook",
+    "repoRelativePath": "packages/webhook/src/toolkit/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/k-msg/src/index.ts",
+    "exportKey": ".",
+    "packageDir": "packages/k-msg",
+    "packageName": "k-msg",
+    "repoRelativePath": "packages/k-msg/src/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/k-msg/src/adapters/bun/index.ts",
+    "exportKey": "./adapters/bun",
+    "packageDir": "packages/k-msg",
+    "packageName": "k-msg",
+    "repoRelativePath": "packages/k-msg/src/adapters/bun/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/k-msg/src/adapters/cloudflare/index.ts",
+    "exportKey": "./adapters/cloudflare",
+    "packageDir": "packages/k-msg",
+    "packageName": "k-msg",
+    "repoRelativePath": "packages/k-msg/src/adapters/cloudflare/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/k-msg/src/adapters/node/index.ts",
+    "exportKey": "./adapters/node",
+    "packageDir": "packages/k-msg",
+    "packageName": "k-msg",
+    "repoRelativePath": "packages/k-msg/src/adapters/node/index.ts"
+  },
+  {
+    "docsRelativePath": "../../packages/k-msg/src/core/index.ts",
+    "exportKey": "./core",
+    "packageDir": "packages/k-msg",
+    "packageName": "k-msg",
+    "repoRelativePath": "packages/k-msg/src/core/index.ts"
+  }
+]

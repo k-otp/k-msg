@@ -36,6 +36,7 @@ Generated files:
 - `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
+- `apps/docs/api-sources.json`
 - `apps/docs/typedoc.entrypoints.json`
 
 Rules:
@@ -49,7 +50,8 @@ Rules:
 `bun run docs:generate` runs the following in order:
 
 1. `scripts/docs/collect-entrypoints.ts`
-- Reads package `exports` and builds TypeDoc entrypoints
+- Reads package `exports`, writes a tool-neutral API source inventory, then derives TypeDoc entrypoints
+- Output: `apps/docs/api-sources.json`
 - Output: `apps/docs/typedoc.entrypoints.json`
 
 2. `scripts/docs/generate-cli-help.ts`
