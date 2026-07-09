@@ -52,6 +52,7 @@ function relativePath(filePath: string): string {
 function stripCodeFences(markdown: string): string {
   let stripped = markdown.replace(/```[\s\S]*?```/g, "");
   stripped = stripped.replace(/~~~[\s\S]*?~~~/g, "");
+  stripped = stripped.replace(/`[^`\n]+`/g, "");
   return stripped;
 }
 
@@ -83,7 +84,7 @@ function detectFindings(markdown: string): AuditFinding[] {
     findings.add("jsx-tag");
   }
 
-  if (/<[A-Z][A-Za-z0-9]*([\s/>]|\/>)/.test(proseOnly)) {
+  if (/(?<!\\)<[A-Z][A-Za-z0-9]*[\s/>]/.test(proseOnly)) {
     findings.add("jsx-tag");
   }
 
@@ -120,6 +121,21 @@ function renderFindingList(findings: AuditFinding[]): string {
   return findings.map((finding) => findingLabels[finding]).join(", ");
 }
 
+function getMigrationInterpretation(incompatibleCount: number): string {
+  if (incompatibleCount === 0) {
+    return `- The current docs source tree is plain-Markdown compatible for the Hono pipeline.
+- Remaining migration work is now about retiring legacy Astro/Starlight runtime files and duplicated build wiring, not rewriting page content.`;
+  }
+
+  if (incompatibleCount <= 5) {
+    return `- Remaining rewrite work is narrowly concentrated in ${incompatibleCount} file(s), so the content migration is nearly complete.
+- The next step is to either normalize those specific files or remove the legacy generation path that still produces them.`;
+  }
+
+  return `- Files in the "rewrite" table need either Markdown normalization or custom rendering components before the Astro docs app can be fully retired.
+- Files in the compatible list can move first into the Hono pipeline with minimal risk.`;
+}
+
 function renderReport(audits: FileAudit[]): string {
   const { compatible, incompatible, totals } = summarize(audits);
 
@@ -135,6 +151,9 @@ function renderReport(audits: FileAudit[]): string {
     .join("\n");
 
   const remainingCompatibleCount = Math.max(compatible.length - 40, 0);
+  const migrationInterpretation = getMigrationInterpretation(
+    incompatible.length,
+  );
 
   return `# Hono Docs Source Audit
 
@@ -171,9 +190,7 @@ ${remainingCompatibleCount > 0 ? `\n- ...and ${remainingCompatibleCount} more` :
 
 ## Migration Interpretation
 
-- Files in the "rewrite" table need either Markdown normalization or custom rendering components before the Astro docs app can be retired.
-- Files in the compatible list can move first into the Hono pipeline with minimal risk.
-- The highest-value rewrite targets are the top-level landing pages and snippet pages because they currently depend on Starlight-only components.
+${migrationInterpretation}
 `;
 }
 

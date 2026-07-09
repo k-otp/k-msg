@@ -214,6 +214,7 @@ function buildIndexPage(params: {
 
   const title = isKo ? "k-msg 문서" : "k-msg Docs";
   const description = isKo ? "k-msg 문서" : "k-msg docs";
+  const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
   const navItems = isKo
     ? `- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
 - 시작하기: [${urlRoot}/guides/getting-started/](${urlRoot}/guides/getting-started/)
@@ -243,15 +244,12 @@ function buildIndexPage(params: {
 - [Package Selection](${urlRoot}/guides/package-selection/): choose the smallest package set before wiring your app.
 - [Provider Selection](${urlRoot}/guides/provider-selection/): compare IWINV, SOLAPI, and Aligo by use case.
 - [Use Cases](${urlRoot}/guides/use-cases/): jump straight to OTP, order notification, and marketing flows.`;
-  const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
   const content = `---
 title: ${title}
 description: ${description}
 ---
 
-import { LinkButton } from "@astrojs/starlight/components";
-
-<LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</LinkButton>
+<a href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</a>
 
 ${navItems}
 
@@ -269,7 +267,7 @@ ${exampleLinks}
 `;
 
   return {
-    path: path.join(docsFsRoot(params.locale), "index.mdx"),
+    path: path.join(docsFsRoot(params.locale), "index.md"),
     content,
   };
 }

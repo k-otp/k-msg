@@ -3,9 +3,7 @@ title: k-msg 문서
 description: k-msg 문서
 ---
 
-import { LinkButton } from "@astrojs/starlight/components";
-
-<LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">GitHub 저장소 보기</LinkButton>
+<a href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">GitHub 저장소 보기</a>
 
 - 개요: [/guides/overview/](/guides/overview/)
 - 시작하기: [/guides/getting-started/](/guides/getting-started/)

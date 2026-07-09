@@ -21,10 +21,10 @@
 
 수동 작성 대상:
 
-- `apps/docs/src/content/docs/cli.mdx`
-- `apps/docs/src/content/docs/en/cli.mdx`
-- `apps/docs/src/content/docs/snippets.mdx`
-- `apps/docs/src/content/docs/en/snippets.mdx`
+- `apps/docs/src/content/docs/cli.md`
+- `apps/docs/src/content/docs/en/cli.md`
+- `apps/docs/src/content/docs/snippets.md`
+- `apps/docs/src/content/docs/en/snippets.md`
 - `apps/docs/snippets/**` (코드 예제 원본)
 
 자동 생성 대상:
