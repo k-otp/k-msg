@@ -1,14 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { flattenGuideIds } from "../../apps/docs-hono/src/navigation";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const docsRoot = path.join(repoRoot, "apps/docs/src/content/docs");
 const englishDocsRoot = path.join(docsRoot, "en");
-const navigationModulePath = path.join(
-  repoRoot,
-  "apps/docs-hono/src/navigation.ts",
-);
+const astroConfigPath = path.join(repoRoot, "apps/docs/astro.config.mjs");
 
 type MissingReference = {
   ref: string;
@@ -85,6 +81,17 @@ function extractEnglishGuideHrefs(markdown: string): string[] {
   return [...hrefs];
 }
 
+function extractSidebarGuideIds(source: string): string[] {
+  const guideIds = new Set<string>();
+
+  for (const match of source.matchAll(/["'](guides\/[^"']+)["']/g)) {
+    const value = match[1];
+    if (value) guideIds.add(normalizeSlug(value));
+  }
+
+  return [...guideIds];
+}
+
 function formatMissing(title: string, items: MissingReference[]): string {
   const lines = items.map(
     ({ ref, source }) =>
@@ -99,13 +106,11 @@ const englishSlugs = new Set(
 );
 
 const missingSidebarRefs: MissingReference[] = [];
+const astroConfig = await readFile(astroConfigPath, "utf8");
 
-for (const guideId of flattenGuideIds()) {
+for (const guideId of extractSidebarGuideIds(astroConfig)) {
   if (!englishSlugs.has(guideId)) {
-    missingSidebarRefs.push({
-      ref: guideId,
-      source: navigationModulePath,
-    });
+    missingSidebarRefs.push({ ref: guideId, source: astroConfigPath });
   }
 }
 

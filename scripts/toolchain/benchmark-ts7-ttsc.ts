@@ -207,38 +207,33 @@ async function measureGraphDump(): Promise<BenchmarkRecord> {
   };
 }
 
-async function measureApiDocsGeneration(): Promise<BenchmarkRecord> {
-  const measurement = await measureCommand(
-    ["bun", "run", "scripts/docs/generate-api-extractor-docs.ts"],
-    {
-      command: "bun run scripts/docs/generate-api-extractor-docs.ts",
-    },
-  );
-
-  return {
-    category: "docs",
-    command: "bun run scripts/docs/generate-api-extractor-docs.ts",
-    notes:
-      "Build types plus API Extractor/API Documenter generation for docs-hono API content",
-    result: "pass",
-    seconds: measurement.seconds,
-    title: "API docs generation",
-  };
-}
-
-async function measureHonoDocsBuild(): Promise<BenchmarkRecord> {
-  const measurement = await measureCommand(["bun", "run", "docs-hono:build"], {
-    command: "bun run docs-hono:build",
+async function measureDocsGeneration(): Promise<BenchmarkRecord> {
+  const measurement = await measureCommand(["bun", "run", "docs:generate"], {
+    command: "bun run docs:generate",
   });
 
   return {
     category: "docs",
-    command: "bun run docs-hono:build",
-    notes:
-      "End-to-end Hono docs build including neutral content export and API reference generation",
+    command: "bun run docs:generate",
+    notes: "Generated CLI, schema, guide, and TypeDoc entrypoint inputs",
     result: "pass",
     seconds: measurement.seconds,
-    title: "Hono docs build",
+    title: "Docs source generation",
+  };
+}
+
+async function measureStarlightDocsBuild(): Promise<BenchmarkRecord> {
+  const measurement = await measureCommand(["bun", "run", "docs:build"], {
+    command: "bun run docs:build",
+  });
+
+  return {
+    category: "docs",
+    command: "bun run docs:build",
+    notes: "End-to-end Astro/Starlight build including TypeDoc API pages",
+    result: "pass",
+    seconds: measurement.seconds,
+    title: "Starlight docs build",
   };
 }
 
@@ -295,8 +290,8 @@ ${renderTable("Setup And Exploration Costs", otherRows)}
 
 - \`Relative\` is only meant for the validation-lane comparison and uses \`bun run typecheck\` as the baseline.
 - The root lane now uses the default TS7 compiler and includes the current package \`build:types\` flow plus CLI generation before \`tsc --noEmit\`.
-- The isolated TS7 lane remains a pure \`--noEmit\` pass over selected package, CLI, and docs-hono tsconfigs.
-- The docs rows separate API reference generation cost from the full Hono static-site build cost.
+- The isolated TS7 lane remains a pure \`--noEmit\` pass over selected package and CLI tsconfigs.
+- The docs rows separate generated source preparation from the full Astro/Starlight and TypeDoc build cost.
 - The graph dump measures analysis startup cost for \`ttsc-graph\`, not a CI-quality replacement for typecheck.
 - Absolute numbers depend on machine state; the checked-in value is mainly useful as a repeatable reference point for this repository.
 `;
@@ -310,8 +305,8 @@ async function main(): Promise<void> {
     await measureRunnerInstall(),
     await measureRootTypecheck(),
     await measureTtscTypecheck(),
-    await measureApiDocsGeneration(),
-    await measureHonoDocsBuild(),
+    await measureDocsGeneration(),
+    await measureStarlightDocsBuild(),
     await measureGraphDump(),
   ];
 

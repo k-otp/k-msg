@@ -214,14 +214,13 @@ function buildIndexPage(params: {
 
   const title = isKo ? "k-msg 문서" : "k-msg Docs";
   const description = isKo ? "k-msg 문서" : "k-msg docs";
-  const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
   const navItems = isKo
     ? `- 개요: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
 - 시작하기: [${urlRoot}/guides/getting-started/](${urlRoot}/guides/getting-started/)
 - 패키지 선택: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
 - Provider 선택: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
 - 트러블슈팅: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
-- API 문서: [${urlRoot}/api/](${urlRoot}/api/)
+- API 문서: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
 - CLI 문서: [${urlRoot}/cli/](${urlRoot}/cli/)
 - 코드 스니펫: [${urlRoot}/snippets/](${urlRoot}/snippets/)`
     : `- Overview: [${urlRoot}/guides/overview/](${urlRoot}/guides/overview/)
@@ -229,7 +228,7 @@ function buildIndexPage(params: {
 - Package Selection: [${urlRoot}/guides/package-selection/](${urlRoot}/guides/package-selection/)
 - Provider Selection: [${urlRoot}/guides/provider-selection/](${urlRoot}/guides/provider-selection/)
 - Troubleshooting: [${urlRoot}/guides/troubleshooting/](${urlRoot}/guides/troubleshooting/)
-- API docs: [${urlRoot}/api/](${urlRoot}/api/)
+- API docs: [${urlRoot}/api/readme/](${urlRoot}/api/readme/)
 - CLI docs: [${urlRoot}/cli/](${urlRoot}/cli/)
 - Code snippets: [${urlRoot}/snippets/](${urlRoot}/snippets/)`;
   const packageHeading = isKo ? "## 패키지 가이드" : "## Package Guides";
@@ -244,12 +243,15 @@ function buildIndexPage(params: {
 - [Package Selection](${urlRoot}/guides/package-selection/): choose the smallest package set before wiring your app.
 - [Provider Selection](${urlRoot}/guides/provider-selection/): compare IWINV, SOLAPI, and Aligo by use case.
 - [Use Cases](${urlRoot}/guides/use-cases/): jump straight to OTP, order notification, and marketing flows.`;
+  const githubLabel = isKo ? "GitHub 저장소 보기" : "View on GitHub";
   const content = `---
 title: ${title}
 description: ${description}
 ---
 
-<a href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</a>
+import { LinkButton } from "@astrojs/starlight/components";
+
+<LinkButton href="https://github.com/k-otp/k-msg" target="_blank" rel="noopener noreferrer">${githubLabel}</LinkButton>
 
 ${navItems}
 
@@ -267,7 +269,7 @@ ${exampleLinks}
 `;
 
   return {
-    path: path.join(docsFsRoot(params.locale), "index.md"),
+    path: path.join(docsFsRoot(params.locale), "index.mdx"),
     content,
   };
 }

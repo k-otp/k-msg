@@ -1,0 +1,94 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "TemplateBuilders"
+---
+
+> `const` **TemplateBuilders**: `object`
+
+Defined in: [packages/template/src/builder/template.builder.ts:419](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L419)
+
+Static factory methods for common template types
+
+## Type Declaration
+
+### authentication()
+
+> **authentication**(`name`, `provider`): [`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+Create an authentication template builder
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### provider
+
+`string`
+
+#### Returns
+
+[`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+### notification()
+
+> **notification**(`name`, `provider`): [`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+Create a notification template builder
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### provider
+
+`string`
+
+#### Returns
+
+[`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+### payment()
+
+> **payment**(`name`, `provider`): [`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+Create a payment template builder
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### provider
+
+`string`
+
+#### Returns
+
+[`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+### promotion()
+
+> **promotion**(`name`, `provider`): [`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)
+
+Create a promotion template builder
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### provider
+
+`string`
+
+#### Returns
+
+[`TemplateBuilder`](/en/api/template/src/toolkit/classes/templatebuilder/)

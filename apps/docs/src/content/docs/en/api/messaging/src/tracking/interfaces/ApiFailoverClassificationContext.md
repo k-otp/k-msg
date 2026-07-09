@@ -1,0 +1,40 @@
+---
+editUrl: false
+next: false
+prev: false
+title: "ApiFailoverClassificationContext"
+---
+
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L63)
+
+## Properties
+
+### raw?
+
+> `optional` **raw?**: `unknown`
+
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L67)
+
+***
+
+### record
+
+> **record**: [`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
+
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L64)
+
+***
+
+### statusCode?
+
+> `optional` **statusCode?**: `string`
+
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L65)
+
+***
+
+### statusMessage?
+
+> `optional` **statusMessage?**: `string`
+
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L66)

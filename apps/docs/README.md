@@ -4,11 +4,10 @@ Korean version: `README_ko.md`
 
 This is the contributor and operations runbook for the `k-msg` docs site (`https://k-msg.and.guide`).
 
-- Active site runtime: Hono SSG (`apps/docs-hono`)
-- Source-content workspace: `apps/docs` owns plain Markdown sources, generated docs inputs, and snippet source files
+- Framework: Astro + Starlight
 - Default locale: `ko` (Korean), secondary locale: `en`
 - Root route: `/` (Korean root locale), English route: `/en/`
-- Build output: `apps/docs-hono/dist`
+- Build output: `apps/docs/dist`
 
 ## 1. Quick Start
 
@@ -23,24 +22,21 @@ Run from repository root:
 
 Manually maintained files:
 
-- `apps/docs/src/content/docs/cli.md`
-- `apps/docs/src/content/docs/en/cli.md`
-- `apps/docs/src/content/docs/snippets.md`
-- `apps/docs/src/content/docs/en/snippets.md`
+- `apps/docs/src/content/docs/cli.mdx`
+- `apps/docs/src/content/docs/en/cli.mdx`
+- `apps/docs/src/content/docs/snippets.mdx`
+- `apps/docs/src/content/docs/en/snippets.mdx`
 - `apps/docs/snippets/**` (code example source)
 
 Generated files:
 
 - `apps/docs/src/content/docs/guides/**` (Korean root locale)
 - `apps/docs/src/content/docs/en/guides/**`
+- `apps/docs/src/content/docs/api/**` (root locale API source)
+- `apps/docs/src/content/docs/en/api/**`
 - `apps/docs/src/generated/cli/help.md`
 - `apps/docs/src/generated/cli/schema.md`
-- `apps/docs/api-sources.json`
-
-Generated runtime output outside this workspace:
-
-- `apps/docs-hono/content/docs/api/**`
-- `apps/docs-hono/content/docs/en/api/**`
+- `apps/docs/typedoc.entrypoints.json`
 
 Rules:
 
@@ -53,38 +49,26 @@ Rules:
 `bun run docs:generate` runs the following in order:
 
 1. `scripts/docs/collect-entrypoints.ts`
-- Reads package `exports` and writes the API source inventory consumed by the docs pipeline
-- Output: `apps/docs/api-sources.json`
+- Reads package `exports` and builds TypeDoc entrypoints
+- Output: `apps/docs/typedoc.entrypoints.json`
 
 2. `scripts/docs/generate-cli-help.ts`
 - Captures CLI help output from `apps/cli/src/k-msg.ts`
 - Output: `apps/docs/src/generated/cli/help.md`
 
-3. `scripts/docs/sync-tracking-schema-docs.ts`
-- Syncs tracked schema reference pages into the docs source tree
-
-4. `scripts/docs/generate-schema-docs.ts`
+3. `scripts/docs/generate-schema-docs.ts`
 - Generates docs from `apps/cli/schemas/*.json`
 - Output: `apps/docs/src/generated/cli/schema.md`
 
-5. `scripts/docs/generate-static-pages.ts`
-- Rebuilds plain-Markdown landing pages for `cli` and `snippets`
-
-6. `scripts/docs/generate-guides.ts`
+4. `scripts/docs/generate-guides.ts`
 - Generates guide pages from repo/package/example `README*.md`
 - Output: `apps/docs/src/content/docs/guides/**`, `apps/docs/src/content/docs/en/guides/**`, `index.md`
-
-7. `scripts/docs/export-hono-content.ts`
-- Validates that docs content stays plain-Markdown compatible and copies it into the Hono app content tree
-
-8. `scripts/docs/generate-api-extractor-docs.ts`
-- Builds API markdown from the `apps/docs/api-sources.json` inventory with API Extractor + API Documenter
 
 All generators support `--check`.
 
 Note:
 
-- `bun run scripts/docs/run-generate.ts --check` intentionally skips `scripts/docs/generate-cli-help.ts`, `scripts/docs/generate-schema-docs.ts`, `scripts/docs/export-hono-content.ts`, and `scripts/docs/generate-api-extractor-docs.ts`.
+- `bun run scripts/docs/run-generate.ts --check` intentionally skips `scripts/docs/generate-cli-help.ts` and `scripts/docs/generate-schema-docs.ts`.
 - `apps/docs/src/generated/cli/help.md` and `apps/docs/src/generated/cli/schema.md` are generated during docs build (`docs:build` / Pages deploy), not enforced by `docs:check`.
 - `apps/docs/src/generated/cli/help.md` and `apps/docs/src/generated/cli/schema.md` are not tracked in Git.
 
@@ -96,13 +80,18 @@ Note:
 
 ## 4. API Docs Generation
 
+Config files:
+
+- `apps/docs/astro.config.mjs`
+- `apps/docs/typedoc.tsconfig.json`
+- `apps/docs/plugins/sync-typedoc-locales.mjs`
+
 Flow:
 
-1. `scripts/docs/collect-entrypoints.ts` builds `apps/docs/api-sources.json` from package `exports`
-2. `scripts/docs/generate-api-extractor-docs.ts` runs API Extractor and API Documenter against that inventory
-3. Generated API pages land in `apps/docs-hono/content/docs/api/**` and `apps/docs-hono/content/docs/en/api/**`
-4. `scripts/docs/export-hono-content.ts` copies the normalized Markdown source pages into the Hono app content tree
-5. Source links remain anchored to the repository paths recorded in the inventory
+1. `starlight-typedoc` generates API docs from `typedoc.entrypoints.json`
+2. Source output path: `src/content/docs/api/**`
+3. Locale sync plugin copies output to `en/api`
+4. `gitRevision: "main"` reduces source-link drift
 
 ## 5. Contributor Workflow
 
@@ -148,15 +137,15 @@ Verification command:
 - Project name: `k-msg`
 - Production branch: `main`
 - Build command: `bun install --frozen-lockfile && bun run docs:build`
-- Output directory: `apps/docs-hono/dist`
+- Output directory: `apps/docs/dist`
 - Custom domain: `k-msg.and.guide`
 - PR Preview: enabled
 
 Note:
 
-- `bun run docs-hono:build` generates `sitemap-index.xml` in `apps/docs-hono/dist`.
-- Sitemap metadata is post-processed by `scripts/docs/postprocess-sitemap.ts` and verified by `scripts/docs/check-sitemap-lastmod.ts`.
-- `apps/docs-hono/public/sitemap.xsl` and the Hono build emit the canonical sitemap assets.
+- `astro build` generates `sitemap-index.xml` in `apps/docs/dist`.
+- Sitemap metadata is customized with `lastmod`, `changefreq`, and `priority` in `apps/docs/astro.config.mjs`.
+- `apps/docs/public/robots.txt` advertises the canonical sitemap URL.
 
 ## 8. Troubleshooting
 

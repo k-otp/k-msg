@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
-const sitemapPath = path.join(repoRoot, "apps/docs-hono/dist/sitemap-0.xml");
+const sitemapPath = path.join(repoRoot, "apps/docs/dist/sitemap-0.xml");
 const minApiEntries = 20;
 
 function extractTagValue(block: string, tag: string): string | undefined {
