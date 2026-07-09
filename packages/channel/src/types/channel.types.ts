@@ -125,91 +125,42 @@ export enum DocumentStatus {
   REJECTED = "REJECTED",
 }
 
-// Request/Response types
-export interface ChannelCreateRequest {
-  name: string;
-  type: ChannelType;
-  provider: string;
-  profileKey: string;
-  businessInfo?: {
-    name: string;
-    registrationNumber: string;
-    category: string;
-    contactPerson: string;
-    contactEmail: string;
-    contactPhone: string;
-  };
-  kakaoInfo?: {
-    plusFriendId: string;
-    brandName: string;
-    logoUrl?: string;
-    description?: string;
-  };
-}
+const ChannelBusinessInfoSchema = z.object({
+  name: z.string().check(z.minLength(1)),
+  registrationNumber: z.string().check(z.minLength(1)),
+  category: z.string().check(z.minLength(1)),
+  contactPerson: z.string().check(z.minLength(1)),
+  contactEmail: z.email(),
+  contactPhone: z.string().check(z.regex(/^[0-9-+\s()]+$/)),
+});
 
-export interface SenderNumberCreateRequest {
-  phoneNumber: string;
-  category: SenderNumberCategory;
-  businessInfo?: {
-    businessName: string;
-    businessRegistrationNumber: string;
-    contactPerson: string;
-    contactEmail: string;
-  };
-}
+const ChannelKakaoInfoSchema = z.object({
+  plusFriendId: z.string().check(z.minLength(1)),
+  brandName: z.string().check(z.minLength(1)),
+  logoUrl: z.optional(z.url()),
+  description: z.optional(z.string().check(z.maxLength(500))),
+});
 
-export interface ChannelFilters {
-  provider?: string;
-  type?: ChannelType;
-  status?: ChannelStatus;
-  createdAfter?: Date;
-  createdBefore?: Date;
-}
+const SenderNumberBusinessInfoSchema = z.object({
+  businessName: z.string().check(z.minLength(1)),
+  businessRegistrationNumber: z.string().check(z.minLength(1)),
+  contactPerson: z.string().check(z.minLength(1)),
+  contactEmail: z.email(),
+});
 
-export interface SenderNumberFilters {
-  channelId?: string;
-  status?: SenderNumberStatus;
-  category?: SenderNumberCategory;
-  verified?: boolean;
-}
-
-// Zod schemas
 export const ChannelCreateRequestSchema = z.object({
   name: z.string().check(z.minLength(1), z.maxLength(100)),
   type: z.nativeEnum(ChannelType),
   provider: z.string().check(z.minLength(1)),
   profileKey: z.string().check(z.minLength(1)),
-  businessInfo: z.optional(
-    z.object({
-      name: z.string().check(z.minLength(1)),
-      registrationNumber: z.string().check(z.minLength(1)),
-      category: z.string().check(z.minLength(1)),
-      contactPerson: z.string().check(z.minLength(1)),
-      contactEmail: z.email(),
-      contactPhone: z.string().check(z.regex(/^[0-9-+\s()]+$/)),
-    }),
-  ),
-  kakaoInfo: z.optional(
-    z.object({
-      plusFriendId: z.string().check(z.minLength(1)),
-      brandName: z.string().check(z.minLength(1)),
-      logoUrl: z.optional(z.url()),
-      description: z.optional(z.string().check(z.maxLength(500))),
-    }),
-  ),
+  businessInfo: z.optional(ChannelBusinessInfoSchema),
+  kakaoInfo: z.optional(ChannelKakaoInfoSchema),
 });
 
 export const SenderNumberCreateRequestSchema = z.object({
   phoneNumber: z.string().check(z.regex(/^[0-9]{10,11}$/)),
   category: z.nativeEnum(SenderNumberCategory),
-  businessInfo: z.optional(
-    z.object({
-      businessName: z.string().check(z.minLength(1)),
-      businessRegistrationNumber: z.string().check(z.minLength(1)),
-      contactPerson: z.string().check(z.minLength(1)),
-      contactEmail: z.email(),
-    }),
-  ),
+  businessInfo: z.optional(SenderNumberBusinessInfoSchema),
 });
 
 export const ChannelFiltersSchema = z.object({
@@ -227,14 +178,18 @@ export const SenderNumberFiltersSchema = z.object({
   verified: z.optional(z.boolean()),
 });
 
-export type ChannelCreateRequestType = z.infer<
-  typeof ChannelCreateRequestSchema
->;
-export type SenderNumberCreateRequestType = z.infer<
+export type ChannelCreateRequest = z.infer<typeof ChannelCreateRequestSchema>;
+export type SenderNumberCreateRequest = z.infer<
   typeof SenderNumberCreateRequestSchema
 >;
-export type ChannelFiltersType = z.infer<typeof ChannelFiltersSchema>;
-export type SenderNumberFiltersType = z.infer<typeof SenderNumberFiltersSchema>;
+export type ChannelFilters = z.infer<typeof ChannelFiltersSchema>;
+export type SenderNumberFilters = z.infer<typeof SenderNumberFiltersSchema>;
+
+// Legacy alias exports kept stable while the schemas become the source of truth.
+export type ChannelCreateRequestType = ChannelCreateRequest;
+export type SenderNumberCreateRequestType = SenderNumberCreateRequest;
+export type ChannelFiltersType = ChannelFilters;
+export type SenderNumberFiltersType = SenderNumberFilters;
 
 // Additional types for service compatibility
 export interface ChannelConfig {
