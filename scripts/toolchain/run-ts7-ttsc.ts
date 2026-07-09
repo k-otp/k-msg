@@ -89,9 +89,12 @@ async function ensureRunner({ force }: { force: boolean }): Promise<void> {
   const desiredManifest = getRunnerManifest();
   let needsInstall = force || !(await fileExists(runnerTtscPath));
 
-  const currentManifest = (await fileExists(runnerManifestPath))
-    ? await readFile(runnerManifestPath, "utf8")
-    : null;
+  let currentManifest: null | string = null;
+  try {
+    currentManifest = await readFile(runnerManifestPath, "utf8");
+  } catch {
+    currentManifest = null;
+  }
 
   if (currentManifest !== desiredManifest) {
     await writeFile(runnerManifestPath, desiredManifest, "utf8");
@@ -140,34 +143,44 @@ async function runTarget(target: (typeof targets)[number]): Promise<void> {
 }
 
 async function cleanRunner(): Promise<void> {
-  await rm(runnerDir, { force: true, recursive: true });
-  console.log(`Removed ${path.relative(repoRoot, runnerDir) || runnerDir}`);
+  try {
+    await rm(runnerDir, { force: true, recursive: true });
+    console.log(`Removed ${path.relative(repoRoot, runnerDir) || runnerDir}`);
+  } catch (error) {
+    console.error("[ttsc-ts7] Failed to clean runner directory:", error);
+    throw error;
+  }
 }
 
-if (hasFlag("--clean")) {
-  await cleanRunner();
-  process.exit(0);
+try {
+  if (hasFlag("--clean")) {
+    await cleanRunner();
+    process.exit(0);
+  }
+
+  const forceInstall = hasFlag("--force-install");
+  const installOnly = hasFlag("--install-only");
+
+  console.log(
+    `Running isolated ttsc lane with TypeScript ${ts7Version} and ttsc ${ttscVersion}`,
+  );
+  console.log(
+    "Docs toolchain is intentionally excluded from this experiment because the site still depends on a separate TypeDoc/Astro stack.",
+  );
+
+  await ensureRunner({ force: forceInstall });
+
+  if (installOnly) {
+    console.log("Runner installation complete.");
+    process.exit(0);
+  }
+
+  for (const target of targets) {
+    await runTarget(target);
+  }
+
+  console.log("\n[ttsc-ts7] All experimental targets passed.");
+} catch (error) {
+  console.error("\n[ttsc-ts7] Fatal error:", error);
+  process.exit(1);
 }
-
-const forceInstall = hasFlag("--force-install");
-const installOnly = hasFlag("--install-only");
-
-console.log(
-  `Running isolated ttsc lane with TypeScript ${ts7Version} and ttsc ${ttscVersion}`,
-);
-console.log(
-  "Docs toolchain is intentionally excluded from this experiment because the site still depends on a separate TypeDoc/Astro stack.",
-);
-
-await ensureRunner({ force: forceInstall });
-
-if (installOnly) {
-  console.log("Runner installation complete.");
-  process.exit(0);
-}
-
-for (const target of targets) {
-  await runTarget(target);
-}
-
-console.log("\n[ttsc-ts7] All experimental targets passed.");
