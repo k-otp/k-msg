@@ -12,6 +12,7 @@ try {
   throw error;
 }
 const app = new Hono();
+const pageTitles = new Map(pages.map((page) => [page.route, page.title]));
 
 app.get("/health", (c) =>
   c.json({
@@ -22,7 +23,7 @@ app.get("/health", (c) =>
 );
 
 for (const page of pages) {
-  app.get(page.route, (c) => c.html(renderPage(page)));
+  app.get(page.route, (c) => c.html(renderPage(page, pageTitles)));
 }
 
 app.notFound((c) =>

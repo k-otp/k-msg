@@ -1,7 +1,14 @@
 import MarkdownIt from "markdown-it";
 import type { DocsPage } from "./content";
 import { renderPreviewBanner, sourceEditUrl } from "./content";
-import { navigationLinks } from "./site";
+import {
+  type DocsLocale,
+  type DocsNavEntry,
+  docsRouteFromId,
+  docsSidebar,
+  docsTopNav,
+  labelForNavLink,
+} from "./navigation";
 import { escapeHtml, escapeScriptString } from "./utils";
 
 const md = new MarkdownIt({
@@ -52,6 +59,8 @@ function layoutStyles(): string {
       --muted: #6e6256;
       --accent: #0c7a5d;
       --accent-2: #d86a3f;
+      --accent-bg: rgba(12, 122, 93, 0.1);
+      --accent-ink: #0f5b46;
       --shadow: 0 24px 70px rgba(41, 28, 16, 0.12);
       --code: #f2ebe0;
       font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
@@ -150,6 +159,7 @@ function layoutStyles(): string {
     }
 
     .meta,
+    .sidebar-nav,
     .article {
       border: 1px solid var(--border);
       border-radius: 1.5rem;
@@ -157,10 +167,69 @@ function layoutStyles(): string {
       box-shadow: var(--shadow);
     }
 
-    .meta {
+    .sidebar-column {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .meta,
+    .sidebar-nav {
       padding: 1rem 1.1rem;
+    }
+
+    .meta {
       color: var(--muted);
       font-size: 0.95rem;
+    }
+
+    .sidebar-nav h2,
+    .sidebar-nav h3 {
+      margin: 0 0 0.65rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .sidebar-nav ul ul {
+      margin-top: 0.35rem;
+      padding-left: 0.85rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .sidebar-nav li {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.8rem;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .sidebar-nav a.is-active {
+      background: var(--accent-bg);
+      color: var(--accent-ink);
+      font-weight: 600;
+    }
+
+    .sidebar-nav .group-label {
+      font-size: 0.86rem;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 0.2rem 0.1rem;
     }
 
     .article {
@@ -184,14 +253,55 @@ function layoutStyles(): string {
   `;
 }
 
-function navigationFor(localePrefix: string): string {
-  return navigationLinks(localePrefix)
-    .map(([href, label]) => `<a href="${href}">${label}</a>`)
+function renderTopNav(locale: DocsLocale): string {
+  return docsTopNav
+    .map((link) => {
+      const href = docsRouteFromId(link.id, locale);
+      const fallback = link.id === "index" ? "Home" : link.id;
+      const label = labelForNavLink(link, locale, fallback);
+      return `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
+    })
     .join("");
 }
 
-export function renderPage(page: DocsPage): string {
-  const localePrefix = page.route.startsWith("/en/") ? "/en" : "";
+function fallbackTitleFromId(id: string): string {
+  const lastSegment = id.split("/").at(-1) ?? id;
+  return lastSegment.replaceAll("-", " ");
+}
+
+function renderSidebarEntries(params: {
+  currentRoute: string;
+  entries: DocsNavEntry[];
+  locale: DocsLocale;
+  titles: ReadonlyMap<string, string>;
+}): string {
+  return `<ul>${params.entries
+    .map((entry) => {
+      if (entry.type === "group") {
+        return `<li><span class="group-label">${escapeHtml(entry.labels[params.locale])}</span>${renderSidebarEntries(
+          {
+            ...params,
+            entries: entry.items,
+          },
+        )}</li>`;
+      }
+
+      const href = docsRouteFromId(entry.id, params.locale);
+      const title =
+        params.titles.get(href) ??
+        labelForNavLink(entry, params.locale, fallbackTitleFromId(entry.id));
+      const activeClass = href === params.currentRoute ? "is-active" : "";
+
+      return `<li><a class="${activeClass}" href="${escapeHtml(href)}">${escapeHtml(title)}</a></li>`;
+    })
+    .join("")}</ul>`;
+}
+
+export function renderPage(
+  page: DocsPage,
+  titles: ReadonlyMap<string, string>,
+): string {
+  const locale: DocsLocale = page.route.startsWith("/en/") ? "en" : "ko";
   const title = escapeHtml(page.title);
   const description = escapeHtml(
     page.description ??
@@ -200,7 +310,7 @@ export function renderPage(page: DocsPage): string {
   const contentHtml = md.render(page.body);
 
   return `<!doctype html>
-<html lang="${localePrefix === "/en" ? "en" : "ko"}">
+<html lang="${locale}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -215,14 +325,25 @@ export function renderPage(page: DocsPage): string {
         <p class="eyebrow">Static docs runtime</p>
         <h1>${title}</h1>
         <p>${description}</p>
-        <nav class="nav">${navigationFor(localePrefix)}</nav>
+        <nav class="nav">${renderTopNav(locale)}</nav>
       </section>
 
       <section class="content">
-        <aside class="meta">
-          <p><strong>Source</strong></p>
-          <p><code>${escapeHtml(page.sourcePath)}</code></p>
-          <p><a href="${escapeHtml(sourceEditUrl(page.sourcePath))}" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
+        <aside class="sidebar-column">
+          <nav class="sidebar-nav">
+            <h2>${locale === "en" ? "Browse" : "둘러보기"}</h2>
+            ${renderSidebarEntries({
+              currentRoute: page.route,
+              entries: docsSidebar,
+              locale,
+              titles,
+            })}
+          </nav>
+          <section class="meta">
+            <p><strong>Source</strong></p>
+            <p><code>${escapeHtml(page.sourcePath)}</code></p>
+            <p><a href="${escapeHtml(sourceEditUrl(page.sourcePath))}" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
+          </section>
         </aside>
         <article class="article">
           ${renderPreviewBanner(page.sourcePath)}
