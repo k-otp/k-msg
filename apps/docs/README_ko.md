@@ -2,10 +2,11 @@
 
 `k-msg` 문서 사이트(`https://k-msg.and.guide`)의 운영/기여 기준 문서입니다.
 
-- Framework: Astro + Starlight
+- 활성 사이트 런타임: Hono SSG (`apps/docs-hono`)
+- 레거시 소스 워크스페이스: `apps/docs`는 Markdown 소스, 가이드 생성 입력, 마이그레이션 중인 sidebar 메타데이터를 계속 관리합니다
 - 기본 언어: `ko` (한국어), 보조 언어: `en`
 - 루트 경로: `/` (한국어 루트 로케일), 영어 경로: `/en/`
-- 배포 산출물: `apps/docs/dist`
+- 배포 산출물: `apps/docs-hono/dist`
 
 ## 1. 빠른 시작
 

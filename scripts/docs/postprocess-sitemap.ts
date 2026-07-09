@@ -2,7 +2,7 @@ import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
-const distDir = path.join(repoRoot, "apps/docs/dist");
+const distDir = path.join(repoRoot, "apps/docs-hono/dist");
 const stylePi = '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>';
 
 function isSitemapFile(name: string): boolean {

@@ -328,7 +328,7 @@ async function copyMarkdownFolder(params: {
 
   for (const locale of ["ko", "en"] as const) {
     const linkMap = new Map<string, string>([
-      ["index.md", `${routePrefix(locale)}/api/readme/`],
+      ["index.md", `${routePrefix(locale)}/api/`],
     ]);
     const resolvedPages = new Map<string, OutputPage>();
 
@@ -485,12 +485,12 @@ async function main(): Promise<void> {
   await mkdir(path.join(outputRoot, "api"), { recursive: true });
   await mkdir(path.join(outputRoot, "en", "api"), { recursive: true });
   await writeFile(
-    path.join(outputRoot, "api", "README.md"),
+    path.join(outputRoot, "api", "index.md"),
     apiIndexMarkdown("ko", packageNames),
     "utf8",
   );
   await writeFile(
-    path.join(outputRoot, "en", "api", "README.md"),
+    path.join(outputRoot, "en", "api", "index.md"),
     apiIndexMarkdown("en", packageNames),
     "utf8",
   );

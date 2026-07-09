@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { repoBranch, repoUrl } from "./site";
 import { escapeHtml } from "./utils";
 
 type Frontmatter = {
@@ -18,10 +19,6 @@ export type DocsPage = {
 
 const repoRoot = path.resolve(import.meta.dir, "../../..");
 const docsContentRoot = path.join(repoRoot, "apps/docs-hono/content/docs");
-const repoUrl = (
-  process.env.DOCS_REPO_URL ?? "https://github.com/k-otp/k-msg"
-).replace(/\/+$/, "");
-const repoBranch = encodeURIComponent(process.env.DOCS_REPO_BRANCH ?? "main");
 
 function toPosix(value: string): string {
   return value.replaceAll(path.sep, "/");

@@ -6,6 +6,7 @@ Current purpose:
 
 - render the docs site from framework-neutral Markdown inputs
 - ingest generated API reference pages from the API Extractor pipeline
+- emit sitemap and robots assets from the Hono build output
 - keep the output static so Cloudflare Pages can deploy it directly
 - remove the Astro/Starlight/TypeDoc runtime from the critical path for TypeScript 7 adoption
 

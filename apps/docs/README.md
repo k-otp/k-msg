@@ -4,10 +4,11 @@ Korean version: `README_ko.md`
 
 This is the contributor and operations runbook for the `k-msg` docs site (`https://k-msg.and.guide`).
 
-- Framework: Astro + Starlight
+- Active site runtime: Hono SSG (`apps/docs-hono`)
+- Legacy source workspace: `apps/docs` still owns Markdown source content, guide generation inputs, and migration-era sidebar metadata
 - Default locale: `ko` (Korean), secondary locale: `en`
 - Root route: `/` (Korean root locale), English route: `/en/`
-- Build output: `apps/docs/dist`
+- Build output: `apps/docs-hono/dist`
 
 ## 1. Quick Start
 

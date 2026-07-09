@@ -1,6 +1,7 @@
 import MarkdownIt from "markdown-it";
 import type { DocsPage } from "./content";
 import { renderPreviewBanner, sourceEditUrl } from "./content";
+import { navigationLinks } from "./site";
 import { escapeHtml, escapeScriptString } from "./utils";
 
 const md = new MarkdownIt({
@@ -184,18 +185,7 @@ function layoutStyles(): string {
 }
 
 function navigationFor(localePrefix: string): string {
-  const links = [
-    [localePrefix || "/", "Home"],
-    [`${localePrefix}/guides/overview/`, "Overview"],
-    [`${localePrefix}/guides/getting-started/`, "Getting Started"],
-    [`${localePrefix}/guides/package-selection/`, "Package Selection"],
-    [`${localePrefix}/guides/provider-selection/`, "Provider Selection"],
-    [`${localePrefix}/api/readme/`, "API"],
-    [`${localePrefix}/cli/`, "CLI"],
-    [`${localePrefix}/snippets/`, "Snippets"],
-  ];
-
-  return links
+  return navigationLinks(localePrefix)
     .map(([href, label]) => `<a href="${href}">${label}</a>`)
     .join("");
 }
@@ -204,7 +194,8 @@ export function renderPage(page: DocsPage): string {
   const localePrefix = page.route.startsWith("/en/") ? "/en" : "";
   const title = escapeHtml(page.title);
   const description = escapeHtml(
-    page.description ?? "Parallel Hono SSG docs preview for k-msg.",
+    page.description ??
+      "k-msg documentation rendered by the Hono static docs app.",
   );
   const contentHtml = md.render(page.body);
 
@@ -221,7 +212,7 @@ export function renderPage(page: DocsPage): string {
   <body>
     <main class="shell">
       <section class="masthead">
-        <p class="eyebrow">Parallel docs runtime</p>
+        <p class="eyebrow">Static docs runtime</p>
         <h1>${title}</h1>
         <p>${description}</p>
         <nav class="nav">${navigationFor(localePrefix)}</nav>

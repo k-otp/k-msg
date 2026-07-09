@@ -97,7 +97,7 @@ jobs:
           fi
 
           CHANGED="$(git diff --name-only "$BASE" "${{ github.sha }}")"
-          if echo "$CHANGED" | grep -Eq '^(packages/|apps/cli/|examples/|apps/docs/|scripts/docs/|package\.json|bun\.lock)'; then
+          if echo "$CHANGED" | grep -Eq '^(packages/|apps/cli/|examples/|apps/docs/|apps/docs-hono/|scripts/docs/|package\.json|bun\.lock)'; then
             echo "should_run=true" >>"$GITHUB_OUTPUT"
           else
             echo "should_run=false" >>"$GITHUB_OUTPUT"
