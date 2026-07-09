@@ -72,6 +72,7 @@
     "docs:dev": "bun run docs:generate && bun run --cwd apps/docs dev",
     "docs:prepare:git-history": "bun run scripts/docs/ensure-git-history.ts",
     "docs:generate": "bun run scripts/docs/run-generate.ts",
+    "docs:migration:audit:hono": "bun run scripts/docs/audit-hono-migration.ts",
     "docs:postbuild:sitemap": "bun run scripts/docs/postprocess-sitemap.ts",
     "docs:check:sitemap-lastmod": "bun run scripts/docs/check-sitemap-lastmod.ts",
     "docs:build": "bun run docs:prepare:git-history && bun run docs:generate && bun run --cwd apps/docs build && bun run docs:postbuild:sitemap",
