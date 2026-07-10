@@ -73,14 +73,14 @@ function shouldCopy(source: string): boolean {
 
 async function runCommand(command: string[], cwd: string): Promise<void> {
   console.log(`$ ${command.join(" ")}`);
-  const process = Bun.spawn(command, {
+  const processHandle = Bun.spawn(command, {
     cwd,
     env: { ...Bun.env, CI: Bun.env.CI ?? "1" },
     stderr: "inherit",
     stdin: "ignore",
     stdout: "inherit",
   });
-  const exitCode = await process.exited;
+  const exitCode = await processHandle.exited;
   if (exitCode !== 0) {
     throw new Error(`${command.join(" ")} failed with exit code ${exitCode}`);
   }
@@ -130,8 +130,20 @@ async function main(): Promise<void> {
   }
 
   const targets = selectedExample ? [selectedExample] : examples;
+  const failures: string[] = [];
   for (const target of targets) {
-    await validateExample(target);
+    try {
+      await validateExample(target);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failures.push(`${target}: ${message}`);
+    }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `Validation failed for ${failures.length} example(s):\n${failures.join("\n")}`,
+    );
   }
 
   console.log(`\nValidated ${targets.length} standalone example(s).`);
