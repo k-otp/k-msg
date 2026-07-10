@@ -11,7 +11,7 @@
     "schedule": ["before 9am on the first day of the month"],
     "groupName": "monthly lock file maintenance"
   },
-  "ignorePaths": ["**/node_modules/**", "examples/**"],
+  "ignorePaths": ["**/node_modules/**"],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
@@ -51,6 +51,11 @@
         "@ttsc/lint"
       ],
       "groupName": "typescript toolchain monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["examples/**/package.json"],
+      "groupName": "examples monthly"
     }
   ]
 }
