@@ -13,7 +13,7 @@ This is the contributor and operations runbook for the `k-msg` docs site (`https
 
 Run from repository root:
 
-1. Use Node.js 22.12 or newer and the Bun version pinned in the root `packageManager` field.
+1. Use the Bun version pinned in the root `packageManager` field.
 2. Install dependencies: `bun install --frozen-lockfile`
 3. Start docs dev server: `bun run docs:dev`
 4. Build docs: `bun run docs:build`
