@@ -49,3 +49,13 @@ This directory contains runnable templates for common integration setups.
 - Copy one template into your own app and adjust provider/bindings/secrets.
 - `k-msg` and `@k-msg/*` dependencies in examples use the npm `latest` tag.
 - In templates with advanced `POST /send`, array input is supported and batch responses return `200` with per-item outcomes in `data.results`.
+
+## Standalone validation
+
+Run every example from an isolated temporary directory against its declared npm dependencies:
+
+```bash
+bun run examples:standalone
+```
+
+The standalone workflow runs for example source, manifest, and TypeScript configuration changes, and monthly against the current npm `latest` packages. Workspace CI separately validates TypeScript example sources against the repository source tree.

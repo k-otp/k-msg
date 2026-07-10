@@ -11,13 +11,12 @@
   },
   "dependencies": {
     "@k-msg/webhook": "latest",
-    "hono": "^4.8.10"
+    "hono": "^4.12.29"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260214.0",
-    "@ttsc/lint": "^0.18.4",
+    "@cloudflare/workers-types": "^4.20260702.1",
     "ttsc": "^0.18.4",
     "typescript": "^7.0.2",
-    "wrangler": "^4.65.0"
+    "wrangler": "^4.110.0"
   }
 }
