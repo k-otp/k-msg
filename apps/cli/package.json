@@ -45,6 +45,7 @@
     "gunshi": "0.35.1",
     "k-msg": "workspace:*",
     "solapi": "^6.0.1",
+    "ttsc": "catalog:",
     "typescript": "catalog:",
     "zod": "catalog:"
   },

@@ -71,6 +71,7 @@
     "@k-msg/template": "workspace:*"
   },
   "devDependencies": {
+    "ttsc": "catalog:",
     "typescript": "catalog:",
     "@types/bun": "catalog:",
     "drizzle-orm": "0.45.2"

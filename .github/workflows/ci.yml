@@ -136,6 +136,8 @@ jobs:
         with:
           path: node_modules/.cache/ttsc
           key: ttsc-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock', 'lint.config.ts') }}
+          restore-keys: |
+            ttsc-${{ runner.os }}-${{ runner.arch }}-
 
       - name: CLI completions doctor (strict)
         run: bun run --cwd apps/cli doctor:completions

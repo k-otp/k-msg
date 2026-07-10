@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 type BenchmarkRecord = {
@@ -10,6 +11,7 @@ type BenchmarkRecord = {
 };
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
+const requireFromRoot = createRequire(path.join(repoRoot, "package.json"));
 const defaultOutputPath = path.join(
   repoRoot,
   "docs",
@@ -52,7 +54,7 @@ async function runOnce(command: readonly string[]): Promise<number> {
   ]);
   if (exitCode !== 0) {
     throw new Error(
-      `Command failed: ${command.join(" ")}\n${`${stdout}\n${stderr}`.trim()}`,
+      `Command failed with exit code ${exitCode}: ${command.join(" ")}\n${`${stdout}\n${stderr}`.trim()}`,
     );
   }
   return (performance.now() - startedAt) / 1000;
@@ -88,22 +90,48 @@ function relative(value: number, baseline: number): string {
 }
 
 async function packageVersion(packageName: string): Promise<string> {
-  const packagePath = path.join(
-    repoRoot,
-    "node_modules",
-    ...packageName.split("/"),
-    "package.json",
-  );
-  const manifest = JSON.parse(await readFile(packagePath, "utf8")) as {
-    version: string;
-  };
+  let packagePath: string;
+  try {
+    packagePath = requireFromRoot.resolve(`${packageName}/package.json`);
+  } catch (error) {
+    throw new Error(
+      `Cannot resolve ${packageName}; run bun install before benchmarking: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  let manifest: unknown;
+  try {
+    manifest = JSON.parse(await readFile(packagePath, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `Cannot read ${packageName} version from ${packagePath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  if (
+    typeof manifest !== "object" ||
+    manifest === null ||
+    !("version" in manifest) ||
+    typeof manifest.version !== "string"
+  ) {
+    throw new Error(`${packageName} package manifest has no string version.`);
+  }
   return manifest.version;
 }
 
 function renderReport(records: readonly BenchmarkRecord[]): string {
-  const ttscBaseline =
-    records.find((record) => record.title === "Workspace ttsc")
-      ?.medianSeconds ?? 0;
+  const ttscBaseline = records.find(
+    (record) => record.title === "Workspace ttsc",
+  )?.medianSeconds;
+  if (
+    ttscBaseline === undefined ||
+    !Number.isFinite(ttscBaseline) ||
+    ttscBaseline <= 0
+  ) {
+    throw new Error(
+      "Workspace ttsc benchmark did not produce a valid baseline.",
+    );
+  }
   const rows = records
     .map(
       (record) =>

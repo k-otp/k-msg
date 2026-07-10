@@ -46,6 +46,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "ttsc": "catalog:",
     "typescript": "catalog:",
     "@types/bun": "catalog:"
   },
