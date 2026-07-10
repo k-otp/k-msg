@@ -1,0 +1,52 @@
+name: Standalone Examples
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "examples/*/package.json"
+      - "examples/*/src/**"
+      - "examples/*/tsconfig*.json"
+      - "scripts/examples/check-standalone.ts"
+      - ".github/workflows/examples-standalone.yml"
+  schedule:
+    - cron: "0 2 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standalone-examples-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: "1.3.13"
+
+jobs:
+  validate:
+    name: ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - express-node-send-only
+          - hono-bun-send-only
+          - hono-pages-send-only
+          - hono-pages-tracking-hyperdrive
+          - hono-worker-queue-do
+          - hono-worker-tracking-d1
+          - hono-worker-webhook-d1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install and validate standalone example
+        run: bun run scripts/examples/check-standalone.ts --example "${{ matrix.example }}"

@@ -7,7 +7,6 @@
     "strict": true,
     "skipLibCheck": true,
     "types": ["@cloudflare/workers-types"],
-    "plugins": [{ "transform": "@ttsc/lint" }],
     "noEmit": true
   },
   "include": ["functions/**/*.ts"]
