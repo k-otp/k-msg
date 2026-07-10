@@ -37,7 +37,7 @@ function areaForFile(file: string | undefined): string | null {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function parseGraph(output: string): TypeScriptGraph {
