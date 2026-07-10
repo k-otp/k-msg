@@ -53,7 +53,29 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:23](https://gi
 
 ##### metric
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
+###### dimensions
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### timestamp
+
+`Date` = `...`
+
+###### type
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/) = `...`
+
+###### value
+
+`number` = `...`
 
 #### Returns
 
@@ -73,7 +95,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:39](https://gi
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 #### Returns
 
@@ -127,7 +149,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:69](https://gi
 
 ### getRecentMetrics()
 
-> **getRecentMetrics**(`types`, `durationMs`): `Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+> **getRecentMetrics**(`types`, `durationMs`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/metrics.collector.ts#L48)
 
@@ -145,7 +167,7 @@ Defined in: [packages/analytics/src/services/metrics.collector.ts:48](https://gi
 
 #### Returns
 
-`Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 

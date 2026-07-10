@@ -7,4 +7,4 @@ title: "WebhookEventData"
 
 > **WebhookEventData** = `z.infer`\<*typeof* [`WebhookEventSchema`](/en/api/webhook/src/variables/webhookeventschema/)\>
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:258](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L258)
+Defined in: [packages/webhook/src/types/webhook.types.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L192)

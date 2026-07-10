@@ -33,7 +33,33 @@ Defined in: [packages/channel/src/toolkit/kakao/sender-number.ts:11](https://git
 
 ##### request
 
-[`SenderNumberCreateRequest`](/en/api/channel/src/toolkit/interfaces/sendernumbercreaterequest/)
+###### businessInfo?
+
+\{ `businessName`: `string`; `businessRegistrationNumber`: `string`; `contactEmail`: `string`; `contactPerson`: `string`; \} = `...`
+
+###### businessInfo.businessName
+
+`string` = `...`
+
+###### businessInfo.businessRegistrationNumber
+
+`string` = `...`
+
+###### businessInfo.contactEmail
+
+`string` = `...`
+
+###### businessInfo.contactPerson
+
+`string` = `...`
+
+###### category
+
+[`SenderNumberCategory`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/) = `...`
+
+###### phoneNumber
+
+`string` = `...`
 
 #### Returns
 

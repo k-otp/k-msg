@@ -5,6 +5,6 @@ prev: false
 title: "ChannelFiltersType"
 ---
 
-> **ChannelFiltersType** = `z.infer`\<*typeof* [`ChannelFiltersSchema`](/en/api/channel/src/toolkit/variables/channelfiltersschema/)\>
+> **ChannelFiltersType** = [`ChannelFilters`](/en/api/channel/src/toolkit/type-aliases/channelfilters/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:236](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L236)
+Defined in: [packages/channel/src/types/channel.types.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L191)

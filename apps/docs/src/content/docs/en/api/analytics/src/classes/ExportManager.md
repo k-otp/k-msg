@@ -59,7 +59,7 @@ Defined in: [packages/analytics/src/reports/export.manager.ts:204](https://githu
 
 ##### insights
 
-[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
+`object`[]
 
 ##### format
 

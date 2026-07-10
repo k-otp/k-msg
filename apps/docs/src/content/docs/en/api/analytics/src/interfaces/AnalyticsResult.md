@@ -5,7 +5,7 @@ prev: false
 title: "AnalyticsResult"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L98)
+Defined in: [packages/analytics/src/types/analytics.types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L60)
 
 ## Properties
 
@@ -13,23 +13,115 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:98](https://github.
 
 > **data**: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L100)
+Defined in: [packages/analytics/src/types/analytics.types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L62)
 
 ***
 
 ### insights?
 
-> `optional` **insights?**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
+> `optional` **insights?**: `object`[]
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L106)
+Defined in: [packages/analytics/src/types/analytics.types.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L68)
+
+#### actionable
+
+> **actionable**: `boolean`
+
+#### confidence
+
+> **confidence**: `number`
+
+#### description
+
+> **description**: `string`
+
+#### detectedAt
+
+> **detectedAt**: `Date`
+
+#### dimensions
+
+> **dimensions**: `Record`\<`string`, `string`\>
+
+#### expectedValue?
+
+> `optional` **expectedValue?**: `number`
+
+#### id
+
+> **id**: `string`
+
+#### metric
+
+> **metric**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
+
+#### recommendations?
+
+> `optional` **recommendations?**: `string`[]
+
+#### severity
+
+> **severity**: `"high"` \| `"low"` \| `"medium"` \| `"critical"`
+
+#### title
+
+> **title**: `string`
+
+#### type
+
+> **type**: `"anomaly"` \| `"trend"` \| `"recommendation"`
+
+#### value
+
+> **value**: `number`
 
 ***
 
 ### query
 
-> **query**: [`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
+> **query**: `object`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L99)
+Defined in: [packages/analytics/src/types/analytics.types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L61)
+
+#### dateRange
+
+> **dateRange**: `object` = `AnalyticsDateRangeSchema`
+
+##### dateRange.end
+
+> **end**: `Date`
+
+##### dateRange.start
+
+> **start**: `Date`
+
+#### filters?
+
+> `optional` **filters?**: `Record`\<`string`, `any`\>
+
+#### groupBy?
+
+> `optional` **groupBy?**: `string`[]
+
+#### interval?
+
+> `optional` **interval?**: `"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
+
+#### limit?
+
+> `optional` **limit?**: `number`
+
+#### metrics
+
+> **metrics**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[]
+
+#### offset?
+
+> `optional` **offset?**: `number`
+
+#### orderBy?
+
+> `optional` **orderBy?**: `object`[]
 
 ***
 
@@ -37,7 +129,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:99](https://github.
 
 > **summary**: `object`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L101)
+Defined in: [packages/analytics/src/types/analytics.types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L63)
 
 #### dateRange
 

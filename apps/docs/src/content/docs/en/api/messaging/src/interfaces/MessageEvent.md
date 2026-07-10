@@ -5,7 +5,7 @@ prev: false
 title: "MessageEvent"
 ---
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L188)
+Defined in: [packages/messaging/src/types/message.runtime.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L139)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:188](https://github
 
 > **data**: `T`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L192)
+Defined in: [packages/messaging/src/types/message.runtime.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L143)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:192](https://github
 
 > **id**: `string`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L189)
+Defined in: [packages/messaging/src/types/message.runtime.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L140)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:189](https://github
 
 > **metadata**: `object`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:193](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L193)
+Defined in: [packages/messaging/src/types/message.runtime.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L144)
 
 #### correlationId?
 
@@ -59,7 +59,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:193](https://github
 
 > **timestamp**: `Date`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L191)
+Defined in: [packages/messaging/src/types/message.runtime.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L142)
 
 ***
 
@@ -67,4 +67,4 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:191](https://github
 
 > **type**: [`MessageEventType`](/en/api/messaging/src/enumerations/messageeventtype/)
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L190)
+Defined in: [packages/messaging/src/types/message.runtime.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L141)

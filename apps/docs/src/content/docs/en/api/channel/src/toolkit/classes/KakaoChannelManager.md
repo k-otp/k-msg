@@ -47,7 +47,69 @@ Defined in: [packages/channel/src/toolkit/kakao/channel.ts:11](https://github.co
 
 ##### request
 
-[`ChannelCreateRequest`](/en/api/channel/src/toolkit/interfaces/channelcreaterequest/)
+###### businessInfo?
+
+\{ `category`: `string`; `contactEmail`: `string`; `contactPerson`: `string`; `contactPhone`: `string`; `name`: `string`; `registrationNumber`: `string`; \} = `...`
+
+###### businessInfo.category
+
+`string` = `...`
+
+###### businessInfo.contactEmail
+
+`string` = `...`
+
+###### businessInfo.contactPerson
+
+`string` = `...`
+
+###### businessInfo.contactPhone
+
+`string` = `...`
+
+###### businessInfo.name
+
+`string` = `...`
+
+###### businessInfo.registrationNumber
+
+`string` = `...`
+
+###### kakaoInfo?
+
+\{ `brandName`: `string`; `description?`: `string`; `logoUrl?`: `string`; `plusFriendId`: `string`; \} = `...`
+
+###### kakaoInfo.brandName
+
+`string` = `...`
+
+###### kakaoInfo.description?
+
+`string` = `...`
+
+###### kakaoInfo.logoUrl?
+
+`string` = `...`
+
+###### kakaoInfo.plusFriendId
+
+`string` = `...`
+
+###### name
+
+`string` = `...`
+
+###### profileKey
+
+`string` = `...`
+
+###### provider
+
+`string` = `...`
+
+###### type
+
+[`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/) = `...`
 
 #### Returns
 
