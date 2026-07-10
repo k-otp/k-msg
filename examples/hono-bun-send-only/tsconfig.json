@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -6,7 +7,7 @@
     "lib": ["ESNext", "DOM"],
     "strict": true,
     "skipLibCheck": true,
-    "types": ["bun-types", "node"],
+    "types": ["bun", "node"],
     "noEmit": true
   },
   "include": ["src/**/*.ts"]
