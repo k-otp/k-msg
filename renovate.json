@@ -19,26 +19,6 @@
     },
     {
       "matchManagers": ["npm"],
-      "matchFileNames": ["apps/docs/package.json"],
-      "groupName": "docs stack monthly"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchPackageNames": [
-        "gunshi",
-        "@gunshi/plugin-completion",
-        "@types/bun"
-      ],
-      "groupName": "cli toolchain monthly"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchPackageNames": ["typescript"],
-      "matchFileNames": ["apps/cli/package.json", "package.json"],
-      "groupName": "cli toolchain monthly"
-    },
-    {
-      "matchManagers": ["npm"],
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true,
       "automerge": false,
@@ -48,6 +28,29 @@
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "monthly dependency maintenance"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["apps/docs/package.json"],
+      "groupName": "docs stack monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["gunshi", "@gunshi/plugin-completion"],
+      "groupName": "cli toolchain monthly"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["!apps/docs/package.json"],
+      "matchPackageNames": [
+        "@types/bun",
+        "@types/node",
+        "typescript",
+        "ttsc",
+        "@ttsc/graph",
+        "@ttsc/lint"
+      ],
+      "groupName": "typescript toolchain monthly"
     }
   ]
 }

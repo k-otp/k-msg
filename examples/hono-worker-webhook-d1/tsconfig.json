@@ -4,13 +4,9 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
-    "paths": {
-      "@k-msg/webhook": ["../../packages/webhook/src/index.ts"],
-      "@k-msg/webhook/*": ["../../packages/webhook/src/*"]
-    },
+    "ignoreDeprecations": "7.0",
     "types": ["@cloudflare/workers-types/latest"],
+    "plugins": [{ "transform": "@ttsc/lint" }],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

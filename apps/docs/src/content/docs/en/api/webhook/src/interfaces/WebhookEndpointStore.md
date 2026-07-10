@@ -19,7 +19,85 @@ Defined in: [packages/webhook/src/runtime/types.ts:19](https://github.com/k-otp/
 
 ##### endpoint
 
-[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
+###### active
+
+`boolean` = `...`
+
+###### createdAt
+
+`Date` = `...`
+
+###### description?
+
+`string` = `...`
+
+###### events
+
+[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[] = `...`
+
+###### filters?
+
+\{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \} = `...`
+
+###### filters.channelId?
+
+`string`[] = `...`
+
+###### filters.providerId?
+
+`string`[] = `...`
+
+###### filters.templateId?
+
+`string`[] = `...`
+
+###### headers?
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### lastTriggeredAt?
+
+`Date` = `...`
+
+###### name?
+
+`string` = `...`
+
+###### retryConfig?
+
+\{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \} = `...`
+
+###### retryConfig.backoffMultiplier
+
+`number` = `...`
+
+###### retryConfig.maxRetries
+
+`number` = `...`
+
+###### retryConfig.retryDelayMs
+
+`number` = `...`
+
+###### secret?
+
+`string` = `...`
+
+###### status
+
+`"error"` \| `"active"` \| `"inactive"` \| `"suspended"` = `...`
+
+###### updatedAt
+
+`Date` = `...`
+
+###### url
+
+`string` = `...`
 
 #### Returns
 
@@ -29,7 +107,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:19](https://github.com/k-otp/
 
 ### get()
 
-> **get**(`endpointId`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **get**(`endpointId`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L22)
 
@@ -41,19 +119,19 @@ Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
 ***
 
 ### list()
 
-> **list**(): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **list**(): `Promise`\<`object`[]\>
 
 Defined in: [packages/webhook/src/runtime/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L23)
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 
@@ -89,7 +167,85 @@ Defined in: [packages/webhook/src/runtime/types.ts:20](https://github.com/k-otp/
 
 ##### endpoint
 
-[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
+###### active
+
+`boolean` = `...`
+
+###### createdAt
+
+`Date` = `...`
+
+###### description?
+
+`string` = `...`
+
+###### events
+
+[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[] = `...`
+
+###### filters?
+
+\{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \} = `...`
+
+###### filters.channelId?
+
+`string`[] = `...`
+
+###### filters.providerId?
+
+`string`[] = `...`
+
+###### filters.templateId?
+
+`string`[] = `...`
+
+###### headers?
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### lastTriggeredAt?
+
+`Date` = `...`
+
+###### name?
+
+`string` = `...`
+
+###### retryConfig?
+
+\{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \} = `...`
+
+###### retryConfig.backoffMultiplier
+
+`number` = `...`
+
+###### retryConfig.maxRetries
+
+`number` = `...`
+
+###### retryConfig.retryDelayMs
+
+`number` = `...`
+
+###### secret?
+
+`string` = `...`
+
+###### status
+
+`"error"` \| `"active"` \| `"inactive"` \| `"suspended"` = `...`
+
+###### updatedAt
+
+`Date` = `...`
+
+###### url
+
+`string` = `...`
 
 #### Returns
 

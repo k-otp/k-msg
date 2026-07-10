@@ -313,7 +313,10 @@ async function collectPaginatedItems<TResponse, TItem>(input: {
   let nextUrl: string | undefined = input.url;
 
   while (nextUrl) {
-    const page = await githubRestPage<TResponse>(input.token, nextUrl);
+    const page: GithubRestPage<TResponse> = await githubRestPage<TResponse>(
+      input.token,
+      nextUrl,
+    );
     items.push(...input.pickItems(page.body));
     nextUrl = page.nextUrl;
   }
@@ -436,18 +439,17 @@ async function collectReviews(input: {
     | undefined;
 
   do {
-    const payload = await githubGraphql<GraphqlPullRequestResponse>(
-      input.token,
-      query,
-      {
+    const payload: GraphqlPullRequestResponse =
+      await githubGraphql<GraphqlPullRequestResponse>(input.token, query, {
         after,
         number: input.prNumber,
         owner: input.owner,
         repo: input.repo,
-      },
-    );
+      });
 
-    const pullRequest = payload.repository.pullRequest;
+    const pullRequest: NonNullable<
+      GraphqlPullRequestResponse["repository"]["pullRequest"]
+    > | null = payload.repository.pullRequest;
     if (!pullRequest) {
       throw new Error(
         `Pull request #${input.prNumber} not found in ${input.owner}/${input.repo}`,

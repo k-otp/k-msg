@@ -53,6 +53,7 @@ const RETRYABLE_ERROR_CODES = new Set([
   "RATE_LIMIT_EXCEEDED",
   "INTERNAL_ERROR",
 ]);
+const RETRY_DELAY_MS = 1000;
 
 function resolveQueueName(env: Env, requested?: string): string {
   const normalized = requested?.trim();
@@ -131,10 +132,13 @@ export class KMsgQueueDO extends DurableObject<Env> {
           typeof result.error.code === "string" ? result.error.code : "";
         const shouldRetry = RETRYABLE_ERROR_CODES.has(errorCode);
 
-        await this.queue.fail(job.id, result.error.message, shouldRetry);
+        await this.queue.fail(job.id, result.error.message, {
+          enabled: shouldRetry,
+          delayMs: shouldRetry ? RETRY_DELAY_MS : undefined,
+        });
 
         if (shouldRetry) {
-          await this.scheduleAlarm(Date.now() + 1000);
+          await this.scheduleAlarm(Date.now() + RETRY_DELAY_MS);
         }
       }
 

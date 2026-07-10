@@ -7,7 +7,7 @@
     "deploy": "wrangler deploy",
     "check": "wrangler check",
     "types": "wrangler types",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "ttsc --noEmit"
   },
   "dependencies": {
     "@k-msg/provider": "latest",
@@ -16,7 +16,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260129.0",
-    "typescript": "^5.7.2",
+    "@ttsc/lint": "^0.18.1",
+    "ttsc": "^0.18.1",
+    "typescript": "^7.0.2",
     "wrangler": "^4.4.0"
   }
 }

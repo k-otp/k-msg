@@ -39,7 +39,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:34](ht
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### interval
 
@@ -67,7 +67,7 @@ Defined in: [packages/analytics/src/aggregators/time-series.aggregator.ts:74](ht
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### windowSize
 

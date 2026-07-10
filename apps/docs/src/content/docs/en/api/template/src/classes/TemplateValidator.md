@@ -23,7 +23,7 @@ Defined in: [packages/template/src/parser/validator.ts:14](https://github.com/k-
 
 > `static` **quickValidate**(`template`): [`ValidationResult`](/en/api/template/src/interfaces/validationresult/)
 
-Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L206)
+Defined in: [packages/template/src/parser/validator.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/template/src/parser/validator.ts#L210)
 
 빠른 검증 - 기본적인 필수 필드만 검사
 
@@ -31,7 +31,7 @@ Defined in: [packages/template/src/parser/validator.ts:206](https://github.com/k
 
 ##### template
 
-`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/type-aliases/alimtalktemplate/)\>
 
 #### Returns
 
@@ -51,7 +51,81 @@ Defined in: [packages/template/src/parser/validator.ts:18](https://github.com/k-
 
 ##### template
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
+###### buttons?
+
+`object`[] = `...`
+
+###### category
+
+[`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/) = `...`
+
+###### code
+
+`string` = `...`
+
+###### content
+
+`string` = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata
+
+\{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \} = `TemplateMetadataSchema`
+
+###### metadata.approvedAt?
+
+`Date` = `...`
+
+###### metadata.createdAt
+
+`Date` = `...`
+
+###### metadata.rejectedAt?
+
+`Date` = `...`
+
+###### metadata.rejectionReason?
+
+`string` = `...`
+
+###### metadata.updatedAt
+
+`Date` = `...`
+
+###### metadata.usage
+
+\{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \} = `TemplateUsageStatsSchema`
+
+###### metadata.usage.delivered
+
+`number` = `...`
+
+###### metadata.usage.failed
+
+`number` = `...`
+
+###### metadata.usage.sent
+
+`number` = `...`
+
+###### name
+
+`string` = `...`
+
+###### provider
+
+`string` = `...`
+
+###### status
+
+[`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/) = `...`
+
+###### variables?
+
+`object`[] = `...`
 
 #### Returns
 

@@ -5,6 +5,6 @@ prev: false
 title: "SenderNumberFiltersType"
 ---
 
-> **SenderNumberFiltersType** = `z.infer`\<*typeof* [`SenderNumberFiltersSchema`](/en/api/channel/src/toolkit/variables/sendernumberfiltersschema/)\>
+> **SenderNumberFiltersType** = [`SenderNumberFilters`](/en/api/channel/src/toolkit/type-aliases/sendernumberfilters/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:237](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L237)
+Defined in: [packages/channel/src/types/channel.types.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L192)

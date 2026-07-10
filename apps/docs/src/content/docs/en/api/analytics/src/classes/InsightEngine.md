@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:18](https://githu
 
 ### detectAnomalies()
 
-> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L65)
 
@@ -53,13 +53,13 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:65](https://githu
 
 #### Returns
 
-`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 
 ### detectRealTimeAnomalies()
 
-> **detectRealTimeAnomalies**(`metric`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectRealTimeAnomalies**(`metric`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L26)
 
@@ -69,17 +69,39 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:26](https://githu
 
 ##### metric
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
+###### dimensions
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### timestamp
+
+`Date` = `...`
+
+###### type
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/) = `...`
+
+###### value
+
+`number` = `...`
 
 #### Returns
 
-`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 
 ### generateInsights()
 
-> **generateInsights**(`query`, `data`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+> **generateInsights**(`query`, `data`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/insight.engine.ts#L98)
 
@@ -89,7 +111,45 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://githu
 
 ##### query
 
-[`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
+###### dateRange
+
+\{ `end`: `Date`; `start`: `Date`; \} = `AnalyticsDateRangeSchema`
+
+###### dateRange.end
+
+`Date` = `...`
+
+###### dateRange.start
+
+`Date` = `...`
+
+###### filters?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### groupBy?
+
+`string`[] = `...`
+
+###### interval?
+
+`"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"` = `...`
+
+###### limit?
+
+`number` = `...`
+
+###### metrics
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[] = `...`
+
+###### offset?
+
+`number` = `...`
+
+###### orderBy?
+
+`object`[] = `...`
 
 ##### data
 
@@ -97,7 +157,7 @@ Defined in: [packages/analytics/src/services/insight.engine.ts:98](https://githu
 
 #### Returns
 
-`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 

@@ -38,9 +38,20 @@
     "test:all": "bun run test:unit && bun run test:integration",
     "test:coverage": "bun run --filter='./packages/*' test:coverage",
     "test:watch": "bun run --filter='./packages/*' test:watch",
-    "typecheck": "bun run typecheck:all",
-    "typecheck:all": "bun run --cwd packages/core build:types && bun run --cwd packages/template build:types && bun run --cwd packages/provider build:types && bun run --cwd packages/messaging build:types && bun run --filter='./packages/*' typecheck && bun run --cwd apps/cli typecheck",
-    "check:ci": "bun run typecheck && bun run --cwd packages/messaging build && bun run test:unit && bun run build:all && bun run test:integration && bun run --cwd apps/cli test && bun run --cwd apps/cli build",
+    "typecheck": "bun run typecheck:ttsc",
+    "typecheck:all": "bun run typecheck:ttsc",
+    "typecheck:ttsc": "bun run scripts/toolchain/run-typecheck.ts --compiler ttsc",
+    "typecheck:tsc": "bun run scripts/toolchain/run-typecheck.ts --compiler tsc",
+    "typecheck:parity": "bun run typecheck:ttsc && bun run typecheck:tsc",
+    "typecheck:ttsc:ts7": "bun run typecheck:ttsc",
+    "lint:ttsc": "bun run typecheck:ttsc",
+    "graph:ttsc": "bun run scripts/toolchain/run-ttsc-graph.ts",
+    "graph:ttsc:ts7": "bun run graph:ttsc",
+    "graph:ttsc:check": "bun run scripts/toolchain/check-ttsc-graph.ts --check",
+    "graph:ttsc:snapshot": "bun run scripts/toolchain/check-ttsc-graph.ts --write",
+    "benchmark:ttsc": "bun run scripts/toolchain/benchmark-ttsc.ts",
+    "benchmark:ttsc:ts7": "bun run benchmark:ttsc",
+    "check:ci": "bun run typecheck && bun run graph:ttsc:check && bun run build:all && bun run test:unit && bun run test:integration && bun run --cwd apps/cli test && bun run --cwd apps/cli build",
     "lint": "bun x @biomejs/biome lint .",
     "format": "bun x @biomejs/biome format --write .",
     "check": "bun x @biomejs/biome check .",
@@ -71,11 +82,17 @@
     "docs:version:snapshot": "bun run scripts/docs/version-snapshot.ts"
   },
   "peerDependencies": {
-    "typescript": "^5 || ^6"
+    "typescript": "^5 || ^6 || ^7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@ttsc/graph": "^0.18.1",
+    "@ttsc/lint": "^0.18.1",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
+    "hono": "catalog:",
+    "postgres": "catalog:",
+    "ttsc": "catalog:",
     "typescript": "catalog:"
   },
   "keywords": [
@@ -107,15 +124,17 @@
       "apps/*"
     ],
     "catalog": {
-      "typescript": "^6.0.3",
+      "typescript": "^7.0.2",
+      "ttsc": "^0.18.1",
       "@types/bun": "^1.3.14",
       "@types/node": "^26.0.1",
       "zod": "^4.4.3",
       "hono": "^4.8.10",
+      "postgres": "^3.4.7",
       "@hono/zod-validator": "^0.4.1",
       "honox": "^0.1.43",
       "vite": "^6.3.5",
-      "@cloudflare/workers-types": "^4.20250131.0",
+      "@cloudflare/workers-types": "^4.20260214.0",
       "wrangler": "^4.4.0"
     }
   }

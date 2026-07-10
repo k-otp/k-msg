@@ -91,7 +91,69 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:93](https://github.
 
 ##### request
 
-[`ChannelCreateRequest`](/en/api/channel/src/toolkit/interfaces/channelcreaterequest/)
+###### businessInfo?
+
+\{ `category`: `string`; `contactEmail`: `string`; `contactPerson`: `string`; `contactPhone`: `string`; `name`: `string`; `registrationNumber`: `string`; \} = `...`
+
+###### businessInfo.category
+
+`string` = `...`
+
+###### businessInfo.contactEmail
+
+`string` = `...`
+
+###### businessInfo.contactPerson
+
+`string` = `...`
+
+###### businessInfo.contactPhone
+
+`string` = `...`
+
+###### businessInfo.name
+
+`string` = `...`
+
+###### businessInfo.registrationNumber
+
+`string` = `...`
+
+###### kakaoInfo?
+
+\{ `brandName`: `string`; `description?`: `string`; `logoUrl?`: `string`; `plusFriendId`: `string`; \} = `...`
+
+###### kakaoInfo.brandName
+
+`string` = `...`
+
+###### kakaoInfo.description?
+
+`string` = `...`
+
+###### kakaoInfo.logoUrl?
+
+`string` = `...`
+
+###### kakaoInfo.plusFriendId
+
+`string` = `...`
+
+###### name
+
+`string` = `...`
+
+###### profileKey
+
+`string` = `...`
+
+###### provider
+
+`string` = `...`
+
+###### type
+
+[`ChannelType`](/en/api/channel/src/toolkit/enumerations/channeltype/) = `...`
 
 ##### userId?
 
@@ -117,7 +179,33 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:309](https://github
 
 ##### request
 
-[`SenderNumberCreateRequest`](/en/api/channel/src/toolkit/interfaces/sendernumbercreaterequest/)
+###### businessInfo?
+
+\{ `businessName`: `string`; `businessRegistrationNumber`: `string`; `contactEmail`: `string`; `contactPerson`: `string`; \} = `...`
+
+###### businessInfo.businessName
+
+`string` = `...`
+
+###### businessInfo.businessRegistrationNumber
+
+`string` = `...`
+
+###### businessInfo.contactEmail
+
+`string` = `...`
+
+###### businessInfo.contactPerson
+
+`string` = `...`
+
+###### category
+
+[`SenderNumberCategory`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/) = `...`
+
+###### phoneNumber
+
+`string` = `...`
 
 ##### userId?
 
@@ -355,7 +443,25 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:227](https://github
 
 ##### filters?
 
-[`ChannelFilters`](/en/api/channel/src/toolkit/interfaces/channelfilters/) = `{}`
+###### createdAfter?
+
+`Date` = `...`
+
+###### createdBefore?
+
+`Date` = `...`
+
+###### provider?
+
+`string` = `...`
+
+###### status?
+
+[`PENDING`](/en/api/channel/src/toolkit/enumerations/channelstatus/#pending) \| [`VERIFYING`](/en/api/channel/src/toolkit/enumerations/channelstatus/#verifying) \| [`ACTIVE`](/en/api/channel/src/toolkit/enumerations/channelstatus/#active) \| [`SUSPENDED`](/en/api/channel/src/toolkit/enumerations/channelstatus/#suspended) \| [`BLOCKED`](/en/api/channel/src/toolkit/enumerations/channelstatus/#blocked) \| [`DELETED`](/en/api/channel/src/toolkit/enumerations/channelstatus/#deleted) = `...`
+
+###### type?
+
+[`KAKAO_ALIMTALK`](/en/api/channel/src/toolkit/enumerations/channeltype/#kakao_alimtalk) \| [`KAKAO_FRIENDTALK`](/en/api/channel/src/toolkit/enumerations/channeltype/#kakao_friendtalk) \| [`SMS`](/en/api/channel/src/toolkit/enumerations/channeltype/#sms) \| [`LMS`](/en/api/channel/src/toolkit/enumerations/channeltype/#lms) \| [`MMS`](/en/api/channel/src/toolkit/enumerations/channeltype/#mms) = `...`
 
 ##### pagination?
 
@@ -399,7 +505,21 @@ Defined in: [packages/channel/src/toolkit/management/crud.ts:482](https://github
 
 ##### filters?
 
-[`SenderNumberFilters`](/en/api/channel/src/toolkit/interfaces/sendernumberfilters/) = `{}`
+###### category?
+
+[`BUSINESS`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/#business) \| [`PERSONAL`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/#personal) \| [`GOVERNMENT`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/#government) \| [`NON_PROFIT`](/en/api/channel/src/toolkit/enumerations/sendernumbercategory/#non_profit) = `...`
+
+###### channelId?
+
+`string` = `...`
+
+###### status?
+
+[`PENDING`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/#pending) \| [`VERIFYING`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/#verifying) \| [`VERIFIED`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/#verified) \| [`REJECTED`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/#rejected) \| [`BLOCKED`](/en/api/channel/src/toolkit/enumerations/sendernumberstatus/#blocked) = `...`
+
+###### verified?
+
+`boolean` = `...`
 
 ##### pagination?
 
