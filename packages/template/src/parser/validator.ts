@@ -140,7 +140,11 @@ export class TemplateValidator {
       case TemplateCategory.PAYMENT:
         TemplateValidator.validatePaymentTemplate(template, errors, warnings);
         break;
-      // 다른 카테고리들도 필요에 따라 추가
+      case TemplateCategory.INFORMATION:
+      case TemplateCategory.NOTIFICATION:
+      case TemplateCategory.RESERVATION:
+      case TemplateCategory.SHIPPING:
+        break;
     }
   }
 

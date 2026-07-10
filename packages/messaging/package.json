@@ -60,7 +60,7 @@
     "test:e2e": "bun test --testPathPattern='.*\\.e2e\\.(ts|js)$' --testTimeout=30000",
     "test:coverage": "bun test --coverage",
     "test:watch": "bun test --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ttsc --noEmit",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "pack": "bun pm pack",
     "publish": "bun publish --access public"
