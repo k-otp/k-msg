@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -7,6 +6,7 @@
     "strict": true,
     "ignoreDeprecations": "7.0",
     "types": ["@cloudflare/workers-types/latest"],
+    "plugins": [{ "transform": "@ttsc/lint" }],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

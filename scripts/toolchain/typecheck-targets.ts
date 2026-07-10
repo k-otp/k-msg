@@ -60,32 +60,32 @@ export const typecheckTargets: readonly TypecheckTarget[] = [
   {
     category: "example",
     label: "Hono Bun send-only example",
-    tsconfig: "examples/hono-bun-send-only/tsconfig.json",
+    tsconfig: "examples/hono-bun-send-only/tsconfig.workspace.json",
   },
   {
     category: "example",
     label: "Hono Pages tracking example",
-    tsconfig: "examples/hono-pages-tracking-hyperdrive/tsconfig.json",
+    tsconfig: "examples/hono-pages-tracking-hyperdrive/tsconfig.workspace.json",
   },
   {
     category: "example",
     label: "Hono Pages send-only example",
-    tsconfig: "examples/hono-pages-send-only/tsconfig.json",
+    tsconfig: "examples/hono-pages-send-only/tsconfig.workspace.json",
   },
   {
     category: "example",
     label: "Hono Worker queue example",
-    tsconfig: "examples/hono-worker-queue-do/tsconfig.json",
+    tsconfig: "examples/hono-worker-queue-do/tsconfig.workspace.json",
   },
   {
     category: "example",
     label: "Hono Worker tracking example",
-    tsconfig: "examples/hono-worker-tracking-d1/tsconfig.json",
+    tsconfig: "examples/hono-worker-tracking-d1/tsconfig.workspace.json",
   },
   {
     category: "example",
     label: "Hono Worker webhook example",
-    tsconfig: "examples/hono-worker-webhook-d1/tsconfig.json",
+    tsconfig: "examples/hono-worker-webhook-d1/tsconfig.workspace.json",
   },
 ] as const;
 
