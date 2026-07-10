@@ -39,7 +39,29 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:47](https:/
 
 ##### metric
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
+###### dimensions
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### timestamp
+
+`Date` = `...`
+
+###### type
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/) = `...`
+
+###### value
+
+`number` = `...`
 
 #### Returns
 
@@ -59,7 +81,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:65](https:/
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 #### Returns
 
@@ -79,7 +101,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:74](https:/
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 #### Returns
 
@@ -99,7 +121,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:94](https:/
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### groupBy
 
@@ -131,7 +153,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:210](https:
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### windowSizeMs
 
@@ -163,7 +185,7 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:173](https:
 
 ##### metrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### percentiles
 
@@ -191,11 +213,11 @@ Defined in: [packages/analytics/src/aggregators/metric.aggregator.ts:127](https:
 
 ##### numeratorMetrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### denominatorMetrics
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ##### groupBy?
 

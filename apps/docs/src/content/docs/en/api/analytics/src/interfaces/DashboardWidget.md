@@ -51,9 +51,49 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:30](https://github.com/
 
 ### query
 
-> **query**: [`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
+> **query**: `object`
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L31)
+
+#### dateRange
+
+> **dateRange**: `object` = `AnalyticsDateRangeSchema`
+
+##### dateRange.end
+
+> **end**: `Date`
+
+##### dateRange.start
+
+> **start**: `Date`
+
+#### filters?
+
+> `optional` **filters?**: `Record`\<`string`, `any`\>
+
+#### groupBy?
+
+> `optional` **groupBy?**: `string`[]
+
+#### interval?
+
+> `optional` **interval?**: `"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
+
+#### limit?
+
+> `optional` **limit?**: `number`
+
+#### metrics
+
+> **metrics**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[]
+
+#### offset?
+
+> `optional` **offset?**: `number`
+
+#### orderBy?
+
+> `optional` **orderBy?**: `object`[]
 
 ***
 

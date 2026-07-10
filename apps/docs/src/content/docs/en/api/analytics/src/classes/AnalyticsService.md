@@ -39,7 +39,29 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:36](https://gi
 
 ##### metric
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
+###### dimensions
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### timestamp
+
+`Date` = `...`
+
+###### type
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/) = `...`
+
+###### value
+
+`number` = `...`
 
 #### Returns
 
@@ -49,7 +71,7 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:36](https://gi
 
 ### detectAnomalies()
 
-> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectAnomalies**(`metricType`, `timeRange`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/services/analytics.service.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/analytics.service.ts#L136)
 
@@ -73,13 +95,13 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:136](https://g
 
 #### Returns
 
-`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 
 ### getDashboardData()
 
-> **getDashboardData**(`timeRange`): `Promise`\<\{ `insights`: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[] \| `undefined`; `kpis`: \{ `clickRate`: `number`; `deliveryRate`: `number`; `errorRate`: `number`; `totalMessages`: `number`; \}; `metrics`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `timeRange`: \{ `end`: `Date`; `start`: `Date`; \}; `trends`: \{ \}; \}\>
+> **getDashboardData**(`timeRange`): `Promise`\<\{ `insights`: `object`[] \| `undefined`; `kpis`: \{ `clickRate`: `number`; `deliveryRate`: `number`; `errorRate`: `number`; `totalMessages`: `number`; \}; `metrics`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `timeRange`: \{ `end`: `Date`; `start`: `Date`; \}; `trends`: \{ \}; \}\>
 
 Defined in: [packages/analytics/src/services/analytics.service.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/analytics.service.ts#L95)
 
@@ -99,7 +121,7 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:95](https://gi
 
 #### Returns
 
-`Promise`\<\{ `insights`: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[] \| `undefined`; `kpis`: \{ `clickRate`: `number`; `deliveryRate`: `number`; `errorRate`: `number`; `totalMessages`: `number`; \}; `metrics`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `timeRange`: \{ `end`: `Date`; `start`: `Date`; \}; `trends`: \{ \}; \}\>
+`Promise`\<\{ `insights`: `object`[] \| `undefined`; `kpis`: \{ `clickRate`: `number`; `deliveryRate`: `number`; `errorRate`: `number`; `totalMessages`: `number`; \}; `metrics`: [`AggregatedMetric`](/en/api/analytics/src/interfaces/aggregatedmetric/)[]; `timeRange`: \{ `end`: `Date`; `start`: `Date`; \}; `trends`: \{ \}; \}\>
 
 ***
 
@@ -115,7 +137,45 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:52](https://gi
 
 ##### query
 
-[`AnalyticsQuery`](/en/api/analytics/src/interfaces/analyticsquery/)
+###### dateRange
+
+\{ `end`: `Date`; `start`: `Date`; \} = `AnalyticsDateRangeSchema`
+
+###### dateRange.end
+
+`Date` = `...`
+
+###### dateRange.start
+
+`Date` = `...`
+
+###### filters?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### groupBy?
+
+`string`[] = `...`
+
+###### interval?
+
+`"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"` = `...`
+
+###### limit?
+
+`number` = `...`
+
+###### metrics
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/)[] = `...`
+
+###### offset?
+
+`number` = `...`
+
+###### orderBy?
+
+`object`[] = `...`
 
 #### Returns
 
@@ -125,7 +185,7 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:52](https://gi
 
 ### streamMetrics()
 
-> **streamMetrics**(`types`): `AsyncGenerator`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)\>
+> **streamMetrics**(`types`): `AsyncGenerator`\<\{ `dimensions`: `Record`\<`string`, `string`\>; `id`: `string`; `metadata?`: `Record`\<`string`, `any`\>; `timestamp`: `Date`; `type`: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/); `value`: `number`; \}\>
 
 Defined in: [packages/analytics/src/services/analytics.service.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/services/analytics.service.ts#L81)
 
@@ -139,4 +199,4 @@ Defined in: [packages/analytics/src/services/analytics.service.ts:81](https://gi
 
 #### Returns
 
-`AsyncGenerator`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)\>
+`AsyncGenerator`\<\{ `dimensions`: `Record`\<`string`, `string`\>; `id`: `string`; `metadata?`: `Record`\<`string`, `any`\>; `timestamp`: `Date`; `type`: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/); `value`: `number`; \}\>

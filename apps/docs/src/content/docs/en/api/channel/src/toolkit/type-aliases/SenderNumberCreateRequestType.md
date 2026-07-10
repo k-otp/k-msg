@@ -5,6 +5,6 @@ prev: false
 title: "SenderNumberCreateRequestType"
 ---
 
-> **SenderNumberCreateRequestType** = `z.infer`\<*typeof* [`SenderNumberCreateRequestSchema`](/en/api/channel/src/toolkit/variables/sendernumbercreaterequestschema/)\>
+> **SenderNumberCreateRequestType** = [`SenderNumberCreateRequest`](/en/api/channel/src/toolkit/type-aliases/sendernumbercreaterequest/)
 
-Defined in: [packages/channel/src/types/channel.types.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L233)
+Defined in: [packages/channel/src/types/channel.types.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/types/channel.types.ts#L190)

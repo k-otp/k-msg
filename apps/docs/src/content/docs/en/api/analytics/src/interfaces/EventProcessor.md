@@ -29,7 +29,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:35](https://gi
 
 ### process()
 
-> **process**(`event`): `Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+> **process**(`event`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/collectors/event.collector.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L36)
 
@@ -41,4 +41,4 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:36](https://gi
 
 #### Returns
 
-`Promise`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+`Promise`\<`object`[]\>

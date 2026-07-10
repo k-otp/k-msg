@@ -21,7 +21,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:5](https:
 
 ### createTemplate()
 
-> **createTemplate**(`template`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+> **createTemplate**(`template`): `Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L8)
 
@@ -29,11 +29,11 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:8](https:
 
 ##### template
 
-`Omit`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/), `"id"` \| `"metadata"`\>
+`Omit`\<[`AlimTalkTemplate`](/en/api/template/src/type-aliases/alimtalktemplate/), `"id"` \| `"metadata"`\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:70](https
 
 ### getTemplate()
 
-> **getTemplate**(`templateId`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
+> **getTemplate**(`templateId`): `Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L39)
 
@@ -69,7 +69,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:39](https
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`\>
+`Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`\>
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:74](https
 
 ### updateTemplate()
 
-> **updateTemplate**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+> **updateTemplate**(`templateId`, `updates`): `Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/toolkit/in-memory-template-store.ts#L43)
 
@@ -109,8 +109,8 @@ Defined in: [packages/template/src/toolkit/in-memory-template-store.ts:43](https
 
 ##### updates
 
-`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/type-aliases/alimtalktemplate/)\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>

@@ -5,7 +5,7 @@ prev: false
 title: "addEndpoints"
 ---
 
-> **addEndpoints**(`runtime`, `inputs`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+> **addEndpoints**(`runtime`, `inputs`): `Promise`\<`object`[]\>
 
 Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:473](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L473)
 
@@ -21,4 +21,4 @@ readonly [`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpoi
 
 ## Returns
 
-`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]\>
+`Promise`\<`object`[]\>

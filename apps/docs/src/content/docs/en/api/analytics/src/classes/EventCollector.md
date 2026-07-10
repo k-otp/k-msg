@@ -143,7 +143,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:192](https://g
 
 ### getCollectedMetrics()
 
-> **getCollectedMetrics**(`since?`): [`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+> **getCollectedMetrics**(`since?`): `object`[]
 
 Defined in: [packages/analytics/src/collectors/event.collector.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L130)
 
@@ -157,7 +157,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:130](https://g
 
 #### Returns
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]
+`object`[]
 
 ***
 
@@ -347,7 +347,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.c
 
 ### streamMetrics()
 
-> **streamMetrics**(): `AsyncGenerator`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+> **streamMetrics**(): `AsyncGenerator`\<`object`[]\>
 
 Defined in: [packages/analytics/src/collectors/event.collector.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/event.collector.ts#L141)
 
@@ -355,7 +355,7 @@ Defined in: [packages/analytics/src/collectors/event.collector.ts:141](https://g
 
 #### Returns
 
-`AsyncGenerator`\<[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)[]\>
+`AsyncGenerator`\<`object`[]\>
 
 ***
 

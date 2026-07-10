@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryAttempt"
 ---
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L104)
+Defined in: [packages/messaging/src/types/message.runtime.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L55)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:104](https://github
 
 > **attemptedAt**: `Date`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L106)
+Defined in: [packages/messaging/src/types/message.runtime.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L57)
 
 ***
 
@@ -21,15 +21,27 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:106](https://github
 
 > **attemptNumber**: `number`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L105)
+Defined in: [packages/messaging/src/types/message.runtime.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L56)
 
 ***
 
 ### error?
 
-> `optional` **error?**: [`MessageError`](/en/api/messaging/src/interfaces/messageerror/)
+> `optional` **error?**: `object`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L108)
+Defined in: [packages/messaging/src/types/message.runtime.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L59)
+
+#### code
+
+> **code**: `string`
+
+#### details?
+
+> `optional` **details?**: `Record`\<`string`, `unknown`\>
+
+#### message
+
+> **message**: `string`
 
 ***
 
@@ -37,7 +49,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:108](https://github
 
 > **provider**: `string`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L109)
+Defined in: [packages/messaging/src/types/message.runtime.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L60)
 
 ***
 
@@ -45,4 +57,4 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:109](https://github
 
 > **status**: [`MessageStatus`](/en/api/messaging/src/enumerations/messagestatus/)
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L107)
+Defined in: [packages/messaging/src/types/message.runtime.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L58)

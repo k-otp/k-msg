@@ -5,7 +5,7 @@ prev: false
 title: "MessageStatus"
 ---
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L75)
+Defined in: [packages/messaging/src/types/message.runtime.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L32)
 
 ## Enumeration Members
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:75](https://github.
 
 > **CANCELLED**: `"CANCELLED"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L82)
+Defined in: [packages/messaging/src/types/message.runtime.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L39)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:82](https://github.
 
 > **CLICKED**: `"CLICKED"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L81)
+Defined in: [packages/messaging/src/types/message.runtime.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L38)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:81](https://github.
 
 > **DELIVERED**: `"DELIVERED"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L79)
+Defined in: [packages/messaging/src/types/message.runtime.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L36)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:79](https://github.
 
 > **FAILED**: `"FAILED"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L80)
+Defined in: [packages/messaging/src/types/message.runtime.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L37)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:80](https://github.
 
 > **QUEUED**: `"QUEUED"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L76)
+Defined in: [packages/messaging/src/types/message.runtime.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L33)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:76](https://github.
 
 > **SENDING**: `"SENDING"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L77)
+Defined in: [packages/messaging/src/types/message.runtime.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L34)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:77](https://github.
 
 > **SENT**: `"SENT"`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L78)
+Defined in: [packages/messaging/src/types/message.runtime.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L35)

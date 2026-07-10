@@ -69,7 +69,29 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://git
 
 ##### metric
 
-[`MetricData`](/en/api/analytics/src/interfaces/metricdata/)
+###### dimensions
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata?
+
+`Record`\<`string`, `any`\> = `...`
+
+###### timestamp
+
+`Date` = `...`
+
+###### type
+
+[`MetricType`](/en/api/analytics/src/enumerations/metrictype/) = `...`
+
+###### value
+
+`number` = `...`
 
 #### Returns
 
@@ -79,7 +101,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:90](https://git
 
 ### detectTrendChanges()
 
-> **detectTrendChanges**(`metrics`, `windowSize?`): `Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+> **detectTrendChanges**(`metrics`, `windowSize?`): `Promise`\<`object`[]\>
 
 Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/insights/anomaly.detector.ts#L179)
 
@@ -97,7 +119,7 @@ Defined in: [packages/analytics/src/insights/anomaly.detector.ts:179](https://gi
 
 #### Returns
 
-`Promise`\<[`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]\>
+`Promise`\<`object`[]\>
 
 ***
 

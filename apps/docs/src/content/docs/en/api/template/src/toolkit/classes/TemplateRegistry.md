@@ -157,7 +157,7 @@ Export templates to JSON
 
 ### get()
 
-> **get**(`templateId`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **get**(`templateId`): \{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L208)
 
@@ -171,13 +171,13 @@ Get template by ID
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 ***
 
 ### getByCategory()
 
-> **getByCategory**(`category`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
+> **getByCategory**(`category`): `object`[]
 
 Defined in: [packages/template/src/registry/template.registry.ts:350](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L350)
 
@@ -191,13 +191,13 @@ Get templates by category
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
+`object`[]
 
 ***
 
 ### getByCode()
 
-> **getByCode**(`code`, `provider`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **getByCode**(`code`, `provider`): \{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L215)
 
@@ -215,13 +215,13 @@ Get template by code and provider
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 ***
 
 ### getByProvider()
 
-> **getByProvider**(`provider`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
+> **getByProvider**(`provider`): `object`[]
 
 Defined in: [packages/template/src/registry/template.registry.ts:338](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L338)
 
@@ -235,7 +235,7 @@ Get templates by provider
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)[]
+`object`[]
 
 ***
 
@@ -311,7 +311,7 @@ Get template usage statistics
 
 ### getVersion()
 
-> **getVersion**(`templateId`, `version`): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+> **getVersion**(`templateId`, `version`): \{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 Defined in: [packages/template/src/registry/template.registry.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L406)
 
@@ -329,7 +329,7 @@ Get specific template version
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/) \| `null`
+\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \} \| `null`
 
 ***
 
@@ -449,7 +449,81 @@ Register a new template
 
 ##### template
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
+###### buttons?
+
+`object`[] = `...`
+
+###### category
+
+[`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/) = `...`
+
+###### code
+
+`string` = `...`
+
+###### content
+
+`string` = `...`
+
+###### id
+
+`string` = `...`
+
+###### metadata
+
+\{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \} = `TemplateMetadataSchema`
+
+###### metadata.approvedAt?
+
+`Date` = `...`
+
+###### metadata.createdAt
+
+`Date` = `...`
+
+###### metadata.rejectedAt?
+
+`Date` = `...`
+
+###### metadata.rejectionReason?
+
+`string` = `...`
+
+###### metadata.updatedAt
+
+`Date` = `...`
+
+###### metadata.usage
+
+\{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \} = `TemplateUsageStatsSchema`
+
+###### metadata.usage.delivered
+
+`number` = `...`
+
+###### metadata.usage.failed
+
+`number` = `...`
+
+###### metadata.usage.sent
+
+`number` = `...`
+
+###### name
+
+`string` = `...`
+
+###### provider
+
+`string` = `...`
+
+###### status
+
+[`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/) = `...`
+
+###### variables?
+
+`object`[] = `...`
 
 #### Returns
 
@@ -507,7 +581,7 @@ Defined in: [packages/template/src/shared/event-emitter.ts:31](https://github.co
 
 ### restoreVersion()
 
-> **restoreVersion**(`templateId`, `version`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+> **restoreVersion**(`templateId`, `version`): `Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 Defined in: [packages/template/src/registry/template.registry.ts:417](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L417)
 
@@ -525,7 +599,7 @@ Restore template to a specific version
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 ***
 
@@ -555,7 +629,7 @@ Search templates with filters and pagination
 
 ### update()
 
-> **update**(`templateId`, `updates`): `Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+> **update**(`templateId`, `updates`): `Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 Defined in: [packages/template/src/registry/template.registry.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/template/src/registry/template.registry.ts#L153)
 
@@ -569,11 +643,11 @@ Update an existing template
 
 ##### updates
 
-`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/type-aliases/alimtalktemplate/)\>
 
 #### Returns
 
-`Promise`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\>
+`Promise`\<\{ `buttons?`: `object`[]; `category`: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/); `code`: `string`; `content`: `string`; `id`: `string`; `metadata`: \{ `approvedAt?`: `Date`; `createdAt`: `Date`; `rejectedAt?`: `Date`; `rejectionReason?`: `string`; `updatedAt`: `Date`; `usage`: \{ `delivered`: `number`; `failed`: `number`; `sent`: `number`; \}; \}; `name`: `string`; `provider`: `string`; `status`: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/); `variables?`: `object`[]; \}\>
 
 ***
 

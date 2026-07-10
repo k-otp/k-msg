@@ -5,7 +5,7 @@ prev: false
 title: "BulkRecipient"
 ---
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L127)
+Defined in: [packages/messaging/src/types/message.runtime.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L78)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:127](https://github
 
 > `optional` **metadata?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L130)
+Defined in: [packages/messaging/src/types/message.runtime.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L81)
 
 ***
 
@@ -21,12 +21,12 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:130](https://github
 
 > **phoneNumber**: `string`
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L128)
+Defined in: [packages/messaging/src/types/message.runtime.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L79)
 
 ***
 
 ### variables
 
-> **variables**: [`VariableMap`](/en/api/messaging/src/interfaces/variablemap/)
+> **variables**: [`VariableMap`](/en/api/messaging/src/type-aliases/variablemap/)
 
-Defined in: [packages/messaging/src/types/message.runtime.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L129)
+Defined in: [packages/messaging/src/types/message.runtime.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.runtime.ts#L80)

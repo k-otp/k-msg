@@ -273,7 +273,85 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:45](https://github
 
 ##### endpoint
 
-[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)
+###### active
+
+`boolean` = `...`
+
+###### createdAt
+
+`Date` = `...`
+
+###### description?
+
+`string` = `...`
+
+###### events
+
+[`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[] = `...`
+
+###### filters?
+
+\{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \} = `...`
+
+###### filters.channelId?
+
+`string`[] = `...`
+
+###### filters.providerId?
+
+`string`[] = `...`
+
+###### filters.templateId?
+
+`string`[] = `...`
+
+###### headers?
+
+`Record`\<`string`, `string`\> = `...`
+
+###### id
+
+`string` = `...`
+
+###### lastTriggeredAt?
+
+`Date` = `...`
+
+###### name?
+
+`string` = `...`
+
+###### retryConfig?
+
+\{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \} = `...`
+
+###### retryConfig.backoffMultiplier
+
+`number` = `...`
+
+###### retryConfig.maxRetries
+
+`number` = `...`
+
+###### retryConfig.retryDelayMs
+
+`number` = `...`
+
+###### secret?
+
+`string` = `...`
+
+###### status
+
+`"error"` \| `"active"` \| `"inactive"` \| `"suspended"` = `...`
+
+###### updatedAt
+
+`Date` = `...`
+
+###### url
+
+`string` = `...`
 
 #### Returns
 
@@ -331,7 +409,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 ### selectEndpoint()
 
-> **selectEndpoint**(`endpoints`): `Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+> **selectEndpoint**(`endpoints`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
 Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L83)
 
@@ -341,11 +419,11 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github
 
 ##### endpoints
 
-[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/)[]
+`object`[]
 
 #### Returns
 
-`Promise`\<[`WebhookEndpoint`](/en/api/webhook/src/interfaces/webhookendpoint/) \| `null`\>
+`Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
 ***
 
