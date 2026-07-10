@@ -1,23 +1,28 @@
 ---
 import DefaultHead from "@astrojs/starlight/components/Head.astro";
+import { docsAnalytics } from "../config/analytics";
+
+const googleAnalyticsScriptUrl = `https://www.googletagmanager.com/gtag/js?id=${docsAnalytics.googleAnalyticsMeasurementId}`;
+const googleAnalyticsMeasurementId = docsAnalytics.googleAnalyticsMeasurementId;
 ---
 
 <DefaultHead />
 <script>
   import clarity from "@microsoft/clarity";
+  import { docsAnalytics } from "../config/analytics";
 
-  clarity.init("vlennjsv6z");
+  clarity.init(docsAnalytics.clarityProjectId);
 </script>
 <script
   is:inline
   async
-  src="https://www.googletagmanager.com/gtag/js?id=G-2924TMM32H"
+  src={googleAnalyticsScriptUrl}
 ></script>
-<script is:inline>
+<script is:inline define:vars={{ googleAnalyticsMeasurementId }}>
   window.dataLayer = window.dataLayer || [];
   function gtag() {
     dataLayer.push(arguments);
   }
   gtag("js", new Date());
-  gtag("config", "G-2924TMM32H");
+  gtag("config", googleAnalyticsMeasurementId);
 </script>
