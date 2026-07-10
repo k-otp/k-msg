@@ -61,9 +61,9 @@ The shared target registry covers:
 - all publishable packages under `packages/*`
 - `apps/cli`, after its generated command registry is refreshed
 - repository TypeScript scripts through `tsconfig.tooling.json`
-- the five TypeScript Hono examples
+- the six TypeScript Hono examples
 
-The runner resolves the workspace's platform-specific TypeScript 7 binary once and passes it to `ttsc`. This matters for examples because they keep standalone package manifests but are validated from the root installation in CI.
+The runner resolves the workspace's platform-specific TypeScript 7 binary once and passes it to `ttsc`. The examples keep standalone package manifests with their own TypeScript, `ttsc`, and `@ttsc/lint` declarations while CI validates them from the root installation.
 
 The registry is ordered from dependency providers toward consumers. The checked graph currently confirms the main direction as `core -> template -> provider/messaging -> analytics/k-msg/CLI`; the exact compiler-resolved relationships are checked in at [the TypeScript architecture graph](../architecture/typescript-graph.md).
 
