@@ -63,7 +63,7 @@ The shared target registry covers:
 - repository TypeScript scripts through `tsconfig.tooling.json`
 - the six TypeScript Hono examples
 
-The runner resolves the workspace's platform-specific TypeScript 7 binary once and passes it to `ttsc`. The examples keep standalone package manifests with their own TypeScript, `ttsc`, and `@ttsc/lint` declarations while CI validates them from the root installation.
+The runner resolves the workspace's platform-specific TypeScript 7 binary once and passes it to `ttsc`. Each example's default `tsconfig.json` validates its installed package dependencies independently. CI uses the adjacent `tsconfig.workspace.json` overlay to apply workspace source paths without changing that standalone contract.
 
 The registry is ordered from dependency providers toward consumers. The checked graph currently confirms the main direction as `core -> template -> provider/messaging -> analytics/k-msg/CLI`; the exact compiler-resolved relationships are checked in at [the TypeScript architecture graph](../architecture/typescript-graph.md).
 

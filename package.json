@@ -51,7 +51,7 @@
     "graph:ttsc:snapshot": "bun run scripts/toolchain/check-ttsc-graph.ts --write",
     "benchmark:ttsc": "bun run scripts/toolchain/benchmark-ttsc.ts",
     "benchmark:ttsc:ts7": "bun run benchmark:ttsc",
-    "check:ci": "bun run typecheck && bun run graph:ttsc:check && bun run test:unit && bun run build:all && bun run test:integration && bun run --cwd apps/cli test && bun run --cwd apps/cli build",
+    "check:ci": "bun run typecheck && bun run graph:ttsc:check && bun run build:all && bun run test:unit && bun run test:integration && bun run --cwd apps/cli test && bun run --cwd apps/cli build",
     "lint": "bun x @biomejs/biome lint .",
     "format": "bun x @biomejs/biome format --write .",
     "check": "bun x @biomejs/biome check .",

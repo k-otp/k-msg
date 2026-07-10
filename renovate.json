@@ -19,6 +19,18 @@
     },
     {
       "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+      "groupName": "major dependency updates"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "monthly dependency maintenance"
+    },
+    {
+      "matchManagers": ["npm"],
       "matchFileNames": ["apps/docs/package.json"],
       "groupName": "docs stack monthly"
     },
@@ -29,6 +41,7 @@
     },
     {
       "matchManagers": ["npm"],
+      "matchFileNames": ["!apps/docs/package.json"],
       "matchPackageNames": [
         "@types/bun",
         "@types/node",
@@ -38,18 +51,6 @@
         "@ttsc/lint"
       ],
       "groupName": "typescript toolchain monthly"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": true,
-      "automerge": false,
-      "groupName": "major dependency updates"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "groupName": "monthly dependency maintenance"
     }
   ]
 }
