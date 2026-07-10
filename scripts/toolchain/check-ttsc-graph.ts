@@ -139,9 +139,71 @@ async function readSnapshot(): Promise<string> {
   }
 }
 
-function collectDependencies(graph: TypeScriptGraph): string[] {
-  const filesById = new Map(graph.nodes.map((node) => [node.id, node.file]));
+async function collectWorkspacePackageAreas(): Promise<Map<string, string>> {
+  const packageAreas = new Map<string, string>();
+  const packageManifests = new Bun.Glob("packages/*/package.json");
+
+  for await (const manifestPath of packageManifests.scan({ cwd: repoRoot })) {
+    const manifest = await Bun.file(path.join(repoRoot, manifestPath)).json();
+    if (
+      isRecord(manifest) &&
+      typeof manifest.name === "string" &&
+      manifest.name.length > 0
+    ) {
+      packageAreas.set(
+        manifest.name,
+        path.dirname(manifestPath).replaceAll("\\", "/"),
+      );
+    }
+  }
+
+  return packageAreas;
+}
+
+function packageNameForSpecifier(specifier: string): string {
+  const segments = specifier.split("/");
+  return specifier.startsWith("@")
+    ? segments.slice(0, 2).join("/")
+    : (segments[0] ?? specifier);
+}
+
+async function collectReExportDependencies(): Promise<string[]> {
+  const packageAreas = await collectWorkspacePackageAreas();
   const dependencies = new Set<string>();
+  const sources = new Bun.Glob("packages/*/src/**/*.ts");
+  const reExportPattern =
+    /\bexport\s+(?:type\s+)?(?:\*[^;]*?|\{[^;]*?\})\s+from\s+["']([^"']+)["']/g;
+
+  for await (const sourcePath of sources.scan({ cwd: repoRoot })) {
+    if (/\.(?:spec|test)\.ts$/.test(sourcePath)) {
+      continue;
+    }
+
+    const source = areaForFile(sourcePath);
+    if (!source) {
+      continue;
+    }
+
+    const contents = await Bun.file(path.join(repoRoot, sourcePath)).text();
+    for (const match of contents.matchAll(reExportPattern)) {
+      const specifier = match[1];
+      if (!specifier) {
+        continue;
+      }
+
+      const target = packageAreas.get(packageNameForSpecifier(specifier));
+      if (target && target !== source) {
+        dependencies.add(`${source} -> ${target}`);
+      }
+    }
+  }
+
+  return [...dependencies];
+}
+
+async function collectDependencies(graph: TypeScriptGraph): Promise<string[]> {
+  const filesById = new Map(graph.nodes.map((node) => [node.id, node.file]));
+  const dependencies = new Set(await collectReExportDependencies());
 
   for (const edge of graph.edges) {
     const source = areaForFile(filesById.get(edge.from));
@@ -236,6 +298,8 @@ function validateGraph(
 
   const requiredEdges = [
     "apps/cli -> packages/core",
+    "packages/k-msg -> packages/core",
+    "packages/k-msg -> packages/messaging",
     "packages/messaging -> packages/core",
     "packages/provider -> packages/core",
   ];
@@ -289,7 +353,7 @@ ${rows}
 async function main(): Promise<void> {
   const write = process.argv.includes("--write");
   const graph = await loadGraph();
-  const dependencies = collectDependencies(graph);
+  const dependencies = await collectDependencies(graph);
   validateGraph(graph, dependencies);
 
   const snapshot = renderSnapshot(dependencies);

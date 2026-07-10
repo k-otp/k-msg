@@ -69,6 +69,11 @@ export const typecheckTargets: readonly TypecheckTarget[] = [
   },
   {
     category: "example",
+    label: "Hono Pages send-only example",
+    tsconfig: "examples/hono-pages-send-only/tsconfig.json",
+  },
+  {
+    category: "example",
     label: "Hono Worker queue example",
     tsconfig: "examples/hono-worker-queue-do/tsconfig.json",
   },

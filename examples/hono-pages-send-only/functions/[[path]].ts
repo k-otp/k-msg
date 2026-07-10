@@ -9,13 +9,6 @@ type Bindings = {
   IWINV_SMS_SENDER_NUMBER?: string;
 };
 
-type PagesContext = {
-  request: Request;
-  env: Bindings;
-  waitUntil: ExecutionContext["waitUntil"];
-  passThroughOnException: ExecutionContext["passThroughOnException"];
-};
-
 type SendPayload = SendInput | SendInput[];
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -108,5 +101,5 @@ app.post("/send/sms", async (c) => {
   return c.json({ ok: true, data: result.value });
 });
 
-export const onRequest = (context: PagesContext) =>
-  app.fetch(context.request, context.env, context);
+export const onRequest: PagesFunction<Bindings> = (context) =>
+  app.fetch(context.request, context.env);
