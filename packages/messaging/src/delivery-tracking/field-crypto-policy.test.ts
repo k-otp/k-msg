@@ -123,14 +123,14 @@ describe("delivery tracking field crypto policy", () => {
     const failEvent = events.find(
       (event) => event.name === "crypto_fail_count",
     );
-    expect(failEvent).toBeTruthy();
-    expect((failEvent?.tags as Record<string, unknown>).operation).toBe(
-      "encrypt",
-    );
-    expect((failEvent?.tags as Record<string, unknown>).failMode).toBe("open");
-    expect((failEvent?.tags as Record<string, unknown>).fallback).toBe(
-      "masked",
-    );
+    expect(failEvent).toBeDefined();
+    if (!failEvent) {
+      throw new Error("Expected crypto_fail_count event");
+    }
+    const tags = failEvent.tags as Record<string, unknown>;
+    expect(tags.operation).toBe("encrypt");
+    expect(tags.failMode).toBe("open");
+    expect(tags.fallback).toBe("masked");
   });
 
   test("to/from filters are normalized consistently before hash lookup", async () => {
