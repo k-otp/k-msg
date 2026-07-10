@@ -9,7 +9,7 @@
         "@ttsc/lint": "^0.18.1",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
-        "ttsc": "^0.18.1",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
       "peerDependencies": {
@@ -35,6 +35,7 @@
         "gunshi": "0.35.1",
         "k-msg": "workspace:*",
         "solapi": "^6.0.1",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
         "zod": "catalog:",
       },
@@ -67,6 +68,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -79,6 +81,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -90,6 +93,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -102,6 +106,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
       "peerDependencies": {
@@ -123,6 +128,7 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "drizzle-orm": "0.45.2",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
       "peerDependencies": {
@@ -142,6 +148,7 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "solapi": "^6.0.1",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
       "peerDependencies": {
@@ -160,6 +167,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -173,6 +181,7 @@
       },
       "devDependencies": {
         "@types/bun": "catalog:",
+        "ttsc": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -184,6 +193,7 @@
     "@types/node": "^26.0.1",
     "hono": "^4.8.10",
     "honox": "^0.1.43",
+    "ttsc": "^0.18.1",
     "typescript": "^7.0.2",
     "vite": "^6.3.5",
     "wrangler": "^4.4.0",

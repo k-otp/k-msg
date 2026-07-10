@@ -20,5 +20,12 @@ if (args.includes("--help") || args.includes("-h")) {
   process.exit(0);
 }
 
-const processHandle = runGraph(args);
-process.exit(await processHandle.exited);
+try {
+  const processHandle = runGraph(args);
+  process.exit(await processHandle.exited);
+} catch (error) {
+  console.error(
+    `\n[ttsc-graph] ${error instanceof Error ? error.message : String(error)}`,
+  );
+  process.exit(1);
+}

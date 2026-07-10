@@ -3,23 +3,21 @@ import path from "node:path";
 import { repoRoot, runGraph } from "./ttsc-graph-command";
 
 type GraphNode = {
-  external: boolean;
   file: string;
   id: string;
 };
 
 type GraphEdge = {
   from: string;
-  kind: string;
   to: string;
 };
 
 type TypeScriptGraph = {
   edges: GraphEdge[];
   nodes: GraphNode[];
-  project: string;
-  tsconfig: string;
 };
+
+const graphTimeoutMs = 120_000;
 
 const snapshotPath = path.join(
   repoRoot,
@@ -29,12 +27,63 @@ const snapshotPath = path.join(
 );
 
 function areaForFile(file: string | undefined): string | null {
-  if (!file || file.includes("node_modules")) {
+  const normalized = file?.replaceAll("\\", "/");
+  if (!normalized || normalized.includes("node_modules")) {
     return null;
   }
 
-  const match = /^(apps|examples|packages|scripts)\/([^/]+)/.exec(file);
+  const match = /^(apps|examples|packages|scripts)\/([^/]+)/.exec(normalized);
   return match ? `${match[1]}/${match[2]}` : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function parseGraph(output: string): TypeScriptGraph {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(output);
+  } catch (error) {
+    throw new Error(
+      `ttsc graph returned invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  if (
+    !isRecord(parsed) ||
+    !Array.isArray(parsed.nodes) ||
+    !Array.isArray(parsed.edges)
+  ) {
+    throw new Error("ttsc graph output must contain nodes and edges arrays.");
+  }
+
+  const nodes = parsed.nodes.map((node, index): GraphNode => {
+    if (
+      !isRecord(node) ||
+      typeof node.id !== "string" ||
+      typeof node.file !== "string"
+    ) {
+      throw new Error(
+        `ttsc graph node ${index} is missing string id/file fields.`,
+      );
+    }
+    return { file: node.file, id: node.id };
+  });
+  const edges = parsed.edges.map((edge, index): GraphEdge => {
+    if (
+      !isRecord(edge) ||
+      typeof edge.from !== "string" ||
+      typeof edge.to !== "string"
+    ) {
+      throw new Error(
+        `ttsc graph edge ${index} is missing string from/to fields.`,
+      );
+    }
+    return { from: edge.from, to: edge.to };
+  });
+
+  return { edges, nodes };
 }
 
 async function loadGraph(): Promise<TypeScriptGraph> {
@@ -42,7 +91,8 @@ async function loadGraph(): Promise<TypeScriptGraph> {
     stderr: "pipe",
     stdout: "pipe",
   });
-  const [stdout, stderr, exitCode] = await Promise.all([
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const completion = Promise.all([
     processHandle.stdout
       ? new Response(processHandle.stdout).text()
       : Promise.resolve(""),
@@ -51,12 +101,42 @@ async function loadGraph(): Promise<TypeScriptGraph> {
       : Promise.resolve(""),
     processHandle.exited,
   ]);
+  const timedOut = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => {
+      processHandle.kill();
+      reject(
+        new Error(`ttsc graph dump timed out after ${graphTimeoutMs / 1000}s.`),
+      );
+    }, graphTimeoutMs);
+  });
+
+  let stdout: string;
+  let stderr: string;
+  let exitCode: number;
+  try {
+    [stdout, stderr, exitCode] = await Promise.race([completion, timedOut]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
 
   if (exitCode !== 0) {
     throw new Error(`ttsc graph dump failed:\n${stderr.trim()}`);
   }
 
-  return JSON.parse(stdout) as TypeScriptGraph;
+  return parseGraph(stdout);
+}
+
+async function readSnapshot(): Promise<string> {
+  try {
+    return await readFile(snapshotPath, "utf8");
+  } catch (error) {
+    if (isRecord(error) && error.code === "ENOENT") {
+      return "";
+    }
+    throw error;
+  }
 }
 
 function collectDependencies(graph: TypeScriptGraph): string[] {
@@ -218,7 +298,7 @@ async function main(): Promise<void> {
     await writeFile(snapshotPath, `${snapshot}\n`, "utf8");
     console.log(`Wrote ${path.relative(repoRoot, snapshotPath)}.`);
   } else {
-    const current = await readFile(snapshotPath, "utf8").catch(() => "");
+    const current = await readSnapshot();
     if (current !== `${snapshot}\n`) {
       throw new Error(
         "TypeScript architecture snapshot is stale. Run bun run graph:ttsc:snapshot and review the dependency change.",

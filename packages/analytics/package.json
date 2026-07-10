@@ -40,6 +40,7 @@
     "@k-msg/messaging": "workspace:*"
   },
   "devDependencies": {
+    "ttsc": "catalog:",
     "typescript": "catalog:",
     "@types/bun": "catalog:"
   },
