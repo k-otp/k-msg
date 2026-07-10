@@ -11,10 +11,11 @@
 
 리포 루트에서 실행합니다.
 
-1. 의존성 설치: `bun install --frozen-lockfile`
-2. 개발 서버: `bun run docs:dev`
-3. 전체 빌드: `bun run docs:build`
-4. 머지 전 검증: `bun run docs:check`
+1. Node.js 22.12 이상과 루트 `packageManager` 필드에 고정된 Bun 버전을 사용합니다.
+2. 의존성 설치: `bun install --frozen-lockfile`
+3. 개발 서버: `bun run docs:dev`
+4. 전체 빌드: `bun run docs:build`
+5. 머지 전 검증: `bun run docs:check`
 
 ## 2. 문서 소스 원칙 (Single Source of Truth)
 
@@ -127,6 +128,7 @@
 검증 명령:
 
 - `bun run docs:check`
+- `bun run docs:check:site-shell` (`docs:check`에 포함)
 - `bun run docs:check:sitemap-lastmod` (`docs:check`에 포함)
 - 실패 시 PR merge 차단
 
