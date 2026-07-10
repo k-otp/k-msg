@@ -11,13 +11,13 @@ import {
 } from "./sql-schema";
 
 export type { D1DatabaseLike, D1PreparedStatementLike } from "./d1-client";
+export type { WebhookSchemaOptions };
 export {
   buildWebhookSchemaSql,
   DEFAULT_WEBHOOK_DELIVERY_TABLE,
   DEFAULT_WEBHOOK_ENDPOINT_TABLE,
   initializeWebhookSchema,
 };
-export type { WebhookSchemaOptions };
 
 export interface CreateD1WebhookPersistenceOptions
   extends WebhookSchemaOptions {
