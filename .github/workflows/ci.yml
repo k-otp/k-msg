@@ -157,46 +157,13 @@ jobs:
           fi
 
       - name: Biome check
-        run: |
-          set -euo pipefail
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE="${{ github.event.pull_request.base.sha }}"
-          else
-            BASE="${{ github.event.before }}"
-            if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
-              # New branch push: GitHub sets `before` to all zeros.
-              # Compare against the default branch to keep incremental lint useful.
-              DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
-              git fetch origin "$DEFAULT_BRANCH" --depth=1
-              BASE="origin/$DEFAULT_BRANCH"
-            fi
-          fi
-
-          CHANGED="$(git diff --name-only "$BASE" "${{ github.sha }}")"
-          files=()
-          while IFS= read -r f; do
-            [[ -z "$f" ]] && continue
-            # Only run Biome for file types it understands, and skip deleted paths.
-            case "$f" in
-              *.ts|*.tsx|*.js|*.jsx|*.json|*.jsonc)
-                if [[ -f "$f" ]]; then
-                  files+=("$f")
-                fi
-                ;;
-            esac
-          done <<< "$CHANGED"
-
-          if (( ${#files[@]} == 0 )); then
-            echo "No Biome-checkable files changed; skipping."
-            exit 0
-          fi
-
-          # The repository currently has legacy lint debt; to keep CI useful and unblocked,
-          # lint only files changed in this ref (incremental adoption).
-          bun x @biomejs/biome check --files-ignore-unknown=true "${files[@]}"
+        run: bun run check --diagnostic-level=error
 
       - name: Canonical checks
         run: bun run check:ci
+
+      - name: Vanilla TypeScript parity check
+        run: bun run typecheck:tsc
 
   crypto-regression:
     runs-on: ubuntu-latest

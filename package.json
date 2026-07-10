@@ -86,8 +86,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
-    "@ttsc/graph": "^0.18.1",
-    "@ttsc/lint": "^0.18.1",
+    "@ttsc/graph": "^0.18.4",
+    "@ttsc/lint": "^0.18.4",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "hono": "catalog:",
@@ -125,7 +125,7 @@
     ],
     "catalog": {
       "typescript": "^7.0.2",
-      "ttsc": "^0.18.1",
+      "ttsc": "^0.18.4",
       "@types/bun": "^1.3.14",
       "@types/node": "^26.0.1",
       "zod": "^4.4.3",

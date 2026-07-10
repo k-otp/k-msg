@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260214.0",
-    "@ttsc/lint": "^0.18.1",
-    "ttsc": "^0.18.1",
+    "@ttsc/lint": "^0.18.4",
+    "ttsc": "^0.18.4",
     "typescript": "^7.0.2",
     "wrangler": "^4.65.0"
   }
