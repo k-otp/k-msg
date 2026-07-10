@@ -1,5 +1,12 @@
 # @k-msg/template
 
+## 0.29.8 — 2026-07-10
+
+### Patch changes
+
+- [dd68c83](https://github.com/k-otp/k-msg/commit/dd68c83cf05a11b4052a3a50ffed3908798a9bc4) Reduce duplicated runtime type declarations by deriving selected exported types from their Zod schemas while keeping existing public type names stable. — Thanks @imjlk!
+- Updated dependencies: core@0.29.8
+
 ## 0.29.7 — 2026-06-29
 
 ### Patch changes
