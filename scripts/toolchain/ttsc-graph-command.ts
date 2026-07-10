@@ -23,6 +23,7 @@ function resolveGraphBinary(): string {
 }
 
 type RunGraphOptions = {
+  stdin?: "inherit" | "pipe";
   stderr?: "inherit" | "pipe";
   stdout?: "inherit" | "pipe";
 };
@@ -51,10 +52,15 @@ export function withGraphDefaults(args: readonly string[]): string[] {
 
 export function runGraph(
   args: readonly string[],
-  { stderr = "inherit", stdout = "inherit" }: RunGraphOptions = {},
+  {
+    stdin = "inherit",
+    stderr = "inherit",
+    stdout = "inherit",
+  }: RunGraphOptions = {},
 ) {
   return Bun.spawn(["node", resolveGraphBinary(), ...withGraphDefaults(args)], {
     cwd: repoRoot,
+    stdin,
     stderr,
     stdout,
   });
