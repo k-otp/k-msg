@@ -6,7 +6,8 @@
     "lib": ["ESNext", "DOM"],
     "strict": true,
     "skipLibCheck": true,
-    "types": ["bun-types", "node"],
+    "types": ["bun", "node"],
+    "plugins": [{ "transform": "@ttsc/lint" }],
     "noEmit": true
   },
   "include": ["src/**/*.ts"]

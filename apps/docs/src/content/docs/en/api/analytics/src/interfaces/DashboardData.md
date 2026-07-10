@@ -19,9 +19,61 @@ Defined in: [packages/analytics/src/reports/dashboard.ts:62](https://github.com/
 
 ### insights
 
-> **insights**: [`InsightData`](/en/api/analytics/src/interfaces/insightdata/)[]
+> **insights**: `object`[]
 
 Defined in: [packages/analytics/src/reports/dashboard.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/reports/dashboard.ts#L61)
+
+#### actionable
+
+> **actionable**: `boolean`
+
+#### confidence
+
+> **confidence**: `number`
+
+#### description
+
+> **description**: `string`
+
+#### detectedAt
+
+> **detectedAt**: `Date`
+
+#### dimensions
+
+> **dimensions**: `Record`\<`string`, `string`\>
+
+#### expectedValue?
+
+> `optional` **expectedValue?**: `number`
+
+#### id
+
+> **id**: `string`
+
+#### metric
+
+> **metric**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
+
+#### recommendations?
+
+> `optional` **recommendations?**: `string`[]
+
+#### severity
+
+> **severity**: `"high"` \| `"low"` \| `"medium"` \| `"critical"`
+
+#### title
+
+> **title**: `string`
+
+#### type
+
+> **type**: `"anomaly"` \| `"trend"` \| `"recommendation"`
+
+#### value
+
+> **value**: `number`
 
 ***
 

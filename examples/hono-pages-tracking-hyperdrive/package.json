@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler pages dev .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "ttsc --noEmit"
   },
   "dependencies": {
     "@k-msg/messaging": "latest",
@@ -15,7 +15,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260214.0",
-    "typescript": "^5.9.3",
+    "@ttsc/lint": "^0.18.1",
+    "ttsc": "^0.18.1",
+    "typescript": "^7.0.2",
     "wrangler": "^4.65.0"
   }
 }

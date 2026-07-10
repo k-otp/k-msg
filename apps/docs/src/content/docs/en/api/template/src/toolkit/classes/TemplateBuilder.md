@@ -79,7 +79,7 @@ Add a bot keyword button
 
 ### build()
 
-> **build**(): [`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
+> **build**(): `object`
 
 Defined in: [packages/template/src/builder/template.builder.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/template/src/builder/template.builder.ts#L374)
 
@@ -87,7 +87,83 @@ Build the final template
 
 #### Returns
 
-[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)
+`object`
+
+##### buttons?
+
+> `optional` **buttons?**: `object`[]
+
+##### category
+
+> **category**: [`TemplateCategory`](/en/api/template/src/enumerations/templatecategory/)
+
+##### code
+
+> **code**: `string`
+
+##### content
+
+> **content**: `string`
+
+##### id
+
+> **id**: `string`
+
+##### metadata
+
+> **metadata**: `object` = `TemplateMetadataSchema`
+
+###### metadata.approvedAt?
+
+> `optional` **approvedAt?**: `Date`
+
+###### metadata.createdAt
+
+> **createdAt**: `Date`
+
+###### metadata.rejectedAt?
+
+> `optional` **rejectedAt?**: `Date`
+
+###### metadata.rejectionReason?
+
+> `optional` **rejectionReason?**: `string`
+
+###### metadata.updatedAt
+
+> **updatedAt**: `Date`
+
+###### metadata.usage
+
+> **usage**: `object` = `TemplateUsageStatsSchema`
+
+###### metadata.usage.delivered
+
+> **delivered**: `number`
+
+###### metadata.usage.failed
+
+> **failed**: `number`
+
+###### metadata.usage.sent
+
+> **sent**: `number`
+
+##### name
+
+> **name**: `string`
+
+##### provider
+
+> **provider**: `string`
+
+##### status
+
+> **status**: [`TemplateStatus`](/en/api/template/src/enumerations/templatestatus/)
+
+##### variables?
+
+> `optional` **variables?**: `object`[]
 
 ***
 
@@ -103,7 +179,37 @@ Add a custom button
 
 ##### button
 
-[`TemplateButton`](/en/api/template/src/interfaces/templatebutton/)
+###### linkAndroid?
+
+`string` = `...`
+
+###### linkIos?
+
+`string` = `...`
+
+###### linkMobile?
+
+`string` = `...`
+
+###### linkPc?
+
+`string` = `...`
+
+###### name
+
+`string` = `...`
+
+###### schemeAndroid?
+
+`string` = `...`
+
+###### schemeIos?
+
+`string` = `...`
+
+###### type
+
+`"WL"` \| `"AL"` \| `"DS"` \| `"BK"` \| `"MD"` = `...`
 
 #### Returns
 
@@ -251,7 +357,7 @@ Set template metadata
 
 ##### metadata
 
-`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/interfaces/alimtalktemplate/)\[`"metadata"`\]\>
+`Partial`\<[`AlimTalkTemplate`](/en/api/template/src/type-aliases/alimtalktemplate/)\[`"metadata"`\]\>
 
 #### Returns
 

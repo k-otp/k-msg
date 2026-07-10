@@ -351,7 +351,7 @@ Add bulk messages to the processing queue
 
 ##### messageRequests
 
-[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)[]
+`object`[]
 
 ##### options?
 
@@ -385,7 +385,89 @@ Add a message to the processing queue
 
 ##### messageRequest
 
-[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)
+###### options?
+
+\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"normal"` \| `"low"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
+
+###### options.deduplication?
+
+\{ `enabled`: `boolean`; `window`: `number`; \} = `...`
+
+###### options.deduplication.enabled
+
+`boolean` = `...`
+
+###### options.deduplication.window
+
+`number` = `...`
+
+###### options.failover?
+
+\{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \} = `...`
+
+###### options.failover.enabled
+
+`boolean` = `...`
+
+###### options.failover.fallbackChannel?
+
+`"sms"` \| `"lms"` = `...`
+
+###### options.failover.fallbackContent?
+
+`string` = `...`
+
+###### options.failover.fallbackTitle?
+
+`string` = `...`
+
+###### options.priority?
+
+`"high"` \| `"normal"` \| `"low"` = `...`
+
+###### options.tracking?
+
+\{ `enabled`: `boolean`; `webhookUrl?`: `string`; \} = `...`
+
+###### options.tracking.enabled
+
+`boolean` = `...`
+
+###### options.tracking.webhookUrl?
+
+`string` = `...`
+
+###### options.ttl?
+
+`number` = `...`
+
+###### recipients
+
+`object`[] = `...`
+
+###### scheduling?
+
+\{ `retryCount?`: `number`; `scheduledAt`: `Date`; `timezone?`: `string`; \} = `...`
+
+###### scheduling.retryCount?
+
+`number` = `...`
+
+###### scheduling.scheduledAt
+
+`Date` = `...`
+
+###### scheduling.timezone?
+
+`string` = `...`
+
+###### templateId
+
+`string` = `...`
+
+###### variables
+
+`Record`\<`string`, `string` \| `number` \| `Date`\> = `VariableMapSchema`
 
 ##### options?
 
@@ -491,7 +573,89 @@ Schedule a message for future delivery
 
 ##### messageRequest
 
-[`MessageRequest`](/en/api/messaging/src/interfaces/messagerequest/)
+###### options?
+
+\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"normal"` \| `"low"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
+
+###### options.deduplication?
+
+\{ `enabled`: `boolean`; `window`: `number`; \} = `...`
+
+###### options.deduplication.enabled
+
+`boolean` = `...`
+
+###### options.deduplication.window
+
+`number` = `...`
+
+###### options.failover?
+
+\{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \} = `...`
+
+###### options.failover.enabled
+
+`boolean` = `...`
+
+###### options.failover.fallbackChannel?
+
+`"sms"` \| `"lms"` = `...`
+
+###### options.failover.fallbackContent?
+
+`string` = `...`
+
+###### options.failover.fallbackTitle?
+
+`string` = `...`
+
+###### options.priority?
+
+`"high"` \| `"normal"` \| `"low"` = `...`
+
+###### options.tracking?
+
+\{ `enabled`: `boolean`; `webhookUrl?`: `string`; \} = `...`
+
+###### options.tracking.enabled
+
+`boolean` = `...`
+
+###### options.tracking.webhookUrl?
+
+`string` = `...`
+
+###### options.ttl?
+
+`number` = `...`
+
+###### recipients
+
+`object`[] = `...`
+
+###### scheduling?
+
+\{ `retryCount?`: `number`; `scheduledAt`: `Date`; `timezone?`: `string`; \} = `...`
+
+###### scheduling.retryCount?
+
+`number` = `...`
+
+###### scheduling.scheduledAt
+
+`Date` = `...`
+
+###### scheduling.timezone?
+
+`string` = `...`
+
+###### templateId
+
+`string` = `...`
+
+###### variables
+
+`Record`\<`string`, `string` \| `number` \| `Date`\> = `VariableMapSchema`
 
 ##### scheduledAt
 

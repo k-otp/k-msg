@@ -5,7 +5,7 @@ prev: false
 title: "AggregatedMetric"
 ---
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L32)
+Defined in: [packages/analytics/src/types/analytics.types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L23)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:32](https://github.
 
 > **aggregations**: `object`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L37)
+Defined in: [packages/analytics/src/types/analytics.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L28)
 
 #### avg
 
@@ -41,7 +41,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:37](https://github.
 
 > **dimensions**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L36)
+Defined in: [packages/analytics/src/types/analytics.types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L27)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:36](https://github.
 
 > **interval**: `"minute"` \| `"hour"` \| `"day"` \| `"week"` \| `"month"`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L34)
+Defined in: [packages/analytics/src/types/analytics.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L25)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:34](https://github.
 
 > **timestamp**: `Date`
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L35)
+Defined in: [packages/analytics/src/types/analytics.types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L26)
 
 ***
 
@@ -65,4 +65,4 @@ Defined in: [packages/analytics/src/types/analytics.types.ts:35](https://github.
 
 > **type**: [`MetricType`](/en/api/analytics/src/enumerations/metrictype/)
 
-Defined in: [packages/analytics/src/types/analytics.types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L33)
+Defined in: [packages/analytics/src/types/analytics.types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/types/analytics.types.ts#L24)
