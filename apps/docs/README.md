@@ -13,10 +13,11 @@ This is the contributor and operations runbook for the `k-msg` docs site (`https
 
 Run from repository root:
 
-1. Install dependencies: `bun install --frozen-lockfile`
-2. Start docs dev server: `bun run docs:dev`
-3. Build docs: `bun run docs:build`
-4. Run merge gate checks: `bun run docs:check`
+1. Use the Bun version pinned in the root `packageManager` field.
+2. Install dependencies: `bun install --frozen-lockfile`
+3. Start docs dev server: `bun run docs:dev`
+4. Build docs: `bun run docs:build`
+5. Run merge gate checks: `bun run docs:check`
 
 ## 2. Source-of-Truth Rules
 
@@ -129,6 +130,7 @@ Path filters:
 Verification command:
 
 - `bun run docs:check`
+- `bun run docs:check:site-shell` (included in `docs:check`)
 - `bun run docs:check:sitemap-lastmod` (included in `docs:check`)
 - Failing checks block PR merge
 
