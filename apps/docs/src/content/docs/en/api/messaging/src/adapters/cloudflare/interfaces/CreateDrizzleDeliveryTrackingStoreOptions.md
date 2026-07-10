@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleDeliveryTrackingStoreOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L142)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L141)
 
 ## Extends
 
@@ -69,7 +69,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 
 > `optional` **fieldCrypto?**: [`DeliveryTrackingFieldCryptoOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L145)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L144)
 
 ***
 
@@ -193,7 +193,7 @@ readonly `unknown`[]
 
 > `optional` **retention?**: [`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L146)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L145)
 
 ***
 

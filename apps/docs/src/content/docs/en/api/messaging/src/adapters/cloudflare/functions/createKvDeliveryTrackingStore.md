@@ -7,7 +7,7 @@ title: "createKvDeliveryTrackingStore"
 
 > **createKvDeliveryTrackingStore**(`namespace`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L207)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L206)
 
 ## Parameters
 
