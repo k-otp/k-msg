@@ -24,18 +24,20 @@
     },
     {
       "matchManagers": ["npm"],
-      "matchPackageNames": [
-        "gunshi",
-        "@gunshi/plugin-completion",
-        "@types/bun"
-      ],
+      "matchPackageNames": ["gunshi", "@gunshi/plugin-completion"],
       "groupName": "cli toolchain monthly"
     },
     {
       "matchManagers": ["npm"],
-      "matchPackageNames": ["typescript"],
-      "matchFileNames": ["apps/cli/package.json", "package.json"],
-      "groupName": "cli toolchain monthly"
+      "matchPackageNames": [
+        "@types/bun",
+        "@types/node",
+        "typescript",
+        "ttsc",
+        "@ttsc/graph",
+        "@ttsc/lint"
+      ],
+      "groupName": "typescript toolchain monthly"
     },
     {
       "matchManagers": ["npm"],

@@ -690,6 +690,15 @@ export class AnomalyDetector {
           );
         }
         break;
+
+      case MetricType.CHANNEL_USAGE:
+      case MetricType.CLICK_RATE:
+      case MetricType.ERROR_RATE:
+      case MetricType.MESSAGE_CLICKED:
+      case MetricType.MESSAGE_DELIVERED:
+      case MetricType.PROVIDER_PERFORMANCE:
+      case MetricType.TEMPLATE_USAGE:
+        break;
     }
 
     if (change > 2.0) {

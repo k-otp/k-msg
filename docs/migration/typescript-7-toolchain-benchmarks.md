@@ -1,38 +1,31 @@
 # TypeScript 7 Toolchain Benchmarks
 
-Generated on 2026-07-10T08:22:40+09:00 from the repository root with:
+This repository snapshot compares the default `ttsc` path with the TypeScript 7 `tsc` fallback on the same machine and checkout. Validation timings use the median of repeated warm runs; docs and graph rows use one run because they measure different workloads.
 
-- workspace baseline: current root `typecheck` lane on TS7
-- isolated runner: `ttsc@0.18.0`
-- graph tool: `@ttsc/graph@0.18.0`
+Generated on `2026-07-10T00:08:36.431Z` for `darwin-arm64`.
 
-## Validation Lanes
+- Bun: `1.3.13`
+- `ttsc`: `0.18.1`
+- `@ttsc/graph`: `0.18.1`
+- `typescript`: `7.0.2`
 
-| Scenario | Command | Result | Wall time | Relative to `bun run typecheck` | Notes |
-| --- | --- | --- | ---: | ---: | --- |
-| Root default typecheck | `bun run typecheck` | pass | `1.514s` | baseline | Current workspace default TS7 lane |
-| TS7/ttsc validation lane | `bun run typecheck:ttsc:ts7` | pass | `1.317s` | 1.15x faster | Warm isolated ttsc noEmit lane on TS7 |
+| Scenario | Command | Runs | Median wall time | Relative to workspace ttsc | Notes |
+| --- | --- | ---: | ---: | ---: | --- |
+| Workspace ttsc | `bun run typecheck` | 3 | `8.221s` | baseline | Canonical workspace validation with type-aware lint diagnostics |
+| Workspace tsc fallback | `bun run typecheck:tsc` | 3 | `2.128s` | 3.86x faster | Same target registry through the compiler fallback |
+| Focused core ttsc | `bun x ttsc --noEmit --project packages/core/tsconfig.json` | 3 | `0.722s` | 11.39x faster | Small-package edit feedback with ttsc lint enabled |
+| Focused core tsc | `bun x tsc --noEmit --project packages/core/tsconfig.json` | 3 | `0.101s` | 81.55x faster | Small-package edit feedback through the fallback compiler |
+| Graph architecture gate | `bun run graph:ttsc:check` | 1 | `0.821s` | 10.02x faster | Compiler graph architecture invariant and snapshot validation |
+| Docs source generation | `bun run docs:generate` | 1 | `0.704s` | 11.68x faster | Generated CLI, schema, guide, and API inputs |
+| Starlight docs build | `bun run docs:build` | 1 | `106.820s` | 12.99x slower | Astro/Starlight build including TypeDoc API pages |
 
-## Docs Pipeline Costs
+## Interpretation
 
-| Scenario | Command | Result | Wall time | Relative to `bun run typecheck` | Notes |
-| --- | --- | --- | ---: | ---: | --- |
-| Docs source generation | `bun run docs:generate` | pass | `0.656s` | - | Generated CLI, schema, guide, and TypeDoc entrypoint inputs |
-| Starlight docs build | `bun run docs:build` | pass | `95.483s` | - | End-to-end Astro/Starlight build including TypeDoc API pages |
-
-## Setup And Exploration Costs
-
-| Scenario | Command | Result | Wall time | Relative to `bun run typecheck` | Notes |
-| --- | --- | --- | ---: | ---: | --- |
-| TS7 runner cold install | `bun run typecheck:ttsc:ts7:install` | pass | `1.223s` | - | Cold install into .cache/ttsc-ts7-runner |
-| TS7 graph dump | `bun run graph:ttsc:ts7 -- dump --tsconfig tsconfig.json` | pass | `2.580s` | - | Warm graph dump for the root workspace tsconfig |
-
-## Reading The Snapshot
-
-- `Relative` is only meant for the validation-lane comparison and uses `bun run typecheck` as the baseline.
-- The root lane now uses the default TS7 compiler and includes the current package `build:types` flow plus CLI generation before `tsc --noEmit`.
-- The isolated TS7 lane remains a pure `--noEmit` pass over selected package and CLI tsconfigs.
-- The docs rows separate generated source preparation from the full Astro/Starlight and TypeDoc build cost.
-- The graph dump measures analysis startup cost for `ttsc-graph`, not a CI-quality replacement for typecheck.
-- Absolute numbers depend on machine state; the checked-in value is mainly useful as a repeatable reference point for this repository.
+- `bun run typecheck` is the canonical CI path. It covers packages, CLI, repository tooling, and TypeScript examples, and includes type-aware `@ttsc/lint` diagnostics.
+- `bun run typecheck:tsc` is a parity and incident fallback. It checks the same target registry without running ttsc plugins.
+- The fallback is faster in this snapshot because `ttsc` starts the semantic plugin host for each project. The default selects combined diagnostics and architecture guarantees rather than claiming a raw compiler-speed win.
+- Focused package rows estimate the feedback loop for a small library edit without CLI generation or workspace traversal.
+- The graph gate validates package dependency direction, cycles, and the checked-in architecture snapshot; it does not replace typechecking.
+- `apps/docs` remains on its local TypeScript 6 compatibility boundary, so docs generation/build timings are reported separately.
+- Absolute timings depend on cache and machine state. Re-run `bun run benchmark:ttsc` after toolchain or target-scope changes.
 
