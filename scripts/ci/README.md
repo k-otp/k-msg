@@ -32,6 +32,44 @@ Validates publishable package tarballs with `npm pack --dry-run --json`.
 - Release hook: `Pre-publish npm pack smoke checks` in `.github/workflows/release.yml`
 - Ensures:
   - package tarball generation succeeds
-  - package tarball contains `package.json` and at least one `dist/` file
+  - every `exports`, `main`, `module`, and `types` artifact is present
   - package tarball excludes sourcemap files (`.map`)
-  - `k-msg` tarball includes `dist/index.mjs` and `dist/core/index.mjs`
+  - built ESM entrypoints pass the package artifact contract below
+
+## `check-package-artifacts.mjs`
+
+Validates the built files that are referenced by each publishable package
+manifest.
+
+- Script path: `scripts/ci/check-package-artifacts.mjs`
+- Unit tests: `scripts/ci/package-artifacts-lib.test.mjs`
+- Canonical gate: `bun run check:package-artifacts` (included in `check:ci`)
+- Enforces:
+  - root `main`, `module`, and `types` fields agree with the matching root
+    `exports` conditions
+  - every public artifact target exists
+  - every ESM target uses the project `.mjs` convention and passes
+    `node --check`
+  - every export target is included by `npm pack --dry-run`
+
+The `.mjs` check is intentional. Published packages reserve `.mjs` for the
+`import` condition and `.js` for the separately built CommonJS `require`
+condition, even though package manifests use `"type": "module"`.
+
+### Bun build baseline
+
+Bun `1.3.10` through `1.3.14` emit invalid ESM for several barrel re-export
+entrypoints in this workspace. The generated files export identifiers whose
+definitions were removed, so source tests and TypeScript checks pass while
+Node rejects the published artifact. Bun `1.3.9` is the newest verified-good
+builder and remains pinned in package manifests and workflows.
+
+Do not advance the Bun baseline until the candidate version passes all of:
+
+1. `bun run build:all`
+2. `bun run check:package-artifacts`
+3. `bash ./scripts/ci/npm-pack-smoke.sh`
+4. `bash ./scripts/ci/check-bundle-size.sh`
+
+Run every command with the same candidate Bun binary that the release workflow
+will use.
