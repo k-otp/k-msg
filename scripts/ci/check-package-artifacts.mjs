@@ -36,7 +36,11 @@ try {
       );
     }
     const packageDir = path.resolve(repositoryRoot, args[1]);
-    const result = inspectPackedPackage(packageDir, parsePackResult(args[2]));
+    const packJsonFile = path.resolve(repositoryRoot, args[2]);
+    const result = inspectPackedPackage(
+      packageDir,
+      parsePackResult(packJsonFile),
+    );
     if (result.errors.length > 0) fail(result.errors);
     else console.log(`ok: ${result.manifest.name} packed export contract`);
   } else if (args.length === 0) {
