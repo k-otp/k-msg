@@ -1,5 +1,11 @@
 # @k-msg/analytics
 
+## 0.29.9 — 2026-07-20
+
+### Patch changes
+
+- Updated dependencies: core@0.29.9, messaging@0.29.9
+
 ## 0.29.8 — 2026-07-10
 
 ### Patch changes
