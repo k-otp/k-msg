@@ -1,5 +1,12 @@
 # @k-msg/template
 
+## 0.29.9 — 2026-07-20
+
+### Patch changes
+
+- [a07e08a](https://github.com/k-otp/k-msg/commit/a07e08aa4b39c2c610fd3895062fdd612cf80513) Restore valid ESM entrypoints in published packages and reject malformed or missing export artifacts before release. — Thanks @imjlk!
+- Updated dependencies: core@0.29.9
+
 ## 0.29.8 — 2026-07-10
 
 ### Patch changes
