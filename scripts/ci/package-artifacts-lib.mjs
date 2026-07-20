@@ -8,6 +8,45 @@ function readJson(file) {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
+function collectMatchedConditionTargets(value, condition) {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) {
+    return value.flatMap((candidate) =>
+      collectMatchedConditionTargets(candidate, condition),
+    );
+  }
+  if (!value || typeof value !== "object") return [];
+
+  return Object.entries(value).flatMap(([key, candidate]) => {
+    // A matched `types` branch may select declaration files by the nested
+    // `import`/`require` conditions. Runtime branches must not treat nested
+    // declaration targets as JavaScript entrypoints.
+    if (
+      condition !== "types" &&
+      EXPORT_CONDITIONS.includes(key) &&
+      key !== condition
+    ) {
+      return [];
+    }
+    return collectMatchedConditionTargets(candidate, condition);
+  });
+}
+
+function collectNestedConditionTargets(value, condition) {
+  if (Array.isArray(value)) {
+    return value.flatMap((candidate) =>
+      collectNestedConditionTargets(candidate, condition),
+    );
+  }
+  if (!value || typeof value !== "object") return [];
+
+  return Object.entries(value).flatMap(([key, candidate]) =>
+    key === condition
+      ? collectMatchedConditionTargets(candidate, condition)
+      : collectNestedConditionTargets(candidate, condition),
+  );
+}
+
 function collectConditionTargets(value, condition) {
   if (typeof value === "string") return [value];
   if (Array.isArray(value)) {
@@ -17,15 +56,18 @@ function collectConditionTargets(value, condition) {
   }
   if (!value || typeof value !== "object") return [];
 
-  if (Object.hasOwn(value, condition)) {
-    return collectConditionTargets(value[condition], condition);
-  }
-
-  const ignoredConditions = new Set(
-    EXPORT_CONDITIONS.filter((candidate) => candidate !== condition),
-  );
   return Object.entries(value).flatMap(([key, candidate]) => {
-    if (ignoredConditions.has(key)) return [];
+    if (key === condition) {
+      return collectMatchedConditionTargets(candidate, condition);
+    }
+    if (EXPORT_CONDITIONS.includes(key)) {
+      // Type declarations may be nested under runtime conditions, for
+      // example import.types and require.types. Runtime targets nested under
+      // a types branch are declaration selectors and must remain excluded.
+      return condition === "types"
+        ? collectNestedConditionTargets(candidate, condition)
+        : [];
+    }
     return collectConditionTargets(candidate, condition);
   });
 }
@@ -213,15 +255,23 @@ export function inspectPackedPackage(packageDir, packResult) {
 
 export function listPublishablePackageDirs(rootDir) {
   const packagesDir = path.join(rootDir, "packages");
-  return readdirSync(packagesDir, { withFileTypes: true })
+  const packageDirs = readdirSync(packagesDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => path.join(packagesDir, entry.name))
     .filter((packageDir) => {
+      const manifestFile = path.join(packageDir, "package.json");
       try {
-        return readJson(path.join(packageDir, "package.json")).private !== true;
-      } catch {
-        return false;
+        return readJson(manifestFile).private !== true;
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        throw new Error(
+          `unable to read package manifest ${manifestFile}: ${detail}`,
+        );
       }
     })
     .sort();
+  if (packageDirs.length === 0) {
+    throw new Error(`no publishable packages found under ${packagesDir}`);
+  }
+  return packageDirs;
 }

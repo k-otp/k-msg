@@ -9,6 +9,7 @@ import {
   collectPackageArtifactTargets,
   inspectBuiltPackage,
   inspectPackedPackage,
+  listPublishablePackageDirs,
   normalizePackageTarget,
 } from "./package-artifacts-lib.mjs";
 
@@ -47,6 +48,7 @@ test("collects condition-specific and legacy artifact targets", () => {
     module: "dist/index.mjs",
     exports: {
       ".": {
+        import: "./dist/index.mjs",
         node: { import: "./dist/node.mjs", require: "./dist/node.cjs" },
         default: "./dist/default.mjs",
       },
@@ -61,6 +63,12 @@ test("collects condition-specific and legacy artifact targets", () => {
   assert.ok(
     targets.some(
       (target) =>
+        target.condition === "import" && target.target === "./dist/index.mjs",
+    ),
+  );
+  assert.ok(
+    targets.some(
+      (target) =>
         target.condition === "require" && target.target === "./dist/node.cjs",
     ),
   );
@@ -70,6 +78,38 @@ test("collects condition-specific and legacy artifact targets", () => {
         target.condition === "import" && target.target === "dist/index.mjs",
     ),
   );
+});
+
+test("collects nested conditional declaration targets without treating them as runtime", () => {
+  const targets = collectPackageArtifactTargets({
+    exports: {
+      ".": {
+        types: {
+          import: "./dist/index.d.mts",
+          require: "./dist/index.d.cts",
+        },
+        import: {
+          types: "./dist/import.d.mts",
+          default: "./dist/index.mjs",
+        },
+        require: {
+          types: "./dist/require.d.cts",
+          default: "./dist/index.cjs",
+        },
+      },
+    },
+  });
+  const targetKeys = new Set(
+    targets.map(({ condition, target }) => `${condition}:${target}`),
+  );
+  assert.ok(targetKeys.has("types:./dist/index.d.mts"));
+  assert.ok(targetKeys.has("types:./dist/index.d.cts"));
+  assert.ok(targetKeys.has("types:./dist/import.d.mts"));
+  assert.ok(targetKeys.has("types:./dist/require.d.cts"));
+  assert.ok(targetKeys.has("import:./dist/index.mjs"));
+  assert.ok(targetKeys.has("require:./dist/index.cjs"));
+  assert.equal(targetKeys.has("import:./dist/index.d.mts"), false);
+  assert.equal(targetKeys.has("require:./dist/index.d.cts"), false);
 });
 
 test("rejects package target traversal", () => {
@@ -130,6 +170,67 @@ test("reports malformed npm pack JSON as a CI annotation", () => {
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /::error::/);
     assert.doesNotMatch(result.stderr, /\n\s+at /);
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+});
+
+test("resolves relative npm pack JSON paths from the repository root", () => {
+  const root = createFixture();
+  const packJson = path.join(root, "pack.json");
+  writeFileSync(
+    packJson,
+    JSON.stringify([
+      {
+        files: [
+          { path: "package.json" },
+          { path: "dist/index.mjs" },
+          { path: "dist/index.js" },
+          { path: "dist/index.d.ts" },
+        ],
+      },
+    ]),
+  );
+  try {
+    const cli = fileURLToPath(
+      new URL("./check-package-artifacts.mjs", import.meta.url),
+    );
+    const repositoryRoot = path.resolve(path.dirname(cli), "../..");
+    const result = spawnSync(
+      process.execPath,
+      [cli, "--pack-json", root, path.relative(repositoryRoot, packJson)],
+      {
+        cwd: tmpdir(),
+        encoding: "utf8",
+      },
+    );
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+});
+
+test("rejects a workspace with no publishable packages", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "k-msg-workspace-"));
+  mkdirSync(path.join(root, "packages"));
+  try {
+    assert.throws(
+      () => listPublishablePackageDirs(root),
+      /no publishable packages found/,
+    );
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+});
+
+test("reports the directory for an unreadable package manifest", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "k-msg-workspace-"));
+  mkdirSync(path.join(root, "packages/fixture"), { recursive: true });
+  try {
+    assert.throws(
+      () => listPublishablePackageDirs(root),
+      /unable to read package manifest .*packages[/\\]fixture[/\\]package\.json/,
+    );
   } finally {
     rmSync(root, { force: true, recursive: true });
   }
