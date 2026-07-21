@@ -97,6 +97,15 @@ export type RetryPolicyErrorCode = KMsgErrorCode;
 
 export type ProviderRetryHint = "retryable" | "non_retryable";
 
+export interface RetryAfterPolicy {
+  /** Fallback delay when no code or status mapping matches. */
+  defaultMs?: number;
+  /** Delays keyed by provider error code or canonical KMsgErrorCode. */
+  byCode?: Readonly<Record<string, number>>;
+  /** Delays keyed by normalized HTTP status. */
+  byStatus?: Readonly<Record<string, number>>;
+}
+
 export interface KMsgErrorMetadata {
   providerErrorCode?: string;
   providerErrorText?: string;
@@ -110,6 +119,10 @@ export interface KMsgErrorMetadata {
 export interface ErrorRetryPolicy {
   retryableCodes?: readonly KMsgErrorCode[];
   nonRetryableCodes?: readonly KMsgErrorCode[];
+  /** Explicit retryable HTTP statuses, normalized case-insensitively. */
+  retryableStatuses?: readonly string[];
+  /** Explicit non-retryable HTTP statuses; wins on conflicts. */
+  nonRetryableStatuses?: readonly string[];
   classifyByStatusCode?: (status: number) => ProviderRetryHint;
   classifyByMessage?: (message: string) => ProviderRetryHint | undefined;
   /**
@@ -117,9 +130,9 @@ export interface ErrorRetryPolicy {
    */
   fallback?: ProviderRetryHint;
   /**
-   * Optional custom retry delay in milliseconds.
+   * Optional custom retry delay resolver or declarative mapping.
    */
-  retryAfterMs?: (error: KMsgError) => number | undefined;
+  retryAfterMs?: RetryAfterPolicy | ((error: KMsgError) => number | undefined);
 }
 
 export type ErrorRetryPolicyMode = "safe" | "compat";
@@ -229,14 +242,6 @@ export const normalizeRetryAfterMs = (value: unknown): number | undefined => {
   return normalized;
 };
 
-const toLowerString = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  return value.toLowerCase().trim();
-};
-
 const toTrimmedString = (value: unknown): string | undefined => {
   if (typeof value !== "string") {
     return undefined;
@@ -244,6 +249,60 @@ const toTrimmedString = (value: unknown): string | undefined => {
 
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : undefined;
+};
+
+const toLowerString = (value: unknown): string | undefined => {
+  return typeof value === "string" ? value.toLowerCase().trim() : undefined;
+};
+
+const normalizePolicyKey = (
+  value: unknown,
+  mode: ErrorRetryPolicyMode = "safe",
+): string | undefined => {
+  if (typeof value === "string") {
+    const normalized = value.trim().toUpperCase();
+    return normalized.length > 0 ? normalized : undefined;
+  }
+
+  if (
+    mode === "compat" &&
+    (typeof value === "number" || typeof value === "boolean")
+  ) {
+    return String(value).toUpperCase();
+  }
+
+  return undefined;
+};
+
+const policyListIncludes = (
+  values: readonly string[] | undefined,
+  normalizedKey: string,
+): boolean =>
+  values?.some((value) => normalizePolicyKey(value) === normalizedKey) ?? false;
+
+const classifyByConfiguredCode = (
+  code: KMsgErrorCode,
+  policy: ErrorRetryPolicy,
+): ProviderRetryHint | undefined => {
+  if (policy.nonRetryableCodes?.includes(code)) return "non_retryable";
+  if (policy.retryableCodes?.includes(code)) return "retryable";
+  return undefined;
+};
+
+const classifyByConfiguredStatus = (
+  status: unknown,
+  policy: ErrorRetryPolicy,
+): ProviderRetryHint | undefined => {
+  const normalized = normalizePolicyKey(status, "compat");
+  if (!normalized) return undefined;
+
+  if (policyListIncludes(policy.nonRetryableStatuses, normalized)) {
+    return "non_retryable";
+  }
+  if (policyListIncludes(policy.retryableStatuses, normalized)) {
+    return "retryable";
+  }
+  return undefined;
 };
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
@@ -436,12 +495,16 @@ const pushPolicyIssue = (
   });
 };
 
-const normalizePolicyCodeList = (
+const normalizePolicyList = <T extends string>(
   value: unknown,
   path: string,
   mode: ErrorRetryPolicyMode,
   issues: ErrorRetryPolicyIssue[],
-): KMsgErrorCode[] => {
+  options: {
+    label: "code" | "status";
+    normalize: (item: unknown) => T | undefined;
+  },
+): T[] => {
   if (value === undefined) return [];
 
   const items: unknown[] = (() => {
@@ -455,44 +518,200 @@ const normalizePolicyCodeList = (
 
     pushPolicyIssue(issues, {
       code: "invalid_type",
-      message: "expected array of KMsgErrorCode values",
+      message: `expected array of ${options.label} values`,
       path,
     });
     return [];
   })();
 
-  const out: KMsgErrorCode[] = [];
-  const seen = new Set<KMsgErrorCode>();
+  const out: T[] = [];
+  const seen = new Set<T>();
 
   for (let index = 0; index < items.length; index += 1) {
     const item = items[index];
-    const code = normalizeKMsgErrorCode(
-      typeof item === "string" ? item : mode === "compat" ? String(item) : item,
-    );
+    const normalized = options.normalize(item);
 
-    if (!code) {
+    if (!normalized) {
       pushPolicyIssue(issues, {
-        code: "unknown_code",
-        message: `unknown retry policy code: ${String(item)}`,
+        code: options.label === "code" ? "unknown_code" : "invalid_status",
+        message: `invalid retry policy ${options.label}: ${String(item)}`,
         path: `${path}[${index}]`,
       });
       continue;
     }
 
-    if (seen.has(code)) {
+    if (seen.has(normalized)) {
       pushPolicyIssue(issues, {
-        code: "duplicate_code",
-        message: `duplicate retry policy code: ${code}`,
+        code: options.label === "code" ? "duplicate_code" : "duplicate_status",
+        message: `duplicate retry policy ${options.label}: ${normalized}`,
         path: `${path}[${index}]`,
       });
       continue;
     }
 
-    seen.add(code);
-    out.push(code);
+    seen.add(normalized);
+    out.push(normalized);
   }
 
   return out;
+};
+
+const normalizePolicyCodeList = (
+  value: unknown,
+  path: string,
+  mode: ErrorRetryPolicyMode,
+  issues: ErrorRetryPolicyIssue[],
+): KMsgErrorCode[] =>
+  normalizePolicyList(value, path, mode, issues, {
+    label: "code",
+    normalize: (item) => normalizeKMsgErrorCode(normalizePolicyKey(item, mode)),
+  });
+
+const normalizePolicyStatusList = (
+  value: unknown,
+  path: string,
+  mode: ErrorRetryPolicyMode,
+  issues: ErrorRetryPolicyIssue[],
+): string[] =>
+  normalizePolicyList(value, path, mode, issues, {
+    label: "status",
+    normalize: (item) => normalizePolicyKey(item, mode),
+  });
+
+const normalizePolicyRetryAfterValue = (
+  value: unknown,
+  path: string,
+  mode: ErrorRetryPolicyMode,
+  issues: ErrorRetryPolicyIssue[],
+): number | undefined => {
+  if (value === undefined) return undefined;
+
+  const normalized = normalizeRetryAfterMs(normalizeIntegerLike(value, mode));
+  if (normalized !== undefined) return normalized;
+
+  pushPolicyIssue(issues, {
+    code: "invalid_retry_after",
+    message: `invalid retry delay: ${String(value)}`,
+    path,
+  });
+  return undefined;
+};
+
+const normalizePolicyRetryAfterMap = (
+  value: unknown,
+  path: string,
+  mode: ErrorRetryPolicyMode,
+  issues: ErrorRetryPolicyIssue[],
+): Record<string, number> | undefined => {
+  if (value === undefined) return undefined;
+  if (!isObjectRecord(value)) {
+    pushPolicyIssue(issues, {
+      code: "invalid_type",
+      message: "expected retry delay map",
+      path,
+    });
+    return undefined;
+  }
+
+  const out: Record<string, number> = {};
+  const seen = new Set<string>();
+
+  for (const [rawKey, rawValue] of Object.entries(value)) {
+    const key = normalizePolicyKey(rawKey, "safe");
+    const entryPath = `${path}.${rawKey}`;
+    if (!key) {
+      pushPolicyIssue(issues, {
+        code: "invalid_key",
+        message: "retry delay map key must not be empty",
+        path: entryPath,
+      });
+      continue;
+    }
+
+    if (seen.has(key)) {
+      pushPolicyIssue(issues, {
+        code: "duplicate_key",
+        message: `duplicate retry delay map key: ${key}`,
+        path: entryPath,
+      });
+      continue;
+    }
+
+    const delay = normalizePolicyRetryAfterValue(
+      rawValue,
+      entryPath,
+      mode,
+      issues,
+    );
+    if (delay === undefined) continue;
+
+    seen.add(key);
+    out[key] = delay;
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined;
+};
+
+const normalizePolicyRetryAfter = (
+  value: unknown,
+  mode: ErrorRetryPolicyMode,
+  issues: ErrorRetryPolicyIssue[],
+): ErrorRetryPolicy["retryAfterMs"] => {
+  if (value === undefined) return undefined;
+  if (typeof value === "function") {
+    return value as (error: KMsgError) => number | undefined;
+  }
+  if (!isObjectRecord(value)) {
+    pushPolicyIssue(issues, {
+      code: "invalid_type",
+      message: "expected retry delay resolver or policy object",
+      path: "retryAfterMs",
+    });
+    return undefined;
+  }
+
+  const knownKeys = new Set(["defaultMs", "byCode", "byStatus"]);
+  for (const key of Object.keys(value)) {
+    if (knownKeys.has(key)) continue;
+    pushPolicyIssue(issues, {
+      code: "unknown_field",
+      message: `unknown retry-after policy field: ${key}`,
+      path: `retryAfterMs.${key}`,
+    });
+  }
+
+  const defaultMs = normalizePolicyRetryAfterValue(
+    value.defaultMs,
+    "retryAfterMs.defaultMs",
+    mode,
+    issues,
+  );
+  const byCode = normalizePolicyRetryAfterMap(
+    value.byCode,
+    "retryAfterMs.byCode",
+    mode,
+    issues,
+  );
+  const byStatus = normalizePolicyRetryAfterMap(
+    value.byStatus,
+    "retryAfterMs.byStatus",
+    mode,
+    issues,
+  );
+
+  if (
+    defaultMs === undefined &&
+    byCode === undefined &&
+    byStatus === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    ...(defaultMs !== undefined ? { defaultMs } : {}),
+    ...(byCode !== undefined ? { byCode } : {}),
+    ...(byStatus !== undefined ? { byStatus } : {}),
+  };
 };
 
 const normalizeRetryFallback = (
@@ -541,7 +760,10 @@ export function validateErrorRetryPolicy(
   const knownKeys = new Set([
     "retryableCodes",
     "nonRetryableCodes",
+    "retryableStatuses",
+    "nonRetryableStatuses",
     "fallback",
+    "retryAfterMs",
   ]);
   for (const key of Object.keys(input)) {
     if (knownKeys.has(key)) continue;
@@ -564,7 +786,24 @@ export function validateErrorRetryPolicy(
     mode,
     issues,
   );
+  const retryableStatuses = normalizePolicyStatusList(
+    input.retryableStatuses,
+    "retryableStatuses",
+    mode,
+    issues,
+  );
+  const nonRetryableStatuses = normalizePolicyStatusList(
+    input.nonRetryableStatuses,
+    "nonRetryableStatuses",
+    mode,
+    issues,
+  );
   const fallback = normalizeRetryFallback(input.fallback, mode, issues);
+  const retryAfterMs = normalizePolicyRetryAfter(
+    input.retryAfterMs,
+    mode,
+    issues,
+  );
 
   const retryableSet = new Set(retryableCodes);
   const nonRetryableSet = new Set(nonRetryableCodes);
@@ -579,6 +818,19 @@ export function validateErrorRetryPolicy(
     });
   }
 
+  const retryableStatusSet = new Set(retryableStatuses);
+  const nonRetryableStatusSet = new Set(nonRetryableStatuses);
+
+  for (const status of retryableStatusSet) {
+    if (!nonRetryableStatusSet.has(status)) continue;
+    retryableStatusSet.delete(status);
+    pushPolicyIssue(issues, {
+      code: "conflicting_status",
+      message: `status '${status}' is both retryable and nonRetryable; nonRetryable wins`,
+      path: "retryableStatuses",
+    });
+  }
+
   const policy: ErrorRetryPolicy = {
     ...(retryableSet.size > 0
       ? { retryableCodes: Array.from(retryableSet) }
@@ -586,13 +838,23 @@ export function validateErrorRetryPolicy(
     ...(nonRetryableSet.size > 0
       ? { nonRetryableCodes: Array.from(nonRetryableSet) }
       : {}),
+    ...(retryableStatusSet.size > 0
+      ? { retryableStatuses: Array.from(retryableStatusSet) }
+      : {}),
+    ...(nonRetryableStatusSet.size > 0
+      ? { nonRetryableStatuses: Array.from(nonRetryableStatusSet) }
+      : {}),
     ...(fallback ? { fallback } : {}),
+    ...(retryAfterMs ? { retryAfterMs } : {}),
   };
 
   const hasConfig =
     policy.retryableCodes !== undefined ||
     policy.nonRetryableCodes !== undefined ||
-    policy.fallback !== undefined;
+    policy.retryableStatuses !== undefined ||
+    policy.nonRetryableStatuses !== undefined ||
+    policy.fallback !== undefined ||
+    policy.retryAfterMs !== undefined;
 
   return {
     policy: hasConfig ? policy : null,
@@ -690,6 +952,69 @@ const resolveErrorMessage = (error: unknown): string => {
   }
 
   return typeof error === "string" ? error : "Unknown error";
+};
+
+type ResolvedRetryAfter = {
+  value?: number;
+  source?: "input" | "policy";
+};
+
+const resolveRetryAfterMapValue = (
+  map: Readonly<Record<string, number>> | undefined,
+  key: unknown,
+): number | undefined => {
+  const normalizedKey = normalizePolicyKey(key, "compat");
+  if (!map || !normalizedKey) return undefined;
+
+  if (Object.prototype.hasOwnProperty.call(map, normalizedKey)) {
+    return normalizeRetryAfterMs(map[normalizedKey]);
+  }
+
+  for (const [candidateKey, candidateValue] of Object.entries(map)) {
+    if (normalizePolicyKey(candidateKey) !== normalizedKey) continue;
+    return normalizeRetryAfterMs(candidateValue);
+  }
+
+  return undefined;
+};
+
+const resolveRetryAfter = (
+  error: KMsgError,
+  policy?: ErrorRetryPolicy,
+): ResolvedRetryAfter => {
+  const configured = policy?.retryAfterMs;
+  if (typeof configured === "function") {
+    const override = normalizeRetryAfterMs(configured(error));
+    if (override !== undefined) {
+      return { value: override, source: "policy" };
+    }
+  }
+
+  const direct = normalizeRetryAfterMs(error.retryAfterMs);
+  if (direct !== undefined) {
+    return { value: direct, source: "input" };
+  }
+
+  if (!configured || typeof configured === "function") return {};
+
+  const codeKeys = [error.providerErrorCode, error.code];
+  for (const code of codeKeys) {
+    const byCode = resolveRetryAfterMapValue(configured.byCode, code);
+    if (byCode !== undefined) {
+      return { value: byCode, source: "policy" };
+    }
+  }
+
+  const byStatus = resolveRetryAfterMapValue(
+    configured.byStatus,
+    error.httpStatus,
+  );
+  if (byStatus !== undefined) {
+    return { value: byStatus, source: "policy" };
+  }
+
+  const fallback = normalizeRetryAfterMs(configured.defaultMs);
+  return fallback !== undefined ? { value: fallback, source: "policy" } : {};
 };
 
 export function normalizeProviderError(
@@ -886,6 +1211,16 @@ export function normalizeProviderError(
       causeChain,
     },
   );
+  const resolvedRetryAfter = resolveRetryAfter(
+    classificationProbe,
+    options.policy,
+  );
+  if (resolvedRetryAfter.value !== undefined) {
+    retryAfterMs = resolvedRetryAfter.value;
+    if (resolvedRetryAfter.source === "policy") {
+      sources.retryAfterMs = "policy";
+    }
+  }
   const classification = ErrorUtils.classifyForRetry(
     classificationProbe,
     options.policy,
@@ -915,6 +1250,15 @@ export const ErrorUtils = {
     policy: ErrorRetryPolicy = {},
   ): ProviderRetryHint {
     if (error instanceof KMsgError) {
+      const configuredByCode = classifyByConfiguredCode(error.code, policy);
+      if (configuredByCode) return configuredByCode;
+
+      const configuredByStatus = classifyByConfiguredStatus(
+        error.httpStatus,
+        policy,
+      );
+      if (configuredByStatus) return configuredByStatus;
+
       const retryableCodes = new Set(
         policy.retryableCodes ?? Array.from(DEFAULT_RETRYABLE_ERROR_CODES),
       );
@@ -965,6 +1309,11 @@ export const ErrorUtils = {
         : undefined;
 
     const status =
+      normalizePolicyKey(candidate?.status, "compat") ??
+      normalizePolicyKey(candidate?.statusCode, "compat") ??
+      normalizePolicyKey(candidate?.httpStatus, "compat") ??
+      normalizePolicyKey(candidate?.code, "compat");
+    const legacyStringStatus =
       toLowerString(candidate?.status) ??
       toLowerString(candidate?.statusCode) ??
       toLowerString(candidate?.code);
@@ -973,9 +1322,10 @@ export const ErrorUtils = {
       normalizeNumber(candidate?.statusCode) ??
       normalizeNumber(candidate?.httpStatus);
 
-    if (typeof status === "string" && status.startsWith("5")) {
-      return "retryable";
-    }
+    const configuredByStatus = classifyByConfiguredStatus(status, policy);
+    if (configuredByStatus) return configuredByStatus;
+
+    if (legacyStringStatus?.startsWith("5")) return "retryable";
 
     if (statusCode !== undefined) {
       if (policy.classifyByStatusCode) {
@@ -1008,26 +1358,7 @@ export const ErrorUtils = {
     error: KMsgError,
     policy?: ErrorRetryPolicy,
   ): number | undefined {
-    if (policy?.retryAfterMs) {
-      const override = policy.retryAfterMs(error);
-      const normalized = normalizeRetryAfterMs(override);
-      if (normalized !== undefined) {
-        return normalized;
-      }
-    }
-
-    if (error.retryAfterMs !== undefined) {
-      return normalizeRetryAfterMs(error.retryAfterMs);
-    }
-
-    if (
-      error.code === KMsgErrorCode.RATE_LIMIT_EXCEEDED &&
-      error.retryAfterMs === undefined
-    ) {
-      return undefined;
-    }
-
-    return undefined;
+    return resolveRetryAfter(error, policy).value;
   },
 
   isUnknownStatus: (statusCode: number | undefined): boolean => {

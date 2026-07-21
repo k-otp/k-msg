@@ -22,6 +22,43 @@ npm install @k-msg/core
 bun add @k-msg/core
 ```
 
+## Retry policy from JSON
+
+Use the core parser for environment-backed provider policies instead of
+reimplementing status and retry-delay normalization in each application:
+
+```ts
+import {
+  normalizeProviderError,
+  parseErrorRetryPolicyFromJson,
+} from "@k-msg/core";
+
+const policy = parseErrorRetryPolicyFromJson(
+  JSON.stringify({
+    retryableCodes: ["NETWORK_TIMEOUT"],
+    nonRetryableStatuses: ["400"],
+    retryableStatuses: ["429", "503"],
+    retryAfterMs: {
+      defaultMs: 1_000,
+      byCode: { VENDOR_BUSY: 2_000 },
+      byStatus: { "429": 3_000 },
+    },
+  }),
+  { mode: "compat" },
+);
+
+const normalized = normalizeProviderError(providerError, {
+  mode: "compat",
+  policy: policy ?? undefined,
+});
+```
+
+Policy keys are trimmed and normalized case-insensitively. In conflicts,
+explicit non-retryable entries win. Declarative retry delays resolve in this
+order: direct error metadata, provider error code, canonical `KMsgErrorCode`,
+HTTP status, then `defaultMs`. Existing function-based `retryAfterMs(error)`
+resolvers remain supported as overrides.
+
 ## Example: Implement a Provider
 
 ```ts
