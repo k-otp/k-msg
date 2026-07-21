@@ -5,7 +5,7 @@ prev: false
 title: "NormalizedProviderError"
 ---
 
-Defined in: [packages/core/src/errors.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L162)
+Defined in: [packages/core/src/errors.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L175)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:162](https://github.com/k-otp/k-msg/blo
 
 > `optional` **attempt?**: `number`
 
-Defined in: [packages/core/src/errors.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L171)
+Defined in: [packages/core/src/errors.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L184)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:171](https://github.com/k-otp/k-msg/blo
 
 > `optional` **causeChain?**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L170)
+Defined in: [packages/core/src/errors.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L183)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/errors.ts:170](https://github.com/k-otp/k-msg/blo
 
 > **classification**: [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
-Defined in: [packages/core/src/errors.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L164)
+Defined in: [packages/core/src/errors.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L177)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/errors.ts:164](https://github.com/k-otp/k-msg/blo
 
 > **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L163)
+Defined in: [packages/core/src/errors.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L176)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/errors.ts:163](https://github.com/k-otp/k-msg/blo
 
 > `optional` **httpStatus?**: `number`
 
-Defined in: [packages/core/src/errors.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L167)
+Defined in: [packages/core/src/errors.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L180)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/errors.ts:167](https://github.com/k-otp/k-msg/blo
 
 > `optional` **providerErrorCode?**: `string`
 
-Defined in: [packages/core/src/errors.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L165)
+Defined in: [packages/core/src/errors.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L178)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/errors.ts:165](https://github.com/k-otp/k-msg/blo
 
 > `optional` **providerErrorText?**: `string`
 
-Defined in: [packages/core/src/errors.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L166)
+Defined in: [packages/core/src/errors.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L179)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [packages/core/src/errors.ts:166](https://github.com/k-otp/k-msg/blo
 
 > `optional` **requestId?**: `string`
 
-Defined in: [packages/core/src/errors.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L168)
+Defined in: [packages/core/src/errors.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L181)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/errors.ts:168](https://github.com/k-otp/k-msg/blo
 
 > `optional` **retryAfterMs?**: `number`
 
-Defined in: [packages/core/src/errors.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L169)
+Defined in: [packages/core/src/errors.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L182)
 
 ***
 
@@ -85,4 +85,4 @@ Defined in: [packages/core/src/errors.ts:169](https://github.com/k-otp/k-msg/blo
 
 > **sources**: [`NormalizedProviderErrorSources`](/en/api/core/src/interfaces/normalizedprovidererrorsources/)
 
-Defined in: [packages/core/src/errors.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L172)
+Defined in: [packages/core/src/errors.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L185)

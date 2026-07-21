@@ -5,7 +5,7 @@ prev: false
 title: "NormalizeProviderErrorOptions"
 ---
 
-Defined in: [packages/core/src/errors.ts:175](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L175)
+Defined in: [packages/core/src/errors.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L188)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:175](https://github.com/k-otp/k-msg/blo
 
 > `optional` **attempt?**: `number`
 
-Defined in: [packages/core/src/errors.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L178)
+Defined in: [packages/core/src/errors.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L191)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:178](https://github.com/k-otp/k-msg/blo
 
 > `optional` **defaultCode?**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L179)
+Defined in: [packages/core/src/errors.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L192)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/errors.ts:179](https://github.com/k-otp/k-msg/blo
 
 > `optional` **mode?**: [`ErrorRetryPolicyMode`](/en/api/core/src/type-aliases/errorretrypolicymode/)
 
-Defined in: [packages/core/src/errors.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L176)
+Defined in: [packages/core/src/errors.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L189)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/errors.ts:176](https://github.com/k-otp/k-msg/blo
 
 > `optional` **policy?**: [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/)
 
-Defined in: [packages/core/src/errors.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L177)
+Defined in: [packages/core/src/errors.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L190)
