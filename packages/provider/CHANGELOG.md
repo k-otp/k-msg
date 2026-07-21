@@ -1,5 +1,15 @@
 # @k-msg/provider
 
+## 0.30.0 — 2026-07-21
+
+### Minor changes
+
+- [15b4244](https://github.com/k-otp/k-msg/commit/15b4244ff73df50d53573c086037bdc840adff00) Add provider-neutral request contexts, injectable fetch support, and explicit transport capabilities so built-in providers can propagate AbortSignal through send and delivery-status requests. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.30.0, template@0.30.0
+
 ## 0.29.9 — 2026-07-20
 
 ### Patch changes
