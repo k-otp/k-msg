@@ -7,7 +7,7 @@ title: "ErrorUtils"
 
 > `const` **ErrorUtils**: `object`
 
-Defined in: [packages/core/src/errors.ts:908](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L908)
+Defined in: [packages/core/src/errors.ts:1243](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L1243)
 
 ## Type Declaration
 

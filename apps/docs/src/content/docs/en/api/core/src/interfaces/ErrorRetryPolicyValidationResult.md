@@ -5,7 +5,7 @@ prev: false
 title: "ErrorRetryPolicyValidationResult"
 ---
 
-Defined in: [packages/core/src/errors.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L133)
+Defined in: [packages/core/src/errors.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L146)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:133](https://github.com/k-otp/k-msg/blo
 
 > **issues**: [`ErrorRetryPolicyIssue`](/en/api/core/src/interfaces/errorretrypolicyissue/)[]
 
-Defined in: [packages/core/src/errors.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L135)
+Defined in: [packages/core/src/errors.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L148)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/core/src/errors.ts:135](https://github.com/k-otp/k-msg/blo
 
 > **policy**: [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`
 
-Defined in: [packages/core/src/errors.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L134)
+Defined in: [packages/core/src/errors.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L147)

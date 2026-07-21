@@ -7,7 +7,7 @@ title: "normalizeRetryAfterMs"
 
 > **normalizeRetryAfterMs**(`value`): `number` \| `undefined`
 
-Defined in: [packages/core/src/errors.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L223)
+Defined in: [packages/core/src/errors.ts:236](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L236)
 
 ## Parameters
 
