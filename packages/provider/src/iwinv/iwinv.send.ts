@@ -3,11 +3,17 @@ import {
   KMsgError,
   KMsgErrorCode,
   ok,
+  type ProviderRequestContext,
   type Result,
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
 import { safeParseJson } from "../shared/http-json";
+import {
+  fetchWithProviderContext,
+  toProviderNetworkError,
+  toProviderTransportError,
+} from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   getAlimTalkHeaders,
@@ -42,8 +48,9 @@ export async function sendAlimTalk(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   options: Extract<SendOptions, { type: "ALIMTALK" }>;
+  context?: ProviderRequestContext;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, config, options } = params;
+  const { providerId, config, options, context } = params;
   const templateId = options.templateId;
 
   if (!templateId || templateId.length === 0) {
@@ -195,11 +202,16 @@ export async function sendAlimTalk(params: {
   const url = `${config.baseUrl}${getSendEndpoint(config)}`;
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: getAlimTalkHeaders(config),
-      body: JSON.stringify(payload),
-    });
+    const response = await fetchWithProviderContext(
+      context,
+      url,
+      {
+        method: "POST",
+        headers: getAlimTalkHeaders(config),
+        body: JSON.stringify(payload),
+      },
+      providerId,
+    );
 
     const responseText = await response.text();
     const parsed = safeParseJson(responseText);
@@ -232,13 +244,7 @@ export async function sendAlimTalk(params: {
       raw: data,
     });
   } catch (error) {
-    return fail(
-      new KMsgError(
-        KMsgErrorCode.NETWORK_ERROR,
-        error instanceof Error ? error.message : String(error),
-        { providerId },
-      ),
-    );
+    return fail(toProviderTransportError(error, context?.signal, providerId));
   }
 }
 
@@ -251,6 +257,7 @@ async function sendSmsV2Mms(params: {
   text: string;
   scheduledAtValid: boolean;
   scheduledAt?: Date;
+  context?: ProviderRequestContext;
 }): Promise<Result<SendResult, KMsgError>> {
   const {
     providerId,
@@ -261,6 +268,7 @@ async function sendSmsV2Mms(params: {
     text,
     scheduledAtValid,
     scheduledAt,
+    context,
   } = params;
 
   if (options.type !== "MMS") {
@@ -299,15 +307,7 @@ async function sendSmsV2Mms(params: {
   try {
     image = await toImageBlob(imageInput);
   } catch (error) {
-    return fail(
-      error instanceof KMsgError
-        ? error
-        : new KMsgError(
-            KMsgErrorCode.NETWORK_ERROR,
-            error instanceof Error ? error.message : String(error),
-            { providerId },
-          ),
-    );
+    return fail(toProviderNetworkError(error, providerId));
   }
 
   if (image.size > 100 * 1024) {
@@ -359,11 +359,16 @@ async function sendSmsV2Mms(params: {
   const url = `${resolveSmsBaseUrl()}/api/v2/send/`;
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: mergedHeaders,
-      body: form,
-    });
+    const response = await fetchWithProviderContext(
+      context,
+      url,
+      {
+        method: "POST",
+        headers: mergedHeaders,
+        body: form,
+      },
+      providerId,
+    );
 
     const responseText = await response.text();
     const parsed = safeParseJson(responseText);
@@ -406,13 +411,7 @@ async function sendSmsV2Mms(params: {
       raw: data,
     });
   } catch (error) {
-    return fail(
-      new KMsgError(
-        KMsgErrorCode.NETWORK_ERROR,
-        error instanceof Error ? error.message : String(error),
-        { providerId },
-      ),
-    );
+    return fail(toProviderTransportError(error, context?.signal, providerId));
   }
 }
 
@@ -420,8 +419,9 @@ export async function sendSmsV2(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   options: Extract<SendOptions, { type: SmsV2MessageType }>;
+  context?: ProviderRequestContext;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, config, options } = params;
+  const { providerId, config, options, context } = params;
 
   if (!canSendSmsV2(config)) {
     return fail(
@@ -484,6 +484,7 @@ export async function sendSmsV2(params: {
       text,
       scheduledAtValid,
       scheduledAt: scheduledAtValid ? (scheduledAt as Date) : undefined,
+      context,
     });
   }
 
@@ -530,11 +531,16 @@ export async function sendSmsV2(params: {
   const url = `${resolveSmsBaseUrl()}/api/v2/send/`;
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: mergedHeaders,
-      body: JSON.stringify(payload),
-    });
+    const response = await fetchWithProviderContext(
+      context,
+      url,
+      {
+        method: "POST",
+        headers: mergedHeaders,
+        body: JSON.stringify(payload),
+      },
+      providerId,
+    );
 
     const responseText = await response.text();
     const parsed = safeParseJson(responseText);
@@ -577,12 +583,6 @@ export async function sendSmsV2(params: {
       raw: data,
     });
   } catch (error) {
-    return fail(
-      new KMsgError(
-        KMsgErrorCode.NETWORK_ERROR,
-        error instanceof Error ? error.message : String(error),
-        { providerId },
-      ),
-    );
+    return fail(toProviderTransportError(error, context?.signal, providerId));
   }
 }

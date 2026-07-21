@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:5](https://github.com/k-otp/k-msg/blob/
 
 > **CRYPTO\_CONFIG\_ERROR**: `"CRYPTO_CONFIG_ERROR"`
 
-Defined in: [packages/core/src/errors.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L14)
+Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/errors.ts:14](https://github.com/k-otp/k-msg/blob
 
 > **CRYPTO\_DECRYPT\_FAILED**: `"CRYPTO_DECRYPT_FAILED"`
 
-Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
+Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob
 
 > **CRYPTO\_ENCRYPT\_FAILED**: `"CRYPTO_ENCRYPT_FAILED"`
 
-Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L15)
+Defined in: [packages/core/src/errors.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L16)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/errors.ts:15](https://github.com/k-otp/k-msg/blob
 
 > **CRYPTO\_HASH\_FAILED**: `"CRYPTO_HASH_FAILED"`
 
-Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L17)
+Defined in: [packages/core/src/errors.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L18)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/errors.ts:17](https://github.com/k-otp/k-msg/blob
 
 > **CRYPTO\_POLICY\_VIOLATION**: `"CRYPTO_POLICY_VIOLATION"`
 
-Defined in: [packages/core/src/errors.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L18)
+Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)
 
 ***
 
@@ -77,7 +77,7 @@ Defined in: [packages/core/src/errors.ts:4](https://github.com/k-otp/k-msg/blob/
 
 > **MESSAGE\_SEND\_FAILED**: `"MESSAGE_SEND_FAILED"`
 
-Defined in: [packages/core/src/errors.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L13)
+Defined in: [packages/core/src/errors.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L14)
 
 ***
 
@@ -109,7 +109,7 @@ Defined in: [packages/core/src/errors.ts:10](https://github.com/k-otp/k-msg/blob
 
 > **PROVIDER\_ERROR**: `"PROVIDER_ERROR"`
 
-Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L12)
+Defined in: [packages/core/src/errors.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L13)
 
 ***
 
@@ -118,6 +118,14 @@ Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob
 > **RATE\_LIMIT\_EXCEEDED**: `"RATE_LIMIT_EXCEEDED"`
 
 Defined in: [packages/core/src/errors.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L8)
+
+***
+
+### REQUEST\_ABORTED
+
+> **REQUEST\_ABORTED**: `"REQUEST_ABORTED"`
+
+Defined in: [packages/core/src/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L12)
 
 ***
 
@@ -133,4 +141,4 @@ Defined in: [packages/core/src/errors.ts:7](https://github.com/k-otp/k-msg/blob/
 
 > **UNKNOWN\_ERROR**: `"UNKNOWN_ERROR"`
 
-Defined in: [packages/core/src/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L19)
+Defined in: [packages/core/src/errors.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L20)

@@ -6,9 +6,14 @@ import {
   KMsgError,
   KMsgErrorCode,
   ok,
+  type ProviderRequestContext,
   type Result,
 } from "@k-msg/core";
 import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
+import {
+  fetchWithProviderContext,
+  toProviderTransportError,
+} from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   getAlimTalkHeaders,
@@ -34,8 +39,9 @@ export async function getAlimTalkDeliveryStatus(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   query: DeliveryStatusQuery;
+  context?: ProviderRequestContext;
 }): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
-  const { providerId, config, query } = params;
+  const { providerId, config, query, context } = params;
   const providerMessageId = query.providerMessageId.trim();
   if (!providerMessageId) {
     return fail(
@@ -78,11 +84,16 @@ export async function getAlimTalkDeliveryStatus(params: {
   const url = `${config.baseUrl}/api/history/`;
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: getAlimTalkHeaders(config),
-      body: JSON.stringify(payload),
-    });
+    const response = await fetchWithProviderContext(
+      context,
+      url,
+      {
+        method: "POST",
+        headers: getAlimTalkHeaders(config),
+        body: JSON.stringify(payload),
+      },
+      providerId,
+    );
 
     const responseText = await response.text();
     const parsed = safeParseJson(responseText);
@@ -150,13 +161,7 @@ export async function getAlimTalkDeliveryStatus(params: {
       raw: item,
     });
   } catch (error) {
-    return fail(
-      new KMsgError(
-        KMsgErrorCode.NETWORK_ERROR,
-        error instanceof Error ? error.message : String(error),
-        { providerId },
-      ),
-    );
+    return fail(toProviderTransportError(error, context?.signal, providerId));
   }
 }
 
@@ -164,8 +169,9 @@ export async function getSmsV2DeliveryStatus(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   query: DeliveryStatusQuery;
+  context?: ProviderRequestContext;
 }): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
-  const { providerId, config, query } = params;
+  const { providerId, config, query, context } = params;
 
   if (!canSendSmsV2(config)) {
     return fail(
@@ -253,11 +259,16 @@ export async function getSmsV2DeliveryStatus(params: {
   const url = `${resolveSmsBaseUrl()}/api/history/`;
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: mergedHeaders,
-      body: JSON.stringify(payload),
-    });
+    const response = await fetchWithProviderContext(
+      context,
+      url,
+      {
+        method: "POST",
+        headers: mergedHeaders,
+        body: JSON.stringify(payload),
+      },
+      providerId,
+    );
 
     const responseText = await response.text();
     const parsed = safeParseJson(responseText);
@@ -325,12 +336,6 @@ export async function getSmsV2DeliveryStatus(params: {
       raw: item,
     });
   } catch (error) {
-    return fail(
-      new KMsgError(
-        KMsgErrorCode.NETWORK_ERROR,
-        error instanceof Error ? error.message : String(error),
-        { providerId },
-      ),
-    );
+    return fail(toProviderTransportError(error, context?.signal, providerId));
   }
 }

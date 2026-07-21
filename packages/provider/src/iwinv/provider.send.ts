@@ -11,6 +11,8 @@ import {
   ok,
   type Provider,
   type ProviderHealthStatus,
+  type ProviderRequestContext,
+  type ProviderTransportCapabilities,
   type Result,
   readRuntimeEnv,
   type SendOptions,
@@ -67,6 +69,10 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
   readonly id = "iwinv";
   readonly name = "IWINV Messaging Provider";
   readonly supportedTypes: readonly MessageType[];
+  readonly transportCapabilities = {
+    abortSignal: "supported",
+    injectableFetch: "supported",
+  } as const satisfies ProviderTransportCapabilities;
 
   protected readonly config: NormalizedIwinvConfig;
 
@@ -142,7 +148,10 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
     }
   }
 
-  async send(options: SendOptions): Promise<Result<SendResult, KMsgError>> {
+  async send(
+    options: SendOptions,
+    context?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>> {
     const messageId = options.messageId || crypto.randomUUID();
     const normalized = { ...options, messageId } as SendOptions;
 
@@ -152,6 +161,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
           providerId: this.id,
           config: this.config,
           options: normalized,
+          context,
         });
       case "SMS":
       case "LMS":
@@ -163,6 +173,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
             SendOptions,
             { type: SmsV2MessageType }
           >,
+          context,
         });
       default:
         return fail(
@@ -177,6 +188,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
 
   async getDeliveryStatus(
     query: DeliveryStatusQuery,
+    context?: ProviderRequestContext,
   ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
     switch (query.type) {
       case "ALIMTALK":
@@ -184,6 +196,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
           providerId: this.id,
           config: this.config,
           query,
+          context,
         });
       case "SMS":
       case "LMS":
@@ -192,6 +205,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
           providerId: this.id,
           config: this.config,
           query,
+          context,
         });
       default:
         return fail(

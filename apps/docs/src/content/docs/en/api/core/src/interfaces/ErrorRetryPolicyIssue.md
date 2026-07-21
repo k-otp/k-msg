@@ -5,7 +5,7 @@ prev: false
 title: "ErrorRetryPolicyIssue"
 ---
 
-Defined in: [packages/core/src/errors.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L122)
+Defined in: [packages/core/src/errors.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L127)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:122](https://github.com/k-otp/k-msg/blo
 
 > **code**: `string`
 
-Defined in: [packages/core/src/errors.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L123)
+Defined in: [packages/core/src/errors.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L128)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/errors.ts:123](https://github.com/k-otp/k-msg/blo
 
 > **message**: `string`
 
-Defined in: [packages/core/src/errors.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L124)
+Defined in: [packages/core/src/errors.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L129)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/errors.ts:124](https://github.com/k-otp/k-msg/blo
 
 > **path**: `string`
 
-Defined in: [packages/core/src/errors.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L125)
+Defined in: [packages/core/src/errors.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L130)

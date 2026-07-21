@@ -6,6 +6,8 @@ import {
   type MessageType,
   type Provider,
   type ProviderHealthStatus,
+  type ProviderRequestContext,
+  type ProviderTransportCapabilities,
   type Result,
   readRuntimeEnv,
   type SendOptions,
@@ -44,6 +46,10 @@ export class AligoSendProvider implements Provider, KakaoChannelProvider {
     "LMS",
     "MMS",
   ];
+  readonly transportCapabilities = {
+    abortSignal: "supported",
+    injectableFetch: "supported",
+  } as const satisfies ProviderTransportCapabilities;
 
   protected readonly config: AligoConfig;
   protected readonly smsHost: string;
@@ -73,12 +79,15 @@ export class AligoSendProvider implements Provider, KakaoChannelProvider {
     this.alimtalkHost = config.alimtalkBaseUrl || "https://kakaoapi.aligo.in";
   }
 
-  protected getRuntimeContext(): AligoRuntimeContext {
+  protected getRuntimeContext(
+    requestContext?: ProviderRequestContext,
+  ): AligoRuntimeContext {
     return {
       providerId: this.id,
       config: this.config,
       smsHost: this.smsHost,
       alimtalkHost: this.alimtalkHost,
+      requestContext,
     };
   }
 
@@ -121,10 +130,13 @@ export class AligoSendProvider implements Provider, KakaoChannelProvider {
     }
   }
 
-  async send(options: SendOptions): Promise<Result<SendResult, KMsgError>> {
+  async send(
+    options: SendOptions,
+    context?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>> {
     const messageId = options.messageId || crypto.randomUUID();
     const normalized = { ...options, messageId } as SendOptions;
-    return sendWithAligo(this.getRuntimeContext(), normalized);
+    return sendWithAligo(this.getRuntimeContext(context), normalized);
   }
 
   async listKakaoChannels(params?: {
