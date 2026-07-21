@@ -11,6 +11,8 @@ import {
   ok,
   type Provider,
   type ProviderHealthStatus,
+  type ProviderRequestContext,
+  type ProviderTransportCapabilities,
   type Result,
   readRuntimeEnv,
   type SendOptions,
@@ -43,6 +45,10 @@ export class SolapiProvider implements Provider, BalanceProvider {
     "RCS_ITPL",
     "RCS_LTPL",
   ];
+  readonly transportCapabilities = {
+    abortSignal: "unsupported",
+    injectableFetch: "unsupported",
+  } as const satisfies ProviderTransportCapabilities;
 
   private readonly config: SolapiConfig;
   private readonly client: SolapiSdkClient;
@@ -116,7 +122,10 @@ export class SolapiProvider implements Provider, BalanceProvider {
     }
   }
 
-  async send(options: SendOptions): Promise<Result<SendResult, KMsgError>> {
+  async send(
+    options: SendOptions,
+    _context?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>> {
     const messageId = options.messageId || crypto.randomUUID();
     const normalized = { ...options, messageId } as SendOptions;
 
@@ -134,6 +143,7 @@ export class SolapiProvider implements Provider, BalanceProvider {
 
   async getDeliveryStatus(
     query: DeliveryStatusQuery,
+    _context?: ProviderRequestContext,
   ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
     return getSolapiDeliveryStatus({
       providerId: this.id,

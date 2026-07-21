@@ -1,3 +1,4 @@
+import type { ProviderRequestContext } from "@k-msg/core";
 import type { AligoConfig } from "./types/aligo";
 
 export type AligoMessageType =
@@ -12,4 +13,5 @@ export type AligoRuntimeContext = {
   config: AligoConfig;
   smsHost: string;
   alimtalkHost: string;
+  requestContext?: ProviderRequestContext;
 };

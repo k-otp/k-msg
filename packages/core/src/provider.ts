@@ -14,6 +14,35 @@ import type {
 } from "./types/index";
 
 /**
+ * Fetch implementation used for a single provider operation.
+ *
+ * Callers can inject a compatible implementation for runtime-specific
+ * transports, tracing, or deterministic tests.
+ */
+export type ProviderFetch = typeof globalThis.fetch;
+
+/**
+ * Per-operation transport context passed to provider calls.
+ *
+ * Providers that use fetch should forward `signal` unchanged to the
+ * underlying request and prefer `fetch` over the runtime global when supplied.
+ */
+export interface ProviderRequestContext {
+  /** Abort signal for the underlying provider transport. */
+  signal?: AbortSignal;
+  /** Optional fetch implementation for this operation. */
+  fetch?: ProviderFetch;
+}
+
+export type ProviderTransportSupport = "supported" | "unsupported";
+
+/** Transport features a provider forwards to its underlying operation. */
+export interface ProviderTransportCapabilities {
+  abortSignal: ProviderTransportSupport;
+  injectableFetch: ProviderTransportSupport;
+}
+
+/**
  * Represents an AlimTalk template registered with a provider.
  * Templates must be approved by Kakao before use.
  */
@@ -220,6 +249,11 @@ export interface Provider {
    * Messages of unsupported types will be rejected.
    */
   readonly supportedTypes: readonly MessageType[];
+  /**
+   * Per-operation transport features supported by this provider.
+   * Missing declarations must be treated as unsupported.
+   */
+  readonly transportCapabilities?: ProviderTransportCapabilities;
 
   /**
    * Check if the provider is operational.
@@ -230,13 +264,17 @@ export interface Provider {
    * Send a message through this provider.
    * @returns Result with SendResult on success, KMsgError on failure.
    */
-  send(params: SendOptions): Promise<Result<SendResult, KMsgError>>;
+  send(
+    params: SendOptions,
+    context?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>>;
   /**
    * Query delivery status for a previously sent message.
    * Optional capability - not all providers support this.
    */
   getDeliveryStatus?(
     query: DeliveryStatusQuery,
+    context?: ProviderRequestContext,
   ): Promise<Result<DeliveryStatusResult | null, KMsgError>>;
   /**
    * Get the onboarding specification for this provider.

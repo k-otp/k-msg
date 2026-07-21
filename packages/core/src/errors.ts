@@ -9,6 +9,7 @@ export enum KMsgErrorCode {
   NETWORK_ERROR = "NETWORK_ERROR",
   NETWORK_TIMEOUT = "NETWORK_TIMEOUT",
   NETWORK_SERVICE_UNAVAILABLE = "NETWORK_SERVICE_UNAVAILABLE",
+  REQUEST_ABORTED = "REQUEST_ABORTED",
   PROVIDER_ERROR = "PROVIDER_ERROR",
   MESSAGE_SEND_FAILED = "MESSAGE_SEND_FAILED",
   CRYPTO_CONFIG_ERROR = "CRYPTO_CONFIG_ERROR",
@@ -53,6 +54,10 @@ const ERROR_MESSAGES: Record<KMsgErrorCode, { ko: string; en: string }> = {
   [KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE]: {
     ko: "서비스를 일시적으로 사용할 수 없습니다",
     en: "Service temporarily unavailable",
+  },
+  [KMsgErrorCode.REQUEST_ABORTED]: {
+    ko: "요청이 취소되었습니다",
+    en: "Request aborted",
   },
   [KMsgErrorCode.PROVIDER_ERROR]: {
     ko: "제공자 오류가 발생했습니다",
@@ -195,6 +200,7 @@ const DEFAULT_NON_RETRYABLE_ERROR_CODES: ReadonlySet<RetryPolicyErrorCode> =
     KMsgErrorCode.INSUFFICIENT_BALANCE,
     KMsgErrorCode.TEMPLATE_NOT_FOUND,
     KMsgErrorCode.MESSAGE_SEND_FAILED,
+    KMsgErrorCode.REQUEST_ABORTED,
     KMsgErrorCode.CRYPTO_CONFIG_ERROR,
     KMsgErrorCode.CRYPTO_ENCRYPT_FAILED,
     KMsgErrorCode.CRYPTO_DECRYPT_FAILED,

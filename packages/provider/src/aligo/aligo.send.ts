@@ -98,6 +98,7 @@ async function sendSMS(
     endpoint: getAligoEndpoint("sendSMS", ctx.config),
     data: body as unknown as Record<string, unknown>,
     providerId: ctx.providerId,
+    context: ctx.requestContext,
   })) as unknown as AligoResponse;
 
   if (response.result_code !== "1") {
@@ -229,6 +230,7 @@ async function sendAlimTalk(
     endpoint: getAligoEndpoint("sendAlimTalk", ctx.config),
     data: body,
     providerId: ctx.providerId,
+    context: ctx.requestContext,
   })) as unknown as AligoResponse;
 
   if (response.result_code !== "0") {
@@ -316,6 +318,7 @@ async function sendFriendTalk(
     endpoint: getAligoEndpoint("sendFriendTalk", ctx.config),
     data: body,
     providerId: ctx.providerId,
+    context: ctx.requestContext,
   })) as unknown as AligoResponse;
 
   if (response.result_code !== "0") {

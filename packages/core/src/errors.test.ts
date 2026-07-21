@@ -53,6 +53,12 @@ describe("ErrorUtils", () => {
       "Invalid request",
     );
     expect(ErrorUtils.isRetryable(nonRetryableError)).toBe(false);
+
+    const abortedError = new KMsgError(
+      KMsgErrorCode.REQUEST_ABORTED,
+      "Request aborted",
+    );
+    expect(ErrorUtils.isRetryable(abortedError)).toBe(false);
   });
 
   test("resolveRetryAfterMs should normalize valid delay and ignore invalid values", () => {

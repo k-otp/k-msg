@@ -5,7 +5,7 @@ prev: false
 title: "IWINVSendProviderFactory"
 ---
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:428](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L428)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:442](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L442)
 
 IWINV send/status/balance focused entrypoint.
 
@@ -25,7 +25,7 @@ IWINV send/status/balance focused entrypoint.
 
 > `static` **create**(`config`): [`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:429](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L429)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:443](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L443)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/iwinv/provider.send.ts:429](https://github.co
 
 > `static` **createDefault**(): [`IWINVSendProvider`](/en/api/provider/src/iwinv/send/classes/iwinvsendprovider/)
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:433](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L433)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:447](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L447)
 
 #### Returns
 
