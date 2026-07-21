@@ -5,7 +5,7 @@ prev: false
 title: "ErrorRetryPolicyNormalizeOptions"
 ---
 
-Defined in: [packages/core/src/errors.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L138)
+Defined in: [packages/core/src/errors.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L151)
 
 ## Properties
 
@@ -13,4 +13,4 @@ Defined in: [packages/core/src/errors.ts:138](https://github.com/k-otp/k-msg/blo
 
 > `optional` **mode?**: [`ErrorRetryPolicyMode`](/en/api/core/src/type-aliases/errorretrypolicymode/)
 
-Defined in: [packages/core/src/errors.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L139)
+Defined in: [packages/core/src/errors.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L152)

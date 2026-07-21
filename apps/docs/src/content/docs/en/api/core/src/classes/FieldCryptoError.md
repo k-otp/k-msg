@@ -51,7 +51,7 @@ Defined in: [packages/core/src/crypto/errors.ts:38](https://github.com/k-otp/k-m
 
 > `readonly` `optional` **attempt?**: `number`
 
-Defined in: [packages/core/src/errors.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L310)
+Defined in: [packages/core/src/errors.ts:369](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L369)
 
 #### Inherited from
 
@@ -77,7 +77,7 @@ The cause of the error.
 
 > `readonly` `optional` **causeChain?**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:311](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L311)
+Defined in: [packages/core/src/errors.ts:370](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L370)
 
 #### Inherited from
 
@@ -89,7 +89,7 @@ Defined in: [packages/core/src/errors.ts:311](https://github.com/k-otp/k-msg/blo
 
 > `readonly` **code**: [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L303)
+Defined in: [packages/core/src/errors.ts:362](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L362)
 
 #### Inherited from
 
@@ -101,7 +101,7 @@ Defined in: [packages/core/src/errors.ts:303](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **details?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/errors.ts:304](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L304)
+Defined in: [packages/core/src/errors.ts:363](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L363)
 
 #### Inherited from
 
@@ -129,7 +129,7 @@ Defined in: [packages/core/src/crypto/errors.ts:34](https://github.com/k-otp/k-m
 
 > `readonly` `optional` **httpStatus?**: `number`
 
-Defined in: [packages/core/src/errors.ts:307](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L307)
+Defined in: [packages/core/src/errors.ts:366](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L366)
 
 #### Inherited from
 
@@ -181,7 +181,7 @@ Defined in: [packages/core/src/crypto/errors.ts:36](https://github.com/k-otp/k-m
 
 > `readonly` `optional` **providerErrorCode?**: `string`
 
-Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L305)
+Defined in: [packages/core/src/errors.ts:364](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L364)
 
 #### Inherited from
 
@@ -193,7 +193,7 @@ Defined in: [packages/core/src/errors.ts:305](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **providerErrorText?**: `string`
 
-Defined in: [packages/core/src/errors.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L306)
+Defined in: [packages/core/src/errors.ts:365](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L365)
 
 #### Inherited from
 
@@ -205,7 +205,7 @@ Defined in: [packages/core/src/errors.ts:306](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **requestId?**: `string`
 
-Defined in: [packages/core/src/errors.ts:308](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L308)
+Defined in: [packages/core/src/errors.ts:367](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L367)
 
 #### Inherited from
 
@@ -217,7 +217,7 @@ Defined in: [packages/core/src/errors.ts:308](https://github.com/k-otp/k-msg/blo
 
 > `readonly` `optional` **retryAfterMs?**: `number`
 
-Defined in: [packages/core/src/errors.ts:309](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L309)
+Defined in: [packages/core/src/errors.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L368)
 
 #### Inherited from
 
@@ -263,7 +263,7 @@ not capture any frames.
 
 > **getLocalizedMessage**(`locale?`): `string`
 
-Defined in: [packages/core/src/errors.ts:357](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L357)
+Defined in: [packages/core/src/errors.ts:416](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L416)
 
 Returns a localized error message based on the provided locale.
 Falls back to Korean (default) if locale is not provided.
