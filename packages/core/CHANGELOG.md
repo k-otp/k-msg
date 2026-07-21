@@ -1,5 +1,12 @@
 # @k-msg/core
 
+## 0.30.0 — 2026-07-21
+
+### Minor changes
+
+- [15b4244](https://github.com/k-otp/k-msg/commit/15b4244ff73df50d53573c086037bdc840adff00) Extend shared retry policies with status classification and declarative retry-delay mappings, including JSON normalization and provider-error resolution. — Thanks @imjlk!
+- [15b4244](https://github.com/k-otp/k-msg/commit/15b4244ff73df50d53573c086037bdc840adff00) Add provider-neutral request contexts, injectable fetch support, and explicit transport capabilities so built-in providers can propagate AbortSignal through send and delivery-status requests. — Thanks @imjlk!
+
 ## 0.29.9 — 2026-07-20
 
 ### Patch changes
