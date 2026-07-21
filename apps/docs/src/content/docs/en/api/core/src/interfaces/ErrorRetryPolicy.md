@@ -5,7 +5,7 @@ prev: false
 title: "ErrorRetryPolicy"
 ---
 
-Defined in: [packages/core/src/errors.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L105)
+Defined in: [packages/core/src/errors.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L110)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/errors.ts:105](https://github.com/k-otp/k-msg/blo
 
 > `optional` **classifyByMessage?**: (`message`) => [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/) \| `undefined`
 
-Defined in: [packages/core/src/errors.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L109)
+Defined in: [packages/core/src/errors.ts:114](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L114)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/errors.ts:109](https://github.com/k-otp/k-msg/blo
 
 > `optional` **classifyByStatusCode?**: (`status`) => [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
-Defined in: [packages/core/src/errors.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L108)
+Defined in: [packages/core/src/errors.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L113)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/errors.ts:108](https://github.com/k-otp/k-msg/blo
 
 > `optional` **fallback?**: [`ProviderRetryHint`](/en/api/core/src/type-aliases/providerretryhint/)
 
-Defined in: [packages/core/src/errors.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L113)
+Defined in: [packages/core/src/errors.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L118)
 
 Optional override for retry hint inference.
 
@@ -59,7 +59,7 @@ Optional override for retry hint inference.
 
 > `optional` **nonRetryableCodes?**: readonly [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)[]
 
-Defined in: [packages/core/src/errors.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L107)
+Defined in: [packages/core/src/errors.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L112)
 
 ***
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/errors.ts:107](https://github.com/k-otp/k-msg/blo
 
 > `optional` **retryableCodes?**: readonly [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)[]
 
-Defined in: [packages/core/src/errors.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L106)
+Defined in: [packages/core/src/errors.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L111)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/errors.ts:106](https://github.com/k-otp/k-msg/blo
 
 > `optional` **retryAfterMs?**: (`error`) => `number` \| `undefined`
 
-Defined in: [packages/core/src/errors.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L117)
+Defined in: [packages/core/src/errors.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L122)
 
 Optional custom retry delay in milliseconds.
 

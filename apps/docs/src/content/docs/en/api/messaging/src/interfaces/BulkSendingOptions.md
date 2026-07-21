@@ -95,7 +95,7 @@ Defined in: [packages/messaging/src/types/message.runtime.ts:89](https://github.
 
 ### priority?
 
-> `optional` **priority?**: `"high"` \| `"normal"` \| `"low"`
+> `optional` **priority?**: `"high"` \| `"low"` \| `"normal"`
 
 Defined in: [packages/messaging/src/types/message.schema.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/types/message.schema.ts#L25)
 

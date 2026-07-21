@@ -5,7 +5,7 @@ prev: false
 title: "TemplateProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L77)
+Defined in: [packages/core/src/provider.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L106)
 
 Interface for providers that support AlimTalk template management.
 
@@ -15,7 +15,7 @@ Interface for providers that support AlimTalk template management.
 
 > **createTemplate**(`input`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L81)
+Defined in: [packages/core/src/provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L110)
 
 Create a new template.
 
@@ -39,7 +39,7 @@ Create a new template.
 
 > **deleteTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L96)
+Defined in: [packages/core/src/provider.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L125)
 
 Delete a template by code.
 
@@ -63,7 +63,7 @@ Delete a template by code.
 
 > **getTemplate**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L103)
+Defined in: [packages/core/src/provider.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L132)
 
 Get a template by code.
 
@@ -87,7 +87,7 @@ Get a template by code.
 
 > **listTemplates**(`params?`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L110)
+Defined in: [packages/core/src/provider.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L139)
 
 List templates with optional filtering and pagination.
 
@@ -121,7 +121,7 @@ List templates with optional filtering and pagination.
 
 > **updateTemplate**(`code`, `patch`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L88)
+Defined in: [packages/core/src/provider.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L117)
 
 Update an existing template by code.
 
