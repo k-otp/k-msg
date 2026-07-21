@@ -8,6 +8,8 @@ import {
   type MessageType,
   ok,
   type Provider,
+  type ProviderRequestContext,
+  type ProviderTransportCapabilities,
   type Result,
   type SendOptions,
   type SendResult,
@@ -19,6 +21,10 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../../onboarding/specs";
+import {
+  toProviderAbortError,
+  toProviderTransportError,
+} from "../../shared/provider-transport";
 
 type MockSendScenarioStep = {
   outcome: "success" | "failure" | "timeout" | "delay";
@@ -32,9 +38,29 @@ type MockSendScenarioStep = {
   durationMs?: number;
 };
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, Math.max(0, Math.floor(ms)));
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const timeout = setTimeout(
+      () => {
+        signal?.removeEventListener("abort", onAbort);
+        resolve();
+      },
+      Math.max(0, Math.floor(ms)),
+    );
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(
+        signal?.reason ??
+          (typeof DOMException !== "undefined"
+            ? new DOMException("Aborted", "AbortError")
+            : new Error("Aborted")),
+      );
+    };
+    if (signal?.aborted) {
+      onAbort();
+      return;
+    }
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 
 const normalizeMockErrorCode = (
@@ -49,6 +75,7 @@ const normalizeMockErrorCode = (
     code === KMsgErrorCode.NETWORK_ERROR ||
     code === KMsgErrorCode.NETWORK_TIMEOUT ||
     code === KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE ||
+    code === KMsgErrorCode.REQUEST_ABORTED ||
     code === KMsgErrorCode.PROVIDER_ERROR ||
     code === KMsgErrorCode.MESSAGE_SEND_FAILED ||
     code === KMsgErrorCode.UNKNOWN_ERROR
@@ -84,6 +111,10 @@ export class MockProvider
     "RCS_ITPL",
     "RCS_LTPL",
   ];
+  readonly transportCapabilities = {
+    abortSignal: "supported",
+    injectableFetch: "unsupported",
+  } as const satisfies ProviderTransportCapabilities;
 
   public calls: SendOptions[] = [];
   private failureCount = 0;
@@ -134,31 +165,45 @@ export class MockProvider
     return { healthy: true, issues: [] };
   }
 
-  async send(params: SendOptions): Promise<Result<SendResult, KMsgError>> {
+  async send(
+    params: SendOptions,
+    context?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>> {
+    const preflightAbort = toProviderAbortError(
+      context?.signal?.reason,
+      context?.signal,
+      this.id,
+    );
+    if (preflightAbort) return fail(preflightAbort);
+
     this.calls.push(params);
 
     let outcome = this.nextScenarioOutcome();
 
-    while (outcome.outcome === "delay") {
-      await sleep(outcome.durationMs ?? 0);
-      outcome = this.nextScenarioOutcome();
-    }
-
-    if (outcome.outcome === "timeout") {
-      await sleep(outcome.durationMs ?? 0);
-      return fail(
-        new KMsgError(
-          KMsgErrorCode.NETWORK_TIMEOUT,
-          outcome.message ?? "Mock provider simulated timeout",
-          { provider: this.id },
-          {
-            providerErrorCode: outcome.providerErrorCode ?? "TIMEOUT",
-            providerErrorText: outcome.providerErrorText,
-            httpStatus: outcome.httpStatus,
-            retryAfterMs: outcome.retryAfterMs,
-          },
-        ),
+    while (outcome.outcome === "delay" || outcome.outcome === "timeout") {
+      const aborted = await this.waitForDelay(
+        outcome.durationMs ?? 0,
+        context?.signal,
       );
+      if (aborted) return fail(aborted);
+
+      if (outcome.outcome === "timeout") {
+        return fail(
+          new KMsgError(
+            KMsgErrorCode.NETWORK_TIMEOUT,
+            outcome.message ?? "Mock provider simulated timeout",
+            { providerId: this.id },
+            {
+              providerErrorCode: outcome.providerErrorCode ?? "TIMEOUT",
+              providerErrorText: outcome.providerErrorText,
+              httpStatus: outcome.httpStatus,
+              retryAfterMs: outcome.retryAfterMs,
+            },
+          ),
+        );
+      }
+
+      outcome = this.nextScenarioOutcome();
     }
 
     if (outcome.outcome === "failure") {
@@ -167,7 +212,7 @@ export class MockProvider
         new KMsgError(
           code,
           outcome.message ?? "Mock provider simulated failure",
-          { provider: this.id },
+          { providerId: this.id },
           {
             providerErrorCode: outcome.providerErrorCode,
             providerErrorText: outcome.providerErrorText,
@@ -184,7 +229,7 @@ export class MockProvider
         new KMsgError(
           KMsgErrorCode.UNKNOWN_ERROR,
           `Unsupported mock outcome: ${String(outcome.outcome)}`,
-          { provider: this.id },
+          { providerId: this.id },
         ),
       );
     }
@@ -231,6 +276,18 @@ export class MockProvider
   clearScenario(): void {
     this.scenario = [];
     this.scenarioCursor = 0;
+  }
+
+  private async waitForDelay(
+    durationMs: number,
+    signal?: AbortSignal,
+  ): Promise<KMsgError | undefined> {
+    try {
+      await sleep(durationMs, signal);
+      return undefined;
+    } catch (error) {
+      return toProviderTransportError(error, signal, this.id);
+    }
   }
 
   private nextScenarioOutcome(): MockSendScenarioStep {

@@ -1,4 +1,15 @@
-import { fail, KMsgError, KMsgErrorCode, ok, type Result } from "@k-msg/core";
+import {
+  fail,
+  KMsgError,
+  KMsgErrorCode,
+  ok,
+  type ProviderRequestContext,
+  type Result,
+} from "@k-msg/core";
+import {
+  fetchWithProviderContext,
+  toProviderTransportError,
+} from "../shared/provider-transport";
 import { normalizeAligoKakaoCode } from "./aligo.shared.helpers";
 
 export async function requestAligo(params: {
@@ -6,6 +17,7 @@ export async function requestAligo(params: {
   endpoint: string;
   data: Record<string, unknown>;
   providerId: string;
+  context?: ProviderRequestContext;
 }): Promise<Record<string, unknown>> {
   const formData = new FormData();
   for (const [key, value] of Object.entries(params.data)) {
@@ -14,20 +26,33 @@ export async function requestAligo(params: {
     }
   }
 
-  const response = await fetch(`${params.host}${params.endpoint}`, {
-    method: "POST",
-    body: formData,
-  });
+  try {
+    const response = await fetchWithProviderContext(
+      params.context,
+      `${params.host}${params.endpoint}`,
+      {
+        method: "POST",
+        body: formData,
+      },
+      params.providerId,
+    );
 
-  if (!response.ok) {
-    throw new KMsgError(
-      KMsgErrorCode.NETWORK_ERROR,
-      `HTTP error! status: ${response.status}`,
-      { providerId: params.providerId },
+    if (!response.ok) {
+      throw new KMsgError(
+        KMsgErrorCode.NETWORK_ERROR,
+        `HTTP error! status: ${response.status}`,
+        { providerId: params.providerId },
+      );
+    }
+
+    return (await response.json()) as Record<string, unknown>;
+  } catch (error) {
+    throw toProviderTransportError(
+      error,
+      params.context?.signal,
+      params.providerId,
     );
   }
-
-  return (await response.json()) as Record<string, unknown>;
 }
 
 export function ensureAligoKakaoOk(params: {

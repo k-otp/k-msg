@@ -29,8 +29,29 @@ bun add solapi
 All providers implement the `Provider` interface from `@k-msg/core`:
 
 - `supportedTypes` declares supported message `type`s
-- `send(options: SendOptions)` returns `Result<SendResult, KMsgError>` (never throws)
+- `send(options: SendOptions, context?: ProviderRequestContext)` returns `Result<SendResult, KMsgError>` (never throws)
 - some providers also implement optional capability `getBalance(query?)`
+
+### Per-operation transport context
+
+`ProviderRequestContext` can carry an `AbortSignal` and an operation-scoped
+`fetch` implementation. Check `provider.transportCapabilities` before relying
+on either feature; a missing declaration is treated as unsupported.
+
+| Provider | AbortSignal | Injectable fetch | Notes |
+| --- | --- | --- | --- |
+| `iwinv` | supported | supported | `send` and `getDeliveryStatus` forward the context to every underlying request |
+| `aligo` | supported | supported | every send channel uses the shared fetch transport |
+| `solapi` | unsupported | unsupported | the upstream SOLAPI SDK does not expose per-request signal/fetch hooks |
+| `mock` | supported | unsupported | simulated delays observe the signal; no HTTP transport is used |
+
+```ts
+const controller = new AbortController();
+const result = await provider.send(input, {
+  signal: controller.signal,
+  fetch: globalThis.fetch,
+});
+```
 
 Import paths:
 

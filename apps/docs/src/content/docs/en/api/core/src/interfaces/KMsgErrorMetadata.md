@@ -5,7 +5,7 @@ prev: false
 title: "KMsgErrorMetadata"
 ---
 
-Defined in: [packages/core/src/errors.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L95)
+Defined in: [packages/core/src/errors.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L100)
 
 ## Extended by
 
@@ -17,7 +17,7 @@ Defined in: [packages/core/src/errors.ts:95](https://github.com/k-otp/k-msg/blob
 
 > `optional` **attempt?**: `number`
 
-Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L101)
+Defined in: [packages/core/src/errors.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L106)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blo
 
 > `optional` **causeChain?**: `unknown`[]
 
-Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L102)
+Defined in: [packages/core/src/errors.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L107)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blo
 
 > `optional` **httpStatus?**: `number`
 
-Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L98)
+Defined in: [packages/core/src/errors.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L103)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/errors.ts:98](https://github.com/k-otp/k-msg/blob
 
 > `optional` **providerErrorCode?**: `string`
 
-Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L96)
+Defined in: [packages/core/src/errors.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L101)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob
 
 > `optional` **providerErrorText?**: `string`
 
-Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L97)
+Defined in: [packages/core/src/errors.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L102)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/errors.ts:97](https://github.com/k-otp/k-msg/blob
 
 > `optional` **requestId?**: `string`
 
-Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L99)
+Defined in: [packages/core/src/errors.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L104)
 
 ***
 
@@ -65,4 +65,4 @@ Defined in: [packages/core/src/errors.ts:99](https://github.com/k-otp/k-msg/blob
 
 > `optional` **retryAfterMs?**: `number`
 
-Defined in: [packages/core/src/errors.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L100)
+Defined in: [packages/core/src/errors.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L105)

@@ -73,5 +73,25 @@ describe("MockProvider", () => {
     expect(result.isFailure ? result.error.code : undefined).toBe(
       KMsgErrorCode.NETWORK_TIMEOUT,
     );
+    expect(
+      result.isFailure ? result.error.details?.providerId : undefined,
+    ).toBe("mock");
+  });
+
+  test("preserves request-aborted scenario classification", async () => {
+    const provider = new MockProvider();
+    provider.mockScenario([
+      { outcome: "failure", code: KMsgErrorCode.REQUEST_ABORTED },
+    ]);
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "code {{code}}",
+    });
+
+    expect(result.isFailure ? result.error.code : undefined).toBe(
+      KMsgErrorCode.REQUEST_ABORTED,
+    );
   });
 });

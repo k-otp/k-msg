@@ -29,8 +29,29 @@ bun add solapi
 모든 provider는 `@k-msg/core`의 `Provider` 인터페이스를 구현합니다:
 
 - `supportedTypes`: 지원하는 메시지 `type` 선언
-- `send(options: SendOptions)`: `Result<SendResult, KMsgError>` 반환 (throw 하지 않음)
+- `send(options: SendOptions, context?: ProviderRequestContext)`: `Result<SendResult, KMsgError>` 반환 (throw 하지 않음)
 - 일부 provider는 선택 capability인 `getBalance(query?)`를 함께 구현합니다.
+
+### 호출 단위 transport context
+
+`ProviderRequestContext`로 `AbortSignal`과 호출 단위 `fetch` 구현을 전달할
+수 있습니다. 기능에 의존하기 전에 `provider.transportCapabilities`를
+확인해야 하며, capability 선언이 없으면 unsupported로 취급합니다.
+
+| Provider | AbortSignal | Injectable fetch | 비고 |
+| --- | --- | --- | --- |
+| `iwinv` | supported | supported | `send`와 `getDeliveryStatus`의 모든 내부 요청에 context 전달 |
+| `aligo` | supported | supported | 모든 send 채널이 공통 fetch transport 사용 |
+| `solapi` | unsupported | unsupported | upstream SOLAPI SDK가 호출 단위 signal/fetch hook을 제공하지 않음 |
+| `mock` | supported | unsupported | 모의 지연은 signal을 따르며 HTTP transport는 사용하지 않음 |
+
+```ts
+const controller = new AbortController();
+const result = await provider.send(input, {
+  signal: controller.signal,
+  fetch: globalThis.fetch,
+});
+```
 
 import 경로:
 

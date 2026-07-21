@@ -7,4 +7,4 @@ title: "RetryPolicyErrorCode"
 
 > **RetryPolicyErrorCode** = [`KMsgErrorCode`](/en/api/core/src/enumerations/kmsgerrorcode/)
 
-Defined in: [packages/core/src/errors.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L91)
+Defined in: [packages/core/src/errors.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L96)

@@ -387,7 +387,7 @@ Add a message to the processing queue
 
 ###### options?
 
-\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"normal"` \| `"low"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
+\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"low"` \| `"normal"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
 
 ###### options.deduplication?
 
@@ -423,7 +423,7 @@ Add a message to the processing queue
 
 ###### options.priority?
 
-`"high"` \| `"normal"` \| `"low"` = `...`
+`"high"` \| `"low"` \| `"normal"` = `...`
 
 ###### options.tracking?
 
@@ -575,7 +575,7 @@ Schedule a message for future delivery
 
 ###### options?
 
-\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"normal"` \| `"low"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
+\{ `deduplication?`: \{ `enabled`: `boolean`; `window`: `number`; \}; `failover?`: \{ `enabled`: `boolean`; `fallbackChannel?`: `"sms"` \| `"lms"`; `fallbackContent?`: `string`; `fallbackTitle?`: `string`; \}; `priority?`: `"high"` \| `"low"` \| `"normal"`; `tracking?`: \{ `enabled`: `boolean`; `webhookUrl?`: `string`; \}; `ttl?`: `number`; \} = `...`
 
 ###### options.deduplication?
 
@@ -611,7 +611,7 @@ Schedule a message for future delivery
 
 ###### options.priority?
 
-`"high"` \| `"normal"` \| `"low"` = `...`
+`"high"` \| `"low"` \| `"normal"` = `...`
 
 ###### options.tracking?
 
