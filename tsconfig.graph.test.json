@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.graph.json",
+  "include": [
+    "packages/core/src/errors.test.ts",
+    "packages/provider/src/aligo/aligo.transport.test.ts",
+    "packages/provider/src/iwinv/iwinv.transport.test.ts",
+    "packages/provider/src/provider.transport-capabilities.test.ts",
+    "packages/provider/src/shared/provider-transport.test.ts"
+  ],
+  "exclude": ["**/dist/**", "**/node_modules/**"]
+}
