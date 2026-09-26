@@ -451,6 +451,7 @@ export class DeliveryTrackingService {
       this.polling,
     );
 
+    const failures: Array<{ messageId: string; error: unknown }> = [];
     for (const update of updates) {
       const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
 
@@ -459,29 +460,47 @@ export class DeliveryTrackingService {
         patch.nextCheckAt = now;
       }
 
-      await this.store.patch(update.messageId, patch);
+      // A record the store rejects stays due for the next poll; the rest of
+      // the batch is still stored.
+      try {
+        await this.store.patch(update.messageId, patch);
 
-      const originalRecord = dueByMessageId.get(update.messageId);
-      if (!originalRecord) continue;
-      const mergedRecord: TrackingRecord = {
-        ...originalRecord,
-        ...patch,
-        messageId: originalRecord.messageId,
-      };
+        const originalRecord = dueByMessageId.get(update.messageId);
+        if (!originalRecord) continue;
+        const mergedRecord: TrackingRecord = {
+          ...originalRecord,
+          ...patch,
+          messageId: originalRecord.messageId,
+        };
 
-      if (
-        this.onStatusChange &&
-        mergedRecord.status !== originalRecord.status
-      ) {
-        changes.push({
-          record: mergedRecord,
-          previousStatus: originalRecord.status,
-        });
+        if (
+          this.onStatusChange &&
+          mergedRecord.status !== originalRecord.status
+        ) {
+          changes.push({
+            record: mergedRecord,
+            previousStatus: originalRecord.status,
+          });
+        }
+
+        if (this.shouldAttemptApiFailover(mergedRecord)) {
+          await this.attemptApiFailover(mergedRecord, now);
+        }
+      } catch (error) {
+        failures.push({ messageId: update.messageId, error });
       }
+    }
 
-      if (this.shouldAttemptApiFailover(mergedRecord)) {
-        await this.attemptApiFailover(mergedRecord, now);
-      }
+    const [first] = failures;
+    if (first) {
+      const reason =
+        first.error instanceof Error
+          ? first.error.message
+          : String(first.error);
+      throw new AggregateError(
+        failures.map((failure) => failure.error),
+        `Delivery tracking could not update ${failures.length} of ${updates.length} polled messages; ${first.messageId}: ${reason}`,
+      );
     }
   }
 
