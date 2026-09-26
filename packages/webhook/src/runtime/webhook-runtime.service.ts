@@ -79,6 +79,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // migration rewrites endpoints from records it read earlier, and two
   // updates to one endpoint would each write over the other.
   private endpointWrites: Promise<unknown> = Promise.resolve();
+  private shuttingDown = false;
 
   constructor(config: WebhookRuntimeConfig) {
     this.config = config.delivery;
@@ -104,26 +105,28 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
   }
 
-  async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
-    await this.ensureInitialized();
-    validateEndpointUrl(input.url, this.securityOptions);
+  addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      validateEndpointUrl(input.url, this.securityOptions);
 
-    const now = new Date();
-    const active =
-      input.active ?? (input.status ? input.status === "active" : true);
-    const status = input.status ?? toStatusFromActive(active);
+      const now = new Date();
+      const active =
+        input.active ?? (input.status ? input.status === "active" : true);
+      const status = input.status ?? toStatusFromActive(active);
 
-    const endpoint: WebhookEndpoint = {
-      ...input,
-      id: input.id ?? this.generateEndpointId(),
-      active,
-      status,
-      createdAt: now,
-      updatedAt: now,
-    };
+      const endpoint: WebhookEndpoint = {
+        ...input,
+        id: input.id ?? this.generateEndpointId(),
+        active,
+        status,
+        createdAt: now,
+        updatedAt: now,
+      };
 
-    await this.writeEndpoints(() => this.endpointStore.add(endpoint));
-    return endpoint;
+      await this.endpointStore.add(endpoint);
+      return endpoint;
+    });
   }
 
   async addEndpoints(
@@ -137,14 +140,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return created;
   }
 
-  async updateEndpoint(
+  updateEndpoint(
     endpointId: string,
     updates: Partial<WebhookEndpointInput>,
   ): Promise<WebhookEndpoint> {
-    await this.ensureInitialized();
-    return this.writeEndpoints(() =>
-      this.applyEndpointUpdate(endpointId, updates),
-    );
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      return this.applyEndpointUpdate(endpointId, updates);
+    });
   }
 
   private async applyEndpointUpdate(
@@ -181,9 +184,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return merged;
   }
 
-  async removeEndpoint(endpointId: string): Promise<void> {
-    await this.ensureInitialized();
-    await this.writeEndpoints(() => this.endpointStore.remove(endpointId));
+  removeEndpoint(endpointId: string): Promise<void> {
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      await this.endpointStore.remove(endpointId);
+    });
   }
 
   async getEndpoint(endpointId: string): Promise<WebhookEndpoint | null> {
@@ -305,25 +310,27 @@ export class WebhookRuntimeService implements WebhookRuntime {
    * the meantime. Endpoint writes through this runtime wait until it
    * finishes. See `migrateWebhookFieldCryptoToTenant`.
    */
-  async migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult> {
-    await this.ensureInitialized();
-    return this.writeEndpoints(() =>
-      migrateWebhookFieldCryptoToTenant(
+  migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult> {
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      return migrateWebhookFieldCryptoToTenant(
         this.persistence,
         this.fieldCrypto ?? {},
-      ),
-    );
+      );
+    });
   }
 
   async shutdown(): Promise<void> {
+    // Endpoint writes queued before this point, such as ones behind a
+    // running migration, still reach the store before it closes; later
+    // ones are refused instead of running against a closed store.
+    this.shuttingDown = true;
     if (this.batchProcessor) {
       clearInterval(this.batchProcessor);
       this.batchProcessor = null;
     }
 
     await this.flush();
-    // Endpoint writes queued behind a running migration still reach the
-    // store before it closes.
     await this.endpointWrites;
     await this.dispatcher.shutdown();
 
@@ -359,7 +366,16 @@ export class WebhookRuntimeService implements WebhookRuntime {
   }
 
   // Runs `write` once every endpoint write queued before it has settled.
+  // Callers queue as soon as they are called, before any await, so
+  // shutdown() waits for every change requested before it started.
   private writeEndpoints<T>(write: () => Promise<T>): Promise<T> {
+    if (this.shuttingDown) {
+      return Promise.reject(
+        new Error(
+          "Webhook endpoints cannot be changed after shutdown() has started",
+        ),
+      );
+    }
     const run = () => write();
     const result = this.endpointWrites.then(run, run);
     this.endpointWrites = result.catch(() => undefined);

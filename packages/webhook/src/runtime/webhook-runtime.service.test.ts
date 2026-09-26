@@ -65,6 +65,23 @@ describe("WebhookRuntimeService", () => {
     await runtime.shutdown();
   });
 
+  test("refuses endpoint changes once shutdown has started", async () => {
+    const endpoint = await runtime.addEndpoint({
+      url: "https://example.com/before-shutdown",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    const stopping = runtime.shutdown();
+    await expect(
+      runtime.updateEndpoint(endpoint.id, { url: "https://example.com/late" }),
+    ).rejects.toThrow("after shutdown() has started");
+    await expect(runtime.removeEndpoint(endpoint.id)).rejects.toThrow(
+      "after shutdown() has started",
+    );
+    await stopping;
+  });
+
   test("addEndpoint does not auto-probe", async () => {
     await runtime.addEndpoint({
       url: "https://example.com/webhook",
