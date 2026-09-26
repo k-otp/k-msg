@@ -18,8 +18,11 @@ function at(offsetMs: number): Date {
 // per list() call, `startAfter` paging. Counts the calls it serves.
 class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
   readonly data = new Map<string, unknown>();
+  readonly puts = new Map<string, number>();
   gets = 0;
   lists = 0;
+  /** Values longer than this are rejected, as storage rejects oversized values. */
+  maxValueLength = Number.POSITIVE_INFINITY;
 
   async get<T>(key: string): Promise<T | undefined> {
     this.gets += 1;
@@ -27,6 +30,10 @@ class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
   }
 
   async put<T>(key: string, value: T): Promise<void> {
+    if (String(value).length > this.maxValueLength) {
+      throw new RangeError("Values cannot be larger than the storage limit");
+    }
+    this.puts.set(key, (this.puts.get(key) ?? 0) + 1);
     this.data.set(key, value);
   }
 
@@ -119,12 +126,16 @@ describe("CloudflareObjectJobQueue leases", () => {
     expect(expired.map((item) => item.status)).toEqual([JobStatus.FAILED]);
   });
 
-  test("the default lease is five minutes", async () => {
+  test("leases are off unless leaseMs is set", async () => {
     setSystemTime(at(0));
     const { queue } = queueWith<{ to: string }>();
-    await queue.enqueue("send", { to: "01012345678" });
+    const job = await queue.enqueue("send", { to: "01012345678" });
 
-    expect((await queue.dequeue())?.leaseExpiresAt).toEqual(at(5 * 60_000));
+    expect((await queue.dequeue())?.leaseExpiresAt).toBeUndefined();
+    setSystemTime(at(365 * 24 * 60 * 60_000));
+    expect(await queue.dequeue()).toBeUndefined();
+    expect((await queue.getJob(job.id))?.status).toBe(JobStatus.PROCESSING);
+    expect(await queue.nextDueAt()).toBeUndefined();
   });
 
   test("leaseMs: Infinity keeps a dequeued job processing", async () => {
@@ -143,18 +154,19 @@ describe("CloudflareObjectJobQueue leases", () => {
 
   test("rejects a lease that is not a positive number of milliseconds", () => {
     const storage = new DurableObjectStorageFake();
-    for (const leaseMs of [0, -1, Number.NaN]) {
-      expect(() => createDurableObjectJobQueue(storage, { leaseMs })).toThrow(
-        RangeError,
-      );
+    for (const leaseMs of [0, -1, Number.NaN, 1e20, "60000"]) {
+      expect(() =>
+        createDurableObjectJobQueue(storage, { leaseMs: leaseMs as number }),
+      ).toThrow(RangeError);
     }
   });
 
-  test("a job left processing by an earlier version is due a lease after it was", async () => {
+  test("a job left processing without a lease gets one when first seen", async () => {
     setSystemTime(at(0));
     const { storage, queue } = queueWith<{ to: string }>({ leaseMs: 60_000 });
     const job = await queue.enqueue("send", { to: "01012345678" });
-    // What earlier versions stored: processing, without a lease.
+    // What earlier versions, or a queue without leaseMs, stored: processing,
+    // without a lease, maybe still being worked on.
     const key = `kmsg/jobs/jobs/${job.id}`;
     const stored = JSON.parse(String(storage.data.get(key)));
     storage.data.set(
@@ -162,10 +174,42 @@ describe("CloudflareObjectJobQueue leases", () => {
       JSON.stringify({ ...stored, status: JobStatus.PROCESSING }),
     );
 
-    setSystemTime(at(59_999));
+    setSystemTime(at(10_000));
+    // Due now, so that dequeue() gives it a lease.
+    expect(await queue.nextDueAt()).toEqual(at(10_000));
     expect(await queue.dequeue()).toBeUndefined();
-    setSystemTime(at(60_000));
+    expect((await queue.getJob(job.id))?.leaseExpiresAt).toEqual(at(70_000));
+    expect(await queue.nextDueAt()).toEqual(at(70_000));
+
+    setSystemTime(at(69_999));
+    expect(await queue.dequeue()).toBeUndefined();
+    setSystemTime(at(70_000));
     expect((await queue.dequeue())?.id).toBe(job.id);
+  });
+
+  test("onLeaseExpired runs after dequeue() has stored what it changed", async () => {
+    setSystemTime(at(0));
+    const seen: Array<string | undefined> = [];
+    const { storage, queue } = queueWith<{ to: string }>({
+      leaseMs: 1_000,
+      onLeaseExpired: async (job) => {
+        const stored = JSON.parse(
+          String(storage.data.get(`kmsg/jobs/jobs/${job.id}`)),
+        );
+        seen.push(stored.status);
+      },
+    });
+    const job = await queue.enqueue("send", { to: "01012345678" });
+    await queue.dequeue();
+    storage.puts.clear();
+
+    setSystemTime(at(1_000));
+    expect((await queue.dequeue())?.id).toBe(job.id);
+
+    // Taken again at once: stored processing before the callback ran, in one
+    // write rather than one for the recovery and one for the new lease.
+    expect(seen).toEqual([JobStatus.PROCESSING]);
+    expect(storage.puts.get(`kmsg/jobs/jobs/${job.id}`)).toBe(1);
   });
 
   test("size() and peek() count a job whose lease expired, without changing it", async () => {
@@ -265,6 +309,22 @@ describe("CloudflareObjectJobQueue scheduling and cleanup", () => {
       queue.cleanupTerminal({ olderThan: new Date(Number.NaN) }),
     ).rejects.toThrow(TypeError);
     expect(await queue.getJob(job.id)).toBeDefined();
+  });
+
+  test("complete() completes a job whose result cannot be stored", async () => {
+    const { storage, queue } = queueWith<{ to: string }>();
+    const unserializable = await queue.enqueue("send", { to: "1" });
+    const oversized = await queue.enqueue("send", { to: "2" });
+    storage.maxValueLength = 2_000;
+
+    await queue.complete(unserializable.id, { count: 1n });
+    await queue.complete(oversized.id, { report: "x".repeat(5_000) });
+
+    for (const id of [unserializable.id, oversized.id]) {
+      const stored = await queue.getJob(id);
+      expect(stored?.status).toBe(JobStatus.COMPLETED);
+      expect(stored?.result).toBeUndefined();
+    }
   });
 
   test("complete() keeps the result it is given", async () => {

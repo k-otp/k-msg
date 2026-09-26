@@ -13,7 +13,8 @@ import {
 /** The `error` of a job whose lease expired before it was completed or failed. */
 export const JOB_LEASE_EXPIRED = "LEASE_EXPIRED";
 
-const DEFAULT_LEASE_MS = 5 * 60_000;
+// Longer leases are as good as none; Infinity turns them off.
+const MAX_LEASE_MS = 365 * 24 * 60 * 60_000;
 
 /** A job in a KV, R2 or Durable Object queue. */
 export interface CloudflareObjectJob<T> extends Job<T> {
@@ -30,17 +31,20 @@ export interface CloudflareObjectJobQueueOptions<T> {
   /** Default: `kmsg/jobs`. */
   keyPrefix?: string;
   /**
-   * How long a dequeued job may stay processing (default: 5 minutes). If it
-   * is neither completed nor failed by then, for example because the worker
-   * stopped mid-job, it is due again, and the lost attempt counts as a
-   * failed one (`error: "LEASE_EXPIRED"`); a job with no attempts left
-   * fails. Set it above the longest time a job can take. `Infinity` keeps
-   * dequeued jobs processing until they are completed or failed.
+   * How long a dequeued job may stay processing before it is due again
+   * (default: `Infinity`, no lease). If it is neither completed nor failed
+   * by then, for example because the worker stopped mid-job, the next
+   * `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`)
+   * and makes the job due again, or fails it when no attempts are left.
+   * Set it above the longest time a job can take: a lease is not renewed,
+   * and a worker that outlives it can still complete or fail the job while
+   * another worker has it.
    */
   leaseMs?: number;
   /**
-   * Called by `dequeue()` for each job whose lease it found expired, with
-   * the job as stored after: pending again, or failed if it had no attempts
+   * Called by `dequeue()` for each job whose lease had expired, once
+   * `dequeue()` has stored its changes: with the job pending again (the same
+   * `dequeue()` may have taken it again) or failed if it had no attempts
    * left. What it throws is logged and does not stop the dequeue.
    */
   onLeaseExpired?: (job: CloudflareObjectJob<T>) => void | Promise<void>;
@@ -88,6 +92,12 @@ function isDue<T>(job: Job<T>, now: number): boolean {
   return job.status === JobStatus.PENDING && job.processAt.getTime() <= now;
 }
 
+// The value as JSON stores it; throws for a BigInt or a cycle.
+function toJsonValue(value: unknown): unknown {
+  const text = JSON.stringify(value);
+  return text === undefined ? undefined : JSON.parse(text);
+}
+
 export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   private readonly keyPrefix: string;
   private readonly leaseMs: number;
@@ -100,10 +110,14 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   ) {
     const resolved =
       typeof options === "string" ? { keyPrefix: options } : options;
-    const leaseMs = resolved.leaseMs ?? DEFAULT_LEASE_MS;
-    if (!(leaseMs > 0)) {
+    const leaseMs = resolved.leaseMs ?? Number.POSITIVE_INFINITY;
+    if (
+      typeof leaseMs !== "number" ||
+      !(leaseMs > 0) ||
+      (Number.isFinite(leaseMs) && leaseMs > MAX_LEASE_MS)
+    ) {
       throw new RangeError(
-        `leaseMs must be a positive number of milliseconds, got ${leaseMs}`,
+        `leaseMs must be Infinity or a positive number of milliseconds up to ${MAX_LEASE_MS}, got ${String(leaseMs)}`,
       );
     }
     this.keyPrefix = resolved.keyPrefix ?? "kmsg/jobs";
@@ -141,36 +155,61 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   }
 
   /**
-   * Takes the next due job and leases it for `leaseMs`. Jobs whose lease
+   * Takes the next due job and, with `leaseMs`, leases it. Jobs whose lease
    * expired are due again first, or fail when they have no attempts left.
    */
   async dequeue(): Promise<CloudflareObjectJob<T> | undefined> {
     const now = Date.now();
+    const changed = new Map<string, CloudflareObjectJob<T>>();
+    const released: CloudflareObjectJob<T>[] = [];
     let next: CloudflareObjectJob<T> | undefined;
 
-    for (const stored of await this.readAllJobs()) {
+    for await (const stored of this.readJobs()) {
       let job = stored;
-      const recovered = this.recoverExpiredLease(stored, now);
-      if (recovered) {
-        await this.write(recovered);
-        await this.notifyLeaseExpired(recovered);
-        job = recovered;
+      if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
+        if (job.leaseExpiresAt === undefined) {
+          // Left processing by an earlier version or a queue without leases,
+          // and maybe still being worked on: its lease starts now.
+          changed.set(job.id, {
+            ...job,
+            leaseExpiresAt: new Date(now + this.leaseMs),
+          });
+          continue;
+        }
+        const recovered = this.releaseExpiredLease(job, now);
+        if (recovered) {
+          changed.set(recovered.id, recovered);
+          released.push(recovered);
+          job = recovered;
+        }
       }
       if (!isDue(job, now)) continue;
       if (!next || compareJobs(job, next) < 0) next = job;
     }
 
-    if (!next) return undefined;
-    const leased: CloudflareObjectJob<T> = {
-      ...next,
-      status: JobStatus.PROCESSING,
-      leaseExpiresAt: this.leaseExpiry(now),
-    };
-    await this.write(leased);
+    let leased: CloudflareObjectJob<T> | undefined;
+    if (next) {
+      leased = {
+        ...next,
+        status: JobStatus.PROCESSING,
+        leaseExpiresAt: this.leaseExpiry(now),
+      };
+      // One write per job, even for a released job taken again at once.
+      changed.set(leased.id, leased);
+    }
+    for (const job of changed.values()) await this.write(job);
+    // Only after every write: a callback that waits on anything but storage
+    // would let a Durable Object run another dequeue() in between.
+    for (const job of released) await this.notifyLeaseExpired(job);
     return leased;
   }
 
-  /** Marks the job completed and keeps `result` with it. */
+  /**
+   * Marks the job completed and keeps `result` with it when it can be
+   * stored as JSON. A result that cannot be stored is logged and dropped,
+   * never failing the completion, since callers such as `JobProcessor`
+   * would treat that as a failed job and run it again.
+   */
   async complete(jobId: string, result?: unknown): Promise<void> {
     const job = await this.getJob(jobId);
     if (!job) return;
@@ -180,9 +219,21 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
       status: JobStatus.COMPLETED,
       completedAt: new Date(),
       leaseExpiresAt: undefined,
-      ...(result === undefined ? {} : { result }),
     };
-    await this.write(completed);
+    if (result === undefined) {
+      await this.write(completed);
+      return;
+    }
+    try {
+      await this.write({ ...completed, result: toJsonValue(result) });
+    } catch (error) {
+      // Not JSON (a BigInt, a cycle), or too large for the storage.
+      logFallbackFailure(
+        `[k-msg] could not keep the result of job ${jobId}; completing it without the result`,
+        error,
+      );
+      await this.write(completed);
+    }
   }
 
   /** A completed job stays completed, even for a worker whose lease expired. */
@@ -227,8 +278,8 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   async peek(): Promise<CloudflareObjectJob<T> | undefined> {
     const now = Date.now();
     let next: CloudflareObjectJob<T> | undefined;
-    for (const stored of await this.readAllJobs()) {
-      const job = this.recoverExpiredLease(stored, now) ?? stored;
+    for await (const stored of this.readJobs()) {
+      const job = this.releaseExpiredLease(stored, now) ?? stored;
       if (!isDue(job, now)) continue;
       if (!next || compareJobs(job, next) < 0) next = job;
     }
@@ -239,29 +290,32 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   async size(): Promise<number> {
     const now = Date.now();
     let due = 0;
-    for (const stored of await this.readAllJobs()) {
-      const job = this.recoverExpiredLease(stored, now) ?? stored;
+    for await (const stored of this.readJobs()) {
+      const job = this.releaseExpiredLease(stored, now) ?? stored;
       if (isDue(job, now)) due += 1;
     }
     return due;
   }
 
   /**
-   * When a job is next due: the earliest due time of a pending job or lease
-   * expiry of a processing one. It may be in the past, meaning a job is due
-   * now. `undefined` when no job is pending or processing. Use it to set a
-   * Durable Object alarm instead of polling.
+   * When `dequeue()` next has work: the earliest due time of a pending job
+   * or lease expiry of a processing one, and now for a processing job that
+   * has no lease yet. A time in the past means `dequeue()` has work now,
+   * even when it only settles an expired lease, so call `dequeue()` rather
+   * than checking `size()`. `undefined` when no job is pending or leased.
+   * Use it to set a Durable Object alarm instead of polling.
    */
   async nextDueAt(): Promise<Date | undefined> {
+    const now = Date.now();
     let earliest: number | undefined;
-    for (const job of await this.readAllJobs()) {
-      const dueAt =
-        job.status === JobStatus.PENDING
-          ? job.processAt.getTime()
-          : job.status === JobStatus.PROCESSING
-            ? this.leaseExpiresAt(job)
-            : undefined;
-      if (dueAt === undefined || !Number.isFinite(dueAt)) continue;
+    for await (const job of this.readJobs()) {
+      let dueAt: number | undefined;
+      if (job.status === JobStatus.PENDING) {
+        dueAt = job.processAt.getTime();
+      } else if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
+        dueAt = job.leaseExpiresAt?.getTime() ?? now;
+      }
+      if (dueAt === undefined) continue;
       if (earliest === undefined || dueAt < earliest) earliest = dueAt;
     }
     return earliest === undefined ? undefined : new Date(earliest);
@@ -307,7 +361,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     const removable = new Set(statuses);
     const cutoff = olderThan?.getTime();
     let removed = 0;
-    for (const job of await this.readAllJobs()) {
+    for await (const job of this.readJobs()) {
       if (!removable.has(job.status)) continue;
       if (cutoff !== undefined) {
         const finishedAt = (
@@ -323,29 +377,23 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     return removed;
   }
 
-  // When a processing job's lease ends. Jobs that earlier versions left
-  // processing have no lease, so theirs ends leaseMs after they were due.
-  private leaseExpiresAt(job: CloudflareObjectJob<T>): number {
-    return (
-      job.leaseExpiresAt?.getTime() ?? job.processAt.getTime() + this.leaseMs
-    );
+  private leasesEnabled(): boolean {
+    return Number.isFinite(this.leaseMs);
   }
 
   private leaseExpiry(now: number): Date | undefined {
-    return Number.isFinite(this.leaseMs)
-      ? new Date(now + this.leaseMs)
-      : undefined;
+    return this.leasesEnabled() ? new Date(now + this.leaseMs) : undefined;
   }
 
   // The job as it is once its expired lease ends: due again from the lease's
   // end with the lost attempt counted, or failed with no attempts left.
-  private recoverExpiredLease(
+  private releaseExpiredLease(
     job: CloudflareObjectJob<T>,
     now: number,
   ): CloudflareObjectJob<T> | undefined {
     if (job.status !== JobStatus.PROCESSING) return undefined;
-    const expiresAt = this.leaseExpiresAt(job);
-    if (expiresAt > now) return undefined;
+    const expiresAt = job.leaseExpiresAt?.getTime();
+    if (expiresAt === undefined || expiresAt > now) return undefined;
 
     const attempts = job.attempts + 1;
     const released: CloudflareObjectJob<T> = {
@@ -375,16 +423,15 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     }
   }
 
-  private async readAllJobs(): Promise<CloudflareObjectJob<T>[]> {
-    const jobs: CloudflareObjectJob<T>[] = [];
-    for (const [, raw] of await readObjectEntries(
+  // Every stored job, a listing page at a time.
+  private async *readJobs(): AsyncGenerator<CloudflareObjectJob<T>> {
+    for await (const [, raw] of readObjectEntries(
       this.storage,
       this.jobsPrefix(),
     )) {
       const parsed = this.deserialize(raw);
-      if (parsed) jobs.push(parsed);
+      if (parsed) yield parsed;
     }
-    return jobs;
   }
 
   private async write(job: CloudflareObjectJob<T>): Promise<void> {

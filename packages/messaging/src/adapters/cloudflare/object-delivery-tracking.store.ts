@@ -227,10 +227,10 @@ export class CloudflareObjectDeliveryTrackingStore
       : 0;
     if (safeLimit === 0) return [];
 
-    const entries = await readObjectEntries(this.storage, this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const due: TrackingRecord[] = [];
 
-    for (const [, raw] of entries) {
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -259,10 +259,10 @@ export class CloudflareObjectDeliveryTrackingStore
     const orderDirection = options.orderDirection ?? "desc";
     const normalizedFilter = await this.normalizeFilter(options);
 
-    const entries = await readObjectEntries(this.storage, this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const records: TrackingRecord[] = [];
 
-    for (const [, raw] of entries) {
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -285,10 +285,10 @@ export class CloudflareObjectDeliveryTrackingStore
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
     const normalizedFilter = await this.normalizeFilter(filter);
-    const entries = await readObjectEntries(this.storage, this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     let count = 0;
 
-    for (const [, raw] of entries) {
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -306,13 +306,13 @@ export class CloudflareObjectDeliveryTrackingStore
     if (fields.length === 0) return [];
 
     const normalizedFilter = await this.normalizeFilter(filter);
-    const entries = await readObjectEntries(this.storage, this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const buckets = new Map<
       string,
       { key: Record<string, string>; count: number }
     >();
 
-    for (const [, raw] of entries) {
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;

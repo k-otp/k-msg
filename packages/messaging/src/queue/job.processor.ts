@@ -244,6 +244,12 @@ export class JobProcessor extends EventEmitter {
       if (!job) {
         break;
       }
+      // A queue hands out a job again once its lease on it runs out, even
+      // while this processor is still running it; running it twice would
+      // repeat the work.
+      if (this.processing.has(job.id)) {
+        continue;
+      }
       this.processing.add(job.id);
       // Jobs run concurrently. processJob frees the slot before any step that
       // can reject, so a failure here only needs to be reported.
