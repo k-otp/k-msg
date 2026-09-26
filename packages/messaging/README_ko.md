@@ -179,6 +179,14 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()`와 `HyperdriveDeliveryTrackingStore`는 동일한 논리 스키마를 사용합니다.
 `DeliveryTrackingService.init()` 호출 시 테이블/인덱스가 자동 생성됩니다.
 
+스토어 인스턴스는 첫 쿼리 전에 이 `CREATE ... IF NOT EXISTS` 문을 매번 실행하므로, Worker에서는 요청마다 실행됩니다. 마이그레이션으로 스키마를 만든다면(예: `buildDeliveryTrackingSchemaSql()` 출력) `initializeSchema: false`로 건너뛰세요. SQLite, Bun.SQL 스토어도 같은 옵션을 받습니다.
+
+```ts
+const store = createD1DeliveryTrackingStore(env.DB, {
+  initializeSchema: false,
+});
+```
+
 Tracking 테이블/인덱스 기본값은 어댑터 스키마 스펙에서 생성됩니다:
 
 <!-- tracking-schema-summary:start -->

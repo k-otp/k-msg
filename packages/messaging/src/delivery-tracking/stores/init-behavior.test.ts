@@ -49,4 +49,20 @@ describe("Delivery tracking store init behavior", () => {
 
     await store.close();
   });
+
+  test("Bun stores leave the schema to migrations with initializeSchema: false", async () => {
+    const sqlite = new SqliteDeliveryTrackingStore({
+      dbPath: ":memory:",
+      initializeSchema: false,
+    });
+    await sqlite.init();
+    // Nothing created the table.
+    await expect(sqlite.get("m1")).rejects.toThrow(/no such table/);
+    sqlite.close();
+
+    const bunSql = new BunSqlDeliveryTrackingStore({ initializeSchema: false });
+    await bunSql.init();
+    await expect(bunSql.get("m1")).rejects.toThrow(/no such table/);
+    await bunSql.close();
+  });
 });
