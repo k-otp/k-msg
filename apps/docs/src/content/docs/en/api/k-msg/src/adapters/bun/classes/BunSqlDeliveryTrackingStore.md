@@ -5,7 +5,7 @@ prev: false
 title: "BunSqlDeliveryTrackingStore"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L30)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L36)
 
 ## Implements
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:30
 
 > **new BunSqlDeliveryTrackingStore**(`options?`): `BunSqlDeliveryTrackingStore`
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L36)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L42)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:36
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L118)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L125)
 
 #### Returns
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:11
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L104)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L111)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L100)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L107)
 
 #### Parameters
 
@@ -99,7 +99,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:10
 
 > **get**(`messageId`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L86)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L93)
 
 #### Parameters
 
@@ -121,7 +121,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:86
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L78)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L85)
 
 #### Returns
 
@@ -137,7 +137,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:78
 
 > **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L90)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L97)
 
 #### Parameters
 
@@ -163,7 +163,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:90
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L94)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L101)
 
 #### Parameters
 
@@ -185,7 +185,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:94
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L111)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L118)
 
 #### Parameters
 
@@ -211,7 +211,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:11
 
 > **upsert**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L82)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L89)
 
 #### Parameters
 
