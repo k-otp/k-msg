@@ -9,7 +9,8 @@ import type { ShippedOrder } from "./orders";
 export const SHIPPED_TEMPLATE =
   "#{customerName}, your order #{orderId} has shipped.\nTracking number: #{trackingNumber}";
 
-const PROVIDER_TIMEOUT_MS = 10_000;
+/** How long one provider call may take before it fails as NETWORK_TIMEOUT. */
+export const PROVIDER_TIMEOUT_MS = 10_000;
 // A batch shares one signal, and KMsg sends it in chunks of up to 50.
 const BATCH_TIMEOUT_MS = 30_000;
 

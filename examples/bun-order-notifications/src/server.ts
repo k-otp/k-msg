@@ -8,7 +8,7 @@ import {
 import { KMsg } from "k-msg";
 import { createApp } from "./app";
 import { type Config, loadConfig } from "./env";
-import { ShippingNotifier } from "./notifier";
+import { PROVIDER_TIMEOUT_MS, ShippingNotifier } from "./notifier";
 import { maskPhone } from "./phone";
 import { createProviders } from "./provider";
 
@@ -33,7 +33,9 @@ const tracking = new DeliveryTrackingService({
   // provider.
   apiFailover: {
     sender: (input) =>
-      kmsg.send(input, { signal: AbortSignal.timeout(10_000) }),
+      kmsg.send(input, {
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+      }),
   },
   onStatusChange: ({ record, previousStatus }) => {
     console.info(
