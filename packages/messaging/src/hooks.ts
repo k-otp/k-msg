@@ -24,7 +24,7 @@ export interface SendHookFinalState {
 }
 
 /**
- * Hooks that observe a send; see {@link KMsgHooks.onHookError}. `KMsg` does
+ * Hooks that observe a send; see `KMsgHooks.onHookError`. `KMsg` does
  * not dispatch onRetryScheduled itself; a caller that does must guard it the
  * same way.
  */
