@@ -1,0 +1,5 @@
+---
+npm/@k-msg/core: patch
+---
+
+Redact log messages and error text, not only context keys. `Logger` wrote `message`, `error.message`, and `error.stack` verbatim, so a phone number or credential interpolated into them reached console output. Those texts and free-text context values now pass through the new `redactLogText`, which masks Korean phone numbers (domestic or `+82`) and redacts credentials written as key/value pairs such as `apiKey=...`, `"secret":"..."`, or `Authorization: Bearer ...`.
