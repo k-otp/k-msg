@@ -5,7 +5,7 @@ prev: false
 title: "KMsgHooks"
 ---
 
-Defined in: [packages/messaging/src/hooks.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L26)
+Defined in: [packages/messaging/src/hooks.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L43)
 
 ## Properties
 
@@ -13,7 +13,10 @@ Defined in: [packages/messaging/src/hooks.ts:26](https://github.com/k-otp/k-msg/
 
 > `optional` **onBeforeSend?**: (`context`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L27)
+Defined in: [packages/messaging/src/hooks.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L48)
+
+Runs before the provider is called. Throwing aborts the send and rejects
+the call.
 
 #### Parameters
 
@@ -31,7 +34,7 @@ Defined in: [packages/messaging/src/hooks.ts:27](https://github.com/k-otp/k-msg/
 
 > `optional` **onError?**: (`context`, `error`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L32)
+Defined in: [packages/messaging/src/hooks.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L53)
 
 #### Parameters
 
@@ -53,7 +56,7 @@ Defined in: [packages/messaging/src/hooks.ts:32](https://github.com/k-otp/k-msg/
 
 > `optional` **onFinal?**: (`context`, `state`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L42)
+Defined in: [packages/messaging/src/hooks.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L63)
 
 #### Parameters
 
@@ -71,11 +74,37 @@ Defined in: [packages/messaging/src/hooks.ts:42](https://github.com/k-otp/k-msg/
 
 ***
 
+### onHookError?
+
+> `optional` **onHookError?**: (`error`, `info`) => `void` \| `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/hooks.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L72)
+
+Receives errors thrown by the observer hooks (every hook except
+onBeforeSend). Those errors never change the send result. Without this
+hook, or when it throws too, they are written to `console.error`.
+
+#### Parameters
+
+##### error
+
+`unknown`
+
+##### info
+
+[`KMsgHookErrorContext`](/en/api/messaging/src/interfaces/kmsghookerrorcontext/)
+
+#### Returns
+
+`void` \| `Promise`\<`void`\>
+
+***
+
 ### onQueued?
 
 > `optional` **onQueued?**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L33)
+Defined in: [packages/messaging/src/hooks.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L54)
 
 #### Parameters
 
@@ -97,7 +126,7 @@ Defined in: [packages/messaging/src/hooks.ts:33](https://github.com/k-otp/k-msg/
 
 > `optional` **onRetryScheduled?**: (`context`, `error`, `metadata`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L34)
+Defined in: [packages/messaging/src/hooks.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L55)
 
 #### Parameters
 
@@ -129,7 +158,7 @@ Defined in: [packages/messaging/src/hooks.ts:34](https://github.com/k-otp/k-msg/
 
 > `optional` **onSuccess?**: (`context`, `result`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/hooks.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L28)
+Defined in: [packages/messaging/src/hooks.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/hooks.ts#L49)
 
 #### Parameters
 
