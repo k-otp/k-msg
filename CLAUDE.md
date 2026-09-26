@@ -145,14 +145,14 @@ bun test --coverage
 
 ### Package Management
 ```bash
-# Version management (modern bun pm commands)
-bun pm version patch|minor|major
+# Record a release note for changes under packages/* or apps/cli
+sampo add                           # writes .sampo/changesets/*.md
 
-# Packaging and publishing
-bun run pack:all                    # Create tarballs
-bun run publish:all                 # Publish to npm
-bun run release                     # Full release process via script
+# Inspect packages without publishing
+bun run pack:dry
 ```
+
+Versions are managed by Sampo, not `bun pm version`; see Release Process.
 
 ### Environment Setup
 Required environment variables for IWINV provider:
@@ -263,12 +263,9 @@ Bun.serve({
 
 ## Release Process
 
-The project includes an automated release script (`scripts/release.sh`) that:
-1. Validates git state (clean working directory, main branch)
-2. Runs full test suite
-3. Builds all packages
-4. Handles version bumping
-5. Creates git tags
-6. Publishes to npm
+Releases are automated by `.github/workflows/release.yml` and Sampo (`.sampo/README.md`):
+1. Feature PRs carry Sampo changesets in `.sampo/changesets/`.
+2. After merges to `main`, the workflow keeps a `sampo/release` PR that bumps the lockstep versions and changelogs.
+3. Merging that PR publishes every package through npm trusted publishing (OIDC, `scripts/publish-oidc.sh`) and tags the release.
 
-Use `bun run release` for interactive release process.
+Do not publish from a local machine: it bypasses the changelog and provenance of the release workflow.
