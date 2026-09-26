@@ -29,9 +29,22 @@ Manage SMS, LMS, AlimTalk, and FriendTalk with a single unified API.
 import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
 
-const kmsg = new KMsg({ providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })] });
-await kmsg.send({ to: "01012345678", text: "Hello!" });
+const kmsg = new KMsg({
+  providers: [
+    new IWINVProvider({
+      apiKey: process.env.IWINV_API_KEY!, // AlimTalk
+      smsApiKey: process.env.IWINV_SMS_API_KEY!, // SMS/LMS
+      smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+      smsSenderNumber: "01000000000",
+    }),
+  ],
+});
+
+const result = await kmsg.send({ to: "01012345678", text: "Hello!" });
+if (result.isFailure) console.error(result.error.code, result.error.message);
 ```
+
+To try the API without provider credentials, use `MockProvider` from `@k-msg/provider`.
 
 ### When to Use
 
@@ -220,8 +233,8 @@ The roadmap is a living document and is updated quarterly based on operational m
 ## Dependency Policy
 
 - Core packages/apps (`packages/*`, `apps/*`) prioritize stability.
-- Example projects (`examples/*`) are upgraded on a separate, periodic track.
-- Use `bun run deps:outdated:core` and `bun run deps:outdated:examples` to review them independently.
+- Example projects (`examples/*`) depend on the published packages (`latest`) and are upgraded on a separate, periodic track.
+- `bun run deps:outdated:core` reviews the workspace dependencies; `bun run examples:standalone` installs each example from npm and typechecks it.
 
 ## Release Ops
 
