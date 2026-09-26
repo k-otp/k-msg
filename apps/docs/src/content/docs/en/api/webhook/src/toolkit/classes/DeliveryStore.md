@@ -461,7 +461,7 @@ Defined in: [packages/webhook/src/registry/delivery.store.ts:89](https://github.
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/delivery.store.ts:643](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L643)
+Defined in: [packages/webhook/src/registry/delivery.store.ts:642](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/delivery.store.ts#L642)
 
 전달 저장소 종료
 

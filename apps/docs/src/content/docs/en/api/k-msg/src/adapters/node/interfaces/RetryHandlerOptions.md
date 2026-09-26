@@ -5,7 +5,7 @@ prev: false
 title: "RetryHandlerOptions"
 ---
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L50)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L51)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:50](https://github.co
 
 > **checkInterval**: `number`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L52)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L53)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:52](https://github.co
 
 > **execute**: (`attempt`, `item`) => `Promise`\<`unknown`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L54)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L55)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:54](https://github.co
 
 > **maxQueueSize**: `number`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L53)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L54)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:53](https://github.co
 
 > `optional` **onRetryExhausted?**: (`item`) => `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L60)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L61)
 
 #### Parameters
 
@@ -69,7 +69,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:60](https://github.co
 
 > `optional` **onRetryFailed?**: (`item`, `error`) => `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L62)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L63)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.co
 
 > `optional` **onRetrySuccess?**: (`item`, `result`) => `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L61)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L62)
 
 #### Parameters
 
@@ -113,7 +113,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:61](https://github.co
 
 > **policy**: [`RetryPolicy`](/en/api/k-msg/src/adapters/node/interfaces/retrypolicy/)
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L51)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L52)
 
 ***
 
@@ -121,7 +121,7 @@ Defined in: [packages/messaging/src/queue/retry.handler.ts:51](https://github.co
 
 > `optional` **shouldRetryError?**: (`error`, `item`, `attempt`) => `boolean`
 
-Defined in: [packages/messaging/src/queue/retry.handler.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L55)
+Defined in: [packages/messaging/src/queue/retry.handler.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/retry.handler.ts#L56)
 
 #### Parameters
 

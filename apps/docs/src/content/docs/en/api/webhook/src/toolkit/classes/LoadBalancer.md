@@ -5,7 +5,7 @@ prev: false
 title: "LoadBalancer"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L19)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L20)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:19](https://github
 
 > **new LoadBalancer**(`config?`): `LoadBalancer`
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L35)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L36)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:44](https://github.com
 
 > **getAllEndpointHealth**(): `EndpointHealth`[]
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L213)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:214](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L214)
 
 모든 엔드포인트 건강 상태 조회
 
@@ -105,7 +105,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:213](https://githu
 
 > **getEndpointHealth**(`endpointId`): `EndpointHealth` \| `null`
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:206](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L206)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L207)
 
 엔드포인트 건강 상태 조회
 
@@ -125,7 +125,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:206](https://githu
 
 > **getStats**(): `object`
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L220)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:221](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L221)
 
 로드 밸런서 통계 조회
 
@@ -237,7 +237,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:35](https://github.com
 
 > **onRequestComplete**(`endpointId`, `success`, `responseTime`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L146)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L147)
 
 요청 완료 시 호출 (연결 수 감소 및 통계 업데이트)
 
@@ -265,7 +265,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:146](https://githu
 
 > **registerEndpoint**(`endpoint`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L45)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L46)
 
 엔드포인트 등록
 
@@ -411,7 +411,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **selectEndpoint**(`endpoints`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L83)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L84)
 
 로드 밸런싱을 통한 엔드포인트 선택
 
@@ -431,7 +431,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:83](https://github
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:442](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L442)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:456](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L456)
 
 로드 밸런서 종료
 
@@ -445,7 +445,7 @@ Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:442](https://githu
 
 > **unregisterEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L71)
+Defined in: [packages/webhook/src/dispatcher/load-balancer.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/load-balancer.ts#L72)
 
 엔드포인트 등록 해제
 
