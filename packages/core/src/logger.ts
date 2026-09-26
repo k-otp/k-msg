@@ -110,14 +110,15 @@ const PHONE_NUMBER_PATTERN = new RegExp(
   "g",
 );
 const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
-// Quoted values, then values quoted with an escaped quote. Inside an escaped
-// value, an escaped backslash pair belongs to the value, so an embedded
-// `\\\"` does not end it.
+// Quoted values, then values quoted with an escaped quote. Only the escaped
+// quote ends an escaped value: an escaped backslash pair belongs to the value,
+// so an embedded `\\\"` does not end it, and so does a backslash before any
+// other character, which a producer that escapes only quotes leaves as is.
 const QUOTED_VALUE_SOURCES = [
   String.raw`"(?:\\.|[^"\\\n])*"?`,
   String.raw`'(?:\\.|[^'\\\n])*'?`,
-  String.raw`\\"(?:\\\\(?:\\.|[^\\\n])|[^\\\n])*(?:\\")?`,
-  String.raw`\\'(?:\\\\(?:\\.|[^\\\n])|[^\\\n])*(?:\\')?`,
+  String.raw`\\"(?:\\\\(?:\\.|[^\\\n])|\\[^"\\\n]|[^\\\n])*(?:\\")?`,
+  String.raw`\\'(?:\\\\(?:\\.|[^\\\n])|\\[^'\\\n]|[^\\\n])*(?:\\')?`,
 ];
 const CREDENTIAL_PATTERN = new RegExp(
   String.raw`\b(${CREDENTIAL_KEY_SOURCE})((?:\\?["'])?\s*[:=]\s*)(?:${QUOTED_VALUE_SOURCES.join("|")}|((?:Bearer|Basic)\s+)?[^\s"',;&]+)`,

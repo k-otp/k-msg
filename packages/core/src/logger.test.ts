@@ -71,6 +71,18 @@ describe("redactLogText", () => {
       String.raw`{\'password\': \'abc\'}`,
       String.raw`{\'password\': \'[REDACTED]\'}`,
     ],
+    [
+      String.raw`{\"password\":\"p@ss\w0rd\"}`,
+      String.raw`{\"password\":\"[REDACTED]\"}`,
+    ],
+    [
+      String.raw`{\"password\":\"p@ss\\w0rd\"}`,
+      String.raw`{\"password\":\"[REDACTED]\"}`,
+    ],
+    [
+      String.raw`{\'password\': \'p@ss\w0rd\'}`,
+      String.raw`{\'password\': \'[REDACTED]\'}`,
+    ],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
