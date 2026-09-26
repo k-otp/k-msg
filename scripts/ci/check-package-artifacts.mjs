@@ -53,7 +53,7 @@ try {
       const count = (key) =>
         results.reduce((total, result) => total + result[key].length, 0);
       console.log(
-        `ok: ${results.length} publishable packages; loaded ${count("checkedEsm")} ESM exports with import() and ${count("checkedCjs")} CommonJS exports with require(); syntax-checked ${count("syntaxOnly")} Bun-only artifacts`,
+        `ok: ${results.length} publishable packages; loaded ${count("checkedEsm")} ESM exports with import() and ${count("checkedCjs")} CommonJS exports with require(); syntax-checked ${count("syntaxOnly")} Bun-only artifacts; read ${count("sourcemapChecked")} sourcemaps for inlined dependencies`,
       );
     }
   } else {

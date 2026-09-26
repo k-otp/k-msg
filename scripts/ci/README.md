@@ -56,6 +56,9 @@ manifest.
     export, and every export reads as a defined value
   - the `import` and `require` targets of each export subpath expose the
     same export names
+  - no runtime target inlines a package that the manifest lists in
+    `dependencies`, `optionalDependencies`, or `peerDependencies`
+    (see [Inlined dependencies](#inlined-dependencies))
   - every export target is included by `npm pack --dry-run`
 
 Published packages keep `"type": "module"`, so each runtime artifact carries
@@ -68,6 +71,31 @@ a `"type": "module"` package as ESM, so a CommonJS build named `.js` throws
 which Node cannot load. `BUN_ONLY_EXPORTS` in `package-artifacts-lib.mjs`
 lists them, and the gate only syntax-checks their artifacts with
 `node --check`.
+
+### Inlined dependencies
+
+npm installs a package's `dependencies`, `optionalDependencies`, and
+`peerDependencies` for the consumer, so an artifact that also inlines one
+ships a second copy. An error thrown by an inlined copy of `@k-msg/core`
+fails `instanceof KMsgError` in the consumer's code, and the consumer's
+`setGlobalLogger()` never reaches the inlined logger. Each package's
+`build:esm` and `build:cjs` scripts pass `--external` for its runtime
+dependencies instead, for example `--external '@k-msg/*' --external 'zod'`.
+
+The gate reads which packages a runtime target inlines from its linked
+sourcemap, so a package with runtime dependencies must build with
+`--sourcemap`. A source under `node_modules/<name>/` belongs to that package,
+and any other source to the package of its nearest `package.json`. Bun 1.4.2
+writes the sources of an entry built into a subdirectory of the outdir
+relative to the outdir instead of to the map, so the gate resolves each
+source against the map's directory and then each parent up to the package
+directory, and reports a source it cannot find rather than guess its owner.
+
+`INLINED_DEPENDENCIES` in `package-artifacts-lib.mjs` lists what
+`@k-msg/analytics`, `@k-msg/channel`, and `@k-msg/template` still inline.
+The entries are defects to fix, not exemptions: remove one once the
+package's build marks the dependency external. The gate rejects an entry
+that no artifact inlines.
 
 ### Bun build baseline
 
