@@ -7,7 +7,7 @@ title: "TemplateVariableUtils"
 
 > `const` **TemplateVariableUtils**: `object`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:746](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L746)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:771](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L771)
 
 Utility functions
 

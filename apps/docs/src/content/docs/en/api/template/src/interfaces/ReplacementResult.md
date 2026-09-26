@@ -5,7 +5,7 @@ prev: false
 title: "ReplacementResult"
 ---
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L33)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L39)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:33](http
 
 > **content**: `string`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L34)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L40)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:34](http
 
 > **errors**: [`ReplacementError`](/en/api/template/src/interfaces/replacementerror/)[]
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L37)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L43)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:37](http
 
 > **metadata**: `object`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L38)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L44)
 
 #### finalLength
 
@@ -53,7 +53,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:38](http
 
 > **missingVariables**: `string`[]
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L36)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L42)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:36](http
 
 > **variables**: [`TemplateVariableInfo`](/en/api/template/src/interfaces/templatevariableinfo/)[]
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L35)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L41)
