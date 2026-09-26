@@ -532,6 +532,10 @@ export function assertCryptoEnvelopeV1(
 export function toCiphertextEnvelopeString(
   ciphertext: string | CryptoEnvelope,
 ): string {
-  if (typeof ciphertext !== "string") assertCryptoEnvelopeV1(ciphertext);
-  return toCiphertextString(ciphertext);
+  if (typeof ciphertext === "string") return ciphertext;
+  assertCryptoEnvelopeV1(ciphertext);
+  // Only the envelope's own fields: a provider's object may carry more, such
+  // as debugging data or the plaintext, which must not be stored.
+  const { v, alg, kid, iv, tag, ct } = ciphertext;
+  return toCiphertextString({ v, alg, kid, iv, tag, ct });
 }

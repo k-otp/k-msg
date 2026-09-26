@@ -40,4 +40,25 @@ describe("v1 ciphertext envelopes", () => {
   test("keeps a provider's own string form", () => {
     expect(toCiphertextEnvelopeString("opaque-token")).toBe("opaque-token");
   });
+
+  test("stores only the envelope's own fields", () => {
+    const envelope = {
+      v: 1,
+      alg: "A256GCM",
+      kid: "k1",
+      iv: "iv",
+      tag: "tag",
+      ct: "ct",
+      plaintext: "01012345678",
+    };
+
+    expect(JSON.parse(toCiphertextEnvelopeString(envelope))).toEqual({
+      v: 1,
+      alg: "A256GCM",
+      kid: "k1",
+      iv: "iv",
+      tag: "tag",
+      ct: "ct",
+    });
+  });
 });
