@@ -273,6 +273,57 @@ describe("JobProcessor", () => {
     await processor.stop();
   });
 
+  test("should not run a job again while it is still running", async () => {
+    // Hands the same job out on every dequeue, as a queue does once its lease
+    // on a job runs out while the handler is still busy with it.
+    const job: Job<{ n: number }> = {
+      id: "job-1",
+      type: "send",
+      data: { n: 1 },
+      status: JobStatus.PROCESSING,
+      priority: 0,
+      attempts: 0,
+      maxAttempts: 3,
+      delay: 0,
+      createdAt: new Date(),
+      processAt: new Date(),
+      metadata: {},
+    };
+    const queue: JobQueue<{ n: number }> = {
+      enqueue: async () => ({ ...job }),
+      dequeue: async () => ({ ...job }),
+      complete: async () => {},
+      fail: async () => {},
+      peek: async () => undefined,
+      size: async () => 1,
+      getJob: async () => ({ ...job }),
+      remove: async () => true,
+      clear: async () => {},
+    };
+    const processor = new JobProcessor(
+      {
+        concurrency: 2,
+        retryDelays: [0],
+        maxRetries: 3,
+        pollInterval: 5,
+        enableMetrics: false,
+      },
+      queue,
+    );
+    let runs = 0;
+    processor.handle("send", async () => {
+      runs += 1;
+      await wait(100);
+      return "ok";
+    });
+
+    processor.start();
+    await wait(60);
+
+    expect(runs).toBe(1);
+    await processor.stop();
+  });
+
   test("should fail missing handlers without leaving processing slots stuck", async () => {
     const processor = new JobProcessor(
       {

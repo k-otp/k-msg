@@ -4,25 +4,29 @@ export interface CloudflareObjectStorage {
   delete(key: string): Promise<void>;
   list(prefix: string): Promise<string[]>;
   /**
-   * The keys under `prefix` with their values, for storage whose listing
-   * returns values (Durable Objects), so reading everything under a prefix
-   * takes no get() per key.
+   * The keys under `prefix` with their values, a listing page at a time, for
+   * storage whose listing returns values (Durable Objects), so reading
+   * everything under a prefix takes no get() per key.
    */
-  entries?(prefix: string): Promise<Array<[key: string, value: string]>>;
+  entries?(prefix: string): AsyncIterable<[key: string, value: string]>;
 }
 
-/** Every key under `prefix` with its value, in one listing when possible. */
-export async function readObjectEntries(
+/**
+ * Every key under `prefix` with its value, from the listing when the storage
+ * returns values, and without holding more than a page of them at a time.
+ */
+export async function* readObjectEntries(
   storage: CloudflareObjectStorage,
   prefix: string,
-): Promise<Array<[key: string, value: string]>> {
-  if (storage.entries) return storage.entries(prefix);
-  const entries: Array<[string, string]> = [];
+): AsyncGenerator<[key: string, value: string]> {
+  if (storage.entries) {
+    yield* storage.entries(prefix);
+    return;
+  }
   for (const key of await storage.list(prefix)) {
     const value = await storage.get(key);
-    if (value !== null) entries.push([key, value]);
+    if (value !== null) yield [key, value];
   }
-  return entries;
 }
 
 export interface CloudflareKvNamespaceLike {
@@ -184,15 +188,13 @@ export function createDurableObjectStorage(
       }
       return keys;
     },
-    async entries(prefix: string): Promise<Array<[string, string]>> {
+    async *entries(prefix: string): AsyncGenerator<[string, string]> {
       // The listing already holds the values, so no get() per key.
-      const entries: Array<[string, string]> = [];
       for await (const page of durableObjectPages(storage, prefix)) {
         for (const [key, value] of page) {
-          if (typeof value === "string") entries.push([key, value]);
+          if (typeof value === "string") yield [key, value];
         }
       }
-      return entries;
     },
   };
 }
