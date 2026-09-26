@@ -7,7 +7,7 @@ title: "WebhookVerificationErrorCode"
 
 > **WebhookVerificationErrorCode** = `"MISSING_SIGNATURE"` \| `"MISSING_TIMESTAMP"` \| `"INVALID_SIGNATURE"` \| `"INVALID_TIMESTAMP"` \| `"STALE_TIMESTAMP"`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L52)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L53)
 
 Why [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhookrequest/) rejected a request:
 

@@ -57,8 +57,9 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:25](https://github.com/
 
 > `optional` **toleranceMs?**: `number`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L37)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L38)
 
 How far the signed time may be from the receiver's clock, in either
 direction, in milliseconds: a finite number of 0 or more. Defaults to
-300000 (5 minutes).
+300000 (5 minutes). Signed times have one-second resolution, so a
+request up to a second older than this can still pass.

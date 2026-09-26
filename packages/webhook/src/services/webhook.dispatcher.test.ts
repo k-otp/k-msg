@@ -245,6 +245,41 @@ describe("WebhookDispatcher signing", () => {
     },
   );
 
+  test("endpoint headers cannot replace or duplicate the protocol headers", async () => {
+    const client = new StubHttpClient(() => new Response("ok"));
+    const dispatcher = new WebhookDispatcher(
+      createConfig({ enableSecurity: true }),
+      client,
+    );
+
+    const delivery = await dispatcher.dispatch(
+      createEvent(),
+      createEndpoint({
+        secret: "whsec_endpoint",
+        headers: {
+          "X-Webhook-Timestamp": "123",
+          "x-webhook-signature": "sha256=forged",
+          "x-webhook-id": "spoofed",
+          "X-WEBHOOK-EVENT": "spoofed",
+          "content-type": "application/json; charset=utf-8",
+          Authorization: "Bearer receiver-token",
+        },
+      }),
+    );
+
+    const sent = new Headers(client.calls[0]?.headers);
+    const timestamp = sent.get("X-Webhook-Timestamp") ?? "";
+    expect(timestamp).toMatch(/^\d+$/);
+    expect(sent.get("X-Webhook-Signature")).toBe(
+      expectedSignature("whsec_endpoint", timestamp, delivery.payload),
+    );
+    expect(sent.get("X-Webhook-ID")).toBe("evt_1");
+    expect(sent.get("X-Webhook-Event")).toBe(WebhookEventType.MESSAGE_SENT);
+    // Other headers still come from the endpoint, once each.
+    expect(sent.get("Content-Type")).toBe("application/json; charset=utf-8");
+    expect(sent.get("Authorization")).toBe("Bearer receiver-token");
+  });
+
   test("sends no signature when enableSecurity is off", async () => {
     const client = new StubHttpClient(() => new Response("ok"));
     const dispatcher = new WebhookDispatcher(createConfig(), client);
