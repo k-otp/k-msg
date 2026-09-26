@@ -12,12 +12,30 @@ export interface WebhookData {
   timestamp: Date;
   headers: Record<string, string>;
   body: any;
+  /**
+   * The request body exactly as received, before JSON parsing: the bytes the
+   * sender signed. Required while signature validation is on, because
+   * re-serializing `body` rarely reproduces those bytes. `body` should be
+   * parsed from these same bytes.
+   */
+  rawBody?: string | Uint8Array | ArrayBuffer;
+  /** The signature to check when the signature header is missing. */
   signature?: string;
 }
 
 export interface WebhookCollectorConfig {
+  /**
+   * Verify each webhook's signature before collecting it. Defaults to `true`,
+   * which needs `secretKey`; only `false` accepts unsigned webhooks.
+   */
   enableSignatureValidation: boolean;
+  /**
+   * The header holding the signature, matched in any case. Its value is
+   * `sha256=<hex>` or bare `<hex>`: the HMAC-SHA256 of `rawBody` keyed with
+   * `secretKey`. Defaults to `x-signature`.
+   */
   signatureHeader: string;
+  /** The shared signing secret. Required while signature validation is on. */
   secretKey?: string;
   allowedSources: string[];
   maxPayloadSize: number; // bytes
@@ -27,6 +45,69 @@ export interface WebhookCollectorConfig {
 export interface WebhookTransformer {
   canTransform(webhook: WebhookData): boolean;
   transform(webhook: WebhookData): Promise<EventData[]>;
+}
+
+// `sha256=<hex>` or bare `<hex>`, in any case.
+const SHA256_SIGNATURE = /^(?:sha256=)?([0-9a-f]{64})$/i;
+
+function findHeader(
+  headers: Record<string, string>,
+  name: string,
+): string | undefined {
+  const wanted = name.toLowerCase();
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === wanted) return value;
+  }
+  return undefined;
+}
+
+/**
+ * Checks `signature` against the HMAC-SHA256 of `rawBody` keyed with
+ * `secret`, comparing the digests in constant time.
+ */
+async function verifySha256Signature(
+  rawBody: string | Uint8Array | ArrayBuffer,
+  signature: string,
+  secret: string,
+): Promise<boolean> {
+  const match = SHA256_SIGNATURE.exec(signature.trim());
+  if (!match) return false;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const expected = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    typeof rawBody === "string"
+      ? encoder.encode(rawBody)
+      : new Uint8Array(rawBody),
+  );
+  return timingSafeEqual(new Uint8Array(expected), hexToBytes(match[1]));
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+
+// Looks at every byte, so the time taken does not reveal how much of a
+// guessed digest was right.
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i];
+  }
+  return diff === 0;
 }
 
 export class WebhookCollector extends EventEmitter {
@@ -46,7 +127,17 @@ export class WebhookCollector extends EventEmitter {
 
   constructor(config: Partial<WebhookCollectorConfig> = {}) {
     super();
-    this.config = { ...this.defaultConfig, ...config };
+    // An option passed as undefined keeps its default, so
+    // `enableSignatureValidation: undefined` cannot turn validation off.
+    const options = Object.fromEntries(
+      Object.entries(config).filter(([, value]) => value !== undefined),
+    ) as Partial<WebhookCollectorConfig>;
+    this.config = { ...this.defaultConfig, ...options };
+    if (this.config.enableSignatureValidation && !this.config.secretKey) {
+      throw new Error(
+        "WebhookCollector needs a secretKey while enableSignatureValidation is on; set enableSignatureValidation: false to accept unsigned webhooks",
+      );
+    }
     this.initializeDefaultTransformers();
     this.startCleanup();
   }
@@ -155,7 +246,7 @@ export class WebhookCollector extends EventEmitter {
     }
 
     // 서명 검증
-    if (this.config.enableSignatureValidation && this.config.secretKey) {
+    if (this.config.enableSignatureValidation) {
       await this.validateSignature(webhook);
     }
 
@@ -175,7 +266,8 @@ export class WebhookCollector extends EventEmitter {
 
   private async validateSignature(webhook: WebhookData): Promise<void> {
     const signature =
-      webhook.headers[this.config.signatureHeader] || webhook.signature;
+      findHeader(webhook.headers, this.config.signatureHeader) ||
+      webhook.signature;
 
     if (!signature) {
       throw new Error(
@@ -188,24 +280,15 @@ export class WebhookCollector extends EventEmitter {
       throw new Error("secretKey is required for signature validation");
     }
 
-    // 간단한 HMAC 검증 (실제로는 crypto 모듈 사용)
-    const expectedSignature = await this.generateSignature(
-      webhook.body,
-      secretKey,
-    );
+    if (webhook.rawBody === undefined || webhook.rawBody === null) {
+      throw new Error(
+        "rawBody is required for signature validation: pass the request body exactly as received, before JSON parsing",
+      );
+    }
 
-    if (signature !== expectedSignature) {
+    if (!(await verifySha256Signature(webhook.rawBody, signature, secretKey))) {
       throw new Error("Invalid webhook signature");
     }
-  }
-
-  private async generateSignature(
-    payload: any,
-    secret: string,
-  ): Promise<string> {
-    // 실제 구현에서는 crypto.createHmac 사용
-    const payloadStr = JSON.stringify(payload);
-    return `sha256=${payloadStr.length}_${secret.length}`; // 임시 구현
   }
 
   private checkRateLimit(source: string): boolean {
