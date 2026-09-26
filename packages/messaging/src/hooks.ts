@@ -23,7 +23,11 @@ export interface SendHookFinalState {
   retryAfterMs?: number;
 }
 
-/** Hooks that observe a send; see {@link KMsgHooks.onHookError}. */
+/**
+ * Hooks that observe a send; see {@link KMsgHooks.onHookError}. `KMsg` does
+ * not dispatch onRetryScheduled itself; a caller that does must guard it the
+ * same way.
+ */
 export type KMsgObserverHook =
   | "onSuccess"
   | "onError"
@@ -62,8 +66,8 @@ export interface KMsgHooks {
   ) => void | Promise<void>;
   /**
    * Receives errors thrown by the observer hooks (every hook except
-   * onBeforeSend). Those errors never change the send result; without this
-   * hook they are dropped.
+   * onBeforeSend). Those errors never change the send result. Without this
+   * hook, or when it throws too, they are written to `console.error`.
    */
   onHookError?: (
     error: unknown,
