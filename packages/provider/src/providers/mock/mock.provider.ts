@@ -1,4 +1,7 @@
 import {
+  type DeliveryStatus,
+  type DeliveryStatusQuery,
+  type DeliveryStatusResult,
   fail,
   type KakaoChannel,
   type KakaoChannelCategories,
@@ -133,6 +136,7 @@ export class MockProvider
   private templateSeq = 0;
   private channelSeq = 0;
   private kakaoChannels: Map<string, KakaoChannel> = new Map();
+  private deliveries: Map<string, DeliveryStatusResult> = new Map();
 
   getOnboardingSpec() {
     // The spec describes the mock itself, so it does not depend on the id.
@@ -252,11 +256,23 @@ export class MockProvider
       );
     }
 
+    const providerMessageId = `mock-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    const sentAt = new Date();
+    // Reported as delivered until setDeliveryStatus says otherwise, so
+    // delivery tracking works without a real provider.
+    this.deliveries.set(providerMessageId, {
+      providerId: this.id,
+      providerMessageId,
+      status: "DELIVERED",
+      sentAt,
+      deliveredAt: sentAt,
+    });
+
     const result: SendResult = {
       messageId: params.messageId || crypto.randomUUID(),
       status: "SENT",
       providerId: this.id,
-      providerMessageId: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      providerMessageId,
       type: params.type,
       to: params.to,
       ...(params.type === "ALIMTALK" && params.failover?.enabled === true
@@ -294,6 +310,50 @@ export class MockProvider
   clearScenario(): void {
     this.scenario = [];
     this.scenarioCursor = 0;
+  }
+
+  /**
+   * Reports the status of a message this provider sent. Sent messages read
+   * as DELIVERED until {@link setDeliveryStatus} changes them; an unknown
+   * `providerMessageId` reads as not found.
+   */
+  async getDeliveryStatus(
+    query: DeliveryStatusQuery,
+    context?: ProviderRequestContext,
+  ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
+    const aborted = toProviderAbortError(
+      context?.signal?.reason,
+      context?.signal,
+      this.id,
+    );
+    if (aborted) return fail(aborted);
+    const delivery = this.deliveries.get(query.providerMessageId);
+    return ok(delivery ? { ...delivery } : null);
+  }
+
+  /**
+   * Sets what {@link getDeliveryStatus} reports for a sent message, for
+   * example `FAILED` with a provider status code to exercise failure paths.
+   */
+  setDeliveryStatus(
+    providerMessageId: string,
+    status: DeliveryStatus,
+    details: Pick<
+      DeliveryStatusResult,
+      "statusCode" | "statusMessage" | "raw"
+    > = {},
+  ): void {
+    const now = new Date();
+    const previous = this.deliveries.get(providerMessageId);
+    this.deliveries.set(providerMessageId, {
+      providerId: this.id,
+      providerMessageId,
+      status,
+      ...details,
+      sentAt: previous?.sentAt ?? now,
+      ...(status === "DELIVERED" ? { deliveredAt: now } : {}),
+      ...(status === "FAILED" ? { failedAt: now } : {}),
+    });
   }
 
   private async waitForDelay(
