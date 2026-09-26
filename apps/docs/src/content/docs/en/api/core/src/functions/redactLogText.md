@@ -7,7 +7,7 @@ title: "redactLogText"
 
 > **redactLogText**(`text`): `string`
 
-Defined in: [packages/core/src/logger.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L90)
+Defined in: [packages/core/src/logger.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L93)
 
 ## Parameters
 
