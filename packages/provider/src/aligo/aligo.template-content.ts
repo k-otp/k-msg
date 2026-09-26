@@ -4,12 +4,16 @@ import { mapAligoKakaoError } from "./aligo.error";
 import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 
-/** Aligo templates belong to a Kakao sender profile, so both name one. */
+/**
+ * Aligo templates belong to a Kakao sender profile, so both name one. They are
+ * trimmed, as the template APIs trim them, so a send and a later
+ * updateTemplate name the same kept body.
+ */
 export function aligoTemplateContentKey(
   senderKey: string,
   templateCode: string,
 ): string {
-  return `${senderKey}\n${templateCode}`;
+  return `${senderKey.trim()}\n${templateCode.trim()}`;
 }
 
 /**
