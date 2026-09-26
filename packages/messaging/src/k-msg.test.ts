@@ -926,6 +926,58 @@ describe("KMsg", () => {
       }
     });
 
+    test("call method hooks with their own this", async () => {
+      class Tracker {
+        seen: string[] = [];
+        onSuccess(_context: unknown, result: { messageId: string }) {
+          this.seen.push(result.messageId);
+        }
+      }
+      const tracker = new Tracker();
+      const onHookError = mock(() => {});
+      const kmsg = new KMsg({
+        providers: [sentProvider()],
+        hooks: Object.assign(tracker, { onHookError }),
+      });
+
+      const result = await kmsg.send(input);
+
+      expect(result.isSuccess).toBe(true);
+      expect(tracker.seen).toHaveLength(1);
+      expect(onHookError).not.toHaveBeenCalled();
+    });
+
+    test("stay contained when console.error itself throws", async () => {
+      const send = mock(async (options: any) =>
+        ok({
+          messageId: options.messageId,
+          status: "SENT" as const,
+          providerId: "mock",
+          type: options.type,
+          to: options.to,
+        }),
+      );
+      const kmsg = new KMsg({
+        providers: [sentProvider(send)],
+        hooks: {
+          onSuccess: () => {
+            throw new Error("tracking down");
+          },
+        },
+      });
+
+      const consoleError = spyOn(console, "error").mockImplementation(() => {
+        throw new Error("log shim down");
+      });
+      try {
+        const result = await kmsg.send(input);
+        expect(result.isSuccess).toBe(true);
+        expect(send).toHaveBeenCalledTimes(1);
+      } finally {
+        consoleError.mockRestore();
+      }
+    });
+
     test("end an onboarding failure with onFinal like every other failure", async () => {
       const onError = mock(() => {});
       const onFinal = mock(() => {});
