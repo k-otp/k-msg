@@ -16,6 +16,7 @@ import type {
 import {
   formatAligoDate,
   getAligoEndpoint,
+  normalizeAligoKakaoCode,
   resolveAligoTemplateMessage,
   resolveImageRef,
 } from "./aligo.shared.helpers";
@@ -26,7 +27,7 @@ import type {
 } from "./types/aligo";
 
 function toProviderMessageId(
-  value: number | string | undefined,
+  value: number | string | null | undefined,
 ): string | undefined {
   if (value === undefined || value === null || value === "") return undefined;
   return String(value);
@@ -113,7 +114,7 @@ async function sendSMS(
   })) as unknown as AligoResponse;
 
   // The SMS API documents `result_code` as a number; accept its string form too.
-  if (Number(response.result_code) !== 1) {
+  if (normalizeAligoKakaoCode(response.result_code) !== 1) {
     return fail(mapAligoError(response, ctx.providerId));
   }
 
@@ -247,7 +248,7 @@ async function sendAlimTalk(
 
   const accepted = ensureAligoKakaoOk({
     providerId: ctx.providerId,
-    response: response as unknown as Record<string, unknown>,
+    response,
     fallbackMessage: "Aligo AlimTalk send failed",
   });
   if (accepted.isFailure) return accepted;
@@ -338,7 +339,7 @@ async function sendFriendTalk(
 
   const accepted = ensureAligoKakaoOk({
     providerId: ctx.providerId,
-    response: response as unknown as Record<string, unknown>,
+    response,
     fallbackMessage: "Aligo FriendTalk send failed",
   });
   if (accepted.isFailure) return accepted;
