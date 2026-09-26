@@ -144,19 +144,19 @@ describe("KMsg", () => {
       ok({
         messageId: options.messageId || "test-id",
         status: "SENT" as const,
-        providerId: "solapi",
+        providerId: "strict-kakao",
         type: options.type,
         to: options.to,
       }),
     );
     const provider: Provider = {
-      id: "solapi",
-      name: "SOLAPI",
+      id: "strict-kakao",
+      name: "Strict Kakao",
       supportedTypes: ["ALIMTALK"] as const,
       healthCheck: mock(async () => ({ healthy: true, issues: [] })),
       send: sendMock,
       getOnboardingSpec: () => ({
-        providerId: "solapi",
+        providerId: "strict-kakao",
         channelOnboarding: "none",
         templateLifecycleApi: "unavailable",
         plusIdPolicy: "required_if_no_inference",
@@ -990,13 +990,13 @@ describe("KMsg", () => {
       const kmsg = new KMsg({
         providers: [
           {
-            id: "solapi",
-            name: "SOLAPI",
+            id: "strict-kakao",
+            name: "Strict Kakao",
             supportedTypes: ["ALIMTALK"] as const,
             healthCheck: mock(async () => ({ healthy: true, issues: [] })),
             send,
             getOnboardingSpec: () => ({
-              providerId: "solapi",
+              providerId: "strict-kakao",
               channelOnboarding: "none",
               templateLifecycleApi: "unavailable",
               plusIdPolicy: "required_if_no_inference",

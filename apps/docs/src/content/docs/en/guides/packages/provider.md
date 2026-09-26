@@ -68,7 +68,7 @@ Single source of truth: `packages/provider/src/onboarding/specs.ts`
 | --- | --- | --- | --- | --- | --- |
 | `iwinv` | manual (console) | available | optional | unsupported | supported |
 | `aligo` | api | available | required_if_no_inference | supported | supported |
-| `solapi` | none (vendor metadata) | unavailable | required_if_no_inference | unsupported | partial |
+| `solapi` | none (vendor metadata) | unavailable | optional | unsupported | partial |
 | `mock` | api (test fixture) | available | optional | supported | none |
 
 Runtime access:
