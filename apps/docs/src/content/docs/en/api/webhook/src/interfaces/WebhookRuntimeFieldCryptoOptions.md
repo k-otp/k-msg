@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntimeFieldCryptoOptions"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L45)
+Defined in: [packages/webhook/src/runtime/types.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L50)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:45](https://github.com/k-otp/
 
 > `optional` **acceptLegacyAad?**: `boolean`
 
-Defined in: [packages/webhook/src/runtime/types.ts:55](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L55)
+Defined in: [packages/webhook/src/runtime/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L60)
 
 Also reads secrets and payloads written before ciphertext was bound to
 `tenantId`, which are otherwise rejected. Set it only while migrating
@@ -26,7 +26,7 @@ value copied from another tenant's row with the same id would decrypt.
 
 > `optional` **delivery?**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L48)
+Defined in: [packages/webhook/src/runtime/types.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L53)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:48](https://github.com/k-otp/
 
 > `optional` **endpoint?**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L47)
+Defined in: [packages/webhook/src/runtime/types.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L52)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [packages/webhook/src/runtime/types.ts:47](https://github.com/k-otp/
 
 > `optional` **tenantId?**: `string`
 
-Defined in: [packages/webhook/src/runtime/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L46)
+Defined in: [packages/webhook/src/runtime/types.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L51)
