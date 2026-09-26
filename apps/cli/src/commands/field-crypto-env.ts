@@ -9,6 +9,7 @@ export const FIELD_CRYPTO_KEYS_ENV = "KMSG_FIELD_CRYPTO_KEYS";
 export const FIELD_CRYPTO_HASH_KEYS_ENV = "KMSG_FIELD_CRYPTO_HASH_KEYS";
 export const FIELD_CRYPTO_FIELDS_ENV = "KMSG_FIELD_CRYPTO_FIELDS";
 export const FIELD_CRYPTO_TENANT_ENV = "KMSG_FIELD_CRYPTO_TENANT_ID";
+export const ACTIVE_KID_ENV = "KMSG_ACTIVE_KID";
 
 const FIELD_MODES: readonly FieldMode[] = [
   "plain",
@@ -45,10 +46,15 @@ function parseKeyMap(
     entries.length === 0 ||
     entries.some(([, value]) => typeof value !== "string" || value.length === 0)
   ) {
-    throw new Error(`${name} must map each key id to a base64url key`);
+    throw new Error(
+      `${name} must map each key id to a base64 or base64url key`,
+    );
   }
   return Object.fromEntries(entries) as Record<string, string>;
 }
+
+// Either base64 alphabet, optionally padded: the forms the provider decodes.
+const KEY_ENCODING = /^[A-Za-z0-9+/_-]+={0,2}$/;
 
 // The provider decodes keys leniently and only when it first encrypts, so a
 // truncated key would otherwise surface mid-backfill or as AES-128 labeled
@@ -59,15 +65,16 @@ function assertKeyMaterial(
   expectedBytes?: number,
 ): void {
   for (const [kid, value] of Object.entries(keys)) {
-    const bytes = /^[A-Za-z0-9_-]+$/.test(value)
-      ? Buffer.from(value, "base64url").length
+    // Node's base64 decoder reads both alphabets.
+    const bytes = KEY_ENCODING.test(value)
+      ? Buffer.from(value, "base64").length
       : 0;
     if (
       bytes === 0 ||
       (expectedBytes !== undefined && bytes !== expectedBytes)
     ) {
       throw new Error(
-        `${name}.${kid} must be a base64url key${expectedBytes ? ` of ${expectedBytes} bytes` : ""}`,
+        `${name}.${kid} must be a base64 or base64url key${expectedBytes !== undefined ? ` of ${expectedBytes} bytes` : ""}`,
       );
     }
   }
@@ -106,7 +113,7 @@ export async function resolveMigrationFieldCrypto(
   const keys = parseKeyMap(env[FIELD_CRYPTO_KEYS_ENV], FIELD_CRYPTO_KEYS_ENV);
   if (!keys) {
     throw new Error(
-      `Set ${FIELD_CRYPTO_KEYS_ENV} (a JSON object of base64url AES-256 keys by kid) and KMSG_ACTIVE_KID so the backfill can encrypt with the tracking store's keys.`,
+      `Set ${FIELD_CRYPTO_KEYS_ENV} (a JSON object of 32-byte AES keys by kid, in base64 or base64url) and ${ACTIVE_KID_ENV} so the backfill can encrypt with the tracking store's keys.`,
     );
   }
 
@@ -114,16 +121,19 @@ export async function resolveMigrationFieldCrypto(
 
   // The core resolver falls back to the kid "default"; a backfill must use the
   // store's declared active kid instead.
-  if (!env.KMSG_ACTIVE_KID?.trim()) {
+  if (!env[ACTIVE_KID_ENV]?.trim()) {
     throw new Error(
-      "Set KMSG_ACTIVE_KID to the tracking store's active kid so the backfill encrypts with the right key.",
+      `Set ${ACTIVE_KID_ENV} to the tracking store's active kid so the backfill encrypts with the right key.`,
     );
   }
-  const keyResolver = createEnvKeyResolver({ env });
+  const keyResolver = createEnvKeyResolver({
+    env,
+    activeKidEnv: ACTIVE_KID_ENV,
+  });
   const { kid: activeKid } = await keyResolver.resolveEncryptKey({});
   if (!Object.hasOwn(keys, activeKid)) {
     throw new Error(
-      `${FIELD_CRYPTO_KEYS_ENV} has no key for the active kid "${activeKid}" (KMSG_ACTIVE_KID)`,
+      `${FIELD_CRYPTO_KEYS_ENV} has no key for the active kid "${activeKid}" (${ACTIVE_KID_ENV})`,
     );
   }
 

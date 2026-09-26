@@ -30,6 +30,8 @@ export KMSG_FIELD_CRYPTO_FIELDS='{"to":"encrypt+hash","from":"encrypt+hash"}'
 export KMSG_FIELD_CRYPTO_TENANT_ID=tenant-a
 ```
 
+Keys are 32 bytes, in base64url or standard base64 like the tracking store accepts. A truncated or malformed key is rejected before any row is read.
+
 Stores that use another provider (for example KMS) should call `applyFieldCryptoMigration` with their `fieldCrypto` options instead.
 
 ## Operational sequence
