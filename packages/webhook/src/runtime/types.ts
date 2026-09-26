@@ -12,7 +12,14 @@ export interface WebhookDeliveryListOptions {
   endpointId?: string;
   eventType?: WebhookEvent["type"];
   status?: WebhookDelivery["status"];
+  /** Caps the deliveries returned; the built-in stores return 100 when unset. */
   limit?: number;
+  /**
+   * Returns only deliveries that come after this one in the newest-first
+   * order: older, or equally old with a smaller id. Pass the last delivery of
+   * a page to read the next one.
+   */
+  before?: { createdAt: Date; id: string };
 }
 
 export interface WebhookEndpointStore {
@@ -24,8 +31,15 @@ export interface WebhookEndpointStore {
 }
 
 export interface WebhookDeliveryStore {
+  /** Stores a new delivery; ids are unique, so use replace() to overwrite. */
   add(delivery: WebhookDelivery): Promise<void>;
   list(options?: WebhookDeliveryListOptions): Promise<WebhookDelivery[]>;
+  /**
+   * Overwrites the stored delivery with the same id. Optional; the tenant
+   * migration needs it to re-encrypt stored payloads, and the built-in
+   * stores implement it.
+   */
+  replace?(delivery: WebhookDelivery): Promise<void>;
 }
 
 export interface WebhookPersistence {
@@ -44,6 +58,20 @@ export interface WebhookRuntimeFieldCryptoOptions {
   tenantId?: string;
   endpoint?: FieldCryptoConfig;
   delivery?: FieldCryptoConfig;
+  /**
+   * Also reads secrets and payloads written before ciphertext was bound to
+   * `tenantId`, which are otherwise rejected. Set it only while migrating
+   * them with `migrateFieldCryptoToTenant()`, then remove it: a tenant-less
+   * value copied from another tenant's row with the same id would decrypt.
+   */
+  acceptLegacyAad?: boolean;
+}
+
+export interface WebhookTenantMigrationResult {
+  /** Endpoints whose secret was re-encrypted with the tenant. */
+  endpoints: number;
+  /** Deliveries whose payload was re-encrypted with the tenant. */
+  deliveries: number;
 }
 
 export type WebhookEndpointInput = Omit<
@@ -91,5 +119,17 @@ export interface WebhookRuntime {
   listDeliveries(
     options?: WebhookDeliveryListOptions,
   ): Promise<WebhookDelivery[]>;
+  /**
+   * Re-encrypts stored endpoint secrets and delivery payloads written before
+   * ciphertext was bound to `fieldCrypto.tenantId`. Run it once every
+   * instance is upgraded; endpoint writes through this runtime wait until it
+   * finishes. See `migrateWebhookFieldCryptoToTenant`.
+   */
+  migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult>;
+  /**
+   * Stops the batch timer, delivers the queued events, waits for endpoint
+   * writes already queued, and closes the persistence. Endpoint changes
+   * requested after it starts are rejected.
+   */
   shutdown(): Promise<void>;
 }

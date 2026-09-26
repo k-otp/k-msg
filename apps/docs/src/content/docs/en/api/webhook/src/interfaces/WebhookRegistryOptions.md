@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRegistryOptions"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L19)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L21)
 
 ## Properties
 
@@ -13,4 +13,4 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:19](https://githu
 
 > `optional` **fieldCrypto?**: [`WebhookRegistryCryptoOptions`](/en/api/webhook/src/interfaces/webhookregistrycryptooptions/)
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L20)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L22)

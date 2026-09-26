@@ -5,15 +5,28 @@ prev: false
 title: "WebhookRuntimeFieldCryptoOptions"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L43)
+Defined in: [packages/webhook/src/runtime/types.ts:57](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L57)
 
 ## Properties
+
+### acceptLegacyAad?
+
+> `optional` **acceptLegacyAad?**: `boolean`
+
+Defined in: [packages/webhook/src/runtime/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L67)
+
+Also reads secrets and payloads written before ciphertext was bound to
+`tenantId`, which are otherwise rejected. Set it only while migrating
+them with `migrateFieldCryptoToTenant()`, then remove it: a tenant-less
+value copied from another tenant's row with the same id would decrypt.
+
+***
 
 ### delivery?
 
 > `optional` **delivery?**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L46)
+Defined in: [packages/webhook/src/runtime/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L60)
 
 ***
 
@@ -21,7 +34,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:46](https://github.com/k-otp/
 
 > `optional` **endpoint?**: [`FieldCryptoConfig`](/en/api/core/src/interfaces/fieldcryptoconfig/)
 
-Defined in: [packages/webhook/src/runtime/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L45)
+Defined in: [packages/webhook/src/runtime/types.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L59)
 
 ***
 
@@ -29,4 +42,4 @@ Defined in: [packages/webhook/src/runtime/types.ts:45](https://github.com/k-otp/
 
 > `optional` **tenantId?**: `string`
 
-Defined in: [packages/webhook/src/runtime/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L44)
+Defined in: [packages/webhook/src/runtime/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L58)

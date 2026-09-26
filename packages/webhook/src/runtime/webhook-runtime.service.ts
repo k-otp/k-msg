@@ -1,5 +1,6 @@
 import { logger } from "@k-msg/core";
 import {
+  migrateWebhookFieldCryptoToTenant,
   validateWebhookFieldCryptoOptions,
   wrapWebhookDeliveryStoreWithFieldCrypto,
   wrapWebhookEndpointStoreWithFieldCrypto,
@@ -31,6 +32,7 @@ import type {
   WebhookRuntimeConfig,
   WebhookRuntimeSecurityOptions,
   WebhookRuntimeTestPayload,
+  WebhookTenantMigrationResult,
 } from "./types";
 
 function toStatusFromActive(active: boolean): WebhookEndpoint["status"] {
@@ -66,12 +68,18 @@ export class WebhookRuntimeService implements WebhookRuntime {
     typeof resolveEndpointValidationOptions
   >;
   private readonly persistence: WebhookPersistence;
+  private readonly fieldCrypto: WebhookRuntimeConfig["fieldCrypto"];
 
   private readonly eventQueue: WebhookEvent[] = [];
   private batchProcessor: ReturnType<typeof setInterval> | null = null;
   private initPromise: Promise<void> | null = null;
   // The batch currently dispatching, shared so flush() can wait for it.
   private activeBatch: Promise<void> | null = null;
+  // Endpoint writes and the tenant migration run one at a time: the
+  // migration rewrites endpoints from records it read earlier, and two
+  // updates to one endpoint would each write over the other.
+  private endpointWrites: Promise<unknown> = Promise.resolve();
+  private shuttingDown = false;
 
   constructor(config: WebhookRuntimeConfig) {
     this.config = config.delivery;
@@ -80,6 +88,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
     const persistence = this.resolvePersistence(config);
     this.persistence = persistence;
+    this.fieldCrypto = config.fieldCrypto;
     validateWebhookFieldCryptoOptions(config.fieldCrypto);
     this.endpointStore = wrapWebhookEndpointStoreWithFieldCrypto(
       persistence.endpointStore,
@@ -96,10 +105,49 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
   }
 
+  // Checks the URL before queueing, so an invalid one fails at once instead
+  // of waiting behind other endpoint writes.
   async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
-    await this.ensureInitialized();
     validateEndpointUrl(input.url, this.securityOptions);
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      return this.insertEndpoint(input);
+    });
+  }
 
+  // Queued as one write, so a shutdown cannot leave the batch half added.
+  // Every URL is checked first, so an invalid one adds none of them; the
+  // error names its position, not the URL, which may carry a token.
+  async addEndpoints(
+    inputs: readonly WebhookEndpointInput[],
+  ): Promise<WebhookEndpoint[]> {
+    for (const [index, input] of inputs.entries()) {
+      try {
+        validateEndpointUrl(input.url, this.securityOptions);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(`Webhook endpoint ${index} in the batch: ${reason}`, {
+          cause: error,
+        });
+      }
+    }
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      const created: WebhookEndpoint[] = [];
+      for (const input of inputs) {
+        created.push(await this.insertEndpoint(input));
+      }
+      return created;
+    });
+  }
+
+  // Stores a new endpoint. Callers hold the endpoint write queue. The URL is
+  // checked again here, the check that guards the store: callers check it
+  // before queueing only to fail fast.
+  private async insertEndpoint(
+    input: WebhookEndpointInput,
+  ): Promise<WebhookEndpoint> {
+    validateEndpointUrl(input.url, this.securityOptions);
     const now = new Date();
     const active =
       input.active ?? (input.status ? input.status === "active" : true);
@@ -118,23 +166,20 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return endpoint;
   }
 
-  async addEndpoints(
-    inputs: readonly WebhookEndpointInput[],
-  ): Promise<WebhookEndpoint[]> {
-    const created: WebhookEndpoint[] = [];
-    for (const input of inputs) {
-      created.push(await this.addEndpoint(input));
-    }
-
-    return created;
-  }
-
-  async updateEndpoint(
+  updateEndpoint(
     endpointId: string,
     updates: Partial<WebhookEndpointInput>,
   ): Promise<WebhookEndpoint> {
-    await this.ensureInitialized();
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      return this.applyEndpointUpdate(endpointId, updates);
+    });
+  }
 
+  private async applyEndpointUpdate(
+    endpointId: string,
+    updates: Partial<WebhookEndpointInput>,
+  ): Promise<WebhookEndpoint> {
     const current = await this.endpointStore.get(endpointId);
     if (!current) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
@@ -165,9 +210,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return merged;
   }
 
-  async removeEndpoint(endpointId: string): Promise<void> {
-    await this.ensureInitialized();
-    await this.endpointStore.remove(endpointId);
+  removeEndpoint(endpointId: string): Promise<void> {
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      await this.endpointStore.remove(endpointId);
+    });
   }
 
   async getEndpoint(endpointId: string): Promise<WebhookEndpoint | null> {
@@ -281,13 +328,36 @@ export class WebhookRuntimeService implements WebhookRuntime {
     });
   }
 
+  /**
+   * Re-encrypts stored endpoint secrets and delivery payloads written before
+   * ciphertext was bound to `fieldCrypto.tenantId`, returning how many of
+   * each it rewrote. Run it once every instance is upgraded, then remove
+   * `fieldCrypto.acceptLegacyAad` if it was set to keep them readable in
+   * the meantime. Endpoint writes through this runtime wait until it
+   * finishes. See `migrateWebhookFieldCryptoToTenant`.
+   */
+  migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult> {
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      return migrateWebhookFieldCryptoToTenant(
+        this.persistence,
+        this.fieldCrypto ?? {},
+      );
+    });
+  }
+
   async shutdown(): Promise<void> {
+    // Endpoint writes queued before this point, such as ones behind a
+    // running migration, still reach the store before it closes; later
+    // ones are refused instead of running against a closed store.
+    this.shuttingDown = true;
     if (this.batchProcessor) {
       clearInterval(this.batchProcessor);
       this.batchProcessor = null;
     }
 
     await this.flush();
+    await this.endpointWrites;
     await this.dispatcher.shutdown();
 
     if (typeof this.persistence.close === "function") {
@@ -319,6 +389,23 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     return createInMemoryWebhookPersistence();
+  }
+
+  // Runs `write` once every endpoint write queued before it has settled.
+  // Callers queue as soon as they are called, before any await, so
+  // shutdown() waits for every change requested before it started.
+  private writeEndpoints<T>(write: () => Promise<T>): Promise<T> {
+    if (this.shuttingDown) {
+      return Promise.reject(
+        new Error(
+          "Webhook endpoints cannot be changed after shutdown() has started",
+        ),
+      );
+    }
+    const run = () => write();
+    const result = this.endpointWrites.then(run, run);
+    this.endpointWrites = result.catch(() => undefined);
+    return result;
   }
 
   private async ensureInitialized(): Promise<void> {

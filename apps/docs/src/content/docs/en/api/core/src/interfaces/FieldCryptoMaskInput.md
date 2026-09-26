@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMaskInput"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L65)
+Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L81)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:65](https://github.com/k-otp/k-ms
 
 > **path**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L67)
+Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L83)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/core/src/crypto/types.ts:67](https://github.com/k-otp/k-ms
 
 > **value**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L66)
+Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L82)

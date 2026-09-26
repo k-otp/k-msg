@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
   assertFieldCryptoConfig,
+  resolveFieldCryptoFailMode,
+  resolveFieldCryptoOpenFallback,
   resolveFieldMode,
   validateFieldCryptoConfig,
 } from "./policy";
@@ -58,6 +60,43 @@ describe("field crypto policy", () => {
 
     expect(() => assertFieldCryptoConfig(config)).toThrow(
       "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
+    );
+  });
+
+  test("validateFieldCryptoConfig rejects unknown failMode and openFallback", () => {
+    const result = validateFieldCryptoConfig(
+      createConfig({
+        failMode: "close" as never,
+        openFallback: "mask" as never,
+      }),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.map((issue) => issue.rule)).toEqual([
+      "fieldCrypto.fail_mode.supported",
+      "fieldCrypto.open_fallback.supported",
+    ]);
+  });
+
+  test("resolveFieldCryptoFailMode fails open only for an explicit open", () => {
+    expect(resolveFieldCryptoFailMode({})).toBe("closed");
+    expect(resolveFieldCryptoFailMode({ failMode: "closed" })).toBe("closed");
+    expect(resolveFieldCryptoFailMode({ failMode: "close" as never })).toBe(
+      "closed",
+    );
+    expect(resolveFieldCryptoFailMode({ failMode: "open" })).toBe("open");
+  });
+
+  test("resolveFieldCryptoOpenFallback masks unless a known fallback is set", () => {
+    expect(resolveFieldCryptoOpenFallback({})).toBe("masked");
+    expect(
+      resolveFieldCryptoOpenFallback({ openFallback: "maskedd" as never }),
+    ).toBe("masked");
+    expect(resolveFieldCryptoOpenFallback({ openFallback: "null" })).toBe(
+      "null",
+    );
+    expect(resolveFieldCryptoOpenFallback({ openFallback: "plaintext" })).toBe(
+      "plaintext",
     );
   });
 

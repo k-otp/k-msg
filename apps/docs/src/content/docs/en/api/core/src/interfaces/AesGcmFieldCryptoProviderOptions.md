@@ -5,7 +5,7 @@ prev: false
 title: "AesGcmFieldCryptoProviderOptions"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:254](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L254)
+Defined in: [packages/core/src/crypto/types.ts:288](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L288)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:254](https://github.com/k-otp/k-m
 
 > **activeKid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L256)
+Defined in: [packages/core/src/crypto/types.ts:290](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L290)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:256](https://github.com/k-otp/k-m
 
 > `optional` **algorithm?**: `"A256GCM"`
 
-Defined in: [packages/core/src/crypto/types.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L260)
+Defined in: [packages/core/src/crypto/types.ts:294](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L294)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:260](https://github.com/k-otp/k-m
 
 > `optional` **hashKeyEncoding?**: `"base64url"` \| `"utf8"`
 
-Defined in: [packages/core/src/crypto/types.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L259)
+Defined in: [packages/core/src/crypto/types.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L293)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/crypto/types.ts:259](https://github.com/k-otp/k-m
 
 > `optional` **hashKeys?**: `Record`\<`string`, `string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [packages/core/src/crypto/types.ts:257](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L257)
+Defined in: [packages/core/src/crypto/types.ts:291](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L291)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/crypto/types.ts:257](https://github.com/k-otp/k-m
 
 > `optional` **keyEncoding?**: `"base64url"` \| `"utf8"`
 
-Defined in: [packages/core/src/crypto/types.ts:258](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L258)
+Defined in: [packages/core/src/crypto/types.ts:292](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L292)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/core/src/crypto/types.ts:258](https://github.com/k-otp/k-m
 
 > **keys**: `Record`\<`string`, `string` \| `ArrayBuffer` \| `Uint8Array`\>
 
-Defined in: [packages/core/src/crypto/types.ts:255](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L255)
+Defined in: [packages/core/src/crypto/types.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L289)

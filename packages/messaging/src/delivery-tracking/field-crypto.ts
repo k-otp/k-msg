@@ -4,12 +4,13 @@ import {
   type FieldCryptoCircuitState,
   type FieldCryptoConfig,
   FieldCryptoError,
-  type FieldCryptoFailMode,
   type FieldCryptoKeyContext,
   type FieldCryptoMetricEvent,
   type FieldCryptoOpenFallback,
   type FieldMode,
   normalizePhoneForHash,
+  resolveFieldCryptoFailMode,
+  resolveFieldCryptoOpenFallback,
   resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
@@ -174,16 +175,6 @@ async function emitCircuitStateMetric(
   );
 }
 
-function resolveFailMode(config: FieldCryptoConfig): FieldCryptoFailMode {
-  return config.failMode ?? "closed";
-}
-
-function resolveOpenFallback(
-  config: FieldCryptoConfig,
-): FieldCryptoOpenFallback {
-  return config.openFallback ?? "masked";
-}
-
 function shouldEncrypt(mode: FieldMode): boolean {
   return mode === "encrypt" || mode === "encrypt+hash";
 }
@@ -300,7 +291,7 @@ function failOrOpen(
   path: string,
   error: unknown,
 ): never {
-  const failMode = resolveFailMode(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   if (failMode === "open") {
     throw new FieldCryptoError(
       "policy",
@@ -312,7 +303,7 @@ function failOrOpen(
       {
         fieldPath: path,
         failMode,
-        openFallback: resolveOpenFallback(config),
+        openFallback: resolveFieldCryptoOpenFallback(config),
         causeChain: [error],
       },
     );
@@ -502,6 +493,15 @@ function toFallbackValue(
   return "";
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#field-policy-modes
+ *   Applies each field's mode when a tracking record is written, and also
+ *   hashes to and from in encrypt mode for recipient and sender lookups.
+ * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #d6936dd
+ *   Read protectScalar: plain and mask write no ciphertext, encrypt and
+ *   encrypt+hash add the mask, and the hash is written for encrypt+hash and,
+ *   for to and from, for encrypt too; metadata hashes need encrypt+hash.
+ */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
   options: DeliveryTrackingFieldCryptoOptions | undefined,
@@ -520,8 +520,8 @@ export async function applyTrackingCryptoOnWrite(
   }
 
   const started = nowMs();
-  const fallback = resolveOpenFallback(config);
-  const failMode = resolveFailMode(config);
+  const fallback = resolveFieldCryptoOpenFallback(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   const keyContext = {
     ...context,
     messageId: record.messageId,
@@ -615,14 +615,21 @@ export async function applyTrackingCryptoOnWrite(
     let metadataEnc: string | undefined;
     if (record.metadata && shouldEncrypt(metadataMode)) {
       const metadataString = JSON.stringify(record.metadata);
+      // Metadata takes the resolved key like the recipient and sender, or a
+      // tenant or rotated key would cover only some of the record.
+      const kid = await resolveEncryptKid(config, {
+        ...keyContext,
+        fieldPath: "metadata",
+      });
       const encrypted = await config.provider.encrypt({
         value: metadataString,
         aad: buildAad(config, keyContext, "metadata"),
         path: "metadata",
+        ...(kid ? { kid } : {}),
       });
       metadataEnc = toCiphertextEnvelopeString(encrypted.ciphertext);
-      if (!activeKid && encrypted.kid) {
-        activeKid = encrypted.kid;
+      if (!activeKid) {
+        activeKid = encrypted.kid ?? kid;
       }
     }
 
@@ -784,8 +791,8 @@ export async function restoreTrackingCryptoOnRead(
     };
   }
 
-  const fallback = resolveOpenFallback(config);
-  const failMode = resolveFailMode(config);
+  const fallback = resolveFieldCryptoOpenFallback(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   const started = nowMs();
 
   const next: TrackingRecord = {
@@ -1006,7 +1013,7 @@ async function hashFilterValue(
       path,
     });
   } catch (error) {
-    const failMode = resolveFailMode(config);
+    const failMode = resolveFieldCryptoFailMode(config);
     if (failMode === "closed") {
       failOrOpen(config, "hash", path, error);
     }

@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoConfig"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L79)
+Defined in: [packages/core/src/crypto/types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L107)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:79](https://github.com/k-otp/k-ms
 
 > `optional` **aadFields?**: readonly `string`[]
 
-Defined in: [packages/core/src/crypto/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L85)
+Defined in: [packages/core/src/crypto/types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L113)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:85](https://github.com/k-otp/k-ms
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [packages/core/src/crypto/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L80)
+Defined in: [packages/core/src/crypto/types.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L108)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:80](https://github.com/k-otp/k-ms
 
 > `optional` **failMode?**: [`FieldCryptoFailMode`](/en/api/core/src/type-aliases/fieldcryptofailmode/)
 
-Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L82)
+Defined in: [packages/core/src/crypto/types.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L110)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/crypto/types.ts:82](https://github.com/k-otp/k-ms
 
 > **fields**: `Record`\<`string`, [`FieldMode`](/en/api/core/src/type-aliases/fieldmode/)\>
 
-Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L81)
+Defined in: [packages/core/src/crypto/types.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L109)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/crypto/types.ts:81](https://github.com/k-otp/k-ms
 
 > `optional` **keyResolver?**: [`KeyResolver`](/en/api/core/src/interfaces/keyresolver/)
 
-Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L86)
+Defined in: [packages/core/src/crypto/types.ts:114](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L114)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/crypto/types.ts:86](https://github.com/k-otp/k-ms
 
 > `optional` **openFallback?**: [`FieldCryptoOpenFallback`](/en/api/core/src/type-aliases/fieldcryptoopenfallback/)
 
-Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L83)
+Defined in: [packages/core/src/crypto/types.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L111)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [packages/core/src/crypto/types.ts:83](https://github.com/k-otp/k-ms
 
 > **provider**: [`FieldCryptoProvider`](/en/api/core/src/interfaces/fieldcryptoprovider/)
 
-Defined in: [packages/core/src/crypto/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L87)
+Defined in: [packages/core/src/crypto/types.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L115)
 
 ***
 
@@ -69,4 +69,4 @@ Defined in: [packages/core/src/crypto/types.ts:87](https://github.com/k-otp/k-ms
 
 > `optional` **unsafeAllowPlaintextStorage?**: `boolean`
 
-Defined in: [packages/core/src/crypto/types.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L84)
+Defined in: [packages/core/src/crypto/types.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L112)
