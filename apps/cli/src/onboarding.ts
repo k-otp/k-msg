@@ -157,7 +157,7 @@ function withGuidance(input: {
       : check.id === "channel_registered_in_console"
         ? getManualChannelGuidance(check, providerName, providerId)
         : check.id === "plus_id_policy"
-          ? getPlusIdGuidance(check, providerName, providerKind)
+          ? getPlusIdGuidance(check, providerName)
           : check.id === "template_exists_probe"
             ? getTemplateProbeGuidance(check, providerName, scope)
             : check.id === "sms_lms_sender_config"
@@ -207,7 +207,6 @@ function getManualChannelGuidance(
 function getPlusIdGuidance(
   check: OnboardingCheckResult,
   providerName: string,
-  providerKind: string,
 ): Pick<OnboardingCheckResult, "nextAction" | "reason"> {
   const reasonCode = check.details?.reasonCode;
 
@@ -271,9 +270,7 @@ function getPlusIdGuidance(
       return {
         reason: `${providerName} requires an explicit plusId on this path because inference is unavailable or unresolved.`,
         nextAction:
-          providerKind === "solapi"
-            ? "Set --plus-id or configure aliases/defaults.kakao.plusId together with the pfId/profileId binding."
-            : "Set --plus-id or configure a Kakao channel alias/default plusId before retrying.",
+          "Set --plus-id or configure a Kakao channel alias/default plusId before retrying.",
       };
   }
 }
