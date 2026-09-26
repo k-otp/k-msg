@@ -57,6 +57,18 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:15](http
 
 ***
 
+### timeZone
+
+> **timeZone**: `string`
+
+Defined in: [packages/template/src/personalization/variable.replacer.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L21)
+
+IANA time zone for the date, datetime, time, and `date:` formatters.
+Defaults to Korea Standard Time, the time the Korean recipients of
+these messages read, whatever timezone the host runs in.
+
+***
+
 ### undefinedReplacement
 
 > **undefinedReplacement**: `string`

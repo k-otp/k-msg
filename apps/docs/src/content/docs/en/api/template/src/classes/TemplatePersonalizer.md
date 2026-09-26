@@ -5,7 +5,7 @@ prev: false
 title: "TemplatePersonalizer"
 ---
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L69)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L75)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:69](http
 
 > **new TemplatePersonalizer**(`options?`): `TemplatePersonalizer`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L81)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L88)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/template/src/personalization/variable.replacer.ts:81](http
 
 > **extractVariables**(`content`): `string`[]
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L154)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L161)
 
 Extract variables from content without replacing
 
@@ -51,7 +51,7 @@ Extract variables from content without replacing
 
 > **preview**(`content`, `variables`): `object`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:246](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L246)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L253)
 
 Preview replacement result without actually replacing
 
@@ -87,7 +87,7 @@ Preview replacement result without actually replacing
 
 > **replace**(`content`, `variables`): [`ReplacementResult`](/en/api/template/src/interfaces/replacementresult/)
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L88)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L95)
 
 Replace variables in content
 
@@ -111,7 +111,7 @@ Replace variables in content
 
 > **validate**(`content`, `variables`): `object`
 
-Defined in: [packages/template/src/personalization/variable.replacer.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L207)
+Defined in: [packages/template/src/personalization/variable.replacer.ts:214](https://github.com/k-otp/k-msg/blob/main/packages/template/src/personalization/variable.replacer.ts#L214)
 
 Validate that all required variables are provided
 

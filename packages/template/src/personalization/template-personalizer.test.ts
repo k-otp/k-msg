@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import {
   defaultTemplatePersonalizer,
   TemplatePersonalizer,
@@ -102,5 +102,45 @@ describe("TemplateVariableUtils", () => {
     expect(personalized).toHaveLength(2);
     expect(personalized[0]?.content).toBe("안녕하세요, 홍길동님! 코드: 111111");
     expect(personalized[1]?.content).toBe("안녕하세요, 김철수님! 코드: 222222");
+  });
+});
+
+describe("TemplatePersonalizer date formatting", () => {
+  const originalTimeZone = process.env.TZ;
+  afterEach(() => {
+    if (originalTimeZone === undefined) delete process.env.TZ;
+    else process.env.TZ = originalTimeZone;
+  });
+
+  // 08:30 on October 1 in Seoul, still September 30 in UTC.
+  const sentAt = new Date("2026-09-30T23:30:00Z");
+
+  test.each(["UTC", "America/Los_Angeles"])(
+    "formats in Korea time with the host in %s",
+    (timeZone) => {
+      process.env.TZ = timeZone;
+      const personalizer = new TemplatePersonalizer();
+
+      expect(
+        personalizer.replace("#{sentAt|date:YYYY-MM-DD HH:mm:ss}", { sentAt })
+          .content,
+      ).toBe("2026-10-01 08:30:00");
+      expect(personalizer.replace("#{sentAt|date}", { sentAt }).content).toBe(
+        "2026. 10. 1.",
+      );
+      expect(
+        personalizer.replace("#{sentAt|time}", { sentAt }).content,
+      ).toContain("8:30:00");
+    },
+  );
+
+  test("uses the configured time zone", () => {
+    process.env.TZ = "Asia/Seoul";
+    const personalizer = new TemplatePersonalizer({ timeZone: "UTC" });
+
+    expect(
+      personalizer.replace("#{sentAt|date:YYYY-MM-DD HH:mm}", { sentAt })
+        .content,
+    ).toBe("2026-09-30 23:30");
   });
 });

@@ -13,6 +13,12 @@ export interface TemplatePersonalizerOptions {
   enableConditionals: boolean;
   enableLoops: boolean;
   maxRecursionDepth: number;
+  /**
+   * IANA time zone for the date, datetime, time, and `date:` formatters.
+   * Defaults to Korea Standard Time, the time the Korean recipients of
+   * these messages read, whatever timezone the host runs in.
+   */
+  timeZone: string;
 }
 
 export interface TemplateVariableInfo {
@@ -76,6 +82,7 @@ export class TemplatePersonalizer {
     enableConditionals: true,
     enableLoops: true,
     maxRecursionDepth: 10,
+    timeZone: "Asia/Seoul",
   };
 
   constructor(private options: Partial<TemplatePersonalizerOptions> = {}) {
@@ -521,11 +528,17 @@ export class TemplatePersonalizer {
             currency: "KRW",
           }).format(Number(value));
         case "date":
-          return new Date(value).toLocaleDateString("ko-KR");
+          return new Date(value).toLocaleDateString("ko-KR", {
+            timeZone: this.options.timeZone,
+          });
         case "datetime":
-          return new Date(value).toLocaleString("ko-KR");
+          return new Date(value).toLocaleString("ko-KR", {
+            timeZone: this.options.timeZone,
+          });
         case "time":
-          return new Date(value).toLocaleTimeString("ko-KR");
+          return new Date(value).toLocaleTimeString("ko-KR", {
+            timeZone: this.options.timeZone,
+          });
         default:
           // Custom format patterns
           if (formatter.startsWith("date:")) {
@@ -545,12 +558,24 @@ export class TemplatePersonalizer {
   }
 
   private formatDate(date: Date, format: string): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: this.options.timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+    const part = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((entry) => entry.type === type)?.value ?? "";
+    const year = part("year");
+    const month = part("month");
+    const day = part("day");
+    const hours = part("hour");
+    const minutes = part("minute");
+    const seconds = part("second");
 
     return format
       .replace("YYYY", String(year))
