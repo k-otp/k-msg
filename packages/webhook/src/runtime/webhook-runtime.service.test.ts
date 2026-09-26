@@ -5,6 +5,7 @@ import {
   type WebhookEvent,
   WebhookEventType,
 } from "../types/webhook.types";
+import { createInMemoryWebhookPersistence } from "./persistence";
 import { WebhookRuntimeService } from "./webhook-runtime.service";
 
 class RecordingHttpClient implements HttpClient {
@@ -126,5 +127,88 @@ describe("WebhookRuntimeService", () => {
     });
     expect(deliveries.length).toBe(1);
     expect(deliveries[0]?.endpointId).toBe(endpoint.id);
+  });
+});
+
+class SlowHttpClient implements HttpClient {
+  readonly calls: string[] = [];
+
+  async fetch(url: string): Promise<Response> {
+    this.calls.push(url);
+    await Bun.sleep(150);
+    return new Response("ok", { status: 200 });
+  }
+}
+
+describe("WebhookRuntimeService batching", () => {
+  test("flush waits for a batch the interval already started", async () => {
+    const client = new SlowHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 2, batchTimeoutMs: 20 },
+      httpClient: client,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/slow",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      await runtime.emit(createEvent());
+      // Let the interval start dispatching the first event.
+      await Bun.sleep(60);
+      await runtime.emit(createEvent());
+
+      await runtime.flush();
+
+      expect(client.calls.length).toBe(2);
+      expect((await runtime.listDeliveries()).length).toBe(2);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("a failed batch re-queues only the events it did not dispatch", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const listEndpoints = persistence.endpointStore.list.bind(
+      persistence.endpointStore,
+    );
+    let listCalls = 0;
+    persistence.endpointStore.list = async () => {
+      listCalls += 1;
+      if (listCalls === 2) {
+        throw new Error("endpoint store unavailable");
+      }
+      return listEndpoints();
+    };
+
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      persistence,
+      autoStart: false,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/requeue",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      await runtime.emit(createEvent());
+      await runtime.emit(createEvent());
+      listCalls = 0;
+
+      await expect(runtime.flush()).rejects.toThrow(
+        "endpoint store unavailable",
+      );
+      expect(client.calls.length).toBe(1);
+
+      await runtime.flush();
+      expect(client.calls.length).toBe(2);
+    } finally {
+      await runtime.shutdown();
+    }
   });
 });
