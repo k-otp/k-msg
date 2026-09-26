@@ -22,18 +22,9 @@ import type {
   KMsgHooks,
   KMsgObserverHook,
 } from "./hooks";
+import { logFallbackFailure } from "./shared/log-fallback";
 import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "./sms-bytes";
 import type { BatchSendResult } from "./types/message.types";
-
-// Hook failures must never reach the send path, even through a console
-// replacement that throws.
-function logHookFailure(message: string, error: unknown): void {
-  try {
-    console.error(message, error);
-  } catch {
-    // Nothing is left to report to.
-  }
-}
 
 function interpolateTemplate(
   text: string,
@@ -873,14 +864,14 @@ export class KMsg {
         await this.hooks.onHookError(error, info);
         return;
       } catch (reportError) {
-        logHookFailure(
+        logFallbackFailure(
           `[k-msg] onHookError threw while reporting a ${info.hook} hook error`,
           reportError,
         );
       }
     }
     // Last resort, so a broken hook does not fail silently.
-    logHookFailure(
+    logFallbackFailure(
       `[k-msg] ${info.hook} hook threw; the send result is unaffected`,
       error,
     );

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import {
   type DeliveryStatusQuery,
   fail,
@@ -8,10 +8,11 @@ import {
   type Provider,
   type SendInput,
 } from "@k-msg/core";
-import { DeliveryTrackingService } from "./service";
+import { type DeliveryStatusChange, DeliveryTrackingService } from "./service";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
+import type { TrackingRecord } from "./types";
 
 function createMockProvider(params: {
   id: string;
@@ -808,5 +809,827 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
     const withRaw = await rawStore.get("bun-with-raw");
     expect(withRaw?.raw).toEqual({ kept: true });
     await rawStore.close();
+  });
+});
+
+// Runs in a separate Bun process with process.getBuiltinModule removed
+// before the service loads, as in Workers without nodejs_compat.
+const WITHOUT_ASYNC_CONTEXT = `
+delete process.getBuiltinModule;
+const { DeliveryTrackingService } = await import(process.env.SERVICE_URL);
+const { InMemoryDeliveryTrackingStore } = await import(process.env.STORE_URL);
+const { ok } = await import("@k-msg/core");
+
+const provider = (statusFor) => ({
+  id: "mock",
+  name: "mock",
+  supportedTypes: ["SMS"],
+  healthCheck: async () => ({ healthy: true, issues: [] }),
+  send: async () => ok({ messageId: "msg", providerId: "mock", status: "SENT", type: "SMS", to: "01012345678" }),
+  getDeliveryStatus: async (query) =>
+    ok({ providerId: "mock", providerMessageId: query.providerMessageId, status: statusFor(query.providerMessageId), statusCode: "OK" }),
+});
+const recordSent = (service, messageId) =>
+  service.recordSend(
+    { messageId, options: { type: "SMS", to: "01012345678", text: "hi" }, timestamp: Date.now() },
+    { messageId, providerId: "mock", providerMessageId: "p-" + messageId, status: "SENT", type: "SMS", to: "01012345678" },
+  );
+const polling = { initialDelayMs: 0, intervalMs: 10, batchSize: 10, concurrency: 2, backoffMs: [0] };
+const within = (promise, ms) =>
+  Promise.race([promise.then(() => true), new Promise((resolve) => setTimeout(() => resolve(false), ms))]);
+const results = {};
+
+{
+  let service;
+  service = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      await service.runOnce();
+    },
+  });
+  await recordSent(service, "m1");
+  results.callbackPollsAgain = await within(service.runOnce(), 1000);
+}
+
+{
+  const statuses = { "p-m1": "DELIVERED", "p-m2": "SENT" };
+  let release = () => {};
+  const gate = new Promise((resolve) => { release = resolve; });
+  let slowStarted = () => {};
+  const started = new Promise((resolve) => { slowStarted = resolve; });
+  const delivered = [];
+  const service = new DeliveryTrackingService({
+    providers: [provider((id) => statuses[id])],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async ({ record }) => {
+      if (record.messageId === "m1") {
+        slowStarted();
+        await gate;
+      }
+      delivered.push(record.messageId);
+    },
+  });
+  await recordSent(service, "m1");
+  await recordSent(service, "m2");
+  const first = service.runOnce();
+  await started;
+  statuses["p-m2"] = "DELIVERED";
+  const finished = await within(service.runOnce(), 1000);
+  results.otherCallerGetsItsChange = finished && delivered.includes("m2");
+  release();
+  await first;
+}
+
+{
+  let first;
+  let second;
+  let arrived = 0;
+  let bothArrived = () => {};
+  const together = new Promise((resolve) => { bothArrived = resolve; });
+  const arrive = async () => {
+    arrived += 1;
+    if (arrived === 2) bothArrived();
+    await together;
+  };
+  first = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => { await arrive(); await second.runOnce(); },
+  });
+  second = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => { await arrive(); await first.runOnce(); },
+  });
+  await recordSent(first, "a1");
+  await recordSent(second, "b1");
+  results.servicesPollEachOther = await within(Promise.all([first.runOnce(), second.runOnce()]), 1000);
+}
+
+console.log(JSON.stringify(results));
+`;
+
+test("without AsyncLocalStorage, every caller waits for its changes and none deadlocks", async () => {
+  const child = Bun.spawn([process.execPath, "-e", WITHOUT_ASYNC_CONTEXT], {
+    cwd: new URL("../..", import.meta.url).pathname,
+    env: {
+      ...process.env,
+      SERVICE_URL: new URL("./service.ts", import.meta.url).href,
+      STORE_URL: new URL("./stores/memory.store.ts", import.meta.url).href,
+    },
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [output, errors, exitCode] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+
+  expect({ exitCode, errors }).toEqual({ exitCode: 0, errors: "" });
+  expect(JSON.parse(output.trim().split("\n").at(-1) ?? "{}")).toEqual({
+    callbackPollsAgain: true,
+    otherCallerGetsItsChange: true,
+    servicesPollEachOther: true,
+  });
+}, 15_000);
+
+describe("DeliveryTrackingService onStatusChange", () => {
+  async function recordSent(
+    service: DeliveryTrackingService,
+    messageId: string,
+  ): Promise<void> {
+    await service.recordSend(
+      {
+        messageId,
+        options: { type: "SMS", to: "01012345678", text: "hi" },
+        timestamp: Date.now(),
+      },
+      {
+        messageId,
+        providerId: "mock",
+        providerMessageId: `p-${messageId}`,
+        status: "SENT",
+        type: "SMS",
+        to: "01012345678",
+      },
+    );
+  }
+
+  const polling = {
+    initialDelayMs: 0,
+    intervalMs: 10,
+    batchSize: 10,
+    concurrency: 2,
+  };
+
+  test("reports each stored status change once", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.previousStatus).toBe("SENT");
+    expect(changes[0]?.record).toMatchObject({
+      messageId: "m1",
+      status: "DELIVERED",
+    });
+  });
+
+  test("does not report a poll that keeps the status", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "SENT" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(0);
+  });
+
+  test("keeps polling when the callback throws and reports the error", async () => {
+    const reported: Array<{ error: unknown; messageId: string }> = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: ({ record }) => {
+        if (record.messageId === "m1") throw new Error("webhook down");
+      },
+      onStatusChangeError: (error, change) => {
+        reported.push({ error, messageId: change.record.messageId });
+      },
+    });
+    await recordSent(service, "m1");
+    await recordSent(service, "m2");
+
+    await service.runOnce();
+
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+    expect((await service.getRecord("m2"))?.status).toBe("DELIVERED");
+    expect(reported).toHaveLength(1);
+    expect(reported[0]?.messageId).toBe("m1");
+    expect(String(reported[0]?.error)).toContain("webhook down");
+  });
+
+  test("falls back to console.error, and survives a throwing console", async () => {
+    const logged: unknown[][] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: () => {
+        throw new Error("webhook down");
+      },
+      onStatusChangeError: () => {
+        throw new Error("reporter down");
+      },
+    });
+    await recordSent(service, "m1");
+    await recordSent(service, "m2");
+
+    const consoleError = spyOn(console, "error").mockImplementation(
+      (...args: unknown[]) => {
+        logged.push(args);
+        throw new Error("log shim down");
+      },
+    );
+    try {
+      await service.runOnce();
+    } finally {
+      consoleError.mockRestore();
+    }
+
+    // Both records are stored even though every reporter threw.
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+    expect((await service.getRecord("m2"))?.status).toBe("DELIVERED");
+    const messages = logged.map((args) => String(args[0]));
+    expect(messages.some((m) => m.includes("onStatusChangeError threw"))).toBe(
+      true,
+    );
+    expect(messages.some((m) => m.includes("onStatusChange threw"))).toBe(true);
+  });
+
+  test("lets the callback poll again without deadlocking", async () => {
+    let service: DeliveryTrackingService | undefined;
+    let nested = 0;
+    service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        nested += 1;
+        await service?.runOnce();
+      },
+    });
+    await recordSent(service, "m1");
+
+    const finished = await Promise.race([
+      service.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(nested).toBe(1);
+  });
+
+  test("lets the callback poll again after other awaits without deadlocking", async () => {
+    let service: DeliveryTrackingService | undefined;
+    let nested = 0;
+    service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        nested += 1;
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        await Promise.resolve();
+        await service?.runOnce();
+      },
+    });
+    await recordSent(service, "m1");
+
+    const finished = await Promise.race([
+      service.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(nested).toBe(1);
+  });
+
+  test("lets callbacks of two services poll each other without deadlocking", async () => {
+    let first: DeliveryTrackingService | undefined;
+    let second: DeliveryTrackingService | undefined;
+    const calls: string[] = [];
+    first = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        calls.push("first");
+        await second?.runOnce();
+      },
+    });
+    second = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        calls.push("second");
+        await first?.runOnce();
+      },
+    });
+    await recordSent(first, "a1");
+    await recordSent(second, "b1");
+
+    const finished = await Promise.race([
+      first.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(calls).toEqual(["first", "second"]);
+  });
+
+  test("lets callbacks of two services that run side by side poll each other", async () => {
+    let first: DeliveryTrackingService | undefined;
+    let second: DeliveryTrackingService | undefined;
+    // Both callbacks start before either polls the other, so both services
+    // are delivering at once rather than one inside the other.
+    let started = 0;
+    let bothStarted: () => void = () => {};
+    const together = new Promise<void>((resolve) => {
+      bothStarted = resolve;
+    });
+    const arrive = async () => {
+      started += 1;
+      if (started === 2) bothStarted();
+      await together;
+    };
+    first = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        await arrive();
+        await second?.runOnce();
+      },
+    });
+    second = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        await arrive();
+        await first?.runOnce();
+      },
+    });
+    await recordSent(first, "a1");
+    await recordSent(second, "b1");
+
+    const finished = await Promise.race([
+      Promise.all([first.runOnce(), second.runOnce()]).then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+  });
+
+  test("reports the record as stored, without fields the store dropped", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    // Like a SQL store with storeRaw off: raw provider payloads are not kept.
+    const withoutRaw = Object.assign(Object.create(store), {
+      patch: (messageId: string, patch: Record<string, unknown>) => {
+        const { raw: _raw, ...kept } = patch;
+        return store.patch(messageId, kept);
+      },
+    }) as InMemoryDeliveryTrackingStore;
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [
+        createMockProvider({
+          id: "mock",
+          status: "DELIVERED",
+          raw: { secret: "provider payload" },
+        }),
+      ],
+      store: withoutRaw,
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.record.status).toBe("DELIVERED");
+    expect(changes[0]?.record.raw).toBeUndefined();
+  });
+
+  test("a caller that joins a poll also waits for its notifications", async () => {
+    const provider = createMockProvider({ id: "mock", status: "DELIVERED" });
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const slow: Provider = {
+      ...provider,
+      getDeliveryStatus: async (query) => {
+        await gate;
+        return (await provider.getDeliveryStatus?.(query)) ?? ok(null);
+      },
+    };
+    let notified = false;
+    const service = new DeliveryTrackingService({
+      providers: [slow],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        // Slow enough that a caller not waiting for it would finish first.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        notified = true;
+      },
+    });
+    await recordSent(service, "m1");
+
+    const started = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const joined = service.runOnce().then(() => notified);
+    release();
+
+    expect(await joined).toBe(true);
+    await started;
+  });
+
+  async function failedAlimtalkService(options: {
+    store: InMemoryDeliveryTrackingStore;
+    changes: DeliveryStatusChange[];
+    onFallback: () => void;
+    raw?: unknown;
+  }): Promise<DeliveryTrackingService> {
+    const service = new DeliveryTrackingService({
+      providers: [
+        createMockProvider({
+          id: "iwinv",
+          status: "FAILED",
+          statusCode: "ERR",
+          statusMessage: "카카오 미사용 대상",
+          raw: options.raw ?? { payload: "kept out of callbacks" },
+        }),
+      ],
+      store: options.store,
+      polling,
+      apiFailover: {
+        sender: async () => {
+          options.onFallback();
+          return ok({
+            messageId: "fallback-1",
+            providerId: "sms-provider",
+            status: "SENT",
+            type: "SMS",
+            to: "01012345678",
+          });
+        },
+      },
+      onStatusChange: (change) => {
+        options.changes.push(change);
+      },
+    });
+    await service.recordSend(
+      {
+        messageId: "m-at",
+        options: {
+          type: "ALIMTALK",
+          to: "01012345678",
+          templateId: "TPL_1",
+          variables: { code: "1234" },
+          failover: { enabled: true, fallbackContent: "fallback body" },
+        },
+        timestamp: Date.now(),
+      },
+      {
+        messageId: "m-at",
+        providerId: "iwinv",
+        providerMessageId: "p-at",
+        status: "SENT",
+        type: "ALIMTALK",
+        to: "01012345678",
+        warnings: [{ code: "FAILOVER_PARTIAL_PROVIDER", message: "partial" }],
+      },
+    );
+    return service;
+  }
+
+  test("reports the record with the failover the poll already attempted", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+    });
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    const apiAttempt = getFailoverMetadata(changes[0]?.record).apiAttempt as
+      | Record<string, unknown>
+      | undefined;
+    expect(apiAttempt?.attempted).toBe(true);
+  });
+
+  test("still fails over and reports a change it cannot read back", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    let failReads = false;
+    const flaky = Object.assign(Object.create(store), {
+      get: async (messageId: string) => {
+        if (failReads) throw new Error("store unavailable");
+        return store.get(messageId);
+      },
+    }) as InMemoryDeliveryTrackingStore;
+    const changes: DeliveryStatusChange[] = [];
+    let fallbacks = 0;
+    const service = await failedAlimtalkService({
+      store: flaky,
+      changes,
+      onFallback: () => {
+        fallbacks += 1;
+      },
+    });
+
+    failReads = true;
+    const consoleError = spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await service.runOnce();
+    } finally {
+      consoleError.mockRestore();
+    }
+
+    expect(fallbacks).toBe(1);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.record.status).toBe("FAILED");
+    expect(changes[0]?.record.raw).toBeUndefined();
+  });
+
+  test("delivers a later poll's change after a slow earlier callback, and waits for it", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const delivered: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: async ({ record }) => {
+        if (record.status === "PENDING") await gate;
+        delivered.push(record.status);
+      },
+    });
+    await recordSent(service, "m1");
+
+    const first = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    status = "DELIVERED";
+    // Not called from a callback, so it waits for its own change, which is
+    // delivered after the slow callback.
+    let secondDone = false;
+    const second = service.runOnce().then(() => {
+      secondDone = true;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(secondDone).toBe(false);
+    release();
+    await Promise.all([first, second]);
+
+    expect(delivered).toEqual(["PENDING", "DELIVERED"]);
+  });
+
+  test("gives callbacks a copy they can change without touching the store", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+    });
+
+    await service.runOnce();
+    const failover = getFailoverMetadata(changes[0]?.record);
+    (failover.apiAttempt as Record<string, unknown>).attempted = false;
+
+    const stored = await service.getRecord("m-at");
+    const apiAttempt = getFailoverMetadata(stored).apiAttempt as
+      | Record<string, unknown>
+      | undefined;
+    expect(apiAttempt?.attempted).toBe(true);
+  });
+
+  test("reports each change as its own poll stored it", async () => {
+    let status: "PENDING" | "SENT" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const reported: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: async ({ record, previousStatus }) => {
+        if (reported.length === 0) await gate;
+        reported.push(`${previousStatus}->${record.status}`);
+      },
+    });
+    await recordSent(service, "m1");
+
+    // Each later poll finishes while the first callback waits, and resolves
+    // only after its own change is reported.
+    const pause = () => new Promise((resolve) => setTimeout(resolve, 10));
+    const first = service.runOnce();
+    await pause();
+    status = "SENT";
+    const second = service.runOnce();
+    await pause();
+    status = "DELIVERED";
+    const third = service.runOnce();
+    await pause();
+    release();
+    await Promise.all([first, second, third]);
+
+    expect(reported).toEqual([
+      "SENT->PENDING",
+      "PENDING->SENT",
+      "SENT->DELIVERED",
+    ]);
+  });
+
+  test("reads each snapshot before another poll can change the record", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    const store = new InMemoryDeliveryTrackingStore();
+    const reported: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: ({ record, previousStatus }) => {
+        reported.push(`${previousStatus}->${record.status}`);
+      },
+    });
+    await recordSent(service, "m1");
+
+    // Hold the first poll's snapshot read until a second poll has had its
+    // chance to run.
+    let readStarted: () => void = () => {};
+    const reading = new Promise<void>((resolve) => {
+      readStarted = resolve;
+    });
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const get = store.get.bind(store);
+    let held = false;
+    store.get = async (messageId) => {
+      if (!held) {
+        held = true;
+        readStarted();
+        await gate;
+      }
+      return get(messageId);
+    };
+
+    const first = service.runOnce();
+    await reading;
+    status = "DELIVERED";
+    // Joins the first poll instead of polling while its snapshot is pending.
+    const second = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    release();
+    await Promise.all([first, second]);
+    await service.runOnce();
+
+    expect(reported).toEqual(["SENT->PENDING", "PENDING->DELIVERED"]);
+  });
+
+  test("gives callbacks their own raw data even when it cannot be cloned", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+      raw: { parse: () => "not cloneable", nested: { value: 1 } },
+    });
+
+    await service.runOnce();
+    const raw = changes[0]?.record.raw as { nested: { value: number } };
+    // Copied through JSON, which leaves the function out.
+    expect(raw).toEqual({ nested: { value: 1 } });
+    raw.nested.value = 2;
+
+    const stored = await service.getRecord("m-at");
+    const storedRaw = stored?.raw as { nested: { value: number } };
+    expect(storedRaw.nested.value).toBe(1);
+  });
+
+  test("reports a change and keeps polling when a store returns an uncloneable field", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    // A custom store that hands back a field structuredClone rejects.
+    const store = new InMemoryDeliveryTrackingStore();
+    const odd = (record: TrackingRecord): TrackingRecord => ({
+      ...record,
+      providerStatusMessage: (() => "odd") as unknown as string,
+    });
+    const get = store.get.bind(store);
+    store.get = async (messageId) => {
+      const record = await get(messageId);
+      return record && odd(record);
+    };
+    const listDue = store.listDue.bind(store);
+    store.listDue = async (now, limit) => (await listDue(now, limit)).map(odd);
+    const reported: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: ({ record, previousStatus }) => {
+        reported.push(`${previousStatus}->${record.status}`);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+    status = "DELIVERED";
+    await service.runOnce();
+
+    expect(reported).toEqual(["SENT->PENDING", "PENDING->DELIVERED"]);
+  });
+
+  test("copies metadata deeply even when raw data cannot be cloned", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+      raw: { parse: () => "not cloneable" },
+    });
+
+    await service.runOnce();
+    const failover = getFailoverMetadata(changes[0]?.record);
+    (failover.apiAttempt as Record<string, unknown>).attempted = false;
+
+    const stored = await service.getRecord("m-at");
+    const apiAttempt = getFailoverMetadata(stored).apiAttempt as
+      | Record<string, unknown>
+      | undefined;
+    expect(apiAttempt?.attempted).toBe(true);
   });
 });
