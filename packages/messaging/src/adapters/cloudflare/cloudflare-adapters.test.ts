@@ -5,6 +5,8 @@ import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import {
   CloudflareObjectDeliveryTrackingStore,
   CloudflareObjectJobQueue,
+  createD1DeliveryTrackingStore,
+  createDrizzleDeliveryTrackingStore,
   createDurableObjectDeliveryTrackingStore,
   createDurableObjectJobQueue,
   createKvDeliveryTrackingStore,
@@ -214,6 +216,118 @@ describe("Cloudflare SQL adapters", () => {
     expect(result.rows[0]?.ok).toBe(true);
     expect(calls[0]?.sql).toContain("SELECT * FROM t");
     expect(calls[0]?.params).toEqual([1]);
+  });
+
+  test("createD1SqlClient runs a failed statement once and rethrows its error", async () => {
+    const failure = new Error(
+      "D1_ERROR: UNIQUE constraint failed: kmsg_jobs.id",
+    );
+    const calls = { all: 0, run: 0 };
+    const db = {
+      prepare() {
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all() {
+            calls.all += 1;
+            throw failure;
+          },
+          async run() {
+            calls.run += 1;
+            return { success: true, meta: { changes: 1 } };
+          },
+        };
+        return statement;
+      },
+    };
+
+    const client = createD1SqlClient(db as unknown as D1DatabaseLike);
+
+    await expect(
+      client.query("INSERT INTO kmsg_jobs (id) VALUES (?)", ["job-1"]),
+    ).rejects.toBe(failure);
+    // Running it again could apply a write twice, or report success for a
+    // statement that failed.
+    expect(calls).toEqual({ all: 1, run: 0 });
+  });
+
+  test("createD1SqlClient keeps the error of a statement without run()", async () => {
+    const failure = new Error("D1_ERROR: no such table: kmsg_jobs");
+    const db = {
+      prepare() {
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all(): Promise<never> {
+            throw failure;
+          },
+        };
+        return statement;
+      },
+    };
+
+    const client = createD1SqlClient(db as unknown as D1DatabaseLike);
+
+    await expect(client.query("SELECT * FROM kmsg_jobs")).rejects.toBe(failure);
+  });
+
+  test("SQL tracking stores skip schema setup with initializeSchema: false", async () => {
+    const d1Statements: string[] = [];
+    const d1 = {
+      prepare(sql: string) {
+        d1Statements.push(sql);
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all() {
+            return { results: [] };
+          },
+        };
+        return statement;
+      },
+    };
+    const d1Store = createD1DeliveryTrackingStore(
+      d1 as unknown as D1DatabaseLike,
+      { initializeSchema: false },
+    );
+    await d1Store.init();
+    expect(await d1Store.get("m1")).toBeUndefined();
+    expect(d1Statements).toHaveLength(1);
+    expect(d1Statements[0]).toStartWith("SELECT");
+
+    const postgres = createCapturingSqlClient("postgres");
+    const hyperdriveStore = new HyperdriveDeliveryTrackingStore(
+      postgres.client,
+      { initializeSchema: false },
+    );
+    await hyperdriveStore.listDue(new Date(), 10);
+    expect(postgres.queries.map((query) => query.sql)).toEqual([
+      expect.stringMatching(/^SELECT/),
+    ]);
+
+    const drizzleQueries: unknown[] = [];
+    const drizzleStore = createDrizzleDeliveryTrackingStore({
+      dialect: "postgres",
+      db: {
+        execute(query: unknown) {
+          drizzleQueries.push(query);
+          return [];
+        },
+      },
+      initializeSchema: false,
+    });
+    await drizzleStore.init();
+    expect(drizzleQueries).toHaveLength(0);
+
+    // The default still creates the table and indexes on first use.
+    const defaults = createCapturingSqlClient("postgres");
+    await new HyperdriveDeliveryTrackingStore(defaults.client).get("m1");
+    expect(
+      defaults.queries.some((query) => /^\s*CREATE TABLE/.test(query.sql)),
+    ).toBe(true);
   });
 
   test("HyperdriveDeliveryTrackingStore uses dialect-specific upsert SQL", async () => {

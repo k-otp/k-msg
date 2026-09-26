@@ -97,6 +97,23 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ***
 
+### initializeSchema?
+
+> `optional` **initializeSchema?**: `boolean`
+
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L151)
+
+Whether the store creates its table and indexes on first use. Set it to
+`false` when migrations create the schema.
+
+#### Default
+
+```ts
+true
+```
+
+***
+
 ### mapTransactionDb?
 
 > `optional` **mapTransactionDb?**: (`value`) => [`DrizzleSqlDatabaseLike`](/en/api/k-msg/src/adapters/cloudflare/interfaces/drizzlesqldatabaselike/)
