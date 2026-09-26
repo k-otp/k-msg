@@ -77,7 +77,7 @@ async function seedLegacyTable(recipient: string): Promise<string> {
 }
 
 async function migrate(
-  command: "plan" | "apply",
+  command: "plan" | "apply" | "retry",
   file: string,
 ): Promise<{ exitCode: number; stdout: string }> {
   const proc = Bun.spawn(
@@ -90,9 +90,9 @@ async function migrate(
       command,
       "--sqlite-file",
       file,
-      ...(command === "apply"
-        ? ["--snapshot-dir", path.join(path.dirname(file), "snapshots")]
-        : []),
+      ...(command === "plan"
+        ? []
+        : ["--snapshot-dir", path.join(path.dirname(file), "snapshots")]),
     ],
     {
       cwd: path.dirname(file),
@@ -123,6 +123,27 @@ describe("db tracking migrate", () => {
       const applied = await migrate("apply", file);
       expect(applied.stdout).toContain("status=failed");
       expect(applied.exitCode).toBe(3);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
+    "retry exits 3 while a chunk still fails and 0 once it succeeds",
+    async () => {
+      const file = await seedLegacyTable("");
+      expect((await migrate("plan", file)).exitCode).toBe(0);
+      expect((await migrate("apply", file)).exitCode).toBe(3);
+
+      const stillFailing = await migrate("retry", file);
+      expect(stillFailing.stdout).toContain("status=failed");
+      expect(stillFailing.exitCode).toBe(3);
+
+      const database = new Database(file);
+      database.run(`UPDATE ${TABLE} SET "to" = ?`, ["01012345678"]);
+      database.close();
+      const retried = await migrate("retry", file);
+      expect(retried.stdout).toContain("status=running");
+      expect(retried.exitCode).toBe(0);
     },
     TEST_TIMEOUT,
   );
