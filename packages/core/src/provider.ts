@@ -17,9 +17,15 @@ import type {
  * Fetch implementation used for a single provider operation.
  *
  * Callers can inject a compatible implementation for runtime-specific
- * transports, tracing, or deterministic tests.
+ * transports, tracing, or deterministic tests. It is a call signature rather
+ * than `typeof globalThis.fetch`, so a plain async function qualifies in every
+ * runtime (Bun's `fetch` type also declares `preconnect`, which providers never
+ * call); the global `fetch` still satisfies it.
  */
-export type ProviderFetch = typeof globalThis.fetch;
+export type ProviderFetch = (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+) => Promise<Response>;
 
 /**
  * Per-operation transport context passed to provider calls.
