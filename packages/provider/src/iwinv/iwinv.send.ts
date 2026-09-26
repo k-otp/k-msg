@@ -76,20 +76,26 @@ async function resolveTemplateParam(params: {
   }
 
   const variables = options.variables ?? {};
-  if (Object.keys(variables).length === 0) return ok(undefined);
-
   const inlineContent = options.providerOptions?.templateContent;
-  const content =
-    typeof inlineContent === "string" && inlineContent.length > 0
-      ? ok(inlineContent)
-      : await templateContents.get(options.templateId, context, () =>
-          fetchIwinvTemplateContent({
-            providerId,
-            config,
-            templateCode: options.templateId,
-            context,
-          }),
-        );
+  const hasInlineContent =
+    typeof inlineContent === "string" && inlineContent.length > 0;
+  // Without variables there is nothing to place, so skip the lookup; a template
+  // that needs values is then refused by IWINV (code 508). Inline content costs
+  // no request, so it is still checked.
+  if (Object.keys(variables).length === 0 && !hasInlineContent) {
+    return ok(undefined);
+  }
+
+  const content = hasInlineContent
+    ? ok(inlineContent)
+    : await templateContents.get(options.templateId, context, () =>
+        fetchIwinvTemplateContent({
+          providerId,
+          config,
+          templateCode: options.templateId,
+          context,
+        }),
+      );
   if (content.isFailure) return content;
 
   const placeholders = listTemplatePlaceholders(content.value);
