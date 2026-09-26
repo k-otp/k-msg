@@ -183,6 +183,8 @@ const runtime = new WebhookRuntimeService({
 | `registerEndpoint()` 시 자동 테스트 전송 | `addEndpoint()` + 필요 시 `probeEndpoint()` |
 | 고급 클래스 루트 import | `@k-msg/webhook/toolkit`에서 import |
 | Cloudflare persistence 수동 구성 | `@k-msg/webhook/adapters/cloudflare` 사용 |
+| `fields.secret` / `fields.payload` 없이, 또는 `plain`/`mask`로 설정한 `fieldCrypto.endpoint` / `fieldCrypto.delivery` | `fields.secret`(endpoint)과 `fields.payload`(delivery)를 `encrypt` 또는 `encrypt+hash`로 설정. 그 외 값은 이제 시작 시 실패 |
+| `fieldCrypto.tenantId`를 설정한 상태로 저장한 암호문 | 이제 tenant에도 바인딩됨. 이전에 저장된 값은 레코드를 다시 저장할 때까지 legacy AAD로 계속 읽힘 |
 
 ## Toolkit subpath
 
