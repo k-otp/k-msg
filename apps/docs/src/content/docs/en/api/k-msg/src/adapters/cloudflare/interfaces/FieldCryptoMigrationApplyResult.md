@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMigrationApplyResult"
 ---
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L86)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L97)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:86](https://
 
 > `optional` **cursorMessageId?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L93)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:104](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L104)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:93](https://
 
 > `optional` **cursorRequestedAt?**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L92)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L103)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:92](https://
 
 > **failedChunks**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L90)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L101)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:90](https://
 
 > **planId**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L87)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L98)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:87](https://
 
 > **processedChunks**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L88)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L99)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:88](https://
 
 > **processedRows**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L89)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L100)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:89](https://
 
 > **status**: `FieldCryptoMigrationRunStatus`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L91)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L102)

@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMigrationStateTables"
 ---
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L15)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L16)
 
 ## Extended by
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:15](https://
 
 > `optional` **chunksTableName?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L18)
 
 ***
 
@@ -27,4 +27,4 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://
 
 > `optional` **runsTableName?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L16)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)

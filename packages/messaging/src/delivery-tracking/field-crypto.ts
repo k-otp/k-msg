@@ -42,6 +42,12 @@ export interface TrackingCryptoMode {
   compatPlainColumns: boolean;
 }
 
+/** The record fields the write path reads to derive the secure columns. */
+export type TrackingCryptoWriteInput = Pick<
+  TrackingRecord,
+  "messageId" | "providerId" | "to" | "from" | "metadata"
+>;
+
 type CryptoOperation = "encrypt" | "decrypt" | "hash";
 
 interface ScalarProtection {
@@ -497,7 +503,7 @@ function toFallbackValue(
 }
 
 export async function applyTrackingCryptoOnWrite(
-  record: TrackingRecord,
+  record: TrackingCryptoWriteInput,
   options: DeliveryTrackingFieldCryptoOptions | undefined,
   context: FieldCryptoKeyContext & {
     tableName: string;

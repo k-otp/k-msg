@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   applyFieldCryptoMigration,
   type CloudflareSqlClient,
+  type FieldCryptoMigrationApplyResult,
   getFieldCryptoMigrationStatus,
   getLatestFieldCryptoMigrationRun,
   planFieldCryptoMigration,
@@ -12,6 +13,7 @@ import {
 import { z } from "zod";
 import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
+import { resolveMigrationFieldCrypto } from "./field-crypto-env";
 
 const chunkSizeSchema = z.coerce.number().int().positive().max(100_000);
 const maxChunksSchema = z.coerce.number().int().positive().max(100_000);
@@ -33,6 +35,15 @@ function toSqliteBinding(value: unknown): SqliteBinding {
 
 function toSqliteBindings(values: readonly unknown[]): SqliteBinding[] {
   return values.map((value) => toSqliteBinding(value));
+}
+
+// A failed run must fail the command, or automation would move on to the
+// next rollout stage with the migration incomplete. 3 is the CLI's runtime
+// failure code.
+function exitCodeForRun(
+  result: Pick<FieldCryptoMigrationApplyResult, "status">,
+): number | undefined {
+  return result.status === "failed" ? 3 : undefined;
 }
 
 function toSqliteClient(filePath: string): {
@@ -203,6 +214,7 @@ const applyCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     const snapshotDir = flags["snapshot-dir"] ?? ".kmsg/migrations";
+    const fieldCrypto = await resolveMigrationFieldCrypto(Bun.env);
     const sqliteFile = path.resolve(process.cwd(), flags["sqlite-file"]);
     const { client, close } = toSqliteClient(sqliteFile);
 
@@ -214,6 +226,7 @@ const applyCmd = defineCommand({
         maxChunks: flags["max-chunks"],
         runsTableName: flags["runs-table"],
         chunksTableName: flags["chunks-table"],
+        fieldCrypto,
       });
 
       const status = await getFieldCryptoMigrationStatus(client, planId, {
@@ -236,6 +249,7 @@ const applyCmd = defineCommand({
           `Applied migration ${planId}: chunks=${result.processedChunks}, rows=${result.processedRows}, failed=${result.failedChunks}, status=${result.status}`,
         );
       }
+      process.exitCode = exitCodeForRun(result) ?? process.exitCode;
     } finally {
       close();
     }
@@ -311,6 +325,7 @@ const retryCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     const snapshotDir = flags["snapshot-dir"] ?? ".kmsg/migrations";
+    const fieldCrypto = await resolveMigrationFieldCrypto(Bun.env);
     const sqliteFile = path.resolve(process.cwd(), flags["sqlite-file"]);
     const { client, close } = toSqliteClient(sqliteFile);
 
@@ -322,6 +337,7 @@ const retryCmd = defineCommand({
         maxChunks: flags["max-chunks"],
         runsTableName: flags["runs-table"],
         chunksTableName: flags["chunks-table"],
+        fieldCrypto,
       });
 
       const status = await getFieldCryptoMigrationStatus(client, planId, {
@@ -340,6 +356,7 @@ const retryCmd = defineCommand({
       console.log(
         `Retried migration ${planId}: chunks=${result.processedChunks}, rows=${result.processedRows}, failed=${result.failedChunks}, status=${result.status}`,
       );
+      process.exitCode = exitCodeForRun(result) ?? process.exitCode;
     } finally {
       close();
     }

@@ -1,4 +1,5 @@
 import type { DeliveryTrackingFieldCryptoSchemaOptions } from "../../adapters/cloudflare/delivery-tracking-schema";
+import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
 
 export type FieldCryptoMigrationRunStatus =
   | "planned"
@@ -73,6 +74,11 @@ export interface FieldCryptoMigrationApplyInput
   trackingTableName?: string;
   maxChunks?: number;
   fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
+  /**
+   * The field crypto options the tracking store uses. The backfill encrypts
+   * legacy plaintext with them, so lookups and reads match new writes.
+   */
+  fieldCrypto: DeliveryTrackingFieldCryptoOptions;
 }
 
 export interface FieldCryptoMigrationRetryInput
@@ -81,6 +87,11 @@ export interface FieldCryptoMigrationRetryInput
   trackingTableName?: string;
   maxChunks?: number;
   fieldCryptoSchema?: DeliveryTrackingFieldCryptoSchemaOptions;
+  /**
+   * The field crypto options the tracking store uses. The backfill encrypts
+   * legacy plaintext with them, so lookups and reads match new writes.
+   */
+  fieldCrypto: DeliveryTrackingFieldCryptoOptions;
 }
 
 export interface FieldCryptoMigrationApplyResult {

@@ -20,10 +20,12 @@ k-msg db tracking migrate status --sqlite-file ./local.db
 k-msg db tracking migrate retry --sqlite-file ./local.db
 ```
 
+`apply`와 `retry`는 tracking store와 같은 키로 암호화합니다. `KMSG_FIELD_CRYPTO_KEYS`(kid별 base64url AES-256 키 JSON)와 `KMSG_ACTIVE_KID`를 설정하고, store가 사용한다면 `KMSG_FIELD_CRYPTO_HASH_KEYS`, `KMSG_FIELD_CRYPTO_FIELDS`, `KMSG_FIELD_CRYPTO_TENANT_ID`, `KMSG_FIELD_CRYPTO_AAD_FIELDS`도 설정합니다. 자세한 내용은 아래 런북을 참고하세요.
+
 ## 운영 체크포인트
 
 1. `planId` 기준으로 동일 실행인지 확인합니다.
-2. 실패 청크는 `retry`로만 재처리합니다.
+2. 실패 청크는 `retry`로만 재처리합니다. 읽기 오류로 멈춘 run에는 실패 청크가 없으므로 `apply`로 이어서 실행합니다.
 3. `compatPlainColumns=false` 전환은 해시/암호문 정합성 검증 이후에 수행합니다.
 
 ## 위험 라벨
