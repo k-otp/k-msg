@@ -51,14 +51,34 @@ function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
 }
 
 // Name the field in a fail-closed error, since this storage encrypts both the
-// endpoint secret and the delivery payload.
-function withFieldPath(error: unknown, path: string): unknown {
-  if (!(error instanceof FieldCryptoError) || error.fieldPath) return error;
-  return new FieldCryptoError(error.kind, error.message, error.details, {
-    fieldPath: path,
-    failMode: "closed",
-    causeChain: [error],
-  });
+// endpoint secret and the delivery payload. Provider and key resolver errors
+// are wrapped; a FieldCryptoError keeps its kind and metadata.
+function withFieldPath(
+  error: unknown,
+  path: string,
+  kind: "encrypt" | "decrypt",
+): FieldCryptoError {
+  if (error instanceof FieldCryptoError) {
+    if (error.fieldPath) return error;
+    return new FieldCryptoError(error.kind, error.message, error.details, {
+      providerErrorCode: error.providerErrorCode,
+      providerErrorText: error.providerErrorText,
+      httpStatus: error.httpStatus,
+      requestId: error.requestId,
+      retryAfterMs: error.retryAfterMs,
+      attempt: error.attempt,
+      openFallback: error.openFallback,
+      fieldPath: path,
+      failMode: "closed",
+      causeChain: [error],
+    });
+  }
+  return new FieldCryptoError(
+    kind,
+    `Field crypto ${kind} failed for ${path}`,
+    { cause: error instanceof Error ? error.message : String(error) },
+    { fieldPath: path, failMode: "closed", causeChain: [error] },
+  );
 }
 
 // Shared by the runtime store wrappers and WebhookRegistry.
@@ -99,7 +119,7 @@ export async function protectFieldValue(
     return toCiphertextEnvelopeString(encrypted.ciphertext);
   } catch (error) {
     if (failMode === "closed") {
-      throw withFieldPath(error, input.path);
+      throw withFieldPath(error, input.path, "encrypt");
     }
     return toFallbackValue(config, value);
   }
@@ -145,7 +165,7 @@ export async function revealFieldValue(
     });
   } catch (error) {
     if (failMode === "closed") {
-      throw withFieldPath(error, input.path);
+      throw withFieldPath(error, input.path, "decrypt");
     }
     return toFallbackValue(config, value);
   }

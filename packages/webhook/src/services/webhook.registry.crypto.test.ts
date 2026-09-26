@@ -40,6 +40,43 @@ describe("WebhookRegistry field crypto", () => {
     );
   });
 
+  test("names the field when the provider fails with a plain error", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        delivery: createConfig({
+          fields: { payload: "encrypt" },
+          provider: {
+            encrypt: async () => {
+              throw new Error("kms unavailable");
+            },
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addDelivery({
+        id: "dl-1",
+        endpointId: "ep-1",
+        eventId: "ev-1",
+        eventType: WebhookEventType.MESSAGE_SENT,
+        url: "https://example.com/hook",
+        httpMethod: "POST",
+        headers: {},
+        payload: '{"a":1}',
+        attempts: [],
+        status: "pending",
+        createdAt: new Date(),
+      }),
+    ).rejects.toMatchObject({
+      kind: "encrypt",
+      fieldPath: "payload",
+      details: { cause: "kms unavailable" },
+    });
+  });
+
   test("constructor rejects a misspelled failMode", () => {
     expect(
       () =>
