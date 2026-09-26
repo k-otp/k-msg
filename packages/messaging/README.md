@@ -256,6 +256,21 @@ tracking.start();
 await tracking.runOnce();
 ```
 
+To react when a status changes, for example to notify a webhook, pass `onStatusChange`. It runs once per stored change; if it throws, the poll continues and the error goes to `onStatusChangeError` (or `console.error`).
+
+```ts
+const tracking = new DeliveryTrackingService({
+  providers,
+  store: new InMemoryDeliveryTrackingStore(),
+  onStatusChange: async ({ record, previousStatus }) => {
+    // Your code, e.g. a POST to your webhook endpoint.
+    await notifyStatus(record.messageId, previousStatus, record.status);
+  },
+});
+```
+
+`MockProvider` from `@k-msg/provider` reports each message it sent as `DELIVERED` (change it with `setDeliveryStatus`), so tracking can run without real credentials.
+
 ### Bun SQLite Example
 
 ```ts

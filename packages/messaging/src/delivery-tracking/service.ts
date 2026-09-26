@@ -67,11 +67,33 @@ const API_FAILOVER_ELIGIBLE_WARNING_CODES = new Set([
   "FAILOVER_PARTIAL_PROVIDER",
 ]);
 
+/** A status a poll stored for a tracked message. */
+export interface DeliveryStatusChange {
+  /** The record as stored after the poll. */
+  record: TrackingRecord;
+  /** The status the record had before the poll. */
+  previousStatus: DeliveryStatus;
+}
+
 export interface DeliveryTrackingServiceConfig {
   providers: Provider[];
   store?: DeliveryTrackingStore;
   polling?: Partial<DeliveryTrackingPollingConfig>;
   apiFailover?: DeliveryTrackingApiFailoverConfig;
+  /**
+   * Called once each time a poll stores a different status for a record,
+   * after the store is updated: for example, to notify a webhook when a
+   * message is delivered or fails. It does not stop the poll if it throws.
+   */
+  onStatusChange?: (change: DeliveryStatusChange) => void | Promise<void>;
+  /**
+   * Receives what `onStatusChange` throws. Without it, or when it throws
+   * too, the error is written to `console.error`.
+   */
+  onStatusChangeError?: (
+    error: unknown,
+    change: DeliveryStatusChange,
+  ) => void | Promise<void>;
 }
 
 export class DeliveryTrackingService {
@@ -79,6 +101,8 @@ export class DeliveryTrackingService {
   private readonly store: DeliveryTrackingStore;
   private readonly polling: DeliveryTrackingPollingConfig;
   private readonly apiFailover?: DeliveryTrackingApiFailoverConfig;
+  private readonly onStatusChange?: DeliveryTrackingServiceConfig["onStatusChange"];
+  private readonly onStatusChangeError?: DeliveryTrackingServiceConfig["onStatusChangeError"];
 
   private initPromise?: Promise<void>;
   private timer?: ReturnType<typeof setInterval>;
@@ -95,6 +119,8 @@ export class DeliveryTrackingService {
     this.providers = config.providers;
     this.store = config.store ?? new InMemoryDeliveryTrackingStore();
     this.apiFailover = config.apiFailover;
+    this.onStatusChange = config.onStatusChange;
+    this.onStatusChangeError = config.onStatusChangeError;
 
     const polling = config.polling ?? {};
     this.polling = {
@@ -282,6 +308,13 @@ export class DeliveryTrackingService {
           messageId: originalRecord.messageId,
         };
 
+        if (mergedRecord.status !== originalRecord.status) {
+          await this.notifyStatusChange({
+            record: mergedRecord,
+            previousStatus: originalRecord.status,
+          });
+        }
+
         if (this.shouldAttemptApiFailover(mergedRecord)) {
           await this.attemptApiFailover(mergedRecord, now);
         }
@@ -293,6 +326,32 @@ export class DeliveryTrackingService {
       await op;
     } finally {
       if (this.runOnceInFlight === op) this.runOnceInFlight = undefined;
+    }
+  }
+
+  private async notifyStatusChange(
+    change: DeliveryStatusChange,
+  ): Promise<void> {
+    if (!this.onStatusChange) return;
+    try {
+      await this.onStatusChange(change);
+    } catch (error) {
+      if (this.onStatusChangeError) {
+        try {
+          await this.onStatusChangeError(error, change);
+          return;
+        } catch (reportError) {
+          console.error(
+            "[k-msg] onStatusChangeError threw while reporting an onStatusChange error",
+            reportError,
+          );
+        }
+      }
+      // Last resort, so a broken callback does not fail silently.
+      console.error(
+        `[k-msg] onStatusChange threw for message ${change.record.messageId}; the stored status is unaffected`,
+        error,
+      );
     }
   }
 
