@@ -156,11 +156,11 @@ function parseGraph(output: string): TypeScriptGraph {
       typeof diagnostic.code !== "number" ||
       typeof diagnostic.category !== "string" ||
       typeof diagnostic.message !== "string" ||
-      (diagnostic.file !== undefined && typeof diagnostic.file !== "string") ||
-      (diagnostic.line !== undefined && typeof diagnostic.line !== "number")
+      (diagnostic.file != null && typeof diagnostic.file !== "string") ||
+      (diagnostic.line != null && typeof diagnostic.line !== "number")
     ) {
       throw new Error(
-        `ttsc graph diagnostic ${index} is missing code/category/message fields.`,
+        `ttsc graph diagnostic ${index} must carry a number code, string category, and string message; file and line, when present, must be a string and a number.`,
       );
     }
     return {
