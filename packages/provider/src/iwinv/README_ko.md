@@ -51,12 +51,15 @@ CLI 기준:
   - IP 미등록: `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}`
 
 템플릿 변수:
-- IWINV의 `templateParam`은 위치 기반입니다. 템플릿에 나오는 `#{변수}` 하나마다 값 하나를 순서대로 넣습니다.
-- `IWINVProvider`는 `variables`를 이름으로 매칭해 이 배열을 만듭니다. 템플릿 본문은
-  `providerOptions.templateContent`에서 읽고, 없으면 템플릿 목록 API(`POST /api/template/`)로
-  조회해 provider 인스턴스마다 10분간 재사용합니다.
-- `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
-  `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
+- IWINV의 `templateParam`은 위치 기반 배열이지만, IWINV 규격서에는 위치와 변수의 대응이 나와 있지 않습니다.
+  `IWINVProvider`는 서로 다른 `#{이름}`마다 값 하나를, 템플릿 내용과 버튼 링크에서 그 이름이 처음 나오는
+  순서대로 보냅니다(IWINV 매뉴얼 예시는 한 버튼의 두 링크에 같은 `#{idx}`를 씁니다). IWINV 콘솔이 변수마다
+  값 하나를 받는 방식이며, 이전 버전이 `variables`의 키를 템플릿 순서로 적었을 때 보내던 형태와 같습니다.
+- 값은 `variables`에서 이름으로 찾습니다. 템플릿 본문은 `providerOptions.templateContent`(변수가 있는 버튼
+  링크도 포함)에서 읽고, 없으면 템플릿 목록 API(`POST /api/template/`)로 조회해 provider 인스턴스마다
+  10분간 재사용합니다.
+- `variables`에 값이 없는 변수(키가 없거나 `undefined`)가 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로
+  실패합니다. 순서가 다른 템플릿은 `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
 - `variables`가 비어 있고 `templateContent`도 없으면 채울 값이 없으므로 조회하지 않습니다. 값이 필요한
   템플릿은 IWINV가 거부합니다(코드 `508`).
 

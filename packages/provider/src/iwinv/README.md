@@ -53,12 +53,17 @@ For CLI:
   - `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}` when IP is not whitelisted
 
 Template variables:
-- IWINV's `templateParam` is positional: one value per `#{placeholder}` occurrence, in template order.
-- `IWINVProvider` builds it from `variables` by name. It reads the template body from
-  `providerOptions.templateContent`, or else looks it up with the template list API
-  (`POST /api/template/`) and keeps it for 10 minutes per provider instance.
-- A placeholder with no matching key in `variables` fails the send with `INVALID_REQUEST`
-  before anything is sent. `providerOptions.templateParam` (an array) is still sent as-is.
+- IWINV's `templateParam` is a positional array, and IWINV's spec does not say how positions map
+  to placeholders. `IWINVProvider` sends one value per distinct `#{name}`, in the order the names
+  first appear in the template content and then in its button links (IWINV's manual reuses one
+  `#{idx}` in two links of a button). That is the one value per variable that IWINV's console
+  asks for, and what earlier versions sent when `variables` listed its keys in template order.
+- The values come from `variables` by name. The template text comes from
+  `providerOptions.templateContent` (include any button links that have placeholders), or else
+  from the template list API (`POST /api/template/`), kept for 10 minutes per provider instance.
+- A placeholder without a value in `variables` (no key, or `undefined`) fails the send with
+  `INVALID_REQUEST` before anything is sent. `providerOptions.templateParam` (an array) is sent
+  as-is, for a template that needs a different order.
 - With empty `variables` and no `templateContent` there is nothing to place, so no lookup is
   made; IWINV itself refuses a template that needs values (code `508`).
 
