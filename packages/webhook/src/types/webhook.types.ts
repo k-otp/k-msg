@@ -24,9 +24,10 @@ export interface WebhookConfig {
   // 배치 처리 설정
   /**
    * How many events queued by `emit()` go out in one batch. The `emit()` call
-   * that fills a batch sends it, retries included, before it resolves.
-   * Defaults to 10, which also replaces a value below 1. `emitSync()` does
-   * not use it.
+   * that fills a batch sends it, retries included, before it resolves, unless
+   * another batch is still being sent: then the full batch follows that one.
+   * `Infinity` leaves every event for `flush()` or the timer. Defaults to 10,
+   * which also replaces a value below 1. `emitSync()` does not use it.
    */
   batchSize?: number;
   /**

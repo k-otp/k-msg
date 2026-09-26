@@ -7,4 +7,4 @@ title: "WebhookDelivery"
 
 > **WebhookDelivery** = `z.infer`\<*typeof* [`WebhookDeliverySchema`](/en/api/webhook/src/variables/webhookdeliveryschema/)\>
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L209)
+Defined in: [packages/webhook/src/types/webhook.types.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L210)
