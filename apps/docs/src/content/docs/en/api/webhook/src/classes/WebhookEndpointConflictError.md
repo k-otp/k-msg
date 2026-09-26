@@ -24,7 +24,7 @@ store from `@k-msg/webhook/adapters/cloudflare`.
 
 > **new WebhookEndpointConflictError**(`field`, `value`, `endpointId`): `WebhookEndpointConflictError`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L39)
+Defined in: [packages/webhook/src/runtime/errors.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L42)
 
 #### Parameters
 
@@ -68,9 +68,10 @@ The cause of the error.
 
 > `readonly` **endpointId**: `string`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L37)
+Defined in: [packages/webhook/src/runtime/errors.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L40)
 
-The id of the stored endpoint that has it.
+The id of the endpoint that has it: a stored one, or one earlier in the
+same `addEndpoints()` batch.
 
 ***
 

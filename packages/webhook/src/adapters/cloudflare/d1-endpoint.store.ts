@@ -160,12 +160,21 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
   ): Promise<WebhookEndpointConflictError | undefined> {
     const row = await queryFirst<EndpointRow>(
       this.db,
-      `SELECT id FROM ${this.tableName} WHERE id = ? OR url = ? LIMIT 1`,
+      `SELECT id, url, created_at FROM ${this.tableName} WHERE id = ? OR url = ? LIMIT 1`,
       [endpoint.id, endpoint.url],
     );
     if (!row) return undefined;
 
     const storedId = toStringValue(row.id);
+    // D1 can report a failure after the INSERT committed. The row found is
+    // then this endpoint, and the original error is the one to report.
+    if (
+      storedId === endpoint.id &&
+      toStringValue(row.url) === endpoint.url &&
+      toNumber(row.created_at, Number.NaN) === endpoint.createdAt.getTime()
+    ) {
+      return undefined;
+    }
     return storedId === endpoint.id
       ? new WebhookEndpointConflictError("id", endpoint.id, storedId)
       : new WebhookEndpointConflictError("url", endpoint.url, storedId);

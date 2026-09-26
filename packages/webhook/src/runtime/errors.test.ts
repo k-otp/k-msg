@@ -27,6 +27,15 @@ describe("WebhookEndpointConflictError", () => {
     ).toBe(true);
   });
 
+  test("the message leaves out the URL, which may hold a token", () => {
+    const url = "https://hooks.example.com/services/T0/B0/token-abc123";
+    const error = new WebhookEndpointConflictError("url", url, "first");
+
+    expect(error.message).not.toContain("token-abc123");
+    expect(error.message).toContain("first");
+    expect(error.value).toBe(url);
+  });
+
   test("instanceof rejects other errors", () => {
     const lookalike = Object.assign(new Error("conflict"), {
       name: "WebhookEndpointConflictError",
