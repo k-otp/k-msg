@@ -25,6 +25,7 @@ bun add solapi
 - `SolapiProvider` (SOLAPI)
 - `IWINVProvider` (IWINV AlimTalk + optional SMS v2)
 - `AligoProvider` (Aligo)
+- `MockProvider` (no vendor calls, for tests and local runs). Pass `{ id }` to give each instance its own provider id, for example to try `routing.byType` with two mocks; the id defaults to `"mock"`.
 
 All providers implement the `Provider` interface from `@k-msg/core`:
 

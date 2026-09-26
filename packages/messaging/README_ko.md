@@ -86,6 +86,28 @@ const kmsg = new KMsg({
 await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
+## 라우팅
+
+`routing.byType`으로 메시지 타입별 provider를 정할 수 있습니다. provider 자격 증명 없이 라우팅을 시험하려면 `MockProvider`마다 다른 id를 주세요:
+
+```ts
+import { KMsg } from "@k-msg/messaging";
+import { MockProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({
+  providers: [
+    new MockProvider({ id: "kakao" }),
+    new MockProvider({ id: "sms" }),
+  ],
+  routing: { byType: { ALIMTALK: "kakao", SMS: "sms", LMS: "sms" } },
+});
+
+const result = await kmsg.send({ to: "01012345678", text: "hello" });
+// result.value.providerId === "sms"
+```
+
+## 대량 발송
+
 배열을 넘기면 provider별로 묶어 최대 50건(provider의 배치 한도가 더 작으면 그 값) 단위로 보내고, 메시지마다 `Result`를 돌려줍니다.
 
 ## 타임아웃과 취소
