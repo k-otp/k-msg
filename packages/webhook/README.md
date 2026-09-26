@@ -26,6 +26,7 @@ bun add @k-msg/webhook
 - `createInMemoryWebhookPersistence`
 - `addEndpoints`, `probeEndpoint`
 - `validateEndpointUrl`
+- `verifyWebhookRequest`, for receivers
 
 Advanced building blocks are now exposed from subpaths:
 
@@ -243,6 +244,67 @@ const runtime = new WebhookRuntimeService({
 
 - Private hosts are blocked by default
 - `http://localhost` style URLs require explicit allowance (runtime security options)
+
+## Signing and verifying deliveries
+
+With `enableSecurity: true`, every delivery is signed with HMAC, using the
+endpoint's `secret`, or the delivery config's `secretKey` for an endpoint
+without one. A delivery is never sent unsigned while `enableSecurity` is on:
+
+- `addEndpoint()` and `updateEndpoint()` throw for an endpoint that would have
+  no secret.
+- An endpoint stored without one, for example before security was turned on,
+  gets a `failed` delivery and no request. Its only attempt has no
+  `httpStatus`, and its `error` says why; `probeEndpoint()` reports the same
+  `error`.
+
+Each request carries these headers:
+
+| Header | Value |
+| --- | --- |
+| `X-Webhook-ID` | The event id |
+| `X-Webhook-Event` | The event type |
+| `X-Webhook-Timestamp` | Unix time, in seconds, when this attempt was sent |
+| `X-Webhook-Signature` | `sha256=` and the hex HMAC-SHA256 of `<X-Webhook-Timestamp>.<raw body>`; only with `enableSecurity` |
+
+The timestamp is the send time of each attempt, not the event's `timestamp`,
+and every retry is signed again, so a receiver that rejects old timestamps
+still accepts retries and events that waited in the queue. `signatureHeader`,
+`signaturePrefix` (default `sha256=`), and `algorithm` (`sha256` or `sha1`) in
+the delivery config change the signature header, its prefix, and the hash.
+
+Receivers verify a request with `verifyWebhookRequest`. It compares the
+signature in constant time, then rejects a timestamp more than `toleranceMs`
+(default five minutes) from the receiver's clock:
+
+```ts
+import { verifyWebhookRequest } from "@k-msg/webhook";
+
+export async function receiveWebhook(
+  request: Request,
+  secret: string,
+): Promise<Response> {
+  // Verify the raw body; JSON.parse and JSON.stringify can change the bytes.
+  const body = await request.text();
+  const verified = verifyWebhookRequest(request.headers, body, secret, {
+    toleranceMs: 5 * 60 * 1000,
+  });
+  if (verified.isFailure) {
+    // MISSING_SIGNATURE, MISSING_TIMESTAMP, INVALID_SIGNATURE,
+    // INVALID_TIMESTAMP or STALE_TIMESTAMP
+    return new Response(verified.error.code, { status: 401 });
+  }
+
+  const event = JSON.parse(body);
+  // Deliveries are at least once: skip event ids you have already processed.
+  console.log("webhook received", event.id);
+  return new Response(null, { status: 204 });
+}
+```
+
+It also accepts Node-style header records (`req.headers`) and `Uint8Array` or
+`ArrayBuffer` bodies. If the sender changed `algorithm`, `signatureHeader`, or
+`signaturePrefix`, pass the same values in the options.
 
 ## Migration notes (breaking)
 
