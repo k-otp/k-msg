@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { KMsg } from "./index";
+import {
+  type DeliveryStatus,
+  KMsg,
+  type KMsgConfig,
+  type KMsgDefaultsConfig,
+  type KMsgRoutingConfig,
+} from "./index";
 
 describe("k-msg package exports", () => {
   test("exports KMsg client class", () => {
@@ -30,6 +36,18 @@ describe("k-msg package exports", () => {
     expect(typeof facade.normalizeProviderError).toBe("function");
     expect(typeof facade.ok).toBe("function");
     expect(typeof facade.fail).toBe("function");
+  });
+
+  test("root facade exports the KMsg config types, DeliveryStatus, and estimateSmsBytes", async () => {
+    const facade = await import("./index");
+    const routing: KMsgRoutingConfig = { byType: { ALIMTALK: "iwinv" } };
+    const defaults: KMsgDefaultsConfig = { sms: { autoLmsBytes: 90 } };
+    const config: KMsgConfig = { providers: [], routing, defaults };
+    const status: DeliveryStatus = "DELIVERED";
+
+    expect(config.defaults).toBe(defaults);
+    expect(status).toBe("DELIVERED");
+    expect(facade.estimateSmsBytes("안녕 hi")).toBe(7);
   });
 
   test("core subpath exposes lightweight core-only exports", async () => {

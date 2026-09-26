@@ -20,6 +20,7 @@ export {
   createRollingKeyResolver,
   createStaticKeyResolver,
   createVaultTransitKeyResolver,
+  type DeliveryStatus,
   type EnvKeyResolverOptions,
   type ErrorRetryPolicyIssue,
   type ErrorRetryPolicyMode,
@@ -89,4 +90,10 @@ export {
   validateErrorRetryPolicy,
   validateFieldCryptoConfig,
 } from "@k-msg/core";
-export { KMsg } from "@k-msg/messaging";
+export {
+  estimateSmsBytes,
+  KMsg,
+  type KMsgConfig,
+  type KMsgDefaultsConfig,
+  type KMsgRoutingConfig,
+} from "@k-msg/messaging";

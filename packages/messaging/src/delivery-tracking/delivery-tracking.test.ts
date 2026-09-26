@@ -6,6 +6,7 @@ import {
   KMsgErrorCode,
   ok,
   type Provider,
+  type SendInput,
 } from "@k-msg/core";
 import { DeliveryTrackingService } from "./service";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
@@ -264,6 +265,83 @@ describe("DeliveryTrackingService API failover", () => {
       expect(apiAttempt.outcome).toBe("sent");
       expect(apiAttempt.fallbackProviderId).toBe("sms-provider");
     }
+  });
+
+  test("sends a long API fallback as LMS unless a channel was chosen", async () => {
+    const provider = createMockProvider({
+      id: "solapi",
+      status: "FAILED",
+      statusCode: "3104",
+      statusMessage: "카카오톡 미사용자",
+    });
+    const sent: Array<{ input: SendInput; fallbackType: string }> = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      polling: { initialDelayMs: 0 },
+      apiFailover: {
+        sender: async (input, context) => {
+          sent.push({ input, fallbackType: context.fallbackType });
+          return ok({
+            messageId: context.fallbackMessageId,
+            providerId: "sms-provider",
+            status: "SENT",
+            type: context.fallbackType,
+            to: "01012345678",
+          });
+        },
+      },
+    });
+
+    const cases = {
+      short: { enabled: true, fallbackContent: "a".repeat(90) },
+      long: {
+        enabled: true,
+        fallbackTitle: "Notice",
+        fallbackContent: "가".repeat(46),
+      },
+      chosen: {
+        enabled: true,
+        fallbackChannel: "sms" as const,
+        fallbackContent: "가".repeat(46),
+      },
+    };
+    for (const [messageId, failover] of Object.entries(cases)) {
+      await service.recordSend(
+        {
+          messageId,
+          options: {
+            type: "ALIMTALK",
+            to: "01012345678",
+            templateId: "TPL_1",
+            variables: {},
+            failover,
+          },
+          timestamp: Date.now(),
+        },
+        {
+          messageId,
+          providerId: "solapi",
+          providerMessageId: `p-${messageId}`,
+          status: "SENT",
+          type: "ALIMTALK",
+          to: "01012345678",
+          warnings: [{ code: "FAILOVER_PARTIAL_PROVIDER", message: "partial" }],
+        },
+      );
+    }
+
+    await service.runOnce();
+
+    const byMessage = new Map(
+      sent.map((entry) => [entry.input.messageId, entry]),
+    );
+    expect(byMessage.get("short:api-fallback")?.fallbackType).toBe("SMS");
+    expect(byMessage.get("long:api-fallback")?.fallbackType).toBe("LMS");
+    expect(byMessage.get("long:api-fallback")?.input).toMatchObject({
+      type: "LMS",
+      subject: "Notice",
+    });
+    expect(byMessage.get("chosen:api-fallback")?.fallbackType).toBe("SMS");
   });
 
   test("matches iwinv non-kakao-user message keywords", async () => {

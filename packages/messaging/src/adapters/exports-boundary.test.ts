@@ -1,4 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import type {
+  KMsgConfig,
+  KMsgDefaultsConfig,
+  KMsgRoutingConfig,
+  RoutingStrategy,
+} from "../index";
 
 describe("messaging export boundaries", () => {
   test("root export is runtime-neutral", async () => {
@@ -16,6 +22,20 @@ describe("messaging export boundaries", () => {
     expect("JobStatus" in root).toBe(false);
 
     expect(typeof root.KMsg).toBe("function");
+  });
+
+  test("root export types the KMsg config and estimates SMS bytes", async () => {
+    const root = await import("../index");
+    const strategy: RoutingStrategy = "round_robin";
+    const routing: KMsgRoutingConfig = {
+      byType: { SMS: ["a", "b"] },
+      strategy,
+    };
+    const defaults: KMsgDefaultsConfig = { sms: { autoLmsBytes: 80 } };
+    const config: Omit<KMsgConfig, "providers"> = { routing, defaults };
+
+    expect(config.routing?.strategy).toBe("round_robin");
+    expect(root.estimateSmsBytes("SMS 문자")).toBe(8);
   });
 
   test("tracking subpath exports tracking symbols", async () => {

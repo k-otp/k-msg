@@ -4,7 +4,8 @@ description: "Generated from `packages/k-msg/README.md`"
 ---
 Unified package that re-exports the main public API:
 
-- `KMsg` from `@k-msg/messaging`
+- `KMsg`, its config types (`KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`), and `estimateSmsBytes` from `@k-msg/messaging`
+- selected `@k-msg/core` exports, such as `Result`, `KMsgError`, and the delivery status helpers and `DeliveryStatus` type
 
 Provider implementations and advanced/runtime-specific APIs should be imported directly from their packages:
 
