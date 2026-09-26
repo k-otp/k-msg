@@ -4,7 +4,7 @@
   "packageManager": "bun@1.4.2",
   "type": "module",
   "description": "Complete provider system with adapters and implementations for K-Message platform",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
@@ -12,42 +12,42 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./aligo": {
       "types": "./dist/aligo/index.d.ts",
       "import": "./dist/aligo/index.mjs",
-      "require": "./dist/aligo/index.js"
+      "require": "./dist/aligo/index.cjs"
     },
     "./aligo/send": {
       "types": "./dist/aligo/send.d.ts",
       "import": "./dist/aligo/send.mjs",
-      "require": "./dist/aligo/send.js"
+      "require": "./dist/aligo/send.cjs"
     },
     "./aligo/template": {
       "types": "./dist/aligo/template.d.ts",
       "import": "./dist/aligo/template.mjs",
-      "require": "./dist/aligo/template.js"
+      "require": "./dist/aligo/template.cjs"
     },
     "./iwinv": {
       "types": "./dist/iwinv/index.d.ts",
       "import": "./dist/iwinv/index.mjs",
-      "require": "./dist/iwinv/index.js"
+      "require": "./dist/iwinv/index.cjs"
     },
     "./iwinv/send": {
       "types": "./dist/iwinv/send.d.ts",
       "import": "./dist/iwinv/send.mjs",
-      "require": "./dist/iwinv/send.js"
+      "require": "./dist/iwinv/send.cjs"
     },
     "./iwinv/template": {
       "types": "./dist/iwinv/template.d.ts",
       "import": "./dist/iwinv/template.mjs",
-      "require": "./dist/iwinv/template.js"
+      "require": "./dist/iwinv/template.cjs"
     },
     "./solapi": {
       "types": "./dist/solapi/index.d.ts",
       "import": "./dist/solapi/index.mjs",
-      "require": "./dist/solapi/index.js"
+      "require": "./dist/solapi/index.cjs"
     }
   },
   "publishConfig": {
@@ -56,7 +56,7 @@
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts ./src/aligo/index.ts ./src/aligo/send.ts ./src/aligo/template.ts ./src/iwinv/index.ts ./src/iwinv/send.ts ./src/iwinv/template.ts ./src/solapi/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
-    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/aligo/send.ts ./src/aligo/template.ts ./src/iwinv/index.ts ./src/iwinv/send.ts ./src/iwinv/template.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts ./src/aligo/index.ts ./src/aligo/send.ts ./src/aligo/template.ts ./src/iwinv/index.ts ./src/iwinv/send.ts ./src/iwinv/template.ts ./src/solapi/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].cjs' --external 'bun:test' --external 'solapi' --external '@k-msg/*'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",
@@ -98,7 +98,7 @@
     "adapter"
   ],
   "files": [
-    "dist/**/*.js",
+    "dist/**/*.cjs",
     "dist/**/*.mjs",
     "dist/**/*.d.ts",
     "README.md"

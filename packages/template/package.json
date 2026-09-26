@@ -4,7 +4,7 @@
   "packageManager": "bun@1.4.2",
   "description": "AlimTalk template engine for parsing, building and managing templates",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "sideEffects": false,
@@ -12,22 +12,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./send": {
       "types": "./dist/send/index.d.ts",
       "import": "./dist/send/index.mjs",
-      "require": "./dist/send/index.js"
+      "require": "./dist/send/index.cjs"
     },
     "./lifecycle": {
       "types": "./dist/lifecycle/index.d.ts",
       "import": "./dist/lifecycle/index.mjs",
-      "require": "./dist/lifecycle/index.js"
+      "require": "./dist/lifecycle/index.cjs"
     },
     "./toolkit": {
       "types": "./dist/toolkit/index.d.ts",
       "import": "./dist/toolkit/index.mjs",
-      "require": "./dist/toolkit/index.js"
+      "require": "./dist/toolkit/index.cjs"
     }
   },
   "publishConfig": {
@@ -36,7 +36,7 @@
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts ./src/send/index.ts ./src/lifecycle/index.ts ./src/toolkit/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
-    "build:cjs": "bun build ./src/index.ts ./src/send/index.ts ./src/lifecycle/index.ts ./src/toolkit/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test'",
+    "build:cjs": "bun build ./src/index.ts ./src/send/index.ts ./src/lifecycle/index.ts ./src/toolkit/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].cjs' --external 'bun:test'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",
@@ -63,7 +63,7 @@
     "kakao"
   ],
   "files": [
-    "dist/**/*.js",
+    "dist/**/*.cjs",
     "dist/**/*.mjs",
     "dist/**/*.d.ts",
     "README.md"
