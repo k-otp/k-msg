@@ -79,8 +79,11 @@ function createSqliteBackedD1(): { db: D1DatabaseLike; close: () => void } {
         },
       };
     },
+    // Like D1, exec runs each line as its own statement.
     async exec(query: string) {
-      sqlite.exec(query);
+      for (const line of query.split("\n")) {
+        if (line.trim()) sqlite.exec(line);
+      }
       return undefined;
     },
   };
