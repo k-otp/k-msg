@@ -98,8 +98,9 @@ function maskStringValue(value: string): string {
 // path or query string and is not matched.
 const PHONE_NUMBER_PATTERN = new RegExp(
   [
-    // Domestic or +82 mobile, Seoul, regional, VoIP, 050x, and 080 numbers.
-    String.raw`(?:\+82[-.\s]?0?|0)(?:1[016789]|2|70|80|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
+    // Domestic or +82 mobile, Seoul, regional, VoIP, 050x, and 080 numbers;
+    // +82 may keep the trunk 0, bare or as "(0)": +82 (0)10-1234-5678.
+    String.raw`(?:\+82[-.\s]?(?:\(0\)[-.\s]?|0)?|0)(?:1[016789]|2|70|80|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
     // An area code in parentheses: (010) 1234-5678, (02) 123-4567.
     String.raw`\(0\d{1,2}\)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
     // Nationwide representative numbers such as 1588-1234.
