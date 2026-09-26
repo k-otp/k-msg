@@ -48,7 +48,8 @@ export interface VerifyWebhookRequestOptions
  * - `INVALID_TIMESTAMP`: the signed timestamp is not a whole number of
  *   seconds.
  * - `STALE_TIMESTAMP`: the signed time is further from now than
- *   `toleranceMs`.
+ *   `toleranceMs` allows, counting the second the signed time was
+ *   rounded down from.
  */
 export type WebhookVerificationErrorCode =
   | "MISSING_SIGNATURE"
@@ -202,7 +203,7 @@ export function verifyWebhookRequest(
     return fail(
       new WebhookVerificationError(
         "STALE_TIMESTAMP",
-        `${WEBHOOK_TIMESTAMP_HEADER} is more than ${toleranceMs} ms from the current time`,
+        `${WEBHOOK_TIMESTAMP_HEADER} is outside the ${toleranceMs} ms tolerance`,
       ),
     );
   }
