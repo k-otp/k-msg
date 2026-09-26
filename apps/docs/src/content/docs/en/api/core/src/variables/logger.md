@@ -7,7 +7,7 @@ title: "logger"
 
 > `const` **logger**: `object`
 
-Defined in: [packages/core/src/logger.ts:408](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L408)
+Defined in: [packages/core/src/logger.ts:438](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L438)
 
 ## Type Declaration
 
