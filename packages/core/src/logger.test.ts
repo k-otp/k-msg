@@ -76,6 +76,10 @@ describe("redactLogText", () => {
     ],
     ["config.password.value=TOPSECRET", "config.password.value=[REDACTED]"],
     ["client[secret]=TOPSECRET", "client[secret]=[REDACTED]"],
+    ["settings.api.key=abc", "settings.api.key=[REDACTED]"],
+    ["auth.private.key=abc", "auth.private.key=[REDACTED]"],
+    ["config.auth.value=abc", "config.auth.value=[REDACTED]"],
+    ["auth[0]=abc", "auth[0]=[REDACTED]"],
     [
       "headers.authorization: Bearer abc.def",
       "headers.authorization: Bearer [REDACTED]",
