@@ -79,21 +79,27 @@ function maskStringValue(value: string): string {
 
 // Messages, error text, and free-text context values cannot be redacted by
 // key, so they are scrubbed for the values the logging policy protects:
-// Korean phone numbers (domestic or +82) and credentials written as key/value
-// pairs, such as `apiKey=...`, `"secret":"..."`, or
-// `Authorization: Bearer ...`.
+// Korean phone numbers (domestic, VoIP, or +82), credentials written as
+// key/value pairs (`apiKey=...`, `client_secret: ...`, `"password":"..."`,
+// `Authorization: Bearer ...`), and passwords in URLs
+// (`postgres://user:...@host`). A bare value that contains spaces is only
+// redacted up to the first space.
 const PHONE_NUMBER_PATTERN =
-  /(?<![\w+])(?:\+82[-.\s]?0?|0)(?:1[016789]|2|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\w)/g;
+  /(?<![\w+])(?:\+82[-.\s]?0?|0)(?:1[016789]|2|70|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\w)/g;
+const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/]*@/gi;
 const CREDENTIAL_PATTERN =
-  /\b(api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth)("?\s*[:=]\s*"?)((?:Bearer|Basic)\s+)?[^\s"',;&]+/gi;
+  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))("?\s*[:=]\s*)(?:"[^"]*"|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
 
 export function redactLogText(text: string): string {
   return text
+    .replace(URL_PASSWORD_PATTERN, `$1:${REDACTED_TOKEN}@`)
     .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone))
     .replace(
       CREDENTIAL_PATTERN,
-      (_match, key: string, separator: string, scheme = "") =>
-        `${key}${separator}${scheme}${REDACTED_TOKEN}`,
+      (match, key: string, separator: string, scheme: string | undefined) =>
+        match.startsWith('"', key.length + separator.length)
+          ? `${key}${separator}"${REDACTED_TOKEN}"`
+          : `${key}${separator}${scheme ?? ""}${REDACTED_TOKEN}`,
     );
 }
 
@@ -138,10 +144,11 @@ function sanitizeLogContext(context: LogContext): LogContext {
  * @evidence docs/security/field-crypto-v1.md#logging-policy
  *   Masks sensitive context keys and scrubs the message, error text, and
  *   string context values with redactLogText before output.
- * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #7fe97f3
- *   Read formatMessage and sanitizeContextValue, and ran logger.test.ts in
- *   JSON and text modes: phone numbers and apiKey values in the message,
- *   error, and context stay out of the output.
+ * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #0f37b79
+ *   Read formatMessage, sanitizeContextValue, and redactLogText, and ran
+ *   logger.test.ts: phone numbers, key/value credentials (compound and
+ *   quoted), and URL passwords stay out of messages, errors, and context
+ *   in JSON and text modes.
  */
 export class Logger {
   private config: LoggerConfig;
@@ -174,10 +181,7 @@ export class Logger {
     const error = entry.error && {
       name: entry.error.name,
       message: redactLogText(entry.error.message),
-      stack:
-        entry.error.stack === undefined
-          ? undefined
-          : redactLogText(entry.error.stack),
+      stack: entry.error.stack ? redactLogText(entry.error.stack) : undefined,
     };
 
     if (this.config.enableJson) {
