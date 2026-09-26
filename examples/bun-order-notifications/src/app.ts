@@ -43,6 +43,13 @@ export function createApp({ apiToken, notifier, tracking }: AppOptions): Hono {
     if (outcome.isFailure) {
       logFailure(parsed.value, outcome.error);
       const failure = describeFailure(outcome.error);
+      const { retryAfterMs } = outcome.error;
+      if (failure.status === 429 && retryAfterMs !== undefined) {
+        c.header(
+          "Retry-After",
+          String(Math.max(1, Math.ceil(retryAfterMs / 1000))),
+        );
+      }
       return c.json(errorBody(failure.code, failure.message), failure.status);
     }
     return c.json({ messageId: outcome.value.messageId }, 202);
@@ -159,9 +166,13 @@ function invalidJson(c: Context) {
   );
 }
 
+const MAX_PROBLEMS_SHOWN = 10;
+
 function invalidRequest(c: Context, problems: string[]) {
-  const shown = problems.slice(0, 10).join("; ");
-  return c.json(errorBody("INVALID_REQUEST", shown), 400);
+  const hidden = problems.length - MAX_PROBLEMS_SHOWN;
+  const shown = problems.slice(0, MAX_PROBLEMS_SHOWN).join("; ");
+  const message = hidden > 0 ? `${shown}; and ${hidden} more` : shown;
+  return c.json(errorBody("INVALID_REQUEST", message), 400);
 }
 
 function errorBody(code: string, message: string) {

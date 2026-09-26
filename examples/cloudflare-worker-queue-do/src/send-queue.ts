@@ -92,7 +92,10 @@ const IDEMPOTENCY_PREFIX = "idempotency/";
 const IN_FLIGHT_KEY = "in-flight";
 const STATS_KEY = "stats";
 
-/** A provider call that takes longer fails as NETWORK_TIMEOUT, a retryable code. */
+/**
+ * A provider call that takes longer fails as NETWORK_TIMEOUT, a retryable
+ * code. The SOLAPI SDK ignores the signal, so SOLAPI calls are not bounded.
+ */
 const SEND_TIMEOUT_MS = 10_000;
 /** Jobs per pass. A full pass sets the alarm to fire again at once. */
 const BATCH_SIZE = 25;
@@ -201,7 +204,12 @@ export class SendQueue extends DurableObject<Env> {
   }
 
   private getSender(): Promise<Sender> {
-    this.sender ??= createSender(this.env);
+    // A failed build is not kept, so a transient failure, such as a failed
+    // provider import, does not fail every later pass.
+    this.sender ??= createSender(this.env).catch((error: unknown) => {
+      this.sender = undefined;
+      throw error;
+    });
     return this.sender;
   }
 

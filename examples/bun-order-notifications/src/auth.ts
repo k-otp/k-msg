@@ -8,7 +8,7 @@ import type { MiddlewareHandler } from "hono";
 export function requireBearerToken(token: string): MiddlewareHandler {
   const expected = sha256(token);
   return async (c, next) => {
-    const presented = /^Bearer (\S+)$/.exec(
+    const presented = /^Bearer\s+(\S+)\s*$/i.exec(
       c.req.header("authorization") ?? "",
     )?.[1];
     if (
