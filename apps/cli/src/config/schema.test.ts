@@ -35,4 +35,14 @@ describe("provider config schema", () => {
       expect(result.error.issues[0]?.message).toContain("apiKey");
     }
   });
+
+  test("rejects an IWINV entry without a config object", () => {
+    // A defaulted `{}` must go through the same credential check.
+    const result = kMsgCliConfigSchema.safeParse({
+      version: 1,
+      providers: [{ type: "iwinv", id: "iwinv" }],
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

@@ -139,7 +139,6 @@
                 "minLength": 1
               },
               "config": {
-                "default": {},
                 "type": "object",
                 "properties": {
                   "apiKey": {
