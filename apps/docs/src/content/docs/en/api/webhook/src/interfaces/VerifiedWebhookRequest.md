@@ -5,7 +5,7 @@ prev: false
 title: "VerifiedWebhookRequest"
 ---
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L69)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L70)
 
 A request that [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhookrequest/) accepted.
 
@@ -15,6 +15,6 @@ A request that [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhoo
 
 > **timestamp**: `Date`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L71)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L72)
 
 When the sender signed the request, from `X-Webhook-Timestamp`.

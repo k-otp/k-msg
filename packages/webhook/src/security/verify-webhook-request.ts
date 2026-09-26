@@ -14,7 +14,8 @@ export type WebhookRequestHeaders =
 
 /**
  * The raw request body, exactly as received. Parsing and re-serializing JSON
- * changes the bytes and breaks the signature.
+ * changes the bytes and breaks the signature. Bytes are checked exactly, so
+ * they must be valid UTF-8, as the sender's always are.
  */
 export type WebhookRequestBody = string | Uint8Array | ArrayBuffer;
 
@@ -42,7 +43,7 @@ export interface VerifyWebhookRequestOptions
  * - `MISSING_SIGNATURE`: the signature header is missing or empty.
  * - `MISSING_TIMESTAMP`: the `X-Webhook-Timestamp` header is missing or empty.
  * - `INVALID_SIGNATURE`: the signature does not match the body, timestamp,
- *   and secret.
+ *   and secret, or a byte body is not valid UTF-8.
  * - `INVALID_TIMESTAMP`: the signed timestamp is not a whole number of
  *   seconds.
  * - `STALE_TIMESTAMP`: the signed time is further from now than
@@ -89,11 +90,19 @@ function readHeader(
   return undefined;
 }
 
-function readBody(body: WebhookRequestBody): string {
+// The sender signs a UTF-8 JSON string, and decoding well-formed UTF-8 (with
+// any leading BOM kept) gives back exactly those bytes. Malformed bytes are
+// refused rather than replaced: replacement would let different bytes, such
+// as FF in place of a signed U+FFFD, pass as the signed body.
+function readBody(body: WebhookRequestBody): string | undefined {
   if (typeof body === "string") return body;
-  // The sender signs a UTF-8 JSON string. Keep a leading BOM so the bytes
-  // are checked as received.
-  return new TextDecoder("utf-8", { ignoreBOM: true }).decode(body);
+  try {
+    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+      body,
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -163,13 +172,10 @@ export function verifyWebhookRequest(
     );
   }
 
+  const text = readBody(body);
   if (
-    !security.verifySignatureWithTimestamp(
-      readBody(body),
-      timestamp,
-      signature,
-      secret,
-    )
+    text === undefined ||
+    !security.verifySignatureWithTimestamp(text, timestamp, signature, secret)
   ) {
     return fail(
       new WebhookVerificationError(
