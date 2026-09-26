@@ -7,7 +7,7 @@ title: "createAligoProvider"
 
 > **createAligoProvider**(`config`): [`AligoProvider`](/en/api/provider/src/aligo/classes/aligoprovider/)
 
-Defined in: [packages/provider/src/aligo/provider.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L70)
+Defined in: [packages/provider/src/aligo/provider.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L79)
 
 Aligo Provider package entrypoint
 
