@@ -170,3 +170,14 @@ export const providerConfigFieldSpecs = {
 } as const satisfies Record<string, ProviderConfigFieldMap>;
 
 export type ProviderTypeWithConfig = keyof typeof providerConfigFieldSpecs;
+
+/**
+ * Key sets a provider config must contain one of in full, beyond the fields
+ * marked `required`: an IWINV config needs the AlimTalk `apiKey`, or both SMS
+ * keys.
+ */
+export const providerConfigKeyAlternatives: Partial<
+  Record<ProviderTypeWithConfig, readonly (readonly string[])[]>
+> = {
+  iwinv: [["apiKey"], ["smsApiKey", "smsAuthKey"]],
+};
