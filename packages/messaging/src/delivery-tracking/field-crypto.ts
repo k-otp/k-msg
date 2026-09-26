@@ -615,14 +615,21 @@ export async function applyTrackingCryptoOnWrite(
     let metadataEnc: string | undefined;
     if (record.metadata && shouldEncrypt(metadataMode)) {
       const metadataString = JSON.stringify(record.metadata);
+      // Metadata takes the resolved key like the recipient and sender, or a
+      // tenant or rotated key would cover only some of the record.
+      const kid = await resolveEncryptKid(config, {
+        ...keyContext,
+        fieldPath: "metadata",
+      });
       const encrypted = await config.provider.encrypt({
         value: metadataString,
         aad: buildAad(config, keyContext, "metadata"),
         path: "metadata",
+        ...(kid ? { kid } : {}),
       });
       metadataEnc = toCiphertextEnvelopeString(encrypted.ciphertext);
-      if (!activeKid && encrypted.kid) {
-        activeKid = encrypted.kid;
+      if (!activeKid) {
+        activeKid = encrypted.kid ?? kid;
       }
     }
 
