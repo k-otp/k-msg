@@ -42,6 +42,7 @@ const resolved = resolver.resolve({
 });
 
 // precedence: explicit > alias > defaults > provider config
+// aliases (named or defaults.kakao.channel) bound to another provider are skipped
 console.log(resolved.senderKey, resolved.plusId);
 ```
 

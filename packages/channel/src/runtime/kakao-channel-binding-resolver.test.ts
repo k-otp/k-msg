@@ -60,6 +60,93 @@ describe("KakaoChannelBindingResolver", () => {
     expect(providerOnly.senderKeySource).toBe("provider_config");
   });
 
+  test("skips aliases bound to another provider", () => {
+    // Shaped like `k-msg config init --template full`: the default channel
+    // alias belongs to aligo.
+    const aligo = {
+      id: "aligo",
+      type: "aligo",
+      config: { senderKey: "aligo-config-sender" },
+    };
+    const config = {
+      defaults: { kakao: { channel: "main" } },
+      aliases: {
+        kakaoChannels: {
+          main: {
+            providerId: "aligo",
+            senderKey: "aligo-sender",
+            plusId: "@aligo",
+            name: "Main Channel",
+          },
+        },
+      },
+      providers: [
+        aligo,
+        { id: "solapi", type: "solapi", config: { kakaoPfId: "solapi-pf-id" } },
+      ],
+    };
+    const resolver = new KakaoChannelBindingResolver(config);
+
+    const solapi = resolver.resolve({ providerId: "solapi" });
+    expect(solapi.senderKey).toBe("solapi-pf-id");
+    expect(solapi.senderKeySource).toBe("provider_config");
+    expect(solapi.plusId).toBeUndefined();
+    expect(solapi.name).toBeUndefined();
+
+    const namedAlias = resolver.resolve({
+      providerId: "solapi",
+      channelAlias: "main",
+      strictAlias: true,
+    });
+    expect(namedAlias.senderKey).toBe("solapi-pf-id");
+    expect(namedAlias.senderKeySource).toBe("provider_config");
+    expect(namedAlias.plusId).toBeUndefined();
+
+    // Without a pfId of its own, SOLAPI gets no sender key rather than
+    // aligo's.
+    const withoutPfId = new KakaoChannelBindingResolver({
+      ...config,
+      providers: [aligo, { id: "solapi", type: "solapi", config: {} }],
+    }).resolve({ providerId: "solapi" });
+    expect(withoutPfId.senderKey).toBeUndefined();
+    expect(withoutPfId.senderKeySource).toBeUndefined();
+
+    const ownProvider = resolver.resolve({ providerId: "aligo" });
+    expect(ownProvider.senderKey).toBe("aligo-sender");
+    expect(ownProvider.senderKeySource).toBe("defaults");
+    expect(ownProvider.plusId).toBe("@aligo");
+    expect(ownProvider.name).toBe("Main Channel");
+  });
+
+  test("does not fill a named alias from another provider's default alias", () => {
+    const resolver = new KakaoChannelBindingResolver({
+      defaults: { kakao: { channel: "main" } },
+      aliases: {
+        kakaoChannels: {
+          main: {
+            providerId: "aligo",
+            senderKey: "aligo-sender",
+            plusId: "@aligo",
+          },
+          promo: { providerId: "solapi", plusId: "@promo" },
+        },
+      },
+      providers: [
+        { id: "aligo", type: "aligo", config: {} },
+        { id: "solapi", type: "solapi", config: { kakaoPfId: "solapi-pf-id" } },
+      ],
+    });
+
+    const promo = resolver.resolve({ channelAlias: "promo" });
+
+    expect(promo.providerId).toBe("solapi");
+    expect(promo.providerIdSource).toBe("alias");
+    expect(promo.senderKey).toBe("solapi-pf-id");
+    expect(promo.senderKeySource).toBe("provider_config");
+    expect(promo.plusId).toBe("@promo");
+    expect(promo.plusIdSource).toBe("alias");
+  });
+
   test("lists solapi config binding with source=config", () => {
     const resolver = new KakaoChannelBindingResolver({
       providers: [
