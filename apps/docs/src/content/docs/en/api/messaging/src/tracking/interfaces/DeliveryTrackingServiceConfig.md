@@ -21,13 +21,14 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:154](https://gi
 
 > `optional` **onStatusChange?**: (`change`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L164)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L165)
 
 Called for each record a poll stored with a different status, with the
 record as stored, after the poll finishes: for example, to notify a
 webhook when a message is delivered or fails. Calls run one at a time,
-in the order changes were stored, each with its own copy of the record.
-It does not stop polling if it throws. Delivery is at least once:
+in the order changes were stored, each with its own copy of the record;
+see `runOnce()` for the one exception, in runtimes without
+AsyncLocalStorage. It does not stop polling if it throws. Delivery is at least once:
 services polling the same store can each report the same change, so
 make it idempotent, for example by message id and status.
 
@@ -47,7 +48,7 @@ make it idempotent, for example by message id and status.
 
 > `optional` **onStatusChangeError?**: (`error`, `change`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L169)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L170)
 
 Receives what `onStatusChange` throws. Without it, or when it throws
 too, the error is written to `console.error`.
