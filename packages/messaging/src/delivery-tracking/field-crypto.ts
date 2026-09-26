@@ -4,13 +4,13 @@ import {
   type FieldCryptoCircuitState,
   type FieldCryptoConfig,
   FieldCryptoError,
-  type FieldCryptoFailMode,
   type FieldCryptoKeyContext,
   type FieldCryptoMetricEvent,
   type FieldCryptoOpenFallback,
   type FieldMode,
   normalizePhoneForHash,
   resolveFieldCryptoFailMode,
+  resolveFieldCryptoOpenFallback,
   resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
@@ -175,16 +175,6 @@ async function emitCircuitStateMetric(
   );
 }
 
-function resolveFailMode(config: FieldCryptoConfig): FieldCryptoFailMode {
-  return resolveFieldCryptoFailMode(config);
-}
-
-function resolveOpenFallback(
-  config: FieldCryptoConfig,
-): FieldCryptoOpenFallback {
-  return config.openFallback ?? "masked";
-}
-
 function shouldEncrypt(mode: FieldMode): boolean {
   return mode === "encrypt" || mode === "encrypt+hash";
 }
@@ -301,7 +291,7 @@ function failOrOpen(
   path: string,
   error: unknown,
 ): never {
-  const failMode = resolveFailMode(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   if (failMode === "open") {
     throw new FieldCryptoError(
       "policy",
@@ -313,7 +303,7 @@ function failOrOpen(
       {
         fieldPath: path,
         failMode,
-        openFallback: resolveOpenFallback(config),
+        openFallback: resolveFieldCryptoOpenFallback(config),
         causeChain: [error],
       },
     );
@@ -521,8 +511,8 @@ export async function applyTrackingCryptoOnWrite(
   }
 
   const started = nowMs();
-  const fallback = resolveOpenFallback(config);
-  const failMode = resolveFailMode(config);
+  const fallback = resolveFieldCryptoOpenFallback(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   const keyContext = {
     ...context,
     messageId: record.messageId,
@@ -785,8 +775,8 @@ export async function restoreTrackingCryptoOnRead(
     };
   }
 
-  const fallback = resolveOpenFallback(config);
-  const failMode = resolveFailMode(config);
+  const fallback = resolveFieldCryptoOpenFallback(config);
+  const failMode = resolveFieldCryptoFailMode(config);
   const started = nowMs();
 
   const next: TrackingRecord = {
@@ -1007,7 +997,7 @@ async function hashFilterValue(
       path,
     });
   } catch (error) {
-    const failMode = resolveFailMode(config);
+    const failMode = resolveFieldCryptoFailMode(config);
     if (failMode === "closed") {
       failOrOpen(config, "hash", path, error);
     }

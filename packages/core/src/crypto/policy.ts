@@ -2,6 +2,7 @@ import { FieldCryptoError } from "./errors";
 import type {
   FieldCryptoConfig,
   FieldCryptoFailMode,
+  FieldCryptoOpenFallback,
   FieldMode,
 } from "./types";
 
@@ -48,8 +49,12 @@ export function resolveFieldMode(
   return fallback;
 }
 
-const FAIL_MODES: readonly unknown[] = ["closed", "open"];
-const OPEN_FALLBACKS: readonly unknown[] = ["masked", "plaintext", "null"];
+const FAIL_MODES: readonly FieldCryptoFailMode[] = ["closed", "open"];
+const OPEN_FALLBACKS: readonly FieldCryptoOpenFallback[] = [
+  "masked",
+  "plaintext",
+  "null",
+];
 
 /**
  * The fail mode to apply. Only an explicit `"open"` fails open; a missing or
@@ -59,6 +64,19 @@ export function resolveFieldCryptoFailMode(
   config: Pick<FieldCryptoConfig, "failMode">,
 ): FieldCryptoFailMode {
   return config.failMode === "open" ? "open" : "closed";
+}
+
+/**
+ * The fallback a fail-open write stores. A missing or unrecognized value
+ * falls back to `"masked"`.
+ */
+export function resolveFieldCryptoOpenFallback(
+  config: Pick<FieldCryptoConfig, "openFallback">,
+): FieldCryptoOpenFallback {
+  const fallback = config.openFallback;
+  return fallback !== undefined && OPEN_FALLBACKS.includes(fallback)
+    ? fallback
+    : "masked";
 }
 
 export function validateFieldCryptoConfig(
@@ -176,7 +194,7 @@ export function validateFieldCryptoConfig(
   }
 
   const failMode = resolveFieldCryptoFailMode(config);
-  const openFallback = config.openFallback ?? "masked";
+  const openFallback = resolveFieldCryptoOpenFallback(config);
   if (
     failMode === "open" &&
     openFallback === "plaintext" &&

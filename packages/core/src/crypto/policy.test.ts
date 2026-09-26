@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   assertFieldCryptoConfig,
   resolveFieldCryptoFailMode,
+  resolveFieldCryptoOpenFallback,
   resolveFieldMode,
   validateFieldCryptoConfig,
 } from "./policy";
@@ -84,6 +85,19 @@ describe("field crypto policy", () => {
       "closed",
     );
     expect(resolveFieldCryptoFailMode({ failMode: "open" })).toBe("open");
+  });
+
+  test("resolveFieldCryptoOpenFallback masks unless a known fallback is set", () => {
+    expect(resolveFieldCryptoOpenFallback({})).toBe("masked");
+    expect(
+      resolveFieldCryptoOpenFallback({ openFallback: "maskedd" as never }),
+    ).toBe("masked");
+    expect(resolveFieldCryptoOpenFallback({ openFallback: "null" })).toBe(
+      "null",
+    );
+    expect(resolveFieldCryptoOpenFallback({ openFallback: "plaintext" })).toBe(
+      "plaintext",
+    );
   });
 
   test("assertFieldCryptoConfig rejects plain lookup fields in secure mode", () => {
