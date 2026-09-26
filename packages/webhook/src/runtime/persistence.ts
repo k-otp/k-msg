@@ -59,6 +59,8 @@ function matchesDeliveryOptions(
   return true;
 }
 
+// Stores and returns copies, so changing an endpoint object a caller holds
+// cannot change a stored endpoint or get around the id and URL checks.
 export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   private readonly endpoints = new Map<string, WebhookEndpoint>();
 
@@ -68,7 +70,7 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
     }
     this.assertUrlAvailable(endpoint.url, endpoint.id);
 
-    this.endpoints.set(endpoint.id, endpoint);
+    this.endpoints.set(endpoint.id, structuredClone(endpoint));
   }
 
   async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
@@ -77,7 +79,7 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
     }
     this.assertUrlAvailable(endpoint.url, endpointId);
 
-    this.endpoints.set(endpointId, endpoint);
+    this.endpoints.set(endpointId, structuredClone(endpoint));
   }
 
   private assertUrlAvailable(url: string, endpointId: string): void {
@@ -93,11 +95,14 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   }
 
   async get(endpointId: string): Promise<WebhookEndpoint | null> {
-    return this.endpoints.get(endpointId) ?? null;
+    const endpoint = this.endpoints.get(endpointId);
+    return endpoint ? structuredClone(endpoint) : null;
   }
 
   async list(): Promise<WebhookEndpoint[]> {
-    return Array.from(this.endpoints.values()).sort(sortByUpdatedAtDesc);
+    return Array.from(this.endpoints.values(), (endpoint) =>
+      structuredClone(endpoint),
+    ).sort(sortByUpdatedAtDesc);
   }
 }
 

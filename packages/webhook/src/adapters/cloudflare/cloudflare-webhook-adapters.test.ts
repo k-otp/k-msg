@@ -56,8 +56,12 @@ function createEvent(): WebhookEvent {
   };
 }
 
-function createSqliteBackedD1(): { db: D1DatabaseLike; close: () => void } {
+function createSqliteBackedD1(options: { reportChanges?: boolean } = {}): {
+  db: D1DatabaseLike;
+  close: () => void;
+} {
   const sqlite = new Database(":memory:");
+  const reportChanges = options.reportChanges ?? true;
 
   const db: D1DatabaseLike = {
     prepare(query: string) {
@@ -79,8 +83,11 @@ function createSqliteBackedD1(): { db: D1DatabaseLike; close: () => void } {
         },
         async run() {
           const statement = sqlite.query(query);
-          statement.run(...params);
-          return undefined;
+          const { changes } = statement.run(...params);
+          // D1 returns a D1Result whose meta counts the changed rows.
+          return reportChanges
+            ? { success: true, meta: { changes } }
+            : undefined;
         },
       };
     },
@@ -323,6 +330,43 @@ describe.each([
     expect((await store.get("b"))?.url).toBe("https://example.com/b");
   });
 
+  test("update rejects an id that is not stored", async () => {
+    await expect(
+      store.update(
+        "missing",
+        createStoredEndpoint({ id: "missing", url: "https://example.com/m" }),
+      ),
+    ).rejects.toThrow("not found");
+    expect(await store.list()).toHaveLength(0);
+  });
+
+  test("changing an object after add(), get() or list() leaves the store alone", async () => {
+    const added = createStoredEndpoint({
+      id: "a",
+      url: "https://example.com/a",
+    });
+    await store.add(added);
+    await store.add(
+      createStoredEndpoint({ id: "b", url: "https://example.com/b" }),
+    );
+
+    added.url = "https://example.com/b";
+    const fetched = await store.get("b");
+    if (fetched) {
+      fetched.url = "https://example.com/a";
+      fetched.events.push(WebhookEventType.MESSAGE_FAILED);
+    }
+    const [listed] = await store.list();
+    if (listed) listed.id = "c";
+
+    expect((await store.get("a"))?.url).toBe("https://example.com/a");
+    expect(await store.get("b")).toMatchObject({
+      url: "https://example.com/b",
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+    expect(await store.get("c")).toBeNull();
+  });
+
   test("update changes an endpoint in place", async () => {
     const createdAt = new Date("2026-01-01T00:00:00.000Z");
     await store.add(
@@ -356,5 +400,69 @@ describe.each([
       updatedAt,
     });
     expect(await store.list()).toHaveLength(1);
+  });
+});
+
+// Another request removes the endpoint just before this store's UPDATE runs.
+function removeBeforeUpdate(
+  db: D1DatabaseLike,
+  endpointId: string,
+): D1DatabaseLike {
+  return {
+    prepare(query: string) {
+      const statement = db.prepare(query);
+      if (!query.trimStart().startsWith("UPDATE")) return statement;
+      const remove = () =>
+        db
+          .prepare("DELETE FROM kmsg_webhook_endpoints WHERE id = ?")
+          .bind(endpointId)
+          .run();
+      return {
+        bind(...values: unknown[]) {
+          statement.bind(...values);
+          return this;
+        },
+        async first<T extends Record<string, unknown>>() {
+          await remove();
+          return statement.first<T>();
+        },
+        async all<T extends Record<string, unknown>>() {
+          await remove();
+          return statement.all<T>();
+        },
+        async run() {
+          await remove();
+          return statement.run();
+        },
+      };
+    },
+  };
+}
+
+describe.each([
+  ["reports changed rows", true],
+  ["reports no changed rows", false],
+])("D1 endpoint store on a database that %s", (_label, reportChanges) => {
+  test("update rejects an endpoint removed while it runs", async () => {
+    const sqliteD1 = createSqliteBackedD1({ reportChanges });
+    try {
+      const { endpointStore } = createD1WebhookPersistence(sqliteD1.db);
+      await endpointStore.add(
+        createStoredEndpoint({ id: "a", url: "https://example.com/a" }),
+      );
+      const racing = createD1WebhookPersistence(
+        removeBeforeUpdate(sqliteD1.db, "a"),
+      ).endpointStore;
+
+      await expect(
+        racing.update(
+          "a",
+          createStoredEndpoint({ id: "a", url: "https://example.com/a2" }),
+        ),
+      ).rejects.toThrow("not found");
+      expect(await endpointStore.list()).toHaveLength(0);
+    } finally {
+      sqliteD1.close();
+    }
   });
 });
