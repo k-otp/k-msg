@@ -186,6 +186,36 @@ function createRuntime(env: Env): WebhookRuntimeService {
 
 `createD1WebhookPersistence()` initializes schema automatically by default.
 
+## Registering endpoints
+
+Endpoint ids and URLs are unique, and registering never replaces an endpoint.
+`addEndpoint()` rejects an id or URL that is already registered with
+`WebhookEndpointConflictError`: its `field` is `"id"` or `"url"`, and its
+`endpointId` is the registered endpoint's id. `updateEndpoint()` rejects a URL
+that another endpoint uses in the same way. Change an endpoint's secret,
+events or URL with `updateEndpoint()`.
+
+```ts
+import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
+
+try {
+  await runtime.addEndpoint({
+    url: "https://example.com/webhooks/k-msg",
+    active: true,
+    events: [WebhookEventType.MESSAGE_SENT],
+  });
+} catch (error) {
+  if (error instanceof WebhookEndpointConflictError) {
+    // For example, answer 409 Conflict and point at error.endpointId.
+  }
+  throw error;
+}
+```
+
+URLs are compared exactly as stored. If the same address can reach you
+spelled differently, such as with an uppercase host or an explicit `:443`,
+register `new URL(url).href`.
+
 ## Schema helpers (Cloudflare)
 
 ```ts
@@ -202,7 +232,10 @@ await initializeWebhookSchema(env.DB);
 ## SQLite / Drizzle(Postgres) snippets
 
 `WebhookRuntimeService` accepts custom stores via `endpointStore` + `deliveryStore`.
-Implement the same interfaces to plug any backend:
+Implement the same interfaces to plug any backend. An endpoint store's `add()`
+must reject an id or URL that is already stored, and its `update()` a URL that
+another endpoint uses, with `WebhookEndpointConflictError`; a unique index on
+the URL column does most of the work.
 
 ```ts
 import type {
