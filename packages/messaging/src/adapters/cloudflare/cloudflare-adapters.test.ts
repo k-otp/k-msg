@@ -817,6 +817,35 @@ describe("Cloudflare backend helpers", () => {
     expect(new Set(keys).size).toBe(2500);
   });
 
+  test("stops listing when DurableObject storage ignores startAfter", async () => {
+    const data = new Map<string, string>();
+    for (let index = 0; index < 1500; index += 1) {
+      data.set(`job:${String(index).padStart(5, "0")}`, "{}");
+    }
+    // Returns the first page for every call, as a storage shim that does not
+    // know startAfter would.
+    const doStorage = {
+      async get<T>(key: string) {
+        return data.get(key) as T | undefined;
+      },
+      async put<T>(key: string, value: T) {
+        data.set(key, String(value));
+      },
+      async delete(key: string) {
+        return data.delete(key);
+      },
+      async list<T>(options?: { limit?: number }) {
+        return new Map(
+          Array.from(data.entries()).slice(0, options?.limit),
+        ) as Map<string, T>;
+      },
+    };
+
+    const keys = await createDurableObjectStorage(doStorage).list("job:");
+
+    expect(keys).toHaveLength(1000);
+  });
+
   test("creates DurableObject-backed store/queue", async () => {
     const data = new Map<string, string>();
     const doStorage = {
