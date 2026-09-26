@@ -225,6 +225,15 @@ k-msg db schema generate \
   --format sql \
   --out-dir ./db \
   --sql-file tracking.sql
+
+# { tableName: "otp_tracking", typeStrategy: { timestamp: "date" } }로
+# 만든 스토어의 tracking 테이블
+k-msg db schema print \
+  --dialect postgres \
+  --target tracking \
+  --format sql \
+  --tracking-table otp_tracking \
+  --timestamp-type date
 ```
 
 옵션:
@@ -232,6 +241,10 @@ k-msg db schema generate \
 - `--dialect <postgres|mysql|sqlite>`: 필수
 - `--target <tracking|queue|both>`: 기본값 `both`
 - `--format <drizzle|sql|both>`: 기본값 `both`
+- 스토어나 큐와 같은 옵션을 넘겨야 그 스토어가 기대하는 스키마가 나옵니다:
+  - `--message-id-type <text|uuid|varchar>`, `--id-type <text|varchar>`, `--short-text-type <text|varchar>`, `--timestamp-type <bigint|integer|date>`, `--json-type <auto|text>`: tracking 스토어의 `typeStrategy` (기본값 `text`, `text`, `varchar`, `bigint`, `auto`)
+  - `--tracking-table <name>`(기본값 `kmsg_delivery_tracking`), `--queue-table <name>`(기본값 `kmsg_jobs`)
+  - `--store-raw`: `storeRaw: true`처럼 tracking `raw` 컬럼을 추가합니다 (기본값 `false`)
 - `generate` 전용:
   - `--out-dir <path>` 기본 현재 디렉터리
   - `--drizzle-file <name>` 기본 `kmsg.schema.ts`
