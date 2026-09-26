@@ -279,6 +279,52 @@ describe("CircuitBreaker", () => {
     expect(opened).toBe(1);
   });
 
+  test("reset releases the half-open trial slot to the next trial only", async () => {
+    const circuitBreaker = new CircuitBreaker({
+      failureThreshold: 1,
+      timeout: 1000,
+      resetTimeout: 10,
+    });
+    const openCircuit = async () => {
+      await expect(
+        circuitBreaker.execute(async () => {
+          throw new Error("Service failure");
+        }),
+      ).rejects.toThrow();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    };
+    const startTrial = () => {
+      let settle: (error?: Error) => void = () => {};
+      const promise = circuitBreaker.execute(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            settle = (error) => (error ? reject(error) : resolve());
+          }),
+      );
+      return { promise, settle: (error?: Error) => settle(error) };
+    };
+
+    await openCircuit();
+    const staleTrial = startTrial();
+    circuitBreaker.reset();
+    await openCircuit();
+    // reset() freed the slot, so the reopened circuit admits a new trial.
+    const trial = startTrial();
+
+    // The stale trial fails late and reopens the circuit, but settling it must
+    // not free the slot the current trial still holds.
+    staleTrial.settle(new Error("late failure"));
+    await expect(staleTrial.promise).rejects.toThrow("late failure");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    await expect(circuitBreaker.execute(async () => "extra")).rejects.toThrow(
+      "trial call is in flight",
+    );
+
+    trial.settle();
+    await trial.promise;
+    expect(circuitBreaker.getState()).toBe("CLOSED");
+  });
+
   test("reports an opening once when in-flight calls fail late", async () => {
     let opened = 0;
     const circuitBreaker = new CircuitBreaker({
