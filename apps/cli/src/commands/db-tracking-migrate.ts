@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   applyFieldCryptoMigration,
   type CloudflareSqlClient,
+  type FieldCryptoMigrationApplyResult,
   getFieldCryptoMigrationStatus,
   getLatestFieldCryptoMigrationRun,
   planFieldCryptoMigration,
@@ -39,7 +40,9 @@ function toSqliteBindings(values: readonly unknown[]): SqliteBinding[] {
 // A failed run must fail the command, or automation would move on to the
 // next rollout stage with the migration incomplete. 3 is the CLI's runtime
 // failure code.
-function exitCodeForRun(result: { status: string }): number | undefined {
+function exitCodeForRun(
+  result: Pick<FieldCryptoMigrationApplyResult, "status">,
+): number | undefined {
   return result.status === "failed" ? 3 : undefined;
 }
 
