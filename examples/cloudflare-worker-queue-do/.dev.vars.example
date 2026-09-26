@@ -1,0 +1,26 @@
+# Copy to .dev.vars for `wrangler dev` (git-ignored). Values here override
+# "vars" in wrangler.jsonc. In production, use `wrangler secret put`.
+
+# Required. Bearer token for every endpoint, at least 32 characters.
+# Generate one with: openssl rand -hex 32
+API_TOKEN=
+
+# The default provider is mock: nothing is sent and no keys are needed.
+# To send for real, pick a provider, set its keys, and set the sender number
+# registered with it (digits only).
+# KMSG_PROVIDER=iwinv
+# KMSG_SENDER_NUMBER=0212345678
+
+# KMSG_PROVIDER=iwinv: the AlimTalk key plus the SMS key pair
+# IWINV_API_KEY=
+# IWINV_SMS_API_KEY=
+# IWINV_SMS_AUTH_KEY=
+
+# KMSG_PROVIDER=solapi
+# SOLAPI_API_KEY=
+# SOLAPI_API_SECRET=
+
+# KMSG_PROVIDER=aligo (test mode validates requests without sending them)
+# ALIGO_API_KEY=
+# ALIGO_USER_ID=
+# ALIGO_TEST_MODE=false

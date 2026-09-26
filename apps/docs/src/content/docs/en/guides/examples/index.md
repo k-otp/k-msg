@@ -5,34 +5,30 @@ description: Choose the starter example that matches your runtime and delivery g
 
 This hub helps you choose the right example by runtime and goal.
 
-- First send-only check: [express-node-send-only](/en/guides/examples/express-node-send-only/)
-- Cloudflare queue/tracking: [hono-worker-queue-do](/en/guides/examples/hono-worker-queue-do/), [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/)
-- Webhook runtime: [hono-worker-webhook-d1](/en/guides/examples/hono-worker-webhook-d1/)
+- OTP request and verification: [node-express-otp](/en/guides/examples/node-express-otp/)
+- AlimTalk order notifications with delivery tracking: [bun-order-notifications](/en/guides/examples/bun-order-notifications/)
+- Cloudflare: [cloudflare-worker-d1](/en/guides/examples/cloudflare-worker-d1/) (tracking and webhooks), [cloudflare-worker-queue-do](/en/guides/examples/cloudflare-worker-queue-do/) (queue), [cloudflare-worker-hyperdrive](/en/guides/examples/cloudflare-worker-hyperdrive/) (Postgres)
 
 ## Quick picks
 
 | Goal | Recommended example | Pick it first when |
 | --- | --- | --- |
-| Fastest send-only proof | [express-node-send-only](/en/guides/examples/express-node-send-only/) | You want the shortest path on Node |
-| Lightweight Bun API server | [hono-bun-send-only](/en/guides/examples/hono-bun-send-only/) | You are building with Bun + Hono |
-| Send-only deploy on Pages Functions | [hono-pages-send-only](/en/guides/examples/hono-pages-send-only/) | You want the simplest Cloudflare Pages entry point |
-| Queue processing on Workers | [hono-worker-queue-do](/en/guides/examples/hono-worker-queue-do/) | You need Durable Objects-based async processing |
-| Delivery tracking on Workers + D1 | [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/) | You want Cloudflare-native tracking storage |
-| Delivery tracking on Pages + Hyperdrive | [hono-pages-tracking-hyperdrive](/en/guides/examples/hono-pages-tracking-hyperdrive/) | You are staying on Pages but need Hyperdrive |
-| Webhook ingestion and runtime operations | [hono-worker-webhook-d1](/en/guides/examples/hono-worker-webhook-d1/) | You need event intake, retries, and persistence |
+| OTP and verification codes | [node-express-otp](/en/guides/examples/node-express-otp/) | You need a Node backend that sends and verifies codes safely |
+| AlimTalk with SMS fallback | [bun-order-notifications](/en/guides/examples/bun-order-notifications/) | You send order or shipping updates and want to know they arrived |
+| Tracking and status webhooks on Workers | [cloudflare-worker-d1](/en/guides/examples/cloudflare-worker-d1/) | You run on Cloudflare and push status changes to other services |
+| Queued sending on Workers | [cloudflare-worker-queue-do](/en/guides/examples/cloudflare-worker-queue-do/) | You want sends decoupled from requests, with idempotent retries |
+| Tracking in Postgres on Workers | [cloudflare-worker-hyperdrive](/en/guides/examples/cloudflare-worker-hyperdrive/) | Your tracking data belongs in an existing Postgres database |
 
 ## Recommended reading path
 
-- New users: start with [express-node-send-only](/en/guides/examples/express-node-send-only/) or [hono-bun-send-only](/en/guides/examples/hono-bun-send-only/) to validate the send-only flow first
-- Cloudflare-focused teams: [hono-pages-send-only](/en/guides/examples/hono-pages-send-only/) -> [hono-worker-queue-do](/en/guides/examples/hono-worker-queue-do/) -> [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/)
-- Webhook-heavy systems: start with [hono-worker-webhook-d1](/en/guides/examples/hono-worker-webhook-d1/) and pair it with [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/) when you also need delivery state
+- New users: follow one send end to end in [node-express-otp](/en/guides/examples/node-express-otp/), then AlimTalk, fallback, and tracking in [bun-order-notifications](/en/guides/examples/bun-order-notifications/)
+- Cloudflare-focused teams: [cloudflare-worker-d1](/en/guides/examples/cloudflare-worker-d1/) -> [cloudflare-worker-queue-do](/en/guides/examples/cloudflare-worker-queue-do/), and [cloudflare-worker-hyperdrive](/en/guides/examples/cloudflare-worker-hyperdrive/) when tracking must live in Postgres
+- Webhook-driven systems: start with the signed status webhooks and verifying receiver in [cloudflare-worker-d1](/en/guides/examples/cloudflare-worker-d1/)
 
 ## Example directory
 
-- [express-node-send-only](/en/guides/examples/express-node-send-only/): Minimal Node + Express send-only server.
-- [hono-bun-send-only](/en/guides/examples/hono-bun-send-only/): Fast Bun + Hono send-only API.
-- [hono-pages-send-only](/en/guides/examples/hono-pages-send-only/): Cloudflare Pages Functions send-only starter.
-- [hono-pages-tracking-hyperdrive](/en/guides/examples/hono-pages-tracking-hyperdrive/): Pages + Hyperdrive example with delivery tracking.
-- [hono-worker-queue-do](/en/guides/examples/hono-worker-queue-do/): Workers + Durable Objects queue processing example.
-- [hono-worker-tracking-d1](/en/guides/examples/hono-worker-tracking-d1/): Workers + D1 delivery tracking example.
-- [hono-worker-webhook-d1](/en/guides/examples/hono-worker-webhook-d1/): Workers + D1 webhook runtime example.
+- [bun-order-notifications](/en/guides/examples/bun-order-notifications/): Order notifications on Bun: AlimTalk with SMS fallback, batches, and SQLite delivery tracking.
+- [cloudflare-worker-d1](/en/guides/examples/cloudflare-worker-d1/): Workers + D1: delivery tracking on a cron and signed webhooks for status changes.
+- [cloudflare-worker-hyperdrive](/en/guides/examples/cloudflare-worker-hyperdrive/): Workers + Hyperdrive: delivery tracking in Postgres with cron polling.
+- [cloudflare-worker-queue-do](/en/guides/examples/cloudflare-worker-queue-do/): Workers + Durable Objects: an idempotent send queue with retries.
+- [node-express-otp](/en/guides/examples/node-express-otp/): OTP request and verification on Node + Express.

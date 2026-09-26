@@ -28,9 +28,22 @@ SMS, LMS, 알림톡, 친구톡을 하나의 통합 API로 관리할 수 있습�
 import { KMsg } from "k-msg";
 import { IWINVProvider } from "@k-msg/provider";
 
-const kmsg = new KMsg({ providers: [new IWINVProvider({ apiKey: process.env.IWINV_API_KEY! })] });
-await kmsg.send({ to: "01012345678", text: "안녕하세요!" });
+const kmsg = new KMsg({
+  providers: [
+    new IWINVProvider({
+      apiKey: process.env.IWINV_API_KEY!, // 알림톡
+      smsApiKey: process.env.IWINV_SMS_API_KEY!, // SMS/LMS
+      smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+      smsSenderNumber: "01000000000",
+    }),
+  ],
+});
+
+const result = await kmsg.send({ to: "01012345678", text: "안녕하세요!" });
+if (result.isFailure) console.error(result.error.code, result.error.message);
 ```
+
+프로바이더 자격 증명 없이 API를 먼저 써 보려면 `@k-msg/provider`의 `MockProvider`를 사용하세요.
 
 ### 언제 사용하나요?
 
@@ -172,8 +185,8 @@ Delivery Tracking 기반 API 레벨 fallback은 아래 조건에서 SMS/LMS를 1
 ## 의존성 운영 정책
 
 - 본체 패키지/앱(`packages/*`, `apps/*`)은 안정성을 우선합니다.
-- 예제 프로젝트(`examples/*`)는 별도 주기로 업그레이드합니다.
-- 점검은 `bun run deps:outdated:core` / `bun run deps:outdated:examples`로 분리해 수행합니다.
+- 예제 프로젝트(`examples/*`)는 배포된 패키지(`latest`)에 의존하며 별도 주기로 업그레이드합니다.
+- 워크스페이스 의존성은 `bun run deps:outdated:core`로, 예제는 `bun run examples:standalone`(npm에서 설치 후 타입체크)으로 점검합니다.
 
 ## 릴리즈 운영
 

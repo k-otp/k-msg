@@ -1,0 +1,22 @@
+{
+  "name": "bun-order-notifications-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "typecheck": "ttsc --noEmit"
+  },
+  "dependencies": {
+    "@k-msg/messaging": "latest",
+    "@k-msg/provider": "latest",
+    "hono": "^4.12.29",
+    "k-msg": "latest",
+    "solapi": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "ttsc": "^0.30.4",
+    "typescript": "^7.0.2"
+  }
+}

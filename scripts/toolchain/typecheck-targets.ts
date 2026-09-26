@@ -79,33 +79,28 @@ export const typecheckTargets: readonly TypecheckTarget[] = [
   },
   {
     category: "example",
-    label: "Hono Bun send-only example",
-    tsconfig: "examples/hono-bun-send-only/tsconfig.workspace.json",
+    label: "Node Express OTP example",
+    tsconfig: "examples/node-express-otp/tsconfig.workspace.json",
   },
   {
     category: "example",
-    label: "Hono Pages tracking example",
-    tsconfig: "examples/hono-pages-tracking-hyperdrive/tsconfig.workspace.json",
+    label: "Bun order notifications example",
+    tsconfig: "examples/bun-order-notifications/tsconfig.workspace.json",
   },
   {
     category: "example",
-    label: "Hono Pages send-only example",
-    tsconfig: "examples/hono-pages-send-only/tsconfig.workspace.json",
+    label: "Cloudflare Worker D1 example",
+    tsconfig: "examples/cloudflare-worker-d1/tsconfig.workspace.json",
   },
   {
     category: "example",
-    label: "Hono Worker queue example",
-    tsconfig: "examples/hono-worker-queue-do/tsconfig.workspace.json",
+    label: "Cloudflare Worker queue example",
+    tsconfig: "examples/cloudflare-worker-queue-do/tsconfig.workspace.json",
   },
   {
     category: "example",
-    label: "Hono Worker tracking example",
-    tsconfig: "examples/hono-worker-tracking-d1/tsconfig.workspace.json",
-  },
-  {
-    category: "example",
-    label: "Hono Worker webhook example",
-    tsconfig: "examples/hono-worker-webhook-d1/tsconfig.workspace.json",
+    label: "Cloudflare Worker Hyperdrive example",
+    tsconfig: "examples/cloudflare-worker-hyperdrive/tsconfig.workspace.json",
   },
 ] as const;
 
