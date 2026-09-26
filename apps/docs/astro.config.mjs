@@ -372,13 +372,11 @@ export default defineConfig({
               },
               items: [
                 "guides/examples",
-                "guides/examples/express-node-send-only",
-                "guides/examples/hono-bun-send-only",
-                "guides/examples/hono-pages-send-only",
-                "guides/examples/hono-pages-tracking-hyperdrive",
-                "guides/examples/hono-worker-queue-do",
-                "guides/examples/hono-worker-tracking-d1",
-                "guides/examples/hono-worker-webhook-d1",
+                "guides/examples/node-express-otp",
+                "guides/examples/bun-order-notifications",
+                "guides/examples/cloudflare-worker-d1",
+                "guides/examples/cloudflare-worker-queue-do",
+                "guides/examples/cloudflare-worker-hyperdrive",
               ],
             },
             {

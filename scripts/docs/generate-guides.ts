@@ -310,33 +310,25 @@ const packageSummaries: Record<string, GuideSummary> = {
 };
 
 const exampleSummaries: Record<string, GuideSummary> = {
-  "express-node-send-only": {
-    en: "Minimal Node + Express send-only server.",
-    ko: "가장 단순한 Node + Express send-only 서버 예제입니다.",
+  "node-express-otp": {
+    en: "OTP request and verification on Node + Express.",
+    ko: "Node + Express로 OTP 발송과 검증을 구현한 예제입니다.",
   },
-  "hono-bun-send-only": {
-    en: "Fast Bun + Hono send-only API.",
-    ko: "Bun + Hono 기반의 빠른 send-only API 예제입니다.",
+  "bun-order-notifications": {
+    en: "Order notifications on Bun: AlimTalk with SMS fallback, batches, and SQLite delivery tracking.",
+    ko: "Bun에서 알림톡(SMS 대체 발송), 배치 발송, SQLite delivery tracking을 다루는 주문 알림 예제입니다.",
   },
-  "hono-pages-send-only": {
-    en: "Cloudflare Pages Functions send-only starter.",
-    ko: "Cloudflare Pages Functions용 send-only 스타터입니다.",
+  "cloudflare-worker-d1": {
+    en: "Workers + D1: delivery tracking on a cron and signed webhooks for status changes.",
+    ko: "Workers + D1에서 cron으로 delivery tracking을 돌리고 상태 변경을 서명된 웹훅으로 알리는 예제입니다.",
   },
-  "hono-pages-tracking-hyperdrive": {
-    en: "Pages + Hyperdrive example with delivery tracking.",
-    ko: "Pages + Hyperdrive 기반 delivery tracking 예제입니다.",
+  "cloudflare-worker-queue-do": {
+    en: "Workers + Durable Objects: an idempotent send queue with retries.",
+    ko: "Workers + Durable Objects로 멱등 발송 큐와 재시도를 구현한 예제입니다.",
   },
-  "hono-worker-queue-do": {
-    en: "Workers + Durable Objects queue processing example.",
-    ko: "Workers + Durable Objects 큐 처리 예제입니다.",
-  },
-  "hono-worker-tracking-d1": {
-    en: "Workers + D1 delivery tracking example.",
-    ko: "Workers + D1 delivery tracking 예제입니다.",
-  },
-  "hono-worker-webhook-d1": {
-    en: "Workers + D1 webhook runtime example.",
-    ko: "Workers + D1 웹훅 runtime 예제입니다.",
+  "cloudflare-worker-hyperdrive": {
+    en: "Workers + Hyperdrive: delivery tracking in Postgres with cron polling.",
+    ko: "Workers + Hyperdrive(Postgres)에서 cron 폴링으로 delivery tracking을 하는 예제입니다.",
   },
 };
 
@@ -382,14 +374,14 @@ function buildGuideIndex(params: {
       : isKo
         ? `런타임과 목적에 맞는 예제를 고를 수 있도록 정리한 허브입니다.
 
-- 첫 send-only 검증: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/)
-- Cloudflare queue/tracking: [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/), [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
-- Webhook runtime: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/)`
+- OTP 발송과 검증: [node-express-otp](${urlRoot}/guides/examples/node-express-otp/)
+- 알림톡 주문 알림과 delivery tracking: [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/)
+- Cloudflare: [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/)(tracking + 웹훅), [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/)(큐), [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/)(Postgres)`
         : `This hub helps you choose the right example by runtime and goal.
 
-- First send-only check: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/)
-- Cloudflare queue/tracking: [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/), [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
-- Webhook runtime: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/)`;
+- OTP request and verification: [node-express-otp](${urlRoot}/guides/examples/node-express-otp/)
+- AlimTalk order notifications with delivery tracking: [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/)
+- Cloudflare: [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) (tracking and webhooks), [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/) (queue), [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/) (Postgres)`;
 
   const list =
     section === "packages"
@@ -433,22 +425,18 @@ function buildGuideIndex(params: {
       : isKo
         ? `| 목표 | 추천 예제 | 이 예제를 먼저 보면 좋은 경우 |
 | --- | --- | --- |
-| 가장 빨리 send-only 검증 | [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) | Node 서버에서 가장 단순한 성공 경로가 필요할 때 |
-| Bun 기반의 가벼운 API 서버 | [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) | Bun + Hono 조합으로 빠르게 시작할 때 |
-| Pages Functions에 send-only 배포 | [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) | Cloudflare Pages에 간단히 올릴 때 |
-| Workers에서 큐 처리 | [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) | Durable Objects 기반 비동기 처리 흐름이 필요할 때 |
-| Workers + D1 배달 추적 | [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) | Cloudflare에서 tracking 저장소까지 같이 보고 싶을 때 |
-| Pages + Hyperdrive 추적 | [hono-pages-tracking-hyperdrive](${urlRoot}/guides/examples/hono-pages-tracking-hyperdrive/) | Pages 런타임에서 Hyperdrive를 붙일 때 |
-| 웹훅 수신과 runtime 운영 | [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) | 이벤트 수집, 재시도, persistence까지 보고 싶을 때 |`
+| OTP·인증번호 | [node-express-otp](${urlRoot}/guides/examples/node-express-otp/) | Node 백엔드에서 인증번호를 안전하게 보내고 검증해야 할 때 |
+| 알림톡 + SMS 대체 발송 | [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/) | 주문·배송 알림을 보내고 도달 여부까지 추적하고 싶을 때 |
+| Workers에서 추적과 상태 웹훅 | [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) | Cloudflare에서 상태 변경을 다른 서비스로 알려야 할 때 |
+| Workers에서 큐 기반 발송 | [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/) | 요청과 발송을 분리하고 멱등 재시도가 필요할 때 |
+| Workers에서 Postgres 추적 | [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/) | 추적 데이터를 기존 Postgres에 두고 싶을 때 |`
         : `| Goal | Recommended example | Pick it first when |
 | --- | --- | --- |
-| Fastest send-only proof | [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) | You want the shortest path on Node |
-| Lightweight Bun API server | [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) | You are building with Bun + Hono |
-| Send-only deploy on Pages Functions | [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) | You want the simplest Cloudflare Pages entry point |
-| Queue processing on Workers | [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) | You need Durable Objects-based async processing |
-| Delivery tracking on Workers + D1 | [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) | You want Cloudflare-native tracking storage |
-| Delivery tracking on Pages + Hyperdrive | [hono-pages-tracking-hyperdrive](${urlRoot}/guides/examples/hono-pages-tracking-hyperdrive/) | You are staying on Pages but need Hyperdrive |
-| Webhook ingestion and runtime operations | [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) | You need event intake, retries, and persistence |`;
+| OTP and verification codes | [node-express-otp](${urlRoot}/guides/examples/node-express-otp/) | You need a Node backend that sends and verifies codes safely |
+| AlimTalk with SMS fallback | [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/) | You send order or shipping updates and want to know they arrived |
+| Tracking and status webhooks on Workers | [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) | You run on Cloudflare and push status changes to other services |
+| Queued sending on Workers | [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/) | You want sends decoupled from requests, with idempotent retries |
+| Tracking in Postgres on Workers | [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/) | Your tracking data belongs in an existing Postgres database |`;
   const readingPath =
     section === "packages"
       ? isKo
@@ -459,12 +447,12 @@ function buildGuideIndex(params: {
 - Platform or infrastructure teams: [@k-msg/core](${urlRoot}/guides/packages/core/) -> [@k-msg/messaging](${urlRoot}/guides/packages/messaging/) -> [@k-msg/provider](${urlRoot}/guides/packages/provider/)
 - Admin or operations tooling teams: [@k-msg/channel](${urlRoot}/guides/packages/channel/) -> [@k-msg/webhook](${urlRoot}/guides/packages/webhook/) -> [@k-msg/analytics](${urlRoot}/guides/packages/analytics/)`
       : isKo
-        ? `- 처음 보는 사용자: [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) 또는 [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) 로 send-only 흐름을 먼저 확인
-- Cloudflare 배포가 목표면: [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) -> [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) -> [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
-- 웹훅 중심 시스템이면: [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) 부터 보고 필요 시 [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) 를 함께 참고`
-        : `- New users: start with [express-node-send-only](${urlRoot}/guides/examples/express-node-send-only/) or [hono-bun-send-only](${urlRoot}/guides/examples/hono-bun-send-only/) to validate the send-only flow first
-- Cloudflare-focused teams: [hono-pages-send-only](${urlRoot}/guides/examples/hono-pages-send-only/) -> [hono-worker-queue-do](${urlRoot}/guides/examples/hono-worker-queue-do/) -> [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/)
-- Webhook-heavy systems: start with [hono-worker-webhook-d1](${urlRoot}/guides/examples/hono-worker-webhook-d1/) and pair it with [hono-worker-tracking-d1](${urlRoot}/guides/examples/hono-worker-tracking-d1/) when you also need delivery state`;
+        ? `- 처음 보는 사용자: [node-express-otp](${urlRoot}/guides/examples/node-express-otp/) 로 발송 흐름 하나를 끝까지 본 뒤 [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/) 로 알림톡, 대체 발송, 추적을 확인
+- Cloudflare 배포가 목표면: [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) -> [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/), 추적 데이터를 Postgres에 둔다면 [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/)
+- 웹훅 중심 시스템이면: [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) 의 서명된 상태 웹훅과 검증하는 수신기부터`
+        : `- New users: follow one send end to end in [node-express-otp](${urlRoot}/guides/examples/node-express-otp/), then AlimTalk, fallback, and tracking in [bun-order-notifications](${urlRoot}/guides/examples/bun-order-notifications/)
+- Cloudflare-focused teams: [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/) -> [cloudflare-worker-queue-do](${urlRoot}/guides/examples/cloudflare-worker-queue-do/), and [cloudflare-worker-hyperdrive](${urlRoot}/guides/examples/cloudflare-worker-hyperdrive/) when tracking must live in Postgres
+- Webhook-driven systems: start with the signed status webhooks and verifying receiver in [cloudflare-worker-d1](${urlRoot}/guides/examples/cloudflare-worker-d1/)`;
   const quickPicksHeading = isKo ? "빠른 선택" : "Quick picks";
   const readingPathHeading = isKo
     ? "추천 읽는 순서"
