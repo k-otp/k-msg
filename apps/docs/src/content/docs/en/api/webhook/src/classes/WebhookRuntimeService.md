@@ -211,6 +211,10 @@ the meantime. See `migrateWebhookFieldCryptoToTenant`.
 
 `Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
 
+#### Implementation of
+
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`migrateFieldCryptoToTenant`](/en/api/webhook/src/interfaces/webhookruntime/#migratefieldcryptototenant)
+
 ***
 
 ### probeEndpoint()

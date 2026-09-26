@@ -29,7 +29,9 @@ Defined in: [packages/webhook/src/runtime/types.ts:13](https://github.com/k-otp/
 
 > `optional` **limit?**: `number`
 
-Defined in: [packages/webhook/src/runtime/types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L15)
+Defined in: [packages/webhook/src/runtime/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L16)
+
+Caps the deliveries returned; the built-in stores return 100 when unset.
 
 ***
 
