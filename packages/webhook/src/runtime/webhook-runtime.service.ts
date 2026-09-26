@@ -75,6 +75,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private initPromise: Promise<void> | null = null;
   // The batch currently dispatching, shared so flush() can wait for it.
   private activeBatch: Promise<void> | null = null;
+  // Endpoint writes and the tenant migration run one at a time: the
+  // migration rewrites endpoints from records it read earlier, and two
+  // updates to one endpoint would each write over the other.
+  private endpointWrites: Promise<unknown> = Promise.resolve();
 
   constructor(config: WebhookRuntimeConfig) {
     this.config = config.delivery;
@@ -118,7 +122,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
       updatedAt: now,
     };
 
-    await this.endpointStore.add(endpoint);
+    await this.writeEndpoints(() => this.endpointStore.add(endpoint));
     return endpoint;
   }
 
@@ -138,7 +142,15 @@ export class WebhookRuntimeService implements WebhookRuntime {
     updates: Partial<WebhookEndpointInput>,
   ): Promise<WebhookEndpoint> {
     await this.ensureInitialized();
+    return this.writeEndpoints(() =>
+      this.applyEndpointUpdate(endpointId, updates),
+    );
+  }
 
+  private async applyEndpointUpdate(
+    endpointId: string,
+    updates: Partial<WebhookEndpointInput>,
+  ): Promise<WebhookEndpoint> {
     const current = await this.endpointStore.get(endpointId);
     if (!current) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
@@ -171,7 +183,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
   async removeEndpoint(endpointId: string): Promise<void> {
     await this.ensureInitialized();
-    await this.endpointStore.remove(endpointId);
+    await this.writeEndpoints(() => this.endpointStore.remove(endpointId));
   }
 
   async getEndpoint(endpointId: string): Promise<WebhookEndpoint | null> {
@@ -288,15 +300,18 @@ export class WebhookRuntimeService implements WebhookRuntime {
   /**
    * Re-encrypts stored endpoint secrets and delivery payloads written before
    * ciphertext was bound to `fieldCrypto.tenantId`, returning how many of
-   * each it rewrote. Run it once after upgrading, then remove
+   * each it rewrote. Run it once every instance is upgraded, then remove
    * `fieldCrypto.acceptLegacyAad` if it was set to keep them readable in
-   * the meantime. See `migrateWebhookFieldCryptoToTenant`.
+   * the meantime. Endpoint writes through this runtime wait until it
+   * finishes. See `migrateWebhookFieldCryptoToTenant`.
    */
   async migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult> {
     await this.ensureInitialized();
-    return migrateWebhookFieldCryptoToTenant(
-      this.persistence,
-      this.fieldCrypto ?? {},
+    return this.writeEndpoints(() =>
+      migrateWebhookFieldCryptoToTenant(
+        this.persistence,
+        this.fieldCrypto ?? {},
+      ),
     );
   }
 
@@ -338,6 +353,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     return createInMemoryWebhookPersistence();
+  }
+
+  // Runs `write` once every endpoint write queued before it has settled.
+  private writeEndpoints<T>(write: () => Promise<T>): Promise<T> {
+    const run = () => write();
+    const result = this.endpointWrites.then(run, run);
+    this.endpointWrites = result.catch(() => undefined);
+    return result;
   }
 
   private async ensureInitialized(): Promise<void> {

@@ -299,6 +299,144 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     expect(await endpointStore.get("ep-2")).toBeNull();
   });
 
+  test("keeps an update another process makes while a secret is re-encrypted", async () => {
+    const persistence = await seedLegacyRecords();
+    const { endpointStore } = persistence;
+    const legacyView = await wrapWebhookEndpointStoreWithFieldCrypto(
+      endpointStore,
+      { ...tenantOptions, acceptLegacyAad: true },
+    ).get("ep-1");
+    if (!legacyView) throw new Error("seeded endpoint missing");
+    const upgraded = wrapWebhookEndpointStoreWithFieldCrypto(
+      endpointStore,
+      tenantOptions,
+    );
+    let reads = 0;
+    const racing = {
+      ...persistence,
+      endpointStore: {
+        ...endpointStore,
+        list: endpointStore.list.bind(endpointStore),
+        update: endpointStore.update.bind(endpointStore),
+        get: async (id: string) => {
+          const endpoint = await endpointStore.get(id);
+          reads += 1;
+          // After the migration's first read, an upgraded instance moves the
+          // endpoint and rotates its secret.
+          if (reads === 1) {
+            await upgraded.update("ep-1", {
+              ...legacyView,
+              url: "https://example.com/moved",
+              secret: "rotated",
+            });
+          }
+          return endpoint;
+        },
+      },
+    };
+
+    expect(
+      await migrateWebhookFieldCryptoToTenant(racing, tenantOptions),
+    ).toEqual({ endpoints: 0, deliveries: 1 });
+    expect(await upgraded.get("ep-1")).toMatchObject({
+      url: "https://example.com/moved",
+      secret: "rotated",
+    });
+  });
+
+  test("gives up on an endpoint whose secret changes on every attempt", async () => {
+    const persistence = await seedLegacyRecords();
+    const { endpointStore } = persistence;
+    const legacyStore = wrapWebhookEndpointStoreWithFieldCrypto(endpointStore, {
+      ...tenantOptions,
+      tenantId: undefined,
+    });
+    const seeded = await legacyStore.get("ep-1");
+    if (!seeded) throw new Error("seeded endpoint missing");
+    let reads = 0;
+    const churning = {
+      ...persistence,
+      endpointStore: {
+        ...endpointStore,
+        list: endpointStore.list.bind(endpointStore),
+        update: endpointStore.update.bind(endpointStore),
+        get: async (id: string) => {
+          const endpoint = await endpointStore.get(id);
+          // An older instance writes a new tenant-less secret after each read.
+          reads += 1;
+          await legacyStore.update("ep-1", {
+            ...seeded,
+            secret: `legacy-${reads}`,
+          });
+          return endpoint;
+        },
+      },
+    };
+
+    await expect(
+      migrateWebhookFieldCryptoToTenant(churning, tenantOptions),
+    ).rejects.toThrow(
+      "Cannot migrate webhook endpoint ep-1: its secret changed during each of 3 attempts",
+    );
+  });
+
+  test("holds the runtime's endpoint writes until its migration finishes", async () => {
+    const persistence = await seedLegacyRecords();
+    const { endpointStore } = persistence;
+    let pendingUpdate: Promise<unknown> | undefined;
+    const runtime = new WebhookRuntimeService({
+      delivery: {
+        maxRetries: 0,
+        retryDelayMs: 10,
+        timeoutMs: 500,
+        enableSecurity: false,
+        enabledEvents: [WebhookEventType.MESSAGE_SENT],
+        batchSize: 10,
+        batchTimeoutMs: 50,
+      },
+      persistence: {
+        ...persistence,
+        endpointStore: {
+          ...endpointStore,
+          list: endpointStore.list.bind(endpointStore),
+          get: endpointStore.get.bind(endpointStore),
+          update: async (id, endpoint) => {
+            // The migration's write: an update through the runtime starts
+            // before it lands.
+            if (!pendingUpdate) {
+              pendingUpdate = runtime.updateEndpoint("ep-1", {
+                url: "https://example.com/moved",
+              });
+              await new Promise((resolve) => setTimeout(resolve, 20));
+            }
+            await endpointStore.update(id, endpoint);
+          },
+        },
+      },
+      fieldCrypto: { ...tenantOptions, acceptLegacyAad: true },
+      autoStart: false,
+    });
+
+    try {
+      expect(await runtime.migrateFieldCryptoToTenant()).toEqual({
+        endpoints: 1,
+        deliveries: 1,
+      });
+      await pendingUpdate;
+      expect(await runtime.getEndpoint("ep-1")).toMatchObject({
+        url: "https://example.com/moved",
+        secret: "my-secret",
+      });
+      const upgraded = wrapWebhookEndpointStoreWithFieldCrypto(
+        endpointStore,
+        tenantOptions,
+      );
+      expect((await upgraded.get("ep-1"))?.secret).toBe("my-secret");
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
   test("refuses a delivery store without replace() before changing anything", async () => {
     const persistence = await seedLegacyRecords();
     const { deliveryStore } = persistence;
