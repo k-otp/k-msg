@@ -82,9 +82,12 @@ export interface DeliveryTrackingServiceConfig {
   polling?: Partial<DeliveryTrackingPollingConfig>;
   apiFailover?: DeliveryTrackingApiFailoverConfig;
   /**
-   * Called once each time a poll stores a different status for a record,
-   * after the store is updated: for example, to notify a webhook when a
-   * message is delivered or fails. It does not stop the poll if it throws.
+   * Called for each record a poll stored with a different status, with the
+   * record as stored, after the poll finishes: for example, to notify a
+   * webhook when a message is delivered or fails. It does not stop polling
+   * if it throws. Delivery is at least once: services polling the same store
+   * can each report the same change, so make it idempotent, for example by
+   * message id and status.
    */
   onStatusChange?: (change: DeliveryStatusChange) => void | Promise<void>;
   /**
@@ -276,6 +279,9 @@ export class DeliveryTrackingService {
       return;
     }
 
+    // Reported once the poll is done, so a callback can call runOnce itself
+    // and cannot change a record that API failover still has to read.
+    const changes: DeliveryStatusChange[] = [];
     const op = (async () => {
       const now = new Date();
       const due = await this.store.listDue(now, this.polling.batchSize);
@@ -309,11 +315,18 @@ export class DeliveryTrackingService {
           messageId: originalRecord.messageId,
         };
 
-        if (mergedRecord.status !== originalRecord.status) {
-          await this.notifyStatusChange({
-            record: mergedRecord,
-            previousStatus: originalRecord.status,
-          });
+        if (
+          this.onStatusChange &&
+          mergedRecord.status !== originalRecord.status
+        ) {
+          // Read back, since a store may not keep every patched field (raw).
+          const stored = await this.store.get(update.messageId);
+          if (stored) {
+            changes.push({
+              record: stored,
+              previousStatus: originalRecord.status,
+            });
+          }
         }
 
         if (this.shouldAttemptApiFailover(mergedRecord)) {
@@ -327,6 +340,10 @@ export class DeliveryTrackingService {
       await op;
     } finally {
       if (this.runOnceInFlight === op) this.runOnceInFlight = undefined;
+      // Changes stored before a failure are still reported.
+      for (const change of changes) {
+        await this.notifyStatusChange(change);
+      }
     }
   }
 

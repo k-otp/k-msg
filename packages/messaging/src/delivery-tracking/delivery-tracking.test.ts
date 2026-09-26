@@ -942,4 +942,60 @@ describe("DeliveryTrackingService onStatusChange", () => {
     );
     expect(messages.some((m) => m.includes("onStatusChange threw"))).toBe(true);
   });
+
+  test("lets the callback poll again without deadlocking", async () => {
+    let service: DeliveryTrackingService | undefined;
+    let nested = 0;
+    service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        nested += 1;
+        await service?.runOnce();
+      },
+    });
+    await recordSent(service, "m1");
+
+    const finished = await Promise.race([
+      service.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(nested).toBe(1);
+  });
+
+  test("reports the record as stored, without fields the store dropped", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    // Like a SQL store with storeRaw off: raw provider payloads are not kept.
+    const withoutRaw = Object.assign(Object.create(store), {
+      patch: (messageId: string, patch: Record<string, unknown>) => {
+        const { raw: _raw, ...kept } = patch;
+        return store.patch(messageId, kept);
+      },
+    }) as InMemoryDeliveryTrackingStore;
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [
+        createMockProvider({
+          id: "mock",
+          status: "DELIVERED",
+          raw: { secret: "provider payload" },
+        }),
+      ],
+      store: withoutRaw,
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.record.status).toBe("DELIVERED");
+    expect(changes[0]?.record.raw).toBeUndefined();
+  });
 });
