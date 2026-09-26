@@ -81,6 +81,15 @@ function withFieldPath(
   );
 }
 
+// Binds ciphertext to the tenant when one is configured, so a value copied
+// between tenants' rows with the same id does not decrypt.
+function withTenant(
+  aad: Record<string, string>,
+  tenantId: string | undefined,
+): Record<string, string> {
+  return tenantId ? { ...aad, tenantId } : aad;
+}
+
 // Shared by the runtime store wrappers and WebhookRegistry.
 export async function protectFieldValue(
   config: FieldCryptoConfig | undefined,
@@ -113,7 +122,7 @@ export async function protectFieldValue(
     const encrypted = await config.provider.encrypt({
       value,
       path: input.path,
-      aad: input.aad,
+      aad: withTenant(input.aad, input.tenantId),
       ...(kid ? { kid } : {}),
     });
     return toCiphertextEnvelopeString(encrypted.ciphertext);
@@ -155,14 +164,27 @@ export async function revealFieldValue(
         })
       : undefined;
 
-    return await config.provider.decrypt({
-      ciphertext: value,
-      path: input.path,
-      aad: input.aad,
-      ...(Array.isArray(candidateKids) && candidateKids.length > 0
-        ? { candidateKids }
-        : {}),
-    });
+    const decrypt = (aad: Record<string, string>) =>
+      config.provider.decrypt({
+        ciphertext: value,
+        path: input.path,
+        aad,
+        ...(Array.isArray(candidateKids) && candidateKids.length > 0
+          ? { candidateKids }
+          : {}),
+      });
+    const tenantAad = withTenant(input.aad, input.tenantId);
+    if (tenantAad === input.aad) return await decrypt(input.aad);
+    try {
+      return await decrypt(tenantAad);
+    } catch (error) {
+      // Values written before tenant binding carry the legacy AAD.
+      try {
+        return await decrypt(input.aad);
+      } catch {
+        throw error;
+      }
+    }
   } catch (error) {
     if (failMode === "closed") {
       throw withFieldPath(error, input.path, "decrypt");
@@ -182,10 +204,12 @@ function assertWebhookFieldMode(
 ): void {
   if (config.enabled === false) return;
   const mode = config.fields[path];
-  if (mode === undefined || WEBHOOK_FIELD_MODES.includes(mode)) return;
+  if (mode !== undefined && WEBHOOK_FIELD_MODES.includes(mode)) return;
   throw new FieldCryptoError(
     "config",
-    `webhook storage always encrypts ${path}; fields.${path} must be "encrypt" or "encrypt+hash", not "${mode}"`,
+    mode === undefined
+      ? `webhook storage always encrypts ${path}; set fields.${path} to "encrypt" or "encrypt+hash"`
+      : `webhook storage always encrypts ${path}; fields.${path} must be "encrypt" or "encrypt+hash", not "${mode}"`,
     { rule: "fieldCrypto.webhook.encrypt_only", path: `fields.${path}` },
     { fieldPath: `fields.${path}` },
   );
@@ -198,8 +222,8 @@ function assertWebhookFieldMode(
  * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #d6936dd
  *   Read assertWebhookFieldMode and protectFieldValue, which encrypts
  *   whenever crypto is enabled and stores no hash, and ran
- *   webhook.registry.crypto.test.ts, which rejects plain and mask for
- *   secret and payload and accepts both encrypt modes.
+ *   webhook.registry.crypto.test.ts, which rejects a missing, plain, or mask
+ *   mode for secret and payload and accepts both encrypt modes.
  */
 export function validateWebhookFieldCryptoOptions(
   options: WebhookRuntimeFieldCryptoOptions | undefined,

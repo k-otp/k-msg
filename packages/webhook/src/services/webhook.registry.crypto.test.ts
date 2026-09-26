@@ -187,6 +187,17 @@ describe("WebhookRegistry field crypto", () => {
     },
   );
 
+  test("constructor requires the field the store encrypts", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ fields: { payload: "encrypt" } }),
+          },
+        }),
+    ).toThrow('set fields.secret to "encrypt" or "encrypt+hash"');
+  });
+
   test("constructor accepts either encrypt mode", () => {
     expect(
       () =>
