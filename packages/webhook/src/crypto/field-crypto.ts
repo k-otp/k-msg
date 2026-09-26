@@ -5,6 +5,7 @@ import {
   FieldCryptoError,
   type FieldMode,
   resolveFieldCryptoFailMode,
+  resolveFieldCryptoOpenFallback,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
 import type {
@@ -22,7 +23,7 @@ function normalizeString(value: unknown): string | undefined {
 }
 
 function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
-  const fallback = config.openFallback ?? "masked";
+  const fallback = resolveFieldCryptoOpenFallback(config);
   if (fallback === "plaintext") {
     if (!config.unsafeAllowPlaintextStorage) {
       throw new FieldCryptoError(
