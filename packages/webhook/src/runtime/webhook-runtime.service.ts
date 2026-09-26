@@ -1,6 +1,8 @@
 import { logger } from "@k-msg/core";
 import {
+  migrateWebhookFieldCryptoToTenant,
   validateWebhookFieldCryptoOptions,
+  type WebhookTenantMigrationResult,
   wrapWebhookDeliveryStoreWithFieldCrypto,
   wrapWebhookEndpointStoreWithFieldCrypto,
 } from "../crypto/field-crypto";
@@ -66,6 +68,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
     typeof resolveEndpointValidationOptions
   >;
   private readonly persistence: WebhookPersistence;
+  private readonly fieldCrypto: WebhookRuntimeConfig["fieldCrypto"];
 
   private readonly eventQueue: WebhookEvent[] = [];
   private batchProcessor: ReturnType<typeof setInterval> | null = null;
@@ -80,6 +83,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
     const persistence = this.resolvePersistence(config);
     this.persistence = persistence;
+    this.fieldCrypto = config.fieldCrypto;
     validateWebhookFieldCryptoOptions(config.fieldCrypto);
     this.endpointStore = wrapWebhookEndpointStoreWithFieldCrypto(
       persistence.endpointStore,
@@ -279,6 +283,21 @@ export class WebhookRuntimeService implements WebhookRuntime {
       ...options,
       limit: normalizeLimit(options.limit, 100),
     });
+  }
+
+  /**
+   * Re-encrypts stored endpoint secrets and delivery payloads written before
+   * ciphertext was bound to `fieldCrypto.tenantId`, returning how many of
+   * each it rewrote. Run it once after upgrading, then remove
+   * `fieldCrypto.acceptLegacyAad` if it was set to keep them readable in
+   * the meantime. See `migrateWebhookFieldCryptoToTenant`.
+   */
+  async migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult> {
+    await this.ensureInitialized();
+    return migrateWebhookFieldCryptoToTenant(
+      this.persistence,
+      this.fieldCrypto ?? {},
+    );
   }
 
   async shutdown(): Promise<void> {

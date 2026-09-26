@@ -12,6 +12,7 @@ import type {
   WebhookDeliveryListOptions,
   WebhookDeliveryStore,
   WebhookEndpointStore,
+  WebhookPersistence,
   WebhookRuntimeFieldCryptoOptions,
 } from "../runtime/types";
 import type { WebhookDelivery, WebhookEndpoint } from "../types/webhook.types";
@@ -134,6 +135,18 @@ export async function protectFieldValue(
   }
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#threat-model
+ *   Decrypts with the tenant-bound AAD, falling back to the tenant-less AAD
+ *   only when acceptLegacyAad is set, as migrateWebhookFieldCryptoToTenant
+ *   does to re-encrypt values written before tenant binding.
+ * @evidenceReview docs/security/field-crypto-v1.md#threat-model #98761bf
+ *   Read revealFieldValue and migrateWebhookFieldCryptoToTenant, and ran
+ *   field-crypto.test.ts: a tenant-less value is rejected by default and
+ *   read with acceptLegacyAad, and the migration re-encrypts it with the
+ *   tenant, from the runtime too, stopping at a value neither AAD decrypts
+ *   instead of storing a fallback.
+ */
 export async function revealFieldValue(
   config: FieldCryptoConfig | undefined,
   input: {
@@ -141,6 +154,7 @@ export async function revealFieldValue(
     path: string;
     aad: Record<string, string>;
     tenantId?: string;
+    acceptLegacyAad?: boolean;
   },
 ): Promise<string | undefined> {
   const value = normalizeString(input.value);
@@ -174,11 +188,14 @@ export async function revealFieldValue(
           : {}),
       });
     if (!input.tenantId) return await decrypt(input.aad);
+    if (!input.acceptLegacyAad) {
+      return await decrypt(withTenant(input.aad, input.tenantId));
+    }
     try {
       return await decrypt(withTenant(input.aad, input.tenantId));
     } catch (error) {
-      // Values written before tenant binding carry the legacy AAD. Until a
-      // record is saved again, reading it costs one failed decrypt first.
+      // Values written before tenant binding carry the legacy AAD. They are
+      // read only while a migration re-encrypts them with the tenant.
       try {
         return await decrypt(input.aad);
       } catch (legacyError) {
@@ -256,20 +273,28 @@ function withSecret(
   return next;
 }
 
+function endpointAad(endpoint: WebhookEndpoint): Record<string, string> {
+  return { tableName: "webhook_endpoint", messageId: endpoint.id };
+}
+
+function deliveryAad(delivery: WebhookDelivery): Record<string, string> {
+  return {
+    tableName: "webhook_delivery",
+    messageId: delivery.id,
+    providerId: delivery.endpointId,
+  };
+}
+
 // The endpoint and delivery helpers below are shared by the runtime store
 // wrappers and WebhookRegistry.
 export async function protectEndpoint(
   endpoint: WebhookEndpoint,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookEndpoint> {
-  const aad = {
-    tableName: "webhook_endpoint",
-    messageId: endpoint.id,
-  };
   const secret = await protectFieldValue(options?.endpoint, {
     value: endpoint.secret,
     path: "secret",
-    aad,
+    aad: endpointAad(endpoint),
     tenantId: options?.tenantId,
   });
 
@@ -280,15 +305,12 @@ export async function revealEndpoint(
   endpoint: WebhookEndpoint,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookEndpoint> {
-  const aad = {
-    tableName: "webhook_endpoint",
-    messageId: endpoint.id,
-  };
   const secret = await revealFieldValue(options?.endpoint, {
     value: endpoint.secret,
     path: "secret",
-    aad,
+    aad: endpointAad(endpoint),
     tenantId: options?.tenantId,
+    acceptLegacyAad: options?.acceptLegacyAad,
   });
 
   return withSecret(endpoint, secret);
@@ -298,15 +320,10 @@ export async function protectDelivery(
   delivery: WebhookDelivery,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookDelivery> {
-  const aad = {
-    tableName: "webhook_delivery",
-    messageId: delivery.id,
-    providerId: delivery.endpointId,
-  };
   const payload = await protectFieldValue(options?.delivery, {
     value: delivery.payload,
     path: "payload",
-    aad,
+    aad: deliveryAad(delivery),
     tenantId: options?.tenantId,
   });
 
@@ -320,16 +337,12 @@ export async function revealDelivery(
   delivery: WebhookDelivery,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookDelivery> {
-  const aad = {
-    tableName: "webhook_delivery",
-    messageId: delivery.id,
-    providerId: delivery.endpointId,
-  };
   const payload = await revealFieldValue(options?.delivery, {
     value: delivery.payload,
     path: "payload",
-    aad,
+    aad: deliveryAad(delivery),
     tenantId: options?.tenantId,
+    acceptLegacyAad: options?.acceptLegacyAad,
   });
 
   return {
@@ -391,4 +404,144 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
       );
     },
   };
+}
+
+export interface WebhookTenantMigrationResult {
+  /** Endpoints whose secret was re-encrypted with the tenant. */
+  endpoints: number;
+  /** Deliveries whose payload was re-encrypted with the tenant. */
+  deliveries: number;
+}
+
+function failClosed(
+  config: FieldCryptoConfig | undefined,
+): FieldCryptoConfig | undefined {
+  return config ? { ...config, failMode: "closed" } : undefined;
+}
+
+// Whether a stored value already reads with the tenant-bound AAD. A value the
+// tenant AAD cannot decrypt is a legacy value, or unreadable, which the
+// legacy read that follows reports.
+async function isTenantBound(
+  config: FieldCryptoConfig,
+  input: {
+    value: string | undefined;
+    path: string;
+    aad: Record<string, string>;
+    tenantId: string;
+  },
+): Promise<boolean> {
+  try {
+    await revealFieldValue(config, input);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Reads a value the tenant AAD could not, naming the record if the legacy AAD
+// cannot either.
+async function revealLegacy<T>(
+  reveal: () => Promise<T>,
+  kind: "endpoint" | "delivery",
+  id: string,
+  path: "secret" | "payload",
+): Promise<T> {
+  try {
+    return await reveal();
+  } catch (error) {
+    throw new FieldCryptoError(
+      "decrypt",
+      `Cannot migrate webhook ${kind} ${id}: its ${path} decrypts with neither the tenant-bound nor the legacy AAD`,
+      { recordId: id },
+      { fieldPath: path, failMode: "closed", causeChain: [error] },
+    );
+  }
+}
+
+/**
+ * Re-encrypts endpoint secrets and delivery payloads written before
+ * ciphertext was bound to `options.tenantId`, so they read without
+ * `acceptLegacyAad`. Pass the stores the runtime persists to, not wrapped
+ * ones. Values already bound to the tenant are left as they are. The
+ * migration runs fail-closed whatever `failMode` says, so a value that
+ * decrypts with neither AAD stops it rather than being replaced by a
+ * fallback. Deliveries are listed without a limit and written back with
+ * `add`, which must replace a delivery with the same id, as the built-in
+ * stores do.
+ */
+export async function migrateWebhookFieldCryptoToTenant(
+  persistence: Pick<WebhookPersistence, "endpointStore" | "deliveryStore">,
+  options: WebhookRuntimeFieldCryptoOptions,
+): Promise<WebhookTenantMigrationResult> {
+  validateWebhookFieldCryptoOptions(options);
+  const tenantId = normalizeString(options.tenantId);
+  if (!tenantId) {
+    throw new FieldCryptoError(
+      "config",
+      "migrating webhook ciphertext to the tenant requires fieldCrypto.tenantId",
+      { rule: "fieldCrypto.webhook.tenant_migration", path: "tenantId" },
+      { fieldPath: "tenantId" },
+    );
+  }
+
+  const bound: WebhookRuntimeFieldCryptoOptions = {
+    tenantId,
+    endpoint: failClosed(options.endpoint),
+    delivery: failClosed(options.delivery),
+  };
+  const legacy = { ...bound, acceptLegacyAad: true };
+  const result: WebhookTenantMigrationResult = { endpoints: 0, deliveries: 0 };
+
+  const endpointConfig = bound.endpoint;
+  if (endpointConfig && endpointConfig.enabled !== false) {
+    for (const endpoint of await persistence.endpointStore.list()) {
+      const input = {
+        value: endpoint.secret,
+        path: "secret",
+        aad: endpointAad(endpoint),
+        tenantId,
+      };
+      if (await isTenantBound(endpointConfig, input)) continue;
+      const revealed = await revealLegacy(
+        () => revealEndpoint(endpoint, legacy),
+        "endpoint",
+        endpoint.id,
+        "secret",
+      );
+      await persistence.endpointStore.update(
+        endpoint.id,
+        await protectEndpoint(revealed, bound),
+      );
+      result.endpoints += 1;
+    }
+  }
+
+  const deliveryConfig = bound.delivery;
+  if (deliveryConfig && deliveryConfig.enabled !== false) {
+    const deliveries = await persistence.deliveryStore.list({
+      limit: Number.MAX_SAFE_INTEGER,
+    });
+    for (const delivery of deliveries) {
+      const input = {
+        value: delivery.payload,
+        path: "payload",
+        aad: deliveryAad(delivery),
+        tenantId,
+      };
+      if (await isTenantBound(deliveryConfig, input)) continue;
+      const revealed = await revealLegacy(
+        () => revealDelivery(delivery, legacy),
+        "delivery",
+        delivery.id,
+        "payload",
+      );
+      await persistence.deliveryStore.add(
+        await protectDelivery(revealed, bound),
+      );
+      result.deliveries += 1;
+    }
+  }
+
+  return result;
 }

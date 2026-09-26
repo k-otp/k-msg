@@ -17,6 +17,7 @@ If this is your first time with crypto terms, read `./field-crypto-basics.md` fi
 - Prevent accidental plaintext persistence for recipient/sender identifiers.
 - Prevent index/search reliance on deterministic encryption.
 - Prevent record-copy attacks by binding ciphertext to AAD (`messageId`, `providerId`, `tableName`, `fieldPath`, optional `tenantId`).
+- Webhook ciphertext written before `tenantId` was bound is rejected, since a copy from another tenant's row would decrypt. It is read only while `acceptLegacyAad` is set for a one-time migration (`migrateWebhookFieldCryptoToTenant` or `runtime.migrateFieldCryptoToTenant()`) that re-encrypts it with the tenant.
 - Keep operational logs plaintext-free by default redaction.
 
 ## Envelope format
