@@ -1,11 +1,23 @@
+import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
-import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
+import {
+  createAesGcmFieldCryptoProvider,
+  createStaticKeyResolver,
+  type FieldCryptoConfig,
+  FieldCryptoError,
+  type FieldCryptoProvider,
+} from "@k-msg/core";
 import { HyperdriveDeliveryTrackingStore } from "../adapters/cloudflare/hyperdrive-delivery-tracking.store";
 import { CloudflareObjectDeliveryTrackingStore } from "../adapters/cloudflare/object-delivery-tracking.store";
+import type { CloudflareSqlClient } from "../adapters/cloudflare/sql-client";
 import {
   applyTrackingCryptoOnWrite,
   normalizeTrackingFilterWithHashes,
 } from "./field-crypto";
+import type {
+  DeliveryTrackingFieldCryptoOptions,
+  DeliveryTrackingStore,
+} from "./store.interface";
 import type { TrackingRecord } from "./types";
 
 function createConfig(
@@ -226,13 +238,443 @@ describe("delivery tracking field crypto policy", () => {
         secureMode: true,
         compatPlainColumns: false,
       },
+      { tableName: "kmsg_delivery_tracking", store: "memory" },
     );
 
-    expect(normalizedFilter.toHash).toEqual([
-      "h:01012345678",
-      "h:01012345678",
-      "h:01012345678",
+    // All three spellings hash to one value.
+    expect(normalizedFilter?.toHash).toBe("h:01012345678");
+    expect(normalizedFilter?.to).toBeUndefined();
+  });
+});
+
+function testKey(fill: number): string {
+  return Buffer.alloc(32, fill).toString("base64url");
+}
+
+// Keys for every kid the tests hand out. The provider's own active kid is one
+// no resolver returns, as with tenant-specific keys.
+function createKeyedProvider(): FieldCryptoProvider {
+  const kids = ["k-default", "tenant-a", "k-2026-01", "k-2026-02"];
+  return createAesGcmFieldCryptoProvider({
+    keys: Object.fromEntries(kids.map((kid, index) => [kid, testKey(index)])),
+    hashKeys: Object.fromEntries(
+      kids.map((kid, index) => [kid, testKey(index + 100)]),
+    ),
+    activeKid: "k-default",
+  });
+}
+
+function createMemoryObjectStorage() {
+  const map = new Map<string, string>();
+  return {
+    async get(key: string): Promise<string | null> {
+      return map.get(key) ?? null;
+    },
+    async put(key: string, value: string): Promise<void> {
+      map.set(key, value);
+    },
+    async delete(key: string): Promise<void> {
+      map.delete(key);
+    },
+    async list(prefix: string): Promise<string[]> {
+      return Array.from(map.keys()).filter((key) => key.startsWith(prefix));
+    },
+  };
+}
+
+function createSecureObjectStore(
+  config: FieldCryptoConfig,
+): CloudflareObjectDeliveryTrackingStore {
+  return new CloudflareObjectDeliveryTrackingStore(
+    createMemoryObjectStorage(),
+    {
+      secureMode: true,
+      compatPlainColumns: false,
+      fieldCrypto: { tenantId: "tenant-a", config },
+    },
+  );
+}
+
+function createSqliteClient(): CloudflareSqlClient {
+  const database = new Database(":memory:");
+  const query = async (sql: string, params: readonly unknown[] = []) => {
+    const statement = database.query(sql);
+    const bindings = params.map((value) =>
+      value instanceof Date ? value.getTime() : (value ?? null),
+    ) as Parameters<typeof statement.all>;
+    if (/^\s*SELECT/i.test(sql)) {
+      const rows = statement.all(...bindings) as unknown[];
+      return { rows, rowCount: rows.length };
+    }
+    const result = statement.run(...bindings) as { changes?: number };
+    return { rows: [], rowCount: result.changes ?? 0 };
+  };
+  return { dialect: "sqlite", query: query as CloudflareSqlClient["query"] };
+}
+
+function trackingRecord(index: number, to: string): TrackingRecord {
+  return { ...createRecord(), messageId: `m-${index}`, to };
+}
+
+async function messageIdsTo(
+  store: DeliveryTrackingStore,
+  to: string | string[],
+): Promise<string[]> {
+  const found = (await store.listRecords?.({ to, limit: 10 })) ?? [];
+  return found.map((record) => record.messageId).sort();
+}
+
+describe("tracking hash lookups", () => {
+  test("finds a record written under a tenant key by its recipient and sender", async () => {
+    const store = createSecureObjectStore({
+      enabled: true,
+      fields: { to: "encrypt+hash", from: "encrypt+hash" },
+      keyResolver: {
+        resolveEncryptKey: () => ({ kid: "tenant-a" }),
+        resolveDecryptKeys: () => ["tenant-a"],
+      },
+      provider: createKeyedProvider(),
+    });
+
+    const record = createRecord();
+    await store.upsert(record);
+    expect((await store.get(record.messageId))?.cryptoKid).toBe("tenant-a");
+
+    const byRecipient = await store.listRecords({
+      to: "010-1234-5678",
+      limit: 10,
+    });
+    expect(byRecipient.map((found) => found.messageId)).toEqual([
+      record.messageId,
     ]);
-    expect(normalizedFilter.to).toBeUndefined();
+    expect(await store.countRecords({ from: record.from })).toBe(1);
+  });
+
+  test("keeps records hashed before a key rotation findable while their kid stays in the decrypt set", async () => {
+    const client = createSqliteClient();
+    const provider = createKeyedProvider();
+    const openStore = (activeKid: string, decryptKids: string[]) =>
+      new HyperdriveDeliveryTrackingStore(client, {
+        tableName: "kmsg_delivery_tracking",
+        fieldCrypto: {
+          tenantId: "tenant-a",
+          config: {
+            enabled: true,
+            fields: { to: "encrypt+hash", from: "encrypt+hash" },
+            keyResolver: createStaticKeyResolver({ activeKid, decryptKids }),
+            provider,
+          },
+        },
+      });
+
+    const before = openStore("k-2026-01", []);
+    await before.upsert(trackingRecord(1, "01011110001"));
+
+    // Rotation: new writes use k-2026-02, and k-2026-01 stays readable.
+    const after = openStore("k-2026-02", ["k-2026-01"]);
+    await after.upsert(trackingRecord(2, "01011110002"));
+    expect((await after.get("m-1"))?.cryptoKid).toBe("k-2026-01");
+    expect((await after.get("m-2"))?.cryptoKid).toBe("k-2026-02");
+
+    expect(await messageIdsTo(after, "010-1111-0001")).toEqual(["m-1"]);
+    expect(await messageIdsTo(after, "01011110002")).toEqual(["m-2"]);
+    expect(await messageIdsTo(after, ["01011110001", "01011110002"])).toEqual([
+      "m-1",
+      "m-2",
+    ]);
+    expect(await after.countRecords({ from: createRecord().from })).toBe(2);
+    expect(await after.countBy({ to: "01011110001" }, ["providerId"])).toEqual([
+      { key: { providerId: "p-1" }, count: 1 },
+    ]);
+
+    // Once the old kid leaves the decrypt set, its records stop matching.
+    const retired = openStore("k-2026-02", []);
+    expect(await messageIdsTo(retired, "01011110001")).toEqual([]);
+    expect(await messageIdsTo(retired, "01011110002")).toEqual(["m-2"]);
+  });
+
+  test("resolves lookup candidates for the store: the encrypt kid first, then the decrypt set", async () => {
+    const contexts: Array<Record<string, unknown>> = [];
+    const provider: FieldCryptoProvider = {
+      encrypt: async ({ value }) => ({ ciphertext: value }),
+      decrypt: async ({ ciphertext }) => ciphertext,
+      hash: async ({ value, kid }) => `${kid ?? "provider-default"}:${value}`,
+    };
+    const normalize = (
+      keyResolver: FieldCryptoConfig["keyResolver"],
+      to: string | string[],
+    ) =>
+      normalizeTrackingFilterWithHashes(
+        { to },
+        {
+          tenantId: "tenant-a",
+          config: createConfig({ keyResolver, provider }),
+        },
+        { secureMode: true, compatPlainColumns: false },
+        { tableName: "kmsg_delivery_tracking", store: "sql" },
+      );
+
+    const withDecryptSet = await normalize(
+      {
+        resolveEncryptKey: (context) => {
+          contexts.push({ ...context });
+          return { kid: "k-2026-02" };
+        },
+        // Trimmed, deduplicated, and blank entries dropped.
+        resolveDecryptKeys: (context) => {
+          contexts.push({ ...context });
+          return ["k-2026-01", " k-2026-02 ", "", "k-2025-12"];
+        },
+      },
+      ["010-1234-5678", "01012345678"],
+    );
+    expect(withDecryptSet?.toHash).toEqual([
+      "k-2026-02:01012345678",
+      "k-2026-01:01012345678",
+      "k-2025-12:01012345678",
+    ]);
+    expect(withDecryptSet?.to).toBeUndefined();
+    // A lookup spans records, so no message or provider id reaches the resolver.
+    for (const context of contexts) {
+      expect(context).toMatchObject({
+        tenantId: "tenant-a",
+        tableName: "kmsg_delivery_tracking",
+        fieldPath: "to",
+      });
+      expect(context.messageId).toBeUndefined();
+      expect(context.providerId).toBeUndefined();
+    }
+
+    const encryptKidOnly = await normalize(
+      { resolveEncryptKey: () => ({ kid: "tenant-a" }) },
+      "01012345678",
+    );
+    expect(encryptKidOnly?.toHash).toBe("tenant-a:01012345678");
+
+    // Without a resolver a write hashes with the provider's default key, and
+    // so does the lookup.
+    const withoutResolver = await normalize(undefined, "01012345678");
+    expect(withoutResolver?.toHash).toBe("provider-default:01012345678");
+  });
+
+  test("hashes metadata under the key that encrypts it", async () => {
+    const hashKids: Record<string, string | undefined> = {};
+    const config = createConfig({
+      fields: {
+        to: "encrypt+hash",
+        from: "encrypt+hash",
+        metadata: "encrypt",
+        "metadata.callback": "encrypt+hash",
+      },
+      keyResolver: {
+        resolveEncryptKey: ({ fieldPath }) => ({
+          kid: fieldPath === "metadata" ? "metadata-key" : "tenant-key",
+        }),
+      },
+      provider: {
+        encrypt: async ({ value, kid }) => ({ ciphertext: value, kid }),
+        decrypt: async ({ ciphertext }) => ciphertext,
+        hash: async ({ value, path, kid }) => {
+          hashKids[path] = kid;
+          return `h:${value}`;
+        },
+      },
+    });
+
+    const secured = await applyTrackingCryptoOnWrite(
+      { ...createRecord(), metadata: { callback: "010-9999-0000" } },
+      { config },
+      { tableName: "kmsg_delivery_tracking", store: "memory" },
+      { secureMode: true, compatPlainColumns: false },
+    );
+
+    expect(secured.metadataHashes).toEqual({
+      "metadata.callback": "h:01099990000",
+    });
+    expect(hashKids).toEqual({
+      to: "tenant-key",
+      from: "tenant-key",
+      "metadata.callback": "metadata-key",
+    });
+  });
+
+  test("hashes a degraded write under the resolved kid, so lookups still find it", async () => {
+    const keyed = createKeyedProvider();
+    const store = createSecureObjectStore({
+      enabled: true,
+      fields: { to: "encrypt+hash", from: "encrypt+hash" },
+      failMode: "open",
+      openFallback: "masked",
+      keyResolver: {
+        resolveEncryptKey: () => ({ kid: "tenant-a" }),
+        resolveDecryptKeys: () => ["tenant-a"],
+      },
+      provider: {
+        ...keyed,
+        encrypt: async () => {
+          throw new Error("encryption service unavailable");
+        },
+      },
+    });
+
+    const record = createRecord();
+    await store.upsert(record);
+    const stored = await store.get(record.messageId);
+    expect(stored?.cryptoState).toBe("degraded");
+    expect(stored?.toHash).toBe(
+      await keyed.hash({ value: record.to, path: "to", kid: "tenant-a" }),
+    );
+
+    expect(await messageIdsTo(store, "010-1234-5678")).toEqual([
+      record.messageId,
+    ]);
+    expect(await store.countRecords({ from: record.from })).toBe(1);
+  });
+
+  test("stores a degraded write without the hash it cannot compute", async () => {
+    const failures: Array<Partial<FieldCryptoConfig>> = [
+      {
+        keyResolver: {
+          resolveEncryptKey: () => {
+            throw new Error("key service unavailable");
+          },
+        },
+      },
+      {
+        provider: {
+          encrypt: async ({ value }) => ({ ciphertext: value }),
+          decrypt: async ({ ciphertext }) => ciphertext,
+          hash: async () => {
+            throw new Error("hash service unavailable");
+          },
+        },
+      },
+    ];
+
+    for (const failure of failures) {
+      const secured = await applyTrackingCryptoOnWrite(
+        createRecord(),
+        {
+          config: createConfig({
+            failMode: "open",
+            openFallback: "masked",
+            ...failure,
+          }),
+        },
+        { tableName: "kmsg_delivery_tracking", store: "memory" },
+        { secureMode: true, compatPlainColumns: false },
+      );
+
+      expect(secured.cryptoState).toBe("degraded");
+      expect(secured.toMasked).toBe("010******78");
+      expect(secured.toHash).toBeUndefined();
+      expect(secured.fromHash).toBeUndefined();
+    }
+  });
+
+  const openSecureStores: Record<
+    string,
+    (fieldCrypto: DeliveryTrackingFieldCryptoOptions) => DeliveryTrackingStore
+  > = {
+    object: (fieldCrypto) =>
+      new CloudflareObjectDeliveryTrackingStore(createMemoryObjectStorage(), {
+        secureMode: true,
+        compatPlainColumns: false,
+        fieldCrypto,
+      }),
+    sql: (fieldCrypto) =>
+      new HyperdriveDeliveryTrackingStore(createSqliteClient(), {
+        tableName: "kmsg_delivery_tracking",
+        fieldCrypto,
+      }),
+  };
+
+  for (const [kind, openStore] of Object.entries(openSecureStores)) {
+    test(`an open-mode lookup skips a hash it cannot compute and matches no records without one (${kind} store)`, async () => {
+      let decryptKids = (): string[] => ["tenant-a"];
+      const hashFailures: unknown[] = [];
+      const store = openStore({
+        tenantId: "tenant-a",
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          failMode: "open",
+          keyResolver: {
+            resolveEncryptKey: () => ({ kid: "tenant-a" }),
+            resolveDecryptKeys: () => decryptKids(),
+          },
+          provider: createKeyedProvider(),
+        },
+        metrics: (event) => {
+          if (
+            event.name === "crypto_fail_count" &&
+            event.tags?.operation === "hash"
+          ) {
+            hashFailures.push(event);
+          }
+        },
+      });
+      await store.upsert(trackingRecord(1, "01011110001"));
+      await store.upsert(trackingRecord(2, "01011110002"));
+
+      // The provider has no hash key for k-unknown, so the lookup skips it.
+      decryptKids = () => ["tenant-a", "k-unknown"];
+      expect(await messageIdsTo(store, "01011110001")).toEqual(["m-1"]);
+
+      // With the key service down no hash is left: the lookup matches no
+      // record rather than dropping the filter and matching every record.
+      decryptKids = () => {
+        throw new Error("key service unavailable");
+      };
+      expect(await messageIdsTo(store, "01011110001")).toEqual([]);
+      expect(await store.countRecords?.({ to: "01011110001" })).toBe(0);
+      expect(
+        await store.countBy?.({ from: createRecord().from }, ["type"]),
+      ).toEqual([]);
+      expect(hashFailures).toHaveLength(4);
+    });
+
+    test(`an open-mode lookup whose hash fails matches no records instead of every record (${kind} store)`, async () => {
+      const keyed = createKeyedProvider();
+      let hashServiceDown = false;
+      const store = openStore({
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          failMode: "open",
+          provider: {
+            ...keyed,
+            hash: (input) => {
+              if (hashServiceDown) {
+                throw new Error("hash service unavailable");
+              }
+              return keyed.hash(input);
+            },
+          },
+        },
+      });
+      await store.upsert(trackingRecord(1, "01011110001"));
+      await store.upsert(trackingRecord(2, "01011110002"));
+
+      hashServiceDown = true;
+      expect(await messageIdsTo(store, "01011110001")).toEqual([]);
+      expect(await store.countRecords?.({ from: createRecord().from })).toBe(0);
+    });
+  }
+
+  test("a closed-mode lookup that cannot hash fails", async () => {
+    const store = createSecureObjectStore({
+      enabled: true,
+      fields: { to: "encrypt+hash", from: "encrypt+hash" },
+      keyResolver: {
+        resolveEncryptKey: () => ({ kid: "tenant-a" }),
+        resolveDecryptKeys: () => ["tenant-a", "k-unknown"],
+      },
+      provider: createKeyedProvider(),
+    });
+
+    await expect(
+      store.listRecords({ to: "01012345678", limit: 10 }),
+    ).rejects.toThrow("Field crypto hash failed for to");
   });
 });

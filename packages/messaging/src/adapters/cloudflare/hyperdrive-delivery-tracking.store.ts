@@ -284,6 +284,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       : 0;
 
     const normalizedFilter = await this.normalizeFilterForCrypto(options);
+    if (!normalizedFilter) return [];
     const where = this.buildWhere(normalizedFilter);
     const orderBy =
       options.orderBy === "statusUpdatedAt"
@@ -307,6 +308,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     await this.init();
 
     const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    if (!normalizedFilter) return 0;
     const where = this.buildWhere(normalizedFilter);
     const { rows } = await this.client.query<{ count?: number | string }>(
       `SELECT COUNT(1) as count FROM ${this.tableRef()} ${where.sql}`,
@@ -338,6 +340,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       .join(", ");
 
     const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    if (!normalizedFilter) return [];
     const where = this.buildWhere(normalizedFilter);
 
     const { rows } = await this.client.query<Record<string, unknown>>(
@@ -828,15 +831,20 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     };
   }
 
+  // Resolves to undefined when no record can match the filter.
   private async normalizeFilterForCrypto<
     T extends DeliveryTrackingRecordFilter,
-  >(filter: T): Promise<T> {
+  >(filter: T): Promise<T | undefined> {
     const normalized = await normalizeTrackingFilterWithHashes(
       filter,
       this.fieldCrypto,
       this.cryptoMode(),
+      {
+        tableName: this.schema.tableName,
+        store: "sql",
+      },
     );
-    return normalized as T;
+    return normalized as T | undefined;
   }
 
   private patchTouchesCrypto(patch: Partial<TrackingRecord>): boolean {

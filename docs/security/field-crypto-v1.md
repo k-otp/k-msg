@@ -59,6 +59,13 @@ The messaging tracking stores look records up by `to` and `from`, so they also s
 - Encrypt uses active `kid` from `resolveEncryptKey`
 - Decrypt supports multi-kid from `resolveDecryptKeys`
 - Rotation: write with new `kid`, read with old+new `kid`
+- Lookup: hash with the field's encrypt `kid`, search under every `kid` a record may carry
+
+The messaging tracking stores hash `to`, `from`, and metadata `encrypt+hash` paths with the provider's hash key for the field's encrypt `kid`: the one `resolveEncryptKey` returns for `to`, `from`, or `metadata`. A degraded write under `failMode=open` stores the same `to` and `from` hashes, or none for a field whose `kid` or hash it cannot compute.
+
+A `to` or `from` lookup hashes each value under the `kid` that `resolveEncryptKey` returns and under every `kid` from `resolveDecryptKeys`, and matches a record carrying any of those hashes, so records written under a tenant key or before a rotation stay findable. A lookup spans records, so it resolves keys with the store's `tenantId`, `tableName`, and `fieldPath`, but no `messageId` or `providerId`. A record hashed under a `kid` that neither call returns is not found: keep a retired `kid` in `resolveDecryptKeys` while its records must stay findable, and give every listed `kid` a hash key. Without a `keyResolver`, writes and lookups both use the provider's default hash key.
+
+A lookup that cannot compute a hash emits `crypto_fail_count` with `operation=hash`. Under `failMode=closed` it fails. Under `failMode=open` it skips that hash, and if a field is left with no hash while the store keeps no plain columns, the lookup matches no records.
 
 ## Metrics
 
