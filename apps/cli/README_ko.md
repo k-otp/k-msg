@@ -252,7 +252,7 @@ k-msg db tracking migrate retry --sqlite-file ./local.db
 운영 참고:
 
 - 상태는 DB 메타테이블 + 로컬 스냅샷(`.kmsg/migrations`)에 함께 저장됩니다.
-- `retry`는 실패한 청크만 재실행합니다.
+- `retry`는 실패한 청크만 재실행합니다. 읽기 오류로 멈춘 run은 `apply`로 이어서 실행합니다.
 - `apply`와 `retry`는 tracking store와 같은 키(`KMSG_FIELD_CRYPTO_KEYS`, `KMSG_ACTIVE_KID`)로 암호화합니다(`docs/security/migration-cli-runbook.md` 참고).
 - 롤아웃 플래그(`compatPlainColumns`) 변경 전 `status` 확인을 권장합니다.
 

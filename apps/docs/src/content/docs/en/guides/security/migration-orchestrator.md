@@ -25,7 +25,7 @@ k-msg db tracking migrate retry --sqlite-file ./local.db
 ## Operational checkpoints
 
 1. Keep the same `planId` for resumed execution.
-2. Retry only failed chunks with `retry`.
+2. Retry only failed chunks with `retry`. A run that stopped on a read error has none; resume it with `apply`.
 3. Switch `compatPlainColumns=false` only after hash/cipher consistency checks.
 
 ## Risk labels

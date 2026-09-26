@@ -6,9 +6,11 @@ import type {
   CloudflareSqlClient,
   SqlDialect,
 } from "../../adapters/cloudflare/sql-client";
-import { applyTrackingCryptoOnWrite } from "../../delivery-tracking/field-crypto";
+import {
+  applyTrackingCryptoOnWrite,
+  type TrackingCryptoWriteInput,
+} from "../../delivery-tracking/field-crypto";
 import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
-import type { TrackingRecord } from "../../delivery-tracking/types";
 import {
   ensureFieldCryptoMigrationStateTables,
   getFieldCryptoMigrationRun,
@@ -195,16 +197,20 @@ async function backfillChunkByMessageIds(
   for (const row of rows) {
     const messageId = String(row.message_id ?? "");
     const to = toStringValue(row.to_plain);
-    if (!messageId || !to) continue;
+    if (!to) {
+      // Skipping would mark the chunk completed and leave the row unprotected.
+      throw new Error(
+        `Cannot encrypt message ${messageId}: its plain recipient column is empty, so there is no plaintext to encrypt`,
+      );
+    }
 
-    // The write path only reads identity, recipient, sender, and metadata.
-    const record = {
+    const record: TrackingCryptoWriteInput = {
       messageId,
       providerId: String(row.provider_id ?? ""),
       to,
       from: toStringValue(row.from_plain),
       metadata: parseMetadata(row.metadata_plain),
-    } as TrackingRecord;
+    };
     const secured = await applyTrackingCryptoOnWrite(
       record,
       fieldCrypto,
@@ -306,10 +312,12 @@ export async function applyFieldCryptoMigration(
     };
   };
 
-  while (processedChunks < maxChunks) {
-    let rows: TrackingCursorRow[];
-    try {
-      rows = await selectNextRows(
+  // Any read or state write that fails stops the run as failed. Rows up to the
+  // recorded cursor are done, so `apply` resumes from there.
+  let hasMore: boolean;
+  try {
+    while (processedChunks < maxChunks) {
+      const rows = await selectNextRows(
         client,
         spec,
         {
@@ -318,69 +326,22 @@ export async function applyFieldCryptoMigration(
         },
         run.chunkSize,
       );
-    } catch (error) {
-      return failRun(error);
-    }
 
-    if (rows.length === 0) {
-      break;
-    }
+      if (rows.length === 0) {
+        break;
+      }
 
-    chunkNo += 1;
-    const start = rows[0];
-    const end = rows[rows.length - 1];
-    const messageIds = rows.map((row) => row.messageId);
+      chunkNo += 1;
+      const start = rows[0];
+      const end = rows[rows.length - 1];
+      const messageIds = rows.map((row) => row.messageId);
 
-    await upsertFieldCryptoMigrationChunk(
-      client,
-      {
-        planId: run.planId,
-        chunkNo,
-        status: "processing",
-        startRequestedAt: start?.requestedAt,
-        startMessageId: start?.messageId,
-        endRequestedAt: end?.requestedAt,
-        endMessageId: end?.messageId,
-        processedRows: 0,
-        attempts: 1,
-        messageIds,
-        updatedAt: Date.now(),
-      },
-      options,
-    );
-
-    try {
-      await backfillChunkByMessageIds(client, spec, messageIds, fieldCrypto);
       await upsertFieldCryptoMigrationChunk(
         client,
         {
           planId: run.planId,
           chunkNo,
-          status: "completed",
-          startRequestedAt: start?.requestedAt,
-          startMessageId: start?.messageId,
-          endRequestedAt: end?.requestedAt,
-          endMessageId: end?.messageId,
-          processedRows: rows.length,
-          attempts: 1,
-          messageIds,
-          updatedAt: Date.now(),
-        },
-        options,
-      );
-
-      processedChunks += 1;
-      processedRows += rows.length;
-      cursorRequestedAt = end?.requestedAt;
-      cursorMessageId = end?.messageId;
-    } catch (error) {
-      failedChunks += 1;
-      await upsertFieldCryptoMigrationChunk(
-        client,
-        {
-          planId: run.planId,
-          chunkNo,
-          status: "failed",
+          status: "processing",
           startRequestedAt: start?.requestedAt,
           startMessageId: start?.messageId,
           endRequestedAt: end?.requestedAt,
@@ -388,28 +349,74 @@ export async function applyFieldCryptoMigration(
           processedRows: 0,
           attempts: 1,
           messageIds,
-          lastError: toErrorMessage(error),
           updatedAt: Date.now(),
         },
         options,
       );
 
-      return failRun(error);
-    }
-  }
+      try {
+        await backfillChunkByMessageIds(client, spec, messageIds, fieldCrypto);
+        await upsertFieldCryptoMigrationChunk(
+          client,
+          {
+            planId: run.planId,
+            chunkNo,
+            status: "completed",
+            startRequestedAt: start?.requestedAt,
+            startMessageId: start?.messageId,
+            endRequestedAt: end?.requestedAt,
+            endMessageId: end?.messageId,
+            processedRows: rows.length,
+            attempts: 1,
+            messageIds,
+            updatedAt: Date.now(),
+          },
+          options,
+        );
 
-  const hasMore =
-    (
-      await selectNextRows(
-        client,
-        spec,
-        {
-          requestedAt: cursorRequestedAt,
-          messageId: cursorMessageId,
-        },
-        1,
-      )
-    ).length > 0;
+        processedChunks += 1;
+        processedRows += rows.length;
+        cursorRequestedAt = end?.requestedAt;
+        cursorMessageId = end?.messageId;
+      } catch (error) {
+        failedChunks += 1;
+        await upsertFieldCryptoMigrationChunk(
+          client,
+          {
+            planId: run.planId,
+            chunkNo,
+            status: "failed",
+            startRequestedAt: start?.requestedAt,
+            startMessageId: start?.messageId,
+            endRequestedAt: end?.requestedAt,
+            endMessageId: end?.messageId,
+            processedRows: 0,
+            attempts: 1,
+            messageIds,
+            lastError: toErrorMessage(error),
+            updatedAt: Date.now(),
+          },
+          options,
+        );
+        throw error;
+      }
+    }
+
+    hasMore =
+      (
+        await selectNextRows(
+          client,
+          spec,
+          {
+            requestedAt: cursorRequestedAt,
+            messageId: cursorMessageId,
+          },
+          1,
+        )
+      ).length > 0;
+  } catch (error) {
+    return failRun(error);
+  }
 
   const finalStatus = hasMore ? "running" : "completed";
   await upsertFieldCryptoMigrationRun(
@@ -459,6 +466,19 @@ export async function retryFieldCryptoMigration(
     run.planId,
     options,
   );
+  if (failedChunks.length === 0) {
+    // Only failed chunks are retried. A run that stopped on a read error has
+    // none and resumes from its cursor with `apply`, so leave it as it is.
+    return {
+      planId: run.planId,
+      processedChunks: 0,
+      processedRows: 0,
+      failedChunks: run.failedChunks,
+      status: run.status,
+      cursorRequestedAt: run.cursorRequestedAt,
+      cursorMessageId: run.cursorMessageId,
+    };
+  }
   const maxChunks = normalizeMaxChunks(options.maxChunks);
 
   let retriedChunks = 0;

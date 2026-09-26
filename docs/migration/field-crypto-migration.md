@@ -38,10 +38,10 @@ fields: {
 ## 3. Backfill order
 
 1. Add secure columns and indexes
-2. Backfill `to_enc`, `to_hash`, `from_enc`, `from_hash` with `applyFieldCryptoMigration`, passing the tracking store's `fieldCrypto` options. Rows whose `crypto_state` is empty, `plain`, or `degraded` are encrypted from the plain columns; a row that cannot be encrypted fails its chunk instead of storing fallback values
+2. Backfill `to_enc`, `to_hash`, `from_enc`, `from_hash` with `applyFieldCryptoMigration`, passing the tracking store's `fieldCrypto` options. Rows whose `crypto_state` is empty, `plain`, or `degraded` are encrypted from the plain columns; a row that cannot be encrypted, including one whose plain recipient is empty, fails its chunk instead of storing fallback values
 3. Switch read path to secure mode
 4. Disable plain compatibility (`compatPlainColumns=false`)
-5. Optionally drop legacy plain columns
+5. Drop the legacy plain columns (`to`, `from`, `metadata`). The backfill leaves them in place, so they hold plaintext until they are dropped
 
 ## 4. Query migration
 
