@@ -5,7 +5,7 @@ prev: false
 title: "KeySetState"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L28)
+Defined in: [packages/core/src/crypto/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L45)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:28](https://github.com/k-otp/k-ms
 
 > **activeKid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L29)
+Defined in: [packages/core/src/crypto/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L46)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:29](https://github.com/k-otp/k-ms
 
 > `optional` **decryptKids?**: readonly `string`[]
 
-Defined in: [packages/core/src/crypto/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L30)
+Defined in: [packages/core/src/crypto/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L47)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/crypto/types.ts:30](https://github.com/k-otp/k-ms
 
 > `optional` **refreshedAt?**: `number`
 
-Defined in: [packages/core/src/crypto/types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L31)
+Defined in: [packages/core/src/crypto/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L48)

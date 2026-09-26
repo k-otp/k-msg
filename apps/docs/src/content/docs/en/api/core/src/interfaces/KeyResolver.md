@@ -5,7 +5,9 @@ prev: false
 title: "KeyResolver"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L34)
+Defined in: [packages/core/src/crypto/types.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L61)
+
+Chooses the key id used to write and the key ids tried when reading.
 
 ## Methods
 
@@ -13,7 +15,7 @@ Defined in: [packages/core/src/crypto/types.ts:34](https://github.com/k-otp/k-ms
 
 > `optional` **resolveDecryptKeys**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<readonly `string`[]\>
 
-Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L38)
+Defined in: [packages/core/src/crypto/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L65)
 
 #### Parameters
 
@@ -31,7 +33,7 @@ Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-ms
 
 > **resolveEncryptKey**(`context`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `kid`: `string`; \}\>
 
-Defined in: [packages/core/src/crypto/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L35)
+Defined in: [packages/core/src/crypto/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L62)
 
 #### Parameters
 
