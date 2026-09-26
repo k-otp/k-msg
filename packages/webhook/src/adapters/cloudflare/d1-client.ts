@@ -107,15 +107,8 @@ export async function runStatements(
     .map((statement) => statement.trim())
     .filter((statement) => statement.length > 0);
 
-  if (statements.length === 0) {
-    return;
-  }
-
-  if (typeof db.exec === "function") {
-    await db.exec(`${statements.join(";\n")};`);
-    return;
-  }
-
+  // Not db.exec(): D1 runs each line of its input as a separate statement,
+  // so a statement that spans lines, like the schema's CREATE TABLE, fails.
   for (const statement of statements) {
     await runStatement(db, statement);
   }
