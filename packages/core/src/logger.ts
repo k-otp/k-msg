@@ -59,10 +59,13 @@ const SENSITIVE_CONTEXT_KEYS = [
 
 // A key names a credential when it contains one of these words anywhere
 // (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, or a property path
-// such as `config.password.value`, `client[secret]`, or `settings.api.key`),
-// or has an auth or authorization segment (`Authorization`, `config.auth.value`,
-// `auth[0]`). Auth only counts as a whole segment: `author` is not a key.
-const CREDENTIAL_KEY_SOURCE = String.raw`[\w.[\]-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)[\w.[\]-]*|auth(?:orization)?(?:[.[\]][\w.[\]-]*)?)`;
+// such as `config.password.value`, `client[secret]`, `config["password"]`,
+// or `settings.api.key`), or has an auth or authorization segment
+// (`Authorization`, `config.auth.value`, `headers['authorization']`). Auth
+// only counts as a whole segment: `author` is not a key. Each side of the
+// word is bounded, so text with long dotted runs is scanned in linear time.
+const KEY_PART = String.raw`[\w.[\]"'-]{0,64}`;
+const CREDENTIAL_KEY_SOURCE = String.raw`${KEY_PART}(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)${KEY_PART}|auth(?:orization)?(?:[.[\]"']${KEY_PART})?)`;
 const CREDENTIAL_KEY = new RegExp(`^${CREDENTIAL_KEY_SOURCE}$`, "i");
 
 function isSensitiveContextKey(rawKey: string): boolean {
@@ -112,7 +115,9 @@ const PHONE_NUMBER_PATTERN = new RegExp(
     .join("|"),
   "g",
 );
-const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
+// The scheme is bounded, as the key pattern below is, to keep scans linear.
+const URL_PASSWORD_PATTERN =
+  /(\b[a-z][\w+.-]{0,31}:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
 // Quoted values, then values quoted with an escaped quote. Only the escaped
 // quote ends an escaped value: an escaped backslash pair belongs to the value,
 // so an embedded `\\\"` does not end it, and so does a backslash before any

@@ -80,6 +80,11 @@ describe("redactLogText", () => {
     ["auth.private.key=abc", "auth.private.key=[REDACTED]"],
     ["config.auth.value=abc", "config.auth.value=[REDACTED]"],
     ["auth[0]=abc", "auth[0]=[REDACTED]"],
+    ['config["password"]=TOPSECRET', 'config["password"]=[REDACTED]'],
+    [
+      "headers['authorization']: Bearer abc.def",
+      "headers['authorization']: Bearer [REDACTED]",
+    ],
     [
       "headers.authorization: Bearer abc.def",
       "headers.authorization: Bearer [REDACTED]",
@@ -98,6 +103,15 @@ describe("redactLogText", () => {
     ],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
+  });
+
+  test("scans long runs of path-like text in linear time", () => {
+    // Took seconds before key parts were bounded: every word boundary
+    // rescanned the rest of the run.
+    const text = "config.".repeat(15_000);
+    const started = performance.now();
+    expect(redactLogText(text)).toBe(text);
+    expect(performance.now() - started).toBeLessThan(1_000);
   });
 
   test("leaves timestamps, ids, and prose alone", () => {
