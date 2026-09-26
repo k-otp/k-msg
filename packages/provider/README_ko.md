@@ -25,6 +25,7 @@ bun add solapi
 - `SolapiProvider` (SOLAPI)
 - `IWINVProvider` (IWINV AlimTalk + optional SMS v2)
 - `AligoProvider` (Aligo)
+- `MockProvider` (벤더 API를 호출하지 않는 테스트·로컬 실행용). `{ id }`를 넘기면 인스턴스마다 provider id를 따로 줄 수 있어, 예를 들어 mock 두 개로 `routing.byType`을 시험할 수 있습니다. 기본 id는 `"mock"`입니다.
 
 모든 provider는 `@k-msg/core`의 `Provider` 인터페이스를 구현합니다:
 

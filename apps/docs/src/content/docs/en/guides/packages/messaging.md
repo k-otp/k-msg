@@ -132,6 +132,24 @@ const kmsg = new KMsg({
 });
 ```
 
+To try routing without provider credentials, give each `MockProvider` its own id:
+
+```ts
+import { KMsg } from "@k-msg/messaging";
+import { MockProvider } from "@k-msg/provider";
+
+const kmsg = new KMsg({
+  providers: [
+    new MockProvider({ id: "kakao" }),
+    new MockProvider({ id: "sms" }),
+  ],
+  routing: { byType: { ALIMTALK: "kakao", SMS: "sms", LMS: "sms" } },
+});
+
+const result = await kmsg.send({ to: "01012345678", text: "hello" });
+// result.value.providerId === "sms"
+```
+
 ## Bulk Sending
 
 Pass an array to `send()`. Messages are grouped by provider and sent in chunks of up to 50, or the provider's batch limit if it is lower, and each message gets its own `Result`.

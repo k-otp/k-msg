@@ -39,4 +39,7 @@ export {
   type ProviderCliMetadata,
   providerCliMetadata,
 } from "./provider-cli-metadata";
-export { MockProvider } from "./providers/mock/mock.provider";
+export {
+  MockProvider,
+  type MockProviderOptions,
+} from "./providers/mock/mock.provider";
