@@ -6,6 +6,7 @@ import {
   type MessageRepository,
   ok,
   type Provider,
+  type ProviderRequestContext,
   type SendInput,
 } from "@k-msg/core";
 import { KMsg } from "./k-msg";
@@ -1037,5 +1038,61 @@ describe("KMsg", () => {
       await expect(kmsg.send(input)).rejects.toThrow("blocked");
       expect(send).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("KMsg request context", () => {
+  function createCapturingProvider() {
+    const contexts: Array<ProviderRequestContext | undefined> = [];
+    const provider: Provider = {
+      id: "mock",
+      name: "Mock Provider",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options, context) => {
+        contexts.push(context);
+        return ok({
+          messageId: options.messageId ?? "test-id",
+          status: "SENT" as const,
+          providerId: "mock",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+    return { provider, contexts };
+  }
+
+  test("forwards the caller's signal and fetch to the provider", async () => {
+    const { provider, contexts } = createCapturingProvider();
+    const kmsg = new KMsg({ providers: [provider] });
+    const request: ProviderRequestContext = {
+      signal: new AbortController().signal,
+      fetch: async () => new Response("{}"),
+    };
+
+    await kmsg.send({ to: "01012345678", text: "one" }, request);
+    await kmsg.sendOrThrow({ to: "01012345678", text: "two" }, request);
+    await kmsg.send(
+      [
+        { to: "01011112222", text: "a" },
+        { to: "01033334444", text: "b" },
+      ],
+      request,
+    );
+
+    expect(contexts).toHaveLength(4);
+    for (const context of contexts) {
+      expect(context).toBe(request);
+    }
+  });
+
+  test("calls the provider without a context when none is given", async () => {
+    const { provider, contexts } = createCapturingProvider();
+    const kmsg = new KMsg({ providers: [provider] });
+
+    await kmsg.send({ to: "01012345678", text: "one" });
+
+    expect(contexts).toEqual([undefined]);
   });
 });
