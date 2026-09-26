@@ -2,7 +2,8 @@
  * Tests for messaging-core package
  */
 
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
+import { logger } from "@k-msg/core";
 import { TemplatePersonalizer, TemplateVariableUtils } from "@k-msg/template";
 import {
   DeliveryTracker,
@@ -18,11 +19,49 @@ import {
 } from "./queue/job-queue.interface";
 import {
   type DeliveryReport,
+  MessageEventType,
   type MessageRequest,
   MessageStatus,
 } from "./types/message.types";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The "should log" tests drive timer loops whose async work nothing awaits
+// until that work fails. bun test fails the running test on any unhandled
+// rejection (process "unhandledRejection" listeners never see it), so a pass
+// shows the loop handled the failure; the tests then check that it reached
+// the logger and that the loop kept running. Polling instead of sleeping a
+// fixed time keeps them fast locally and stable on a loaded CI runner.
+async function waitFor(
+  condition: () => boolean,
+  timeoutMs = 2000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition()) {
+    if (Date.now() > deadline) {
+      throw new Error(`Condition not met within ${timeoutMs}ms`);
+    }
+    await wait(5);
+  }
+}
+
+function failedDeliveryReport(messageId: string): DeliveryReport {
+  return {
+    messageId,
+    phoneNumber: "01012345678",
+    status: MessageStatus.FAILED,
+    attempts: [
+      {
+        attemptNumber: 1,
+        attemptedAt: new Date(),
+        status: MessageStatus.FAILED,
+        error: { code: "NETWORK_TIMEOUT", message: "Request timeout" },
+        provider: "test-provider",
+      },
+    ],
+    metadata: { templateId: "test_template" },
+  };
+}
 
 class InMemoryJobQueue<T> implements JobQueue<T> {
   private readonly jobs = new Map<string, Job<T>>();
@@ -391,6 +430,87 @@ describe("JobProcessor", () => {
 
     await processor.stop();
   });
+
+  test("should log a rejected poll and keep polling", async () => {
+    class OfflineJobQueue extends InMemoryJobQueue<unknown> {
+      dequeueCalls = 0;
+
+      override async dequeue(): Promise<Job<unknown> | undefined> {
+        this.dequeueCalls++;
+        throw new Error("queue offline");
+      }
+    }
+
+    const queue = new OfflineJobQueue();
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [],
+        maxRetries: 1,
+        pollInterval: 10,
+        enableMetrics: true,
+      },
+      queue,
+    );
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      processor.start();
+      await waitFor(() => queue.dequeueCalls >= 3);
+
+      // Every failed poll was logged, and each one scheduled the next.
+      expect(loggerError).toHaveBeenCalledTimes(queue.dequeueCalls);
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe("queue offline");
+    } finally {
+      await processor.stop();
+      loggerError.mockRestore();
+    }
+  });
+
+  test("should log a job whose outcome cannot be stored and free its slot", async () => {
+    class ReadOnlyJobQueue extends InMemoryJobQueue<unknown> {
+      override async complete(): Promise<void> {
+        throw new Error("queue is read-only");
+      }
+
+      override async fail(): Promise<void> {
+        throw new Error("queue is read-only");
+      }
+    }
+
+    const processor = new JobProcessor(
+      {
+        concurrency: 1,
+        retryDelays: [],
+        maxRetries: 1,
+        pollInterval: 10,
+        enableMetrics: true,
+      },
+      new ReadOnlyJobQueue(),
+    );
+    processor.handle("store-result", async () => "done");
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      processor.start();
+      const jobId = await processor.add("store-result", {});
+      await waitFor(() => loggerError.mock.calls.length > 0);
+
+      const stopResult = await Promise.race([
+        processor.stop().then(() => "stopped"),
+        wait(300).then(() => "timed-out"),
+      ]);
+
+      expect(stopResult).toBe("stopped");
+      expect(loggerError).toHaveBeenCalledTimes(1);
+      expect(loggerError.mock.calls[0]?.[1]).toMatchObject({ jobId });
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe(
+        "queue is read-only",
+      );
+    } finally {
+      loggerError.mockRestore();
+    }
+  });
 });
 
 describe("MessageJobProcessor", () => {
@@ -650,6 +770,49 @@ describe("MessageRetryHandler", () => {
 
     await retryHandler.stop();
   });
+
+  test("should log a rejected onRetryFailed callback and keep checking", async () => {
+    const retryHandler = new MessageRetryHandler({
+      policy: {
+        maxAttempts: 2,
+        backoffMultiplier: 2,
+        initialDelay: 10,
+        maxDelay: 1000,
+        jitter: false,
+        retryableStatuses: [MessageStatus.FAILED],
+        retryableErrorCodes: ["NETWORK_TIMEOUT"],
+      },
+      checkInterval: 10,
+      maxQueueSize: 100,
+      execute: async (attempt) => {
+        if (attempt.messageId === "msg_down") {
+          throw new Error("provider down");
+        }
+        return { delivered: true };
+      },
+      onRetryFailed: async () => {
+        throw new Error("audit store down");
+      },
+    });
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      retryHandler.start();
+      await retryHandler.addForRetry(failedDeliveryReport("msg_down"));
+      await waitFor(() => loggerError.mock.calls.length > 0);
+      await retryHandler.addForRetry(failedDeliveryReport("msg_up"));
+      await waitFor(
+        () => retryHandler.getRetryStatus("msg_up")?.status === "succeeded",
+      );
+
+      expect(retryHandler.getRetryStatus("msg_down")?.status).toBe("exhausted");
+      expect(loggerError).toHaveBeenCalledTimes(1);
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe("audit store down");
+    } finally {
+      await retryHandler.stop();
+      loggerError.mockRestore();
+    }
+  });
 });
 
 describe("DeliveryTracker", () => {
@@ -753,6 +916,67 @@ describe("DeliveryTracker", () => {
     expect(stats.byStatus[MessageStatus.FAILED]).toBe(3);
     expect(stats.deliveryRate).toBe(70);
     expect(stats.failureRate).toBe(30);
+  });
+
+  test("should log a throwing webhook:failed listener and keep delivering", async () => {
+    const tracker = new DeliveryTracker({
+      trackingInterval: 10,
+      maxTrackingDuration: 60000,
+      batchSize: 10,
+      enableWebhooks: true,
+      webhookRetries: 0,
+      webhookTimeout: 1000,
+      persistence: { enabled: false, retentionDays: 7 },
+    });
+    tracker.on("webhook:failed", () => {
+      throw new Error("alerting down");
+    });
+    // Bun's `typeof fetch` also declares `preconnect`, which this stub never
+    // uses.
+    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+      (async () => {
+        throw new Error("network unreachable");
+      }) as unknown as typeof fetch,
+    );
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      tracker.start();
+      await tracker.trackMessage(
+        "msg_hook",
+        "01012345678",
+        "test_template",
+        "test-provider",
+        {
+          webhooks: [
+            {
+              url: "https://hooks.example.test/delivery",
+              events: [
+                MessageEventType.MESSAGE_QUEUED,
+                MessageEventType.MESSAGE_SENT,
+              ],
+              timeout: 1000,
+              retries: 0,
+            },
+          ],
+        },
+      );
+      await waitFor(() => loggerError.mock.calls.length === 1);
+      // The next event goes out on a later tick, after the first delivery's
+      // failure was logged.
+      await tracker.updateStatus("msg_hook", MessageStatus.SENT);
+      await waitFor(() => loggerError.mock.calls.length === 2);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(loggerError.mock.calls[0]?.[1]).toMatchObject({
+        eventType: MessageEventType.MESSAGE_QUEUED,
+      });
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe("alerting down");
+    } finally {
+      tracker.stop();
+      fetchSpy.mockRestore();
+      loggerError.mockRestore();
+    }
   });
 });
 
