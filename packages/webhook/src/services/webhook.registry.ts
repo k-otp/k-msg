@@ -1,7 +1,9 @@
 import type { FieldCryptoConfig } from "@k-msg/core";
 import {
-  protectFieldValue,
-  revealFieldValue,
+  protectDelivery,
+  protectEndpoint,
+  revealDelivery,
+  revealEndpoint,
   validateWebhookFieldCryptoOptions,
 } from "../crypto/field-crypto";
 import type {
@@ -118,89 +120,20 @@ export class WebhookRegistry {
     );
   }
 
-  private async protectEndpoint(
-    endpoint: WebhookEndpoint,
-  ): Promise<WebhookEndpoint> {
-    const aad = {
-      tableName: "webhook_endpoint",
-      messageId: endpoint.id,
-    };
-    const secret = await protectFieldValue(this.options.fieldCrypto?.endpoint, {
-      value: endpoint.secret,
-      path: "secret",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...endpoint,
-      ...(secret ? { secret } : {}),
-    };
+  private protectEndpoint(endpoint: WebhookEndpoint): Promise<WebhookEndpoint> {
+    return protectEndpoint(endpoint, this.options.fieldCrypto);
   }
 
-  private async revealEndpoint(
-    endpoint: WebhookEndpoint,
-  ): Promise<WebhookEndpoint> {
-    const aad = {
-      tableName: "webhook_endpoint",
-      messageId: endpoint.id,
-    };
-    const secret = await revealFieldValue(this.options.fieldCrypto?.endpoint, {
-      value: endpoint.secret,
-      path: "secret",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...endpoint,
-      ...(secret ? { secret } : {}),
-    };
+  private revealEndpoint(endpoint: WebhookEndpoint): Promise<WebhookEndpoint> {
+    return revealEndpoint(endpoint, this.options.fieldCrypto);
   }
 
-  private async protectDelivery(
-    delivery: WebhookDelivery,
-  ): Promise<WebhookDelivery> {
-    const aad = {
-      tableName: "webhook_delivery",
-      messageId: delivery.id,
-      providerId: delivery.endpointId,
-    };
-    const payload = await protectFieldValue(
-      this.options.fieldCrypto?.delivery,
-      {
-        value: delivery.payload,
-        path: "payload",
-        aad,
-        tenantId: this.options.fieldCrypto?.tenantId,
-      },
-    );
-
-    return {
-      ...delivery,
-      payload: payload ?? delivery.payload,
-    };
+  private protectDelivery(delivery: WebhookDelivery): Promise<WebhookDelivery> {
+    return protectDelivery(delivery, this.options.fieldCrypto);
   }
 
-  private async revealDelivery(
-    delivery: WebhookDelivery,
-  ): Promise<WebhookDelivery> {
-    const aad = {
-      tableName: "webhook_delivery",
-      messageId: delivery.id,
-      providerId: delivery.endpointId,
-    };
-    const payload = await revealFieldValue(this.options.fieldCrypto?.delivery, {
-      value: delivery.payload,
-      path: "payload",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...delivery,
-      payload: payload ?? delivery.payload,
-    };
+  private revealDelivery(delivery: WebhookDelivery): Promise<WebhookDelivery> {
+    return revealDelivery(delivery, this.options.fieldCrypto);
   }
 
   private validateCryptoOptions(

@@ -279,4 +279,37 @@ describe("WebhookRegistry field crypto", () => {
     expect(deliveries).toHaveLength(1);
     expect(deliveries[0]?.payload).toBe('{"message":"ok"}');
   });
+  test("does not keep the plaintext secret when encryption fails with the null fallback", async () => {
+    const unavailable = async () => {
+      throw new Error("key service unavailable");
+    };
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          failMode: "open",
+          openFallback: "null",
+          provider: {
+            encrypt: unavailable,
+            decrypt: unavailable,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await registry.addEndpoint({
+      id: "ep-1",
+      url: "https://example.com/hook",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+      secret: "my-secret",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: "active",
+    });
+
+    const endpoint = await registry.getEndpoint("ep-1");
+    expect(endpoint?.url).toBe("https://example.com/hook");
+    expect(endpoint).not.toHaveProperty("secret");
+  });
 });

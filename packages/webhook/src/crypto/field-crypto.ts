@@ -242,7 +242,23 @@ export function validateWebhookFieldCryptoOptions(
   }
 }
 
-async function protectEndpoint(
+// Applies a protected or revealed secret. An empty one is the null fallback,
+// so the endpoint keeps no secret rather than the one it came with, which on
+// a write is the plaintext.
+function withSecret(
+  endpoint: WebhookEndpoint,
+  secret: string | undefined,
+): WebhookEndpoint {
+  if (secret === undefined) return endpoint;
+  if (secret) return { ...endpoint, secret };
+  const next = { ...endpoint };
+  delete next.secret;
+  return next;
+}
+
+// The endpoint and delivery helpers below are shared by the runtime store
+// wrappers and WebhookRegistry.
+export async function protectEndpoint(
   endpoint: WebhookEndpoint,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookEndpoint> {
@@ -257,13 +273,10 @@ async function protectEndpoint(
     tenantId: options?.tenantId,
   });
 
-  return {
-    ...endpoint,
-    ...(secret ? { secret } : {}),
-  };
+  return withSecret(endpoint, secret);
 }
 
-async function revealEndpoint(
+export async function revealEndpoint(
   endpoint: WebhookEndpoint,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookEndpoint> {
@@ -278,13 +291,10 @@ async function revealEndpoint(
     tenantId: options?.tenantId,
   });
 
-  return {
-    ...endpoint,
-    ...(secret ? { secret } : {}),
-  };
+  return withSecret(endpoint, secret);
 }
 
-async function protectDelivery(
+export async function protectDelivery(
   delivery: WebhookDelivery,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookDelivery> {
@@ -306,7 +316,7 @@ async function protectDelivery(
   };
 }
 
-async function revealDelivery(
+export async function revealDelivery(
   delivery: WebhookDelivery,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookDelivery> {
