@@ -54,6 +54,15 @@ describe("validateEndpointUrl", () => {
     ).toThrow("Private hosts are not allowed");
   });
 
+  test("rejects IPv6 hosts with a zone id", () => {
+    expect(() =>
+      validateEndpointUrl(
+        "https://[fe80::1%25eth0]/webhook",
+        DEFAULT_ENDPOINT_VALIDATION_OPTIONS,
+      ),
+    ).toThrow();
+  });
+
   test.each([
     "https://hooks.example.com/webhook",
     "https://8.8.8.8/webhook",

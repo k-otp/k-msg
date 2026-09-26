@@ -132,7 +132,10 @@ function isLoopbackHost(host: string): boolean {
 }
 
 function isPrivateHost(host: string): boolean {
-  if (isLoopbackHost(host)) return true;
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  // WHATWG URL parsing rejects IPv6 zone ids, but a zone-scoped address is
+  // link- or site-local by definition, so fail closed if one ever arrives.
+  if (host.includes("%")) return true;
 
   const ipv4 = parseIpv4(host);
   if (ipv4) return isPrivateIpv4(ipv4);
