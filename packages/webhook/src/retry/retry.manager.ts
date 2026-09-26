@@ -60,6 +60,9 @@ export class RetryManager {
 
   /**
    * 재시도 가능 여부 확인
+   *
+   * Checks the global `maxRetries` budget only. Per-endpoint retry budgets are
+   * enforced by the delivery loop, which should call `isRetryableError`.
    */
   shouldRetry(attemptNumber: number, error?: Error): boolean {
     // 최대 재시도 횟수 확인
