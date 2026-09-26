@@ -51,6 +51,42 @@ describe("WebhookRegistry field crypto", () => {
     ).toThrow("unsupported failMode: close");
   });
 
+  test("an envelope from another version is rejected before it is stored", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          provider: {
+            encrypt: async () => ({
+              ciphertext: {
+                v: 2,
+                alg: "X",
+                kid: "k",
+                iv: "i",
+                tag: "t",
+                ct: "c",
+              },
+            }),
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addEndpoint({
+        id: "ep-v2",
+        url: "https://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "my-secret",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "active",
+      }),
+    ).rejects.toThrow("ciphertext envelope must be v1 A256GCM");
+  });
+
   test("constructor rejects invalid provider methods", () => {
     expect(
       () =>
