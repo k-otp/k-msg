@@ -109,21 +109,24 @@ bun run dev
 
 ### Testing Strategy
 ```bash
-# Run all tests (195+ passing, ~40 skipped)
+# Run every test from the repository root
 bun test
 
-# Test specific package
+# Test specific package (what CI runs, once per package)
 cd packages/provider && bun test
+bun run test:unit
 
-# Run with coverage
+# Live provider tests only
+bun run test:integration
+
+# Run with coverage (opt-in; no threshold)
 bun test --coverage
 ```
 
 **Test Organization**:
-- **Unit Tests**: Fast, isolated tests (all enabled)
-- **Integration Tests**: Cross-package interaction tests (enabled)
-- **E2E Tests**: External API tests (skipped as `.skip()` - marked as TODO)
-- **Provider Tests**: External API dependent tests (skipped for dev environment)
+- **Unit and cross-package tests**: `*.test.ts` beside the source, run by `bun test` and `test:unit`.
+- **Live provider tests**: `packages/provider/src/*/provider.integration.test.ts`. They pass as no-ops unless `KMSG_LIVE_<PROVIDER>_ENABLED=true` and the provider credentials are set (`KMSG_LIVE_<PROVIDER>_ALLOW_MUTATION=true` also allows writes); `.github/workflows/provider-live.yml` runs them.
+- `bun test` does not understand Jest flags such as `--testPathPattern` or `--testTimeout` and ignores them silently: filter with positional path patterns and use `--timeout`.
 
 ### Package Management
 ```bash
@@ -218,7 +221,7 @@ const result = await kmsg.sendMany(
 - ESM/CJS interop edge cases ([#5654](https://github.com/oven-sh/bun/issues/5654))
 - Strange CJS output behavior ([#14532](https://github.com/oven-sh/bun/issues/14532))
 
-**Test Strategy**: External API tests are intentionally skipped (`.skip()`) to prevent development workflow interruption. They're marked as TODO for E2E environment setup.
+**Test Strategy**: Live provider tests are gated by `KMSG_LIVE_*` environment variables instead of `.skip()`, so the default run never calls external APIs.
 
 **Frontend Development**
 Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
