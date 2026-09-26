@@ -88,7 +88,7 @@ Interpretation notes:
 | Provider | Native mapping | Warning |
 | --- | --- | --- |
 | `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` | none (treated as native) |
-| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` |
+| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` only without a sender number |
 | `aligo` | `failover`, `fmessage_1`, `fsubject_1` | `FAILOVER_PARTIAL_PROVIDER` |
 | `mock` | no native mapping | `FAILOVER_UNSUPPORTED_PROVIDER` |
 
@@ -96,7 +96,8 @@ Boundary:
 
 - Provider package maps to vendor-native fields and returns warning metadata.
 - `iwinv` sends `failover.fallbackContent` as `resendContent` (`resendType: "N"`); without it, IWINV resends the AlimTalk text. IWINV picks SMS or LMS by the text's length.
-- Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`.
+- Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`, only for sends that return one of the warnings above.
+- `solapi` sends the fallback itself (`kakao.disableSms: false`) when the AlimTalk has a sender number (`from` or `defaultFrom`), so it returns no warning then; otherwise SOLAPI cannot replace it and the send is marked for API-level fallback.
 
 ## Usage (with KMsg)
 
