@@ -70,7 +70,10 @@ const API_FAILOVER_ELIGIBLE_WARNING_CODES = new Set([
 
 /** A status a poll stored for a tracked message. */
 export interface DeliveryStatusChange {
-  /** The record as stored after the poll. */
+  /**
+   * The record as stored after the poll, or as the poll updated it, without
+   * `raw`, if the store cannot return it.
+   */
   record: TrackingRecord;
   /** The status the record had before the poll. */
   previousStatus: DeliveryStatus;
@@ -319,14 +322,10 @@ export class DeliveryTrackingService {
           this.onStatusChange &&
           mergedRecord.status !== originalRecord.status
         ) {
-          // Read back, since a store may not keep every patched field (raw).
-          const stored = await this.store.get(update.messageId);
-          if (stored) {
-            changes.push({
-              record: stored,
-              previousStatus: originalRecord.status,
-            });
-          }
+          changes.push({
+            record: mergedRecord,
+            previousStatus: originalRecord.status,
+          });
         }
 
         if (this.shouldAttemptApiFailover(mergedRecord)) {
@@ -335,16 +334,48 @@ export class DeliveryTrackingService {
       }
     })();
 
-    this.runOnceInFlight = op;
+    // Callers that join this run wait for its notifications too.
+    const run = this.finishRun(op, changes);
+    this.runOnceInFlight = run;
+    await run;
+  }
+
+  private async finishRun(
+    op: Promise<void>,
+    changes: DeliveryStatusChange[],
+  ): Promise<void> {
     try {
       await op;
     } finally {
-      if (this.runOnceInFlight === op) this.runOnceInFlight = undefined;
+      // Only this run can be in flight until it clears the guard. It does so
+      // before notifying, so a callback's own runOnce() starts a new poll
+      // instead of waiting for itself.
+      this.runOnceInFlight = undefined;
       // Changes stored before a failure are still reported.
       for (const change of changes) {
-        await this.notifyStatusChange(change);
+        await this.notifyStatusChange(await this.readBack(change));
       }
     }
+  }
+
+  // The record as stored now, after failover has written its own metadata;
+  // a store may also not keep every polled field (raw). If it cannot be read
+  // back, the polled record is reported without raw rather than dropped.
+  private async readBack(
+    change: DeliveryStatusChange,
+  ): Promise<DeliveryStatusChange> {
+    try {
+      const stored = await this.store.get(change.record.messageId);
+      if (stored) return { ...change, record: stored };
+    } catch (error) {
+      logFallbackFailure(
+        `[k-msg] could not read message ${change.record.messageId} back for onStatusChange; reporting the polled record`,
+        error,
+      );
+    }
+    const record = { ...change.record };
+    delete record.raw;
+    return { ...change, record };
   }
 
   private async notifyStatusChange(

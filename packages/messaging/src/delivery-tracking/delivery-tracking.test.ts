@@ -998,4 +998,147 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(changes[0]?.record.status).toBe("DELIVERED");
     expect(changes[0]?.record.raw).toBeUndefined();
   });
+
+  test("a caller that joins a poll also waits for its notifications", async () => {
+    const provider = createMockProvider({ id: "mock", status: "DELIVERED" });
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const slow: Provider = {
+      ...provider,
+      getDeliveryStatus: async (query) => {
+        await gate;
+        return (await provider.getDeliveryStatus?.(query)) ?? ok(null);
+      },
+    };
+    let notified = false;
+    const service = new DeliveryTrackingService({
+      providers: [slow],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        // Slow enough that a caller not waiting for it would finish first.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        notified = true;
+      },
+    });
+    await recordSent(service, "m1");
+
+    const started = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const joined = service.runOnce().then(() => notified);
+    release();
+
+    expect(await joined).toBe(true);
+    await started;
+  });
+
+  async function failedAlimtalkService(options: {
+    store: InMemoryDeliveryTrackingStore;
+    changes: DeliveryStatusChange[];
+    onFallback: () => void;
+  }): Promise<DeliveryTrackingService> {
+    const service = new DeliveryTrackingService({
+      providers: [
+        createMockProvider({
+          id: "iwinv",
+          status: "FAILED",
+          statusCode: "ERR",
+          statusMessage: "카카오 미사용 대상",
+          raw: { payload: "kept out of callbacks" },
+        }),
+      ],
+      store: options.store,
+      polling,
+      apiFailover: {
+        sender: async () => {
+          options.onFallback();
+          return ok({
+            messageId: "fallback-1",
+            providerId: "sms-provider",
+            status: "SENT",
+            type: "SMS",
+            to: "01012345678",
+          });
+        },
+      },
+      onStatusChange: (change) => {
+        options.changes.push(change);
+      },
+    });
+    await service.recordSend(
+      {
+        messageId: "m-at",
+        options: {
+          type: "ALIMTALK",
+          to: "01012345678",
+          templateId: "TPL_1",
+          variables: { code: "1234" },
+          failover: { enabled: true, fallbackContent: "fallback body" },
+        },
+        timestamp: Date.now(),
+      },
+      {
+        messageId: "m-at",
+        providerId: "iwinv",
+        providerMessageId: "p-at",
+        status: "SENT",
+        type: "ALIMTALK",
+        to: "01012345678",
+        warnings: [{ code: "FAILOVER_PARTIAL_PROVIDER", message: "partial" }],
+      },
+    );
+    return service;
+  }
+
+  test("reports the record with the failover the poll already attempted", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+    });
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    const apiAttempt = getFailoverMetadata(changes[0]?.record).apiAttempt as
+      | Record<string, unknown>
+      | undefined;
+    expect(apiAttempt?.attempted).toBe(true);
+  });
+
+  test("still fails over and reports a change it cannot read back", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    let failReads = false;
+    const flaky = Object.assign(Object.create(store), {
+      get: async (messageId: string) => {
+        if (failReads) throw new Error("store unavailable");
+        return store.get(messageId);
+      },
+    }) as InMemoryDeliveryTrackingStore;
+    const changes: DeliveryStatusChange[] = [];
+    let fallbacks = 0;
+    const service = await failedAlimtalkService({
+      store: flaky,
+      changes,
+      onFallback: () => {
+        fallbacks += 1;
+      },
+    });
+
+    failReads = true;
+    const consoleError = spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await service.runOnce();
+    } finally {
+      consoleError.mockRestore();
+    }
+
+    expect(fallbacks).toBe(1);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.record.status).toBe("FAILED");
+    expect(changes[0]?.record.raw).toBeUndefined();
+  });
 });
