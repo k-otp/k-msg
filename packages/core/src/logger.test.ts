@@ -74,6 +74,12 @@ describe("redactLogText", () => {
       String.raw`{\'password\': \'abc\'}`,
       String.raw`{\'password\': \'[REDACTED]\'}`,
     ],
+    ["config.password.value=TOPSECRET", "config.password.value=[REDACTED]"],
+    ["client[secret]=TOPSECRET", "client[secret]=[REDACTED]"],
+    [
+      "headers.authorization: Bearer abc.def",
+      "headers.authorization: Bearer [REDACTED]",
+    ],
     [
       String.raw`{\"password\":\"p@ss\w0rd\"}`,
       String.raw`{\"password\":\"[REDACTED]\"}`,
