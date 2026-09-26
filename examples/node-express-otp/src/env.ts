@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { isIP } from "node:net";
 
 const PROVIDER_NAMES = ["mock", "iwinv", "solapi", "aligo"] as const;
 
@@ -84,9 +85,12 @@ export function loadConfig(env: Env): Config {
   };
 }
 
+const PROXY_PRESETS = ["loopback", "linklocal", "uniquelocal"];
+
 /**
- * A hop count such as `1`, or what Express accepts as a list, such as
- * `loopback` or `10.0.0.0/8`. `true` is refused: it would take the client
+ * A hop count such as `1`, or a comma-separated list of proxy addresses,
+ * subnets such as `10.0.0.0/8`, and Express's presets (`loopback`,
+ * `linklocal`, `uniquelocal`). `true` is refused: it would take the client
  * address from X-Forwarded-For, which any caller can set, and so let one
  * caller dodge the per-client limit.
  */
@@ -101,7 +105,24 @@ function readTrustProxy(
     );
     return undefined;
   }
-  return /^\d+$/.test(value) ? Number(value) : value;
+  if (/^\d+$/.test(value)) return Number(value);
+  const entries = value.split(",").map((entry) => entry.trim());
+  if (!entries.every(isProxyEntry)) {
+    problems.push(
+      "TRUST_PROXY must be a number of proxies, such as 1, or addresses, subnets (10.0.0.0/8) and presets (loopback, linklocal, uniquelocal) separated by commas",
+    );
+    return undefined;
+  }
+  return entries.join(",");
+}
+
+function isProxyEntry(entry: string): boolean {
+  if (PROXY_PRESETS.includes(entry)) return true;
+  const [address = "", prefix, ...rest] = entry.split("/");
+  const version = isIP(address);
+  if (version === 0 || rest.length > 0) return false;
+  if (prefix === undefined) return true;
+  return /^\d+$/.test(prefix) && Number(prefix) <= (version === 4 ? 32 : 128);
 }
 
 function readProvider(
