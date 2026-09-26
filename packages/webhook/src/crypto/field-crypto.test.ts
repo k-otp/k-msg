@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { FieldCryptoConfig } from "@k-msg/core";
-import { protectFieldValue, revealFieldValue } from "./field-crypto";
+import { createInMemoryWebhookPersistence } from "../runtime/persistence";
+import { WebhookEventType } from "../types/webhook.types";
+import {
+  protectFieldValue,
+  revealFieldValue,
+  wrapWebhookEndpointStoreWithFieldCrypto,
+} from "./field-crypto";
 
 // Decrypts only with the exact AAD it encrypted with, as AES-GCM would.
 function createAadBoundConfig(): FieldCryptoConfig {
@@ -68,5 +74,77 @@ describe("webhook field crypto AAD", () => {
         tenantId: "tenant-a",
       }),
     ).toBe("my-secret");
+  });
+});
+
+// Fails every encrypt and decrypt, as during a key service outage.
+function createUnavailableConfig(
+  openFallback: "null" | "masked",
+): FieldCryptoConfig {
+  return {
+    enabled: true,
+    fields: { secret: "encrypt" },
+    failMode: "open",
+    openFallback,
+    provider: {
+      encrypt: async () => {
+        throw new Error("key service unavailable");
+      },
+      decrypt: async () => {
+        throw new Error("key service unavailable");
+      },
+      hash: async ({ value }) => `h:${value}`,
+    },
+  };
+}
+
+describe("webhook endpoint store fail-open fallbacks", () => {
+  const endpoint = {
+    id: "ep-1",
+    url: "https://example.com/hook",
+    active: true,
+    events: [WebhookEventType.MESSAGE_SENT],
+    secret: "my-secret",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: "active" as const,
+  };
+
+  test("stores no secret when encryption fails with the null fallback", async () => {
+    const { endpointStore } = createInMemoryWebhookPersistence();
+    const store = wrapWebhookEndpointStoreWithFieldCrypto(endpointStore, {
+      endpoint: createUnavailableConfig("null"),
+    });
+
+    await store.add(endpoint);
+    await store.update(endpoint.id, endpoint);
+
+    const stored = await endpointStore.get(endpoint.id);
+    expect(stored?.url).toBe(endpoint.url);
+    expect(stored).not.toHaveProperty("secret");
+    expect(await store.get(endpoint.id)).not.toHaveProperty("secret");
+  });
+
+  test("stores the masked secret when encryption fails with the masked fallback", async () => {
+    const { endpointStore } = createInMemoryWebhookPersistence();
+    const store = wrapWebhookEndpointStoreWithFieldCrypto(endpointStore, {
+      endpoint: createUnavailableConfig("masked"),
+    });
+
+    await store.add(endpoint);
+
+    const stored = await endpointStore.get(endpoint.id);
+    expect(stored?.secret).toBeDefined();
+    expect(stored?.secret).not.toBe(endpoint.secret);
+  });
+
+  test("returns no secret for one that cannot be decrypted with the null fallback", async () => {
+    const { endpointStore } = createInMemoryWebhookPersistence();
+    await endpointStore.add({ ...endpoint, secret: "enc:unreadable" });
+    const store = wrapWebhookEndpointStoreWithFieldCrypto(endpointStore, {
+      endpoint: createUnavailableConfig("null"),
+    });
+
+    expect(await store.get(endpoint.id)).not.toHaveProperty("secret");
   });
 });
