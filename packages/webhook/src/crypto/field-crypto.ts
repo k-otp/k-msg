@@ -8,6 +8,7 @@ import {
   resolveFieldCryptoOpenFallback,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
+import { isBeforeDeliveryCursor } from "../runtime/persistence";
 import type {
   WebhookDeliveryListOptions,
   WebhookDeliveryStore,
@@ -415,8 +416,9 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
   };
 }
 
-// Lists every delivery: the built-in stores return 100 when no limit is set.
-const ALL_DELIVERIES = Number.MAX_SAFE_INTEGER;
+// Deliveries are migrated a page at a time: a delivery history can be too
+// large to load at once.
+const DELIVERY_PAGE_SIZE = 200;
 
 function failClosed(
   config: FieldCryptoConfig | undefined,
@@ -474,17 +476,18 @@ async function revealLegacy<T>(
  * cannot be read with either AAD stops it rather than being replaced by a
  * fallback. Each endpoint is read again just before it is rewritten, but
  * pause endpoint updates while it runs: one landing in between would be
- * overwritten. Deliveries, which the runtime never rewrites, are listed
- * without a limit and written back with the delivery store's `replace()`,
- * which a custom store must implement for the migration to run.
+ * overwritten. Deliveries, which the runtime never rewrites, are read a
+ * page at a time with the `before` cursor and written back with the
+ * delivery store's `replace()`; a custom store must support both.
  */
 export async function migrateWebhookFieldCryptoToTenant(
   persistence: Pick<WebhookPersistence, "endpointStore" | "deliveryStore">,
   options: WebhookRuntimeFieldCryptoOptions,
 ): Promise<WebhookTenantMigrationResult> {
   validateWebhookFieldCryptoOptions(options);
-  const tenantId = normalizeString(options.tenantId);
-  if (!tenantId) {
+  // Kept exactly as configured: reads and writes bind this value, untrimmed.
+  const tenantId = options.tenantId;
+  if (typeof tenantId !== "string" || tenantId.trim().length === 0) {
     throw new FieldCryptoError(
       "config",
       "migrating webhook ciphertext to the tenant requires fieldCrypto.tenantId",
@@ -546,25 +549,46 @@ export async function migrateWebhookFieldCryptoToTenant(
 
   const deliveryConfig = bound.delivery;
   if (replaceDelivery && deliveryConfig && deliveryConfig.enabled !== false) {
-    const deliveries = await deliveryStore.list({
-      limit: ALL_DELIVERIES,
-    });
-    for (const delivery of deliveries) {
-      const input = {
-        value: delivery.payload,
-        path: "payload",
-        aad: deliveryAad(delivery),
-        tenantId,
-      };
-      if (await isTenantBound(deliveryConfig, input)) continue;
-      const revealed = await revealLegacy(
-        () => revealDelivery(delivery, legacy),
-        "delivery",
-        delivery.id,
-        "payload",
-      );
-      await replaceDelivery(await protectDelivery(revealed, bound));
-      result.deliveries += 1;
+    let before: { createdAt: Date; id: string } | undefined;
+    for (;;) {
+      const page = await deliveryStore.list({
+        limit: DELIVERY_PAGE_SIZE,
+        ...(before ? { before } : {}),
+      });
+      const first = page[0];
+      const last = page.at(-1);
+      // Only an empty page ends the listing: a store may cap its pages below
+      // the requested size.
+      if (!first || !last) break;
+      if (before && !isBeforeDeliveryCursor(first, before)) {
+        throw new FieldCryptoError(
+          "config",
+          "migrating webhook deliveries needs a delivery store whose list() honors the `before` cursor; the built-in stores do",
+          {
+            rule: "fieldCrypto.webhook.tenant_migration",
+            path: "deliveryStore",
+          },
+          { fieldPath: "deliveryStore" },
+        );
+      }
+      for (const delivery of page) {
+        const input = {
+          value: delivery.payload,
+          path: "payload",
+          aad: deliveryAad(delivery),
+          tenantId,
+        };
+        if (await isTenantBound(deliveryConfig, input)) continue;
+        const revealed = await revealLegacy(
+          () => revealDelivery(delivery, legacy),
+          "delivery",
+          delivery.id,
+          "payload",
+        );
+        await replaceDelivery(await protectDelivery(revealed, bound));
+        result.deliveries += 1;
+      }
+      before = { createdAt: last.createdAt, id: last.id };
     }
   }
 

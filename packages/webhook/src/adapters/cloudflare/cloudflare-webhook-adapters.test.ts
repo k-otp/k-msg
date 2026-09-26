@@ -140,6 +140,39 @@ describe("webhook cloudflare adapter", () => {
     expect(stored.map((saved) => saved.payload)).toEqual(["after"]);
   });
 
+  test("D1 delivery store pages newest first with the before cursor", async () => {
+    const sqliteD1 = createSqliteBackedD1();
+    closers.push(sqliteD1.close);
+    const { deliveryStore } = createD1WebhookPersistence(sqliteD1.db);
+    const createdAt = new Date(Date.UTC(2026, 0, 1));
+    for (const id of ["d-1", "d-2", "d-3"]) {
+      await deliveryStore.add({
+        id,
+        endpointId: "ep-1",
+        eventId: `evt-${id}`,
+        eventType: WebhookEventType.MESSAGE_SENT,
+        url: "https://example.com/hook",
+        httpMethod: "POST",
+        headers: {},
+        payload: id,
+        attempts: [],
+        status: "success",
+        createdAt,
+      });
+    }
+
+    const first = await deliveryStore.list({ limit: 2 });
+    const last = first.at(-1);
+    if (!last) throw new Error("first page is empty");
+    const second = await deliveryStore.list({
+      limit: 2,
+      before: { createdAt: last.createdAt, id: last.id },
+    });
+
+    expect(first.map((delivery) => delivery.id)).toEqual(["d-3", "d-2"]);
+    expect(second.map((delivery) => delivery.id)).toEqual(["d-1"]);
+  });
+
   test("D1 persistence works with WebhookRuntimeService", async () => {
     const sqliteD1 = createSqliteBackedD1();
     closers.push(sqliteD1.close);

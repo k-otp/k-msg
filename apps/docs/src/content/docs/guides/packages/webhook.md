@@ -184,7 +184,7 @@ const runtime = new WebhookRuntimeService({
 | 고급 클래스 루트 import | `@k-msg/webhook/toolkit`에서 import |
 | Cloudflare persistence 수동 구성 | `@k-msg/webhook/adapters/cloudflare` 사용 |
 | `fields.secret` / `fields.payload` 없이, 또는 `plain`/`mask`로 설정한 `fieldCrypto.endpoint` / `fieldCrypto.delivery` | `fields.secret`(endpoint)과 `fields.payload`(delivery)를 `encrypt` 또는 `encrypt+hash`로 설정. 그 외 값은 이제 시작 시 실패 |
-| `fieldCrypto.tenantId`를 설정한 상태로 저장한 암호문 | 이제 tenant에도 바인딩됨. 이전에 저장된 값은 `fieldCrypto.acceptLegacyAad`를 켜지 않으면 거부됨. `runtime.migrateFieldCryptoToTenant()`를 한 번 실행해 재암호화한 뒤(커스텀 delivery store는 `replace()` 구현 필요) 플래그를 제거 |
+| `fieldCrypto.tenantId`를 설정한 상태로 저장한 암호문 | 이제 tenant에도 바인딩됨. 이전에 저장된 값은 `fieldCrypto.acceptLegacyAad`를 켜지 않으면 거부됨. `runtime.migrateFieldCryptoToTenant()`를 한 번 실행해 재암호화한 뒤(커스텀 delivery store는 `replace()`와 `list()`의 `before` 커서 지원 필요) 플래그를 제거 |
 
 ## Toolkit subpath
 
