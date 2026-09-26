@@ -486,6 +486,54 @@ const queue = createDrizzleJobQueue({
 });
 ```
 
+### KV, R2 and Durable Object Job Queues
+
+`createDurableObjectJobQueue`, `createKvJobQueue` and `createR2JobQueue` store each job as JSON under `keyPrefix` (default `kmsg/jobs`).
+
+- `dequeue()` leases the job it returns for `leaseMs` (default 5 minutes). If the job is neither completed nor failed by then, for example because the worker stopped mid-job, it is due again and the lost attempt counts as failed (`error: "LEASE_EXPIRED"`, exported as `JOB_LEASE_EXPIRED`); a job with no attempts left fails. `onLeaseExpired(job)` is called for each such job. Set `leaseMs` above the longest time a job can take; `Infinity` turns leases off.
+- `nextDueAt()` returns when a job is next due, pending or with an expiring lease, so an alarm can wake up then instead of polling. `size()` and `peek()` count only jobs due now.
+- `complete(jobId, result)` keeps `result` on the job, for example the provider's message id, and `fail()` never reopens a completed job.
+- `cleanupTerminal({ olderThan })` removes only jobs that finished before `olderThan`, so a finished job stays readable for a while.
+- On Durable Objects, reads take the values from the storage listing instead of one `get()` per job. `dequeue()` still reads every stored job, so clean up finished jobs regularly.
+
+For example, a Durable Object that sends from its alarm:
+
+```ts
+import { DurableObject } from "cloudflare:workers";
+import { createDurableObjectJobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export class SendQueue extends DurableObject<Env> {
+  private readonly queue = createDurableObjectJobQueue<SendInput>(
+    this.ctx.storage,
+    // Sends time out after 10 seconds, so a minute is plenty.
+    { leaseMs: 60_000 },
+  );
+
+  async alarm(): Promise<void> {
+    for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
+      const result = await kmsg.send(job.data);
+      if (result.isSuccess) {
+        await this.queue.complete(job.id, {
+          providerMessageId: result.value.providerMessageId,
+        });
+      } else {
+        await this.queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // Keep finished jobs readable for a day.
+    await this.queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+    const next = await this.queue.nextDueAt();
+    if (next) await this.ctx.storage.setAlarm(next);
+  }
+}
+```
+
 ### Tracking Schema Customization
 
 `storeRaw` defaults to `false`. Enable it only when you explicitly need provider raw payload storage.
