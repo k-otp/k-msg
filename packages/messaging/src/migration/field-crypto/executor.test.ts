@@ -465,4 +465,75 @@ describe("applyFieldCryptoMigration", () => {
     });
     expect(await countUnencrypted(client)).toBe(0);
   });
+  test("encrypts the stored recipient exactly, whitespace included", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const record = legacyRecord(0);
+    const padded = ` ${record.to} `;
+    await client.query(`UPDATE ${TABLE} SET "to" = ?`, [padded]);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+
+    expect(
+      await applyFieldCryptoMigration(client, {
+        planId: plan.planId,
+        trackingTableName: TABLE,
+        fieldCrypto,
+      }),
+    ).toMatchObject({ status: "completed" });
+
+    // A store without plain columns has to decrypt to_enc to answer.
+    const secureOnly = new HyperdriveDeliveryTrackingStore(client, {
+      tableName: TABLE,
+      fieldCrypto,
+      fieldCryptoSchema: {
+        enabled: true,
+        mode: "secure",
+        compatPlainColumns: false,
+      },
+    });
+    expect((await secureOnly.get(record.messageId))?.to).toBe(padded);
+  });
+
+  test("leaves a row that a live writer encrypted after it was read", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+
+    // The live write lands between the backfill's read and its update.
+    let raced = false;
+    const racing: CloudflareSqlClient = {
+      ...client,
+      query: (async (sql: string, params: readonly unknown[] = []) => {
+        if (!raced && /^\s*UPDATE\b/i.test(sql) && sql.includes("to_enc")) {
+          raced = true;
+          await client.query(
+            `UPDATE ${TABLE} SET to_enc = 'live-writer', crypto_state = 'encrypted' WHERE message_id = ?`,
+            [params[params.length - 1]],
+          );
+        }
+        return client.query(sql, params);
+      }) as CloudflareSqlClient["query"],
+    };
+
+    expect(
+      await applyFieldCryptoMigration(racing, {
+        planId: plan.planId,
+        trackingTableName: TABLE,
+        fieldCrypto,
+      }),
+    ).toMatchObject({ status: "completed" });
+    expect(raced).toBe(true);
+    const { rows } = await client.query<{ to_enc: string }>(
+      `SELECT to_enc FROM ${TABLE}`,
+    );
+    expect(rows[0]?.to_enc).toBe("live-writer");
+  });
 });

@@ -65,10 +65,12 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-function toStringValue(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
+// Returns the stored string unchanged when it has content: the backfill must
+// encrypt exactly what the plain column holds.
+function nonBlankString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -196,7 +198,7 @@ async function backfillChunkByMessageIds(
 
   for (const row of rows) {
     const messageId = String(row.message_id ?? "");
-    const to = toStringValue(row.to_plain);
+    const to = nonBlankString(row.to_plain);
     if (!to) {
       // Skipping would mark the chunk completed and leave the row unprotected.
       throw new Error(
@@ -208,7 +210,7 @@ async function backfillChunkByMessageIds(
       messageId,
       providerId: String(row.provider_id ?? ""),
       to,
-      from: toStringValue(row.from_plain),
+      from: nonBlankString(row.from_plain),
       metadata: parseMetadata(row.metadata_plain),
     };
     const secured = await applyTrackingCryptoOnWrite(
@@ -243,8 +245,10 @@ async function backfillChunkByMessageIds(
       ([column], index) =>
         `${q(column)} = ${placeholder(client.dialect, index + 1)}`,
     );
+    // A live writer may have encrypted the row since it was read; its secure
+    // columns are newer than this snapshot, so leave that row alone.
     await client.query(
-      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)}`,
+      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)} AND (${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`,
       [...values.map(([, value]) => value), messageId],
     );
   }
