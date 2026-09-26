@@ -105,39 +105,65 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
   }
 
-  addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
+  // Checks the URL before queueing, so an invalid one fails at once instead
+  // of waiting behind other endpoint writes.
+  async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
+    validateEndpointUrl(input.url, this.securityOptions);
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
-      validateEndpointUrl(input.url, this.securityOptions);
-
-      const now = new Date();
-      const active =
-        input.active ?? (input.status ? input.status === "active" : true);
-      const status = input.status ?? toStatusFromActive(active);
-
-      const endpoint: WebhookEndpoint = {
-        ...input,
-        id: input.id ?? this.generateEndpointId(),
-        active,
-        status,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      await this.endpointStore.add(endpoint);
-      return endpoint;
+      return this.insertEndpoint(input);
     });
   }
 
+  // Queued as one write, so a shutdown cannot leave the batch half added.
+  // Every URL is checked first, so an invalid one adds none of them; the
+  // error names its position, not the URL, which may carry a token.
   async addEndpoints(
     inputs: readonly WebhookEndpointInput[],
   ): Promise<WebhookEndpoint[]> {
-    const created: WebhookEndpoint[] = [];
-    for (const input of inputs) {
-      created.push(await this.addEndpoint(input));
+    for (const [index, input] of inputs.entries()) {
+      try {
+        validateEndpointUrl(input.url, this.securityOptions);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(`Webhook endpoint ${index} in the batch: ${reason}`, {
+          cause: error,
+        });
+      }
     }
+    return this.writeEndpoints(async () => {
+      await this.ensureInitialized();
+      const created: WebhookEndpoint[] = [];
+      for (const input of inputs) {
+        created.push(await this.insertEndpoint(input));
+      }
+      return created;
+    });
+  }
 
-    return created;
+  // Stores a new endpoint. Callers hold the endpoint write queue. The URL is
+  // checked again here, the check that guards the store: callers check it
+  // before queueing only to fail fast.
+  private async insertEndpoint(
+    input: WebhookEndpointInput,
+  ): Promise<WebhookEndpoint> {
+    validateEndpointUrl(input.url, this.securityOptions);
+    const now = new Date();
+    const active =
+      input.active ?? (input.status ? input.status === "active" : true);
+    const status = input.status ?? toStatusFromActive(active);
+
+    const endpoint: WebhookEndpoint = {
+      ...input,
+      id: input.id ?? this.generateEndpointId(),
+      active,
+      status,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.endpointStore.add(endpoint);
+    return endpoint;
   }
 
   updateEndpoint(
