@@ -19,7 +19,9 @@ export class CircuitBreaker {
   private failureCount = 0;
   private lastFailureTime = 0;
   private nextAttemptTime = 0;
-  private trialInFlight = false;
+  // Identifies the half-open trial in flight, so a trial that outlives a
+  // reset() cannot release a later trial's slot.
+  private trial: symbol | undefined;
 
   constructor(private options: CircuitBreakerOptions) {}
 
@@ -48,16 +50,17 @@ export class CircuitBreaker {
 
     // Half-open admits a single trial call; the rest fail fast until it
     // settles, so a recovering service is not hit by every waiting caller.
-    const isTrial = this.state === "HALF_OPEN";
-    if (isTrial) {
-      if (this.trialInFlight) {
+    let trial: symbol | undefined;
+    if (this.state === "HALF_OPEN") {
+      if (this.trial) {
         throw new KMsgError(
           KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE,
           "Circuit breaker is HALF_OPEN and a trial call is in flight",
           { state: this.state },
         );
       }
-      this.trialInFlight = true;
+      trial = Symbol("trial");
+      this.trial = trial;
     }
 
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -88,7 +91,7 @@ export class CircuitBreaker {
       // A pending timer would keep the event loop alive for `timeout` after
       // every call.
       if (timer !== undefined) clearTimeout(timer);
-      if (isTrial) this.trialInFlight = false;
+      if (trial && this.trial === trial) this.trial = undefined;
     }
   }
 
@@ -133,5 +136,6 @@ export class CircuitBreaker {
     this.failureCount = 0;
     this.lastFailureTime = 0;
     this.nextAttemptTime = 0;
+    this.trial = undefined;
   }
 }
