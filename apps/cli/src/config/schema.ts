@@ -90,18 +90,22 @@ function buildProviderConfigSchema(
   const expected = keyAlternatives
     .map((keys) => keys.join(" + "))
     .join(", or ");
-  return schema
-    .superRefine((config, ctx) => {
-      const values = config as Record<string, unknown>;
-      const satisfied = keyAlternatives.some((keys) =>
-        keys.every((key) => values[key] !== undefined),
-      );
-      if (!satisfied) {
-        ctx.addIssue({ code: "custom", message: `Set ${expected}` });
-      }
-    })
-    .meta({ anyOf: keyAlternatives.map((keys) => ({ required: [...keys] })) })
-    .default({});
+  return (
+    schema
+      .superRefine((config, ctx) => {
+        const values = config as Record<string, unknown>;
+        const satisfied = keyAlternatives.some((keys) =>
+          keys.every((key) => values[key] !== undefined),
+        );
+        if (!satisfied) {
+          ctx.addIssue({ code: "custom", message: `Set ${expected}` });
+        }
+      })
+      .meta({ anyOf: keyAlternatives.map((keys) => ({ required: [...keys] })) })
+      // prefault (unlike default) parses the fallback `{}`, so an entry without
+      // a config object is checked too.
+      .prefault({})
+  );
 }
 
 const providerConfigSchemaByType = Object.fromEntries(

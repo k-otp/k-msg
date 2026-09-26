@@ -243,6 +243,9 @@ describe("onboarding guidance", () => {
       (check) => check.id === "channel_registered_in_console",
     );
     expect(manual?.status).toBe("skip");
+    // Skipped checks do not carry the advice written for failed ones.
+    expect(manual?.reason).toContain("not configured for ALIMTALK");
+    expect(manual?.nextAction).not.toContain("vendor console approval");
     expect(
       result.checks.find((check) => check.id === "template_list_probe")?.status,
     ).toBe("skip");

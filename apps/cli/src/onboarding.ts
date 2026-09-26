@@ -139,6 +139,18 @@ function withGuidance(input: {
 }): OnboardingCheckResult {
   const { check, providerId, providerName, scope, spec } = input;
   const providerKind = spec?.providerId ?? providerId;
+  const notApplicableTypes = check.details?.notApplicable
+    ? check.details.messageTypes
+    : undefined;
+  if (Array.isArray(notApplicableTypes)) {
+    const types = notApplicableTypes.join(", ");
+    return {
+      ...check,
+      reason: `${providerName} is not configured for ${types}, so this check does not apply.`,
+      nextAction: `No action needed unless this provider should send ${types}.`,
+    };
+  }
+
   const guidance =
     check.id === "health_check"
       ? getHealthCheckGuidance(check, providerName)
@@ -587,6 +599,7 @@ async function evaluateSpecChecks(params: {
         severity: check.severity,
         status: "skip",
         message: `Not applicable: the provider is not configured for ${check.messageTypes.join(", ")}`,
+        details: { notApplicable: true, messageTypes: check.messageTypes },
       });
       continue;
     }
