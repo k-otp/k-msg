@@ -66,6 +66,16 @@ function toColumnValues(endpoint: WebhookEndpoint): unknown[] {
   ];
 }
 
+// D1 and SQLite report a violated primary key or unique index as "UNIQUE
+// constraint failed: <table>.<column>" (SQLITE_CONSTRAINT). Such an INSERT did
+// not commit, so no row it finds can be its own.
+function isConstraintViolation(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /constraint failed|SQLITE_CONSTRAINT/i.test(error.message)
+  );
+}
+
 export class D1WebhookEndpointStore implements WebhookEndpointStore {
   constructor(
     private readonly db: D1DatabaseLike,
@@ -87,7 +97,10 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
       // The primary key and the unique url index reject a duplicate; say
       // which stored endpoint holds the id or URL. If that lookup fails too,
       // the original error is the better report.
-      const conflict = await this.findConflict(endpoint).catch(() => undefined);
+      const conflict = await this.findConflict(
+        endpoint,
+        !isConstraintViolation(error),
+      ).catch(() => undefined);
       throw conflict ?? error;
     }
   }
@@ -157,6 +170,7 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
 
   private async findConflict(
     endpoint: WebhookEndpoint,
+    mayBeOwnRow: boolean,
   ): Promise<WebhookEndpointConflictError | undefined> {
     const row = await queryFirst<EndpointRow>(
       this.db,
@@ -169,6 +183,7 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
     // D1 can report a failure after the INSERT committed. The row found is
     // then this endpoint, and the original error is the one to report.
     if (
+      mayBeOwnRow &&
       storedId === endpoint.id &&
       toStringValue(row.url) === endpoint.url &&
       toNumber(row.created_at, Number.NaN) === endpoint.createdAt.getTime()

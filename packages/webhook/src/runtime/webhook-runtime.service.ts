@@ -86,6 +86,26 @@ function cloneEventWithValidTimestamp(event: WebhookEvent): WebhookEvent {
   };
 }
 
+// Repeating an id or URL within one addEndpoints() call is bad input, not a
+// conflict: no stored endpoint has it for the error to name.
+function assertDistinctEndpoints(endpoints: readonly WebhookEndpoint[]): void {
+  const ids = new Set<string>();
+  const urls = new Set<string>();
+  for (const endpoint of endpoints) {
+    if (ids.has(endpoint.id)) {
+      throw new Error(
+        `addEndpoints() was given endpoint id ${endpoint.id} more than once`,
+      );
+    }
+    if (urls.has(endpoint.url)) {
+      // The URL stays out of the message; it may carry a token.
+      throw new Error("addEndpoints() was given the same URL more than once");
+    }
+    ids.add(endpoint.id);
+    urls.add(endpoint.url);
+  }
+}
+
 export class WebhookRuntimeService implements WebhookRuntime {
   private readonly config: WebhookRuntimeConfig["delivery"];
   private readonly dispatcher: WebhookDispatcher;
@@ -156,7 +176,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
   // Queued as one write, so a shutdown cannot leave the batch half added.
   // Every URL is checked first, so an invalid one adds none of them; the
-  // error names its position, not the URL, which may carry a token.
+  // error names its position, not the URL, which may carry a token. The
+  // batch is stored all or none.
   async addEndpoints(
     inputs: readonly WebhookEndpointInput[],
   ): Promise<WebhookEndpoint[]> {
@@ -178,13 +199,24 @@ export class WebhookRuntimeService implements WebhookRuntime {
       await this.ensureInitialized();
       const endpoints = inputs.map((input) => this.createEndpoint(input));
       // Check the whole batch first, so a repeated id or URL does not leave
-      // part of it stored. The store still rejects one that races this check.
+      // part of it stored.
+      assertDistinctEndpoints(endpoints);
       await this.assertNoConflicts(endpoints);
 
       const created: WebhookEndpoint[] = [];
-      for (const endpoint of endpoints) {
-        await this.endpointStore.add(endpoint);
-        created.push(endpoint);
+      try {
+        for (const endpoint of endpoints) {
+          await this.endpointStore.add(endpoint);
+          created.push(endpoint);
+        }
+      } catch (error) {
+        // A later write failed, or a writer outside this runtime took an id
+        // or URL: remove what this call added. If that fails too, the
+        // original error is still the one to report.
+        for (const endpoint of created) {
+          await this.endpointStore.remove(endpoint.id).catch(() => undefined);
+        }
+        throw error;
       }
       return created;
     });
@@ -667,24 +699,22 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private async assertNoConflicts(
     endpoints: readonly WebhookEndpoint[],
   ): Promise<void> {
-    const idOwners = new Map<string, string>();
-    const urlOwners = new Map<string, string>();
-    for (const stored of await this.endpointStore.list()) {
-      idOwners.set(stored.id, stored.id);
-      urlOwners.set(stored.url, stored.id);
-    }
+    // Only ids and URLs are compared, so read the store without field crypto:
+    // a secret that cannot be decrypted must not block registration.
+    const stored = await this.persistence.endpointStore.list();
+    const idOwners = new Set(stored.map((endpoint) => endpoint.id));
+    const urlOwners = new Map(
+      stored.map((endpoint) => [endpoint.url, endpoint.id] as const),
+    );
 
     for (const endpoint of endpoints) {
-      const idOwner = idOwners.get(endpoint.id);
-      if (idOwner !== undefined) {
-        throw new WebhookEndpointConflictError("id", endpoint.id, idOwner);
+      if (idOwners.has(endpoint.id)) {
+        throw new WebhookEndpointConflictError("id", endpoint.id, endpoint.id);
       }
       const urlOwner = urlOwners.get(endpoint.url);
       if (urlOwner !== undefined) {
         throw new WebhookEndpointConflictError("url", endpoint.url, urlOwner);
       }
-      idOwners.set(endpoint.id, endpoint.id);
-      urlOwners.set(endpoint.url, endpoint.id);
     }
   }
 

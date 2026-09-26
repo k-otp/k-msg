@@ -70,8 +70,7 @@ The cause of the error.
 
 Defined in: [packages/webhook/src/runtime/errors.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L40)
 
-The id of the endpoint that has it: a stored one, or one earlier in the
-same `addEndpoints()` batch.
+The id of the stored endpoint that has it.
 
 ***
 
@@ -125,9 +124,10 @@ Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib
 
 > `readonly` **value**: `string`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L35)
+Defined in: [packages/webhook/src/runtime/errors.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L38)
 
-The taken id or URL.
+The taken id or URL. It is not enumerable, so loggers that print an
+error's properties do not print a URL that may carry a token.
 
 ***
 

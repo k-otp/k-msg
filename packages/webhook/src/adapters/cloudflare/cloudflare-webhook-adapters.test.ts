@@ -1,5 +1,12 @@
 import { Database, type SQLQueryBindings } from "bun:sqlite";
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { WebhookEndpointConflictError } from "../../runtime/errors";
 import { createInMemoryWebhookPersistence } from "../../runtime/persistence";
 import type { WebhookEndpointStore } from "../../runtime/types";
@@ -521,6 +528,45 @@ describe("D1 endpoint store errors", () => {
 
       expect(error).not.toBeInstanceOf(WebhookEndpointConflictError);
       expect((error as Error).message).toBe("Network connection lost");
+    } finally {
+      sqliteD1.close();
+    }
+  });
+});
+
+describe("D1 endpoint store conflicts in the same millisecond", () => {
+  afterEach(() => {
+    setSystemTime();
+  });
+
+  test("two runtimes adding one endpoint at the same moment get a conflict", async () => {
+    setSystemTime(new Date("2026-03-01T00:00:00.000Z"));
+    const sqliteD1 = createSqliteBackedD1();
+    try {
+      const input = {
+        id: "hook",
+        url: "https://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      };
+      const runtimes = [0, 1].map(
+        () =>
+          new WebhookRuntimeService({
+            delivery: createConfig(),
+            persistence: createD1WebhookPersistence(sqliteD1.db),
+            httpClient: new RecordingHttpClient(),
+            autoStart: false,
+          }),
+      );
+
+      await runtimes[0]?.addEndpoint(input);
+      // Same id, URL and creation time as the stored row, but this INSERT
+      // failed, so the row is not this call's.
+      const error = await runtimes[1]
+        ?.addEndpoint(input)
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(WebhookEndpointConflictError);
     } finally {
       sqliteD1.close();
     }
