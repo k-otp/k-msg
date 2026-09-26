@@ -106,7 +106,7 @@ describe("delivery tracking field crypto policy", () => {
       {
         config,
         metrics: async (event) => {
-          events.push(event as Record<string, unknown>);
+          events.push({ ...event });
         },
       },
       {

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { KMsgErrorCode } from "@k-msg/core";
 import { AligoSendProvider } from "./aligo/provider.send";
 import { IWINVSendProvider } from "./iwinv/provider.send";
 import { MockProvider } from "./providers/mock/mock.provider";
@@ -52,7 +53,7 @@ describe("built-in provider transport capabilities", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("REQUEST_ABORTED");
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
       expect(result.error.message).toBe("mock deadline exceeded");
     }
   });
@@ -75,7 +76,7 @@ describe("built-in provider transport capabilities", () => {
 
     expect(aborted.isFailure).toBe(true);
     if (aborted.isFailure) {
-      expect(aborted.error.code).toBe("REQUEST_ABORTED");
+      expect(aborted.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
       expect(aborted.error.message).toBe("cancelled before send");
     }
     expect(next.isSuccess).toBe(true);
@@ -102,7 +103,7 @@ describe("built-in provider transport capabilities", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("NETWORK_TIMEOUT");
+      expect(result.error.code).toBe(KMsgErrorCode.NETWORK_TIMEOUT);
       expect(result.error.message).toBe("provider deadline exceeded");
     }
   });

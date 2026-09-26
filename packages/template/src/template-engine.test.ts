@@ -252,7 +252,7 @@ describe("TemplateBuilder", () => {
       .provider("test");
 
     const template = builder.build();
-    expect(template.variables.map((v) => v.name)).toEqual(["name", "code"]);
+    expect(template.variables?.map((v) => v.name)).toEqual(["name", "code"]);
   });
 
   test("should add web link button", () => {
@@ -319,7 +319,7 @@ describe("TemplateBuilders factory", () => {
       .build();
 
     expect(template.category).toBe(TemplateCategory.AUTHENTICATION);
-    expect(template.variables.some((v) => v.name === "code")).toBe(true);
+    expect(template.variables?.some((v) => v.name === "code")).toBe(true);
   });
 
   test("should create notification template", () => {
@@ -329,7 +329,7 @@ describe("TemplateBuilders factory", () => {
       .build();
 
     expect(template.category).toBe(TemplateCategory.NOTIFICATION);
-    expect(template.variables.some((v) => v.name === "name")).toBe(true);
+    expect(template.variables?.some((v) => v.name === "name")).toBe(true);
   });
 
   test("should create promotion template", () => {
@@ -339,7 +339,7 @@ describe("TemplateBuilders factory", () => {
       .build();
 
     expect(template.category).toBe(TemplateCategory.PROMOTION);
-    expect(template.variables.some((v) => v.name === "discount")).toBe(true);
+    expect(template.variables?.some((v) => v.name === "discount")).toBe(true);
   });
 
   test("should create payment template", () => {
@@ -349,7 +349,7 @@ describe("TemplateBuilders factory", () => {
       .build();
 
     expect(template.category).toBe(TemplateCategory.PAYMENT);
-    expect(template.variables.some((v) => v.name === "amount")).toBe(true);
+    expect(template.variables?.some((v) => v.name === "amount")).toBe(true);
   });
 });
 
@@ -361,7 +361,7 @@ describe("InMemoryTemplateStore", () => {
       code: "TEST_001",
       name: "테스트 템플릿",
       content: "안녕하세요, #{name}님!",
-      variables: [{ name: "name", type: "string", required: true }],
+      variables: [{ name: "name", type: "string" as const, required: true }],
       category: TemplateCategory.NOTIFICATION,
       status: TemplateStatus.DRAFT,
       provider: "test-provider",
@@ -750,7 +750,7 @@ describe("Integration Tests", () => {
 
     // Validate variables
     const variableValidation = VariableParser.validateVariables(
-      template.variables,
+      template.variables ?? [],
       { code: "123456" },
     );
     expect(variableValidation.isValid).toBe(true);

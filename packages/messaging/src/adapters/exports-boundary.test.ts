@@ -38,7 +38,7 @@ describe("messaging export boundaries", () => {
     const queue = await import("../queue/index");
 
     expect(typeof queue.JobStatus).toBe("object");
-    expect(queue.JobStatus.PENDING).toBe("pending");
+    expect<string>(queue.JobStatus.PENDING).toBe("pending");
     expect(typeof queue.buildSendInputFromJob).toBe("function");
     expect(typeof queue.buildSendInputFromJobDetailed).toBe("function");
   });

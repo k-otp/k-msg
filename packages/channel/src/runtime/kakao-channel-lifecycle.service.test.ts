@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ok } from "@k-msg/core";
+import { KMsgErrorCode, ok, type ProviderOnboardingSpec } from "@k-msg/core";
 import { KakaoChannelLifecycleService } from "./kakao-channel-lifecycle.service";
 import type { KakaoChannelRuntimeProvider } from "./types";
 
@@ -14,7 +14,7 @@ function createSpec(input: {
     plusIdPolicy: "optional",
     plusIdInference: "unsupported",
     checks: [],
-  } as const;
+  } satisfies ProviderOnboardingSpec;
 }
 
 describe("KakaoChannelLifecycleService", () => {
@@ -64,7 +64,7 @@ describe("KakaoChannelLifecycleService", () => {
     const result = await service.list();
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain("manual Kakao channel onboarding");
     }
   });
@@ -84,7 +84,7 @@ describe("KakaoChannelLifecycleService", () => {
     });
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain(
         "does not expose Kakao channel onboarding API",
       );

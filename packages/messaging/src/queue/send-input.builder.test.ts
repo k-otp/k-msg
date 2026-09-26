@@ -33,6 +33,7 @@ describe("buildSendInputFromJob", () => {
       unknown
     >;
     expect(result.value.type).toBe("ALIMTALK");
+    if (result.value.type !== "ALIMTALK") return;
     expect(result.value.templateId).toBe("AUTH_001");
     expect(providerOptions.requestId).toBe("job-req");
     expect(providerOptions.correlationId).toBe("job-corr");
