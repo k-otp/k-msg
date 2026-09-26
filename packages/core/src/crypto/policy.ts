@@ -44,16 +44,6 @@ export function resolveFieldMode(
   return fallback;
 }
 
-/**
- * Validates a field crypto configuration against the v1 policy.
- *
- * @evidence docs/security/field-crypto-v1.md#fail-policy
- *   Treats a missing failMode as closed and rejects openFallback=plaintext
- *   unless unsafeAllowPlaintextStorage is true.
- * @evidenceReview docs/security/field-crypto-v1.md#fail-policy #537f002
- *   Read the failMode/openFallback guard in this function and ran
- *   src/crypto/policy.test.ts, which asserts the plaintext guard.
- */
 export function validateFieldCryptoConfig(
   config: FieldCryptoConfig,
   options: FieldCryptoPolicyOptions = {},

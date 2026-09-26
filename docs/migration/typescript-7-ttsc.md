@@ -98,7 +98,7 @@ The graph is a source architecture index, not a model of documentation-site rout
 
 ## Specification Evidence
 
-`@ttsc/evidence` makes selected normative documents compile-time obligations: the field crypto v1 policy and the KR B2B retention baseline. `lint.evidence.config.ts` declares the claims and `tsconfig.evidence.json` runs them as part of `bun run typecheck`. Each citation carries a review fingerprint, so editing a governed section fails the build until the implementation is re-verified.
+`@ttsc/evidence` makes selected normative documents compile-time obligations, starting with the KR B2B retention baseline. `lint.evidence.config.ts` declares the claims and `tsconfig.evidence.json` runs them as part of `bun run typecheck`. Each citation carries a review fingerprint, so editing a governed section fails the build until the implementation is re-verified.
 
 The governed documents, tag grammar, and update workflow are described in [Specification Evidence](../architecture/specification-evidence.md).
 

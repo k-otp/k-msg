@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoControlScope"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L149)
+Defined in: [packages/core/src/crypto/types.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L100)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:149](https://github.com/k-otp/k-m
 
 > `optional` **kid?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L152)
+Defined in: [packages/core/src/crypto/types.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L103)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:152](https://github.com/k-otp/k-m
 
 > `optional` **providerId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L151)
+Defined in: [packages/core/src/crypto/types.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L102)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/core/src/crypto/types.ts:151](https://github.com/k-otp/k-m
 
 > `optional` **tenantId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L150)
+Defined in: [packages/core/src/crypto/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L101)

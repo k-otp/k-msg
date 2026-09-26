@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoControlSignalEvent"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L155)
+Defined in: [packages/core/src/crypto/types.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L106)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:155](https://github.com/k-otp/k-m
 
 > **at**: `number`
 
-Defined in: [packages/core/src/crypto/types.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L161)
+Defined in: [packages/core/src/crypto/types.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L112)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:161](https://github.com/k-otp/k-m
 
 > `optional` **errorClass?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L162)
+Defined in: [packages/core/src/crypto/types.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L113)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:162](https://github.com/k-otp/k-m
 
 > **operation**: `"encrypt"` \| `"decrypt"` \| `"hash"`
 
-Defined in: [packages/core/src/crypto/types.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L160)
+Defined in: [packages/core/src/crypto/types.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L111)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/crypto/types.ts:160](https://github.com/k-otp/k-m
 
 > **reason**: `"threshold"` \| `"cooldown"` \| `"manual"` \| `"recovered"`
 
-Defined in: [packages/core/src/crypto/types.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L157)
+Defined in: [packages/core/src/crypto/types.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L108)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/crypto/types.ts:157](https://github.com/k-otp/k-m
 
 > **scope**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L158)
+Defined in: [packages/core/src/crypto/types.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L109)
 
 ***
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/crypto/types.ts:158](https://github.com/k-otp/k-m
 
 > **scopeParts**: [`FieldCryptoControlScope`](/en/api/core/src/interfaces/fieldcryptocontrolscope/)
 
-Defined in: [packages/core/src/crypto/types.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L159)
+Defined in: [packages/core/src/crypto/types.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L110)
 
 ***
 
@@ -61,4 +61,4 @@ Defined in: [packages/core/src/crypto/types.ts:159](https://github.com/k-otp/k-m
 
 > **state**: [`FieldCryptoCircuitState`](/en/api/core/src/type-aliases/fieldcryptocircuitstate/)
 
-Defined in: [packages/core/src/crypto/types.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L156)
+Defined in: [packages/core/src/crypto/types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L107)

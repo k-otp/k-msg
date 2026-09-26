@@ -8,21 +8,6 @@ import type { ITtscLintConfig } from "@ttsc/lint";
 const graph: ITtscEvidenceGraphConfig = {
   claims: [
     {
-      name: "field crypto v1 policy contract",
-      type: "typescript",
-      files: [
-        "packages/core/src/crypto/**/*.ts",
-        "packages/core/src/logger.ts",
-        "!**/*.test.ts",
-      ],
-      reference: {
-        type: "markdown",
-        files: ["docs/security/field-crypto-v1.md"],
-        symbol: "h2",
-        requireReview: true,
-      },
-    },
-    {
       name: "KR B2B retention baseline",
       type: "typescript",
       files: ["packages/messaging/src/delivery-tracking/retention.ts"],

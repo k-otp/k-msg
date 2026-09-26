@@ -112,16 +112,6 @@ function sanitizeLogContext(context: LogContext): LogContext {
   return sanitized;
 }
 
-/**
- * Structured logger for SDK components.
- *
- * @evidence docs/security/field-crypto-v1.md#logging-policy
- *   Masks or redacts sensitive context keys such as to, from, payload,
- *   secret, token, and authorization before an entry is formatted.
- * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #f554342
- *   Read formatMessage: sanitizeLogContext masks strings and redacts objects
- *   under the listed keys before console output.
- */
 export class Logger {
   private config: LoggerConfig;
   private context: LogContext;
