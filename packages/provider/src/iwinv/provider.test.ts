@@ -556,7 +556,8 @@ describe("IWINVProvider", () => {
 
     expect(calledBody instanceof FormData).toBe(true);
     if (calledBody instanceof FormData) {
-      expect(calledBody.get("date")).toBe("2030-01-01 00:00:00");
+      // IWINV reads the reservation as Korea Standard Time (UTC+9).
+      expect(calledBody.get("date")).toBe("2030-01-01 09:00:00");
     }
     expect(result.isSuccess).toBe(true);
     if (result.isSuccess) {
@@ -639,8 +640,9 @@ describe("IWINVProvider", () => {
     expect(result.isSuccess).toBe(true);
     if (result.isSuccess) {
       expect(result.value?.status).toBe("DELIVERED");
-      expect(result.value?.deliveredAt?.getTime()).toBe(
-        new Date(2030, 0, 1, 0, 0, 20).getTime(),
+      // receiveDate is Korea Standard Time.
+      expect(result.value?.deliveredAt?.toISOString()).toBe(
+        "2029-12-31T15:00:20.000Z",
       );
     }
   });
