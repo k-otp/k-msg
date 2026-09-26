@@ -170,7 +170,7 @@ function buildDeliveryTrackingSchemaStatements(
   tableColumns.push(
     `${q(columns.status)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
     `${q(columns.providerStatusCode)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
-    `${q(columns.providerStatusMessage)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+    `${q(columns.providerStatusMessage)} ${resolveDeliveryTrackingSqlType(options.dialect, "text", strategy)}`,
     `${q(columns.sentAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
     `${q(columns.deliveredAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
     `${q(columns.failedAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
