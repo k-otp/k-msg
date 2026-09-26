@@ -25,9 +25,14 @@ export interface WebhookEndpointStore {
 }
 
 export interface WebhookDeliveryStore {
-  /** Stores a delivery, replacing any stored delivery with the same id. */
   add(delivery: WebhookDelivery): Promise<void>;
   list(options?: WebhookDeliveryListOptions): Promise<WebhookDelivery[]>;
+  /**
+   * Overwrites the stored delivery with the same id. Optional; the tenant
+   * migration needs it to re-encrypt stored payloads, and the built-in
+   * stores implement it.
+   */
+  replace?(delivery: WebhookDelivery): Promise<void>;
 }
 
 export interface WebhookPersistence {
