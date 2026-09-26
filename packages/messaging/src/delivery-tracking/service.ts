@@ -26,12 +26,25 @@ import {
   type TrackingRecord,
 } from "./types";
 
-// A deep copy where the record allows one (raw provider data might not).
+// A deep copy. Raw provider data may not be cloneable; metadata, which stores
+// persist as JSON, is then copied through JSON so nothing nested is shared.
 function copyRecord(record: TrackingRecord): TrackingRecord {
   try {
     return structuredClone(record);
   } catch {
-    return { ...record, metadata: record.metadata && { ...record.metadata } };
+    const copy = { ...record };
+    if (record.metadata) {
+      try {
+        copy.metadata = JSON.parse(JSON.stringify(record.metadata)) as Record<
+          string,
+          unknown
+        >;
+      } catch {
+        // Not JSON either (a cycle): the top-level copy is all that is left.
+        copy.metadata = { ...record.metadata };
+      }
+    }
+    return copy;
   }
 }
 
@@ -365,23 +378,28 @@ export class DeliveryTrackingService {
       // before notifying, so a callback's own runOnce() starts a new poll
       // instead of waiting for itself.
       this.runOnceInFlight = undefined;
-      // Changes stored before a failure are still reported. A run that ends
-      // while a callback is running (such as one that callback started) does
-      // not wait for its changes, which queue behind that callback.
+      // Changes stored before a failure are still reported, each as this poll
+      // left it: reading back later, behind a slow callback, would show a
+      // later poll's state instead. A run that ends while a callback is
+      // running (such as one that callback started) does not wait for its
+      // changes, which queue behind that callback.
       const reentrant = this.deliveringNotifications;
-      const delivered = this.queueNotifications(changes);
+      const snapshots = await Promise.all(
+        changes.map((change) => this.readBack(change)),
+      );
+      const delivered = this.queueNotifications(snapshots);
       if (!reentrant) await delivered;
     }
   }
 
   private queueNotifications(changes: DeliveryStatusChange[]): Promise<void> {
     if (changes.length === 0) return this.notificationTail;
-    // Neither readBack nor notifyStatusChange rejects, so neither does this.
+    // notifyStatusChange never rejects, so neither does this.
     const delivered = this.notificationTail.then(async () => {
       this.deliveringNotifications = true;
       try {
         for (const change of changes) {
-          await this.notifyStatusChange(await this.readBack(change));
+          await this.notifyStatusChange(change);
         }
       } finally {
         this.deliveringNotifications = false;
