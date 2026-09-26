@@ -50,11 +50,39 @@ function parseKeyMap(
   return Object.fromEntries(entries) as Record<string, string>;
 }
 
+// The provider decodes keys leniently and only when it first encrypts, so a
+// truncated key would otherwise surface mid-backfill or as AES-128 labeled
+// A256GCM. Decode strictly up front.
+function assertKeyMaterial(
+  keys: Record<string, string>,
+  name: string,
+  expectedBytes?: number,
+): void {
+  for (const [kid, value] of Object.entries(keys)) {
+    const bytes = /^[A-Za-z0-9_-]+$/.test(value)
+      ? Buffer.from(value, "base64url").length
+      : 0;
+    if (
+      bytes === 0 ||
+      (expectedBytes !== undefined && bytes !== expectedBytes)
+    ) {
+      throw new Error(
+        `${name}.${kid} must be a base64url key${expectedBytes ? ` of ${expectedBytes} bytes` : ""}`,
+      );
+    }
+  }
+}
+
 function parseFields(
   raw: string | undefined,
 ): Record<string, FieldMode> | undefined {
   const parsed = parseJsonObject(raw, FIELD_CRYPTO_FIELDS_ENV);
   if (!parsed) return undefined;
+  if (Object.keys(parsed).length === 0) {
+    throw new Error(
+      `${FIELD_CRYPTO_FIELDS_ENV} must map at least one field path to a mode`,
+    );
+  }
   for (const [path, mode] of Object.entries(parsed)) {
     if (!FIELD_MODES.includes(mode as FieldMode)) {
       throw new Error(
@@ -82,9 +110,18 @@ export async function resolveMigrationFieldCrypto(
     );
   }
 
+  assertKeyMaterial(keys, FIELD_CRYPTO_KEYS_ENV, 32);
+
+  // The core resolver falls back to the kid "default"; a backfill must use the
+  // store's declared active kid instead.
+  if (!env.KMSG_ACTIVE_KID?.trim()) {
+    throw new Error(
+      "Set KMSG_ACTIVE_KID to the tracking store's active kid so the backfill encrypts with the right key.",
+    );
+  }
   const keyResolver = createEnvKeyResolver({ env });
   const { kid: activeKid } = await keyResolver.resolveEncryptKey({});
-  if (!keys[activeKid]) {
+  if (!Object.hasOwn(keys, activeKid)) {
     throw new Error(
       `${FIELD_CRYPTO_KEYS_ENV} has no key for the active kid "${activeKid}" (KMSG_ACTIVE_KID)`,
     );
@@ -94,11 +131,16 @@ export async function resolveMigrationFieldCrypto(
     env[FIELD_CRYPTO_HASH_KEYS_ENV],
     FIELD_CRYPTO_HASH_KEYS_ENV,
   );
+  if (hashKeys) {
+    assertKeyMaterial(hashKeys, FIELD_CRYPTO_HASH_KEYS_ENV);
+  }
   const tenantId = env[FIELD_CRYPTO_TENANT_ENV]?.trim();
 
   return {
     config: {
       enabled: true,
+      // Mirrors the tracking store's defaults (DEFAULT_TO_MODE and
+      // DEFAULT_FROM_MODE in @k-msg/messaging's delivery-tracking/field-crypto).
       fields: parseFields(env[FIELD_CRYPTO_FIELDS_ENV]) ?? {
         to: "encrypt+hash",
         from: "encrypt+hash",
