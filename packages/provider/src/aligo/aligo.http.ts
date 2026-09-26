@@ -57,10 +57,13 @@ export async function requestAligo(params: {
 }
 
 // -99 is Aligo's catch-all Kakao failure (authentication, missing
-// parameters, insufficient points); only its message says which one. Points
-// is checked first, so a message naming both is treated as a balance failure.
+// parameters, insufficient points); only its message says which one. The
+// documented credential messages are "등록되지 않은 인증키 입니다." and
+// "인증오류입니다.", so match those phrases rather than "인증" alone, which
+// also appears in verification-number (인증번호) errors. Points is checked
+// first, so a message naming both is treated as a balance failure.
 const INSUFFICIENT_POINTS_KEYWORD = "포인트";
-const AUTHENTICATION_KEYWORD = "인증";
+const AUTHENTICATION_KEYWORDS = ["인증키", "인증오류"];
 
 function mapAligoKakaoErrorCode(
   code: number | undefined,
@@ -70,7 +73,11 @@ function mapAligoKakaoErrorCode(
     if (providerMessage?.includes(INSUFFICIENT_POINTS_KEYWORD)) {
       return KMsgErrorCode.INSUFFICIENT_BALANCE;
     }
-    if (providerMessage?.includes(AUTHENTICATION_KEYWORD)) {
+    if (
+      AUTHENTICATION_KEYWORDS.some((keyword) =>
+        providerMessage?.includes(keyword),
+      )
+    ) {
       return KMsgErrorCode.AUTHENTICATION_FAILED;
     }
     // Stay non-retryable when the cause is unknown, as before.

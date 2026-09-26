@@ -8,6 +8,11 @@ describe("ensureAligoKakaoOk", () => {
       { code: -99, message: "등록되지 않은 인증키 입니다." },
       "AUTHENTICATION_FAILED",
     ],
+    [{ code: -99, message: "인증오류입니다." }, "AUTHENTICATION_FAILED"],
+    [
+      { code: -99, message: "인증번호가 올바르지 않습니다." },
+      "INVALID_REQUEST",
+    ],
     [
       {
         code: -99,
