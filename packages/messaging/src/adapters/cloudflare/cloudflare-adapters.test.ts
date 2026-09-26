@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { JobStatus } from "../../queue/job-queue.interface";
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
 import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import {
@@ -11,7 +12,7 @@ import {
   createR2DeliveryTrackingStore,
   createR2JobQueue,
 } from "./index";
-import type { CloudflareSqlClient } from "./sql-client";
+import type { CloudflareSqlClient, D1DatabaseLike } from "./sql-client";
 import {
   createD1SqlClient,
   createDrizzleSqlClient,
@@ -19,6 +20,17 @@ import {
 } from "./sql-client";
 
 type CapturedQuery = { sql: string; params: readonly unknown[] };
+
+// The client interface is generic over row types; these stubs return fixed rows.
+function stubSqlClient(
+  dialect: CloudflareSqlClient["dialect"],
+  query: (
+    sql: string,
+    params?: readonly unknown[],
+  ) => Promise<{ rows: unknown[]; rowCount?: number }>,
+): CloudflareSqlClient {
+  return { dialect, query: query as CloudflareSqlClient["query"] };
+}
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -50,16 +62,13 @@ function createCapturingSqlClient(dialect: CloudflareSqlClient["dialect"]): {
   queries: CapturedQuery[];
 } {
   const queries: CapturedQuery[] = [];
-  const client: CloudflareSqlClient = {
-    dialect,
-    async query(sql, params = []) {
-      queries.push({ sql, params });
-      if (/SELECT COUNT\(1\)/i.test(sql)) {
-        return { rows: [{ count: 0 }] };
-      }
-      return { rows: [] };
-    },
-  };
+  const client = stubSqlClient(dialect, async (sql, params = []) => {
+    queries.push({ sql, params });
+    if (/SELECT COUNT\(1\)/i.test(sql)) {
+      return { rows: [{ count: 0 }] };
+    }
+    return { rows: [] };
+  });
   return { client, queries };
 }
 
@@ -69,95 +78,92 @@ function createMemoryHyperdriveJobSqlClient(): {
 } {
   const rows = new Map<string, Record<string, unknown>>();
 
-  const client: CloudflareSqlClient = {
-    dialect: "sqlite",
-    async query(sql, params = []) {
-      if (/CREATE TABLE|CREATE INDEX/i.test(sql)) {
-        return { rows: [] };
-      }
-
-      if (/INSERT INTO/i.test(sql)) {
-        const [
-          id,
-          type,
-          data,
-          status,
-          priority,
-          attempts,
-          maxAttempts,
-          delay,
-          createdAt,
-          processAt,
-          completedAt,
-          failedAt,
-          error,
-          metadata,
-        ] = params;
-        rows.set(String(id), {
-          id,
-          type,
-          data,
-          status,
-          priority,
-          attempts,
-          max_attempts: maxAttempts,
-          delay,
-          created_at: createdAt,
-          process_at: processAt,
-          completed_at: completedAt,
-          failed_at: failedAt,
-          error,
-          metadata,
-        });
-        return { rows: [], rowCount: 1 };
-      }
-
-      if (/SELECT \* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
-        const row = rows.get(String(params[0]));
-        return { rows: row ? [row] : [] };
-      }
-
-      if (/SELECT .*"id".*WHERE .*"status" IN/is.test(sql)) {
-        const statusSet = new Set(params.map((value) => String(value)));
-        const matchingRows = Array.from(rows.values())
-          .filter((row) => statusSet.has(String(row.status ?? "")))
-          .map((row) => ({ id: row.id }));
-        return { rows: matchingRows };
-      }
-
-      if (/UPDATE .*SET .*"process_at".*WHERE .*"id" =/is.test(sql)) {
-        const [status, attempts, processAt, error, jobId] = params;
-        const row = rows.get(String(jobId));
-        if (!row) {
-          return { rows: [], rowCount: 0 };
-        }
-
-        rows.set(String(jobId), {
-          ...row,
-          status,
-          attempts,
-          process_at: processAt,
-          error,
-        });
-        return { rows: [], rowCount: 1 };
-      }
-
-      if (/DELETE FROM .*WHERE .*"status" IN/is.test(sql)) {
-        const statusSet = new Set(params.map((value) => String(value)));
-        let removed = 0;
-        for (const [jobId, row] of rows) {
-          if (!statusSet.has(String(row.status ?? ""))) {
-            continue;
-          }
-          rows.delete(jobId);
-          removed++;
-        }
-        return { rows: [], rowCount: removed };
-      }
-
+  const client = stubSqlClient("sqlite", async (sql, params = []) => {
+    if (/CREATE TABLE|CREATE INDEX/i.test(sql)) {
       return { rows: [] };
-    },
-  };
+    }
+
+    if (/INSERT INTO/i.test(sql)) {
+      const [
+        id,
+        type,
+        data,
+        status,
+        priority,
+        attempts,
+        maxAttempts,
+        delay,
+        createdAt,
+        processAt,
+        completedAt,
+        failedAt,
+        error,
+        metadata,
+      ] = params;
+      rows.set(String(id), {
+        id,
+        type,
+        data,
+        status,
+        priority,
+        attempts,
+        max_attempts: maxAttempts,
+        delay,
+        created_at: createdAt,
+        process_at: processAt,
+        completed_at: completedAt,
+        failed_at: failedAt,
+        error,
+        metadata,
+      });
+      return { rows: [], rowCount: 1 };
+    }
+
+    if (/SELECT \* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
+      const row = rows.get(String(params[0]));
+      return { rows: row ? [row] : [] };
+    }
+
+    if (/SELECT .*"id".*WHERE .*"status" IN/is.test(sql)) {
+      const statusSet = new Set(params.map((value) => String(value)));
+      const matchingRows = Array.from(rows.values())
+        .filter((row) => statusSet.has(String(row.status ?? "")))
+        .map((row) => ({ id: row.id }));
+      return { rows: matchingRows };
+    }
+
+    if (/UPDATE .*SET .*"process_at".*WHERE .*"id" =/is.test(sql)) {
+      const [status, attempts, processAt, error, jobId] = params;
+      const row = rows.get(String(jobId));
+      if (!row) {
+        return { rows: [], rowCount: 0 };
+      }
+
+      rows.set(String(jobId), {
+        ...row,
+        status,
+        attempts,
+        process_at: processAt,
+        error,
+      });
+      return { rows: [], rowCount: 1 };
+    }
+
+    if (/DELETE FROM .*WHERE .*"status" IN/is.test(sql)) {
+      const statusSet = new Set(params.map((value) => String(value)));
+      let removed = 0;
+      for (const [jobId, row] of rows) {
+        if (!statusSet.has(String(row.status ?? ""))) {
+          continue;
+        }
+        rows.delete(jobId);
+        removed++;
+      }
+      return { rows: [], rowCount: removed };
+    }
+
+    return { rows: [] };
+  });
 
   return { client, rows };
 }
@@ -199,7 +205,7 @@ describe("Cloudflare SQL adapters", () => {
       },
     };
 
-    const client = createD1SqlClient(db);
+    const client = createD1SqlClient(db as unknown as D1DatabaseLike);
     const result = await client.query<{ ok: boolean }>(
       "SELECT * FROM t WHERE id = ?",
       [1],
@@ -422,7 +428,7 @@ describe("Cloudflare SQL adapters", () => {
     });
 
     const retriedJob = await queue.getJob(job.id);
-    expect(retriedJob?.status).toBe("pending");
+    expect(retriedJob?.status).toBe(JobStatus.PENDING);
     expect(retriedJob?.attempts).toBe(1);
     expect(retriedJob?.processAt.getTime()).toBeGreaterThanOrEqual(
       beforeRetry + 60,
@@ -464,21 +470,18 @@ describe("Cloudflare SQL adapters", () => {
     expect(removed).toBe(2);
     expect(await queue.getJob(completed.id)).toBeUndefined();
     expect(await queue.getJob(failed.id)).toBeUndefined();
-    expect((await queue.getJob(pending.id))?.status).toBe("pending");
+    expect((await queue.getJob(pending.id))?.status).toBe(JobStatus.PENDING);
   });
 
   test("HyperdriveDeliveryTrackingStore retries init after init failure", async () => {
     let shouldFail = true;
-    const client: CloudflareSqlClient = {
-      dialect: "sqlite",
-      async query(sql) {
-        if (shouldFail && sql.includes("CREATE TABLE")) {
-          shouldFail = false;
-          throw new Error("failed to create table");
-        }
-        return { rows: [] };
-      },
-    };
+    const client = stubSqlClient("sqlite", async (sql) => {
+      if (shouldFail && sql.includes("CREATE TABLE")) {
+        shouldFail = false;
+        throw new Error("failed to create table");
+      }
+      return { rows: [] };
+    });
 
     const store = new HyperdriveDeliveryTrackingStore(client);
 
@@ -489,19 +492,16 @@ describe("Cloudflare SQL adapters", () => {
 
   test("HyperdriveJobQueue retries init after init failure", async () => {
     let shouldFail = true;
-    const client: CloudflareSqlClient = {
-      dialect: "sqlite",
-      async query(sql) {
-        if (shouldFail && sql.includes("CREATE TABLE")) {
-          shouldFail = false;
-          throw new Error("failed to create table");
-        }
-        if (/SELECT COUNT\(1\)/i.test(sql)) {
-          return { rows: [{ count: 0 }] };
-        }
-        return { rows: [] };
-      },
-    };
+    const client = stubSqlClient("sqlite", async (sql) => {
+      if (shouldFail && sql.includes("CREATE TABLE")) {
+        shouldFail = false;
+        throw new Error("failed to create table");
+      }
+      if (/SELECT COUNT\(1\)/i.test(sql)) {
+        return { rows: [{ count: 0 }] };
+      }
+      return { rows: [] };
+    });
 
     const queue = new HyperdriveJobQueue<{ hello: string }>(client);
 
@@ -561,7 +561,7 @@ describe("Cloudflare object-store adapters", () => {
     });
 
     const pendingJob = await queue.getJob(job.id);
-    expect(pendingJob?.status).toBe("pending");
+    expect(pendingJob?.status).toBe(JobStatus.PENDING);
     expect(pendingJob?.attempts).toBe(1);
     expect(pendingJob?.processAt.getTime()).toBeGreaterThanOrEqual(
       beforeRetry + 60,
@@ -592,7 +592,7 @@ describe("Cloudflare object-store adapters", () => {
     expect(removed).toBe(2);
     expect(await queue.getJob(completed.id)).toBeUndefined();
     expect(await queue.getJob(failed.id)).toBeUndefined();
-    expect((await queue.getJob(pending.id))?.status).toBe("pending");
+    expect((await queue.getJob(pending.id))?.status).toBe(JobStatus.PENDING);
   });
 });
 
@@ -674,7 +674,7 @@ describe("Cloudflare backend helpers", () => {
         data.set(key, String(value));
       },
       async delete(key: string) {
-        data.delete(key);
+        return data.delete(key);
       },
       async list<T>(options?: { prefix?: string }) {
         const prefix = options?.prefix ?? "";

@@ -1,10 +1,16 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { KMsgErrorCode } from "@k-msg/core";
 import { AligoProvider } from "./provider";
+
+// Bun's `typeof fetch` also declares `preconnect`, which these stubs never use.
+const fetchStub = globalThis as unknown as {
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
 
 const originalFetch = globalThis.fetch;
 
 afterEach(() => {
-  globalThis.fetch = originalFetch;
+  fetchStub.fetch = originalFetch;
 });
 
 async function formDataToObject(
@@ -23,7 +29,7 @@ describe("AligoProvider (Kakao APIs)", () => {
     let calledUrl = "";
     let calledBody: Record<string, string> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledBody = await formDataToObject(init?.body);
       return new Response(
@@ -69,7 +75,7 @@ describe("AligoProvider (Kakao APIs)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
     }
   });
 
@@ -94,7 +100,7 @@ describe("AligoProvider (Kakao APIs)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toBe("buttons[0].name is required");
     }
   });
@@ -103,7 +109,7 @@ describe("AligoProvider (Kakao APIs)", () => {
     let calledUrl = "";
     let calledBody: Record<string, string> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledBody = await formDataToObject(init?.body);
       return new Response(
@@ -154,7 +160,7 @@ describe("AligoProvider (Kakao APIs)", () => {
     let calledUrl = "";
     let calledBody: Record<string, string> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledBody = await formDataToObject(init?.body);
       return new Response(JSON.stringify({ code: 0, message: "ok" }), {
@@ -181,7 +187,7 @@ describe("AligoProvider (send)", () => {
     let calledUrl = "";
     let calledBody: Record<string, string> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledBody = await formDataToObject(init?.body);
       return new Response(

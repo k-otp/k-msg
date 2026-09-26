@@ -4,6 +4,7 @@ import type {
   ProviderFetch,
   SendOptions,
 } from "@k-msg/core";
+import { KMsgErrorCode } from "@k-msg/core";
 import { IWINVSendProvider } from "./provider.send";
 
 const createProvider = () =>
@@ -160,7 +161,7 @@ describe("IWINV transport context", () => {
     expect(settled).toBe(true);
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("REQUEST_ABORTED");
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
       expect(result.error.message).toBe("provider deadline exceeded");
     }
   });
@@ -179,7 +180,7 @@ describe("IWINV transport context", () => {
             controller.abort(new Error("send response body cancelled"));
             throw new DOMException("Aborted", "AbortError");
           },
-        }) as Response;
+        }) as unknown as Response;
 
       const result = await provider.send(input as SendOptions, {
         signal: controller.signal,
@@ -188,7 +189,7 @@ describe("IWINV transport context", () => {
 
       expect(result.isFailure).toBe(true);
       if (result.isFailure) {
-        expect(result.error.code).toBe("REQUEST_ABORTED");
+        expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
         expect(result.error.message).toBe("send response body cancelled");
       }
     }
@@ -216,7 +217,7 @@ describe("IWINV transport context", () => {
             controller.abort(new Error("history response body cancelled"));
             throw new DOMException("Aborted", "AbortError");
           },
-        }) as Response;
+        }) as unknown as Response;
 
       const result = await provider.getDeliveryStatus(query, {
         signal: controller.signal,
@@ -225,7 +226,7 @@ describe("IWINV transport context", () => {
 
       expect(result.isFailure).toBe(true);
       if (result.isFailure) {
-        expect(result.error.code).toBe("REQUEST_ABORTED");
+        expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
         expect(result.error.message).toBe("history response body cancelled");
       }
     }

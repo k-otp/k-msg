@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { KMsgErrorCode } from "@k-msg/core";
 import { MessageNotReceivedError } from "solapi";
 import { SolapiProvider } from "./provider";
 import type {
@@ -20,7 +21,7 @@ function createStubClient(mode: "v5" | "v6" = "v5") {
   >;
 
   const calls: {
-    sendOne: Array<{ message: Record<string, unknown>; appId?: string }>;
+    sendOne: Array<{ message: SolapiSendOneMessage; appId?: string }>;
     send: Array<{
       message: Record<string, unknown>;
       requestConfig?: Record<string, unknown>;
@@ -85,10 +86,7 @@ function createStubClient(mode: "v5" | "v6" = "v5") {
 
   if (mode === "v5") {
     client.sendOne = async (message: SolapiSendOneMessage, appId?: string) => {
-      calls.sendOne.push({
-        message: message as unknown as Record<string, unknown>,
-        appId,
-      });
+      calls.sendOne.push({ message, appId });
       return sendOneResponse;
     };
   } else {
@@ -242,16 +240,20 @@ describe("SolapiProvider (SendOptions-based)", () => {
 
     expect(result.isSuccess).toBe(true);
     expect(calls.sendOne).toHaveLength(1);
-    expect(calls.sendOne[0]?.message?.scheduledDate).toBe(
-      scheduledAt.toISOString(),
-    );
+    // The v5 SDK accepts scheduledDate beside the message; v6 types omit it.
+    const v5Message = calls.sendOne[0]?.message as
+      | { scheduledDate?: string }
+      | undefined;
+    expect(v5Message?.scheduledDate).toBe(scheduledAt.toISOString());
   });
 
   test("prefers sendOne when the client exposes both sendOne() and send()", async () => {
     const { client, calls } = createStubClient("v5");
     client.send = async () => {
       calls.send.push({ message: { type: "SMS" } });
-      return { messageList: [{ messageId: "msg_v6_1" }] };
+      return { messageList: [{ messageId: "msg_v6_1" }] } as unknown as Awaited<
+        ReturnType<NonNullable<typeof client.send>>
+      >;
     };
 
     const provider = new SolapiProvider(
@@ -291,7 +293,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
           },
         ],
         totalCount: 1,
-      });
+      } as unknown as ConstructorParameters<typeof MessageNotReceivedError>[0]);
     };
 
     const provider = new SolapiProvider(
@@ -313,7 +315,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("PROVIDER_ERROR");
+      expect(result.error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
       expect(result.error.details?.totalCount).toBe(1);
       expect(Array.isArray(result.error.details?.failedMessageList)).toBe(true);
     }
@@ -507,7 +509,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
     }
   });
 
@@ -822,7 +824,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("UNKNOWN_ERROR");
+      expect(result.error.code).toBe(KMsgErrorCode.UNKNOWN_ERROR);
     }
   });
 });

@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { KMsgErrorCode } from "@k-msg/core";
 import { IWINVProvider } from "./provider";
+
+// Bun's `typeof fetch` also declares `preconnect`, which these stubs never use.
+const fetchStub = globalThis as unknown as {
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
 
 const originalFetch = globalThis.fetch;
 const originalDateNow = Date.now;
@@ -24,7 +30,7 @@ function toBase64Utf8(value: string): string {
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch;
+  fetchStub.fetch = originalFetch;
   Date.now = originalDateNow;
 });
 
@@ -32,7 +38,7 @@ describe("IWINVProvider", () => {
   test("uses default AlimTalk base URL when baseUrl is omitted", async () => {
     let calledUrl = "";
 
-    globalThis.fetch = async (input: RequestInfo | URL) => {
+    fetchStub.fetch = async (input: RequestInfo | URL) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       return new Response(
         JSON.stringify({ code: 200, message: "ok", seqNo: 1 }),
@@ -61,7 +67,7 @@ describe("IWINVProvider", () => {
     let calledSecret = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledSecret = new Headers(init?.headers).get("secret") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -100,12 +106,12 @@ describe("IWINVProvider", () => {
     expect(calledBody.msgType).toBe("SMS");
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("AUTHENTICATION_FAILED");
+      expect(result.error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
     }
   });
 
   test("maps numeric SMS response code 202 to clear auth message", async () => {
-    globalThis.fetch = async () => new Response("202", { status: 200 });
+    fetchStub.fetch = async () => new Response("202", { status: 200 });
 
     const provider = new IWINVProvider({
       apiKey: "test-api-key",
@@ -122,7 +128,7 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("AUTHENTICATION_FAILED");
+      expect(result.error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
       expect(result.error.message).toContain("SMS API 인증 실패");
     }
   });
@@ -132,7 +138,7 @@ describe("IWINVProvider", () => {
     let calledAuth = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledAuth = new Headers(init?.headers).get("AUTH") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -174,10 +180,7 @@ describe("IWINVProvider", () => {
   test("ALIMTALK maps failover options to IWINV resend fields", async () => {
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
         string,
         unknown
@@ -218,7 +221,7 @@ describe("IWINVProvider", () => {
   });
 
   test("ALIMTALK maps numeric-only response code 501 to TEMPLATE_NOT_FOUND", async () => {
-    globalThis.fetch = async () => new Response("501", { status: 200 });
+    fetchStub.fetch = async () => new Response("501", { status: 200 });
 
     const provider = new IWINVProvider({
       apiKey: "api-key",
@@ -235,17 +238,14 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("TEMPLATE_NOT_FOUND");
+      expect(result.error.code).toBe(KMsgErrorCode.TEMPLATE_NOT_FOUND);
     }
   });
 
   test("ALIMTALK uses providerOptions.templateParam when provided", async () => {
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
         string,
         unknown
@@ -294,10 +294,7 @@ describe("IWINVProvider", () => {
   test("SMS supports providerOptions.msgType override (e.g. GSMS)", async () => {
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
         string,
         unknown
@@ -333,9 +330,9 @@ describe("IWINVProvider", () => {
   test("MMS uses multipart/form-data with secret header and image", async () => {
     let calledUrl = "";
     let calledSecret = "";
-    let calledBody: BodyInit | null = null;
+    let calledBody = null as BodyInit | null;
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledSecret = new Headers(init?.headers).get("secret") || "";
       calledBody = init?.body ?? null;
@@ -409,18 +406,15 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain("blob or bytes");
     }
   });
 
   test("MMS supports blob input", async () => {
-    let calledBody: BodyInit | null = null;
+    let calledBody = null as BodyInit | null;
 
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = init?.body ?? null;
       return new Response(
         JSON.stringify({
@@ -487,7 +481,7 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain("caller must provide blob/bytes");
     }
   });
@@ -510,18 +504,15 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain("caller must provide blob/bytes");
     }
   });
 
   test("MMS scheduledAt returns PENDING and includes date field", async () => {
-    let calledBody: BodyInit | null = null;
+    let calledBody = null as BodyInit | null;
 
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = init?.body ?? null;
       return new Response(
         JSON.stringify({
@@ -573,7 +564,7 @@ describe("IWINVProvider", () => {
     const fixedNow = new Date(2030, 0, 2, 3, 4, 5).getTime();
     Date.now = () => fixedNow;
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledAuth = new Headers(init?.headers).get("AUTH") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -655,7 +646,7 @@ describe("IWINVProvider", () => {
     const fixedNow = new Date(2030, 0, 2, 3, 4, 5).getTime();
     Date.now = () => fixedNow;
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledSecret = new Headers(init?.headers).get("secret") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -713,7 +704,7 @@ describe("IWINVProvider", () => {
   });
 
   test("getDeliveryStatus(SMS) keeps pending-like statuses as PENDING", async () => {
-    globalThis.fetch = async () =>
+    fetchStub.fetch = async () =>
       new Response(
         JSON.stringify({
           resultCode: 0,
@@ -766,7 +757,7 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
     }
   });
 
@@ -775,7 +766,7 @@ describe("IWINVProvider", () => {
     let calledAuth = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledAuth = new Headers(init?.headers).get("AUTH") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -816,7 +807,7 @@ describe("IWINVProvider", () => {
     let calledSecret = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledSecret = new Headers(init?.headers).get("secret") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -863,7 +854,7 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toContain(
         "smsApiKey and smsAuthKey are required",
       );
@@ -875,7 +866,7 @@ describe("IWINVProvider", () => {
     let calledAuth = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledAuth = new Headers(init?.headers).get("AUTH") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -928,7 +919,7 @@ describe("IWINVProvider", () => {
     let calledAuth = "";
     let calledBody: Record<string, unknown> = {};
 
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       calledUrl = typeof input === "string" ? input : input.toString();
       calledAuth = new Headers(init?.headers).get("AUTH") || "";
       calledBody = JSON.parse((init?.body as string) || "{}") as Record<
@@ -990,13 +981,13 @@ describe("IWINVProvider", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("INVALID_REQUEST");
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
       expect(result.error.message).toBe("buttons[0].name is required");
     }
   });
 
   test("Template get fails with TEMPLATE_NOT_FOUND when list is empty", async () => {
-    globalThis.fetch = async () =>
+    fetchStub.fetch = async () =>
       new Response(
         JSON.stringify({ code: 200, message: "ok", totalCount: 0, list: [] }),
         { status: 200 },
@@ -1010,7 +1001,7 @@ describe("IWINVProvider", () => {
     const result = await provider.getTemplate("99999");
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("TEMPLATE_NOT_FOUND");
+      expect(result.error.code).toBe(KMsgErrorCode.TEMPLATE_NOT_FOUND);
     }
   });
 });
