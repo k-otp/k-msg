@@ -20,6 +20,8 @@ concurrency:
 env:
   BUN_VERSION: "1.4.2"
   NODE_VERSION: "24"
+  # The branch Sampo keeps the release PR on.
+  RELEASE_BRANCH: sampo/release
 
 jobs:
   plan:
@@ -93,7 +95,7 @@ jobs:
           command: auto
           create-github-release: false
           base-branch: main
-          pr-branch: sampo/release
+          pr-branch: ${{ env.RELEASE_BRANCH }}
           pr-title: "chore(release): publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -109,22 +111,23 @@ jobs:
       - name: Keep only the version bumps in the release lockfile
         run: |
           set -euo pipefail
-          if ! git ls-remote --exit-code --heads origin sampo/release >/dev/null; then
+          if ! git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null; then
             echo "No release branch; nothing to fix."
             exit 0
           fi
-          git fetch --no-tags origin main sampo/release
-          git switch --discard-changes --force-create sampo/release origin/sampo/release
+          git fetch --no-tags origin main "$RELEASE_BRANCH"
+          git switch --discard-changes --force-create "$RELEASE_BRANCH" "origin/$RELEASE_BRANCH"
           git checkout origin/main -- bun.lock
           bun install --lockfile-only
-          if git diff --quiet -- bun.lock; then
+          # Against HEAD, not the index, which now holds main's lockfile.
+          if git diff --quiet HEAD -- bun.lock; then
             echo "bun.lock already records only the version bumps."
             exit 0
           fi
           git -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "chore(release): keep only the version bumps in bun.lock" -- bun.lock
-          git push origin sampo/release
+          git push origin "$RELEASE_BRANCH"
 
   # Pushes made with GITHUB_TOKEN do not trigger CI, so dispatch it for the
   # release PR branch from a job that runs no third-party code.
@@ -141,10 +144,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if gh api "repos/${GITHUB_REPOSITORY}/branches/sampo/release" >/dev/null 2>&1; then
-            gh workflow run ci.yml --repo "${GITHUB_REPOSITORY}" --ref sampo/release
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/${RELEASE_BRANCH}" >/dev/null 2>&1; then
+            gh workflow run ci.yml --repo "${GITHUB_REPOSITORY}" --ref "$RELEASE_BRANCH"
           else
-            echo "sampo/release branch not found; skipping CI dispatch."
+            echo "$RELEASE_BRANCH branch not found; skipping CI dispatch."
           fi
 
   publish:
