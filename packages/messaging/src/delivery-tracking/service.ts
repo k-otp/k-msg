@@ -61,14 +61,15 @@ function jsonCopy<T>(value: T): T | undefined {
 }
 
 interface CallbackContext {
-  run<R>(service: DeliveryTrackingService, callback: () => R): R;
-  getStore(): DeliveryTrackingService | undefined;
+  run<R>(store: true, callback: () => R): R;
+  getStore(): true | undefined;
 }
 
-// Tells a runOnce() made by a status change callback apart from any other
-// call made while the callback runs. AsyncLocalStorage is reached through
-// process.getBuiltinModule, which Node, Bun, and Cloudflare Workers provide,
-// so nothing is imported in a runtime that lacks it.
+// Tells a runOnce() made from a status change callback, of any service,
+// apart from any other call made while a callback runs. AsyncLocalStorage
+// is reached through process.getBuiltinModule, which Node, Bun, and
+// Cloudflare Workers provide, so nothing is imported in a runtime that
+// lacks it.
 function createCallbackContext(): CallbackContext | undefined {
   try {
     const runtime = globalThis as {
@@ -349,10 +350,12 @@ export class DeliveryTrackingService {
   /**
    * Polls the records that are due once, or joins a poll already running.
    * It resolves once the poll's status changes have been delivered to
-   * `onStatusChange`. A callback may call it too: that call resolves once
-   * the poll's changes are queued, since they are delivered after the
-   * callback. In a runtime without AsyncLocalStorage, every call made while
-   * a callback runs is treated as the callback's own.
+   * `onStatusChange`. A callback may call it too, as may a callback of
+   * another service: while this service is delivering, such a call resolves
+   * once the poll's changes are queued, since they may be delivered after
+   * the callback. Work a callback starts without awaiting it counts as the
+   * callback's, and in a runtime without AsyncLocalStorage, so does every
+   * call made while this service delivers.
    */
   async runOnce(): Promise<void> {
     // Checked before any await, while the caller's context is current.
@@ -363,10 +366,12 @@ export class DeliveryTrackingService {
   }
 
   // A callback that waited for notifications queued behind itself would
-  // never finish.
+  // never finish. So would callbacks of two services that each wait for
+  // the other's, nested or running side by side, so a call from any
+  // service's callback does not wait while this service is delivering.
   private calledFromCallback(): boolean {
     if (!this.deliveringNotifications) return false;
-    return callbackContext ? callbackContext.getStore() === this : true;
+    return callbackContext ? callbackContext.getStore() === true : true;
   }
 
   private startRun(): PollRun {
@@ -500,11 +505,11 @@ export class DeliveryTrackingService {
     return { ...change, record };
   }
 
-  // Runs the callbacks in this service's callback context, so a runOnce()
-  // they make is known to come from them.
+  // Runs the callbacks in the callback context, so a runOnce() they make is
+  // known to come from a callback.
   private notifyStatusChange(change: DeliveryStatusChange): Promise<void> {
     return callbackContext
-      ? callbackContext.run(this, () => this.deliverStatusChange(change))
+      ? callbackContext.run(true, () => this.deliverStatusChange(change))
       : this.deliverStatusChange(change);
   }
 
