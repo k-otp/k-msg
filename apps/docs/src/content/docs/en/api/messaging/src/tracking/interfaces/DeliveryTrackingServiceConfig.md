@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingServiceConfig"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L116)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L149)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:116](https://gi
 
 > `optional` **apiFailover?**: [`DeliveryTrackingApiFailoverConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverconfig/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L120)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L153)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:120](https://gi
 
 > `optional` **onStatusChange?**: (`change`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L130)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L163)
 
 Called for each record a poll stored with a different status, with the
 record as stored, after the poll finishes: for example, to notify a
@@ -47,7 +47,7 @@ make it idempotent, for example by message id and status.
 
 > `optional` **onStatusChangeError?**: (`error`, `change`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L135)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L168)
 
 Receives what `onStatusChange` throws. Without it, or when it throws
 too, the error is written to `console.error`.
@@ -72,7 +72,7 @@ too, the error is written to `console.error`.
 
 > `optional` **polling?**: `Partial`\<[`DeliveryTrackingPollingConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingpollingconfig/)\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L119)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L152)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:119](https://gi
 
 > **providers**: [`Provider`](/en/api/core/src/interfaces/provider/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L117)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L150)
 
 ***
 
@@ -88,4 +88,4 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:117](https://gi
 
 > `optional` **store?**: [`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L118)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L151)
