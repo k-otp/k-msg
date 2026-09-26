@@ -93,6 +93,14 @@ export interface HyperdriveDeliveryTrackingStoreConfig
   extends DeliveryTrackingSchemaOptions {
   fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
   retention?: DeliveryTrackingRetentionConfig;
+  /**
+   * Whether `init()` creates the table and indexes (`IF NOT EXISTS`). Each
+   * new store runs those statements before its first query, which in a
+   * Worker means every request. Set it to `false` when migrations create the
+   * schema, for example from `buildDeliveryTrackingSchemaSql()`.
+   * @default true
+   */
+  initializeSchema?: boolean;
 }
 
 export type HyperdriveDeliveryTrackingStoreOptions =
@@ -104,6 +112,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   private readonly schema: DeliveryTrackingSchemaSpec;
   private readonly fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
   private readonly retention?: DeliveryTrackingRetentionConfig;
+  private readonly initializeSchema: boolean;
 
   constructor(
     private readonly client: CloudflareSqlClient,
@@ -126,6 +135,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     });
     this.fieldCrypto = resolved.fieldCrypto;
     this.retention = resolved.retention;
+    this.initializeSchema = resolved.initializeSchema !== false;
 
     if (this.schema.fieldCrypto.enabled && !this.fieldCrypto?.config) {
       throw new FieldCryptoError(
@@ -153,6 +163,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async init(): Promise<void> {
+    if (!this.initializeSchema) return;
     if (this.initPromise) {
       return this.initPromise;
     }
