@@ -105,17 +105,10 @@ async function validateExample(name: string): Promise<void> {
     await runCommand(["bun", "install", "--no-save"], temporaryExample);
 
     console.log(`== ${name}: validate ==`);
-    if (manifest.scripts?.typecheck) {
-      await runCommand(["bun", "run", "typecheck"], temporaryExample);
-      return;
+    if (!manifest.scripts?.typecheck) {
+      throw new Error(`${name} does not define a typecheck script`);
     }
-
-    if (name === "express-node-send-only") {
-      await runCommand(["node", "--check", "src/index.mjs"], temporaryExample);
-      return;
-    }
-
-    throw new Error(`${name} does not define a standalone validation command`);
+    await runCommand(["bun", "run", "typecheck"], temporaryExample);
   } finally {
     await rm(temporaryRoot, { force: true, recursive: true });
   }

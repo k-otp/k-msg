@@ -1,0 +1,30 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+# Restart `wrangler dev` after editing it; changes are not picked up live.
+
+# Bearer token for the admin routes, at least 32 characters.
+# Generate a real one with: openssl rand -hex 32
+API_TOKEN=dev-admin-token-for-local-testing-only
+
+# Local development only: lets you register http://localhost webhook URLs.
+DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true
+
+# The secret POST /webhook-endpoints returned for
+# http://localhost:8787/webhooks/receiver. Enables the sample receiver.
+# WEBHOOK_RECEIVER_SECRET=
+
+# A real provider: set KMSG_PROVIDER, a registered KMSG_SENDER_NUMBER and that
+# provider's keys (see README.md).
+# KMSG_PROVIDER=iwinv
+# KMSG_SENDER_NUMBER=0212345678
+
+# IWINV_API_KEY=
+# IWINV_SMS_API_KEY=
+# IWINV_SMS_AUTH_KEY=
+# IWINV_SMS_COMPANY_ID=
+
+# SOLAPI_API_KEY=
+# SOLAPI_API_SECRET=
+
+# ALIGO_API_KEY=
+# ALIGO_USER_ID=
+# ALIGO_TEST_MODE=true

@@ -1,61 +1,29 @@
 # Examples
 
-This directory contains runnable templates for common integration setups.
+Each example is a small app built around one real use case, written the way you would ship it. All of them run offline with the mock provider (`KMSG_PROVIDER=mock`, the default) and switch to IWINV, SOLAPI, or Aligo through environment variables.
 
-## Templates (current)
+| Example | Runtime | What it shows |
+| --- | --- | --- |
+| [`node-express-otp`](./node-express-otp) | Node + Express | OTP request and verification: hashed codes, expiry, cooldowns, and attempt limits |
+| [`bun-order-notifications`](./bun-order-notifications) | Bun + Hono | AlimTalk with SMS fallback, routing by message type, capped batches, and SQLite delivery tracking |
+| [`cloudflare-worker-d1`](./cloudflare-worker-d1) | Cloudflare Workers + D1 | Delivery tracking on a cron, signed webhooks for status changes, and a receiver that verifies them |
+| [`cloudflare-worker-queue-do`](./cloudflare-worker-queue-do) | Cloudflare Workers + Durable Objects | An idempotent send queue with retries and cleanup |
+| [`cloudflare-worker-hyperdrive`](./cloudflare-worker-hyperdrive) | Cloudflare Workers + Hyperdrive | Delivery tracking in Postgres with cron polling |
 
-- `hono-pages-send-only`
-  - Hono + Cloudflare Pages Functions
-  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
-  - Uses `k-msg` (`KMsg`) + `@k-msg/provider/iwinv`
+## Shared conventions
 
-- `express-node-send-only`
-  - Express + Node.js
-  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
-  - Uses `k-msg` (`KMsg`) + `@k-msg/provider`
+- Configuration is validated once at startup (`src/env.ts`) and fails with a message that names what is missing. Only the selected provider's credentials are required.
+- The server owns the sender number and the message content. Endpoints accept domain input (a phone number, an order) and never forward request bodies to `kmsg.send`.
+- Errors are returned as `{ "error": { "code", "message" } }` with a status code mapped from the `KMsgError` code (400, 429, 502, 503). Provider error details stay out of responses.
+- Admin endpoints require `Authorization: Bearer <token>` and refuse requests when no token is configured.
+- Provider calls get a timeout through `kmsg.send(input, { signal: AbortSignal.timeout(...) })`.
 
-- `hono-bun-send-only`
-  - Hono + Bun (`Bun.serve`)
-  - Advanced send route (`POST /send`, single/batch) + SMS shortcut (`POST /send/sms`)
-  - Uses `k-msg` (`KMsg`) + `@k-msg/provider`
+## Validation
 
-- `hono-pages-tracking-hyperdrive`
-  - Hono + Cloudflare Pages Functions
-  - Advanced send route (`POST /send`, single/batch) + tracking (Hyperdrive/Postgres)
-  - Requires `nodejs_compat` (current `postgres` driver dependency)
-  - Uses `k-msg/adapters/cloudflare` SQL adapter + `@k-msg/messaging/tracking`
-
-- `hono-worker-tracking-d1`
-  - Hono + Cloudflare Workers
-  - Send + delivery tracking (D1)
-  - Uses `createD1DeliveryTrackingStore`
-
-- `hono-worker-queue-do`
-  - Hono + Cloudflare Workers
-  - Durable Object backed queue for async send
-  - Queue in DO storage, send execution in DO alarm/drain loop
-  - Uses `@k-msg/provider` (IWINV)
-  - No `nodejs_compat` required
-
-- `hono-worker-webhook-d1`
-  - Hono + Cloudflare Workers
-  - Runtime-first webhook endpoint registration + emit APIs
-  - D1-backed webhook endpoint/delivery persistence
-  - Uses `@k-msg/webhook` + `@k-msg/webhook/adapters/cloudflare`
-
-## Notes
-
-- These templates are intentionally minimal and focused on wiring.
-- Copy one template into your own app and adjust provider/bindings/secrets.
-- `k-msg` and `@k-msg/*` dependencies in examples use the npm `latest` tag.
-- In templates with advanced `POST /send`, array input is supported and batch responses return `200` with per-item outcomes in `data.results`.
-
-## Standalone validation
-
-Run every example from an isolated temporary directory against its declared npm dependencies:
+- `bun run typecheck` at the repository root checks every example against the current package sources, through each example's `tsconfig.workspace.json`.
+- `bun run examples:standalone` copies each example to a temporary directory, installs its dependencies from npm (the `latest` tag), and runs its `typecheck` script, as `.github/workflows/examples-standalone.yml` does:
 
 ```bash
 bun run examples:standalone
+bun run examples:standalone --example node-express-otp
 ```
-
-The standalone workflow runs for example source, manifest, and TypeScript configuration changes, and monthly against the current npm `latest` packages. Workspace CI separately validates TypeScript example sources against the repository source tree.

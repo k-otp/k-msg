@@ -67,7 +67,9 @@
     "@ttsc/graph": "catalog:",
     "@ttsc/lint": "catalog:",
     "@types/bun": "catalog:",
+    "@types/express": "catalog:",
     "@types/node": "catalog:",
+    "express": "catalog:",
     "hono": "catalog:",
     "postgres": "catalog:",
     "ttsc": "catalog:",
@@ -113,7 +115,9 @@
       "zod": "^4.4.3",
       "hono": "^4.8.10",
       "postgres": "^3.4.7",
-      "@cloudflare/workers-types": "^4.20260214.0"
+      "@cloudflare/workers-types": "^4.20260214.0",
+      "express": "^5.1.0",
+      "@types/express": "^5.0.3"
     }
   }
 }

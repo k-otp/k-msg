@@ -4,9 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - "examples/*/package.json"
-      - "examples/*/src/**"
-      - "examples/*/tsconfig*.json"
+      - "examples/**"
       - "scripts/examples/check-standalone.ts"
       - ".github/workflows/examples-standalone.yml"
   schedule:
@@ -32,13 +30,11 @@ jobs:
       fail-fast: false
       matrix:
         example:
-          - express-node-send-only
-          - hono-bun-send-only
-          - hono-pages-send-only
-          - hono-pages-tracking-hyperdrive
-          - hono-worker-queue-do
-          - hono-worker-tracking-d1
-          - hono-worker-webhook-d1
+          - node-express-otp
+          - bun-order-notifications
+          - cloudflare-worker-d1
+          - cloudflare-worker-queue-do
+          - cloudflare-worker-hyperdrive
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
