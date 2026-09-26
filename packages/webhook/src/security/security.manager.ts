@@ -11,6 +11,9 @@ export interface SecurityConfig {
   prefix?: string;
 }
 
+/** Carries the signed Unix time, in seconds, of every delivery. */
+export const WEBHOOK_TIMESTAMP_HEADER = "X-Webhook-Timestamp";
+
 /**
  * Webhook 보안 관리자
  * 서명 생성 및 검증을 담당
@@ -130,7 +133,7 @@ export class SecurityManager {
 
     return {
       [this.config.header]: signature,
-      "X-Webhook-Timestamp": timestamp,
+      [WEBHOOK_TIMESTAMP_HEADER]: timestamp,
       "X-Webhook-ID": this.generateWebhookId(),
       "User-Agent": "K-Message-Webhook/1.0",
     };
