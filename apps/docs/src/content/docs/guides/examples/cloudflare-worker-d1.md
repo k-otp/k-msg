@@ -262,12 +262,13 @@ the new statuses and sends one webhook per change. `@k-msg/webhook` has no
 event for `CANCELLED` or `UNKNOWN`, so those changes are logged but not sent;
 `GET /messages/:id` still shows them.
 
-Status webhooks are delivered at least once. Two services polling the same
-store, or two overlapping cron runs, can each report the same change, and
-every delivery carries a fresh timestamp and signature. The event id is
-always `<messageId>:<status>`, so receivers must skip ids they have already
-processed; the sample receiver does this with the `sample_receiver_events`
-table.
+Status webhooks are best effort, and one can arrive more than once. Two
+services polling the same store, or two overlapping cron runs, can each
+report the same change, and every delivery carries a fresh timestamp and
+signature. The event id is always `<messageId>:<status>`, so receivers must
+skip ids they have already processed; the sample receiver does this with the
+`sample_receiver_events` table. A delivery that fails every attempt in its
+cron run is not sent again, as described below.
 
 A delivery is a `POST` with a JSON body:
 

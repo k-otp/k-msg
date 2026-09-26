@@ -172,7 +172,7 @@ app.post("/webhooks/receiver", async (c) => {
 
   const event = parseReceivedEvent(body);
 
-  // Status webhooks are delivered at least once, and a repeat carries a fresh
+  // A status webhook can arrive more than once, and a repeat carries a fresh
   // timestamp, so skip event ids already processed. The id comes from the
   // signed body; the X-Webhook-ID header is not signed. A real receiver
   // records the id in the same transaction as its own changes.

@@ -86,6 +86,10 @@ export function loadConfig(env: Env): Config {
 }
 
 const PROXY_PRESETS = ["loopback", "linklocal", "uniquelocal"];
+// A deployment has a few proxies at most. A larger count, or Infinity from
+// an oversized number, would take the client address from X-Forwarded-For
+// entries that any caller can add.
+const MAX_PROXY_HOPS = 10;
 
 /**
  * A hop count such as `1`, or a comma-separated list of proxy addresses,
@@ -105,7 +109,16 @@ function readTrustProxy(
     );
     return undefined;
   }
-  if (/^\d+$/.test(value)) return Number(value);
+  if (/^\d+$/.test(value)) {
+    const hops = Number(value);
+    if (hops > MAX_PROXY_HOPS) {
+      problems.push(
+        `TRUST_PROXY must be the number of proxies in front of the server, at most ${MAX_PROXY_HOPS}`,
+      );
+      return undefined;
+    }
+    return hops;
+  }
   const entries = value.split(",").map((entry) => entry.trim());
   if (!entries.every(isProxyEntry)) {
     problems.push(
