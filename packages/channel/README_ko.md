@@ -40,6 +40,7 @@ const resolved = resolver.resolve({
 });
 
 // 우선순위: explicit > alias > defaults > provider config
+// 다른 provider에 묶인 alias(지정한 alias나 defaults.kakao.channel)는 건너뜁니다
 console.log(resolved.senderKey, resolved.plusId);
 ```
 
