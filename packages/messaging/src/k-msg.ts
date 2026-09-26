@@ -10,6 +10,7 @@ import {
   type PersistenceStrategy,
   type Provider,
   type ProviderHealthStatus,
+  type ProviderRequestContext,
   type Result,
   type SendInput,
   type SendOptions,
@@ -441,6 +442,10 @@ export class KMsg {
    * @param input - The message to send. Can be a single `SendInput` or an array.
    *   When `type` is omitted, the message is treated as SMS and may be upgraded
    *   to LMS based on content length and `defaults.sms.autoLmsBytes`.
+   * @param request - Transport options forwarded to the provider for this
+   *   call: a `signal` to cancel it and a `fetch` to make the request with.
+   *   A batch shares them. Providers that do not support one ignore it; see
+   *   `provider.transportCapabilities`.
    * @returns A promise resolving to:
    *   - For single input: `Result<SendResult, KMsgError>`
    *   - For array input: `BatchSendResult` with individual results
@@ -476,17 +481,33 @@ export class KMsg {
    * ]);
    * console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}`);
    * ```
+   *
+   * @example
+   * Give up on the provider after five seconds:
+   * ```ts
+   * const result = await kmsg.send(
+   *   { to: '01012345678', text: 'Hello!' },
+   *   { signal: AbortSignal.timeout(5000) },
+   * );
+   * ```
    */
-  async send(input: SendInput): Promise<Result<SendResult, KMsgError>>;
-  async send(input: SendInput[]): Promise<BatchSendResult>;
+  async send(
+    input: SendInput,
+    request?: ProviderRequestContext,
+  ): Promise<Result<SendResult, KMsgError>>;
+  async send(
+    input: SendInput[],
+    request?: ProviderRequestContext,
+  ): Promise<BatchSendResult>;
   async send(
     input: SendInput | SendInput[],
+    request?: ProviderRequestContext,
   ): Promise<Result<SendResult, KMsgError> | BatchSendResult> {
     if (Array.isArray(input)) {
-      return this.handleBatch(input);
+      return this.handleBatch(input, request);
     }
 
-    return this.sendSingle(input);
+    return this.sendSingle(input, request);
   }
 
   /**
@@ -498,6 +519,7 @@ export class KMsg {
    * checking `result.isSuccess`.
    *
    * @param input - The message to send (single message only, not an array)
+   * @param request - Transport options forwarded to the provider, as for `send`
    * @returns A promise resolving to `SendResult` on success
    * @throws KMsgError if the message fails to send
    *
@@ -514,8 +536,11 @@ export class KMsg {
    * }
    * ```
    */
-  async sendOrThrow(input: SendInput): Promise<SendResult> {
-    const result = await this.sendSingle(input);
+  async sendOrThrow(
+    input: SendInput,
+    request?: ProviderRequestContext,
+  ): Promise<SendResult> {
+    const result = await this.sendSingle(input, request);
     if (result.isFailure) {
       throw result.error;
     }
@@ -524,6 +549,7 @@ export class KMsg {
 
   private async sendSingle(
     input: SendInput,
+    request?: ProviderRequestContext,
   ): Promise<Result<SendResult, KMsgError>> {
     const normalized = this.normalizeInput(input);
     const context = this.createHookContext(normalized);
@@ -538,13 +564,19 @@ export class KMsg {
       return fail(providerResult.error);
     }
 
-    return this.sendWithProvider(providerResult.value, normalized, context);
+    return this.sendWithProvider(
+      providerResult.value,
+      normalized,
+      context,
+      request,
+    );
   }
 
   private async sendWithProvider(
     provider: Provider,
     normalized: SendOptions & { messageId: string },
     context: HookContext,
+    request?: ProviderRequestContext,
   ): Promise<Result<SendResult, KMsgError>> {
     const messageId = normalized.messageId;
     const strategy = this.persistence?.strategy || "none";
@@ -602,7 +634,9 @@ export class KMsg {
         persistedRecordId = saveResult.value;
       }
 
-      const result = await provider.send(normalized);
+      const result = request
+        ? await provider.send(normalized, request)
+        : await provider.send(normalized);
 
       if (result.isSuccess) {
         const value: SendResult = {
@@ -706,7 +740,10 @@ export class KMsg {
     };
   }
 
-  private async handleBatch(inputs: SendInput[]): Promise<BatchSendResult> {
+  private async handleBatch(
+    inputs: SendInput[],
+    request?: ProviderRequestContext,
+  ): Promise<BatchSendResult> {
     const resolved = this.resolveProviders(inputs);
     const groupedByProvider = this.groupInputsByProvider(resolved);
     const results: Array<Result<SendResult, KMsgError> | undefined> = new Array(
@@ -719,7 +756,7 @@ export class KMsg {
         if (resolvedIndexes.has(index)) {
           return;
         }
-        results[index] = await this.sendSingle(input);
+        results[index] = await this.sendSingle(input, request);
       }),
     );
 
@@ -735,7 +772,7 @@ export class KMsg {
 
           for (const chunk of this.chunkInputs(providerInputs, chunkSize)) {
             const chunkResults = await Promise.all(
-              chunk.map((item) => this.sendResolved(item)),
+              chunk.map((item) => this.sendResolved(item, request)),
             );
 
             chunkResults.forEach(({ index, result }) => {
@@ -761,7 +798,10 @@ export class KMsg {
     };
   }
 
-  private async sendResolved(item: ResolvedInput): Promise<{
+  private async sendResolved(
+    item: ResolvedInput,
+    request?: ProviderRequestContext,
+  ): Promise<{
     index: number;
     result: Result<SendResult, KMsgError>;
   }> {
@@ -777,6 +817,7 @@ export class KMsg {
         item.provider,
         item.normalized,
         context,
+        request,
       ),
     };
   }
