@@ -20,6 +20,7 @@ import {
 } from "@k-msg/core";
 import { SolapiMessageService } from "solapi";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { toProviderAbortError } from "../shared/provider-transport";
 import { getSolapiDeliveryStatus } from "./solapi.delivery";
 import { mapSolapiError } from "./solapi.error";
 import type { SolapiSdkClient } from "./solapi.internal.types";
@@ -45,8 +46,11 @@ export class SolapiProvider implements Provider, BalanceProvider {
     "RCS_ITPL",
     "RCS_LTPL",
   ];
+  // The SDK takes neither a signal nor a fetch. The provider checks the signal
+  // before each SDK call and stops waiting when it aborts, but a request the
+  // SDK already sent cannot be cancelled.
   readonly transportCapabilities = {
-    abortSignal: "unsupported",
+    abortSignal: "supported",
     injectableFetch: "unsupported",
   } as const satisfies ProviderTransportCapabilities;
 
@@ -124,8 +128,9 @@ export class SolapiProvider implements Provider, BalanceProvider {
 
   async send(
     options: SendOptions,
-    _context?: ProviderRequestContext,
+    context?: ProviderRequestContext,
   ): Promise<Result<SendResult, KMsgError>> {
+    const signal = context?.signal;
     const messageId = options.messageId || crypto.randomUUID();
     const normalized = { ...options, messageId } as SendOptions;
 
@@ -135,20 +140,25 @@ export class SolapiProvider implements Provider, BalanceProvider {
         client: this.client,
         config: this.config,
         options: normalized,
+        signal,
       });
     } catch (error) {
-      return fail(mapSolapiError(error, this.id));
+      return fail(
+        toProviderAbortError(error, signal, this.id) ??
+          mapSolapiError(error, this.id),
+      );
     }
   }
 
   async getDeliveryStatus(
     query: DeliveryStatusQuery,
-    _context?: ProviderRequestContext,
+    context?: ProviderRequestContext,
   ): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
     return getSolapiDeliveryStatus({
       providerId: this.id,
       client: this.client,
       query,
+      signal: context?.signal,
     });
   }
 

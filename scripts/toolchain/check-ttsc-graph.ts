@@ -317,6 +317,8 @@ function validateProviderContracts(graph: TypeScriptGraph): void {
     "packages/provider/src/shared/provider-transport.ts#fetchWithProviderContext:function";
   const toAbortError =
     "packages/provider/src/shared/provider-transport.ts#toProviderAbortError:function";
+  const raceAbort =
+    "packages/provider/src/shared/provider-transport.ts#raceProviderAbort:function";
   const implementations = [
     "packages/provider/src/aligo/provider.send.ts#AligoSendProvider:class",
     "packages/provider/src/iwinv/provider.send.ts#IWINVSendProvider:class",
@@ -374,13 +376,16 @@ function validateProviderContracts(graph: TypeScriptGraph): void {
   requireCallPath(graph, mockSend, toAbortError);
   forbidCallPath(graph, mockSend, fetchWithContext);
 
+  // The SOLAPI SDK takes neither a fetch nor a signal, so SOLAPI observes the
+  // signal around its SDK calls instead of forwarding it to a request.
   const solapiTransports = [
     "packages/provider/src/solapi/provider.ts#SolapiProvider.getDeliveryStatus:method",
     "packages/provider/src/solapi/provider.ts#SolapiProvider.send:method",
   ];
   for (const transport of solapiTransports) {
     forbidCallPath(graph, transport, fetchWithContext);
-    forbidCallPath(graph, transport, toAbortError);
+    requireCallPath(graph, transport, raceAbort);
+    requireCallPath(graph, transport, toAbortError);
   }
 }
 

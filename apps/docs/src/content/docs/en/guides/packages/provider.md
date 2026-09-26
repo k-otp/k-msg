@@ -43,7 +43,7 @@ on either feature; a missing declaration is treated as unsupported.
 | --- | --- | --- | --- |
 | `iwinv` | supported | supported | `send` and `getDeliveryStatus` forward the context to every underlying request |
 | `aligo` | supported | supported | every send channel uses the shared fetch transport |
-| `solapi` | unsupported | unsupported | the upstream SOLAPI SDK does not expose per-request signal/fetch hooks |
+| `solapi` | supported | unsupported | the SOLAPI SDK takes no signal or fetch, so the provider checks the signal before each SDK call and stops waiting when it aborts; a request the SDK already sent cannot be cancelled, so SOLAPI may still accept that message |
 | `mock` | supported | unsupported | simulated delays observe the signal; no HTTP transport is used |
 
 ```ts

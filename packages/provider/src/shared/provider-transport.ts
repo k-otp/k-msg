@@ -53,6 +53,39 @@ export function toProviderAbortError(
   );
 }
 
+/**
+ * Waits for `operation` until `signal` aborts, then rejects with the abort
+ * reason. This is for transports that cannot take a signal, such as the SOLAPI
+ * SDK: the caller stops waiting, but the operation keeps running and its
+ * outcome is dropped.
+ */
+export function raceProviderAbort<T>(
+  operation: Promise<T>,
+  signal: AbortSignal | undefined,
+): Promise<T> {
+  if (!signal) return operation;
+
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    if (signal.aborted) {
+      onAbort();
+    } else {
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+
+    void operation.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      },
+    );
+  });
+}
+
 export function toProviderNetworkError(
   error: unknown,
   providerId: string,
