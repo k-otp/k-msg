@@ -145,11 +145,12 @@ Defined in: [packages/webhook/src/runtime/types.ts:112](https://github.com/k-otp
 
 > **migrateFieldCryptoToTenant**(): `Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L127)
+Defined in: [packages/webhook/src/runtime/types.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L128)
 
 Re-encrypts stored endpoint secrets and delivery payloads written before
-ciphertext was bound to `fieldCrypto.tenantId`; see
-`migrateWebhookFieldCryptoToTenant`.
+ciphertext was bound to `fieldCrypto.tenantId`. Run it once every
+instance is upgraded; endpoint writes through this runtime wait until it
+finishes. See `migrateWebhookFieldCryptoToTenant`.
 
 #### Returns
 
@@ -197,7 +198,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:110](https://github.com/k-otp
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L128)
+Defined in: [packages/webhook/src/runtime/types.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L129)
 
 #### Returns
 
