@@ -85,6 +85,12 @@ function nullSafeEquals(
   return `${column} IS ${valuePlaceholder}`;
 }
 
+// Reads a column as text in every dialect, so a JSON column is compared with
+// the exact text it was read as.
+function asText(dialect: SqlDialect, column: string): string {
+  return `CAST(${column} AS ${dialect === "mysql" ? "CHAR" : "TEXT"})`;
+}
+
 const MAX_BACKFILL_ATTEMPTS = 3;
 
 function toErrorMessage(error: unknown): string {
@@ -208,7 +214,8 @@ async function backfillChunkByMessageIds(
   // The read and the guarded write must agree on which rows still need
   // encryption, or rows read here could be skipped by the write below.
   const stillMigratable = `(${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`;
-  const selectColumns = `${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain, ${q(columns.cryptoState)} AS crypto_state`;
+  const metadataText = asText(client.dialect, q(columns.metadata));
+  const selectColumns = `${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${metadataText} AS metadata_plain, ${q(columns.cryptoState)} AS crypto_state`;
   const { rows } = await client.query<Record<string, unknown>>(
     `SELECT ${selectColumns} FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND ${stillMigratable}`,
     messageIds,
@@ -217,25 +224,29 @@ async function backfillChunkByMessageIds(
   for (const first of rows) {
     let row: Record<string, unknown> | undefined = first;
     for (let attempt = 1; row; attempt += 1) {
-      if (await encryptRow(row)) break;
-      if (attempt >= MAX_BACKFILL_ATTEMPTS) {
-        throw new Error(
-          `Message ${String(row.message_id)} kept changing during the backfill; retry the chunk`,
-        );
-      }
-      // Another writer changed the row after it was read; encrypt its
-      // current values, or leave it if it is no longer plain or degraded.
+      const updated = await encryptRow(row);
+      if (updated !== undefined && updated > 0) break;
+      // No affected row reported: either another writer changed the row
+      // after it was read, or the client does not report a count. Re-read
+      // it; a row that is no longer plain or degraded is protected.
       const messageId: unknown = row.message_id;
       const { rows: current } = await client.query<Record<string, unknown>>(
         `SELECT ${selectColumns} FROM ${tableRef} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, 1)} AND ${stillMigratable}`,
         [messageId],
       );
       row = current[0];
+      if (row && attempt >= MAX_BACKFILL_ATTEMPTS) {
+        throw new Error(
+          `Message ${String(messageId)} kept changing during the backfill; retry the chunk`,
+        );
+      }
     }
   }
 
-  // Returns false when the row no longer matches what was read.
-  async function encryptRow(row: Record<string, unknown>): Promise<boolean> {
+  // Returns the number of rows the guarded write reports, when it reports one.
+  async function encryptRow(
+    row: Record<string, unknown>,
+  ): Promise<number | undefined> {
     const messageId = String(row.message_id ?? "");
     const to = nonEmptyString(row.to_plain);
     if (!to) {
@@ -286,20 +297,31 @@ async function backfillChunkByMessageIds(
       ([column], index) =>
         `${q(column)} = ${placeholder(client.dialect, index + 1)}`,
     );
-    // Write only if the row still holds the state, recipient, and sender this
-    // ciphertext was derived from; a live writer may have changed it since.
-    // Metadata is not compared: its column type differs by dialect and schema.
+    // Write only if the row still holds every value this ciphertext was
+    // derived from: its state, recipient, sender, provider (part of the
+    // default AAD), and metadata. A live writer may have changed any of them
+    // since the row was read.
+    const guards: Array<[string, unknown]> = [
+      [q(columns.cryptoState), row.crypto_state ?? null],
+      [q(columns.to), row.to_plain ?? null],
+      [q(columns.from), row.from_plain ?? null],
+      [q(columns.providerId), row.provider_id ?? null],
+      [metadataText, row.metadata_plain ?? null],
+    ];
+    const guardSql = guards
+      .map(([column], index) =>
+        nullSafeEquals(client.dialect, column, at(index + 2)),
+      )
+      .join(" AND ");
     const result = await client.query(
-      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${at(1)} AND ${nullSafeEquals(client.dialect, q(columns.cryptoState), at(2))} AND ${nullSafeEquals(client.dialect, q(columns.to), at(3))} AND ${nullSafeEquals(client.dialect, q(columns.from), at(4))}`,
+      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${at(1)} AND ${guardSql}`,
       [
         ...values.map(([, value]) => value),
         messageId,
-        row.crypto_state ?? null,
-        row.to_plain ?? null,
-        row.from_plain ?? null,
+        ...guards.map(([, value]) => value),
       ],
     );
-    return result.rowCount !== 0;
+    return result.rowCount;
   }
 }
 

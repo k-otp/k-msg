@@ -38,7 +38,7 @@ Set `KMSG_FIELD_CRYPTO_AAD_FIELDS` exactly when the store sets `aadFields`: ciph
 ## Operational sequence
 
 1. Generate a plan and record `planId`.
-2. Apply chunks with controlled `--max-chunks`.
+2. Apply chunks with controlled `--max-chunks`. The tracking store can keep writing: a row that changes while its chunk runs is re-read and encrypted from its current values, and one that keeps changing fails its chunk for `retry`.
 3. Check status before each stage transition.
 4. Retry only failed chunks. A run that stopped on a read error has none; resume it with `apply`, which continues from the recorded cursor.
 5. Switch to secure-only read path after parity checks.
