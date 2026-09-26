@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { JobStatus } from "../../queue/job-queue.interface";
-import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
+import {
+  HyperdriveDeliveryTrackingStore,
+  type HyperdriveDeliveryTrackingStoreConfig,
+} from "./hyperdrive-delivery-tracking.store";
 import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import {
   CloudflareObjectDeliveryTrackingStore,
@@ -328,6 +331,88 @@ describe("Cloudflare SQL adapters", () => {
     expect(
       defaults.queries.some((query) => /^\s*CREATE TABLE/.test(query.sql)),
     ).toBe(true);
+  });
+
+  test("SQL tracking stores create indexes under the configured names", async () => {
+    // Field crypto adds the hash and retention indexes, so the test sets all
+    // six names, half through each option.
+    const options: HyperdriveDeliveryTrackingStoreConfig = {
+      indexNames: {
+        due: "otp_due",
+        providerMessage: "otp_provider_msg",
+        requestedAt: "otp_requested_at",
+      },
+      trackingIndexNames: {
+        toHash: "otp_to_hash",
+        fromHash: "otp_from_hash",
+        retentionBucket: "otp_retention_bucket",
+      },
+      fieldCrypto: {
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          provider: {
+            encrypt: async ({ value }) => ({ ciphertext: value }),
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        },
+      },
+    };
+    const expected = [
+      "otp_due",
+      "otp_provider_msg",
+      "otp_requested_at",
+      "otp_to_hash",
+      "otp_from_hash",
+      "otp_retention_bucket",
+    ];
+    const indexNamesIn = (statements: readonly string[]) =>
+      statements.flatMap((sql) => {
+        const match = /^\s*CREATE INDEX (?:IF NOT EXISTS )?"([^"]+)"/.exec(sql);
+        return match ? [match[1]] : [];
+      });
+
+    const postgres = createCapturingSqlClient("postgres");
+    await new HyperdriveDeliveryTrackingStore(postgres.client, options).init();
+    expect(indexNamesIn(postgres.queries.map((query) => query.sql))).toEqual(
+      expected,
+    );
+
+    const d1Statements: string[] = [];
+    const d1 = {
+      prepare(sql: string) {
+        d1Statements.push(sql);
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all() {
+            return { results: [] };
+          },
+        };
+        return statement;
+      },
+    };
+    await createD1DeliveryTrackingStore(
+      d1 as unknown as D1DatabaseLike,
+      options,
+    ).init();
+    expect(indexNamesIn(d1Statements)).toEqual(expected);
+
+    // Statements without parameters reach Drizzle as plain strings.
+    const drizzleStatements: string[] = [];
+    await createDrizzleDeliveryTrackingStore({
+      ...options,
+      dialect: "postgres",
+      db: {
+        execute(query: unknown) {
+          drizzleStatements.push(String(query));
+          return [];
+        },
+      },
+    }).init();
+    expect(indexNamesIn(drizzleStatements)).toEqual(expected);
   });
 
   test("HyperdriveDeliveryTrackingStore uses dialect-specific upsert SQL", async () => {

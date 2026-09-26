@@ -65,4 +65,35 @@ describe("Delivery tracking store init behavior", () => {
     await expect(bunSql.get("m1")).rejects.toThrow(/no such table/);
     await bunSql.close();
   });
+
+  test("Bun stores create indexes under the configured names", async () => {
+    const indexOptions = {
+      indexNames: { due: "otp_due", providerMessage: "otp_provider_msg" },
+      trackingIndexNames: { requestedAt: "otp_requested_at" },
+    };
+    // SQLite's own primary key index has no SQL.
+    const listIndexes =
+      "SELECT name FROM sqlite_master WHERE type = 'index' AND sql IS NOT NULL ORDER BY name";
+    const expected = ["otp_due", "otp_provider_msg", "otp_requested_at"];
+
+    const sqlite = new SqliteDeliveryTrackingStore({
+      dbPath: ":memory:",
+      ...indexOptions,
+    });
+    await sqlite.init();
+    const db = (
+      sqlite as unknown as {
+        db: { prepare: (sql: string) => { all: () => unknown[] } };
+      }
+    ).db;
+    const sqliteIndexes = db.prepare(listIndexes).all() as { name: string }[];
+    expect(sqliteIndexes.map((row) => row.name)).toEqual(expected);
+    sqlite.close();
+
+    const sql = new Bun.SQL({ adapter: "sqlite", filename: ":memory:" });
+    await new BunSqlDeliveryTrackingStore({ sql, ...indexOptions }).init();
+    const bunSqlIndexes: { name: string }[] = await sql.unsafe(listIndexes);
+    expect(bunSqlIndexes.map((row) => row.name)).toEqual(expected);
+    await sql.close();
+  });
 });
