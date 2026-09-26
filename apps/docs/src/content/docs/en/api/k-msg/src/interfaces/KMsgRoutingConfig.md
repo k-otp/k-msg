@@ -5,7 +5,7 @@ prev: false
 title: "KMsgRoutingConfig"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L76)
+Defined in: [packages/messaging/src/k-msg.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L67)
 
 Configuration for routing messages to specific providers.
 
@@ -32,7 +32,7 @@ const routing: KMsgRoutingConfig = {
 
 > `optional` **byType?**: `Partial`\<`Record`\<[`MessageType`](/en/api/core/src/type-aliases/messagetype/), `string` \| `string`[]\>\>
 
-Defined in: [packages/messaging/src/k-msg.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L82)
+Defined in: [packages/messaging/src/k-msg.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L73)
 
 Map of message types to provider IDs.
 Can be a single provider ID or an array for load balancing.
@@ -44,7 +44,7 @@ When an array is provided, the `strategy` determines which provider is selected.
 
 > `optional` **defaultProviderId?**: `string`
 
-Defined in: [packages/messaging/src/k-msg.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L88)
+Defined in: [packages/messaging/src/k-msg.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L79)
 
 Default provider ID to use when no type-specific routing is configured
 and no explicit `providerId` is provided in the send options.
@@ -55,7 +55,7 @@ and no explicit `providerId` is provided in the send options.
 
 > `optional` **strategy?**: [`RoutingStrategy`](/en/api/messaging/src/type-aliases/routingstrategy/)
 
-Defined in: [packages/messaging/src/k-msg.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L94)
+Defined in: [packages/messaging/src/k-msg.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L85)
 
 Strategy for selecting from multiple providers when `byType` contains an array.
 

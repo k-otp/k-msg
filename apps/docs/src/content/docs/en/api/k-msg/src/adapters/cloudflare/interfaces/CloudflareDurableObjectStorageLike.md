@@ -79,6 +79,12 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:46](ht
 
 `string`
 
+###### startAfter?
+
+`string`
+
+Lists keys after this one, as Durable Object storage pages.
+
 #### Returns
 
 `Promise`\<`Map`\<`string`, `T`\>\>

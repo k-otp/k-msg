@@ -5,7 +5,7 @@ prev: false
 title: "KMsgConfig"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L164)
+Defined in: [packages/messaging/src/k-msg.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L155)
 
 Configuration object for initializing a KMsg instance.
 
@@ -35,7 +35,7 @@ const config: KMsgConfig = {
 
 > `optional` **defaults?**: [`KMsgDefaultsConfig`](/en/api/k-msg/src/interfaces/kmsgdefaultsconfig/)
 
-Defined in: [packages/messaging/src/k-msg.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L179)
+Defined in: [packages/messaging/src/k-msg.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L170)
 
 Optional defaults applied to outgoing messages.
 
@@ -45,7 +45,7 @@ Optional defaults applied to outgoing messages.
 
 > `optional` **hooks?**: [`KMsgHooks`](/en/api/messaging/src/interfaces/kmsghooks/)
 
-Defined in: [packages/messaging/src/k-msg.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L185)
+Defined in: [packages/messaging/src/k-msg.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L176)
 
 Optional lifecycle hooks for send operations.
 Hooks are called at various stages: before send, on success, on error, and on completion.
@@ -56,7 +56,7 @@ Hooks are called at various stages: before send, on success, on error, and on co
 
 > `optional` **persistence?**: `object`
 
-Defined in: [packages/messaging/src/k-msg.ts:194](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L194)
+Defined in: [packages/messaging/src/k-msg.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L185)
 
 Optional persistence configuration for message storage.
 - `none`: No persistence (default)
@@ -78,7 +78,7 @@ Optional persistence configuration for message storage.
 
 > **providers**: [`Provider`](/en/api/core/src/interfaces/provider/)[]
 
-Defined in: [packages/messaging/src/k-msg.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L169)
+Defined in: [packages/messaging/src/k-msg.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L160)
 
 Array of provider instances to use for sending messages.
 At least one provider is required.
@@ -89,6 +89,6 @@ At least one provider is required.
 
 > `optional` **routing?**: [`KMsgRoutingConfig`](/en/api/k-msg/src/interfaces/kmsgroutingconfig/)
 
-Defined in: [packages/messaging/src/k-msg.ts:174](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L174)
+Defined in: [packages/messaging/src/k-msg.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L165)
 
 Optional routing configuration for provider selection.
