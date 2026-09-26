@@ -1,0 +1,43 @@
+import { AligoProvider, IWINVProvider, MockProvider } from "@k-msg/provider";
+import type { Provider } from "k-msg";
+import type { ProviderConfig } from "./env";
+
+// MockProvider remembers the messages it sent and reports them as DELIVERED
+// to the next status poll. `wrangler dev` runs a single isolate, so sharing
+// one instance lets the cron see messages that earlier requests sent. It does
+// no I/O, which makes it safe to keep across requests.
+const mockProvider = new MockProvider();
+
+/**
+ * Creates the provider KMSG_PROVIDER selects. The sender number is not set
+ * here: every send passes the configured KMSG_SENDER_NUMBER as `from`.
+ */
+export async function createProvider(
+  config: ProviderConfig,
+): Promise<Provider> {
+  switch (config.name) {
+    case "mock":
+      return mockProvider;
+    case "iwinv":
+      return new IWINVProvider({
+        apiKey: config.apiKey,
+        smsApiKey: config.smsApiKey,
+        smsAuthKey: config.smsAuthKey,
+        smsCompanyId: config.smsCompanyId,
+      });
+    case "solapi": {
+      // The SOLAPI SDK is large, so it is evaluated only when selected.
+      const { SolapiProvider } = await import("@k-msg/provider/solapi");
+      return new SolapiProvider({
+        apiKey: config.apiKey,
+        apiSecret: config.apiSecret,
+      });
+    }
+    case "aligo":
+      return new AligoProvider({
+        apiKey: config.apiKey,
+        userId: config.userId,
+        testMode: config.testMode,
+      });
+  }
+}

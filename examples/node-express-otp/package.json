@@ -1,0 +1,26 @@
+{
+  "name": "node-express-otp-example",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/server.ts",
+    "start": "node --env-file-if-exists=.env src/server.ts",
+    "test": "node --test",
+    "typecheck": "ttsc --noEmit"
+  },
+  "dependencies": {
+    "@k-msg/provider": "latest",
+    "express": "^5.2.1",
+    "k-msg": "latest",
+    "solapi": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.13.3",
+    "ttsc": "^0.30.4",
+    "typescript": "^7.0.2"
+  }
+}

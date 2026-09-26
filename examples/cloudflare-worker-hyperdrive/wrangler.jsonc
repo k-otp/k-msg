@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-cloudflare-worker-hyperdrive",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-25",
+  // postgres.js and the SOLAPI SDK import Node.js built-ins.
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Polls the provider for the delivery status of recently sent messages.
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      // Replace with the id that `wrangler hyperdrive create` prints before
+      // you deploy.
+      "id": "00000000000000000000000000000000",
+      // What `wrangler dev` connects to instead; see the README.
+      "localConnectionString": "postgres://postgres:postgres@localhost:5432/kmsg"
+    }
+  ],
+  // Non-secret settings. API_TOKEN and the provider keys are secrets:
+  // `wrangler secret put` (or .dev.vars locally).
+  "vars": {
+    "KMSG_PROVIDER": "mock",
+    // Registered sender number, digits only. Required unless KMSG_PROVIDER
+    // is mock.
+    "KMSG_SENDER_NUMBER": ""
+  }
+}

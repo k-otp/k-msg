@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-cloudflare-worker-queue-do",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-25",
+  // The SOLAPI SDK imports Node.js built-ins (crypto, fs, url).
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // One Durable Object owns the queue: it stores the jobs and sends them from
+  // its alarm.
+  "durable_objects": {
+    "bindings": [{ "name": "SEND_QUEUE", "class_name": "SendQueue" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SendQueue"] }],
+  // Non-secret settings. API_TOKEN and the provider keys are secrets:
+  // `wrangler secret put` (or .dev.vars locally).
+  "vars": {
+    "KMSG_PROVIDER": "mock",
+    // Registered sender number, digits only. Required unless KMSG_PROVIDER
+    // is mock.
+    "KMSG_SENDER_NUMBER": "",
+    // Attempts per message, the first one included.
+    "SEND_MAX_ATTEMPTS": "5"
+  }
+}

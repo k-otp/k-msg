@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kmsg-cloudflare-worker-d1",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-25",
+  // The SOLAPI SDK imports Node.js built-ins (crypto, fs, url).
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Polls delivery statuses and sends the resulting webhooks.
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  // Non-secret settings. Provider keys, API_TOKEN and
+  // WEBHOOK_RECEIVER_SECRET are secrets: `wrangler secret put` (or .dev.vars).
+  "vars": {
+    "KMSG_PROVIDER": "mock"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kmsg",
+      // Local development works with this placeholder. Replace it with the id
+      // that `wrangler d1 create kmsg` prints before you deploy.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
