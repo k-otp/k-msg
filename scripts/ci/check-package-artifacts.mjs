@@ -50,12 +50,10 @@ try {
     const errors = results.flatMap((result) => result.errors);
     if (errors.length > 0) fail(errors);
     else {
-      const esmCount = results.reduce(
-        (total, result) => total + result.checkedEsm.length,
-        0,
-      );
+      const count = (key) =>
+        results.reduce((total, result) => total + result[key].length, 0);
       console.log(
-        `ok: ${results.length} publishable packages and ${esmCount} ESM exports validated`,
+        `ok: ${results.length} publishable packages; loaded ${count("checkedEsm")} ESM exports with import() and ${count("checkedCjs")} CommonJS exports with require(); syntax-checked ${count("syntaxOnly")} Bun-only artifacts`,
       );
     }
   } else {
