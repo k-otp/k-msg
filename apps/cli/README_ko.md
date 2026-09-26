@@ -167,7 +167,7 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 | `aligo` | `SMS/LMS/MMS` | `apiKey`, `userId` | `to`, `text`, 발신번호 (`--from` 또는 `aligo.config.sender`) | MMS는 이미지 입력도 필요 |
 | `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), 발신번호 (`--from` 또는 `aligo.config.sender`) | `preflight`에서 채널/템플릿 접근성 확인 |
 | `iwinv` | `SMS/LMS/MMS` | `apiKey`, `smsApiKey`, `smsAuthKey` | `to`, `text`, 발신번호 (`--from` 또는 `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS는 바이너리 이미지 입력 필요 |
-| `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | failover/reSend 활성화 시 callback 발신번호 필요 (`--from` 또는 config sender) |
+| `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | `vars`는 템플릿의 `#{이름}` 변수에 이름으로 매칭. failover/reSend 활성화 시 callback 발신번호 필요 (`--from` 또는 config sender) |
 | `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, 발신번호 (`--from` 또는 `solapi.config.defaultFrom`) | MMS는 이미지 입력도 필요 |
 | `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/채널 alias 또는 `solapi.config.kakaoPfId`) | preflight 정책 점검용 `plusId`는 `--plus-id` 또는 channel/default alias로 지정 |
 | `mock` | 전체 | 없음 | 최소 메시지 필드 (`to`, `text` 또는 `template-id`/`vars`) | 로컬 테스트용 provider |

@@ -37,24 +37,28 @@ export class IWINVProvider
     patch: TemplateUpdateInput,
     ctx?: TemplateContext,
   ): Promise<Result<Template, KMsgError>> {
-    return updateTemplate({
+    const result = await updateTemplate({
       providerId: this.id,
       config: this.config,
       code,
       patch,
       ctx,
     });
+    this.templateContents.delete(code);
+    return result;
   }
 
   async deleteTemplate(
     code: string,
     _ctx?: TemplateContext,
   ): Promise<Result<void, KMsgError>> {
-    return deleteTemplate({
+    const result = await deleteTemplate({
       providerId: this.id,
       config: this.config,
       code,
     });
+    this.templateContents.delete(code);
+    return result;
   }
 
   async getTemplate(

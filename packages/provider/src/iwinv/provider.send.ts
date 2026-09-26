@@ -20,6 +20,7 @@ import {
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
 import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
+import { TemplateContentCache } from "../shared/template-content-cache";
 import {
   getAlimTalkHeaders,
   mapIwinvCodeToKMsgErrorCode,
@@ -75,6 +76,8 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
   } as const satisfies ProviderTransportCapabilities;
 
   protected readonly config: NormalizedIwinvConfig;
+  /** Template bodies used to fill AlimTalk variables by name. */
+  protected readonly templateContents = new TemplateContentCache();
 
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
@@ -162,6 +165,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
           config: this.config,
           options: normalized,
           context,
+          templateContents: this.templateContents,
         });
       case "SMS":
       case "LMS":

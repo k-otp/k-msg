@@ -16,8 +16,8 @@ bun add @k-msg/provider @k-msg/core
 
 ## Official IWINV Docs (Source)
 
-- SMS API: https://docs.iwinv.kr/api/Message_api/
-- Kakao (AlimTalk) API: https://docs.iwinv.kr/api/kakao_api/
+- SMS API: https://help.iwinv.kr/manual/read.html?idx=904
+- Kakao (AlimTalk) API: https://help.iwinv.kr/manual/862
 
 ## Onboarding Requirements
 
@@ -48,6 +48,14 @@ For CLI:
 - Typical response shape:
   - `{"code":200,...}` on success
   - `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}` when IP is not whitelisted
+
+Template variables:
+- IWINV's `templateParam` is positional: one value per `#{placeholder}` occurrence, in template order.
+- `IWINVProvider` builds it from `variables` by name. It reads the template body from
+  `providerOptions.templateContent`, or else looks it up with the template list API
+  (`POST /api/template/`) and keeps it for 10 minutes per provider instance.
+- A placeholder with no matching key in `variables` fails the send with `INVALID_REQUEST`
+  before anything is sent. `providerOptions.templateParam` (an array) is still sent as-is.
 
 AlimTalk `code` quick reference:
 - `200`: sent
@@ -155,11 +163,11 @@ const sms = await provider.send({
 });
 if (sms.isFailure) throw sms.error;
 
-// AlimTalk
+// AlimTalk: variables are matched to the template's #{name} placeholders.
 const alimtalk = await provider.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "YOUR_TEMPLATE_CODE",
+  templateId: "YOUR_TEMPLATE_CODE",
   variables: { name: "Jane" },
   // Optional: set `from` to enable SMS fallback (IWINV's `reSend` flow).
   from: "01000000000",
