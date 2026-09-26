@@ -10,6 +10,7 @@ import {
   type FieldCryptoOpenFallback,
   type FieldMode,
   normalizePhoneForHash,
+  resolveFieldCryptoFailMode,
   resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
@@ -175,7 +176,7 @@ async function emitCircuitStateMetric(
 }
 
 function resolveFailMode(config: FieldCryptoConfig): FieldCryptoFailMode {
-  return config.failMode ?? "closed";
+  return resolveFieldCryptoFailMode(config);
 }
 
 function resolveOpenFallback(

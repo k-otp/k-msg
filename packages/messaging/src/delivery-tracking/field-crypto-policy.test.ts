@@ -86,6 +86,28 @@ describe("delivery tracking field crypto policy", () => {
     );
   });
 
+  test("a misspelled failMode is rejected instead of failing open", async () => {
+    const config = createConfig({
+      failMode: "close" as never,
+      provider: {
+        encrypt: async () => {
+          throw new Error("encrypt failed");
+        },
+        decrypt: async ({ ciphertext }) => ciphertext,
+        hash: async ({ value }) => `h:${value}`,
+      },
+    });
+
+    await expect(
+      applyTrackingCryptoOnWrite(
+        createRecord(),
+        { config },
+        { tableName: "kmsg_delivery_tracking", store: "memory" },
+        { secureMode: true, compatPlainColumns: false },
+      ),
+    ).rejects.toThrow("unsupported failMode: close");
+  });
+
   test("fail-open path emits degraded state and metric tags", async () => {
     const events: Array<Record<string, unknown>> = [];
     const record = createRecord();

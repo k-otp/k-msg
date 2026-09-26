@@ -1,5 +1,9 @@
 import { FieldCryptoError } from "./errors";
-import type { FieldCryptoConfig, FieldMode } from "./types";
+import type {
+  FieldCryptoConfig,
+  FieldCryptoFailMode,
+  FieldMode,
+} from "./types";
 
 export interface FieldCryptoPolicyValidationIssue {
   message: string;
@@ -42,6 +46,19 @@ export function resolveFieldMode(
   }
 
   return fallback;
+}
+
+const FAIL_MODES: readonly unknown[] = ["closed", "open"];
+const OPEN_FALLBACKS: readonly unknown[] = ["masked", "plaintext", "null"];
+
+/**
+ * The fail mode to apply. Only an explicit `"open"` fails open; a missing or
+ * unrecognized value, such as a typo in JSON configuration, fails closed.
+ */
+export function resolveFieldCryptoFailMode(
+  config: Pick<FieldCryptoConfig, "failMode">,
+): FieldCryptoFailMode {
+  return config.failMode === "open" ? "open" : "closed";
 }
 
 export function validateFieldCryptoConfig(
@@ -137,7 +154,28 @@ export function validateFieldCryptoConfig(
     }
   }
 
-  const failMode = config.failMode ?? "closed";
+  if (config.failMode !== undefined && !FAIL_MODES.includes(config.failMode)) {
+    issues.push({
+      message: `unsupported failMode: ${String(config.failMode)}`,
+      rule: "fieldCrypto.fail_mode.supported",
+      path: "failMode",
+      hint: 'Use "closed" (default) or "open"',
+    });
+  }
+
+  if (
+    config.openFallback !== undefined &&
+    !OPEN_FALLBACKS.includes(config.openFallback)
+  ) {
+    issues.push({
+      message: `unsupported openFallback: ${String(config.openFallback)}`,
+      rule: "fieldCrypto.open_fallback.supported",
+      path: "openFallback",
+      hint: 'Use "masked" (default), "null", or "plaintext"',
+    });
+  }
+
+  const failMode = resolveFieldCryptoFailMode(config);
   const openFallback = config.openFallback ?? "masked";
   if (
     failMode === "open" &&

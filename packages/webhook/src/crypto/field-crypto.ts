@@ -3,6 +3,7 @@ import {
   createDefaultMasker,
   type FieldCryptoConfig,
   FieldCryptoError,
+  resolveFieldCryptoFailMode,
 } from "@k-msg/core";
 import type {
   WebhookDeliveryListOptions,
@@ -59,7 +60,7 @@ async function protectValue(
   if (!value) return undefined;
   if (!config || config.enabled === false) return value;
 
-  const failMode = config.failMode ?? "closed";
+  const failMode = resolveFieldCryptoFailMode(config);
   const keyResolver = config.keyResolver;
 
   try {
@@ -104,7 +105,7 @@ async function revealValue(
   if (!value) return undefined;
   if (!config || config.enabled === false) return value;
 
-  const failMode = config.failMode ?? "closed";
+  const failMode = resolveFieldCryptoFailMode(config);
 
   try {
     const keyContext = {
