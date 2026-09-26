@@ -306,7 +306,8 @@ export interface AesGcmFieldCryptoProviderOptions {
  *   The messaging stores bind messageId, providerId, tableName, fieldPath, and
  *   tenantId by default; webhook storage, which encrypts one field per table,
  *   binds the table, the endpoint or delivery id, and the tenant when one is
- *   set (field-crypto.test.ts in @k-msg/webhook covers the cross-tenant read).
+ *   set; reads fall back to the tenant-less AAD for values written before
+ *   tenant binding (field-crypto.test.ts in @k-msg/webhook covers both).
  */
 export function createAesGcmFieldCryptoProvider(
   options: AesGcmFieldCryptoProviderOptions,

@@ -173,16 +173,19 @@ export async function revealFieldValue(
           ? { candidateKids }
           : {}),
       });
-    const tenantAad = withTenant(input.aad, input.tenantId);
-    if (tenantAad === input.aad) return await decrypt(input.aad);
+    if (!input.tenantId) return await decrypt(input.aad);
     try {
-      return await decrypt(tenantAad);
+      return await decrypt(withTenant(input.aad, input.tenantId));
     } catch (error) {
-      // Values written before tenant binding carry the legacy AAD.
+      // Values written before tenant binding carry the legacy AAD. Until a
+      // record is saved again, reading it costs one failed decrypt first.
       try {
         return await decrypt(input.aad);
-      } catch {
-        throw error;
+      } catch (legacyError) {
+        throw new AggregateError(
+          [error, legacyError],
+          "decrypt failed with both the tenant-bound and the legacy AAD",
+        );
       }
     }
   } catch (error) {
