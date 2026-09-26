@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   assertFieldCryptoConfig,
+  resolveFieldCryptoFailMode,
   resolveFieldMode,
   validateFieldCryptoConfig,
 } from "./policy";
@@ -59,6 +60,30 @@ describe("field crypto policy", () => {
     expect(() => assertFieldCryptoConfig(config)).toThrow(
       "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
     );
+  });
+
+  test("validateFieldCryptoConfig rejects unknown failMode and openFallback", () => {
+    const result = validateFieldCryptoConfig(
+      createConfig({
+        failMode: "close" as never,
+        openFallback: "mask" as never,
+      }),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.map((issue) => issue.rule)).toEqual([
+      "fieldCrypto.fail_mode.supported",
+      "fieldCrypto.open_fallback.supported",
+    ]);
+  });
+
+  test("resolveFieldCryptoFailMode fails open only for an explicit open", () => {
+    expect(resolveFieldCryptoFailMode({})).toBe("closed");
+    expect(resolveFieldCryptoFailMode({ failMode: "closed" })).toBe("closed");
+    expect(resolveFieldCryptoFailMode({ failMode: "close" as never })).toBe(
+      "closed",
+    );
+    expect(resolveFieldCryptoFailMode({ failMode: "open" })).toBe("open");
   });
 
   test("assertFieldCryptoConfig rejects plain lookup fields in secure mode", () => {

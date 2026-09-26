@@ -40,6 +40,17 @@ describe("WebhookRegistry field crypto", () => {
     );
   });
 
+  test("constructor rejects a misspelled failMode", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ failMode: "close" as never }),
+          },
+        }),
+    ).toThrow("unsupported failMode: close");
+  });
+
   test("constructor rejects invalid provider methods", () => {
     expect(
       () =>
