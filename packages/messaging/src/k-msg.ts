@@ -23,6 +23,16 @@ import type {
 } from "./hooks";
 import type { BatchSendResult } from "./types/message.types";
 
+// Hook failures must never reach the send path, even through a console
+// replacement that throws.
+function logHookFailure(message: string, error: unknown): void {
+  try {
+    console.error(message, error);
+  } catch {
+    // Nothing is left to report to.
+  }
+}
+
 function interpolateTemplate(
   text: string,
   vars: Record<string, string>,
@@ -802,7 +812,8 @@ export class KMsg {
       | undefined;
     if (!handler) return;
     try {
-      await handler(...args);
+      // Call through the hooks object so method hooks keep their `this`.
+      await handler.apply(this.hooks, args);
     } catch (error) {
       await this.reportHookError(error, { hook, context: args[0] });
     }
@@ -812,20 +823,19 @@ export class KMsg {
     error: unknown,
     info: KMsgHookErrorContext,
   ): Promise<void> {
-    const report = this.hooks.onHookError;
-    if (report) {
+    if (this.hooks.onHookError) {
       try {
-        await report(error, info);
+        await this.hooks.onHookError(error, info);
         return;
       } catch (reportError) {
-        console.error(
+        logHookFailure(
           `[k-msg] onHookError threw while reporting a ${info.hook} hook error`,
           reportError,
         );
       }
     }
     // Last resort, so a broken hook does not fail silently.
-    console.error(
+    logHookFailure(
       `[k-msg] ${info.hook} hook threw; the send result is unaffected`,
       error,
     );
