@@ -10,7 +10,12 @@ import {
   sendFailure,
 } from "./http";
 import { errorFields, log } from "./log";
-import { createRuntime, toMessageStatus } from "./runtime";
+import {
+  createRuntime,
+  type Runtime,
+  sendStatusWebhook,
+  toMessageStatus,
+} from "./runtime";
 import {
   parseEndpointRegistration,
   parseMessageId,
@@ -56,10 +61,10 @@ app.use(
 app.post("/messages", requireAdmin, async (c) => {
   const input = parseSendMessage(await readJsonObject(c.req));
   const config = c.var.config;
-  const { kmsg } = await createRuntime(config);
+  const runtime = await createRuntime(config);
 
   // The tracking hook records the send in D1 before this resolves.
-  const result = await kmsg.send(
+  const result = await runtime.kmsg.send(
     { to: input.to, text: input.text, from: config.senderNumber },
     { signal: AbortSignal.timeout(SEND_TIMEOUT_MS) },
   );
@@ -75,6 +80,10 @@ app.post("/messages", requireAdmin, async (c) => {
   }
 
   const { messageId, type, status } = result.value;
+  // Tracking stores an accepted message with its status, usually SENT, and
+  // the cron reports only later changes, so the first webhook goes from here.
+  // waitUntil keeps the Worker alive for it without delaying the response.
+  c.executionCtx.waitUntil(sendFirstWebhook(runtime, messageId));
   return c.json({ messageId, type, status }, 202, {
     Location: `/messages/${messageId}`,
   });
@@ -103,8 +112,10 @@ app.post("/webhook-endpoints", requireAdmin, async (c) => {
   }
 
   const webhooks = createWebhookRuntime(config);
-  // The D1 store would replace an endpoint that has the same URL, silently
-  // changing its secret, so a duplicate is refused instead.
+  // The D1 store writes endpoints with INSERT OR REPLACE and the url column
+  // is unique, so adding a registered URL would replace that endpoint and its
+  // secret. This check refuses a duplicate, but two registrations of the same
+  // URL at the same moment can both pass it.
   const endpoints = await webhooks.listEndpoints();
   if (endpoints.some((endpoint) => endpoint.url === url)) {
     throw new ApiError(
@@ -212,6 +223,20 @@ app.onError((error, c) => {
   });
   return c.json(errorBody("INTERNAL_ERROR", "Internal server error"), 500);
 });
+
+async function sendFirstWebhook(
+  { tracking, webhooks }: Runtime,
+  messageId: string,
+): Promise<void> {
+  try {
+    const record = await tracking.getRecord(messageId);
+    // Missing when the tracking hook failed, which it has logged.
+    if (record === undefined) return;
+    await sendStatusWebhook(webhooks, record, null);
+  } catch (error) {
+    log("error", "status webhook failed", { messageId, ...errorFields(error) });
+  }
+}
 
 /** Polls due messages and sends a webhook for each status that changed. */
 async function pollDeliveryStatuses(env: Env): Promise<void> {

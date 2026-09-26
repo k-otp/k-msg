@@ -31,6 +31,7 @@ status change to your systems as a signed webhook.
 ```text
 POST /messages -> KMsg.send -> provider
                     '-> tracking hook -> D1 kmsg_delivery_tracking
+               '-> waitUntil: first status webhook (message.sent)
 
 cron, every minute -> DeliveryTrackingService.runOnce -> provider status lookup
                         '-> onStatusChange -> emitSync -> signed POST to each endpoint
@@ -103,6 +104,13 @@ export API_TOKEN=dev-admin-token-for-local-testing-only
 
    ```json
    {"messageId":"00445612-e3e6-41b0-aa0e-a6f9b1e5282b","type":"SMS","status":"SENT"}
+   ```
+
+   Right after the response, the Worker sends a signed `message.sent` webhook
+   to the receiver, and the `wrangler dev` output shows:
+
+   ```text
+   {"level":"info","message":"webhook received","eventId":"00445612-...:SENT","type":"message.sent","messageId":"00445612-...","status":"SENT"}
    ```
 
 4. Read its tracked status. It is `SENT` until the tracker polls it:
@@ -245,12 +253,14 @@ signed body is not an event, and `204` otherwise.
 
 ## Webhooks
 
-Each cron run polls the messages that are due, stores the new statuses and
-then sends one webhook per status change to every endpoint subscribed to its
-event: `SENT` becomes `message.sent`, `DELIVERED` `message.delivered` and
-`FAILED` `message.failed`. `@k-msg/webhook` has no event for `CANCELLED` or
-`UNKNOWN`, so those changes are logged but not sent; `GET /messages/:id`
-still shows them.
+Every endpoint subscribed to an event gets a webhook when a message reaches
+that status: `SENT` becomes `message.sent`, `DELIVERED` `message.delivered`
+and `FAILED` `message.failed`. `POST /messages` sends the first one, usually
+`message.sent`, after the provider accepts the message; its `previousStatus`
+is `null`. After that, each cron run polls the messages that are due, stores
+the new statuses and sends one webhook per change. `@k-msg/webhook` has no
+event for `CANCELLED` or `UNKNOWN`, so those changes are logged but not sent;
+`GET /messages/:id` still shows them.
 
 Status webhooks are delivered at least once. Two services polling the same
 store, or two overlapping cron runs, can each report the same change, and

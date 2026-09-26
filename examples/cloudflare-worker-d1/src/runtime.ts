@@ -1,7 +1,6 @@
 import { createD1DeliveryTrackingStore } from "@k-msg/messaging/adapters/cloudflare";
 import {
   createDeliveryTrackingHooks,
-  type DeliveryStatusChange,
   DeliveryTrackingService,
   type TrackingRecord,
 } from "@k-msg/messaging/tracking";
@@ -16,6 +15,7 @@ import { createWebhookRuntime } from "./webhooks";
 export interface Runtime {
   kmsg: KMsg;
   tracking: DeliveryTrackingService;
+  webhooks: WebhookRuntimeService;
 }
 
 /**
@@ -32,7 +32,8 @@ export async function createRuntime(config: Config): Promise<Runtime> {
     // The tables come from migrations/. The store still runs CREATE TABLE IF
     // NOT EXISTS on first use, which does nothing once they are applied.
     store: createD1DeliveryTrackingStore(config.db),
-    onStatusChange: (change) => sendStatusWebhook(webhooks, change),
+    onStatusChange: ({ record, previousStatus }) =>
+      sendStatusWebhook(webhooks, record, previousStatus),
     onStatusChangeError: (error, { record }) => {
       log("error", "status webhook failed", {
         messageId: record.messageId,
@@ -58,7 +59,7 @@ export async function createRuntime(config: Config): Promise<Runtime> {
     hooks: { ...trackingHooks, onError: undefined },
   });
 
-  return { kmsg, tracking };
+  return { kmsg, tracking, webhooks };
 }
 
 /** A message's tracked state, as GET /messages/:id and webhooks show it. */
@@ -92,9 +93,15 @@ export function toMessageStatus(record: TrackingRecord): MessageStatus {
   };
 }
 
-async function sendStatusWebhook(
+/**
+ * Sends the webhook for a message's current status to every subscribed
+ * endpoint. `previousStatus` is null for the first one, sent when the provider
+ * accepts the message.
+ */
+export async function sendStatusWebhook(
   webhooks: WebhookRuntimeService,
-  { record, previousStatus }: DeliveryStatusChange,
+  record: TrackingRecord,
+  previousStatus: DeliveryStatus | null,
 ): Promise<void> {
   const type = eventTypeFor(record.status);
   if (type === undefined) {
