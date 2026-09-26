@@ -5,7 +5,7 @@ prev: false
 title: "CreateD1DeliveryTrackingStoreOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L148)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L154)
 
 ## Extends
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 > `optional` **fieldCrypto?**: [`DeliveryTrackingFieldCryptoOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L150)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L156)
 
 ***
 
@@ -57,11 +57,28 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 ***
 
+### initializeSchema?
+
+> `optional` **initializeSchema?**: `boolean`
+
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:163](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L163)
+
+Whether the store creates its table and indexes on first use. Set it to
+`false` when migrations create the schema.
+
+#### Default
+
+```ts
+true
+```
+
+***
+
 ### retention?
 
 > `optional` **retention?**: [`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L151)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L157)
 
 ***
 
