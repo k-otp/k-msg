@@ -401,7 +401,7 @@ Defined in: [packages/webhook/src/registry/event.store.ts:91](https://github.com
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/registry/event.store.ts:727](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L727)
+Defined in: [packages/webhook/src/registry/event.store.ts:726](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/registry/event.store.ts#L726)
 
 이벤트 저장소 종료
 
