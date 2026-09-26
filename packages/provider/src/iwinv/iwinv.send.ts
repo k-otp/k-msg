@@ -56,10 +56,12 @@ function toTemplateParamValue(value: unknown): string {
 }
 
 /**
- * Builds IWINV's `templateParam`, which IWINV applies by position: one value
- * per `#{placeholder}` occurrence, in template order. Values are taken from
- * `variables` by placeholder name, using the template body from
- * `providerOptions.templateContent` or else IWINV's template API.
+ * Builds IWINV's `templateParam`, which IWINV applies by position. Its spec
+ * does not say how positions map to placeholders, so this sends one value per
+ * distinct `#{name}`, in the order the names first appear in the template's
+ * content and then its button links: the one value per variable that IWINV's
+ * console asks for, and what the key-order mapping used to send. The text
+ * comes from `providerOptions.templateContent` or else IWINV's template API.
  */
 async function resolveTemplateParam(params: {
   providerId: string;
@@ -98,7 +100,7 @@ async function resolveTemplateParam(params: {
       );
   if (content.isFailure) return content;
 
-  const placeholders = listTemplatePlaceholders(content.value);
+  const placeholders = [...new Set(listTemplatePlaceholders(content.value))];
   const missing = findMissingTemplateVariables(placeholders, variables);
   if (missing.length > 0) {
     return fail(

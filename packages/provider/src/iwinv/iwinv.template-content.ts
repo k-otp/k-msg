@@ -19,9 +19,13 @@ import {
 } from "./iwinv.alimtalk.helpers";
 import type { NormalizedIwinvConfig } from "./iwinv.internal.types";
 
+const BUTTON_LINK_FIELDS = ["linkMo", "linkPc", "linkIos", "linkAnd"] as const;
+
 /**
- * Reads one template's body from IWINV's template list API through the send's
- * request context, so its signal and fetch apply to the lookup as well.
+ * Reads the text whose placeholders one template's `templateParam` fills, its
+ * content followed by its buttons' links, from IWINV's template list API
+ * through the send's request context, so its signal and fetch apply to the
+ * lookup as well.
  */
 export async function fetchIwinvTemplateContent(params: {
   providerId: string;
@@ -82,7 +86,15 @@ export async function fetchIwinvTemplateContent(params: {
       );
     }
 
-    return ok(template.templateContent);
+    const buttons = Array.isArray(template.buttons) ? template.buttons : [];
+    const links = buttons.flatMap((button) =>
+      isObjectRecord(button)
+        ? BUTTON_LINK_FIELDS.map((field) => button[field]).filter(
+            (link): link is string => typeof link === "string",
+          )
+        : [],
+    );
+    return ok([template.templateContent, ...links].join("\n"));
   } catch (error) {
     return fail(toProviderTransportError(error, context?.signal, providerId));
   }

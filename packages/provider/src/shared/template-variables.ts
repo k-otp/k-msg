@@ -10,13 +10,19 @@ export function listTemplatePlaceholders(content: string): string[] {
   );
 }
 
-/** Placeholder names that `variables` has no key for, each listed once. */
+/**
+ * Placeholder names that `variables` has no value for, each listed once. A key
+ * set to `undefined` counts as missing, as it would after a JSON round trip
+ * (a queued send); `null` is an explicit empty value.
+ */
 export function findMissingTemplateVariables(
   placeholders: readonly string[],
   variables: Readonly<Record<string, unknown>>,
 ): string[] {
   const missing = placeholders.filter(
-    (name) => !Object.prototype.hasOwnProperty.call(variables, name),
+    (name) =>
+      !Object.prototype.hasOwnProperty.call(variables, name) ||
+      variables[name] === undefined,
   );
   return [...new Set(missing)];
 }

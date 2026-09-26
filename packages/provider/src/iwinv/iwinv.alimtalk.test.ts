@@ -8,11 +8,13 @@ import { IWINVProvider } from "./provider";
 
 type RecordedCall = { url: string; body: Record<string, unknown> };
 
+type TemplateFixture = string | { content: string; buttons: unknown[] };
+
 /**
- * Answers IWINV's template list API from `templates` (code -> content) and
- * accepts every send.
+ * Answers IWINV's template list API from `templates` (code -> content, or
+ * content with buttons) and accepts every send.
  */
-function createIwinvFetch(templates: Record<string, string>) {
+function createIwinvFetch(templates: Record<string, TemplateFixture>) {
   const calls: RecordedCall[] = [];
   const fetch: ProviderFetch = async (input, init) => {
     const url = String(input);
@@ -24,22 +26,26 @@ function createIwinvFetch(templates: Record<string, string>) {
 
     if (url.endsWith("/api/template/")) {
       const code = String(body.templateCode ?? "");
-      const content = templates[code];
+      const fixture = templates[code];
+      const template =
+        typeof fixture === "string"
+          ? { content: fixture, buttons: [] }
+          : fixture;
       return Response.json({
         code: 200,
         message: "ok",
-        totalCount: content === undefined ? 0 : 1,
+        totalCount: template === undefined ? 0 : 1,
         list:
-          content === undefined
+          template === undefined
             ? []
             : [
                 {
                   templateCode: code,
                   templateName: "template",
-                  templateContent: content,
+                  templateContent: template.content,
                   status: "Y",
                   createDate: "2026-01-01 00:00:00",
-                  buttons: [],
+                  buttons: template.buttons,
                 },
               ],
       });
@@ -89,7 +95,7 @@ describe("IWINV AlimTalk template variables", () => {
     expect(templateParamOf(iwinv.sends()[0])).toEqual(["Jane", "1234"]);
   });
 
-  test("repeats a value for every occurrence of its placeholder", async () => {
+  test("sends one value per placeholder name, in order of first appearance", async () => {
     const iwinv = createIwinvFetch({
       TPL_1: "#{name}님 안녕하세요. #{name}님의 코드는 #{code}입니다.",
     });
@@ -100,8 +106,39 @@ describe("IWINV AlimTalk template variables", () => {
       { fetch: iwinv.fetch },
     );
 
+    // One value per variable, as IWINV's console asks for and as the
+    // previous key-order mapping sent; IWINV's spec does not say more.
     expect(result.isSuccess).toBe(true);
-    expect(templateParamOf(iwinv.sends()[0])).toEqual(["Jane", "Jane", "7"]);
+    expect(templateParamOf(iwinv.sends()[0])).toEqual(["Jane", "7"]);
+  });
+
+  test("fills placeholders in button links after the content's", async () => {
+    // The template from IWINV's AlimTalk API manual: #{idx} is used by both
+    // links of its web-link button.
+    const iwinv = createIwinvFetch({
+      TPL_1: {
+        content: "#{이름} 고객님 우리 회사와 거래하여주셔서 감사합니다.",
+        buttons: [
+          {
+            type: "WL",
+            name: "공지 보기",
+            linkMo:
+              "https://www.iwinv.kr/board/notice/read.html?branch=NEWS&idx=#{idx}",
+            linkPc:
+              "https://www.iwinv.kr/board/notice/read.html?branch=NEWS&idx=#{idx}",
+          },
+        ],
+      },
+    });
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({ variables: { idx: 42, 이름: "Jane" } }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isSuccess).toBe(true);
+    expect(templateParamOf(iwinv.sends()[0])).toEqual(["Jane", "42"]);
   });
 
   test("uses providerOptions.templateContent instead of looking the template up", async () => {
@@ -166,6 +203,23 @@ describe("IWINV AlimTalk template variables", () => {
 
     const result = await provider.send(
       alimtalk({ variables: { code: "1234" } }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(result.error.message).toContain("name");
+    }
+    expect(iwinv.sends()).toHaveLength(0);
+  });
+
+  test("treats a variable set to undefined as missing", async () => {
+    const iwinv = createIwinvFetch({ TPL_1: "#{name}: #{code}" });
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({ variables: { code: "1234", name: undefined } }),
       { fetch: iwinv.fetch },
     );
 
