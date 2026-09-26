@@ -346,7 +346,7 @@ describe("SolapiProvider (SendOptions-based)", () => {
     );
   });
 
-  test("maps ALIMTALK failover options and returns partial warning", async () => {
+  test("marks ALIMTALK failover for API-level fallback when SOLAPI has no sender to replace with", async () => {
     const { client, calls } = createStubClient();
     const provider = new SolapiProvider(
       {
@@ -381,8 +381,54 @@ describe("SolapiProvider (SendOptions-based)", () => {
       expect(result.value.warnings?.[0]?.code).toBe(
         "FAILOVER_PARTIAL_PROVIDER",
       );
+      expect(result.value.warnings?.[0]?.message).toContain("sender number");
     }
   });
+
+  test.each([
+    ["config.defaultFrom", { defaultFrom: "01000000000" }, {}],
+    ["options.from", {}, { from: "01000000000" }],
+  ])(
+    "does not mark ALIMTALK failover SOLAPI replaces itself (%s) for API-level fallback",
+    async (_label, config, input) => {
+      const { client, calls } = createStubClient();
+      const provider = new SolapiProvider(
+        {
+          apiKey: "key",
+          apiSecret: "secret",
+          baseUrl: "https://api.solapi.com",
+          kakaoPfId: "pf_default",
+          debug: false,
+          ...config,
+        } satisfies SolapiConfig,
+        client,
+      );
+
+      const result = await provider.send({
+        type: "ALIMTALK",
+        to: "01012345678",
+        templateId: "TPL_1",
+        variables: { code: 1234 },
+        ...input,
+        failover: {
+          enabled: true,
+          fallbackChannel: "lms",
+          fallbackContent: "fallback text",
+        },
+      });
+
+      // SOLAPI sends the fallback itself (disableSms: false with a sender
+      // number). A FAILOVER_* warning would also let DeliveryTrackingService
+      // resend it, so the customer would get two messages.
+      expect(result.isSuccess).toBe(true);
+      expect(calls.sendOne[0]?.message?.kakaoOptions?.disableSms).toBe(false);
+      expect(calls.sendOne[0]?.message?.from).toBe("01000000000");
+      expect(calls.sendOne[0]?.message?.text).toBe("fallback text");
+      if (result.isSuccess) {
+        expect(result.value.warnings).toBeUndefined();
+      }
+    },
+  );
 
   test("sends FRIENDTALK image as CTI and uploads KAKAO file with link", async () => {
     const { client, calls } = createStubClient();

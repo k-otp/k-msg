@@ -24,21 +24,34 @@ import type {
 } from "./solapi.internal.types";
 import type { SolapiConfig } from "./types/solapi";
 
+/**
+ * FAILOVER_* warnings make a send eligible for DeliveryTrackingService's
+ * API-level fallback. With a sender number SOLAPI replaces a failed AlimTalk
+ * with SMS/LMS itself (kakaoOptions.disableSms: false), so a warning there
+ * would get the customer a second message; only a send without one is marked.
+ */
 export function collectSolapiSendWarnings(
   options: SendOptions,
   providerId: string,
+  config: Pick<SolapiConfig, "defaultFrom">,
 ): SendResult["warnings"] {
   if (options.type !== "ALIMTALK") return undefined;
   if (options.failover?.enabled !== true) return undefined;
+
+  const hasSender =
+    (typeof options.from === "string" && options.from.length > 0) ||
+    (typeof config.defaultFrom === "string" && config.defaultFrom.length > 0);
+  if (hasSender) return undefined;
 
   return [
     {
       code: "FAILOVER_PARTIAL_PROVIDER",
       message:
-        "SOLAPI failover mapping is partial. API-level fallback may be attempted for non-Kakao-user failures.",
+        "SOLAPI replaces a failed AlimTalk with SMS/LMS only when it has a sender number (options.from or config.defaultFrom), and none was set. API-level fallback may be attempted for non-Kakao-user failures.",
       details: {
         providerId,
         mappedFields: ["kakao.disableSms", "text", "subject"],
+        missingFields: ["from"],
         unsupportedFields: ["fallbackChannel"],
       },
     },
@@ -623,7 +636,7 @@ export async function sendWithSolapi(params: {
 }): Promise<Result<SendResult, KMsgError>> {
   const { providerId, client, config, options, signal } = params;
 
-  const warnings = collectSolapiSendWarnings(options, providerId);
+  const warnings = collectSolapiSendWarnings(options, providerId, config);
   throwIfAborted(signal);
   const message = await raceProviderAbort(
     buildSolapiSendOneMessage({
