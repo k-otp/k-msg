@@ -127,7 +127,7 @@ function createMemoryHyperdriveJobSqlClient(): {
       return { rows: [], rowCount: 1 };
     }
 
-    if (/SELECT \* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
+    if (/SELECT .* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
       const row = rows.get(String(params[0]));
       return { rows: row ? [row] : [] };
     }
@@ -485,8 +485,8 @@ describe("Cloudflare SQL adapters", () => {
     const dueParams =
       postgres.queries.find(
         (query) =>
-          query.sql.includes("SELECT * FROM") &&
-          query.sql.includes("next_check_at"),
+          query.sql.startsWith("SELECT") &&
+          query.sql.includes('"next_check_at" <='),
       )?.params ?? [];
 
     expect(insertParams.some((value) => value instanceof Date)).toBe(true);
@@ -728,7 +728,7 @@ describe("Cloudflare SQL adapters", () => {
     });
     expect(await d1Queue.getJob("job-1")).toBeUndefined();
     expect(d1Statements).toEqual([
-      expect.stringMatching(/^SELECT \* FROM "custom_jobs"/),
+      expect.stringMatching(/^SELECT .* FROM "custom_jobs"/s),
     ]);
 
     const drizzleStatements: unknown[] = [];
@@ -853,6 +853,71 @@ describe("Cloudflare SQL adapters", () => {
     await expect(queue.init()).rejects.toThrow("failed to create table");
     const size = await queue.size();
     expect(size).toBe(0);
+  });
+
+  test("HyperdriveDeliveryTrackingStore reads JSON columns a driver already decoded", async () => {
+    const now = Date.now();
+    for (const dialect of ["postgres", "mysql"] as const) {
+      // node-postgres and mysql2 return JSON columns as objects.
+      const client = stubSqlClient(dialect, async (sql) => {
+        if (!sql.startsWith("SELECT")) return { rows: [] };
+        return {
+          rows: [
+            {
+              message_id: "m1",
+              provider_id: "mock",
+              provider_message_id: "p1",
+              type: "SMS",
+              to: "01012345678",
+              status: "FAILED",
+              requested_at: now,
+              status_updated_at: now,
+              attempt_count: 1,
+              next_check_at: now,
+              last_error: { code: "E1", message: "first" },
+              metadata: { tenant: "t1" },
+            },
+          ],
+        };
+      });
+
+      const record = await new HyperdriveDeliveryTrackingStore(client).get(
+        "m1",
+      );
+
+      expect(record?.lastError).toEqual({ code: "E1", message: "first" });
+      expect(record?.metadata).toEqual({ tenant: "t1" });
+    }
+  });
+
+  test("HyperdriveJobQueue reads job data a driver already decoded", async () => {
+    const client = stubSqlClient("postgres", async (sql) => {
+      if (!sql.startsWith("SELECT")) return { rows: [] };
+      return {
+        rows: [
+          {
+            id: "job_1",
+            type: "send",
+            data: { to: "01012345678" },
+            status: "pending",
+            priority: 0,
+            attempts: 0,
+            max_attempts: 3,
+            delay: 0,
+            created_at: 1,
+            process_at: 1,
+            metadata: { tenant: "t1" },
+          },
+        ],
+      };
+    });
+
+    const job = await new HyperdriveJobQueue<{ to: string }>(client).getJob(
+      "job_1",
+    );
+
+    expect(job?.data).toEqual({ to: "01012345678" });
+    expect(job?.metadata).toEqual({ tenant: "t1" });
   });
 });
 
