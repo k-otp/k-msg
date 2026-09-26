@@ -58,11 +58,18 @@ condition, even though package manifests use `"type": "module"`.
 
 ### Bun build baseline
 
-Bun `1.3.10` through `1.3.14` emit invalid ESM for several barrel re-export
-entrypoints in this workspace. The generated files export identifiers whose
-definitions were removed, so source tests and TypeScript checks pass while
-Node rejects the published artifact. Bun `1.3.9` is the newest verified-good
-builder and remains pinned in package manifests and workflows.
+Bun `1.3.10` through `1.4.0` emit broken bundles for entrypoints that only
+re-export (`export { x } from "./x"`) in packages that declare
+`"sideEffects": false`. Bun's barrel import optimization treats such an
+entrypoint as a barrel, skips the re-exported modules, and still emits the
+export clause ([oven-sh/bun#40578](https://github.com/oven-sh/bun/issues/40578)).
+Source tests and TypeScript checks still pass. The ESM output exports
+undeclared identifiers, which `node --check` rejects; the CommonJS output is
+broken the same way but only throws a `ReferenceError` at runtime, which this
+gate does not detect. No `--minify*` or `--splitting` flag avoids it. Bun
+`1.4.1` fixed it ([oven-sh/bun#40580](https://github.com/oven-sh/bun/pull/40580)),
+and Bun `1.4.2` is the verified builder pinned in package manifests and
+workflows.
 
 Do not advance the Bun baseline until the candidate version passes all of:
 
