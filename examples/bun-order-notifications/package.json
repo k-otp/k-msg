@@ -10,7 +10,6 @@
   "dependencies": {
     "@k-msg/messaging": "latest",
     "@k-msg/provider": "latest",
-    "@k-msg/template": "latest",
     "hono": "^4.12.29",
     "k-msg": "latest",
     "solapi": "^6.0.1"

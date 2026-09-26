@@ -29,9 +29,11 @@ export async function createRuntime(config: Config): Promise<Runtime> {
 
   const tracking = new DeliveryTrackingService({
     providers: [provider],
-    // The tables come from migrations/. The store still runs CREATE TABLE IF
-    // NOT EXISTS on first use, which does nothing once they are applied.
-    store: createD1DeliveryTrackingStore(config.db),
+    // The tables come from migrations/, so the store skips its own CREATE
+    // TABLE and CREATE INDEX statements, four queries on every request.
+    store: createD1DeliveryTrackingStore(config.db, {
+      initializeSchema: false,
+    }),
     onStatusChange: ({ record, previousStatus }) =>
       sendStatusWebhook(webhooks, record, previousStatus),
     onStatusChangeError: (error, { record }) => {

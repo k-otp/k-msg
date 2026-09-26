@@ -322,12 +322,10 @@ keeps every attempt, and the Worker logs `webhook delivery failed`.
 | `0002_webhooks.sql` | `kmsg_webhook_endpoints`, `kmsg_webhook_deliveries` | `buildWebhookSchemaSql()` from `@k-msg/webhook/adapters/cloudflare` |
 | `0003_sample_receiver.sql` | `sample_receiver_events` | This example's receiver, not k-msg |
 
-The migrations are the source of truth. The webhook persistence is created
-with `initializeSchema: false`. The tracking store has no such option: the
-first query of each request runs its `CREATE TABLE IF NOT EXISTS` and
-`CREATE INDEX IF NOT EXISTS` statements, which do nothing once the migration
-is applied but cannot change an existing table. When you upgrade k-msg, print
-the schema again and add a migration for any difference:
+The migrations are the source of truth: the tracking store and the webhook
+persistence are both created with `initializeSchema: false`, so requests run
+no DDL, and the tables must exist before the first deploy. When you upgrade
+k-msg, print the schema again and add a migration for any difference:
 
 ```bash
 bun -e 'import { buildDeliveryTrackingSchemaSql } from "@k-msg/messaging/adapters/cloudflare"; import { buildWebhookSchemaSql } from "@k-msg/webhook/adapters/cloudflare"; console.log(buildDeliveryTrackingSchemaSql({ dialect: "sqlite" })); console.log(buildWebhookSchemaSql().map((s) => `${s};`).join("\n\n"));'

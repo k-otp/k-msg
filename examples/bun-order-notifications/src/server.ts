@@ -26,7 +26,7 @@ mkdirSync(dirname(config.trackingDbPath), { recursive: true });
 const tracking = new DeliveryTrackingService({
   providers: providers.all,
   store: new SqliteDeliveryTrackingStore({ dbPath: config.trackingDbPath }),
-  // IWINV sends the LMS fallback itself. Providers that only partly can flag
+  // IWINV sends the fallback itself. Providers that only partly can flag
   // the send with a warning; if polling then finds the AlimTalk failed because
   // the customer does not use KakaoTalk (k-msg recognizes SOLAPI's codes),
   // tracking sends the fallback once through kmsg, which routes it to the SMS

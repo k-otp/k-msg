@@ -3,8 +3,8 @@
 An internal service that tells customers their order has shipped. Your order
 system calls `POST /orders/:orderId/shipped`, or the batch endpoint for up to
 100 orders, and the service sends a KakaoTalk AlimTalk from an approved
-template, carrying the same text as an LMS fallback for customers who do not
-use KakaoTalk. Every send is tracked in SQLite, so
+template, carrying the same text as an SMS or LMS fallback for customers who
+do not use KakaoTalk. Every send is tracked in SQLite, so
 `GET /notifications/:messageId` can tell whether it arrived when the provider
 reports delivery status. It shows k-msg's
 `routing.byType` (AlimTalk and SMS can go through different providers), KMsg
@@ -73,7 +73,7 @@ Set these in `.env`:
 - `KMSG_SMS_PROVIDER`: the provider for SMS and LMS. Leave it empty to use
   `KMSG_PROVIDER` for both.
 - `KMSG_SENDER_NUMBER`: a sender number registered with your providers, digits
-  only. The LMS fallback comes from it.
+  only. The SMS or LMS fallback comes from it.
 - `ALIMTALK_TEMPLATE_ID`: the code of your approved AlimTalk template. Its text
   must match `SHIPPED_TEMPLATE` in `src/notifier.ts` exactly, so change both
   together:
