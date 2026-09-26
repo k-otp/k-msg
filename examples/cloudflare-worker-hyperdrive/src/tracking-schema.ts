@@ -12,13 +12,6 @@ export const TRACKING_SCHEMA = {
   typeStrategy: {
     // TIMESTAMPTZ instead of epoch-millisecond BIGINT, readable in psql.
     timestamp: "date",
-    // TEXT instead of VARCHAR(64): a longer provider status message would
-    // make the status update, and with it the cron run, fail.
-    shortText: "text",
-    // TEXT instead of JSONB: the store passes JSON it already serialized and
-    // postgres.js would encode it again, storing JSON strings that SQL JSON
-    // operators cannot read.
-    json: "text",
   },
 } as const satisfies DeliveryTrackingSchemaOptions;
 
