@@ -812,6 +812,134 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
   });
 });
 
+// Runs in a separate Bun process with process.getBuiltinModule removed
+// before the service loads, as in Workers without nodejs_compat.
+const WITHOUT_ASYNC_CONTEXT = `
+delete process.getBuiltinModule;
+const { DeliveryTrackingService } = await import(process.env.SERVICE_URL);
+const { InMemoryDeliveryTrackingStore } = await import(process.env.STORE_URL);
+const { ok } = await import("@k-msg/core");
+
+const provider = (statusFor) => ({
+  id: "mock",
+  name: "mock",
+  supportedTypes: ["SMS"],
+  healthCheck: async () => ({ healthy: true, issues: [] }),
+  send: async () => ok({ messageId: "msg", providerId: "mock", status: "SENT", type: "SMS", to: "01012345678" }),
+  getDeliveryStatus: async (query) =>
+    ok({ providerId: "mock", providerMessageId: query.providerMessageId, status: statusFor(query.providerMessageId), statusCode: "OK" }),
+});
+const recordSent = (service, messageId) =>
+  service.recordSend(
+    { messageId, options: { type: "SMS", to: "01012345678", text: "hi" }, timestamp: Date.now() },
+    { messageId, providerId: "mock", providerMessageId: "p-" + messageId, status: "SENT", type: "SMS", to: "01012345678" },
+  );
+const polling = { initialDelayMs: 0, intervalMs: 10, batchSize: 10, concurrency: 2, backoffMs: [0] };
+const within = (promise, ms) =>
+  Promise.race([promise.then(() => true), new Promise((resolve) => setTimeout(() => resolve(false), ms))]);
+const results = {};
+
+{
+  let service;
+  service = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      await service.runOnce();
+    },
+  });
+  await recordSent(service, "m1");
+  results.callbackPollsAgain = await within(service.runOnce(), 1000);
+}
+
+{
+  const statuses = { "p-m1": "DELIVERED", "p-m2": "SENT" };
+  let release = () => {};
+  const gate = new Promise((resolve) => { release = resolve; });
+  let slowStarted = () => {};
+  const started = new Promise((resolve) => { slowStarted = resolve; });
+  const delivered = [];
+  const service = new DeliveryTrackingService({
+    providers: [provider((id) => statuses[id])],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async ({ record }) => {
+      if (record.messageId === "m1") {
+        slowStarted();
+        await gate;
+      }
+      delivered.push(record.messageId);
+    },
+  });
+  await recordSent(service, "m1");
+  await recordSent(service, "m2");
+  const first = service.runOnce();
+  await started;
+  statuses["p-m2"] = "DELIVERED";
+  const finished = await within(service.runOnce(), 1000);
+  results.otherCallerGetsItsChange = finished && delivered.includes("m2");
+  release();
+  await first;
+}
+
+{
+  let first;
+  let second;
+  let arrived = 0;
+  let bothArrived = () => {};
+  const together = new Promise((resolve) => { bothArrived = resolve; });
+  const arrive = async () => {
+    arrived += 1;
+    if (arrived === 2) bothArrived();
+    await together;
+  };
+  first = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => { await arrive(); await second.runOnce(); },
+  });
+  second = new DeliveryTrackingService({
+    providers: [provider(() => "DELIVERED")],
+    store: new InMemoryDeliveryTrackingStore(),
+    polling,
+    onStatusChange: async () => { await arrive(); await first.runOnce(); },
+  });
+  await recordSent(first, "a1");
+  await recordSent(second, "b1");
+  results.servicesPollEachOther = await within(Promise.all([first.runOnce(), second.runOnce()]), 1000);
+}
+
+console.log(JSON.stringify(results));
+`;
+
+test("without AsyncLocalStorage, every caller waits for its changes and none deadlocks", async () => {
+  const child = Bun.spawn([process.execPath, "-e", WITHOUT_ASYNC_CONTEXT], {
+    cwd: new URL("../..", import.meta.url).pathname,
+    env: {
+      ...process.env,
+      SERVICE_URL: new URL("./service.ts", import.meta.url).href,
+      STORE_URL: new URL("./stores/memory.store.ts", import.meta.url).href,
+    },
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [output, errors, exitCode] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+
+  expect({ exitCode, errors }).toEqual({ exitCode: 0, errors: "" });
+  expect(JSON.parse(output.trim().split("\n").at(-1) ?? "{}")).toEqual({
+    callbackPollsAgain: true,
+    otherCallerGetsItsChange: true,
+    servicesPollEachOther: true,
+  });
+}, 15_000);
+
 describe("DeliveryTrackingService onStatusChange", () => {
   async function recordSent(
     service: DeliveryTrackingService,

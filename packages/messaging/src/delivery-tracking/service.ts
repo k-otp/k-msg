@@ -156,8 +156,9 @@ export interface DeliveryTrackingServiceConfig {
    * Called for each record a poll stored with a different status, with the
    * record as stored, after the poll finishes: for example, to notify a
    * webhook when a message is delivered or fails. Calls run one at a time,
-   * in the order changes were stored, each with its own copy of the record.
-   * It does not stop polling if it throws. Delivery is at least once:
+   * in the order changes were stored, each with its own copy of the record;
+   * see `runOnce()` for the one exception, in runtimes without
+   * AsyncLocalStorage. It does not stop polling if it throws. Delivery is at least once:
    * services polling the same store can each report the same change, so
    * make it idempotent, for example by message id and status.
    */
@@ -186,7 +187,9 @@ export class DeliveryTrackingService {
   // Status changes are delivered one at a time, in the order polls stored
   // them, so a slow callback cannot be overtaken by a later change.
   private notificationTail: Promise<void> = Promise.resolve();
-  private deliveringNotifications = false;
+  // Batches of changes being delivered: queued ones, and in a runtime
+  // without AsyncLocalStorage, ones delivered at once.
+  private activeDeliveries = 0;
 
   constructor(config: DeliveryTrackingServiceConfig) {
     if (!config || typeof config !== "object") {
@@ -354,8 +357,13 @@ export class DeliveryTrackingService {
    * another service: while this service is delivering, such a call resolves
    * once the poll's changes are queued, since they may be delivered after
    * the callback. Work a callback starts without awaiting it counts as the
-   * callback's, and in a runtime without AsyncLocalStorage, so does every
-   * call made while this service delivers.
+   * callback's.
+   *
+   * A runtime without AsyncLocalStorage, such as Workers without
+   * nodejs_compat on older compatibility dates, cannot tell those calls
+   * from others. There, a poll that ends while callbacks run delivers its
+   * changes at once, beside them rather than after them, and every call
+   * waits until its changes are delivered.
    */
   async runOnce(): Promise<void> {
     // Checked before any await, while the caller's context is current.
@@ -369,9 +377,10 @@ export class DeliveryTrackingService {
   // never finish. So would callbacks of two services that each wait for
   // the other's, nested or running side by side, so a call from any
   // service's callback does not wait while this service is delivering.
+  // Without AsyncLocalStorage every caller waits: see startRun().
   private calledFromCallback(): boolean {
-    if (!this.deliveringNotifications) return false;
-    return callbackContext ? callbackContext.getStore() === true : true;
+    if (!callbackContext || this.activeDeliveries === 0) return false;
+    return callbackContext.getStore() === true;
   }
 
   private startRun(): PollRun {
@@ -399,7 +408,13 @@ export class DeliveryTrackingService {
           // not stuck behind this one.
           this.runOnceInFlight = undefined;
         }
-        delivery = this.queueNotifications(snapshots);
+        // Without AsyncLocalStorage the caller may be a running callback,
+        // which would wait forever for changes queued behind it, so they
+        // are delivered at once instead.
+        delivery =
+          !callbackContext && this.activeDeliveries > 0
+            ? this.deliverNow(snapshots)
+            : this.queueNotifications(snapshots);
       }
     })();
     const delivered = polled.then(
@@ -468,19 +483,28 @@ export class DeliveryTrackingService {
 
   private queueNotifications(changes: DeliveryStatusChange[]): Promise<void> {
     if (changes.length === 0) return this.notificationTail;
-    // notifyStatusChange never rejects, so neither does this.
-    const delivered = this.notificationTail.then(async () => {
-      this.deliveringNotifications = true;
-      try {
-        for (const change of changes) {
-          await this.notifyStatusChange(change);
-        }
-      } finally {
-        this.deliveringNotifications = false;
-      }
-    });
+    const delivered = this.notificationTail.then(() =>
+      this.deliverAll(changes),
+    );
     this.notificationTail = delivered;
     return delivered;
+  }
+
+  // Beside the batches being delivered, outside the queue.
+  private deliverNow(changes: DeliveryStatusChange[]): Promise<void> {
+    return changes.length === 0 ? Promise.resolve() : this.deliverAll(changes);
+  }
+
+  // notifyStatusChange never rejects, so neither does this.
+  private async deliverAll(changes: DeliveryStatusChange[]): Promise<void> {
+    this.activeDeliveries += 1;
+    try {
+      for (const change of changes) {
+        await this.notifyStatusChange(change);
+      }
+    } finally {
+      this.activeDeliveries -= 1;
+    }
   }
 
   // The record as stored now, after failover has written its own metadata;
