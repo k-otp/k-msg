@@ -226,6 +226,40 @@ describe("WebhookRuntimeService", () => {
   });
 });
 
+describe("WebhookRuntimeService message status events", () => {
+  test.each([
+    [WebhookEventType.MESSAGE_CANCELLED, "message.cancelled"],
+    [WebhookEventType.MESSAGE_UNKNOWN, "message.unknown"],
+  ])("delivers %s events", async (type, wireName) => {
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), enabledEvents: [type] },
+      httpClient: client,
+      autoStart: false,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/statuses",
+        active: true,
+        events: [type],
+      });
+
+      const deliveries = await runtime.emitSync(createEvent(type));
+
+      expect<string>(type).toBe(wireName);
+      expect(deliveries.map((delivery) => delivery.status)).toEqual([
+        "success",
+      ]);
+      expect(
+        new Headers(client.calls[0]?.options.headers).get("X-Webhook-Event"),
+      ).toBe(wireName);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+});
+
 class SlowHttpClient implements HttpClient {
   readonly calls: string[] = [];
 

@@ -33,6 +33,13 @@ export enum WebhookEventType {
   MESSAGE_FAILED = "message.failed",
   MESSAGE_CLICKED = "message.clicked",
   MESSAGE_READ = "message.read",
+  /** The message was cancelled (delivery status `CANCELLED`). */
+  MESSAGE_CANCELLED = "message.cancelled",
+  /**
+   * Tracking ended without a final result (delivery status `UNKNOWN`), for
+   * example when the provider has no status lookup.
+   */
+  MESSAGE_UNKNOWN = "message.unknown",
 
   // 템플릿 이벤트
   TEMPLATE_CREATED = "template.created",
