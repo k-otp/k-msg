@@ -214,13 +214,6 @@ export async function sendAlimTalk(params: {
     );
   }
 
-  const resendTypeFromFailover =
-    failover?.fallbackChannel === "lms"
-      ? "Y"
-      : failover?.fallbackChannel === "sms"
-        ? "N"
-        : undefined;
-
   const resendTitle =
     typeof options.providerOptions?.resendTitle === "string" &&
     options.providerOptions.resendTitle.trim().length > 0
@@ -238,6 +231,20 @@ export async function sendAlimTalk(params: {
           failover.fallbackContent.trim().length > 0
         ? failover.fallbackContent.trim()
         : undefined;
+
+  // resendType picks the fallback text, not the channel: "Y" (IWINV's default)
+  // resends the AlimTalk text and "N" sends resendContent. IWINV sends SMS or
+  // LMS by the text's length, so failover.fallbackChannel has no IWINV field.
+  const effectiveResendType = resendType ?? (resendContent ? "N" : undefined);
+  if (reSend === "Y" && effectiveResendType === "N" && !resendContent) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "resendContent is required when resendType is 'N' (failover.fallbackContent or providerOptions.resendContent)",
+        { providerId },
+      ),
+    );
+  }
 
   const templateParam = await resolveTemplateParam({
     providerId,
@@ -260,9 +267,7 @@ export async function sendAlimTalk(params: {
     ],
     reSend,
     ...(resendCallback ? { resendCallback } : {}),
-    ...((resendType ?? resendTypeFromFailover)
-      ? { resendType: resendType ?? resendTypeFromFailover }
-      : {}),
+    ...(effectiveResendType ? { resendType: effectiveResendType } : {}),
     ...(resendTitle ? { resendTitle } : {}),
     ...(resendContent ? { resendContent } : {}),
   };

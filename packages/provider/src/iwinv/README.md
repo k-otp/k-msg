@@ -57,6 +57,15 @@ Template variables:
 - A placeholder with no matching key in `variables` fails the send with `INVALID_REQUEST`
   before anything is sent. `providerOptions.templateParam` (an array) is still sent as-is.
 
+Fallback SMS/LMS (`reSend`):
+- `failover.fallbackContent` (or `providerOptions.resendContent`) is sent as `resendContent`
+  with `resendType: "N"`, IWINV's direct-input type. `failover.fallbackTitle` becomes
+  `resendTitle`, the LMS title.
+- Without fallback content, `resendType` is left to IWINV's default `"Y"`, which resends
+  the AlimTalk text.
+- IWINV sends the fallback as SMS (up to 90 bytes) or LMS by its length, so
+  `failover.fallbackChannel` has no IWINV field.
+
 AlimTalk `code` quick reference:
 - `200`: sent
 - `501`: invalid `templateCode`

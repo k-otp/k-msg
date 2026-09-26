@@ -204,3 +204,78 @@ describe("IWINV AlimTalk template variables", () => {
     expect(templateParamOf(iwinv.sends()[0])).toBeUndefined();
   });
 });
+
+describe("IWINV AlimTalk resend (fallback) fields", () => {
+  const withTemplate = { providerOptions: { templateContent: "#{code}" } };
+
+  test("sends failover.fallbackContent as direct-input resend content", async () => {
+    const iwinv = createIwinvFetch({});
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({
+        ...withTemplate,
+        from: "01000000000",
+        variables: { code: "1234" },
+        failover: {
+          enabled: true,
+          fallbackChannel: "lms",
+          fallbackTitle: "fallback title",
+          fallbackContent: "fallback body",
+        },
+      }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isSuccess).toBe(true);
+    const body = iwinv.sends()[0]?.body;
+    expect(body?.reSend).toBe("Y");
+    // "N" is IWINV's direct-input type; "Y" would resend the AlimTalk text.
+    expect(body?.resendType).toBe("N");
+    expect(body?.resendTitle).toBe("fallback title");
+    expect(body?.resendContent).toBe("fallback body");
+  });
+
+  test("resends the AlimTalk text when no fallback content is given", async () => {
+    const iwinv = createIwinvFetch({});
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({
+        ...withTemplate,
+        from: "01000000000",
+        variables: { code: "1234" },
+        failover: { enabled: true, fallbackChannel: "sms" },
+      }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isSuccess).toBe(true);
+    const body = iwinv.sends()[0]?.body;
+    expect(body?.reSend).toBe("Y");
+    // IWINV's default resendType ("Y") resends the AlimTalk text.
+    expect(body?.resendType).toBeUndefined();
+    expect(body?.resendContent).toBeUndefined();
+  });
+
+  test("rejects a direct-input resendType without resend content", async () => {
+    const iwinv = createIwinvFetch({});
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({
+        from: "01000000000",
+        variables: { code: "1234" },
+        providerOptions: { templateContent: "#{code}", resendType: "N" },
+      }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(result.error.message).toContain("resendContent");
+    }
+    expect(iwinv.sends()).toHaveLength(0);
+  });
+});
