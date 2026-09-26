@@ -191,8 +191,11 @@ async function backfillChunkByMessageIds(
   const idPlaceholders = placeholders(client.dialect, messageIds.length).join(
     ", ",
   );
+  // The read and the guarded write must agree on which rows still need
+  // encryption, or rows read here could be skipped by the write below.
+  const stillMigratable = `(${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`;
   const { rows } = await client.query<Record<string, unknown>>(
-    `SELECT ${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND (${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`,
+    `SELECT ${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND ${stillMigratable}`,
     messageIds,
   );
 
@@ -248,7 +251,7 @@ async function backfillChunkByMessageIds(
     // A live writer may have encrypted the row since it was read; its secure
     // columns are newer than this snapshot, so leave that row alone.
     await client.query(
-      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)} AND (${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`,
+      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)} AND ${stillMigratable}`,
       [...values.map(([, value]) => value), messageId],
     );
   }
