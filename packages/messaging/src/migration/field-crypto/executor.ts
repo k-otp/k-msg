@@ -65,13 +65,27 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-// Returns the stored string unchanged when it has content: the backfill must
-// encrypt exactly what the plain column holds.
-function nonBlankString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0
-    ? value
-    : undefined;
+// Returns the stored string unchanged when it is non-empty: the backfill must
+// encrypt exactly what the plain column holds, as the store's write path does.
+function nonEmptyString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
+
+// `?` placeholders need the dialect's null-safe equality to compare a column
+// with a value that may be NULL.
+function nullSafeEquals(
+  dialect: SqlDialect,
+  column: string,
+  valuePlaceholder: string,
+): string {
+  if (dialect === "postgres") {
+    return `${column} IS NOT DISTINCT FROM ${valuePlaceholder}`;
+  }
+  if (dialect === "mysql") return `${column} <=> ${valuePlaceholder}`;
+  return `${column} IS ${valuePlaceholder}`;
+}
+
+const MAX_BACKFILL_ATTEMPTS = 3;
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
@@ -194,14 +208,36 @@ async function backfillChunkByMessageIds(
   // The read and the guarded write must agree on which rows still need
   // encryption, or rows read here could be skipped by the write below.
   const stillMigratable = `(${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`;
+  const selectColumns = `${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain, ${q(columns.cryptoState)} AS crypto_state`;
   const { rows } = await client.query<Record<string, unknown>>(
-    `SELECT ${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND ${stillMigratable}`,
+    `SELECT ${selectColumns} FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND ${stillMigratable}`,
     messageIds,
   );
 
-  for (const row of rows) {
+  for (const first of rows) {
+    let row: Record<string, unknown> | undefined = first;
+    for (let attempt = 1; row; attempt += 1) {
+      if (await encryptRow(row)) break;
+      if (attempt >= MAX_BACKFILL_ATTEMPTS) {
+        throw new Error(
+          `Message ${String(row.message_id)} kept changing during the backfill; retry the chunk`,
+        );
+      }
+      // Another writer changed the row after it was read; encrypt its
+      // current values, or leave it if it is no longer plain or degraded.
+      const messageId: unknown = row.message_id;
+      const { rows: current } = await client.query<Record<string, unknown>>(
+        `SELECT ${selectColumns} FROM ${tableRef} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, 1)} AND ${stillMigratable}`,
+        [messageId],
+      );
+      row = current[0];
+    }
+  }
+
+  // Returns false when the row no longer matches what was read.
+  async function encryptRow(row: Record<string, unknown>): Promise<boolean> {
     const messageId = String(row.message_id ?? "");
-    const to = nonBlankString(row.to_plain);
+    const to = nonEmptyString(row.to_plain);
     if (!to) {
       // Skipping would mark the chunk completed and leave the row unprotected.
       throw new Error(
@@ -213,7 +249,7 @@ async function backfillChunkByMessageIds(
       messageId,
       providerId: String(row.provider_id ?? ""),
       to,
-      from: nonBlankString(row.from_plain),
+      from: nonEmptyString(row.from_plain),
       metadata: parseMetadata(row.metadata_plain),
     };
     const secured = await applyTrackingCryptoOnWrite(
@@ -244,16 +280,26 @@ async function backfillChunkByMessageIds(
       [columns.cryptoVersion, secured.cryptoVersion ?? 1],
       [columns.cryptoState, secured.cryptoState],
     ];
+    const at = (offset: number) =>
+      placeholder(client.dialect, values.length + offset);
     const assignments = values.map(
       ([column], index) =>
         `${q(column)} = ${placeholder(client.dialect, index + 1)}`,
     );
-    // A live writer may have encrypted the row since it was read; its secure
-    // columns are newer than this snapshot, so leave that row alone.
-    await client.query(
-      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)} AND ${stillMigratable}`,
-      [...values.map(([, value]) => value), messageId],
+    // Write only if the row still holds the state, recipient, and sender this
+    // ciphertext was derived from; a live writer may have changed it since.
+    // Metadata is not compared: its column type differs by dialect and schema.
+    const result = await client.query(
+      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${at(1)} AND ${nullSafeEquals(client.dialect, q(columns.cryptoState), at(2))} AND ${nullSafeEquals(client.dialect, q(columns.to), at(3))} AND ${nullSafeEquals(client.dialect, q(columns.from), at(4))}`,
+      [
+        ...values.map(([, value]) => value),
+        messageId,
+        row.crypto_state ?? null,
+        row.to_plain ?? null,
+        row.from_plain ?? null,
+      ],
     );
+    return result.rowCount !== 0;
   }
 }
 
@@ -481,7 +527,7 @@ export async function retryFieldCryptoMigration(
   if (failedChunks.length === 0) {
     // Only failed chunks are retried. A run that stopped on a read error has
     // none and resumes from its cursor with `apply`, so leave it as it is.
-    return {
+    const unchanged: FieldCryptoMigrationApplyResult = {
       planId: run.planId,
       processedChunks: 0,
       processedRows: 0,
@@ -490,6 +536,26 @@ export async function retryFieldCryptoMigration(
       cursorRequestedAt: run.cursorRequestedAt,
       cursorMessageId: run.cursorMessageId,
     };
+    if (run.failedChunks === 0) return unchanged;
+
+    // The run still counts failed chunks that an earlier retry completed but
+    // could not record; reconcile it so `apply` can continue.
+    const status = run.status === "failed" ? "running" : run.status;
+    const recorded = await upsertFieldCryptoMigrationRun(
+      client,
+      {
+        ...run,
+        status,
+        failedChunks: 0,
+        updatedAt: Date.now(),
+        lastError: undefined,
+      },
+      options,
+    ).then(
+      () => true,
+      () => false,
+    );
+    return recorded ? { ...unchanged, failedChunks: 0, status } : unchanged;
   }
   const maxChunks = normalizeMaxChunks(options.maxChunks);
 
