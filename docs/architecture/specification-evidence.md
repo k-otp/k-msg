@@ -6,10 +6,11 @@
 
 | Document | Units | Claim hosts | Why it is governed |
 | --- | --- | --- | --- |
-| [`docs/security/field-crypto-v1.md`](../security/field-crypto-v1.md) | every H2 | `packages/core/src/crypto/**`, `packages/core/src/logger.ts` | It is the security policy contract; a changed policy must be re-verified against the implementation. |
 | [`docs/compliance/kr-b2b-retention.md`](../compliance/kr-b2b-retention.md) | every H2 | `packages/messaging/src/delivery-tracking/retention.ts` | Compliance baseline numbers must match the shipped preset. |
 
-Both references set `requireReview`, so each acknowledgement carries a fingerprint of the section it cites. The generated [citation map](./typescript-graph.md#specification-evidence) shows which declaration answers each section.
+The reference sets `requireReview`, so each acknowledgement carries a fingerprint of the section it cites.
+
+Only a document the code fully implements should be governed: an acknowledgement certifies the whole section. The field crypto v1 policy joins once its implementation gaps are closed. The generated [citation map](./typescript-graph.md#specification-evidence) shows which declaration answers each section.
 
 ## Wiring
 
@@ -23,9 +24,9 @@ Tags are read only from JSDoc on exported declarations inside a claim's files.
 
 ```ts
 /**
- * @evidence docs/security/field-crypto-v1.md#fail-policy
+ * @evidence docs/compliance/kr-b2b-retention.md#contract-precedence
  *   Why this declaration answers for the section.
- * @evidenceReview docs/security/field-crypto-v1.md#fail-policy #537f002
+ * @evidenceReview docs/compliance/kr-b2b-retention.md#contract-precedence #f0e1afd
  *   What you read or ran to verify it.
  */
 ```
@@ -49,7 +50,7 @@ The build reports `Missing acknowledgement` for the new anchor and a dangling ta
 
 ### Governing another document
 
-1. Add a claim to `lint.evidence.config.ts`. Keep `requireReview` for policy or compliance text.
+1. Close any gap between the document and the code first, then add a claim to `lint.evidence.config.ts`. Keep `requireReview` for policy or compliance text.
 2. Keep the claim hosts inside `tsconfig.evidence.json`; `packages/*/src` already covers the runtime packages.
 3. Run `bun run typecheck` and treat the missing acknowledgements as the task list.
 4. Run `bun run graph:ttsc:snapshot` and review the citation map diff.

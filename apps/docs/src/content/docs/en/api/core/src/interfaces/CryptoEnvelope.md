@@ -5,9 +5,7 @@ prev: false
 title: "CryptoEnvelope"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L23)
-
-Persisted JSON form of one ciphertext.
+Defined in: [packages/core/src/crypto/types.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L6)
 
 ## Properties
 
@@ -15,7 +13,7 @@ Persisted JSON form of one ciphertext.
 
 > **alg**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L25)
+Defined in: [packages/core/src/crypto/types.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L8)
 
 ***
 
@@ -23,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:25](https://github.com/k-otp/k-ms
 
 > **ct**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L29)
+Defined in: [packages/core/src/crypto/types.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L12)
 
 ***
 
@@ -31,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:29](https://github.com/k-otp/k-ms
 
 > **iv**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L27)
+Defined in: [packages/core/src/crypto/types.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L10)
 
 ***
 
@@ -39,7 +37,7 @@ Defined in: [packages/core/src/crypto/types.ts:27](https://github.com/k-otp/k-ms
 
 > **kid**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L26)
+Defined in: [packages/core/src/crypto/types.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L9)
 
 ***
 
@@ -47,7 +45,7 @@ Defined in: [packages/core/src/crypto/types.ts:26](https://github.com/k-otp/k-ms
 
 > **tag**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L28)
+Defined in: [packages/core/src/crypto/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L11)
 
 ***
 
@@ -55,4 +53,4 @@ Defined in: [packages/core/src/crypto/types.ts:28](https://github.com/k-otp/k-ms
 
 > **v**: `number`
 
-Defined in: [packages/core/src/crypto/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L24)
+Defined in: [packages/core/src/crypto/types.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L7)

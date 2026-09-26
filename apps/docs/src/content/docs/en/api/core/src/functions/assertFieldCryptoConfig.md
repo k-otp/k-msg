@@ -7,7 +7,7 @@ title: "assertFieldCryptoConfig"
 
 > **assertFieldCryptoConfig**(`config`, `options?`): `void`
 
-Defined in: [packages/core/src/crypto/policy.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L218)
+Defined in: [packages/core/src/crypto/policy.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L208)
 
 ## Parameters
 

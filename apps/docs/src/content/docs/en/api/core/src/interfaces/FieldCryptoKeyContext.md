@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoKeyContext"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L36)
+Defined in: [packages/core/src/crypto/types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L19)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:36](https://github.com/k-otp/k-ms
 
 > `optional` **fieldPath?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L41)
+Defined in: [packages/core/src/crypto/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L24)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:41](https://github.com/k-otp/k-ms
 
 > `optional` **messageId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L39)
+Defined in: [packages/core/src/crypto/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L22)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:39](https://github.com/k-otp/k-ms
 
 > `optional` **providerId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L38)
+Defined in: [packages/core/src/crypto/types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L21)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/core/src/crypto/types.ts:38](https://github.com/k-otp/k-ms
 
 > `optional` **requestId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L42)
+Defined in: [packages/core/src/crypto/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L25)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/core/src/crypto/types.ts:42](https://github.com/k-otp/k-ms
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L40)
+Defined in: [packages/core/src/crypto/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L23)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/core/src/crypto/types.ts:40](https://github.com/k-otp/k-ms
 
 > `optional` **tenantId?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L37)
+Defined in: [packages/core/src/crypto/types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L20)
