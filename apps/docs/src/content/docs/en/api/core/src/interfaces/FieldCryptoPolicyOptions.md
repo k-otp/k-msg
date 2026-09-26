@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoPolicyOptions"
 ---
 
-Defined in: [packages/core/src/crypto/policy.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L11)
+Defined in: [packages/core/src/crypto/policy.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L16)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/policy.ts:11](https://github.com/k-otp/k-m
 
 > `optional` **compatPlainColumns?**: `boolean`
 
-Defined in: [packages/core/src/crypto/policy.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L13)
+Defined in: [packages/core/src/crypto/policy.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L18)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/core/src/crypto/policy.ts:13](https://github.com/k-otp/k-m
 
 > `optional` **secureMode?**: `boolean`
 
-Defined in: [packages/core/src/crypto/policy.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L12)
+Defined in: [packages/core/src/crypto/policy.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L17)

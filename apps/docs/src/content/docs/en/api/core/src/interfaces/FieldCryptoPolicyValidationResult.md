@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoPolicyValidationResult"
 ---
 
-Defined in: [packages/core/src/crypto/policy.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L16)
+Defined in: [packages/core/src/crypto/policy.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L21)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/policy.ts:16](https://github.com/k-otp/k-m
 
 > **issues**: [`FieldCryptoPolicyValidationIssue`](/en/api/core/src/interfaces/fieldcryptopolicyvalidationissue/)[]
 
-Defined in: [packages/core/src/crypto/policy.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L18)
+Defined in: [packages/core/src/crypto/policy.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L23)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/core/src/crypto/policy.ts:18](https://github.com/k-otp/k-m
 
 > **valid**: `boolean`
 
-Defined in: [packages/core/src/crypto/policy.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L17)
+Defined in: [packages/core/src/crypto/policy.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/policy.ts#L22)

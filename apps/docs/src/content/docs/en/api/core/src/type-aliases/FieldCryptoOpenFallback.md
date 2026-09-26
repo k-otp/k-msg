@@ -7,4 +7,4 @@ title: "FieldCryptoOpenFallback"
 
 > **FieldCryptoOpenFallback** = `"masked"` \| `"plaintext"` \| `"null"`
 
-Defined in: [packages/core/src/crypto/types.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L3)
+Defined in: [packages/core/src/crypto/types.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L11)
