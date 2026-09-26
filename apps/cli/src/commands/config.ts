@@ -471,9 +471,9 @@ function getProviderSetupChecklist(provider: ProviderEntry): string[] {
       ];
     case "solapi":
       return [
-        "Prepare pfId/profileId and plusId bindings for the approved Kakao channel path.",
+        "Prepare the pfId/profileId binding (solapi.config.kakaoPfId or a Kakao channel alias) for the approved Kakao channel; SOLAPI does not use a plusId.",
         `Run \`k-msg providers doctor --config <path>\` for provider ${provider.id}.`,
-        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id <code> --plus-id <plusId>\` before live sends.`,
+        `Run \`k-msg alimtalk preflight --provider ${provider.id} --template-id <code>\` before live sends.`,
       ];
     case "mock":
       return [

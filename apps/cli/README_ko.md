@@ -169,7 +169,7 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 | `iwinv` | `SMS/LMS/MMS` | `smsApiKey`, `smsAuthKey` | `to`, `text`, 발신번호 (`--from` 또는 `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS는 바이너리 이미지 입력 필요, `apiKey`는 알림톡에만 필요 (`config provider add`가 기본값으로 넣으므로 SMS만 쓸 때는 `apiKey`와 `ALIMTALK` 라우트를 지우세요) |
 | `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | `vars`는 템플릿의 `#{이름}` 변수에 이름으로 매칭. failover/reSend 활성화 시 callback 발신번호 필요 (`--from` 또는 config sender) |
 | `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, 발신번호 (`--from` 또는 `solapi.config.defaultFrom`) | MMS는 이미지 입력도 필요 |
-| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/채널 alias 또는 `solapi.config.kakaoPfId`) | preflight 정책 점검용 `plusId`는 `--plus-id` 또는 channel/default alias로 지정 |
+| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/채널 alias 또는 `solapi.config.kakaoPfId`) | SOLAPI는 pfId로 채널을 식별하므로 `plusId`가 필요 없음 |
 | `mock` | 전체 | 없음 | 최소 메시지 필드 (`to`, `text` 또는 `template-id`/`vars`) | 로컬 테스트용 provider |
 
 ### 프로바이더 온보딩 기대치
@@ -180,7 +180,7 @@ CLI readiness check는 벤더 prerequisite path를 설명합니다. generic chan
 | --- | --- | --- | --- |
 | `iwinv` | 벤더 콘솔 수동 승인 | config 키, manual evidence record, 템플릿 probe, sender fallback config | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 | `aligo` | API 기반 Kakao channel path | config 키, channel/template capability, Kakao list probe, plusId inference guidance | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
-| `solapi` | 외부 벤더 메타데이터 + explicit binding | config 키, explicit plusId 기대치, 가능한 범위의 template probe | `k-msg providers doctor` -> `k-msg alimtalk preflight --plus-id <plusId>` |
+| `solapi` | 외부 벤더 메타데이터 + explicit binding | config 키, pfId/profileId 바인딩, 가능한 범위의 template probe | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 | `mock` | 로컬 fixture 전용 | 기본 capability check와 seed template 경로 | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 
 ## 명령어

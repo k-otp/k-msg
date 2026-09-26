@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { ProviderOnboardingSpec } from "@k-msg/core";
 import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 import { runAlimTalkPreflight, runProviderDoctor } from "./onboarding";
 import type { ProviderWithCapabilities } from "./providers/registry";
 import type { Runtime } from "./runtime";
@@ -249,6 +250,37 @@ describe("onboarding guidance", () => {
     expect(
       result.checks.find((check) => check.id === "template_list_probe")?.status,
     ).toBe("skip");
+    expect(result.ok).toBe(true);
+  });
+
+  test("SOLAPI alimtalk preflight passes without a plusId", async () => {
+    // SOLAPI sends AlimTalk by pfId and never uses a plusId.
+    const provider = new SolapiProvider({
+      apiKey: "api-key",
+      apiSecret: "api-secret",
+      kakaoPfId: "SOLAPI_PF_ID",
+    }) as unknown as ProviderWithCapabilities;
+
+    const result = await runAlimTalkPreflight({
+      plusId: undefined,
+      provider,
+      runtime: createRuntime({
+        providers: [
+          {
+            type: "solapi",
+            id: "solapi",
+            config: { apiKey: "api-key", apiSecret: "api-secret" },
+          },
+        ],
+      }),
+      senderKey: "SOLAPI_PF_ID",
+      templateId: "TPL_001",
+    });
+
+    const plusIdPolicy = result.checks.find(
+      (check) => check.id === "plus_id_policy",
+    );
+    expect(plusIdPolicy?.status).toBe("pass");
     expect(result.ok).toBe(true);
   });
 });

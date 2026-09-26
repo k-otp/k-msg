@@ -68,7 +68,7 @@ import 경로:
 | --- | --- | --- | --- | --- | --- |
 | `iwinv` | 수동(콘솔) | 가능 | optional | unsupported | supported |
 | `aligo` | API | 가능 | required_if_no_inference | supported | supported |
-| `solapi` | 없음(벤더 메타 의존) | 미지원 | required_if_no_inference | unsupported | partial |
+| `solapi` | 없음(벤더 메타 의존) | 미지원 | optional | unsupported | partial |
 | `mock` | API(테스트용) | 가능 | optional | supported | none |
 
 런타임 접근:

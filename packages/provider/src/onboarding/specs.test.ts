@@ -51,10 +51,13 @@ describe("Provider onboarding specs", () => {
     ).toBe(true);
   });
 
-  test("solapi spec requires plusId when inference is unavailable", () => {
+  test("solapi spec does not require a plusId, which SOLAPI never sends", () => {
     const spec = getProviderOnboardingSpec("solapi");
     expect(spec).toBeDefined();
-    expect(spec?.plusIdPolicy).toBe("required_if_no_inference");
+    // SOLAPI identifies the Kakao channel by pfId (kakao.profileId or
+    // config.kakaoPfId); requiring a plusId made KMsg reject every
+    // SOLAPI AlimTalk send that did not carry one.
+    expect(spec?.plusIdPolicy).toBe("optional");
     expect(spec?.plusIdInference).toBe("unsupported");
   });
 
