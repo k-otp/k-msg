@@ -1,11 +1,11 @@
 import {
-  assertFieldCryptoConfig,
   createDefaultMasker,
   type FieldCryptoConfig,
   FieldCryptoError,
   resolveFieldCryptoFailMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
+import { validateWebhookFieldCryptoOptions } from "../crypto/field-crypto";
 import type {
   WebhookDelivery,
   WebhookEndpoint,
@@ -322,14 +322,6 @@ export class WebhookRegistry {
   private validateCryptoOptions(
     options: WebhookRegistryCryptoOptions | undefined,
   ): void {
-    if (!options) return;
-
-    if (options.endpoint) {
-      assertFieldCryptoConfig(options.endpoint);
-    }
-
-    if (options.delivery) {
-      assertFieldCryptoConfig(options.delivery);
-    }
+    validateWebhookFieldCryptoOptions(options);
   }
 }
