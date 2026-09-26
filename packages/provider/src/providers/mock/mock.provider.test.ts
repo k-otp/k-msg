@@ -161,5 +161,12 @@ describe("MockProvider", () => {
       providerMessageId: "mock-unknown",
     });
     expect(unknown.isSuccess && unknown.value).toBeNull();
+    expect(() => provider.setDeliveryStatus("mock-unknown", "FAILED")).toThrow(
+      "has not sent a message",
+    );
+
+    provider.clearHistory();
+    const cleared = await provider.getDeliveryStatus(query);
+    expect(cleared.isSuccess && cleared.value).toBeNull();
   });
 });

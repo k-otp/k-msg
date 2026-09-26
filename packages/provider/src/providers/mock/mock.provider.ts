@@ -332,8 +332,10 @@ export class MockProvider
   }
 
   /**
-   * Sets what {@link getDeliveryStatus} reports for a sent message, for
-   * example `FAILED` with a provider status code to exercise failure paths.
+   * Sets what {@link getDeliveryStatus} reports for a message this provider
+   * sent, for example `FAILED` with a provider status code to exercise
+   * failure paths. Throws for an id it did not send, so a typo in a test
+   * fails loudly.
    */
   setDeliveryStatus(
     providerMessageId: string,
@@ -343,14 +345,19 @@ export class MockProvider
       "statusCode" | "statusMessage" | "raw"
     > = {},
   ): void {
-    const now = new Date();
     const previous = this.deliveries.get(providerMessageId);
+    if (!previous) {
+      throw new Error(
+        `MockProvider has not sent a message with providerMessageId ${providerMessageId}`,
+      );
+    }
+    const now = new Date();
     this.deliveries.set(providerMessageId, {
       providerId: this.id,
       providerMessageId,
       status,
       ...details,
-      sentAt: previous?.sentAt ?? now,
+      sentAt: previous.sentAt,
       ...(status === "DELIVERED" ? { deliveredAt: now } : {}),
       ...(status === "FAILED" ? { failedAt: now } : {}),
     });
@@ -393,6 +400,7 @@ export class MockProvider
 
   clearHistory(): void {
     this.calls = [];
+    this.deliveries.clear();
   }
 
   async createTemplate(
