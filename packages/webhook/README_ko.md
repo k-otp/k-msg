@@ -185,12 +185,23 @@ const runtime = new WebhookRuntimeService({
 | Cloudflare persistence 수동 구성 | `@k-msg/webhook/adapters/cloudflare` 사용 |
 | `fields.secret` / `fields.payload` 없이, 또는 `plain`/`mask`로 설정한 `fieldCrypto.endpoint` / `fieldCrypto.delivery` | `fields.secret`(endpoint)과 `fields.payload`(delivery)를 `encrypt` 또는 `encrypt+hash`로 설정. 그 외 값은 이제 시작 시 실패 |
 | `fieldCrypto.tenantId`를 설정한 상태로 저장한 암호문 | 이제 tenant에도 바인딩됨. 이전에 저장된 값은 `fieldCrypto.acceptLegacyAad`를 켜지 않으면 거부됨. 플래그를 켠 채 배포하고, 모든 인스턴스가 새 버전으로 바뀐 뒤 `runtime.migrateFieldCryptoToTenant()`를 한 번 실행해 재암호화한 다음(이전 버전 인스턴스는 tenant 없는 값을 계속 쓰므로, 다시 실행하면 그 값도 옮겨짐) 플래그를 제거. 실행하는 동안 다른 인스턴스의 엔드포인트 변경은 멈출 것. 커스텀 delivery store는 `replace()`와 `list()`의 `before` 커서를 지원해야 함 |
+| `@k-msg/webhook/toolkit`의 `BatchDispatcher` / `BatchConfig` | 제거됨. 실제 요청을 보낸 적이 없음. `runtime.emit()` / `flush()`를 쓰거나, 단건 전송은 `WebhookDispatcher.dispatch()` 사용 ([Toolkit subpath](#toolkit-subpath) 참고) |
 
 ## Toolkit subpath
 
 ```ts
 import { LoadBalancer, QueueManager } from "@k-msg/webhook/toolkit";
 ```
+
+`BatchDispatcher`는 더 이상 export되지 않습니다. 이 클래스는 HTTP 요청을 보내지 않고 작업마다 결과를 시뮬레이션했기 때문에(무작위 200 또는 500, 임의의 지연 시간), 실제로 일어나지 않은 전송 결과를 보고했습니다. 배치 전송이 필요하면 runtime 큐를 사용하세요. `emit()`은 이벤트를 큐에 넣고, runtime은 큐의 이벤트를 `batchTimeoutMs`마다 또는 배치가 차는 즉시 `batchSize`개씩 `WebhookDispatcher`로 전송한 뒤 각 결과를 기록합니다.
+
+```ts
+await runtime.emit(event);
+await runtime.flush(); // 아직 큐에 남은 이벤트를 전송 (shutdown()도 동일)
+const deliveries = await runtime.listDeliveries({ endpointId });
+```
+
+runtime 밖에서 관리하는 엔드포인트라면 `new WebhookDispatcher(config, httpClient).dispatch(event, endpoint)`로 한 건을 전송하고, 상태가 담긴 delivery를 돌려받습니다. 이 메서드는 URL을 검사하지 않으므로 엔드포인트 URL은 먼저 `validateEndpointUrl()`로 확인하세요.
 
 ## License
 
