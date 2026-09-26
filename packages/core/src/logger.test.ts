@@ -33,6 +33,10 @@ describe("redactLogText", () => {
     ["password='hunter2'", "password='[REDACTED]'"],
     ["{'password': 'one two'}", "{'password': '[REDACTED]'}"],
     ['truncated apiKey="abc', 'truncated apiKey="[REDACTED]"'],
+    [
+      'password="oops\nretrying, see "runbook"',
+      'password="[REDACTED]"\nretrying, see "runbook"',
+    ],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
