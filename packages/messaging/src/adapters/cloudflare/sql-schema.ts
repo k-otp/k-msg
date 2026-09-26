@@ -176,8 +176,8 @@ function buildDeliveryTrackingSchemaStatements(
 
   const tableColumns: string[] = [
     `${q(columns.messageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "messageId", strategy)} PRIMARY KEY`,
-    `${q(columns.providerId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
-    `${q(columns.providerMessageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+    `${q(columns.providerId)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedId", strategy)} NOT NULL`,
+    `${q(columns.providerMessageId)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedId", strategy)} NOT NULL`,
     `${q(columns.type)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
   ];
 
@@ -196,16 +196,16 @@ function buildDeliveryTrackingSchemaStatements(
   if (secureOnly) {
     tableColumns.push(
       `${q(columns.toEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
-      `${q(columns.toHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
+      `${q(columns.toHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedId", strategy)} NOT NULL`,
       `${q(columns.toMasked)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)} NOT NULL`,
       `${q(columns.fromEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
-      `${q(columns.fromHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.fromHash)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedId", strategy)}`,
       `${q(columns.fromMasked)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
     );
   }
 
   tableColumns.push(
-    `${q(columns.status)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)} NOT NULL`,
+    `${q(columns.status)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedShortText", strategy)} NOT NULL`,
     `${q(columns.providerStatusCode)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
     `${q(columns.providerStatusMessage)} ${resolveDeliveryTrackingSqlType(options.dialect, "text", strategy)}`,
     `${q(columns.sentAt)} ${resolveDeliveryTrackingSqlType(options.dialect, "timestamp", strategy)}`,
@@ -227,7 +227,7 @@ function buildDeliveryTrackingSchemaStatements(
       `${q(columns.cryptoKid)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
       `${q(columns.cryptoVersion)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)} NOT NULL DEFAULT 1`,
       `${q(columns.cryptoState)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
-      `${q(columns.retentionClass)} ${resolveDeliveryTrackingSqlType(options.dialect, "shortText", strategy)}`,
+      `${q(columns.retentionClass)} ${resolveDeliveryTrackingSqlType(options.dialect, "indexedShortText", strategy)}`,
       `${q(columns.retentionBucketYm)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)}`,
     );
   }

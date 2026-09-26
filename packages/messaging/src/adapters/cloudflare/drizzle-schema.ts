@@ -2,8 +2,10 @@ import {
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingFieldCryptoSchemaOptions,
   type DeliveryTrackingSchemaSpec,
+  type DeliveryTrackingSqlTypeKind,
   type DeliveryTrackingTypeStrategy,
   getDeliveryTrackingSchemaSpec,
+  resolveDeliveryTrackingSqlType,
 } from "./delivery-tracking-schema";
 import type { SqlDialect } from "./sql-client";
 import {
@@ -179,6 +181,18 @@ function renderPostgresQueueSchema(
 );`;
 }
 
+// The mysql-core builder for a MySQL type of the SQL schema.
+function mySqlColumnBuilder(sqlType: string, columnName: string): string {
+  const name = q(columnName);
+  const varchar = sqlType.match(/^VARCHAR\((\d+)\)$/);
+  if (varchar) return `varchar(${name}, { length: ${varchar[1]} })`;
+  if (sqlType === "TEXT") return `text(${name})`;
+  if (sqlType === "JSON") return `json(${name})`;
+  if (sqlType === "BIGINT") return `bigint(${name}, { mode: "number" })`;
+  if (sqlType === "INTEGER") return `int(${name})`;
+  throw new Error(`No mysql-core column for the MySQL type ${sqlType}`);
+}
+
 function renderMySqlTrackingSchema(
   options: RenderDrizzleSchemaSourceOptions,
 ): string {
@@ -200,40 +214,30 @@ function renderMySqlTrackingSchema(
   const includePlainColumns =
     !secureOnly || spec.fieldCrypto.compatPlainColumns;
 
-  const messageId =
-    s.messageId === "uuid"
-      ? `varchar(${q(c.messageId)}, { length: 36 }).primaryKey()`
-      : `varchar(${q(c.messageId)}, { length: 255 }).primaryKey()`;
+  // Each column has the type buildDeliveryTrackingSchemaSql gives it on MySQL.
+  const field = (
+    kind: DeliveryTrackingSqlTypeKind,
+    columnName: string,
+  ): string =>
+    mySqlColumnBuilder(
+      resolveDeliveryTrackingSqlType("mysql", kind, s),
+      columnName,
+    );
 
-  const idField = (columnName: string): string =>
-    `varchar(${q(columnName)}, { length: 255 }).notNull()`;
-
-  const shortTextField = (columnName: string, required: boolean): string => {
-    const base =
-      s.shortText === "varchar"
-        ? `varchar(${q(columnName)}, { length: 64 })`
-        : `text(${q(columnName)})`;
-    return required ? `${base}.notNull()` : base;
-  };
-
-  // Epoch milliseconds overflow int(), whatever the timestamp strategy.
-  const timestampField = (columnName: string, required = false): string => {
-    const base = `bigint(${q(columnName)}, { mode: "number" })`;
-    return required ? `${base}.notNull()` : base;
-  };
-
-  const rawFieldLine = spec.storeRaw ? `\n    raw: text(${q(c.raw)}),` : "";
+  const rawFieldLine = spec.storeRaw
+    ? `\n    raw: ${field("json", c.raw)},`
+    : "";
   const plainAddressFields = includePlainColumns
-    ? `\n    to: ${shortTextField(c.to, true)},\n    from: ${shortTextField(c.from, false)},`
+    ? `\n    to: ${field("shortText", c.to)}.notNull(),\n    from: ${field("shortText", c.from)},`
     : "";
   const secureAddressFields = secureOnly
-    ? `\n    toEnc: ${idField(c.toEnc)},\n    toHash: ${idField(c.toHash)},\n    toMasked: ${idField(c.toMasked)},\n    fromEnc: varchar(${q(c.fromEnc)}, { length: 255 }),\n    fromHash: varchar(${q(c.fromHash)}, { length: 255 }),\n    fromMasked: varchar(${q(c.fromMasked)}, { length: 255 }),`
+    ? `\n    toEnc: ${field("id", c.toEnc)}.notNull(),\n    toHash: ${field("indexedId", c.toHash)}.notNull(),\n    toMasked: ${field("id", c.toMasked)}.notNull(),\n    fromEnc: ${field("id", c.fromEnc)},\n    fromHash: ${field("indexedId", c.fromHash)},\n    fromMasked: ${field("id", c.fromMasked)},`
     : "";
   const secureMetaFields = secureOnly
-    ? `\n    metadataEnc: varchar(${q(c.metadataEnc)}, { length: 255 }),\n    metadataHashes: text(${q(c.metadataHashes)}),\n    cryptoKid: varchar(${q(c.cryptoKid)}, { length: 255 }),\n    cryptoVersion: int(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: ${shortTextField(c.cryptoState, false)},\n    retentionClass: ${shortTextField(c.retentionClass, false)},\n    retentionBucketYm: int(${q(c.retentionBucketYm)}),`
+    ? `\n    metadataEnc: ${field("id", c.metadataEnc)},\n    metadataHashes: ${field("json", c.metadataHashes)},\n    cryptoKid: ${field("id", c.cryptoKid)},\n    cryptoVersion: ${field("attemptCount", c.cryptoVersion)}.notNull().default(1),\n    cryptoState: ${field("shortText", c.cryptoState)},\n    retentionClass: ${field("indexedShortText", c.retentionClass)},\n    retentionBucketYm: ${field("attemptCount", c.retentionBucketYm)},`
     : "";
   const plainMetadataField = includePlainColumns
-    ? `\n    metadata: text(${q(c.metadata)}),`
+    ? `\n    metadata: ${field("json", c.metadata)},`
     : "";
   const secureIndexes = secureOnly
     ? `,\n    index(${q(spec.indexNames.toHash)}).on(table.toHash),\n    index(${q(spec.indexNames.fromHash)}).on(table.fromHash),\n    index(${q(spec.indexNames.retentionBucket)}).on(\n      table.retentionClass,\n      table.retentionBucketYm,\n    )`
@@ -242,25 +246,25 @@ function renderMySqlTrackingSchema(
   return `export const deliveryTrackingTable = mysqlTable(
   ${q(spec.tableName)},
   {
-    messageId: ${messageId},
-    providerId: ${idField(c.providerId)},
-    providerMessageId: ${idField(c.providerMessageId)},
-    type: ${shortTextField(c.type, true)},
+    messageId: ${field("messageId", c.messageId)}.primaryKey(),
+    providerId: ${field("indexedId", c.providerId)}.notNull(),
+    providerMessageId: ${field("indexedId", c.providerMessageId)}.notNull(),
+    type: ${field("shortText", c.type)}.notNull(),
     ${plainAddressFields.trimStart()}
     ${secureAddressFields.trimStart()}
-    status: ${shortTextField(c.status, true)},
-    providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
-    providerStatusMessage: text(${q(c.providerStatusMessage)}),
-    sentAt: ${timestampField(c.sentAt)},
-    deliveredAt: ${timestampField(c.deliveredAt)},
-    failedAt: ${timestampField(c.failedAt)},
-    requestedAt: ${timestampField(c.requestedAt, true)},
-    scheduledAt: ${timestampField(c.scheduledAt)},
-    statusUpdatedAt: ${timestampField(c.statusUpdatedAt, true)},
-    attemptCount: int(${q(c.attemptCount)}).notNull().default(0),
-    lastCheckedAt: ${timestampField(c.lastCheckedAt)},
-    nextCheckAt: ${timestampField(c.nextCheckAt, true)},
-    lastError: text(${q(c.lastError)}),${rawFieldLine}${secureMetaFields}${plainMetadataField}
+    status: ${field("indexedShortText", c.status)}.notNull(),
+    providerStatusCode: ${field("shortText", c.providerStatusCode)},
+    providerStatusMessage: ${field("text", c.providerStatusMessage)},
+    sentAt: ${field("timestamp", c.sentAt)},
+    deliveredAt: ${field("timestamp", c.deliveredAt)},
+    failedAt: ${field("timestamp", c.failedAt)},
+    requestedAt: ${field("timestamp", c.requestedAt)}.notNull(),
+    scheduledAt: ${field("timestamp", c.scheduledAt)},
+    statusUpdatedAt: ${field("timestamp", c.statusUpdatedAt)}.notNull(),
+    attemptCount: ${field("attemptCount", c.attemptCount)}.notNull().default(0),
+    lastCheckedAt: ${field("timestamp", c.lastCheckedAt)},
+    nextCheckAt: ${field("timestamp", c.nextCheckAt)}.notNull(),
+    lastError: ${field("json", c.lastError)},${rawFieldLine}${secureMetaFields}${plainMetadataField}
   },
   (table) => [
     index(${q(spec.indexNames.due)}).on(table.status, table.nextCheckAt),
@@ -435,7 +439,7 @@ export function renderDrizzleSchemaSource(
 
   if (options.dialect === "mysql") {
     sections.push(
-      'import { bigint, index, int, mysqlTable, text, varchar } from "drizzle-orm/mysql-core";',
+      'import { bigint, index, int, json, mysqlTable, text, varchar } from "drizzle-orm/mysql-core";',
     );
     if (target === "tracking" || target === "both") {
       sections.push(renderMySqlTrackingSchema(options));
