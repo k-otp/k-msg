@@ -70,7 +70,7 @@ The messaging tracking stores look records up by `to` and `from`, so they also s
 ## Logging policy
 
 - Sensitive keys (`to`, `from`, `payload`, `secret`, `token`, `authorization`, etc.) are masked/redacted in core logger.
-- Log messages, error messages and stacks, and other string context values are scrubbed of Korean phone numbers and of credentials written as key/value pairs (`apiKey=...`, `Authorization: Bearer ...`).
+- Log messages, error messages and stacks, and other string context values are scrubbed of Korean phone numbers and of credentials written as key/value pairs or in URLs (`apiKey=...`, `Authorization: Bearer ...`, `postgres://user:...@host`).
 - Use masked values in operational diagnostics.
 
 ## Companion docs
