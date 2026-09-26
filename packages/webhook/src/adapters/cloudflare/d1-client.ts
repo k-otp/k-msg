@@ -94,9 +94,21 @@ export async function runStatement(
   db: D1DatabaseLike,
   sql: string,
   params: readonly unknown[] = [],
-): Promise<void> {
+): Promise<unknown> {
   const statement = db.prepare(sql).bind(...params);
-  await statement.run();
+  return statement.run();
+}
+
+/**
+ * The number of rows a statement changed, from the `meta.changes` of D1's
+ * `run()` result, or undefined when the client does not report it.
+ */
+export function changedRows(result: unknown): number | undefined {
+  if (typeof result !== "object" || result === null) return undefined;
+  const meta = (result as { meta?: unknown }).meta;
+  if (typeof meta !== "object" || meta === null) return undefined;
+  const changes = (meta as { changes?: unknown }).changes;
+  return typeof changes === "number" ? changes : undefined;
 }
 
 export async function runStatements(

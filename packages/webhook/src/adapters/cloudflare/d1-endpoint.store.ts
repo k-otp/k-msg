@@ -2,6 +2,7 @@ import { WebhookEndpointConflictError } from "../../runtime/errors";
 import type { WebhookEndpointStore } from "../../runtime/types";
 import type { WebhookEndpoint } from "../../types/webhook.types";
 import {
+  changedRows,
   type D1DatabaseLike,
   type D1Row,
   queryAll,
@@ -94,13 +95,9 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
   async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
     await this.ensureInitialized();
 
-    const existing = await this.get(endpointId);
-    if (!existing) {
-      throw new Error(`Webhook endpoint ${endpointId} not found`);
-    }
-
+    let result: unknown;
     try {
-      await runStatement(
+      result = await runStatement(
         this.db,
         `UPDATE ${this.tableName}
         SET ${ENDPOINT_COLUMNS.map((column) => `${column} = ?`).join(", ")}
@@ -113,6 +110,18 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
         endpointId,
       ).catch(() => undefined);
       throw conflict ?? error;
+    }
+
+    // D1 counts the rows the UPDATE changed, so an endpoint removed after the
+    // caller read it is caught by the same statement. A client that does not
+    // report changes gets a read-back instead.
+    const changes = changedRows(result);
+    const missing =
+      changes === undefined
+        ? (await this.get(endpointId)) === null
+        : changes === 0;
+    if (missing) {
+      throw new Error(`Webhook endpoint ${endpointId} not found`);
     }
   }
 
