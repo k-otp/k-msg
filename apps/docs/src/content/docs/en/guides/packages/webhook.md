@@ -81,12 +81,14 @@ await runtime.shutdown();
 
 - `emitSync(event)` sends the event to every matching endpoint and resolves
   with the deliveries once they finish.
-- `emit(event)` queues the event and returns. Up to `batchSize` queued events
-  (default 10) go out together when that many are queued, when you call
-  `flush()` or `shutdown()`, or, with `autoStart` (the default),
-  `batchTimeoutMs` (default 5000 ms) after the first event is queued. That
-  timer runs only while events are queued: a runtime that never calls
-  `emit()` starts none, and one with an empty queue holds none.
+- `emit(event)` queues the event. Up to `batchSize` queued events (default
+  10) go out together when that many are queued, when you call `flush()` or
+  `shutdown()`, or, with `autoStart` (the default), `batchTimeoutMs`
+  (default 5000 ms) after the first event is queued. Most calls resolve as
+  soon as the event is queued, but the call that fills a batch sends it,
+  retries included, before it resolves. The timer runs only while events are
+  queued: a runtime that never calls `emit()` starts none, and one with an
+  empty queue holds none.
 
 `batchSize` and `batchTimeoutMs` only affect `emit()`, so a config used with
 `emitSync()` can leave them out.

@@ -5,7 +5,7 @@ prev: false
 title: "WebhookSecurity"
 ---
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L78)
+Defined in: [packages/webhook/src/types/webhook.types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L79)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:78](https://github.com/
 
 > **algorithm**: `"sha256"` \| `"sha1"`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L79)
+Defined in: [packages/webhook/src/types/webhook.types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L80)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:79](https://github.com/
 
 > **header**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L80)
+Defined in: [packages/webhook/src/types/webhook.types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L81)
 
 ***
 
@@ -29,4 +29,4 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:80](https://github.com/
 
 > `optional` **prefix?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L81)
+Defined in: [packages/webhook/src/types/webhook.types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L82)
