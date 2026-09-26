@@ -966,7 +966,7 @@ const resolveRetryAfterMapValue = (
   const normalizedKey = normalizePolicyKey(key, "compat");
   if (!map || !normalizedKey) return undefined;
 
-  if (Object.prototype.hasOwnProperty.call(map, normalizedKey)) {
+  if (Object.hasOwn(map, normalizedKey)) {
     return normalizeRetryAfterMs(map[normalizedKey]);
   }
 

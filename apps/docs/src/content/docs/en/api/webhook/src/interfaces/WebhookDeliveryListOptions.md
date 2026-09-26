@@ -9,6 +9,26 @@ Defined in: [packages/webhook/src/runtime/types.ts:11](https://github.com/k-otp/
 
 ## Properties
 
+### before?
+
+> `optional` **before?**: `object`
+
+Defined in: [packages/webhook/src/runtime/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L22)
+
+Returns only deliveries that come after this one in the newest-first
+order: older, or equally old with a smaller id. Pass the last delivery of
+a page to read the next one.
+
+#### createdAt
+
+> **createdAt**: `Date`
+
+#### id
+
+> **id**: `string`
+
+***
+
 ### endpointId?
 
 > `optional` **endpointId?**: `string`
@@ -29,7 +49,9 @@ Defined in: [packages/webhook/src/runtime/types.ts:13](https://github.com/k-otp/
 
 > `optional` **limit?**: `number`
 
-Defined in: [packages/webhook/src/runtime/types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L15)
+Defined in: [packages/webhook/src/runtime/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L16)
+
+Caps the deliveries returned; the built-in stores return 100 when unset.
 
 ***
 

@@ -49,6 +49,15 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
   ) {}
 
   async add(delivery: WebhookDelivery): Promise<void> {
+    await this.write(delivery);
+  }
+
+  // INSERT OR REPLACE already overwrites by id, so add and replace share it.
+  async replace(delivery: WebhookDelivery): Promise<void> {
+    await this.write(delivery);
+  }
+
+  private async write(delivery: WebhookDelivery): Promise<void> {
     await this.ensureInitialized();
 
     await runStatement(
@@ -98,6 +107,12 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
       params.push(options.status);
     }
 
+    if (options.before) {
+      const createdAt = options.before.createdAt.getTime();
+      where.push("(created_at, id) < (?, ?)");
+      params.push(createdAt, options.before.id);
+    }
+
     const limit =
       typeof options.limit === "number" && Number.isFinite(options.limit)
         ? Math.max(0, Math.floor(options.limit))
@@ -109,7 +124,7 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
 
     const rows = await queryAll<DeliveryRow>(
       this.db,
-      `SELECT * FROM ${this.tableName} ${whereClause} ORDER BY created_at DESC LIMIT ?`,
+      `SELECT * FROM ${this.tableName} ${whereClause} ORDER BY created_at DESC, id DESC LIMIT ?`,
       params,
     );
 

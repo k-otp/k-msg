@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntimeService"
 ---
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L60)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L62)
 
 ## Implements
 
@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:60](https:/
 
 > **new WebhookRuntimeService**(`config`): `WebhookRuntimeService`
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L76)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L84)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:76](https:/
 
 > **addEndpoint**(`input`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \}\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L99)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L110)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ readonly [`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpoi
 
 > **emit**(`event`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:224](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L224)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:271](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L271)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:224](https:
 
 > **emitSync**(`event`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:242](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L242)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L289)
 
 #### Parameters
 
@@ -123,7 +123,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:242](https:
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:264](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L264)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:311](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L311)
 
 #### Returns
 
@@ -139,7 +139,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:264](https:
 
 > **getEndpoint**(`endpointId`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L173)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L220)
 
 #### Parameters
 
@@ -161,7 +161,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:173](https:
 
 > **listDeliveries**(`options?`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:274](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L274)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:321](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L321)
 
 #### Parameters
 
@@ -183,7 +183,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:274](https:
 
 > **listEndpoints**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L178)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:225](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L225)
 
 #### Returns
 
@@ -195,11 +195,34 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:178](https:
 
 ***
 
+### migrateFieldCryptoToTenant()
+
+> **migrateFieldCryptoToTenant**(): `Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
+
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L339)
+
+Re-encrypts stored endpoint secrets and delivery payloads written before
+ciphertext was bound to `fieldCrypto.tenantId`, returning how many of
+each it rewrote. Run it once every instance is upgraded, then remove
+`fieldCrypto.acceptLegacyAad` if it was set to keep them readable in
+the meantime. Endpoint writes through this runtime wait until it
+finishes. See `migrateWebhookFieldCryptoToTenant`.
+
+#### Returns
+
+`Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
+
+#### Implementation of
+
+[`WebhookRuntime`](/en/api/webhook/src/interfaces/webhookruntime/).[`migrateFieldCryptoToTenant`](/en/api/webhook/src/interfaces/webhookruntime/#migratefieldcryptototenant)
+
+***
+
 ### probeEndpoint()
 
 > **probeEndpoint**(`input`): `Promise`\<[`WebhookTestResult`](/en/api/webhook/src/interfaces/webhooktestresult/)\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L183)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L230)
 
 #### Parameters
 
@@ -221,7 +244,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:183](https:
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L168)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L213)
 
 #### Parameters
 
@@ -243,7 +266,11 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:168](https:
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:284](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L284)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:349](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L349)
+
+Stops the batch timer, delivers the queued events, waits for endpoint
+writes already queued, and closes the persistence. Endpoint changes
+requested after it starts are rejected.
 
 #### Returns
 
@@ -259,7 +286,7 @@ Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:284](https:
 
 > **updateEndpoint**(`endpointId`, `updates`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \}\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L132)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L169)
 
 #### Parameters
 

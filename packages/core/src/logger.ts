@@ -57,7 +57,26 @@ const SENSITIVE_CONTEXT_KEYS = [
   "text",
 ] as const;
 
+// A key names a credential when it contains one of these words anywhere
+// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, the labels `API key`
+// and `private key`, or a property path of any length such as
+// `config.password.value`, `client[secret]`, `config["password"]`, or
+// `settings.api.key`), or has an auth or authorization segment
+// (`Authorization`, `config.auth.value`, `headers['authorization']`). Auth
+// only counts as a whole segment: `author` is not a key.
+const KEY_CHARS = String.raw`\w.[\]"'-`;
+const CREDENTIAL_KEY = new RegExp(
+  String.raw`^[${KEY_CHARS}]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)[${KEY_CHARS}]*|auth(?:orization)?(?:[.[\]"'][${KEY_CHARS}]*)?)$`,
+  "i",
+);
+
+// Spaces count as a separator, as in "API key" and "private key".
+function isCredentialKey(key: string): boolean {
+  return CREDENTIAL_KEY.test(key.replace(/\s+/g, "_"));
+}
+
 function isSensitiveContextKey(rawKey: string): boolean {
+  if (isCredentialKey(rawKey)) return true;
   const key = rawKey.toLowerCase();
   return SENSITIVE_CONTEXT_KEYS.some((candidate) =>
     key.includes(candidate.toLowerCase()),
@@ -75,6 +94,89 @@ function maskStringValue(value: string): string {
   const head = trimmed.slice(0, 3);
   const tail = trimmed.slice(-2);
   return `${head}${"*".repeat(Math.max(1, trimmed.length - 5))}${tail}`;
+}
+
+// Messages, error text, and free-text context values cannot be redacted by
+// key, so they are scrubbed for the values the logging policy protects:
+// Korean phone numbers (domestic, VoIP, toll-free, representative, or +82),
+// credentials written as key/value pairs under a credential key
+// (`apiKey=...`, `AWS_SECRET_ACCESS_KEY=...`, `client_secret: ...`,
+// `"password":"..."`, `password='...'`, `Authorization: Bearer ...`, or JSON
+// escaped once inside a string, `{\"password\":\"...\"}`), and passwords in
+// URLs (`postgres://user:...@host`). A quoted value is redacted to its closing
+// quote, or to the end of the line if it has none; a bare value only up to
+// the first space. JSON escaped more than once is not matched, and a URL
+// password containing a raw "/", "?", or "#" is indistinguishable from a
+// path or query string and is not matched.
+const PHONE_NUMBER_PATTERN = new RegExp(
+  [
+    // Domestic or +82 mobile, Seoul, regional, VoIP, 050x, and 080 numbers;
+    // +82 may keep the trunk 0, bare or as "(0)": +82 (0)10-1234-5678.
+    String.raw`(?:\+82[-.\s]?(?:\(0\)[-.\s]?|0)?|0)(?:1[016789]|2|70|80|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
+    // An area code in parentheses: (010) 1234-5678, (02) 123-4567.
+    String.raw`\(0\d{1,2}\)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
+    // Nationwide representative numbers such as 1588-1234.
+    String.raw`1[5-9]\d{2}[-\s]\d{4}`,
+  ]
+    .map((pattern) => String.raw`(?<![\w+])${pattern}(?!\w)`)
+    .join("|"),
+  "g",
+);
+// The scheme is bounded to keep scans linear.
+const URL_PASSWORD_PATTERN =
+  /(\b[a-z][\w+.-]{0,31}:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
+// Quoted values, then values quoted with an escaped quote. Only the escaped
+// quote ends an escaped value: an escaped backslash pair belongs to the value,
+// so an embedded `\\\"` does not end it, and so does a backslash before any
+// other character, which a producer that escapes only quotes leaves as is.
+const QUOTED_VALUE_SOURCES = [
+  String.raw`"(?:\\.|[^"\\\n])*"?`,
+  String.raw`'(?:\\.|[^'\\\n])*'?`,
+  String.raw`\\"(?:\\\\(?:\\.|[^\\\n])|\\[^"\\\n]|[^\\\n])*(?:\\")?`,
+  String.raw`\\'(?:\\\\(?:\\.|[^\\\n])|\\[^'\\\n]|[^\\\n])*(?:\\')?`,
+];
+// A key and its `:` or `=`. Only a whole run of key characters, or "API" or
+// "private" and a space before one, is tried as a key, so each run is
+// scanned once however long it is; the key is then checked on its own.
+const KEY_AND_SEPARATOR = new RegExp(
+  String.raw`(?<![${KEY_CHARS}])((?:["']?(?:api|private)[ \t]+)?[${KEY_CHARS}]+)((?:\\?["'])?\s*[:=]\s*)`,
+  "gi",
+);
+const CREDENTIAL_VALUE = new RegExp(
+  String.raw`${QUOTED_VALUE_SOURCES.join("|")}|((?:Bearer|Basic)\s+)?[^\s"',;&]+`,
+  "iy",
+);
+
+// Redacts the value after each credential key. Values under other keys are
+// still scanned, since they can hold key/value pairs of their own.
+function redactCredentials(text: string): string {
+  let redacted = "";
+  let copied = 0;
+  for (const match of text.matchAll(KEY_AND_SEPARATOR)) {
+    const [keyAndSeparator, key = ""] = match;
+    // A key inside a value just redacted is part of that value.
+    if (match.index < copied || !isCredentialKey(key)) continue;
+    const valueStart = match.index + keyAndSeparator.length;
+    CREDENTIAL_VALUE.lastIndex = valueStart;
+    const value = CREDENTIAL_VALUE.exec(text);
+    if (!value) continue;
+    // A quoted value keeps its opening quote, escaped or not, to close it.
+    const quote = /^\\?["']/.exec(value[0])?.[0];
+    redacted += text.slice(copied, valueStart);
+    redacted += quote
+      ? `${quote}${REDACTED_TOKEN}${quote}`
+      : `${value[1] ?? ""}${REDACTED_TOKEN}`;
+    copied = valueStart + value[0].length;
+  }
+  return redacted + text.slice(copied);
+}
+
+export function redactLogText(text: string): string {
+  return redactCredentials(
+    text
+      .replace(URL_PASSWORD_PATTERN, `$1:${REDACTED_TOKEN}@`)
+      .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone)),
+  );
 }
 
 function sanitizeContextValue(key: string, value: unknown): unknown {
@@ -101,6 +203,8 @@ function sanitizeContextValue(key: string, value: unknown): unknown {
     return next;
   }
 
+  if (typeof value === "string") return redactLogText(value);
+
   return value;
 }
 
@@ -112,6 +216,21 @@ function sanitizeLogContext(context: LogContext): LogContext {
   return sanitized;
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#logging-policy
+ *   Masks sensitive context keys and scrubs the message, error text, and
+ *   string context values with redactLogText before output.
+ * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #2665a06
+ *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue,
+ *   redactLogText, and redactCredentials, and ran logger.test.ts: phone
+ *   numbers, key/value credentials under any key containing a credential
+ *   word (compound, quoted, AWS-style, spaced API key and private key
+ *   labels, property paths of any length, auth segments but not author,
+ *   and in JSON escaped once, including pairs nested in another key's
+ *   value), URL passwords, and context values under snake, kebab, or
+ *   spaced credential keys stay out of messages, errors, and context in
+ *   JSON and text modes, with key scans in linear time.
+ */
 export class Logger {
   private config: LoggerConfig;
   private context: LogContext;
@@ -139,20 +258,20 @@ export class Logger {
 
   private formatMessage(entry: LogEntry): string {
     const context = sanitizeLogContext(entry.context);
+    const text = redactLogText(entry.message);
+    const error = entry.error && {
+      name: entry.error.name,
+      message: redactLogText(entry.error.message),
+      stack: entry.error.stack ? redactLogText(entry.error.stack) : undefined,
+    };
 
     if (this.config.enableJson) {
       return JSON.stringify({
         level: entry.level,
-        message: entry.message,
+        message: text,
         timestamp: entry.timestamp.toISOString(),
         context,
-        ...(entry.error && {
-          error: {
-            name: entry.error.name,
-            message: entry.error.message,
-            stack: entry.error.stack,
-          },
-        }),
+        ...(error && { error }),
         ...(entry.duration && { duration: entry.duration }),
       });
     }
@@ -168,14 +287,14 @@ export class Logger {
             .join(", ")}]`
         : "";
 
-    let message = `${timestamp} ${level}${contextStr}: ${entry.message}`;
+    let message = `${timestamp} ${level}${contextStr}: ${text}`;
 
     if (entry.duration !== undefined) {
       message += ` (${entry.duration}ms)`;
     }
 
-    if (entry.error) {
-      message += `\n${entry.error.stack}`;
+    if (error) {
+      message += `\n${error.stack ?? `${error.name}: ${error.message}`}`;
     }
 
     return message;

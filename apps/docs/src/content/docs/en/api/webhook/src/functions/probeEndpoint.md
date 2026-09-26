@@ -7,7 +7,7 @@ title: "probeEndpoint"
 
 > **probeEndpoint**(`runtime`, `input`): `Promise`\<[`WebhookTestResult`](/en/api/webhook/src/interfaces/webhooktestresult/)\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:482](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L482)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:569](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L569)
 
 ## Parameters
 

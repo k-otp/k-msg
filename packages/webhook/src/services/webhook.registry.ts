@@ -1,9 +1,11 @@
+import type { FieldCryptoConfig } from "@k-msg/core";
 import {
-  assertFieldCryptoConfig,
-  createDefaultMasker,
-  type FieldCryptoConfig,
-  FieldCryptoError,
-} from "@k-msg/core";
+  protectDelivery,
+  protectEndpoint,
+  revealDelivery,
+  revealEndpoint,
+  validateWebhookFieldCryptoOptions,
+} from "../crypto/field-crypto";
 import type {
   WebhookDelivery,
   WebhookEndpoint,
@@ -18,125 +20,6 @@ export interface WebhookRegistryCryptoOptions {
 
 export interface WebhookRegistryOptions {
   fieldCrypto?: WebhookRegistryCryptoOptions;
-}
-
-function normalizeString(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
-  const fallback = config.openFallback ?? "masked";
-  if (fallback === "plaintext") {
-    if (!config.unsafeAllowPlaintextStorage) {
-      throw new FieldCryptoError(
-        "policy",
-        "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
-        {
-          rule: "fieldCrypto.fail_open.plaintext_guard",
-          path: "openFallback",
-        },
-        {
-          fieldPath: "openFallback",
-          failMode: "open",
-          openFallback: "plaintext",
-        },
-      );
-    }
-    return plaintext;
-  }
-  if (fallback === "null") return "";
-  return createDefaultMasker()(plaintext);
-}
-
-async function protectValue(
-  config: FieldCryptoConfig | undefined,
-  input: {
-    value: string | undefined;
-    path: string;
-    aad: Record<string, string>;
-    tenantId?: string;
-  },
-): Promise<string | undefined> {
-  const value = normalizeString(input.value);
-  if (!value) return undefined;
-  if (!config || config.enabled === false) return value;
-
-  const failMode = config.failMode ?? "closed";
-  const keyResolver = config.keyResolver;
-
-  try {
-    const keyContext = {
-      tenantId: input.tenantId,
-      tableName: input.aad.tableName,
-      fieldPath: input.path,
-      messageId: input.aad.messageId,
-      providerId: input.aad.providerId,
-    };
-    const kid = keyResolver
-      ? normalizeString((await keyResolver.resolveEncryptKey(keyContext)).kid)
-      : undefined;
-    const encrypted = await config.provider.encrypt({
-      value,
-      path: input.path,
-      aad: input.aad,
-      ...(kid ? { kid } : {}),
-    });
-    return typeof encrypted.ciphertext === "string"
-      ? encrypted.ciphertext
-      : JSON.stringify(encrypted.ciphertext);
-  } catch (error) {
-    if (failMode === "closed") {
-      throw error;
-    }
-    return toFallbackValue(config, value);
-  }
-}
-
-async function revealValue(
-  config: FieldCryptoConfig | undefined,
-  input: {
-    value: string | undefined;
-    path: string;
-    aad: Record<string, string>;
-    tenantId?: string;
-  },
-): Promise<string | undefined> {
-  const value = normalizeString(input.value);
-  if (!value) return undefined;
-  if (!config || config.enabled === false) return value;
-
-  const failMode = config.failMode ?? "closed";
-
-  try {
-    const keyContext = {
-      tenantId: input.tenantId,
-      tableName: input.aad.tableName,
-      fieldPath: input.path,
-      messageId: input.aad.messageId,
-      providerId: input.aad.providerId,
-    };
-    const candidateKids = config.keyResolver?.resolveDecryptKeys
-      ? await config.keyResolver.resolveDecryptKeys({
-          ...keyContext,
-          ciphertext: value,
-        })
-      : undefined;
-    return await config.provider.decrypt({
-      ciphertext: value,
-      path: input.path,
-      aad: input.aad,
-      ...(Array.isArray(candidateKids) && candidateKids.length > 0
-        ? { candidateKids }
-        : {}),
-    });
-  } catch (error) {
-    if (failMode === "closed") {
-      throw error;
-    }
-    return toFallbackValue(config, value);
-  }
 }
 
 export class WebhookRegistry {
@@ -237,99 +120,25 @@ export class WebhookRegistry {
     );
   }
 
-  private async protectEndpoint(
-    endpoint: WebhookEndpoint,
-  ): Promise<WebhookEndpoint> {
-    const aad = {
-      tableName: "webhook_endpoint",
-      messageId: endpoint.id,
-    };
-    const secret = await protectValue(this.options.fieldCrypto?.endpoint, {
-      value: endpoint.secret,
-      path: "secret",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...endpoint,
-      ...(secret ? { secret } : {}),
-    };
+  private protectEndpoint(endpoint: WebhookEndpoint): Promise<WebhookEndpoint> {
+    return protectEndpoint(endpoint, this.options.fieldCrypto);
   }
 
-  private async revealEndpoint(
-    endpoint: WebhookEndpoint,
-  ): Promise<WebhookEndpoint> {
-    const aad = {
-      tableName: "webhook_endpoint",
-      messageId: endpoint.id,
-    };
-    const secret = await revealValue(this.options.fieldCrypto?.endpoint, {
-      value: endpoint.secret,
-      path: "secret",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...endpoint,
-      ...(secret ? { secret } : {}),
-    };
+  private revealEndpoint(endpoint: WebhookEndpoint): Promise<WebhookEndpoint> {
+    return revealEndpoint(endpoint, this.options.fieldCrypto);
   }
 
-  private async protectDelivery(
-    delivery: WebhookDelivery,
-  ): Promise<WebhookDelivery> {
-    const aad = {
-      tableName: "webhook_delivery",
-      messageId: delivery.id,
-      providerId: delivery.endpointId,
-    };
-    const payload = await protectValue(this.options.fieldCrypto?.delivery, {
-      value: delivery.payload,
-      path: "payload",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...delivery,
-      payload: payload ?? delivery.payload,
-    };
+  private protectDelivery(delivery: WebhookDelivery): Promise<WebhookDelivery> {
+    return protectDelivery(delivery, this.options.fieldCrypto);
   }
 
-  private async revealDelivery(
-    delivery: WebhookDelivery,
-  ): Promise<WebhookDelivery> {
-    const aad = {
-      tableName: "webhook_delivery",
-      messageId: delivery.id,
-      providerId: delivery.endpointId,
-    };
-    const payload = await revealValue(this.options.fieldCrypto?.delivery, {
-      value: delivery.payload,
-      path: "payload",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
-
-    return {
-      ...delivery,
-      payload: payload ?? delivery.payload,
-    };
+  private revealDelivery(delivery: WebhookDelivery): Promise<WebhookDelivery> {
+    return revealDelivery(delivery, this.options.fieldCrypto);
   }
 
   private validateCryptoOptions(
     options: WebhookRegistryCryptoOptions | undefined,
   ): void {
-    if (!options) return;
-
-    if (options.endpoint) {
-      assertFieldCryptoConfig(options.endpoint);
-    }
-
-    if (options.delivery) {
-      assertFieldCryptoConfig(options.delivery);
-    }
+    validateWebhookFieldCryptoOptions(options);
   }
 }

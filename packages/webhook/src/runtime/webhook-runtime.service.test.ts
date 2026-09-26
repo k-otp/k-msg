@@ -65,6 +65,100 @@ describe("WebhookRuntimeService", () => {
     await runtime.shutdown();
   });
 
+  test("refuses endpoint changes once shutdown has started", async () => {
+    const endpoint = await runtime.addEndpoint({
+      url: "https://example.com/before-shutdown",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    const stopping = runtime.shutdown();
+    await expect(
+      runtime.updateEndpoint(endpoint.id, { url: "https://example.com/late" }),
+    ).rejects.toThrow("after shutdown() has started");
+    await expect(runtime.removeEndpoint(endpoint.id)).rejects.toThrow(
+      "after shutdown() has started",
+    );
+    await stopping;
+  });
+
+  test("finishes every endpoint change requested before shutdown", async () => {
+    const existing = await runtime.addEndpoint({
+      url: "https://example.com/existing",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+    const doomed = await runtime.addEndpoint({
+      url: "https://example.com/doomed",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    // Requested without awaiting, then shutdown() at once: each change is
+    // queued when it is called, so none of them is refused.
+    const added = runtime.addEndpoint({
+      url: "https://example.com/added",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+    const batch = runtime.addEndpoints([
+      {
+        url: "https://example.com/batch-1",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      },
+      {
+        url: "https://example.com/batch-2",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      },
+    ]);
+    const updated = runtime.updateEndpoint(existing.id, {
+      url: "https://example.com/updated",
+    });
+    const removed = runtime.removeEndpoint(doomed.id);
+    const stopping = runtime.shutdown();
+
+    await expect(added).resolves.toMatchObject({
+      url: "https://example.com/added",
+    });
+    expect((await batch).map((endpoint) => endpoint.url)).toEqual([
+      "https://example.com/batch-1",
+      "https://example.com/batch-2",
+    ]);
+    await expect(updated).resolves.toMatchObject({
+      url: "https://example.com/updated",
+    });
+    await expect(removed).resolves.toBeUndefined();
+    await stopping;
+  });
+
+  test("rejects an invalid URL without waiting for queued endpoint writes", async () => {
+    await expect(
+      runtime.addEndpoint({
+        url: "ftp://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      }),
+    ).rejects.toThrow();
+    await expect(
+      runtime.addEndpoints([
+        {
+          url: "https://example.com/fine",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        },
+        {
+          url: "ftp://example.com/hook",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        },
+      ]),
+    ).rejects.toThrow("Webhook endpoint 1 in the batch:");
+    // The batch with an invalid URL added nothing.
+    expect(await runtime.listEndpoints()).toEqual([]);
+  });
+
   test("addEndpoint does not auto-probe", async () => {
     await runtime.addEndpoint({
       url: "https://example.com/webhook",

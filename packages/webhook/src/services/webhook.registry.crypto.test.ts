@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { FieldCryptoConfig } from "@k-msg/core";
+import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
 import { WebhookEventType } from "../types/webhook.types";
 import { WebhookRegistry } from "./webhook.registry";
 
@@ -38,6 +38,176 @@ describe("WebhookRegistry field crypto", () => {
     ).toThrow(
       "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
     );
+  });
+
+  test("names the field when the provider fails with a plain error", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        delivery: createConfig({
+          fields: { payload: "encrypt" },
+          provider: {
+            encrypt: async () => {
+              throw new Error("kms unavailable");
+            },
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addDelivery({
+        id: "dl-1",
+        endpointId: "ep-1",
+        eventId: "ev-1",
+        eventType: WebhookEventType.MESSAGE_SENT,
+        url: "https://example.com/hook",
+        httpMethod: "POST",
+        headers: {},
+        payload: '{"a":1}',
+        attempts: [],
+        status: "pending",
+        createdAt: new Date(),
+      }),
+    ).rejects.toMatchObject({
+      kind: "encrypt",
+      fieldPath: "payload",
+      details: { cause: "kms unavailable" },
+    });
+  });
+
+  test("keeps a provider FieldCryptoError's metadata while naming the field", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          provider: {
+            encrypt: async () => {
+              throw new FieldCryptoError(
+                "encrypt",
+                "kms throttled",
+                { reason: "throttled" },
+                { retryAfterMs: 5000, attempt: 2 },
+              );
+            },
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addEndpoint({
+        id: "ep-throttled",
+        url: "https://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "my-secret",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "active",
+      }),
+    ).rejects.toMatchObject({
+      kind: "encrypt",
+      message: "kms throttled",
+      details: { reason: "throttled" },
+      retryAfterMs: 5000,
+      attempt: 2,
+      fieldPath: "secret",
+    });
+  });
+
+  test("constructor rejects a misspelled failMode", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ failMode: "close" as never }),
+          },
+        }),
+    ).toThrow("unsupported failMode: close");
+  });
+
+  test("an envelope from another version is rejected before it is stored", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          provider: {
+            encrypt: async () => ({
+              ciphertext: {
+                v: 2,
+                alg: "X",
+                kid: "k",
+                iv: "i",
+                tag: "t",
+                ct: "c",
+              },
+            }),
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addEndpoint({
+        id: "ep-v2",
+        url: "https://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "my-secret",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "active",
+      }),
+    ).rejects.toMatchObject({
+      message: expect.stringContaining(
+        "ciphertext envelope must be v1 A256GCM",
+      ),
+      fieldPath: "secret",
+      details: expect.objectContaining({ shapeValid: true, v: 2 }),
+    });
+  });
+
+  test.each([
+    ["endpoint", { secret: "mask" }, 'fields.secret must be "encrypt"'],
+    ["endpoint", { secret: "plain" }, 'fields.secret must be "encrypt"'],
+    ["delivery", { payload: "plain" }, 'fields.payload must be "encrypt"'],
+  ] as const)(
+    "constructor rejects %s fields %o that the storage would not honor",
+    (target, fields, message) => {
+      expect(
+        () =>
+          new WebhookRegistry({
+            fieldCrypto: { [target]: createConfig({ fields }) },
+          }),
+      ).toThrow(message);
+    },
+  );
+
+  test("constructor requires the field the store encrypts", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ fields: { payload: "encrypt" } }),
+          },
+        }),
+    ).toThrow('set fields.secret to "encrypt" or "encrypt+hash"');
+  });
+
+  test("constructor accepts either encrypt mode", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ fields: { secret: "encrypt+hash" } }),
+            delivery: createConfig({ fields: { payload: "encrypt" } }),
+          },
+        }),
+    ).not.toThrow();
   });
 
   test("constructor rejects invalid provider methods", () => {
@@ -108,5 +278,38 @@ describe("WebhookRegistry field crypto", () => {
     const deliveries = await registry.getDeliveries("ep-1");
     expect(deliveries).toHaveLength(1);
     expect(deliveries[0]?.payload).toBe('{"message":"ok"}');
+  });
+  test("does not keep the plaintext secret when encryption fails with the null fallback", async () => {
+    const unavailable = async () => {
+      throw new Error("key service unavailable");
+    };
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          failMode: "open",
+          openFallback: "null",
+          provider: {
+            encrypt: unavailable,
+            decrypt: unavailable,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await registry.addEndpoint({
+      id: "ep-1",
+      url: "https://example.com/hook",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+      secret: "my-secret",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: "active",
+    });
+
+    const endpoint = await registry.getEndpoint("ep-1");
+    expect(endpoint?.url).toBe("https://example.com/hook");
+    expect(endpoint).not.toHaveProperty("secret");
   });
 });

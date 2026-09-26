@@ -183,6 +183,8 @@ const runtime = new WebhookRuntimeService({
 | `registerEndpoint()` auto test call | `addEndpoint()` only; test with `probeEndpoint()` |
 | Advanced classes from root | import from `@k-msg/webhook/toolkit` |
 | Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
+| `fieldCrypto.endpoint` / `fieldCrypto.delivery` without `fields.secret` / `fields.payload`, or with `plain`/`mask` | set `fields.secret` (endpoint) and `fields.payload` (delivery) to `encrypt` or `encrypt+hash`; other values now fail at startup |
+| ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before are rejected unless `fieldCrypto.acceptLegacyAad` is set. Deploy with the flag set, run `runtime.migrateFieldCryptoToTenant()` once every instance runs the new version (an older one still writes tenant-less values; running it again picks them up), pausing endpoint changes from other instances while it runs, then remove the flag. A custom delivery store must implement `replace()` and page `list()` with the `before` cursor |
 
 ## Toolkit subpath
 
