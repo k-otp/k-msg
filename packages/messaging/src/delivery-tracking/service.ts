@@ -26,25 +26,37 @@ import {
   type TrackingRecord,
 } from "./types";
 
-// A deep copy. Raw provider data may not be cloneable; metadata, which stores
-// persist as JSON, is then copied through JSON so nothing nested is shared.
+// A deep copy, which never throws. Only raw and metadata hold free-form data,
+// and raw provider data may hold values structuredClone rejects, such as
+// functions. Both are then copied through JSON, as stores persist them,
+// which drops such values but shares nothing. Raw that JSON cannot copy
+// either (a cycle) is left out; such metadata is copied one level deep, as
+// are the other fields if a store returned something uncloneable in them.
 function copyRecord(record: TrackingRecord): TrackingRecord {
   try {
     return structuredClone(record);
   } catch {
-    const copy = { ...record };
-    if (record.metadata) {
-      try {
-        copy.metadata = JSON.parse(JSON.stringify(record.metadata)) as Record<
-          string,
-          unknown
-        >;
-      } catch {
-        // Not JSON either (a cycle): the top-level copy is all that is left.
-        copy.metadata = { ...record.metadata };
-      }
+    const { raw, metadata, ...fields } = record;
+    let copy: TrackingRecord;
+    try {
+      copy = structuredClone(fields);
+    } catch {
+      copy = { ...fields };
     }
+    if (metadata !== undefined) {
+      copy.metadata = jsonCopy(metadata) ?? { ...metadata };
+    }
+    const rawCopy = raw === undefined ? undefined : jsonCopy(raw);
+    if (rawCopy !== undefined) copy.raw = rawCopy;
     return copy;
+  }
+}
+
+function jsonCopy<T>(value: T): T | undefined {
+  try {
+    return JSON.parse(JSON.stringify(value)) as T;
+  } catch {
+    return undefined;
   }
 }
 
@@ -374,19 +386,26 @@ export class DeliveryTrackingService {
     try {
       await op;
     } finally {
-      // Only this run can be in flight until it clears the guard. It does so
-      // before notifying, so a callback's own runOnce() starts a new poll
-      // instead of waiting for itself.
-      this.runOnceInFlight = undefined;
       // Changes stored before a failure are still reported, each as this poll
-      // left it: reading back later, behind a slow callback, would show a
-      // later poll's state instead. A run that ends while a callback is
-      // running (such as one that callback started) does not wait for its
-      // changes, which queue behind that callback.
+      // left it. The snapshots are read while this run still holds the
+      // guard, so no other poll can change a record first; reading later,
+      // behind a slow callback, would show a later poll's state instead.
+      let snapshots: DeliveryStatusChange[];
+      try {
+        snapshots = await Promise.all(
+          changes.map((change) => this.readBack(change)),
+        );
+      } finally {
+        // Only this run can be in flight until it clears the guard. It does
+        // so before notifying, so a callback's own runOnce() starts a new
+        // poll instead of waiting for itself, and even if reading back
+        // failed, so later polls are not stuck behind this one.
+        this.runOnceInFlight = undefined;
+      }
+      // A run that ends while a callback is running (such as one that
+      // callback started) does not wait for its changes, which queue behind
+      // that callback.
       const reentrant = this.deliveringNotifications;
-      const snapshots = await Promise.all(
-        changes.map((change) => this.readBack(change)),
-      );
       const delivered = this.queueNotifications(snapshots);
       if (!reentrant) await delivered;
     }

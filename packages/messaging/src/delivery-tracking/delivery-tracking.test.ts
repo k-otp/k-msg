@@ -12,6 +12,7 @@ import { type DeliveryStatusChange, DeliveryTrackingService } from "./service";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
+import type { TrackingRecord } from "./types";
 
 function createMockProvider(params: {
   id: string;
@@ -1256,6 +1257,129 @@ describe("DeliveryTrackingService onStatusChange", () => {
       "PENDING->SENT",
       "SENT->DELIVERED",
     ]);
+  });
+
+  test("reads each snapshot before another poll can change the record", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    const store = new InMemoryDeliveryTrackingStore();
+    const reported: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: ({ record, previousStatus }) => {
+        reported.push(`${previousStatus}->${record.status}`);
+      },
+    });
+    await recordSent(service, "m1");
+
+    // Hold the first poll's snapshot read until a second poll has had its
+    // chance to run.
+    let readStarted: () => void = () => {};
+    const reading = new Promise<void>((resolve) => {
+      readStarted = resolve;
+    });
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const get = store.get.bind(store);
+    let held = false;
+    store.get = async (messageId) => {
+      if (!held) {
+        held = true;
+        readStarted();
+        await gate;
+      }
+      return get(messageId);
+    };
+
+    const first = service.runOnce();
+    await reading;
+    status = "DELIVERED";
+    // Joins the first poll instead of polling while its snapshot is pending.
+    const second = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    release();
+    await Promise.all([first, second]);
+    await service.runOnce();
+
+    expect(reported).toEqual(["SENT->PENDING", "PENDING->DELIVERED"]);
+  });
+
+  test("gives callbacks their own raw data even when it cannot be cloned", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+      raw: { parse: () => "not cloneable", nested: { value: 1 } },
+    });
+
+    await service.runOnce();
+    const raw = changes[0]?.record.raw as { nested: { value: number } };
+    // Copied through JSON, which leaves the function out.
+    expect(raw).toEqual({ nested: { value: 1 } });
+    raw.nested.value = 2;
+
+    const stored = await service.getRecord("m-at");
+    const storedRaw = stored?.raw as { nested: { value: number } };
+    expect(storedRaw.nested.value).toBe(1);
+  });
+
+  test("reports a change and keeps polling when a store returns an uncloneable field", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    // A custom store that hands back a field structuredClone rejects.
+    const store = new InMemoryDeliveryTrackingStore();
+    const odd = (record: TrackingRecord): TrackingRecord => ({
+      ...record,
+      providerStatusMessage: (() => "odd") as unknown as string,
+    });
+    const get = store.get.bind(store);
+    store.get = async (messageId) => {
+      const record = await get(messageId);
+      return record && odd(record);
+    };
+    const listDue = store.listDue.bind(store);
+    store.listDue = async (now, limit) => (await listDue(now, limit)).map(odd);
+    const reported: string[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: ({ record, previousStatus }) => {
+        reported.push(`${previousStatus}->${record.status}`);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+    status = "DELIVERED";
+    await service.runOnce();
+
+    expect(reported).toEqual(["SENT->PENDING", "PENDING->DELIVERED"]);
   });
 
   test("copies metadata deeply even when raw data cannot be cloned", async () => {
