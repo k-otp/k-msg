@@ -143,12 +143,24 @@ export interface CreateDrizzleDeliveryTrackingStoreOptions
     DeliveryTrackingSchemaOptions {
   fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
   retention?: DeliveryTrackingRetentionConfig;
+  /**
+   * Whether the store creates its table and indexes on first use. Set it to
+   * `false` when migrations create the schema.
+   * @default true
+   */
+  initializeSchema?: boolean;
 }
 
 export interface CreateD1DeliveryTrackingStoreOptions
   extends DeliveryTrackingSchemaOptions {
   fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
   retention?: DeliveryTrackingRetentionConfig;
+  /**
+   * Whether the store creates its table and indexes on first use. Set it to
+   * `false` when migrations create the schema.
+   * @default true
+   */
+  initializeSchema?: boolean;
 }
 
 export interface CreateDrizzleJobQueueOptions
@@ -168,6 +180,7 @@ export function createD1DeliveryTrackingStore(
     fieldCryptoSchema: options.fieldCryptoSchema,
     fieldCrypto: options.fieldCrypto,
     retention: options.retention,
+    initializeSchema: options.initializeSchema,
   });
 }
 
@@ -193,6 +206,7 @@ export function createDrizzleDeliveryTrackingStore(
     fieldCryptoSchema: options.fieldCryptoSchema,
     fieldCrypto: options.fieldCrypto,
     retention: options.retention,
+    initializeSchema: options.initializeSchema,
   });
 }
 

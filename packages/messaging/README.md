@@ -261,6 +261,14 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()` and `HyperdriveDeliveryTrackingStore` share the same logical table/index schema.
 `DeliveryTrackingService.init()` creates these automatically.
 
+Each new store runs those `CREATE ... IF NOT EXISTS` statements before its first query, which in a Worker means every request. When migrations create the schema (for example from `buildDeliveryTrackingSchemaSql()`), pass `initializeSchema: false` to skip them. The SQLite and Bun.SQL stores take the same option.
+
+```ts
+const store = createD1DeliveryTrackingStore(env.DB, {
+  initializeSchema: false,
+});
+```
+
 Tracking table/index defaults are generated from the adapter schema spec:
 
 <!-- tracking-schema-summary:start -->
