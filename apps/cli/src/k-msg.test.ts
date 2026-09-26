@@ -290,6 +290,84 @@ describe("k-msg CLI E2E", () => {
   );
 
   test(
+    "db schema print takes the stores' type strategy, table and raw options",
+    async () => {
+      const sql = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "print",
+          "--dialect",
+          "postgres",
+          "--format",
+          "sql",
+          "--timestamp-type",
+          "date",
+          "--short-text-type",
+          "text",
+          "--json-type",
+          "text",
+          "--message-id-type",
+          "uuid",
+          "--id-type",
+          "varchar",
+          "--tracking-table",
+          "otp_tracking",
+          "--queue-table",
+          "otp_jobs",
+          "--store-raw",
+        ]),
+      );
+      sql.toHaveSucceeded();
+      expect(sql.stdout).toContain('CREATE TABLE IF NOT EXISTS "otp_tracking"');
+      expect(sql.stdout).toContain('CREATE TABLE IF NOT EXISTS "otp_jobs"');
+      expect(sql.stdout).toContain('"message_id" UUID PRIMARY KEY');
+      expect(sql.stdout).toContain('"provider_id" VARCHAR(255) NOT NULL');
+      expect(sql.stdout).toContain('"status" TEXT NOT NULL');
+      expect(sql.stdout).toContain('"requested_at" TIMESTAMPTZ NOT NULL');
+      expect(sql.stdout).toContain('"last_error" TEXT');
+      expect(sql.stdout).toContain('"raw" TEXT');
+
+      const drizzle = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "print",
+          "--dialect",
+          "postgres",
+          "--target",
+          "tracking",
+          "--format",
+          "drizzle",
+          "--timestamp-type",
+          "date",
+          "--message-id-type",
+          "uuid",
+        ]),
+      );
+      drizzle.toHaveSucceeded();
+      expect(drizzle.stdout).toContain('uuid("message_id").primaryKey()');
+      expect(drizzle.stdout).toContain(
+        'timestamp("requested_at", { withTimezone: true, mode: "date" }).notNull()',
+      );
+
+      const invalid = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "print",
+          "--dialect",
+          "postgres",
+          "--timestamp-type",
+          "weekly",
+        ]),
+      );
+      invalid.toHaveExitCode(2);
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "db schema generate writes files and enforces --force policy",
     async () => {
       const outDir = await createTempCwd();
@@ -397,6 +475,30 @@ describe("k-msg CLI E2E", () => {
       const queueSql = await Bun.file(path.join(queueDir, "queue.sql")).text();
       expect(queueSql).toContain("kmsg_jobs");
       expect(queueSql).not.toContain("kmsg_delivery_tracking");
+
+      const strategyDir = await createTempCwd();
+      const strategyGenerated = expectCommand(
+        await runCli([
+          "db",
+          "schema",
+          "generate",
+          "--dialect",
+          "postgres",
+          "--target",
+          "tracking",
+          "--format",
+          "sql",
+          "--timestamp-type",
+          "date",
+          "--out-dir",
+          strategyDir,
+        ]),
+      );
+      strategyGenerated.toHaveSucceeded();
+      const strategySql = await Bun.file(
+        path.join(strategyDir, "kmsg.schema.sql"),
+      ).text();
+      expect(strategySql).toContain('"requested_at" TIMESTAMPTZ NOT NULL');
     },
     TEST_TIMEOUT,
   );

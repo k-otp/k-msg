@@ -225,6 +225,15 @@ k-msg db schema generate \
   --format sql \
   --out-dir ./db \
   --sql-file tracking.sql
+
+# The tracking table of a store created with
+# { tableName: "otp_tracking", typeStrategy: { timestamp: "date" } }
+k-msg db schema print \
+  --dialect postgres \
+  --target tracking \
+  --format sql \
+  --tracking-table otp_tracking \
+  --timestamp-type date
 ```
 
 Flags:
@@ -232,6 +241,10 @@ Flags:
 - `--dialect <postgres|mysql|sqlite>`: required
 - `--target <tracking|queue|both>`: default `both`
 - `--format <drizzle|sql|both>`: default `both`
+- Pass the options your store or queue uses, so the schema is the one it expects:
+  - `--message-id-type <text|uuid|varchar>`, `--id-type <text|varchar>`, `--short-text-type <text|varchar>`, `--timestamp-type <bigint|integer|date>`, `--json-type <auto|text>`: the tracking store's `typeStrategy` (defaults `text`, `text`, `varchar`, `bigint`, `auto`)
+  - `--tracking-table <name>` (default `kmsg_delivery_tracking`) and `--queue-table <name>` (default `kmsg_jobs`)
+  - `--store-raw`: adds the tracking `raw` column, as `storeRaw: true` does (default `false`)
 - `generate` only:
   - `--out-dir <path>` default current directory
   - `--drizzle-file <name>` default `kmsg.schema.ts`
