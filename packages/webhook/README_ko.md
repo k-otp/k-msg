@@ -52,8 +52,6 @@ const config: WebhookConfig = {
     WebhookEventType.MESSAGE_FAILED,
     WebhookEventType.SYSTEM_MAINTENANCE,
   ],
-  batchSize: 10,
-  batchTimeoutMs: 5_000,
 };
 
 const runtime = new WebhookRuntimeService({
@@ -79,6 +77,68 @@ await runtime.emitSync({
 await runtime.shutdown();
 ```
 
+## 이벤트 전송
+
+- `emitSync(event)`는 조건에 맞는 모든 엔드포인트로 이벤트를 보내고, 전송이
+  끝나면 delivery 목록으로 resolve됩니다.
+- `emit(event)`는 이벤트를 큐에 넣고 바로 반환합니다. 큐에 쌓인 이벤트는
+  최대 `batchSize`개(기본 10)씩 함께 전송되며, 그만큼 쌓였을 때,
+  `flush()`나 `shutdown()`을 호출했을 때, 또는 `autoStart`(기본값)일 때 첫
+  이벤트가 큐에 들어가고 `batchTimeoutMs`(기본 5000ms)가 지났을 때
+  전송됩니다. 이 타이머는 큐에 이벤트가 있을 때만 돌아갑니다. `emit()`을
+  호출하지 않는 런타임은 타이머를 만들지 않고, 큐가 비면 타이머도
+  남지 않습니다.
+
+`batchSize`와 `batchTimeoutMs`는 `emit()`에만 영향을 주므로 `emitSync()`만
+쓰는 설정에서는 생략해도 됩니다.
+
+### Cloudflare Workers 등 서버리스 런타임
+
+await하지도 않고 `ctx.waitUntil()`에 넘기지도 않은 작업은 Worker 호출이
+끝날 때 취소될 수 있고, `emit()` 타이머도 마찬가지입니다. Worker에서는
+다음처럼 쓰세요.
+
+- 요청이나 cron 실행마다 해당 바인딩으로 런타임을 만들고 `autoStart: false`를
+  지정합니다(아래 D1 전환의 `createRuntime` 참고).
+- `emitSync()`를 await하거나, `emit()` 뒤에
+  `ctx.waitUntil(runtime.flush())`를 호출합니다.
+- `timeoutMs`와 재시도가 호출이 허용하는 시간 안에 끝나게 하세요. HTTP
+  응답 후 `waitUntil()` 작업에는 30초가 주어집니다.
+
+```ts
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const runtime = createRuntime(env);
+    await runtime.emit({
+      id: crypto.randomUUID(),
+      type: WebhookEventType.MESSAGE_SENT,
+      timestamp: new Date(),
+      data: await request.json(),
+      metadata: {},
+      version: "1.0",
+    });
+    // 호출이 끝나기 전에 큐를 전송합니다.
+    ctx.waitUntil(runtime.flush());
+    return new Response(null, { status: 202 });
+  },
+};
+```
+
+## 메시지 이벤트
+
+메시지 이벤트는 `@k-msg/messaging` delivery tracking의 전송 상태와
+대응합니다.
+
+| 전송 상태 | 이벤트 |
+| --- | --- |
+| `SENT` | `message.sent` |
+| `DELIVERED` | `message.delivered` |
+| `FAILED` | `message.failed` |
+| `CANCELLED` | `message.cancelled` |
+| `UNKNOWN` | `message.unknown`: provider에 상태 조회가 없는 경우처럼 최종 결과 없이 추적이 끝남 |
+
+`message.clicked`, `message.read`도 사용할 수 있습니다.
+
 ## D1 전환 (동일 API)
 
 ```ts
@@ -99,8 +159,6 @@ const config: WebhookConfig = {
   timeoutMs: 30_000,
   enableSecurity: false,
   enabledEvents: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
-  batchSize: 10,
-  batchTimeoutMs: 5_000,
 };
 
 function createRuntime(env: Env): WebhookRuntimeService {
@@ -110,6 +168,9 @@ function createRuntime(env: Env): WebhookRuntimeService {
     security: {
       allowPrivateHosts: true,
     },
+    // Worker에서는 타이머를 쓰지 않습니다. "Cloudflare Workers 등 서버리스
+    // 런타임"을 참고하세요.
+    autoStart: false,
   });
 }
 ```
