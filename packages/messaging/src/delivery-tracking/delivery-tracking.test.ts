@@ -1141,4 +1141,68 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(changes[0]?.record.status).toBe("FAILED");
     expect(changes[0]?.record.raw).toBeUndefined();
   });
+
+  test("delivers a later poll's change after a slow earlier callback", async () => {
+    let status: "PENDING" | "DELIVERED" = "PENDING";
+    const base = createMockProvider({ id: "mock", status: "PENDING" });
+    const provider: Provider = {
+      ...base,
+      getDeliveryStatus: async (query) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status,
+          statusCode: "OK",
+        }),
+    };
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const delivered: string[] = [];
+    let settle: () => void = () => {};
+    const bothDelivered = new Promise<void>((resolve) => {
+      settle = resolve;
+    });
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling: { ...polling, backoffMs: [0] },
+      onStatusChange: async ({ record }) => {
+        if (record.status === "PENDING") await gate;
+        delivered.push(record.status);
+        if (delivered.length === 2) settle();
+      },
+    });
+    await recordSent(service, "m1");
+
+    const first = service.runOnce();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    status = "DELIVERED";
+    await service.runOnce();
+    release();
+    await bothDelivered;
+    await first;
+
+    expect(delivered).toEqual(["PENDING", "DELIVERED"]);
+  });
+
+  test("gives callbacks a copy they can change without touching the store", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = await failedAlimtalkService({
+      store: new InMemoryDeliveryTrackingStore(),
+      changes,
+      onFallback: () => {},
+    });
+
+    await service.runOnce();
+    const failover = getFailoverMetadata(changes[0]?.record);
+    (failover.apiAttempt as Record<string, unknown>).attempted = false;
+
+    const stored = await service.getRecord("m-at");
+    const apiAttempt = getFailoverMetadata(stored).apiAttempt as
+      | Record<string, unknown>
+      | undefined;
+    expect(apiAttempt?.attempted).toBe(true);
+  });
 });
