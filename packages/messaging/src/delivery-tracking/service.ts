@@ -26,6 +26,15 @@ import {
   type TrackingRecord,
 } from "./types";
 
+// A deep copy where the record allows one (raw provider data might not).
+function copyRecord(record: TrackingRecord): TrackingRecord {
+  try {
+    return structuredClone(record);
+  } catch {
+    return { ...record, metadata: record.metadata && { ...record.metadata } };
+  }
+}
+
 function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
 }
@@ -87,10 +96,11 @@ export interface DeliveryTrackingServiceConfig {
   /**
    * Called for each record a poll stored with a different status, with the
    * record as stored, after the poll finishes: for example, to notify a
-   * webhook when a message is delivered or fails. It does not stop polling
-   * if it throws. Delivery is at least once: services polling the same store
-   * can each report the same change, so make it idempotent, for example by
-   * message id and status.
+   * webhook when a message is delivered or fails. Calls run one at a time,
+   * in the order changes were stored, each with its own copy of the record.
+   * It does not stop polling if it throws. Delivery is at least once:
+   * services polling the same store can each report the same change, so
+   * make it idempotent, for example by message id and status.
    */
   onStatusChange?: (change: DeliveryStatusChange) => void | Promise<void>;
   /**
@@ -114,6 +124,10 @@ export class DeliveryTrackingService {
   private initPromise?: Promise<void>;
   private timer?: ReturnType<typeof setInterval>;
   private runOnceInFlight?: Promise<void>;
+  // Status changes are delivered one at a time, in the order polls stored
+  // them, so a slow callback cannot be overtaken by a later change.
+  private notificationTail: Promise<void> = Promise.resolve();
+  private deliveringNotifications = false;
 
   constructor(config: DeliveryTrackingServiceConfig) {
     if (!config || typeof config !== "object") {
@@ -351,11 +365,30 @@ export class DeliveryTrackingService {
       // before notifying, so a callback's own runOnce() starts a new poll
       // instead of waiting for itself.
       this.runOnceInFlight = undefined;
-      // Changes stored before a failure are still reported.
-      for (const change of changes) {
-        await this.notifyStatusChange(await this.readBack(change));
-      }
+      // Changes stored before a failure are still reported. A run that ends
+      // while a callback is running (such as one that callback started) does
+      // not wait for its changes, which queue behind that callback.
+      const reentrant = this.deliveringNotifications;
+      const delivered = this.queueNotifications(changes);
+      if (!reentrant) await delivered;
     }
+  }
+
+  private queueNotifications(changes: DeliveryStatusChange[]): Promise<void> {
+    if (changes.length === 0) return this.notificationTail;
+    // Neither readBack nor notifyStatusChange rejects, so neither does this.
+    const delivered = this.notificationTail.then(async () => {
+      this.deliveringNotifications = true;
+      try {
+        for (const change of changes) {
+          await this.notifyStatusChange(await this.readBack(change));
+        }
+      } finally {
+        this.deliveringNotifications = false;
+      }
+    });
+    this.notificationTail = delivered;
+    return delivered;
   }
 
   // The record as stored now, after failover has written its own metadata;
@@ -366,14 +399,16 @@ export class DeliveryTrackingService {
   ): Promise<DeliveryStatusChange> {
     try {
       const stored = await this.store.get(change.record.messageId);
-      if (stored) return { ...change, record: stored };
+      // A copy the callback can change without touching the store: a store
+      // such as the in-memory one may share nested objects with its rows.
+      if (stored) return { ...change, record: copyRecord(stored) };
     } catch (error) {
       logFallbackFailure(
         `[k-msg] could not read message ${change.record.messageId} back for onStatusChange; reporting the polled record`,
         error,
       );
     }
-    const record = { ...change.record };
+    const record = copyRecord(change.record);
     delete record.raw;
     return { ...change, record };
   }
