@@ -5,7 +5,7 @@ prev: false
 title: "BalanceProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L216)
+Defined in: [packages/core/src/provider.ts:217](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L217)
 
 Interface for providers that support balance queries.
 
@@ -15,7 +15,7 @@ Interface for providers that support balance queries.
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L220)
+Defined in: [packages/core/src/provider.ts:221](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L221)
 
 Query the remaining balance/points for the provider account.
 

@@ -5,7 +5,7 @@ prev: false
 title: "ProviderRequestContext"
 ---
 
-Defined in: [packages/core/src/provider.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L36)
+Defined in: [packages/core/src/provider.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L37)
 
 Per-operation transport context passed to provider calls.
 
@@ -18,7 +18,7 @@ underlying request and prefer `fetch` over the runtime global when supplied.
 
 > `optional` **fetch?**: [`ProviderFetch`](/en/api/core/src/type-aliases/providerfetch/)
 
-Defined in: [packages/core/src/provider.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L40)
+Defined in: [packages/core/src/provider.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L41)
 
 Optional fetch implementation for this operation.
 
@@ -28,6 +28,6 @@ Optional fetch implementation for this operation.
 
 > `optional` **signal?**: `AbortSignal`
 
-Defined in: [packages/core/src/provider.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L38)
+Defined in: [packages/core/src/provider.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L39)
 
 Abort signal for the underlying provider transport.

@@ -5,7 +5,7 @@ prev: false
 title: "TemplateInspectionProvider"
 ---
 
-Defined in: [packages/core/src/provider.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L154)
+Defined in: [packages/core/src/provider.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L155)
 
 Interface for providers that support requesting template inspection.
 
@@ -15,7 +15,7 @@ Interface for providers that support requesting template inspection.
 
 > **requestTemplateInspection**(`code`, `ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/core/src/provider.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L158)
+Defined in: [packages/core/src/provider.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L159)
 
 Request inspection for a template (submits for approval review).
 

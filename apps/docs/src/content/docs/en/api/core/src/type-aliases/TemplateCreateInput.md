@@ -7,7 +7,7 @@ title: "TemplateCreateInput"
 
 > **TemplateCreateInput** = `object`
 
-Defined in: [packages/core/src/provider.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L81)
+Defined in: [packages/core/src/provider.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L82)
 
 Input for creating a new AlimTalk template.
 
@@ -17,7 +17,7 @@ Input for creating a new AlimTalk template.
 
 > `optional` **buttons?**: `unknown`[]
 
-Defined in: [packages/core/src/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L89)
+Defined in: [packages/core/src/provider.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L90)
 
 Button configurations.
 
@@ -27,7 +27,7 @@ Button configurations.
 
 > `optional` **category?**: `string`
 
-Defined in: [packages/core/src/provider.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L87)
+Defined in: [packages/core/src/provider.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L88)
 
 Template category.
 
@@ -37,7 +37,7 @@ Template category.
 
 > **content**: `string`
 
-Defined in: [packages/core/src/provider.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L85)
+Defined in: [packages/core/src/provider.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L86)
 
 Template body with #{variable} placeholders.
 
@@ -47,7 +47,7 @@ Template body with #{variable} placeholders.
 
 > **name**: `string`
 
-Defined in: [packages/core/src/provider.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L83)
+Defined in: [packages/core/src/provider.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L84)
 
 Human-readable template name.
 
@@ -57,6 +57,6 @@ Human-readable template name.
 
 > `optional` **variables?**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L91)
+Defined in: [packages/core/src/provider.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L92)
 
 Expected variable names in the template.

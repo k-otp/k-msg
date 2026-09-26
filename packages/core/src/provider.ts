@@ -20,10 +20,11 @@ import type {
  * transports, tracing, or deterministic tests. It is a call signature rather
  * than `typeof globalThis.fetch`, so a plain async function qualifies in every
  * runtime (Bun's `fetch` type also declares `preconnect`, which providers never
- * call); the global `fetch` still satisfies it.
+ * call); the global `fetch` still satisfies it. The input avoids the DOM-only
+ * `RequestInfo` alias so Node-only type setups can compile the declaration.
  */
 export type ProviderFetch = (
-  input: RequestInfo | URL,
+  input: string | URL | Request,
   init?: RequestInit,
 ) => Promise<Response>;
 

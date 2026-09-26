@@ -7,6 +7,6 @@ title: "TemplateUpdateInput"
 
 > **TemplateUpdateInput** = `Partial`\<[`TemplateCreateInput`](/en/api/core/src/type-aliases/templatecreateinput/)\>
 
-Defined in: [packages/core/src/provider.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L97)
+Defined in: [packages/core/src/provider.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L98)
 
 Partial input for updating an existing template.
