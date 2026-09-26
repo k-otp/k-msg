@@ -7,7 +7,7 @@
 
 ### 구현됨
 - [x] `KMsg` 통합 진입점 + `send()`
-- [x] `sendMany()` 배치 전송(동시성 제어)
+- [x] `send([...])` 배치 전송, 재시도와 동시성 제한은 `BulkMessageSender`
 - [x] 기본 라우팅: `providerId`, `routing.byType`, `defaultProviderId`, `first | round_robin`
 - [x] 타입 기반 메시지 모델 (SMS/LMS/MMS/ALIMTALK/FRIENDTALK/NSA/VOICE/FAX/RCS)
 - [x] ALIMTALK failover 옵션 표준화 + warning 코드

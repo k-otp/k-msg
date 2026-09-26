@@ -5,7 +5,7 @@ prev: false
 title: "KMsgBuilder"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:1407](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1407)
+Defined in: [packages/messaging/src/k-msg.ts:1451](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1451)
 
 Fluent builder for creating KMsg instances.
 
@@ -40,7 +40,7 @@ const kmsg = KMsg.builder()
 
 > **addProvider**(`provider`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1422](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1422)
+Defined in: [packages/messaging/src/k-msg.ts:1466](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1466)
 
 Adds a single provider to the builder.
 
@@ -70,7 +70,7 @@ builder.addProvider(new SolapiProvider({ apiKey: '...', apiSecret: '...' }))
 
 > **addProviders**(...`providers`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1441](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1441)
+Defined in: [packages/messaging/src/k-msg.ts:1485](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1485)
 
 Adds multiple providers to the builder.
 
@@ -103,7 +103,7 @@ builder.addProviders(
 
 > **build**(): [`KMsg`](/en/api/k-msg/src/classes/kmsg/)
 
-Defined in: [packages/messaging/src/k-msg.ts:1528](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1528)
+Defined in: [packages/messaging/src/k-msg.ts:1572](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1572)
 
 Builds and returns a new KMsg instance with the configured settings.
 
@@ -131,7 +131,7 @@ const kmsg = KMsg.builder()
 
 > **withDefaults**(`defaults`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1480](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1480)
+Defined in: [packages/messaging/src/k-msg.ts:1524](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1524)
 
 Sets the defaults configuration.
 
@@ -164,7 +164,7 @@ builder.withDefaults({
 
 > **withHooks**(`hooks`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1499](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1499)
+Defined in: [packages/messaging/src/k-msg.ts:1543](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1543)
 
 Sets the lifecycle hooks.
 
@@ -197,7 +197,7 @@ builder.withHooks({
 
 > **withPersistence**(`persistence`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1510](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1510)
+Defined in: [packages/messaging/src/k-msg.ts:1554](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1554)
 
 Sets the persistence configuration.
 
@@ -221,7 +221,7 @@ this builder for method chaining
 
 > **withRouting**(`routing`): `this`
 
-Defined in: [packages/messaging/src/k-msg.ts:1461](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1461)
+Defined in: [packages/messaging/src/k-msg.ts:1505](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L1505)
 
 Sets the routing configuration.
 

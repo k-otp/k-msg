@@ -86,6 +86,21 @@ const kmsg = new KMsg({
 await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
+배열을 넘기면 provider별로 묶어 최대 50건(provider의 배치 한도가 더 작으면 그 값) 단위로 보내고, 메시지마다 `Result`를 돌려줍니다.
+
+## 타임아웃과 취소
+
+`send()`와 `sendOrThrow()`의 두 번째 인자는 해당 호출에서 provider로 그대로 전달됩니다. `AbortSignal`과, 필요하면 `fetch` 구현을 넘길 수 있고, 배치는 이를 함께 씁니다.
+
+```ts
+const result = await kmsg.send(
+  { to: "01012345678", text: "hello" },
+  { signal: AbortSignal.timeout(5_000) },
+);
+```
+
+provider가 지원하는 항목은 `provider.transportCapabilities`(`abortSignal`, `injectableFetch`)에 선언되어 있고, 지원하지 않는 항목은 무시됩니다.
+
 ## Delivery Tracking
 
 ```ts
