@@ -78,7 +78,7 @@ export class RetryManager {
   /**
    * 재시도 가능한 에러인지 판단
    */
-  private isRetryableError(error: Error): boolean {
+  isRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
 
     // 네트워크 관련 에러들은 재시도 가능

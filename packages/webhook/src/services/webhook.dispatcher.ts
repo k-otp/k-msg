@@ -120,8 +120,7 @@ export class WebhookDispatcher {
       }
 
       const canRetry =
-        attempt <= maxRetries &&
-        this.shouldRetryAttempt(attempt, attemptResult);
+        attempt <= maxRetries && this.shouldRetryAttempt(attemptResult);
 
       if (!canRetry) {
         delivery.status = "failed";
@@ -138,10 +137,9 @@ export class WebhookDispatcher {
     delivery.completedAt = new Date();
   }
 
-  private shouldRetryAttempt(
-    attemptNumber: number,
-    attempt: WebhookAttempt,
-  ): boolean {
+  // The delivery loop enforces the effective (per-endpoint) retry budget; this
+  // only decides whether the failure is worth retrying.
+  private shouldRetryAttempt(attempt: WebhookAttempt): boolean {
     // If we got an HTTP response code, decide based on status.
     if (typeof attempt.httpStatus === "number") {
       return this.retryManager.shouldRetryStatus(attempt.httpStatus);
@@ -149,10 +147,7 @@ export class WebhookDispatcher {
 
     // Otherwise decide based on error message (network/timeouts etc).
     if (attempt.error) {
-      return this.retryManager.shouldRetry(
-        attemptNumber,
-        new Error(attempt.error),
-      );
+      return this.retryManager.isRetryableError(new Error(attempt.error));
     }
 
     return true;

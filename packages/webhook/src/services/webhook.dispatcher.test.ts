@@ -79,6 +79,36 @@ describe("WebhookDispatcher", () => {
     expect(delivery.status).toBe("failed");
   });
 
+  test("lets a per-endpoint maxRetries above the global value retry network errors", async () => {
+    let calls = 0;
+    const client: HttpClient = {
+      fetch: async () => {
+        calls += 1;
+        throw new Error("network connection reset");
+      },
+    };
+    const dispatcher = new WebhookDispatcher(
+      createConfig({ maxRetries: 1 }),
+      client,
+    );
+    // Keep the test fast; delays are not what this checks.
+    Object.assign(dispatcher, { sleep: async () => {} });
+
+    const delivery = await dispatcher.dispatch(
+      createEvent(),
+      createEndpoint({
+        retryConfig: {
+          maxRetries: 3,
+          retryDelayMs: 1000,
+          backoffMultiplier: 1,
+        },
+      }),
+    );
+
+    expect(calls).toBe(4);
+    expect(delivery.status).toBe("failed");
+  });
+
   test("does not follow redirects", async () => {
     const client = new StubHttpClient(
       () =>
