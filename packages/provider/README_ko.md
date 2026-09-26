@@ -43,7 +43,7 @@ bun add solapi
 | --- | --- | --- | --- |
 | `iwinv` | supported | supported | `send`와 `getDeliveryStatus`의 모든 내부 요청에 context 전달 |
 | `aligo` | supported | supported | 모든 send 채널이 공통 fetch transport 사용 |
-| `solapi` | supported | unsupported | SOLAPI SDK가 signal/fetch를 받지 않으므로 SDK 호출 전마다 signal을 확인하고, abort되면 기다리지 않고 반환합니다. 이미 보낸 SDK 요청은 취소할 수 없어 SOLAPI가 그 메시지를 접수할 수 있습니다 |
+| `solapi` | supported | unsupported | SOLAPI SDK가 signal/fetch를 받지 않으므로 SDK 호출 전마다 signal을 확인하고, abort되면 기다리지 않고 반환합니다. SDK가 이미 보낸 발송 요청은 취소할 수 없어 SOLAPI가 그 메시지를 보낼 수 있으므로, 이 경우는 타임아웃이라도 `REQUEST_ABORTED`(기본적으로 재시도하지 않음)를 반환합니다 |
 | `mock` | supported | unsupported | 모의 지연은 signal을 따르며 HTTP transport는 사용하지 않음 |
 
 ```ts

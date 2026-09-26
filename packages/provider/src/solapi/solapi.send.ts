@@ -7,7 +7,10 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import { raceProviderAbort } from "../shared/provider-transport";
+import {
+  raceProviderAbort,
+  toProviderAbortError,
+} from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   extractFileId,
@@ -653,21 +656,18 @@ export async function sendWithSolapi(params: {
 
   // A file upload may have finished just as the signal aborted.
   throwIfAborted(signal);
-  let response: unknown;
+  let request: Promise<unknown>;
   if (typeof client.sendOne === "function") {
-    response = await raceProviderAbort(
-      client.sendOne(
-        scheduledDate
-          ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
-          : message,
-        config.appId,
-      ),
-      signal,
+    request = client.sendOne(
+      scheduledDate
+        ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
+        : message,
+      config.appId,
     );
   } else if (typeof client.send === "function") {
-    response = await raceProviderAbort(
-      client.send(message, buildSolapiSendRequestConfig(config, scheduledDate)),
-      signal,
+    request = client.send(
+      message,
+      buildSolapiSendRequestConfig(config, scheduledDate),
     );
   } else {
     throw new KMsgError(
@@ -675,6 +675,13 @@ export async function sendWithSolapi(params: {
       "SOLAPI SDK client does not expose a compatible send method",
       { providerId },
     );
+  }
+
+  let response: unknown;
+  try {
+    response = await raceProviderAbort(request, signal);
+  } catch (error) {
+    throw toSentRequestAbortError(error, signal, providerId) ?? error;
   }
 
   return ok(
@@ -689,6 +696,28 @@ export async function sendWithSolapi(params: {
 
 function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw signal.reason;
+}
+
+/**
+ * An abort after the SDK sent the request cannot cancel it, and the SDK may
+ * even retry it, so SOLAPI may still send the message. Report it as
+ * REQUEST_ABORTED, which is not retried by default, even for a timeout: a
+ * retried NETWORK_TIMEOUT could reach the customer twice.
+ */
+function toSentRequestAbortError(
+  error: unknown,
+  signal: AbortSignal | undefined,
+  providerId: string,
+): KMsgError | undefined {
+  if (error instanceof KMsgError) return undefined;
+  const aborted = toProviderAbortError(error, signal, providerId);
+  if (!aborted) return undefined;
+
+  return new KMsgError(
+    KMsgErrorCode.REQUEST_ABORTED,
+    `${aborted.message} (SOLAPI had already received the request and may still send the message)`,
+    { providerId, requestSent: true, abortCode: aborted.code },
+  );
 }
 
 function resolveSolapiScheduledDate(options: SendOptions): string | undefined {

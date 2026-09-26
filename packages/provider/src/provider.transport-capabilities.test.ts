@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { KMsgErrorCode } from "@k-msg/core";
+import { ErrorUtils, KMsgErrorCode } from "@k-msg/core";
 import { AligoSendProvider } from "./aligo/provider.send";
 import { IWINVSendProvider } from "./iwinv/provider.send";
 import { MockProvider } from "./providers/mock/mock.provider";
@@ -189,13 +189,47 @@ describe("built-in provider transport capabilities", () => {
     controller.abort(timeout);
     const result = await resultPromise;
 
+    // The SDK request already went out and cannot be cancelled, so SOLAPI may
+    // still send the message. REQUEST_ABORTED is not retried by default,
+    // where a retried NETWORK_TIMEOUT could reach the customer twice.
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+      expect(ErrorUtils.isRetryable(result.error)).toBe(false);
+      expect(result.error.message).toContain("provider deadline exceeded");
+      expect(result.error.details?.requestSent).toBe(true);
+    }
+    sdk.releaseAll({ messageId: "msg_late" });
+    await settle();
+  });
+
+  test("solapi provider keeps a timeout before the send retryable", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+    const timeout = Object.assign(new Error("provider deadline exceeded"), {
+      code: "NETWORK_TIMEOUT",
+    });
+
+    const resultPromise = createSolapiProvider(sdk.client).send(
+      {
+        type: "MMS",
+        to: "01012345678",
+        text: "message",
+        imageUrl: "https://example.com/image.jpg",
+      },
+      { signal: controller.signal },
+    );
+    await settle();
+    controller.abort(timeout);
+    const result = await resultPromise;
+
+    // Nothing was sent: the abort came during the image upload.
+    expect(sdk.calls.sendOne).toBe(0);
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
       expect(result.error.code).toBe(KMsgErrorCode.NETWORK_TIMEOUT);
-      expect(result.error.message).toBe("provider deadline exceeded");
     }
-    // The SDK request cannot be cancelled; its late answer is ignored.
-    sdk.releaseAll({ messageId: "msg_late" });
+    sdk.releaseAll({ fileId: "MMS_file_1" });
     await settle();
   });
 
