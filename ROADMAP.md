@@ -7,7 +7,7 @@
 
 ### Implemented
 - [x] Unified entry point `KMsg` with `send()`
-- [x] Batch sending via `sendMany()` (concurrency control)
+- [x] Batch sending via `send([...])`, and `BulkMessageSender` for retries and a concurrency limit
 - [x] Routing basics: `providerId`, `routing.byType`, `defaultProviderId`, `first | round_robin`
 - [x] Type-based message model (SMS/LMS/MMS/ALIMTALK/FRIENDTALK/NSA/VOICE/FAX/RCS)
 - [x] ALIMTALK failover option normalization + warning codes

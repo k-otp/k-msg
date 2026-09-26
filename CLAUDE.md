@@ -64,7 +64,8 @@ When to consider expanding toward unified facade:
 
 **Unified Client (KMsg)**: The `KMsg` class provides a unified entry point for send/routing operations:
 - `send()` - Send AlimTalk, SMS, or LMS messages
-- `sendMany()` - Batch sending with concurrency control
+- `send([...])` - Batch sending, grouped by provider and chunked to its batch limit
+- `send(input, { signal, fetch })` - Per-call cancellation or `fetch`, forwarded to the provider
 - Optional hooks/tracking integrations via `@k-msg/messaging/tracking`
 
 **Provider-Based System**: The provider package supplies concrete providers implementing `Provider` contracts from core:
@@ -214,20 +215,18 @@ const rendered = interpolate('Hello #{name}, welcome to #{service}!', {
 ```
 
 ### Handling Bulk Operations
-Use `KMsg.sendMany()` for controlled batch sending:
+Pass an array to `KMsg.send()`; each message gets its own `Result`:
 ```typescript
 import { KMsg } from '@k-msg/messaging';
 
 const kmsg = new KMsg({ providers: [provider] });
 
-const result = await kmsg.sendMany(
-  [
-    { to: '01011112222', text: 'hello 1' },
-    { to: '01033334444', text: 'hello 2' },
-  ],
-  { concurrency: 10 },
-);
+const batch = await kmsg.send([
+  { to: '01011112222', text: 'hello 1' },
+  { to: '01033334444', text: 'hello 2' },
+]);
 ```
+For retries and a concurrency limit over large lists, use `BulkMessageSender` from `@k-msg/messaging/sender`.
 
 ### Known Issues & Workarounds
 
