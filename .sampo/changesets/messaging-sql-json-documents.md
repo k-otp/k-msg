@@ -1,0 +1,5 @@
+---
+npm/@k-msg/messaging: patch
+---
+
+Store JSON columns as JSON on Postgres, and read them back whatever the driver. `HyperdriveDeliveryTrackingStore` and `HyperdriveJobQueue` bound JSON text directly, and postgres.js and Bun.SQL (so also `BunSqlDeliveryTrackingStore`) serialize a parameter that Postgres types as `JSONB` with `JSON.stringify`, so `last_error`, `metadata`, `raw`, `metadata_hashes` and the queue's `data` and `metadata` were stored as JSON strings, which `last_error->>'code'` reads as `NULL`. JSON parameters are now typed as text and cast to `JSONB` in SQL. On the way back, drivers that decode JSON columns, such as node-postgres, mysql2 and Bun.SQL on MySQL, made the store drop `lastError` and `metadata` and the queue return `{}` for every job's data. JSON columns are now selected as text, and rows stored as JSON strings still read as before; the README shows the SQL that converts them.
