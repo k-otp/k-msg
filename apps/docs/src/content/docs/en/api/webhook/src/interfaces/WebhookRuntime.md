@@ -198,7 +198,11 @@ Defined in: [packages/webhook/src/runtime/types.ts:110](https://github.com/k-otp
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L129)
+Defined in: [packages/webhook/src/runtime/types.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L134)
+
+Stops the batch timer, delivers the queued events, waits for endpoint
+writes already queued, and closes the persistence. Endpoint changes
+requested after it starts are rejected.
 
 #### Returns
 
