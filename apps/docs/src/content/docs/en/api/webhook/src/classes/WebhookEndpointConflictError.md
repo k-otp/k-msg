@@ -5,11 +5,14 @@ prev: false
 title: "WebhookEndpointConflictError"
 ---
 
-Defined in: [packages/webhook/src/runtime/errors.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L6)
+Defined in: [packages/webhook/src/runtime/errors.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L17)
 
 Thrown when adding or updating a webhook endpoint would give it the id or
 URL of an endpoint that is already stored. Stores never replace an
 endpoint on add; change one with `updateEndpoint()` instead.
+
+`instanceof` works whichever entry point threw it, for example the D1
+store from `@k-msg/webhook/adapters/cloudflare`.
 
 ## Extends
 
@@ -21,7 +24,7 @@ endpoint on add; change one with `updateEndpoint()` instead.
 
 > **new WebhookEndpointConflictError**(`field`, `value`, `endpointId`): `WebhookEndpointConflictError`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L14)
+Defined in: [packages/webhook/src/runtime/errors.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L39)
 
 #### Parameters
 
@@ -65,7 +68,7 @@ The cause of the error.
 
 > `readonly` **endpointId**: `string`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L12)
+Defined in: [packages/webhook/src/runtime/errors.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L37)
 
 The id of the stored endpoint that has it.
 
@@ -75,7 +78,7 @@ The id of the stored endpoint that has it.
 
 > `readonly` **field**: `"url"` \| `"id"`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L8)
+Defined in: [packages/webhook/src/runtime/errors.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L33)
 
 Which value is already taken.
 
@@ -121,7 +124,7 @@ Defined in: node\_modules/.bun/typescript@6.0.3/node\_modules/typescript/lib/lib
 
 > `readonly` **value**: `string`
 
-Defined in: [packages/webhook/src/runtime/errors.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L10)
+Defined in: [packages/webhook/src/runtime/errors.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L35)
 
 The taken id or URL.
 
@@ -148,6 +151,26 @@ not capture any frames.
 `Error.stackTraceLimit`
 
 ## Methods
+
+### \[hasInstance\]()
+
+> `static` **\[hasInstance\]**(`value`): `boolean`
+
+Defined in: [packages/webhook/src/runtime/errors.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/errors.ts#L19)
+
+True for a conflict error from any copy of this class.
+
+#### Parameters
+
+##### value
+
+`unknown`
+
+#### Returns
+
+`boolean`
+
+***
 
 ### captureStackTrace()
 
