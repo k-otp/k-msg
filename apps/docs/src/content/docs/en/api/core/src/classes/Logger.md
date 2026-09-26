@@ -5,7 +5,7 @@ prev: false
 title: "Logger"
 ---
 
-Defined in: [packages/core/src/logger.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L157)
+Defined in: [packages/core/src/logger.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L169)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/logger.ts:157](https://github.com/k-otp/k-msg/blo
 
 > **new Logger**(`context?`, `config?`): `Logger`
 
-Defined in: [packages/core/src/logger.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L161)
+Defined in: [packages/core/src/logger.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L173)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/logger.ts:161](https://github.com/k-otp/k-msg/blo
 
 > **child**(`context`): `Logger`
 
-Defined in: [packages/core/src/logger.ts:298](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L298)
+Defined in: [packages/core/src/logger.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L310)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [packages/core/src/logger.ts:298](https://github.com/k-otp/k-msg/blo
 
 > **debug**(`message`, `context?`): `void`
 
-Defined in: [packages/core/src/logger.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L260)
+Defined in: [packages/core/src/logger.ts:272](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L272)
 
 #### Parameters
 
@@ -75,7 +75,7 @@ Defined in: [packages/core/src/logger.ts:260](https://github.com/k-otp/k-msg/blo
 
 > **error**(`message`, `context?`, `error?`): `void`
 
-Defined in: [packages/core/src/logger.ts:288](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L288)
+Defined in: [packages/core/src/logger.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L300)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: [packages/core/src/logger.ts:288](https://github.com/k-otp/k-msg/blo
 
 > **info**(`message`, `context?`): `void`
 
-Defined in: [packages/core/src/logger.ts:269](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L269)
+Defined in: [packages/core/src/logger.ts:281](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L281)
 
 #### Parameters
 
@@ -123,7 +123,7 @@ Defined in: [packages/core/src/logger.ts:269](https://github.com/k-otp/k-msg/blo
 
 > **measure**\<`T`\>(`operation`, `fn`, `context?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/logger.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L310)
+Defined in: [packages/core/src/logger.ts:322](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L322)
 
 #### Type Parameters
 
@@ -155,7 +155,7 @@ Defined in: [packages/core/src/logger.ts:310](https://github.com/k-otp/k-msg/blo
 
 > **time**(`label`): () => `void`
 
-Defined in: [packages/core/src/logger.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L302)
+Defined in: [packages/core/src/logger.ts:314](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L314)
 
 #### Parameters
 
@@ -173,7 +173,7 @@ Defined in: [packages/core/src/logger.ts:302](https://github.com/k-otp/k-msg/blo
 
 > **warn**(`message`, `context?`, `error?`): `void`
 
-Defined in: [packages/core/src/logger.ts:278](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L278)
+Defined in: [packages/core/src/logger.ts:290](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L290)
 
 #### Parameters
 
