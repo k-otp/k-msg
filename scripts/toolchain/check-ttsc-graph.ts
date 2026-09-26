@@ -25,8 +25,8 @@ type GraphDocTag = {
 type GraphDiagnostic = {
   category: string;
   code: number;
-  file: string;
-  line: number;
+  file?: string;
+  line?: number;
   message: string;
 };
 
@@ -153,21 +153,21 @@ function parseGraph(output: string): TypeScriptGraph {
   ).map((diagnostic, index): GraphDiagnostic => {
     if (
       !isRecord(diagnostic) ||
-      typeof diagnostic.file !== "string" ||
-      typeof diagnostic.line !== "number" ||
       typeof diagnostic.code !== "number" ||
       typeof diagnostic.category !== "string" ||
-      typeof diagnostic.message !== "string"
+      typeof diagnostic.message !== "string" ||
+      (diagnostic.file !== undefined && typeof diagnostic.file !== "string") ||
+      (diagnostic.line !== undefined && typeof diagnostic.line !== "number")
     ) {
       throw new Error(
-        `ttsc graph diagnostic ${index} is missing file/line/code/category/message fields.`,
+        `ttsc graph diagnostic ${index} is missing code/category/message fields.`,
       );
     }
     return {
       category: diagnostic.category,
       code: diagnostic.code,
-      file: diagnostic.file,
-      line: diagnostic.line,
+      ...(typeof diagnostic.file === "string" ? { file: diagnostic.file } : {}),
+      ...(typeof diagnostic.line === "number" ? { line: diagnostic.line } : {}),
       message: diagnostic.message,
     };
   });
@@ -467,7 +467,7 @@ function validateCompilerDiagnostics(graph: TypeScriptGraph): void {
   const blocking = graph.diagnostics.filter(
     (diagnostic) =>
       diagnostic.category === "error" &&
-      !diagnostic.file.replaceAll("\\", "/").startsWith("examples/"),
+      !(diagnostic.file ?? "").replaceAll("\\", "/").startsWith("examples/"),
   );
   if (blocking.length > 0) {
     throw new Error(
@@ -475,7 +475,7 @@ function validateCompilerDiagnostics(graph: TypeScriptGraph): void {
         .slice(0, 20)
         .map(
           (diagnostic) =>
-            `${diagnostic.file}:${diagnostic.line} TS${diagnostic.code} ${diagnostic.message}`,
+            `${diagnostic.file ?? "<global>"}:${diagnostic.line ?? 0} TS${diagnostic.code} ${diagnostic.message}`,
         )
         .join("\n")}`,
     );
@@ -487,13 +487,21 @@ function acknowledgementFor(
   symbol: string,
   section: string,
 ): SpecificationCitation["acknowledgement"] | null {
+  let acknowledgement: SpecificationCitation["acknowledgement"] | null = null;
   for (const tag of graph.docTagsById.get(symbol) ?? []) {
+    if (tag.name !== "evidence" && tag.name !== "evidenceExclude") continue;
     const target = tag.text.trim().split(/\s+/, 1)[0];
     if (target !== section) continue;
-    if (tag.name === "evidence") return "cited";
-    if (tag.name === "evidenceExclude") return "excluded";
+
+    const resolved = tag.name === "evidence" ? "cited" : "excluded";
+    if (acknowledgement !== null && acknowledgement !== resolved) {
+      throw new Error(
+        `${symbol} both cites and excludes ${section}; keep one acknowledgement.`,
+      );
+    }
+    acknowledgement = resolved;
   }
-  return null;
+  return acknowledgement;
 }
 
 function collectSpecificationEvidence(
@@ -527,9 +535,14 @@ function validateSpecificationEvidence(
   graph: TypeScriptGraph,
   citations: readonly SpecificationCitation[],
 ): void {
-  if (!graph.capabilities.includes("artifactNodes") || citations.length === 0) {
+  if (!graph.capabilities.includes("artifactNodes")) {
     throw new Error(
-      `The graph carries no specification evidence. ${productionGraphConfig} must point @ttsc/lint at ${evidenceLintConfig}, and the evidence plugin must build (run bun run typecheck for its diagnostics).`,
+      `The graph carries no specification artifacts. ${productionGraphConfig} must point @ttsc/lint at ${evidenceLintConfig}, and the evidence plugin must build (run bun run typecheck for its diagnostics).`,
+    );
+  }
+  if (citations.length === 0) {
+    throw new Error(
+      `The evidence plugin published no citations. Check that the documents governed by ${evidenceLintConfig} still exist and that the @evidence targets match their current section anchors (run bun run typecheck for its diagnostics).`,
     );
   }
 }

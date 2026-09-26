@@ -6,6 +6,6 @@
     "noEmit": true,
     "types": ["bun", "node"]
   },
-  "include": ["lint.config.ts", "scripts/**/*.ts"],
+  "include": ["lint.config.ts", "lint.evidence.config.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist", "apps/docs/src/content/docs/api"]
 }
