@@ -58,9 +58,10 @@ const SENSITIVE_CONTEXT_KEYS = [
 ] as const;
 
 // A key names a credential when it contains one of these words anywhere
-// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`) or ends in auth or
+// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, or a property path
+// such as `config.password.value` or `client[secret]`) or ends in auth or
 // authorization; auth elsewhere would also match words such as `author`.
-const CREDENTIAL_KEY_SOURCE = String.raw`[\w-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_]?key|api[-_]?key)[\w-]*|auth(?:orization)?)`;
+const CREDENTIAL_KEY_SOURCE = String.raw`[\w.[\]-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_]?key|api[-_]?key)[\w.[\]-]*|auth(?:orization)?\]?)`;
 const CREDENTIAL_KEY = new RegExp(`^${CREDENTIAL_KEY_SOURCE}$`, "i");
 
 function isSensitiveContextKey(rawKey: string): boolean {
@@ -189,7 +190,8 @@ function sanitizeLogContext(context: LogContext): LogContext {
  *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue, and
  *   redactLogText, and ran logger.test.ts: phone numbers, key/value
  *   credentials under any key containing a credential word (compound,
- *   quoted, AWS-style, and in JSON escaped once), URL passwords, and
+ *   quoted, AWS-style, property paths, and in JSON escaped once), URL
+ *   passwords, and
  *   context values under snake or kebab case credential keys stay out of
  *   messages, errors, and context in JSON and text modes.
  */
