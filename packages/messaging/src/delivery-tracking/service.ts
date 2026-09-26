@@ -60,6 +60,39 @@ function jsonCopy<T>(value: T): T | undefined {
   }
 }
 
+interface CallbackContext {
+  run<R>(service: DeliveryTrackingService, callback: () => R): R;
+  getStore(): DeliveryTrackingService | undefined;
+}
+
+// Tells a runOnce() made by a status change callback apart from any other
+// call made while the callback runs. AsyncLocalStorage is reached through
+// process.getBuiltinModule, which Node, Bun, and Cloudflare Workers provide,
+// so nothing is imported in a runtime that lacks it.
+function createCallbackContext(): CallbackContext | undefined {
+  try {
+    const runtime = globalThis as {
+      process?: { getBuiltinModule?: (id: string) => unknown };
+    };
+    const hooks = runtime.process?.getBuiltinModule?.("node:async_hooks") as
+      | { AsyncLocalStorage?: new () => CallbackContext }
+      | undefined;
+    return hooks?.AsyncLocalStorage ? new hooks.AsyncLocalStorage() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const callbackContext = createCallbackContext();
+
+/** One poll: its changes are queued, then delivered. */
+interface PollRun {
+  /** Settles when the poll is done and its changes are queued. */
+  polled: Promise<void>;
+  /** Settles when its changes have been delivered, with the poll's outcome. */
+  delivered: Promise<void>;
+}
+
 function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
 }
@@ -148,7 +181,7 @@ export class DeliveryTrackingService {
 
   private initPromise?: Promise<void>;
   private timer?: ReturnType<typeof setInterval>;
-  private runOnceInFlight?: Promise<void>;
+  private runOnceInFlight?: PollRun;
   // Status changes are delivered one at a time, in the order polls stored
   // them, so a slow callback cannot be overtaken by a later change.
   private notificationTail: Promise<void> = Promise.resolve();
@@ -313,101 +346,118 @@ export class DeliveryTrackingService {
     return await this.store.countBy(filter, groupBy);
   }
 
+  /**
+   * Polls the records that are due once, or joins a poll already running.
+   * It resolves once the poll's status changes have been delivered to
+   * `onStatusChange`. A callback may call it too: that call resolves once
+   * the poll's changes are queued, since they are delivered after the
+   * callback. In a runtime without AsyncLocalStorage, every call made while
+   * a callback runs is treated as the callback's own.
+   */
   async runOnce(): Promise<void> {
+    // Checked before any await, while the caller's context is current.
+    const fromCallback = this.calledFromCallback();
     await this.ensureInit();
+    const run = this.runOnceInFlight ?? this.startRun();
+    await (fromCallback ? run.polled : run.delivered);
+  }
 
-    if (this.runOnceInFlight) {
-      await this.runOnceInFlight;
-      return;
-    }
+  // A callback that waited for notifications queued behind itself would
+  // never finish.
+  private calledFromCallback(): boolean {
+    if (!this.deliveringNotifications) return false;
+    return callbackContext ? callbackContext.getStore() === this : true;
+  }
 
+  private startRun(): PollRun {
     // Reported once the poll is done, so a callback can call runOnce itself
     // and cannot change a record that API failover still has to read.
     const changes: DeliveryStatusChange[] = [];
-    const op = (async () => {
-      const now = new Date();
-      const due = await this.store.listDue(now, this.polling.batchSize);
-      if (due.length === 0) return;
-      const dueByMessageId = new Map(
-        due.map((record) => [record.messageId, record]),
-      );
-
-      const { updates } = await reconcileDeliveryStatuses(
-        this.providers,
-        due,
-        now,
-        this.polling,
-      );
-
-      for (const update of updates) {
-        const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
-
-        // If the record is terminal, keep it out of the due list.
-        if (patch.status && isTerminalDeliveryStatus(patch.status)) {
-          patch.nextCheckAt = now;
+    let delivery: Promise<void> = Promise.resolve();
+    const polled = (async () => {
+      try {
+        await this.poll(changes);
+      } finally {
+        // Changes stored before a failure are still reported, each as this
+        // poll left it. The snapshots are read while this run still holds
+        // the guard, so no other poll can change a record first; reading
+        // later, behind a slow callback, would show a later poll's state.
+        let snapshots: DeliveryStatusChange[];
+        try {
+          snapshots = await Promise.all(
+            changes.map((change) => this.readBack(change)),
+          );
+        } finally {
+          // Only this run can be in flight until it clears the guard. It
+          // does so before notifying, so a callback's own runOnce() starts
+          // a new poll, and even if reading back failed, so later polls are
+          // not stuck behind this one.
+          this.runOnceInFlight = undefined;
         }
-
-        await this.store.patch(update.messageId, patch);
-
-        const originalRecord = dueByMessageId.get(update.messageId);
-        if (!originalRecord) continue;
-        const mergedRecord: TrackingRecord = {
-          ...originalRecord,
-          ...patch,
-          messageId: originalRecord.messageId,
-        };
-
-        if (
-          this.onStatusChange &&
-          mergedRecord.status !== originalRecord.status
-        ) {
-          changes.push({
-            record: mergedRecord,
-            previousStatus: originalRecord.status,
-          });
-        }
-
-        if (this.shouldAttemptApiFailover(mergedRecord)) {
-          await this.attemptApiFailover(mergedRecord, now);
-        }
+        delivery = this.queueNotifications(snapshots);
       }
     })();
-
-    // Callers that join this run wait for its notifications too.
-    const run = this.finishRun(op, changes);
+    const delivered = polled.then(
+      () => delivery,
+      async (error: unknown) => {
+        await delivery;
+        throw error;
+      },
+    );
+    // Each caller awaits one of the two; the other must not reject unseen.
+    polled.catch(() => {});
+    delivered.catch(() => {});
+    const run = { polled, delivered };
     this.runOnceInFlight = run;
-    await run;
+    return run;
   }
 
-  private async finishRun(
-    op: Promise<void>,
-    changes: DeliveryStatusChange[],
-  ): Promise<void> {
-    try {
-      await op;
-    } finally {
-      // Changes stored before a failure are still reported, each as this poll
-      // left it. The snapshots are read while this run still holds the
-      // guard, so no other poll can change a record first; reading later,
-      // behind a slow callback, would show a later poll's state instead.
-      let snapshots: DeliveryStatusChange[];
-      try {
-        snapshots = await Promise.all(
-          changes.map((change) => this.readBack(change)),
-        );
-      } finally {
-        // Only this run can be in flight until it clears the guard. It does
-        // so before notifying, so a callback's own runOnce() starts a new
-        // poll instead of waiting for itself, and even if reading back
-        // failed, so later polls are not stuck behind this one.
-        this.runOnceInFlight = undefined;
+  private async poll(changes: DeliveryStatusChange[]): Promise<void> {
+    const now = new Date();
+    const due = await this.store.listDue(now, this.polling.batchSize);
+    if (due.length === 0) return;
+    const dueByMessageId = new Map(
+      due.map((record) => [record.messageId, record]),
+    );
+
+    const { updates } = await reconcileDeliveryStatuses(
+      this.providers,
+      due,
+      now,
+      this.polling,
+    );
+
+    for (const update of updates) {
+      const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
+
+      // If the record is terminal, keep it out of the due list.
+      if (patch.status && isTerminalDeliveryStatus(patch.status)) {
+        patch.nextCheckAt = now;
       }
-      // A run that ends while a callback is running (such as one that
-      // callback started) does not wait for its changes, which queue behind
-      // that callback.
-      const reentrant = this.deliveringNotifications;
-      const delivered = this.queueNotifications(snapshots);
-      if (!reentrant) await delivered;
+
+      await this.store.patch(update.messageId, patch);
+
+      const originalRecord = dueByMessageId.get(update.messageId);
+      if (!originalRecord) continue;
+      const mergedRecord: TrackingRecord = {
+        ...originalRecord,
+        ...patch,
+        messageId: originalRecord.messageId,
+      };
+
+      if (
+        this.onStatusChange &&
+        mergedRecord.status !== originalRecord.status
+      ) {
+        changes.push({
+          record: mergedRecord,
+          previousStatus: originalRecord.status,
+        });
+      }
+
+      if (this.shouldAttemptApiFailover(mergedRecord)) {
+        await this.attemptApiFailover(mergedRecord, now);
+      }
     }
   }
 
@@ -450,7 +500,15 @@ export class DeliveryTrackingService {
     return { ...change, record };
   }
 
-  private async notifyStatusChange(
+  // Runs the callbacks in this service's callback context, so a runOnce()
+  // they make is known to come from them.
+  private notifyStatusChange(change: DeliveryStatusChange): Promise<void> {
+    return callbackContext
+      ? callbackContext.run(this, () => this.deliverStatusChange(change))
+      : this.deliverStatusChange(change);
+  }
+
+  private async deliverStatusChange(
     change: DeliveryStatusChange,
   ): Promise<void> {
     if (!this.onStatusChange) return;
