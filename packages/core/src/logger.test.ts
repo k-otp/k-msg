@@ -45,6 +45,16 @@ describe("redactLogText", () => {
       'password="oops\nretrying, see "runbook"',
       'password="[REDACTED]"\nretrying, see "runbook"',
     ],
+    [
+      "AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      "AWS_SECRET_ACCESS_KEY=[REDACTED]",
+    ],
+    ['{"secretAccessKey":"abc"}', '{"secretAccessKey":"[REDACTED]"}'],
+    ["SECRET_KEY: abc", "SECRET_KEY: [REDACTED]"],
+    ["privateKey=abc", "privateKey=[REDACTED]"],
+    ["x-api-key: abc", "x-api-key: [REDACTED]"],
+    ["db_passphrase=abc", "db_passphrase=[REDACTED]"],
+    ["credentials=abc", "credentials=[REDACTED]"],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
@@ -106,4 +116,22 @@ describe("Logger redaction", () => {
     ).not.toThrow();
     expect(lines.join("\n")).toContain("boom");
   });
+
+  test.each([true, false])(
+    "masks context values under snake and kebab case credential keys (json: %p)",
+    (enableJson) => {
+      spies = capture();
+      const logger = new Logger({}, { enableJson, enableColors: false });
+
+      logger.error("configured", {
+        api_key: "sk_live_abcdef123456",
+        "x-api-key": "key_abcdef123456",
+        private_key: "pk_abcdef123456",
+      });
+
+      const output = lines.join("\n");
+      expect(output).toContain("configured");
+      expect(output).not.toContain("abcdef123456");
+    },
+  );
 });

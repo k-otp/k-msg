@@ -70,7 +70,7 @@ The messaging tracking stores look records up by `to` and `from`, so they also s
 ## Logging policy
 
 - Sensitive keys (`to`, `from`, `payload`, `secret`, `token`, `authorization`, etc.) are masked/redacted in core logger.
-- Log messages, error messages and stacks, and other string context values are scrubbed of Korean phone numbers and of credentials written as key/value pairs or in URLs (`apiKey=...`, `Authorization: Bearer ...`, `postgres://user:...@host`).
+- Log messages, error messages and stacks, and other string context values are scrubbed of Korean phone numbers and of credentials written as key/value pairs or in URLs (`apiKey=...`, `AWS_SECRET_ACCESS_KEY=...`, `Authorization: Bearer ...`, `postgres://user:...@host`). A key names a credential when it contains secret, password, passwd, passphrase, token, credential, private key, or API key anywhere, or ends in auth or authorization; context keys of that form are masked too, in any case or with `_` or `-` separators.
 - Use masked values in operational diagnostics.
 
 ## Companion docs

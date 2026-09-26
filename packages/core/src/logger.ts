@@ -57,7 +57,14 @@ const SENSITIVE_CONTEXT_KEYS = [
   "text",
 ] as const;
 
+// A key names a credential when it contains one of these words anywhere
+// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`) or ends in auth or
+// authorization; auth elsewhere would also match words such as `author`.
+const CREDENTIAL_KEY_SOURCE = String.raw`[\w-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_]?key|api[-_]?key)[\w-]*|auth(?:orization)?)`;
+const CREDENTIAL_KEY = new RegExp(`^${CREDENTIAL_KEY_SOURCE}$`, "i");
+
 function isSensitiveContextKey(rawKey: string): boolean {
+  if (CREDENTIAL_KEY.test(rawKey)) return true;
   const key = rawKey.toLowerCase();
   return SENSITIVE_CONTEXT_KEYS.some((candidate) =>
     key.includes(candidate.toLowerCase()),
@@ -80,9 +87,9 @@ function maskStringValue(value: string): string {
 // Messages, error text, and free-text context values cannot be redacted by
 // key, so they are scrubbed for the values the logging policy protects:
 // Korean phone numbers (domestic, VoIP, toll-free, representative, or +82),
-// credentials written as
-// key/value pairs (`apiKey=...`, `client_secret: ...`, `"password":"..."`,
-// `password='...'`, `Authorization: Bearer ...`), and passwords in URLs
+// credentials written as key/value pairs under a credential key
+// (`apiKey=...`, `AWS_SECRET_ACCESS_KEY=...`, `client_secret: ...`,
+// `"password":"..."`, `password='...'`, `Authorization: Bearer ...`), and passwords in URLs
 // (`postgres://user:...@host`). A quoted value is redacted to its closing
 // quote, or to the end of the line if it has none; a bare value only up to
 // the first space. A URL password containing a raw "/", "?", or "#" is
@@ -101,8 +108,10 @@ const PHONE_NUMBER_PATTERN = new RegExp(
   "g",
 );
 const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
-const CREDENTIAL_PATTERN =
-  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))(["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
+const CREDENTIAL_PATTERN = new RegExp(
+  String.raw`\b(${CREDENTIAL_KEY_SOURCE})(["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)`,
+  "gi",
+);
 
 export function redactLogText(text: string): string {
   return text
@@ -160,11 +169,13 @@ function sanitizeLogContext(context: LogContext): LogContext {
  * @evidence docs/security/field-crypto-v1.md#logging-policy
  *   Masks sensitive context keys and scrubs the message, error text, and
  *   string context values with redactLogText before output.
- * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #0f37b79
- *   Read formatMessage, sanitizeContextValue, and redactLogText, and ran
- *   logger.test.ts: phone numbers, key/value credentials (compound and
- *   quoted), and URL passwords stay out of messages, errors, and context
- *   in JSON and text modes.
+ * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #2d4e6e4
+ *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue, and
+ *   redactLogText, and ran logger.test.ts: phone numbers, key/value
+ *   credentials under any key containing a credential word (compound,
+ *   quoted, and AWS-style keys), URL passwords, and context values under
+ *   snake or kebab case credential keys stay out of messages, errors, and
+ *   context in JSON and text modes.
  */
 export class Logger {
   private config: LoggerConfig;
