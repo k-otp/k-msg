@@ -30,7 +30,8 @@ export interface VerifyWebhookRequestOptions
   > {
   /**
    * How far the signed time may be from the receiver's clock, in either
-   * direction, in milliseconds. Defaults to 300000 (5 minutes).
+   * direction, in milliseconds: a finite number of 0 or more. Defaults to
+   * 300000 (5 minutes).
    */
   toleranceMs?: number;
 }
@@ -111,7 +112,7 @@ function readBody(body: WebhookRequestBody): string {
  * @returns The signed time, or a {@link WebhookVerificationError} whose
  *   `code` says which check failed.
  * @throws TypeError when `secret` is empty, and RangeError when
- *   `toleranceMs` is negative or NaN.
+ *   `toleranceMs` is negative, NaN, or infinite.
  *
  * @example
  * ```ts
@@ -135,8 +136,9 @@ export function verifyWebhookRequest(
     throw new TypeError("verifyWebhookRequest needs the signing secret");
   }
   const toleranceMs = options.toleranceMs ?? DEFAULT_TOLERANCE_MS;
-  if (!(toleranceMs >= 0)) {
-    throw new RangeError("toleranceMs must be a number of 0 or more");
+  // Infinity would silently turn the replay check off.
+  if (!Number.isFinite(toleranceMs) || toleranceMs < 0) {
+    throw new RangeError("toleranceMs must be a finite number of 0 or more");
   }
 
   const security = new SecurityManager(options);

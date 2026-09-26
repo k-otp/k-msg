@@ -272,14 +272,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
       await this.deliveryStore.add(delivery);
 
       const success = delivery.status === "success";
+      // After retries, the last attempt is the one that decided the result.
+      const lastAttempt = delivery.attempts[delivery.attempts.length - 1];
       return {
         endpointId,
         url: endpoint.url,
         success,
-        httpStatus: delivery.attempts[0]?.httpStatus,
-        error: success
-          ? undefined
-          : delivery.attempts[delivery.attempts.length - 1]?.error,
+        httpStatus: lastAttempt?.httpStatus,
+        error: success ? undefined : lastAttempt?.error,
         responseTime: Date.now() - startedAt,
         testedAt: new Date(),
       };

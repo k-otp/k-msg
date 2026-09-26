@@ -747,6 +747,45 @@ describe("WebhookRuntimeService message status events", () => {
   });
 });
 
+describe("WebhookRuntimeService probeEndpoint", () => {
+  test.each([
+    [503, 404, { success: false, httpStatus: 404, error: "HTTP 404" }],
+    [503, 200, { success: true, httpStatus: 200, error: undefined }],
+  ])(
+    "probeEndpoint reports the last attempt after a %p then a %p",
+    async (first, last, expected) => {
+      const statuses = [first, last];
+      const runtime = new WebhookRuntimeService({
+        delivery: { ...createConfig(), maxRetries: 1, retryDelayMs: 1 },
+        httpClient: {
+          fetch: async () => new Response("", { status: statuses.shift() }),
+        },
+        autoStart: false,
+      });
+
+      try {
+        const endpoint = await runtime.addEndpoint({
+          url: "https://example.com/flaky",
+          active: true,
+          events: [WebhookEventType.SYSTEM_MAINTENANCE],
+        });
+
+        const result = await runtime.probeEndpoint(endpoint.id);
+
+        expect(result.success).toBe(expected.success);
+        expect(result.httpStatus).toBe(expected.httpStatus);
+        if (expected.error === undefined) {
+          expect(result.error).toBeUndefined();
+        } else {
+          expect(result.error).toStartWith(expected.error);
+        }
+      } finally {
+        await runtime.shutdown();
+      }
+    },
+  );
+});
+
 class SlowHttpClient implements HttpClient {
   readonly calls: string[] = [];
 

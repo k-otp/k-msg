@@ -250,5 +250,11 @@ describe("verifyWebhookRequest", () => {
     expect(() =>
       verifyWebhookRequest(headers, BODY, SECRET, { toleranceMs: Number.NaN }),
     ).toThrow(RangeError);
+    // Infinity would turn the replay check off without saying so.
+    expect(() =>
+      verifyWebhookRequest(headers, BODY, SECRET, {
+        toleranceMs: Number.POSITIVE_INFINITY,
+      }),
+    ).toThrow(RangeError);
   });
 });
