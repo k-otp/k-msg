@@ -59,9 +59,10 @@ const SENSITIVE_CONTEXT_KEYS = [
 
 // A key names a credential when it contains one of these words anywhere
 // (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, or a property path
-// such as `config.password.value` or `client[secret]`) or ends in auth or
-// authorization; auth elsewhere would also match words such as `author`.
-const CREDENTIAL_KEY_SOURCE = String.raw`[\w.[\]-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_]?key|api[-_]?key)[\w.[\]-]*|auth(?:orization)?\]?)`;
+// such as `config.password.value`, `client[secret]`, or `settings.api.key`),
+// or has an auth or authorization segment (`Authorization`, `config.auth.value`,
+// `auth[0]`). Auth only counts as a whole segment: `author` is not a key.
+const CREDENTIAL_KEY_SOURCE = String.raw`[\w.[\]-]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)[\w.[\]-]*|auth(?:orization)?(?:[.[\]][\w.[\]-]*)?)`;
 const CREDENTIAL_KEY = new RegExp(`^${CREDENTIAL_KEY_SOURCE}$`, "i");
 
 function isSensitiveContextKey(rawKey: string): boolean {
