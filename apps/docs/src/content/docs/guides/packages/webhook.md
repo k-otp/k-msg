@@ -195,8 +195,10 @@ function createRuntime(env: Env): WebhookRuntimeService {
 `"url"`이고, `endpointId`는 이미 등록된 엔드포인트의 id입니다.
 `updateEndpoint()`도 다른 엔드포인트가 쓰는 URL을 같은 방식으로 거절합니다.
 엔드포인트의 secret, 이벤트, URL은 `updateEndpoint()`로 바꾸세요.
-`addEndpoints()`는 저장하기 전에 배치 전체를 저장된 엔드포인트, 그리고 배치
-안끼리 확인하므로, 충돌이 나도 일부만 추가된 상태로 남지 않습니다.
+`addEndpoints()`는 엔드포인트를 모두 저장하거나 하나도 저장하지 않습니다.
+먼저 저장된 엔드포인트와 비교하고, 이후 쓰기가 실패하면 이미 추가한 것을
+제거합니다. 한 번의 호출에 같은 id나 URL을 두 번 넣으면 충돌이 아니라 잘못된
+입력이므로 일반 `Error`를 던집니다.
 
 배포할 때마다 같은 엔드포인트를 등록하려면 이미 있는 엔드포인트를
 갱신하세요.

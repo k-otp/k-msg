@@ -193,9 +193,10 @@ Endpoint ids and URLs are unique, and registering never replaces an endpoint.
 `WebhookEndpointConflictError`: its `field` is `"id"` or `"url"`, and its
 `endpointId` is the registered endpoint's id. `updateEndpoint()` rejects a URL
 that another endpoint uses in the same way. Change an endpoint's secret,
-events or URL with `updateEndpoint()`. `addEndpoints()` checks the whole batch,
-against stored endpoints and within itself, before it stores any, so a
-conflict leaves nothing half added.
+events or URL with `updateEndpoint()`. `addEndpoints()` stores all of its
+endpoints or none: it checks them against stored endpoints first, and removes
+the ones it added if a later write fails. An id or URL given twice in one
+call is bad input and throws a plain `Error`, not a conflict.
 
 To register the same endpoints on every deploy, update the one that is
 already there:
