@@ -5,7 +5,7 @@ prev: false
 title: "DefaultHttpClient"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L15)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L35)
 
 ## Implements
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:15](https://git
 
 > **fetch**(`url`, `_options`): `Promise`\<`Response`\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L16)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L36)
 
 #### Parameters
 
