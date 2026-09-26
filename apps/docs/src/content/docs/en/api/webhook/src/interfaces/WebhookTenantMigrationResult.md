@@ -5,7 +5,7 @@ prev: false
 title: "WebhookTenantMigrationResult"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L58)
+Defined in: [packages/webhook/src/runtime/types.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L63)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:58](https://github.com/k-otp/
 
 > **deliveries**: `number`
 
-Defined in: [packages/webhook/src/runtime/types.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L62)
+Defined in: [packages/webhook/src/runtime/types.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L67)
 
 Deliveries whose payload was re-encrypted with the tenant.
 
@@ -23,6 +23,6 @@ Deliveries whose payload was re-encrypted with the tenant.
 
 > **endpoints**: `number`
 
-Defined in: [packages/webhook/src/runtime/types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L60)
+Defined in: [packages/webhook/src/runtime/types.ts:65](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L65)
 
 Endpoints whose secret was re-encrypted with the tenant.
