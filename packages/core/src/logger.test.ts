@@ -13,6 +13,7 @@ describe("redactLogText", () => {
     ["call (010) 1234-5678", "call (01**********78"],
     ["toll-free 080-123-4567", "toll-free 080*******67"],
     ["center 1588-1234", "center 158****34"],
+    ["(010-1234-5678)", "(010********78)"],
   ])("masks the phone number in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
@@ -50,7 +51,7 @@ describe("redactLogText", () => {
 
   test("leaves timestamps, ids, and prose alone", () => {
     const text =
-      "token expired at 2026-09-26T09:00:00Z after 1234 ms (run 1790399550700, amount 25000, author: kim, see https://docs.example.com/a@b and https://host:8443?next=a@b)";
+      "token expired at 2026-09-26T09:00:00Z after 1234 ms (run 1790399550700, amount 25000, rate 1587.5000, author: kim, see https://docs.example.com/a@b and https://host:8443?next=a@b)";
     expect(redactLogText(text)).toBe(text);
   });
 });
