@@ -36,7 +36,7 @@ export function formatKstDate(date: Date): string {
 /** `YYYY-MM-DD HH:mm:ss` in KST. */
 export function formatKstDateTime(date: Date): string {
   const kst = toKst(date);
-  return `${formatKstDate(date)} ${pad(kst.hour)}:${pad(kst.minute)}:${pad(kst.second)}`;
+  return `${kst.year}-${pad(kst.month)}-${pad(kst.day)} ${pad(kst.hour)}:${pad(kst.minute)}:${pad(kst.second)}`;
 }
 
 /** Reads `YYYY-MM-DD HH:mm:ss` as KST. */
@@ -47,15 +47,29 @@ export function parseKstDateTime(value: unknown): Date | undefined {
   );
   if (!match) return undefined;
 
+  const fields: KstDateTime = {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+    hour: Number(match[4]),
+    minute: Number(match[5]),
+    second: Number(match[6]),
+  };
   const date = new Date(
     Date.UTC(
-      Number(match[1]),
-      Number(match[2]) - 1,
-      Number(match[3]),
-      Number(match[4]),
-      Number(match[5]),
-      Number(match[6]),
+      fields.year,
+      fields.month - 1,
+      fields.day,
+      fields.hour,
+      fields.minute,
+      fields.second,
     ) - KST_OFFSET_MS,
   );
-  return Number.isNaN(date.getTime()) ? undefined : date;
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  // Date.UTC rolls out-of-range fields over (February 31 becomes March 3,
+  // year 50 becomes 1950); reject any value that does not round-trip.
+  const roundTrip = toKst(date);
+  const keys = Object.keys(fields) as (keyof KstDateTime)[];
+  return keys.every((key) => roundTrip[key] === fields[key]) ? date : undefined;
 }

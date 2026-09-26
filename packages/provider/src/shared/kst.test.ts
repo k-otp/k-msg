@@ -47,3 +47,12 @@ test("parseKstDateTime rejects other shapes", () => {
   expect(parseKstDateTime("")).toBeUndefined();
   expect(parseKstDateTime(20261001)).toBeUndefined();
 });
+
+test.each([
+  ["2026-02-31 00:00:00"],
+  ["2026-10-01 25:00:00"],
+  ["2026-10-01 00:60:00"],
+  ["0050-01-01 00:00:00"],
+])("parseKstDateTime rejects the out-of-range value %s", (value) => {
+  expect(parseKstDateTime(value)).toBeUndefined();
+});
