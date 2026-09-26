@@ -70,7 +70,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private readonly eventQueue: WebhookEvent[] = [];
   private batchProcessor: ReturnType<typeof setInterval> | null = null;
   private initPromise: Promise<void> | null = null;
-  private processing = false;
+  // The batch currently dispatching, shared so flush() can wait for it.
+  private activeBatch: Promise<void> | null = null;
 
   constructor(config: WebhookRuntimeConfig) {
     this.config = config.delivery;
@@ -230,7 +231,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
     await this.ensureInitialized();
     this.eventQueue.push(cloneEventWithValidTimestamp(event));
 
-    if (this.eventQueue.length >= this.config.batchSize) {
+    if (
+      this.eventQueue.length >= this.config.batchSize &&
+      this.activeBatch === null
+    ) {
       await this.processBatch();
     }
   }
@@ -260,7 +264,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
   async flush(): Promise<void> {
     await this.ensureInitialized();
 
-    while (this.eventQueue.length > 0) {
+    // Awaiting the in-flight batch yields to the event loop, so its requests
+    // can finish before the remaining queue is drained.
+    while (this.eventQueue.length > 0 || this.activeBatch !== null) {
       await this.processBatch();
     }
   }
@@ -357,15 +363,23 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
   }
 
-  private async processBatch(): Promise<void> {
-    if (this.processing || this.eventQueue.length === 0) {
-      return;
+  private processBatch(): Promise<void> {
+    if (this.activeBatch !== null) {
+      return this.activeBatch;
+    }
+    if (this.eventQueue.length === 0) {
+      return Promise.resolve();
     }
 
-    this.processing = true;
-
     const batch = this.eventQueue.splice(0, this.config.batchSize);
+    this.activeBatch = this.dispatchBatch(batch).finally(() => {
+      this.activeBatch = null;
+    });
+    return this.activeBatch;
+  }
 
+  private async dispatchBatch(batch: WebhookEvent[]): Promise<void> {
+    let dispatched = 0;
     try {
       for (const event of batch) {
         const endpoints = await this.getMatchingEndpoints(event);
@@ -389,12 +403,13 @@ export class WebhookRuntimeService implements WebhookRuntime {
             );
           }
         }
+        dispatched += 1;
       }
     } catch (error) {
-      this.eventQueue.unshift(...batch);
+      // Re-queue only what was not dispatched; earlier events already reached
+      // their endpoints and would otherwise be delivered twice.
+      this.eventQueue.unshift(...batch.slice(dispatched));
       throw error;
-    } finally {
-      this.processing = false;
     }
   }
 
@@ -452,6 +467,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private startBatchProcessor(): void {
     const timeout = normalizeLimit(this.config.batchTimeoutMs, 5000);
     this.batchProcessor = setInterval(() => {
+      if (this.activeBatch !== null) return;
       this.processBatch().catch((error) => {
         logger.error(
           "Webhook batch processor error",
