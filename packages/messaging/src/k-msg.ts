@@ -1233,8 +1233,45 @@ export class KMsg {
 
     // Interpolate for text-based types when variables exist.
     const interpolated = this.interpolateTextOptions(patched);
-    return { ...interpolated, messageId } as SendOptions & {
+    const withFallback = this.prepareFailoverContent(interpolated);
+    return { ...withFallback, messageId } as SendOptions & {
       messageId: string;
+    };
+  }
+
+  // Providers send the ALIMTALK fallback text as given, so it is filled in
+  // here like SMS text, and sized for SMS or LMS unless the caller chose.
+  private prepareFailoverContent(options: SendOptions): SendOptions {
+    if (options.type !== "ALIMTALK" || !options.failover) return options;
+
+    const failover = options.failover;
+    const variables = this.coerceVariables(options.variables);
+    const fallbackContent =
+      typeof failover.fallbackContent === "string"
+        ? this.interpolateText(failover.fallbackContent, variables)
+        : undefined;
+    const fallbackTitle =
+      typeof failover.fallbackTitle === "string"
+        ? this.interpolateText(failover.fallbackTitle, variables)
+        : undefined;
+    // Providers trim the text before sending it.
+    const sentContent = fallbackContent?.trim() ?? "";
+    const fallbackChannel =
+      failover.fallbackChannel ??
+      (sentContent.length === 0
+        ? undefined
+        : estimateSmsBytes(sentContent) > this.autoLmsBytes()
+          ? "lms"
+          : "sms");
+
+    return {
+      ...options,
+      failover: {
+        ...failover,
+        ...(fallbackChannel ? { fallbackChannel } : {}),
+        ...(fallbackContent !== undefined ? { fallbackContent } : {}),
+        ...(fallbackTitle !== undefined ? { fallbackTitle } : {}),
+      },
     };
   }
 
