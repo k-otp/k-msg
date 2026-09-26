@@ -94,4 +94,35 @@ describe("MockProvider", () => {
       KMsgErrorCode.REQUEST_ABORTED,
     );
   });
+
+  test("uses the id it is given, so two mocks can back different routes", async () => {
+    const kakao = new MockProvider({ id: "mock-kakao" });
+    const sms = new MockProvider({ id: "mock-sms" });
+
+    expect(kakao.id).toBe("mock-kakao");
+    expect(sms.id).toBe("mock-sms");
+    expect(new MockProvider().id).toBe("mock");
+
+    const sent = await sms.send({ type: "SMS", to: "01012345678", text: "hi" });
+    expect(sent.isSuccess ? sent.value.providerId : undefined).toBe("mock-sms");
+
+    sms.mockFailure(1);
+    const failed = await sms.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hi",
+    });
+    expect(
+      failed.isFailure ? failed.error.details?.providerId : undefined,
+    ).toBe("mock-sms");
+
+    // The onboarding spec describes the mock itself, whatever its id.
+    expect(kakao.getOnboardingSpec()).toEqual(
+      new MockProvider().getOnboardingSpec(),
+    );
+
+    expect(() => new MockProvider({ id: " " })).toThrow(
+      "MockProvider id must be a non-empty string",
+    );
+  });
 });

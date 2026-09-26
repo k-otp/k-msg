@@ -86,6 +86,15 @@ const normalizeMockErrorCode = (
   return KMsgErrorCode.PROVIDER_ERROR;
 };
 
+export interface MockProviderOptions {
+  /**
+   * The provider id, used for routing and reported in results and errors.
+   * Give each mock its own id to route message types to different mocks.
+   * @default "mock"
+   */
+  id?: string;
+}
+
 export class MockProvider
   implements
     Provider,
@@ -93,7 +102,7 @@ export class MockProvider
     TemplateInspectionProvider,
     KakaoChannelProvider
 {
-  readonly id = "mock";
+  readonly id: string;
   readonly name = "Mock Provider";
   readonly supportedTypes: readonly MessageType[] = [
     "ALIMTALK",
@@ -126,14 +135,23 @@ export class MockProvider
   private kakaoChannels: Map<string, KakaoChannel> = new Map();
 
   getOnboardingSpec() {
-    const spec = getProviderOnboardingSpec(this.id);
+    // The spec describes the mock itself, so it does not depend on the id.
+    const spec = getProviderOnboardingSpec("mock");
     if (!spec) {
-      throw new Error(`Onboarding spec missing for provider: ${this.id}`);
+      throw new Error("Onboarding spec missing for provider: mock");
     }
     return spec;
   }
 
-  constructor() {
+  constructor(options: MockProviderOptions = {}) {
+    if (
+      options.id !== undefined &&
+      (typeof options.id !== "string" || options.id.trim().length === 0)
+    ) {
+      throw new Error("MockProvider id must be a non-empty string");
+    }
+    this.id = options.id ?? "mock";
+
     // Seed with a deterministic channel/template so CLI calls can be tested
     // without relying on cross-process state.
     const now = new Date();
