@@ -99,6 +99,33 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Sampo refreshes bun.lock with `bun update --lockfile-only --no-save`,
+      # which also moves every dependency, and the lockfile's copy of the
+      # catalog, to the newest versions while package.json keeps its ranges.
+      # CI's frozen install then rejects the lockfile, and the release would
+      # ship dependency updates nobody reviewed. Rebuild it from main's
+      # lockfile instead, so it records only the new workspace versions.
+      # `--lockfile-only` installs nothing, so no dependency code runs here.
+      - name: Keep only the version bumps in the release lockfile
+        run: |
+          set -euo pipefail
+          if ! git ls-remote --exit-code --heads origin sampo/release >/dev/null; then
+            echo "No release branch; nothing to fix."
+            exit 0
+          fi
+          git fetch --no-tags origin main sampo/release
+          git switch --discard-changes --force-create sampo/release origin/sampo/release
+          git checkout origin/main -- bun.lock
+          bun install --lockfile-only
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock already records only the version bumps."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet -m "chore(release): keep only the version bumps in bun.lock" -- bun.lock
+          git push origin sampo/release
+
   # Pushes made with GITHUB_TOKEN do not trigger CI, so dispatch it for the
   # release PR branch from a job that runs no third-party code.
   release-ci:
