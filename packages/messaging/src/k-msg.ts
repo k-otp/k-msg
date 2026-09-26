@@ -634,6 +634,9 @@ export class KMsg {
         persistedRecordId = saveResult.value;
       }
 
+      // Without a request, call send with one argument as before: a mocked
+      // provider asserted with toHaveBeenCalledWith(options) would not match
+      // a trailing undefined.
       const result = request
         ? await provider.send(normalized, request)
         : await provider.send(normalized);
