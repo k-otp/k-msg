@@ -298,11 +298,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     this.eventQueue.push(cloneEventWithValidTimestamp(event));
 
     try {
-      if (
-        this.eventQueue.length >= this.batchSize &&
-        this.activeBatch === null
-      ) {
-        await this.processBatch();
+      if (this.eventQueue.length >= this.batchSize) {
+        await this.sendFullBatch();
       }
     } finally {
       this.scheduleBatch();
@@ -592,8 +589,27 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }, this.batchTimeoutMs);
   }
 
+  // The emit() that fills a batch sends it, after any batch already in
+  // flight, so the call still resolves only once its batch has gone out.
+  private async sendFullBatch(): Promise<void> {
+    await this.waitForActiveBatch();
+    if (this.eventQueue.length >= this.batchSize && this.activeBatch === null) {
+      await this.processBatch();
+    }
+  }
+
+  // Whoever started a batch handles its failure; others only wait for it.
+  private async waitForActiveBatch(): Promise<void> {
+    if (this.activeBatch !== null) {
+      await this.activeBatch.catch(() => undefined);
+    }
+  }
+
   private async runScheduledBatch(): Promise<void> {
     try {
+      // The queue is due now: if a batch is still in flight, send it right
+      // after that one rather than a whole timeout later.
+      await this.waitForActiveBatch();
       await this.processBatch();
     } catch (error) {
       logger.error(

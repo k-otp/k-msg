@@ -379,6 +379,140 @@ describe("WebhookRuntimeService batch timer", () => {
   });
 });
 
+// Replaces setTimeout with timers that only run when the test fires them.
+function manualTimers(): { fire(): void; pending(): number; restore(): void } {
+  const original = {
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+  };
+  const callbacks = new Map<number, () => void>();
+  let nextId = 1;
+
+  globalThis.setTimeout = ((handler: () => void) => {
+    const id = nextId++;
+    callbacks.set(id, handler);
+    return id;
+  }) as unknown as typeof setTimeout;
+  globalThis.clearTimeout = ((id: number) => {
+    callbacks.delete(id);
+  }) as unknown as typeof clearTimeout;
+
+  return {
+    fire: () => {
+      const due = [...callbacks.values()];
+      callbacks.clear();
+      for (const callback of due) callback();
+    },
+    pending: () => callbacks.size,
+    restore: () => {
+      Object.assign(globalThis, original);
+    },
+  };
+}
+
+// Holds every request at a gate until release(); later requests pass.
+function gatedHttpClient(): {
+  client: HttpClient;
+  calls(): number;
+  release(): void;
+} {
+  let calls = 0;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return {
+    client: {
+      fetch: async () => {
+        calls += 1;
+        await gate;
+        return new Response("ok");
+      },
+    },
+    calls: () => calls,
+    release: () => release(),
+  };
+}
+
+async function waitUntil(condition: () => boolean): Promise<void> {
+  const deadline = Date.now() + 2_000;
+  while (!condition() && Date.now() < deadline) {
+    await Bun.sleep(1);
+  }
+}
+
+describe("WebhookRuntimeService batches in flight", () => {
+  test("a timer that fires during a batch sends the queue right after it", async () => {
+    const clock = manualTimers();
+    const http = gatedHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: http.client,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/in-flight",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      await runtime.emit(createEvent());
+      clock.fire();
+      await waitUntil(() => http.calls() === 1);
+
+      // Queued while the first batch waits at the gate; its timer fires
+      // before that batch finishes.
+      await runtime.emit(createEvent());
+      clock.fire();
+      http.release();
+      await waitUntil(() => http.calls() === 2);
+
+      expect(http.calls()).toBe(2);
+      expect(clock.pending()).toBe(0);
+    } finally {
+      http.release();
+      clock.restore();
+      await runtime.shutdown();
+    }
+  });
+
+  test("the emit() that fills a batch during another one sends it after that one", async () => {
+    const http = gatedHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 2 },
+      httpClient: http.client,
+      autoStart: false,
+    });
+    await runtime.addEndpoint({
+      url: "https://example.com/refill",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    const first = Promise.all([
+      runtime.emit(createEvent()),
+      runtime.emit(createEvent()),
+    ]);
+    await waitUntil(() => http.calls() === 1);
+
+    let secondResolved = false;
+    const second = Promise.all([
+      runtime.emit(createEvent()),
+      runtime.emit(createEvent()),
+    ]).then(() => {
+      secondResolved = true;
+    });
+    await Bun.sleep(10);
+    // It waits for the batch in flight instead of resolving unsent.
+    expect(secondResolved).toBe(false);
+
+    http.release();
+    await first;
+    await second;
+    expect(http.calls()).toBe(4);
+  });
+});
+
 // These runtimes use in-memory storage and autoStart: false, so they hold
 // nothing that needs shutdown(). Skipping it keeps a broken batch size from
 // hanging the test run in flush().
