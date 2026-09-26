@@ -81,14 +81,16 @@ function maskStringValue(value: string): string {
 // key, so they are scrubbed for the values the logging policy protects:
 // Korean phone numbers (domestic, VoIP, or +82), credentials written as
 // key/value pairs (`apiKey=...`, `client_secret: ...`, `"password":"..."`,
-// `Authorization: Bearer ...`), and passwords in URLs
-// (`postgres://user:...@host`). A bare value that contains spaces is only
-// redacted up to the first space.
+// `password='...'`, `Authorization: Bearer ...`), and passwords in URLs
+// (`postgres://user:...@host`). A quoted value is redacted to its closing
+// quote, or to the end if it has none; a bare value only up to the first
+// space. A URL password containing a raw "/" is indistinguishable from a
+// path and is not matched.
 const PHONE_NUMBER_PATTERN =
   /(?<![\w+])(?:\+82[-.\s]?0?|0)(?:1[016789]|2|70|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\w)/g;
-const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/]*@/gi;
+const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
 const CREDENTIAL_PATTERN =
-  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))("?\s*[:=]\s*)(?:"[^"]*"|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
+  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))(["']?\s*[:=]\s*)(?:"[^"]*"?|'[^']*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
 
 export function redactLogText(text: string): string {
   return text
@@ -96,10 +98,12 @@ export function redactLogText(text: string): string {
     .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone))
     .replace(
       CREDENTIAL_PATTERN,
-      (match, key: string, separator: string, scheme: string | undefined) =>
-        match.startsWith('"', key.length + separator.length)
-          ? `${key}${separator}"${REDACTED_TOKEN}"`
-          : `${key}${separator}${scheme ?? ""}${REDACTED_TOKEN}`,
+      (match, key: string, separator: string, scheme: string | undefined) => {
+        const quote = match[key.length + separator.length];
+        return quote === '"' || quote === "'"
+          ? `${key}${separator}${quote}${REDACTED_TOKEN}${quote}`
+          : `${key}${separator}${scheme ?? ""}${REDACTED_TOKEN}`;
+      },
     );
 }
 

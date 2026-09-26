@@ -29,13 +29,17 @@ describe("redactLogText", () => {
       "connect postgres://app:[REDACTED]@db:5432/sms failed",
     ],
     ["redis://:p@ss@cache:6379", "redis://:[REDACTED]@cache:6379"],
+    ["https://user:pw@host?next=a@b", "https://user:[REDACTED]@host?next=a@b"],
+    ["password='hunter2'", "password='[REDACTED]'"],
+    ["{'password': 'one two'}", "{'password': '[REDACTED]'}"],
+    ['truncated apiKey="abc', 'truncated apiKey="[REDACTED]"'],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
 
   test("leaves timestamps, ids, and prose alone", () => {
     const text =
-      "token expired at 2026-09-26T09:00:00Z after 1234 ms (run 1790399550700, amount 25000, author: kim, see https://docs.example.com/a@b)";
+      "token expired at 2026-09-26T09:00:00Z after 1234 ms (run 1790399550700, amount 25000, author: kim, see https://docs.example.com/a@b and https://host:8443?next=a@b)";
     expect(redactLogText(text)).toBe(text);
   });
 });
