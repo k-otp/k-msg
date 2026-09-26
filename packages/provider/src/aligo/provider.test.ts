@@ -326,22 +326,20 @@ describe("AligoProvider (send responses)", () => {
     }
   });
 
-  test.each([
-    [true],
-    [["1"]],
-    ["0x1"],
-    [null],
-  ])("rejects an SMS response with malformed result_code %p", async (resultCode) => {
-    respondWith({ result_code: resultCode, message: "", msg_id: 1 });
+  test.each([[true], [["1"]], ["0x1"], [null]])(
+    "rejects an SMS response with malformed result_code %p",
+    async (resultCode) => {
+      respondWith({ result_code: resultCode, message: "", msg_id: 1 });
 
-    const result = await createSendProvider().send({
-      type: "SMS",
-      to: "01012345678",
-      text: "hello",
-    });
+      const result = await createSendProvider().send({
+        type: "SMS",
+        to: "01012345678",
+        text: "hello",
+      });
 
-    expect(result.isFailure).toBe(true);
-  });
+      expect(result.isFailure).toBe(true);
+    },
+  );
 
   test("rejects a Kakao send response that is not an object", async () => {
     globalThis.fetch = async () =>
