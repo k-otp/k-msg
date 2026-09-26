@@ -5,7 +5,7 @@ prev: false
 title: "MockProvider"
 ---
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L98)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L101)
 
 Core provider interface for sending messages.
 
@@ -38,7 +38,7 @@ class MyProvider implements Provider {
 
 > **new MockProvider**(`options?`): `MockProvider`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L146)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L150)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:146](https://
 
 > **calls**: [`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)[] = `[]`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L128)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L131)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:128](https://
 
 > `readonly` **id**: `string`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L105)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L108)
 
 Unique identifier for this provider instance.
 Used for routing and logging.
@@ -85,7 +85,7 @@ Used for routing and logging.
 
 > `readonly` **name**: `"Mock Provider"` = `"Mock Provider"`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:106](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L106)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L109)
 
 Human-readable name for display purposes.
 
@@ -105,7 +105,7 @@ Human-readable name for display purposes.
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L107)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L110)
 
 Message types this provider supports.
 Messages of unsupported types will be rejected.
@@ -120,7 +120,7 @@ Messages of unsupported types will be rejected.
 
 > `readonly` **transportCapabilities**: `object`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L123)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L126)
 
 Per-operation transport features supported by this provider.
 Missing declarations must be treated as unsupported.
@@ -143,7 +143,7 @@ Missing declarations must be treated as unsupported.
 
 > **addKakaoChannel**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:500](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L500)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:568](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L568)
 
 Add a Kakao channel after authentication.
 
@@ -181,7 +181,7 @@ Add a Kakao channel after authentication.
 
 > **clearHistory**(): `void`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:334](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L334)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:401](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L401)
 
 #### Returns
 
@@ -193,7 +193,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:334](https://
 
 > **clearScenario**(): `void`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:294](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L294)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L310)
 
 #### Returns
 
@@ -205,7 +205,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:294](https://
 
 > **createTemplate**(`input`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:338](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L338)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L406)
 
 Create a new template.
 
@@ -233,7 +233,7 @@ Create a new template.
 
 > **deleteTemplate**(`code`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:387](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L387)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:455](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L455)
 
 Delete a template by code.
 
@@ -257,11 +257,41 @@ Delete a template by code.
 
 ***
 
+### getDeliveryStatus()
+
+> **getDeliveryStatus**(`query`, `context?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:320](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L320)
+
+Reports the status of a message this provider sent. Sent messages read
+as DELIVERED until [setDeliveryStatus](/en/api/provider/src/classes/mockprovider/#setdeliverystatus) changes them; an unknown
+`providerMessageId` reads as not found.
+
+#### Parameters
+
+##### query
+
+[`DeliveryStatusQuery`](/en/api/core/src/interfaces/deliverystatusquery/)
+
+##### context?
+
+[`ProviderRequestContext`](/en/api/core/src/interfaces/providerrequestcontext/)
+
+#### Returns
+
+`Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+
+#### Implementation of
+
+[`Provider`](/en/api/core/src/interfaces/provider/).[`getDeliveryStatus`](/en/api/core/src/interfaces/provider/#getdeliverystatus)
+
+***
+
 ### getHistory()
 
 > **getHistory**(): [`SendOptions`](/en/api/core/src/type-aliases/sendoptions/)[]
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:330](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L330)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:397](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L397)
 
 #### Returns
 
@@ -273,7 +303,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:330](https://
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L137)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L141)
 
 Get the onboarding specification for this provider.
 Used by tooling to guide provider configuration.
@@ -292,7 +322,7 @@ Used by tooling to guide provider configuration.
 
 > **getTemplate**(`code`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L403)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:471](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L471)
 
 Get a template by code.
 
@@ -320,7 +350,7 @@ Get a template by code.
 
 > **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `never`[]; \}\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L182)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:186](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L186)
 
 Check if the provider is operational.
 Used for health monitoring and circuit breaker decisions.
@@ -339,7 +369,7 @@ Used for health monitoring and circuit breaker decisions.
 
 > **listKakaoChannelCategories**(): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:467](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L467)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:535](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L535)
 
 List available channel categories for registration.
 
@@ -357,7 +387,7 @@ List available channel categories for registration.
 
 > **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:453](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L453)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:521](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L521)
 
 List registered Kakao channels.
 
@@ -387,7 +417,7 @@ List registered Kakao channels.
 
 > **listTemplates**(`params?`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:419](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L419)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:487](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L487)
 
 List templates with optional filtering and pagination.
 
@@ -425,7 +455,7 @@ List templates with optional filtering and pagination.
 
 > **mockFailure**(`count`): `void`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:284](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L284)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:300](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L300)
 
 #### Parameters
 
@@ -443,7 +473,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:284](https://
 
 > **mockScenario**(`steps`): `void`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L289)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:305](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L305)
 
 #### Parameters
 
@@ -461,7 +491,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:289](https://
 
 > **mockSuccess**(): `void`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:279](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L279)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:295](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L295)
 
 #### Returns
 
@@ -473,7 +503,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:279](https://
 
 > **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:484](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L484)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:552](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L552)
 
 Request authentication SMS for channel registration.
 
@@ -503,7 +533,7 @@ Request authentication SMS for channel registration.
 
 > **requestTemplateInspection**(`code`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:438](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L438)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:506](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L506)
 
 Request inspection for a template (submits for approval review).
 
@@ -531,7 +561,7 @@ Request inspection for a template (submits for approval review).
 
 > **send**(`params`, `context?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:186](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L186)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:190](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L190)
 
 Send a message through this provider.
 
@@ -557,11 +587,42 @@ Result with SendResult on success, KMsgError on failure.
 
 ***
 
+### setDeliveryStatus()
+
+> **setDeliveryStatus**(`providerMessageId`, `status`, `details?`): `void`
+
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:340](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L340)
+
+Sets what [getDeliveryStatus](/en/api/provider/src/classes/mockprovider/#getdeliverystatus) reports for a message this provider
+sent, for example `FAILED` with a provider status code to exercise
+failure paths. Throws for an id it did not send, so a typo in a test
+fails loudly.
+
+#### Parameters
+
+##### providerMessageId
+
+`string`
+
+##### status
+
+[`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
+
+##### details?
+
+`Pick`\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/), `"statusCode"` \| `"statusMessage"` \| `"raw"`\> = `{}`
+
+#### Returns
+
+`void`
+
+***
+
 ### updateTemplate()
 
 > **updateTemplate**(`code`, `patch`, `_ctx?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`Template`](/en/api/core/src/interfaces/template/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:360](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L360)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:428](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L428)
 
 Update an existing template by code.
 

@@ -5,7 +5,7 @@ prev: false
 title: "KMsgDefaultsConfig"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L103)
+Defined in: [packages/messaging/src/k-msg.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L94)
 
 Configuration for default values applied to outgoing messages.
 
@@ -18,7 +18,7 @@ allowing you to reduce boilerplate for commonly repeated fields.
 
 > `optional` **kakao?**: `object`
 
-Defined in: [packages/messaging/src/k-msg.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L118)
+Defined in: [packages/messaging/src/k-msg.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L109)
 
 Kakao (ALIMTALK/FRIENDTALK) defaults.
 
@@ -40,7 +40,7 @@ Default Kakao profile ID (pfId) for template-based messages.
 
 > `optional` **naver?**: `object`
 
-Defined in: [packages/messaging/src/k-msg.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L128)
+Defined in: [packages/messaging/src/k-msg.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L119)
 
 Naver Talk (NSA) defaults.
 
@@ -56,7 +56,7 @@ Default Naver Talk ID.
 
 > `optional` **rcs?**: `object`
 
-Defined in: [packages/messaging/src/k-msg.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L136)
+Defined in: [packages/messaging/src/k-msg.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L127)
 
 RCS defaults.
 
@@ -72,7 +72,7 @@ Default RCS brand ID.
 
 > `optional` **sms?**: `object`
 
-Defined in: [packages/messaging/src/k-msg.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L107)
+Defined in: [packages/messaging/src/k-msg.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L98)
 
 SMS/LMS-specific defaults.
 

@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingServiceConfig"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L70)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L150)
 
 ## Properties
 
@@ -13,7 +13,63 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:70](https://git
 
 > `optional` **apiFailover?**: [`DeliveryTrackingApiFailoverConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingapifailoverconfig/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L74)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L154)
+
+***
+
+### onStatusChange?
+
+> `optional` **onStatusChange?**: (`change`) => `void` \| `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L169)
+
+Called for each record a poll stored with a different status, with the
+record as stored, after the poll finishes: for example, to notify a
+webhook when a message is delivered or fails. Calls run one at a time,
+in the order changes were stored, each with its own copy of the record;
+`runOnce()` describes the one exception, in runtimes without
+AsyncLocalStorage. It does not stop polling if it throws.
+
+Delivery is best effort: a change whose callback throws is not retried,
+and one stored just before the process stops is not reported, so
+reconcile with the stored records when none may be missed. Services
+polling the same store can also each report the same change, so make
+it idempotent, for example by message id and status.
+
+#### Parameters
+
+##### change
+
+[`DeliveryStatusChange`](/en/api/messaging/src/tracking/interfaces/deliverystatuschange/)
+
+#### Returns
+
+`void` \| `Promise`\<`void`\>
+
+***
+
+### onStatusChangeError?
+
+> `optional` **onStatusChangeError?**: (`error`, `change`) => `void` \| `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:174](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L174)
+
+Receives what `onStatusChange` throws. Without it, or when it throws
+too, the error is written to `console.error`.
+
+#### Parameters
+
+##### error
+
+`unknown`
+
+##### change
+
+[`DeliveryStatusChange`](/en/api/messaging/src/tracking/interfaces/deliverystatuschange/)
+
+#### Returns
+
+`void` \| `Promise`\<`void`\>
 
 ***
 
@@ -21,7 +77,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:74](https://git
 
 > `optional` **polling?**: `Partial`\<[`DeliveryTrackingPollingConfig`](/en/api/messaging/src/tracking/interfaces/deliverytrackingpollingconfig/)\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L73)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L153)
 
 ***
 
@@ -29,7 +85,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:73](https://git
 
 > **providers**: [`Provider`](/en/api/core/src/interfaces/provider/)[]
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L71)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L151)
 
 ***
 
@@ -37,4 +93,4 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:71](https://git
 
 > `optional` **store?**: [`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L72)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L152)
