@@ -55,6 +55,14 @@ CLI 기준:
 - `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
   `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
 
+대체문자(`reSend`):
+- `failover.fallbackContent`(또는 `providerOptions.resendContent`)는 IWINV의 직접 입력 타입인
+  `resendType: "N"`과 함께 `resendContent`로 보냅니다. `failover.fallbackTitle`은 LMS 제목인
+  `resendTitle`이 됩니다.
+- 대체문자 내용이 없으면 `resendType`을 보내지 않아 IWINV 기본값 `"Y"`(알림톡 내용 재발송)가 적용됩니다.
+- IWINV는 내용 길이에 따라 SMS(90바이트 이하) 또는 LMS로 보내므로 `failover.fallbackChannel`에
+  대응하는 IWINV 필드는 없습니다.
+
 알림톡 `code` 요약:
 - `200`: 발송 성공
 - `501`: `templateCode` 오류

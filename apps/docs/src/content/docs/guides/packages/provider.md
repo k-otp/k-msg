@@ -95,6 +95,7 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 경계:
 
 - provider 패키지는 벤더 native 필드로 매핑하고 warning 메타데이터를 반환합니다.
+- `iwinv`는 `failover.fallbackContent`를 `resendContent`(`resendType: "N"`)로 보내고, 없으면 IWINV가 알림톡 내용을 대체문자로 보냅니다. SMS/LMS는 내용 길이로 IWINV가 정합니다.
 - tracking 기반 API 레벨 fallback retry(배달 폴링 + SMS/LMS 재발송)는 `@k-msg/messaging`에서 처리합니다.
 
 ## 사용 예시 (KMsg와 함께)

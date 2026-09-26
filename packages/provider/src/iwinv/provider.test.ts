@@ -214,7 +214,9 @@ describe("IWINVProvider", () => {
     });
 
     expect(calledBody.reSend).toBe("Y");
-    expect(calledBody.resendType).toBe("Y");
+    // "N" is IWINV's direct-input type, which sends resendContent; "Y" would
+    // resend the AlimTalk text and drop fallbackContent.
+    expect(calledBody.resendType).toBe("N");
     expect(calledBody.resendTitle).toBe("fallback title");
     expect(calledBody.resendContent).toBe("fallback body");
     expect(result.isSuccess).toBe(true);

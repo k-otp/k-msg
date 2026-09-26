@@ -95,6 +95,7 @@ Interpretation notes:
 Boundary:
 
 - Provider package maps to vendor-native fields and returns warning metadata.
+- `iwinv` sends `failover.fallbackContent` as `resendContent` (`resendType: "N"`); without it, IWINV resends the AlimTalk text. IWINV picks SMS or LMS by the text's length.
 - Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`.
 
 ## Usage (with KMsg)
