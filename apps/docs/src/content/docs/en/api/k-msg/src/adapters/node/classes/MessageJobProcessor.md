@@ -5,7 +5,7 @@ prev: false
 title: "MessageJobProcessor"
 ---
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L368)
+Defined in: [packages/messaging/src/queue/job.processor.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L374)
 
 Specific processor for message jobs
 
@@ -19,7 +19,7 @@ Specific processor for message jobs
 
 > **new MessageJobProcessor**(`provider`, `options?`, `jobQueue?`): `MessageJobProcessor`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:369](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L369)
+Defined in: [packages/messaging/src/queue/job.processor.ts:375](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L375)
 
 #### Parameters
 
@@ -343,7 +343,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 > **queueBulkMessages**(`messageRequests`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:648](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L648)
+Defined in: [packages/messaging/src/queue/job.processor.ts:654](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L654)
 
 Add bulk messages to the processing queue
 
@@ -377,7 +377,7 @@ Add bulk messages to the processing queue
 
 > **queueMessage**(`messageRequest`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:620](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L620)
+Defined in: [packages/messaging/src/queue/job.processor.ts:626](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L626)
 
 Add a message to the processing queue
 
@@ -565,7 +565,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 > **scheduleMessage**(`messageRequest`, `scheduledAt`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:666](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L666)
+Defined in: [packages/messaging/src/queue/job.processor.ts:672](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L672)
 
 Schedule a message for future delivery
 

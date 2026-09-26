@@ -490,11 +490,13 @@ const queue = createDrizzleJobQueue({
 
 `createDurableObjectJobQueue`, `createKvJobQueue` and `createR2JobQueue` store each job as JSON under `keyPrefix` (default `kmsg/jobs`).
 
-- `dequeue()` leases the job it returns for `leaseMs` (default 5 minutes). If the job is neither completed nor failed by then, for example because the worker stopped mid-job, it is due again and the lost attempt counts as failed (`error: "LEASE_EXPIRED"`, exported as `JOB_LEASE_EXPIRED`); a job with no attempts left fails. `onLeaseExpired(job)` is called for each such job. Set `leaseMs` above the longest time a job can take; `Infinity` turns leases off.
-- `nextDueAt()` returns when a job is next due, pending or with an expiring lease, so an alarm can wake up then instead of polling. `size()` and `peek()` count only jobs due now.
-- `complete(jobId, result)` keeps `result` on the job, for example the provider's message id, and `fail()` never reopens a completed job.
+- With `leaseMs`, `dequeue()` leases the job it returns for that long. Without it, a job whose worker stopped mid-job, for example in a deploy, stays `processing` forever. If a leased job is neither completed nor failed in time, the next `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`, exported as `JOB_LEASE_EXPIRED`) and makes the job due again, or fails it when no attempts are left, then calls `onLeaseExpired(job)`.
+  - A job that is already `processing` without a lease, such as one taken by an earlier version, gets a lease when `dequeue()` first sees it.
+  - Leases are not renewed and not fenced: set `leaseMs` above the longest time a job can take, because a worker that outlives its lease can still complete or fail the job while another worker has it. `JobProcessor` skips a job it is already running.
+- `nextDueAt()` returns when `dequeue()` next has work: a pending job's due time or a lease's end. Set an alarm for it instead of polling. A time in the past means `dequeue()` has work now, even if only to fail a job whose lease ran out, so call `dequeue()` rather than checking `size()`.
+- `complete(jobId, result)` keeps `result` on the job, for example the provider's message id. A result that JSON cannot hold, or that is too large for the storage, is logged and dropped rather than failing the completion. `fail()` never reopens a completed job.
 - `cleanupTerminal({ olderThan })` removes only jobs that finished before `olderThan`, so a finished job stays readable for a while.
-- On Durable Objects, reads take the values from the storage listing instead of one `get()` per job. `dequeue()` still reads every stored job, so clean up finished jobs regularly.
+- On Durable Objects, reads take the values from the storage listing, a page at a time, instead of one `get()` per job. `dequeue()` still reads every stored job, so clean up finished jobs regularly.
 
 For example, a Durable Object that sends from its alarm:
 
@@ -511,7 +513,9 @@ export class SendQueue extends DurableObject<Env> {
 
   async alarm(): Promise<void> {
     for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
-      const result = await kmsg.send(job.data);
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
       if (result.isSuccess) {
         await this.queue.complete(job.id, {
           providerMessageId: result.value.providerMessageId,

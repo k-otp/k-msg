@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareKvNamespaceLike"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L28)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L32)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:28](ht
 
 > **delete**(`key`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L31)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L35)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:31](ht
 
 > **get**(`key`, `type?`): `Promise`\<`string` \| `null`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L29)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L33)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:29](ht
 
 > **list**(`options?`): `Promise`\<\{ `cursor?`: `string`; `keys`: `object`[]; `list_complete`: `boolean`; \}\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L32)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L36)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:32](ht
 
 > **put**(`key`, `value`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L34)
 
 #### Parameters
 

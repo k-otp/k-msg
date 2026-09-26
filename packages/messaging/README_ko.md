@@ -400,11 +400,13 @@ const queue = createDrizzleJobQueue({
 
 `createDurableObjectJobQueue`, `createKvJobQueue`, `createR2JobQueue`는 각 작업(job)을 `keyPrefix`(기본값 `kmsg/jobs`) 아래에 JSON으로 저장합니다.
 
-- `dequeue()`는 반환하는 작업을 `leaseMs`(기본값 5분) 동안 점유(lease)합니다. 그때까지 완료도 실패도 되지 않으면(예: 처리 도중 워커가 멈춤) 작업은 다시 처리 대상이 되고, 잃어버린 시도는 실패한 시도로 계산됩니다(`error: "LEASE_EXPIRED"`, `JOB_LEASE_EXPIRED`로 export). 남은 시도가 없는 작업은 실패합니다. 이런 작업마다 `onLeaseExpired(job)`가 호출됩니다. `leaseMs`는 작업 하나가 걸릴 수 있는 가장 긴 시간보다 길게 잡으세요. `Infinity`이면 lease를 쓰지 않습니다.
-- `nextDueAt()`은 다음 작업의 처리 시각(대기 중인 작업의 예정 시각이나 lease 만료 시각)을 반환하므로, 폴링 대신 그 시각에 알람을 걸 수 있습니다. `size()`와 `peek()`는 지금 처리할 작업만 셉니다.
-- `complete(jobId, result)`는 `result`(예: provider 메시지 ID)를 작업에 남기고, `fail()`은 완료된 작업을 다시 열지 않습니다.
+- `leaseMs`를 지정하면 `dequeue()`는 반환하는 작업을 그 시간 동안 점유(lease)합니다. 지정하지 않으면 처리 도중 워커가 멈춘 작업(예: 배포)은 영원히 `processing`으로 남습니다. 점유한 작업이 제시간에 완료도 실패도 되지 않으면, 다음 `dequeue()`가 잃어버린 시도를 실패로 계산하고(`error: "LEASE_EXPIRED"`, `JOB_LEASE_EXPIRED`로 export) 작업을 다시 처리 대상으로 만들거나, 남은 시도가 없으면 실패시킨 뒤 `onLeaseExpired(job)`를 호출합니다.
+  - lease 없이 이미 `processing`인 작업(예: 이전 버전이 가져간 작업)은 `dequeue()`가 처음 볼 때 lease를 받습니다.
+  - lease는 연장되지 않고, 다른 워커의 처리를 막지도(fencing) 않습니다. `leaseMs`는 작업 하나가 걸릴 수 있는 가장 긴 시간보다 길게 잡으세요. lease가 끝난 뒤에도 원래 워커가 작업을 완료하거나 실패시킬 수 있고, 그 사이 다른 워커가 같은 작업을 가져갈 수 있습니다. `JobProcessor`는 자신이 이미 실행 중인 작업은 건너뜁니다.
+- `nextDueAt()`은 `dequeue()`가 다음에 할 일이 생기는 시각(대기 작업의 예정 시각이나 lease 종료 시각)을 반환하므로, 폴링 대신 그 시각에 알람을 걸 수 있습니다. 과거 시각이면 lease가 끝난 작업을 실패 처리하는 일이라도 `dequeue()`에 할 일이 있다는 뜻이니, `size()`를 확인하지 말고 `dequeue()`를 호출하세요.
+- `complete(jobId, result)`는 `result`(예: provider 메시지 ID)를 작업에 남깁니다. JSON으로 담을 수 없거나 storage에 비해 너무 큰 결과는 로그를 남기고 버리며, 완료 처리 자체는 실패하지 않습니다. `fail()`은 완료된 작업을 다시 열지 않습니다.
 - `cleanupTerminal({ olderThan })`은 `olderThan` 이전에 끝난 작업만 지우므로, 끝난 작업을 한동안 조회할 수 있습니다.
-- Durable Object에서는 작업마다 `get()`을 하지 않고 storage 목록 조회가 돌려준 값을 읽습니다. 그래도 `dequeue()`는 저장된 작업을 모두 읽으므로 끝난 작업은 주기적으로 정리하세요.
+- Durable Object에서는 작업마다 `get()`을 하지 않고 storage 목록 조회가 돌려준 값을 한 페이지씩 읽습니다. 그래도 `dequeue()`는 저장된 작업을 모두 읽으므로 끝난 작업은 주기적으로 정리하세요.
 
 예를 들어 알람에서 발송하는 Durable Object:
 
@@ -421,7 +423,9 @@ export class SendQueue extends DurableObject<Env> {
 
   async alarm(): Promise<void> {
     for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
-      const result = await kmsg.send(job.data);
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
       if (result.isSuccess) {
         await this.queue.complete(job.id, {
           providerMessageId: result.value.providerMessageId,
