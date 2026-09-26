@@ -64,6 +64,11 @@ interface StoredTrackingRecord {
   retentionBucketYm?: number;
 }
 
+// The table name in the key context and AAD of every field crypto call. Writes,
+// reads, and lookups must agree on it, or keys resolve and ciphertext binds
+// differently.
+const TRACKING_TABLE_NAME = "kmsg_delivery_tracking_object";
+
 export interface CloudflareObjectDeliveryTrackingStoreOptions {
   keyPrefix?: string;
   fieldCrypto?: DeliveryTrackingFieldCryptoOptions;
@@ -387,7 +392,7 @@ export class CloudflareObjectDeliveryTrackingStore
       this.fieldCrypto,
       this.cryptoMode(),
       {
-        tableName: "kmsg_delivery_tracking_object",
+        tableName: TRACKING_TABLE_NAME,
         store: "object",
       },
     )) as T | undefined;
@@ -421,7 +426,7 @@ export class CloudflareObjectDeliveryTrackingStore
       record,
       this.fieldCrypto,
       {
-        tableName: "kmsg_delivery_tracking_object",
+        tableName: TRACKING_TABLE_NAME,
         store: "object",
       },
       this.cryptoMode(),
@@ -556,7 +561,7 @@ export class CloudflareObjectDeliveryTrackingStore
         },
         this.fieldCrypto,
         {
-          tableName: "kmsg_delivery_tracking_object",
+          tableName: TRACKING_TABLE_NAME,
           store: "object",
         },
         this.cryptoMode(),
