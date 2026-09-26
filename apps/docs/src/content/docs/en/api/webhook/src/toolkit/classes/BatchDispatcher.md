@@ -323,7 +323,7 @@ Defined in: [packages/webhook/src/shared/event-emitter.ts:31](https://github.com
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L339)
+Defined in: [packages/webhook/src/dispatcher/batch.dispatcher.ts:337](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/batch.dispatcher.ts#L337)
 
 배치 처리기 정지
 

@@ -9,6 +9,7 @@ import {
   type SendResult,
 } from "@k-msg/core";
 import type { KMsg } from "../k-msg";
+import { logBackgroundFailure } from "../shared/log-background-failure";
 import {
   type BulkBatchResult,
   type BulkMessageRequest,
@@ -58,8 +59,15 @@ export class BulkMessageSender {
 
     this.activeBulkJobs.set(requestId, bulkJob);
 
-    // Process batches asynchronously
-    this.processBatchesAsync(bulkJob, batches, batchDelay);
+    // Process batches asynchronously. A failed loop marks the job failed and
+    // then rejects, so the error is logged here instead of being lost.
+    this.processBatchesAsync(bulkJob, batches, batchDelay).catch(
+      (error: unknown) => {
+        logBackgroundFailure("Bulk send processing failed", error, {
+          bulkRequestId: requestId,
+        });
+      },
+    );
 
     return bulkResult;
   }
@@ -139,9 +147,10 @@ export class BulkMessageSender {
 
       bulkJob.status = "completed";
       bulkJob.result.completedAt = new Date();
-    } catch (_error) {
+    } catch (error) {
       bulkJob.status = "failed";
       bulkJob.result.completedAt = new Date();
+      throw error;
     }
   }
 

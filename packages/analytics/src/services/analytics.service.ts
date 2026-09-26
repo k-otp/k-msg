@@ -287,16 +287,14 @@ export class AnalyticsService {
     // 집계 작업 스케줄링 로직
     const scheduleMs = this.getScheduleInterval(interval);
 
-    setInterval(async () => {
-      try {
-        await this.runAggregation(interval);
-      } catch (error) {
+    setInterval(() => {
+      this.runAggregation(interval).catch((error: unknown) => {
         logger.error(
           `Aggregation failed for interval ${interval}`,
           {},
           error instanceof Error ? error : new Error(String(error)),
         );
-      }
+      });
     }, scheduleMs);
   }
 

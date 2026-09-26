@@ -3,6 +3,7 @@
  * 웹훅 엔드포인트 간의 부하 분산 관리
  */
 
+import { logger } from "@k-msg/core";
 import { EventEmitter } from "../shared/event-emitter";
 import type { WebhookEndpoint } from "../types/webhook.types";
 import type { CircuitBreakerState, LoadBalancerConfig } from "./types";
@@ -427,13 +428,26 @@ export class LoadBalancer extends EventEmitter {
    * 건강 상태 확인 시작
    */
   private startHealthChecks(): void {
-    this.healthCheckInterval = setInterval(async () => {
-      const endpoints = Array.from(this.endpoints.values());
-
-      for (const endpoint of endpoints) {
-        await this.checkEndpointHealth(endpoint);
-      }
+    this.healthCheckInterval = setInterval(() => {
+      this.checkAllEndpoints().catch((error: unknown) => {
+        logger.error(
+          "Webhook endpoint health check failed",
+          undefined,
+          error instanceof Error ? error : new Error(String(error)),
+        );
+      });
     }, this.config.healthCheckInterval);
+  }
+
+  /**
+   * 모든 엔드포인트 건강 상태 확인
+   */
+  private async checkAllEndpoints(): Promise<void> {
+    const endpoints = Array.from(this.endpoints.values());
+
+    for (const endpoint of endpoints) {
+      await this.checkEndpointHealth(endpoint);
+    }
   }
 
   /**

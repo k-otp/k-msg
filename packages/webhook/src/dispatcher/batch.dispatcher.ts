@@ -173,12 +173,10 @@ export class BatchDispatcher extends EventEmitter {
    * 배치 처리기 시작
    */
   private startBatchProcessor(): void {
-    this.batchProcessor = setInterval(async () => {
-      try {
-        await this.processAllBatches();
-      } catch (error) {
+    this.batchProcessor = setInterval(() => {
+      this.processAllBatches().catch((error: unknown) => {
         this.emit("processorError", error);
-      }
+      });
     }, this.config.batchTimeoutMs);
   }
 

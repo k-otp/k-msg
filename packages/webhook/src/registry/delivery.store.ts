@@ -532,13 +532,12 @@ export class DeliveryStore extends EventEmitter {
   private startCleanupTask(): void {
     // 1시간마다 정리 작업 실행
     this.cleanupInterval = setInterval(
-      async () => {
-        try {
-          await this.cleanupOldDeliveries();
-          await this.checkMemoryUsage();
-        } catch (error) {
-          this.emit("cleanupError", error);
-        }
+      () => {
+        this.cleanupOldDeliveries()
+          .then(() => this.checkMemoryUsage())
+          .catch((error: unknown) => {
+            this.emit("cleanupError", error);
+          });
       },
       60 * 60 * 1000,
     );

@@ -3,6 +3,7 @@
  * 웹훅 작업 큐 관리 시스템
  */
 
+import { logger } from "@k-msg/core";
 import { EventEmitter } from "../shared/event-emitter";
 import {
   isFileNotFoundError,
@@ -305,18 +306,14 @@ export class QueueManager extends EventEmitter {
   private async scheduleDelayedJob(job: DispatchJob): Promise<void> {
     const delay = job.scheduledAt.getTime() - Date.now();
 
-    const timeout = setTimeout(async () => {
-      this.delayedJobs.delete(job.id);
-
-      // 정시가 되면 큐에 추가
-      const success = await this.enqueue({
-        ...job,
-        scheduledAt: new Date(), // 즉시 처리 가능하도록 변경
+    const timeout = setTimeout(() => {
+      this.activateDelayedJob(job).catch((error: unknown) => {
+        logger.error(
+          "Failed to activate delayed webhook job",
+          { jobId: job.id },
+          error instanceof Error ? error : new Error(String(error)),
+        );
       });
-
-      if (success) {
-        this.emit("delayedJobActivated", { jobId: job.id });
-      }
     }, delay);
 
     this.delayedJobs.set(job.id, timeout);
@@ -329,6 +326,23 @@ export class QueueManager extends EventEmitter {
   }
 
   /**
+   * 지연된 작업 활성화
+   */
+  private async activateDelayedJob(job: DispatchJob): Promise<void> {
+    this.delayedJobs.delete(job.id);
+
+    // 정시가 되면 큐에 추가
+    const success = await this.enqueue({
+      ...job,
+      scheduledAt: new Date(), // 즉시 처리 가능하도록 변경
+    });
+
+    if (success) {
+      this.emit("delayedJobActivated", { jobId: job.id });
+    }
+  }
+
+  /**
    * TTL 정리 작업 시작
    */
   private startTTLCleanup(): void {
@@ -338,12 +352,10 @@ export class QueueManager extends EventEmitter {
 
     // 5분마다 만료된 작업 정리
     this.ttlCleanupInterval = setInterval(
-      async () => {
-        try {
-          await this.cleanupExpiredJobs();
-        } catch (error) {
+      () => {
+        this.cleanupExpiredJobs().catch((error: unknown) => {
           this.emit("cleanupError", error);
-        }
+        });
       },
       5 * 60 * 1000,
     );

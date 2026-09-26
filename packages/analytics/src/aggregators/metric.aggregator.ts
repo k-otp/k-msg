@@ -3,6 +3,7 @@
  * 메트릭별 특화 집계 로직
  */
 
+import { logger } from "@k-msg/core";
 import type { AggregatedMetric, MetricData } from "../types/analytics.types";
 import { MetricType } from "../types/analytics.types";
 
@@ -566,10 +567,20 @@ export class MetricAggregator {
   }
 
   private startPeriodicFlush(): void {
-    setInterval(async () => {
-      for (const bufferKey of this.buffer.keys()) {
-        await this.flushBuffer(bufferKey);
-      }
+    setInterval(() => {
+      this.flushAllBuffers().catch((error: unknown) => {
+        logger.error(
+          "Periodic metric flush failed",
+          {},
+          error instanceof Error ? error : new Error(String(error)),
+        );
+      });
     }, this.config.flushInterval);
+  }
+
+  private async flushAllBuffers(): Promise<void> {
+    for (const bufferKey of this.buffer.keys()) {
+      await this.flushBuffer(bufferKey);
+    }
   }
 }
