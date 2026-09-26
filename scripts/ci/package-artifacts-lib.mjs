@@ -1,8 +1,36 @@
 import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const EXPORT_CONDITIONS = ["import", "require", "types"];
+
+// Packages keep "type": "module", so each runtime artifact carries its format
+// in its extension. Node loads a CommonJS build named .js in such a package as
+// ESM, and require() then throws "module is not defined in ES module scope".
+const RUNTIME_FORMATS = {
+  import: { extension: ".mjs", label: "ESM" },
+  require: { extension: ".cjs", label: "CommonJS" },
+};
+
+// Export subpaths, by package name, whose modules import Bun built-ins such as
+// bun:sqlite. Node cannot load them, so the gate only syntax-checks their
+// runtime artifacts.
+export const BUN_ONLY_EXPORTS = {
+  "@k-msg/messaging": ["./adapters/bun"],
+  "k-msg": ["./adapters/bun"],
+};
+
+const LOADER_SCRIPT = fileURLToPath(
+  new URL("./load-package-artifact.mjs", import.meta.url),
+);
+const NODE_TIMEOUT_MS = 30_000;
+// The gate checks what Node consumers see. Under Bun, for example when
+// `bun test` runs from the repository root, process.execPath is Bun, whose
+// module loader accepts artifacts that Node rejects.
+const DEFAULT_NODE_EXECUTABLE = process.versions.bun
+  ? "node"
+  : process.execPath;
 
 function readJson(file) {
   return JSON.parse(readFileSync(file, "utf8"));
@@ -159,12 +187,124 @@ function validateLegacyEntryFields(manifest, errors) {
   }
 }
 
+function subpathRuntimeTargets(descriptor, condition) {
+  const targets = new Set();
+  for (const target of collectConditionTargets(descriptor, condition)) {
+    try {
+      targets.add(normalizePackageTarget(target));
+    } catch {
+      // inspectBuiltPackage reports invalid targets.
+    }
+  }
+  return [...targets];
+}
+
+function collectBunOnlyTargets(manifest, subpaths, errors) {
+  const descriptors = new Map(exportEntries(manifest.exports));
+  const targets = new Set();
+  for (const subpath of subpaths) {
+    if (!descriptors.has(subpath)) {
+      errors.push(
+        `${manifest.name}: Bun-only export ${subpath} is not in exports`,
+      );
+      continue;
+    }
+    for (const condition of Object.keys(RUNTIME_FORMATS)) {
+      for (const target of subpathRuntimeTargets(
+        descriptors.get(subpath),
+        condition,
+      )) {
+        targets.add(target);
+      }
+    }
+  }
+  return targets;
+}
+
+function listItems(items, limit, separator = ", ") {
+  const shown = items.slice(0, limit).join(separator);
+  return items.length > limit
+    ? `${shown}${separator}and ${items.length - limit} more`
+    : shown;
+}
+
+function runNode(nodeExecutable, args) {
+  const result = spawnSync(nodeExecutable, args, {
+    encoding: "utf8",
+    timeout: NODE_TIMEOUT_MS,
+  });
+  if (result.status === 0) return { stdout: result.stdout };
+
+  // Node prints the failing source line, which may be a whole minified
+  // bundle, before the error itself.
+  const lines = (result.stderr || result.stdout || "").trim().split("\n");
+  const detail =
+    result.error?.message ||
+    lines.find((line) => /^(?:[A-Z]\w*)?Error\b/.test(line)) ||
+    lines[0] ||
+    (result.signal
+      ? `terminated by ${result.signal}`
+      : `exit code ${result.status}`);
+  return { failure: detail };
+}
+
+function loadArtifact(nodeExecutable, condition, file) {
+  const run = runNode(nodeExecutable, [LOADER_SCRIPT, condition, file]);
+  if (run.failure) return { problems: [run.failure] };
+
+  // The loader prints its result last, after anything the module printed.
+  try {
+    const result = JSON.parse(run.stdout.trim().split("\n").at(-1));
+    if (typeof result?.error === "string") return { problems: [result.error] };
+    if (Array.isArray(result?.exports) && Array.isArray(result.problems)) {
+      return result;
+    }
+  } catch {
+    // Reported below.
+  }
+  return { problems: ["the artifact loader printed no result"] };
+}
+
+function compareConditionExports(manifest, exportNames, errors) {
+  for (const [subpath, descriptor] of exportEntries(manifest.exports)) {
+    const [esmTargets, cjsTargets] = ["import", "require"].map((condition) =>
+      subpathRuntimeTargets(descriptor, condition),
+    );
+    if (esmTargets.length !== 1 || cjsTargets.length !== 1) continue;
+
+    const esm = exportNames.get(`import\0${esmTargets[0]}`);
+    const cjs = exportNames.get(`require\0${cjsTargets[0]}`);
+    if (!esm || !cjs) continue;
+
+    for (const [condition, target, names, reference, referenceTarget] of [
+      ["require", cjsTargets[0], cjs, esm, esmTargets[0]],
+      ["import", esmTargets[0], esm, cjs, cjsTargets[0]],
+    ]) {
+      const missing = reference.filter((name) => !names.includes(name));
+      if (missing.length > 0) {
+        errors.push(
+          `${manifest.name}: exports[${subpath}].${condition} (${target}) is missing ${listItems(missing, 5)} exported by ${referenceTarget}`,
+        );
+      }
+    }
+  }
+}
+
 export function inspectBuiltPackage(packageDir, options = {}) {
-  const nodeExecutable = options.nodeExecutable ?? process.execPath;
+  const nodeExecutable = options.nodeExecutable ?? DEFAULT_NODE_EXECUTABLE;
+  const bunOnlyExports = options.bunOnlyExports ?? BUN_ONLY_EXPORTS;
   const manifest = readJson(path.join(packageDir, "package.json"));
   const errors = [];
-  const checkedEsm = [];
+  const checked = { import: [], require: [] };
+  const syntaxOnly = [];
+  const exportNames = new Map();
+  const inspected = new Set();
   validateLegacyEntryFields(manifest, errors);
+  const bunOnlyTargets = collectBunOnlyTargets(
+    manifest,
+    bunOnlyExports[manifest.name] ?? [],
+    errors,
+  );
 
   for (const artifact of collectPackageArtifactTargets(manifest)) {
     let relativeTarget;
@@ -174,6 +314,10 @@ export function inspectBuiltPackage(packageDir, options = {}) {
       errors.push(`${manifest.name}: ${error.message}`);
       continue;
     }
+    // main and module usually repeat an exports target without the ./ prefix.
+    const inspectedKey = `${artifact.condition}\0${relativeTarget}`;
+    if (inspected.has(inspectedKey)) continue;
+    inspected.add(inspectedKey);
 
     const absoluteTarget = path.join(packageDir, relativeTarget);
     try {
@@ -188,34 +332,49 @@ export function inspectBuiltPackage(packageDir, options = {}) {
       continue;
     }
 
-    if (artifact.condition !== "import") continue;
-    // Project packages reserve .mjs for import and .js for the separately
-    // built CommonJS require condition, even though their type is module.
-    if (path.extname(relativeTarget) !== ".mjs") {
+    const format = RUNTIME_FORMATS[artifact.condition];
+    if (!format) continue;
+    if (path.extname(relativeTarget) !== format.extension) {
       errors.push(
-        `${manifest.name}: ESM export must use .mjs: ${relativeTarget}`,
+        `${manifest.name}: ${format.label} export must use ${format.extension}: ${relativeTarget}`,
       );
       continue;
     }
 
-    const result = spawnSync(nodeExecutable, ["--check", absoluteTarget], {
-      encoding: "utf8",
-      timeout: 30_000,
-    });
-    if (result.status !== 0) {
-      const detail =
-        result.error?.message ||
-        (result.stderr || result.stdout).trim().split("\n")[0] ||
-        (result.signal ? `terminated by ${result.signal}` : "");
+    const invalid = (detail) =>
       errors.push(
-        `${manifest.name}: invalid ESM artifact ${relativeTarget}${detail ? ` (${detail})` : ""}`,
+        `${manifest.name}: invalid ${format.label} artifact ${relativeTarget} (${detail})`,
       );
+
+    if (bunOnlyTargets.has(relativeTarget)) {
+      const run = runNode(nodeExecutable, ["--check", absoluteTarget]);
+      if (run.failure) invalid(run.failure);
+      else syntaxOnly.push(relativeTarget);
       continue;
     }
-    checkedEsm.push(relativeTarget);
+
+    const loaded = loadArtifact(
+      nodeExecutable,
+      artifact.condition,
+      absoluteTarget,
+    );
+    if (loaded.problems.length > 0) {
+      invalid(listItems(loaded.problems, 3, "; "));
+      continue;
+    }
+    exportNames.set(inspectedKey, loaded.exports);
+    checked[artifact.condition].push(relativeTarget);
   }
 
-  return { checkedEsm: [...new Set(checkedEsm)], errors, manifest };
+  compareConditionExports(manifest, exportNames, errors);
+
+  return {
+    checkedCjs: checked.require,
+    checkedEsm: checked.import,
+    errors,
+    manifest,
+    syntaxOnly,
+  };
 }
 
 export function inspectPackedPackage(packageDir, packResult) {
