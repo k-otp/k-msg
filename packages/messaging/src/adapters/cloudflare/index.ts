@@ -163,9 +163,25 @@ export interface CreateD1DeliveryTrackingStoreOptions
   initializeSchema?: boolean;
 }
 
+export interface CreateD1JobQueueOptions {
+  tableName?: string;
+  /**
+   * Whether the queue creates its table and indexes on first use. Set it to
+   * `false` when migrations create the schema.
+   * @default true
+   */
+  initializeSchema?: boolean;
+}
+
 export interface CreateDrizzleJobQueueOptions
   extends CreateDrizzleSqlClientOptions {
   tableName?: string;
+  /**
+   * Whether the queue creates its table and indexes on first use. Set it to
+   * `false` when migrations create the schema.
+   * @default true
+   */
+  initializeSchema?: boolean;
 }
 
 export function createD1DeliveryTrackingStore(
@@ -180,12 +196,9 @@ export function createD1DeliveryTrackingStore(
 
 export function createD1JobQueue<T>(
   database: D1DatabaseLike,
-  options: { tableName?: string } = {},
+  options: CreateD1JobQueueOptions = {},
 ): HyperdriveJobQueue<T> {
-  return new HyperdriveJobQueue<T>(
-    createD1SqlClient(database),
-    options.tableName,
-  );
+  return new HyperdriveJobQueue<T>(createD1SqlClient(database), options);
 }
 
 export function createDrizzleDeliveryTrackingStore(
@@ -199,7 +212,7 @@ export function createDrizzleJobQueue<T>(
   options: CreateDrizzleJobQueueOptions,
 ): HyperdriveJobQueue<T> {
   const client = createDrizzleSqlClient(options);
-  return new HyperdriveJobQueue<T>(client, options.tableName);
+  return new HyperdriveJobQueue<T>(client, options);
 }
 
 export function createKvDeliveryTrackingStore(

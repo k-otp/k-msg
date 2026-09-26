@@ -40,15 +40,38 @@ function toNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+export interface HyperdriveJobQueueConfig {
+  /** @default "kmsg_jobs" */
+  tableName?: string;
+  /**
+   * Whether `init()` creates the table and indexes (`IF NOT EXISTS`). Each
+   * new queue runs those statements before its first query, which in a
+   * Worker means every request. Set it to `false` when migrations create the
+   * schema, for example from `buildJobQueueSchemaSql()`.
+   * @default true
+   */
+  initializeSchema?: boolean;
+}
+
+export type HyperdriveJobQueueOptions = string | HyperdriveJobQueueConfig;
+
 export class HyperdriveJobQueue<T> implements JobQueue<T> {
   private initPromise: Promise<void> | undefined;
+  private readonly tableName: string;
+  private readonly initializeSchema: boolean;
 
   constructor(
     private readonly client: CloudflareSqlClient,
-    private readonly tableName = "kmsg_jobs",
-  ) {}
+    options: HyperdriveJobQueueOptions = {},
+  ) {
+    const resolved =
+      typeof options === "string" ? { tableName: options } : options;
+    this.tableName = resolved.tableName ?? "kmsg_jobs";
+    this.initializeSchema = resolved.initializeSchema !== false;
+  }
 
   async init(): Promise<void> {
+    if (!this.initializeSchema) return;
     if (this.initPromise) {
       return this.initPromise;
     }

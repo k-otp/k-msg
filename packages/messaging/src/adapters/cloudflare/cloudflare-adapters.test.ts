@@ -9,7 +9,9 @@ import {
   CloudflareObjectDeliveryTrackingStore,
   CloudflareObjectJobQueue,
   createD1DeliveryTrackingStore,
+  createD1JobQueue,
   createDrizzleDeliveryTrackingStore,
+  createDrizzleJobQueue,
   createDurableObjectDeliveryTrackingStore,
   createDurableObjectJobQueue,
   createKvDeliveryTrackingStore,
@@ -613,6 +615,84 @@ describe("Cloudflare SQL adapters", () => {
     const size = await queue.size();
 
     expect(typeof size).toBe("number");
+  });
+
+  test("HyperdriveJobQueue takes the table name as a string or in options", async () => {
+    const fromString = createCapturingSqlClient("postgres");
+    const fromOptions = createCapturingSqlClient("postgres");
+    await new HyperdriveJobQueue(fromString.client, "custom_jobs").size();
+    await new HyperdriveJobQueue(fromOptions.client, {
+      tableName: "custom_jobs",
+    }).size();
+
+    const statements = fromString.queries.map((query) => query.sql);
+    expect(statements[0]).toContain('CREATE TABLE IF NOT EXISTS "custom_jobs"');
+    expect(statements.at(-1)).toContain('FROM "custom_jobs"');
+    expect(fromOptions.queries.map((query) => query.sql)).toEqual(statements);
+  });
+
+  test("SQL job queues skip schema setup with initializeSchema: false", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const hyperdriveQueue = new HyperdriveJobQueue(postgres.client, {
+      initializeSchema: false,
+    });
+    await hyperdriveQueue.init();
+    expect(await hyperdriveQueue.size()).toBe(0);
+    expect(postgres.queries.map((query) => query.sql)).toEqual([
+      expect.stringMatching(/^SELECT COUNT\(1\)/),
+    ]);
+
+    const d1Statements: string[] = [];
+    const d1 = {
+      prepare(sql: string) {
+        d1Statements.push(sql);
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all() {
+            return { results: [] };
+          },
+        };
+        return statement;
+      },
+    };
+    const d1Queue = createD1JobQueue(d1 as unknown as D1DatabaseLike, {
+      tableName: "custom_jobs",
+      initializeSchema: false,
+    });
+    expect(await d1Queue.getJob("job-1")).toBeUndefined();
+    expect(d1Statements).toEqual([
+      expect.stringMatching(/^SELECT \* FROM "custom_jobs"/),
+    ]);
+
+    const drizzleStatements: unknown[] = [];
+    const drizzleQueue = createDrizzleJobQueue({
+      dialect: "postgres",
+      db: {
+        execute(query: unknown) {
+          drizzleStatements.push(query);
+          return [];
+        },
+      },
+      renderQuery: ({ sql }) => sql,
+      tableName: "custom_jobs",
+      initializeSchema: false,
+    });
+    expect(await drizzleQueue.size()).toBe(0);
+    expect(drizzleStatements).toEqual([
+      expect.stringMatching(/^SELECT COUNT\(1\) as count FROM "custom_jobs"/),
+    ]);
+
+    // The default still creates the table and indexes on first use.
+    const defaults = createCapturingSqlClient("postgres");
+    await new HyperdriveJobQueue(defaults.client).size();
+    expect(defaults.queries.map((query) => query.sql.trim())).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^CREATE TABLE IF NOT EXISTS "kmsg_jobs"/),
+        expect.stringMatching(/^CREATE INDEX IF NOT EXISTS/),
+      ]),
+    );
   });
 
   test("HyperdriveJobQueue stores retry delay in process_at", async () => {
