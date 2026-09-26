@@ -14,6 +14,7 @@ import {
   createR2DeliveryTrackingStore,
   createR2JobQueue,
 } from "./index";
+import { createDurableObjectStorage } from "./object-storage";
 import type { CloudflareSqlClient, D1DatabaseLike } from "./sql-client";
 import {
   createD1SqlClient,
@@ -776,6 +777,44 @@ describe("Cloudflare backend helpers", () => {
     await store.init();
     await queue.enqueue("sample", { ok: true });
     expect(await queue.size()).toBe(1);
+  });
+
+  test("lists every DurableObject key past the storage page limit", async () => {
+    const data = new Map<string, string>();
+    for (let index = 0; index < 2500; index += 1) {
+      data.set(`job:${String(index).padStart(5, "0")}`, "{}");
+    }
+    data.set("other:1", "{}");
+    // Behaves like Durable Object storage: sorted keys, `limit` per call.
+    const doStorage = {
+      async get<T>(key: string) {
+        return data.get(key) as T | undefined;
+      },
+      async put<T>(key: string, value: T) {
+        data.set(key, String(value));
+      },
+      async delete(key: string) {
+        return data.delete(key);
+      },
+      async list<T>(options?: {
+        prefix?: string;
+        startAfter?: string;
+        limit?: number;
+      }) {
+        const prefix = options?.prefix ?? "";
+        const entries = Array.from(data.entries())
+          .filter(([key]) => key.startsWith(prefix))
+          .filter(([key]) => !options?.startAfter || key > options.startAfter)
+          .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          .slice(0, options?.limit ?? Number.POSITIVE_INFINITY);
+        return new Map(entries) as Map<string, T>;
+      },
+    };
+
+    const keys = await createDurableObjectStorage(doStorage).list("job:");
+
+    expect(keys).toHaveLength(2500);
+    expect(new Set(keys).size).toBe(2500);
   });
 
   test("creates DurableObject-backed store/queue", async () => {
