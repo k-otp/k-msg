@@ -53,16 +53,19 @@ export class TemplateContentCache {
       return shared.promise;
     }
 
-    const settle = () => {
-      if (this.pending.get(key) === lookup) this.pending.delete(key);
+    // Only the current lookup for a key may settle it: a delete() or a newer
+    // lookup replaces the pending entry, and a stale answer must not be kept.
+    const settle = (): boolean => {
+      if (this.pending.get(key) !== lookup) return false;
+      this.pending.delete(key);
+      return true;
     };
     const lookup: PendingLookup = {
       signal: context?.signal,
       fetch: context?.fetch,
       promise: load().then(
         (result) => {
-          settle();
-          if (result.isSuccess) {
+          if (settle() && result.isSuccess) {
             this.contents.set(key, {
               content: result.value,
               expiresAt: Date.now() + this.ttlMs,

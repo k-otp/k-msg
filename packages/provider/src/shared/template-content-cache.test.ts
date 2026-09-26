@@ -70,4 +70,27 @@ describe("TemplateContentCache", () => {
     await cache.get("TPL_1", undefined, loader.load);
     expect(loader.calls).toBe(3);
   });
+
+  test("does not keep a lookup that a delete overtook", async () => {
+    const cache = new TemplateContentCache();
+    let finishStaleLookup: (content: string) => void = () => {};
+    const stale = cache.get(
+      "TPL_1",
+      undefined,
+      () =>
+        new Promise((resolve) => {
+          finishStaleLookup = (content) => resolve(ok(content));
+        }),
+    );
+
+    // The template changes while the first lookup is still in flight.
+    cache.delete("TPL_1");
+    finishStaleLookup("#{old}");
+    await stale;
+
+    const loader = countingLoader("#{new}");
+    const fresh = await cache.get("TPL_1", undefined, loader.load);
+    expect(loader.calls).toBe(1);
+    expect(fresh.isSuccess && fresh.value).toBe("#{new}");
+  });
 });
