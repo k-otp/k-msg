@@ -1,10 +1,14 @@
 import { Database, type SQLQueryBindings } from "bun:sqlite";
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { WebhookEndpointConflictError } from "../../runtime/errors";
+import { createInMemoryWebhookPersistence } from "../../runtime/persistence";
+import type { WebhookEndpointStore } from "../../runtime/types";
 import { WebhookRuntimeService } from "../../runtime/webhook-runtime.service";
 import type { HttpClient } from "../../services/webhook.dispatcher";
 import {
   type WebhookConfig,
   type WebhookDelivery,
+  type WebhookEndpoint,
   type WebhookEvent,
   WebhookEventType,
 } from "../../types/webhook.types";
@@ -210,5 +214,147 @@ describe("webhook cloudflare adapter", () => {
     } finally {
       await runtime.shutdown();
     }
+  });
+});
+
+function createStoredEndpoint(
+  overrides: Partial<WebhookEndpoint> & Pick<WebhookEndpoint, "id" | "url">,
+): WebhookEndpoint {
+  const now = new Date();
+  return {
+    active: true,
+    status: "active",
+    events: [WebhookEventType.MESSAGE_SENT],
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
+describe.each([
+  [
+    "in-memory",
+    () => ({
+      store: createInMemoryWebhookPersistence().endpointStore,
+      close: () => {},
+    }),
+  ],
+  [
+    "D1",
+    () => {
+      const sqliteD1 = createSqliteBackedD1();
+      return {
+        store: createD1WebhookPersistence(sqliteD1.db).endpointStore,
+        close: sqliteD1.close,
+      };
+    },
+  ],
+])("%s endpoint store", (_name, createStore) => {
+  let store: WebhookEndpointStore;
+  let close: () => void;
+
+  beforeEach(() => {
+    ({ store, close } = createStore());
+  });
+
+  afterEach(() => {
+    close();
+  });
+
+  test("add rejects a URL that is already registered and keeps the stored endpoint", async () => {
+    await store.add(
+      createStoredEndpoint({
+        id: "first",
+        url: "https://example.com/hook",
+        secret: "whsec_first",
+      }),
+    );
+
+    const error = await store
+      .add(
+        createStoredEndpoint({
+          id: "second",
+          url: "https://example.com/hook",
+          secret: "whsec_second",
+        }),
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(WebhookEndpointConflictError);
+    expect(error).toMatchObject({ field: "url", endpointId: "first" });
+    expect((await store.list()).map((endpoint) => endpoint.id)).toEqual([
+      "first",
+    ]);
+    expect((await store.get("first"))?.secret).toBe("whsec_first");
+  });
+
+  test("add rejects an id that is already registered", async () => {
+    await store.add(
+      createStoredEndpoint({ id: "hook", url: "https://example.com/a" }),
+    );
+
+    const error = await store
+      .add(createStoredEndpoint({ id: "hook", url: "https://example.com/b" }))
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(WebhookEndpointConflictError);
+    expect(error).toMatchObject({ field: "id", endpointId: "hook" });
+    expect((await store.get("hook"))?.url).toBe("https://example.com/a");
+  });
+
+  test("update rejects a URL another endpoint uses and keeps both", async () => {
+    await store.add(
+      createStoredEndpoint({ id: "a", url: "https://example.com/a" }),
+    );
+    await store.add(
+      createStoredEndpoint({ id: "b", url: "https://example.com/b" }),
+    );
+
+    const error = await store
+      .update(
+        "a",
+        createStoredEndpoint({ id: "a", url: "https://example.com/b" }),
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(WebhookEndpointConflictError);
+    expect(error).toMatchObject({ field: "url", endpointId: "b" });
+    expect((await store.get("a"))?.url).toBe("https://example.com/a");
+    expect((await store.get("b"))?.url).toBe("https://example.com/b");
+  });
+
+  test("update changes an endpoint in place", async () => {
+    const createdAt = new Date("2026-01-01T00:00:00.000Z");
+    await store.add(
+      createStoredEndpoint({
+        id: "a",
+        url: "https://example.com/a",
+        secret: "whsec_old",
+        createdAt,
+        updatedAt: createdAt,
+      }),
+    );
+
+    const updatedAt = new Date("2026-02-01T00:00:00.000Z");
+    await store.update(
+      "a",
+      createStoredEndpoint({
+        id: "a",
+        url: "https://example.com/a-moved",
+        secret: "whsec_new",
+        events: [WebhookEventType.MESSAGE_FAILED],
+        createdAt,
+        updatedAt,
+      }),
+    );
+
+    expect(await store.get("a")).toMatchObject({
+      url: "https://example.com/a-moved",
+      secret: "whsec_new",
+      events: [WebhookEventType.MESSAGE_FAILED],
+      createdAt,
+      updatedAt,
+    });
+    expect(await store.list()).toHaveLength(1);
   });
 });

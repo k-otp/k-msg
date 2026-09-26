@@ -1,4 +1,5 @@
 import type { WebhookDelivery, WebhookEndpoint } from "../types/webhook.types";
+import { WebhookEndpointConflictError } from "./errors";
 import type {
   WebhookDeliveryListOptions,
   WebhookDeliveryStore,
@@ -62,6 +63,11 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   private readonly endpoints = new Map<string, WebhookEndpoint>();
 
   async add(endpoint: WebhookEndpoint): Promise<void> {
+    if (this.endpoints.has(endpoint.id)) {
+      throw new WebhookEndpointConflictError("id", endpoint.id, endpoint.id);
+    }
+    this.assertUrlAvailable(endpoint.url, endpoint.id);
+
     this.endpoints.set(endpoint.id, endpoint);
   }
 
@@ -69,8 +75,17 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
     if (!this.endpoints.has(endpointId)) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
     }
+    this.assertUrlAvailable(endpoint.url, endpointId);
 
     this.endpoints.set(endpointId, endpoint);
+  }
+
+  private assertUrlAvailable(url: string, endpointId: string): void {
+    for (const [storedId, stored] of this.endpoints) {
+      if (storedId !== endpointId && stored.url === url) {
+        throw new WebhookEndpointConflictError("url", url, storedId);
+      }
+    }
   }
 
   async remove(endpointId: string): Promise<void> {
