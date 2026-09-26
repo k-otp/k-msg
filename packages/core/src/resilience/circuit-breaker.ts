@@ -5,6 +5,7 @@
 import { KMsgError, KMsgErrorCode } from "../errors";
 
 export interface CircuitBreakerOptions {
+  /** Consecutive failures that open the circuit. */
   failureThreshold: number;
   timeout: number;
   resetTimeout: number;
@@ -18,6 +19,7 @@ export class CircuitBreaker {
   private failureCount = 0;
   private lastFailureTime = 0;
   private nextAttemptTime = 0;
+  private trialInFlight = false;
 
   constructor(private options: CircuitBreakerOptions) {}
 
@@ -44,11 +46,26 @@ export class CircuitBreaker {
         break;
     }
 
+    // Half-open admits a single trial call; the rest fail fast until it
+    // settles, so a recovering service is not hit by every waiting caller.
+    const isTrial = this.state === "HALF_OPEN";
+    if (isTrial) {
+      if (this.trialInFlight) {
+        throw new KMsgError(
+          KMsgErrorCode.NETWORK_SERVICE_UNAVAILABLE,
+          "Circuit breaker is HALF_OPEN and a trial call is in flight",
+          { state: this.state },
+        );
+      }
+      this.trialInFlight = true;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const result = await Promise.race([
         operation(),
-        new Promise<never>((_, reject) =>
-          setTimeout(
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
             () =>
               reject(
                 new KMsgError(
@@ -58,20 +75,33 @@ export class CircuitBreaker {
                 ),
               ),
             this.options.timeout,
-          ),
-        ),
+          );
+        }),
       ]);
 
-      if (this.state === "HALF_OPEN") {
-        this.state = "CLOSED";
-        this.failureCount = 0;
-        this.options.onClose?.();
-      }
-
+      this.recordSuccess();
       return result;
     } catch (error) {
       this.recordFailure();
       throw error;
+    } finally {
+      // A pending timer would keep the event loop alive for `timeout` after
+      // every call.
+      if (timer !== undefined) clearTimeout(timer);
+      if (isTrial) this.trialInFlight = false;
+    }
+  }
+
+  private recordSuccess(): void {
+    if (this.state === "HALF_OPEN") {
+      this.state = "CLOSED";
+      this.failureCount = 0;
+      this.options.onClose?.();
+      return;
+    }
+    // Only consecutive failures count toward the threshold.
+    if (this.state === "CLOSED") {
+      this.failureCount = 0;
     }
   }
 
@@ -79,10 +109,14 @@ export class CircuitBreaker {
     this.failureCount++;
     this.lastFailureTime = Date.now();
 
-    if (this.failureCount >= this.options.failureThreshold) {
+    if (
+      this.state === "HALF_OPEN" ||
+      this.failureCount >= this.options.failureThreshold
+    ) {
+      const wasOpen = this.state === "OPEN";
       this.state = "OPEN";
       this.nextAttemptTime = this.lastFailureTime + this.options.resetTimeout;
-      this.options.onOpen?.();
+      if (!wasOpen) this.options.onOpen?.();
     }
   }
 

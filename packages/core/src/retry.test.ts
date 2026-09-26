@@ -218,6 +218,120 @@ describe("CircuitBreaker", () => {
       "Circuit breaker timeout",
     );
   });
+
+  test("counts only consecutive failures toward the threshold", async () => {
+    const circuitBreaker = new CircuitBreaker({
+      failureThreshold: 3,
+      timeout: 1000,
+      resetTimeout: 5000,
+    });
+    const fail = async () => {
+      throw new Error("Service failure");
+    };
+
+    for (let round = 0; round < 3; round++) {
+      await expect(circuitBreaker.execute(fail)).rejects.toThrow();
+      await expect(circuitBreaker.execute(fail)).rejects.toThrow();
+      await circuitBreaker.execute(async () => "ok");
+    }
+
+    expect(circuitBreaker.getState()).toBe("CLOSED");
+    expect(circuitBreaker.getFailureCount()).toBe(0);
+  });
+
+  test("admits a single trial call while half-open", async () => {
+    let opened = 0;
+    const circuitBreaker = new CircuitBreaker({
+      failureThreshold: 1,
+      timeout: 1000,
+      resetTimeout: 20,
+      onOpen: () => {
+        opened++;
+      },
+    });
+    await expect(
+      circuitBreaker.execute(async () => {
+        throw new Error("Service failure");
+      }),
+    ).rejects.toThrow();
+    await new Promise((resolve) => setTimeout(resolve, 40));
+
+    let finishTrial: (value: string) => void = () => {};
+    const trial = circuitBreaker.execute(
+      () =>
+        new Promise<string>((resolve) => {
+          finishTrial = resolve;
+        }),
+    );
+    let concurrentCalls = 0;
+    await expect(
+      circuitBreaker.execute(async () => {
+        concurrentCalls++;
+        return "concurrent";
+      }),
+    ).rejects.toThrow("trial call is in flight");
+    expect(concurrentCalls).toBe(0);
+
+    finishTrial("recovered");
+    expect(await trial).toBe("recovered");
+    expect(circuitBreaker.getState()).toBe("CLOSED");
+    expect(await circuitBreaker.execute(async () => "next")).toBe("next");
+    expect(opened).toBe(1);
+  });
+
+  test("reports an opening once when in-flight calls fail late", async () => {
+    let opened = 0;
+    const circuitBreaker = new CircuitBreaker({
+      failureThreshold: 1,
+      timeout: 1000,
+      resetTimeout: 5000,
+      onOpen: () => {
+        opened++;
+      },
+    });
+    const failLater = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      throw new Error("Service failure");
+    };
+
+    const results = await Promise.allSettled([
+      circuitBreaker.execute(failLater),
+      circuitBreaker.execute(failLater),
+      circuitBreaker.execute(failLater),
+    ]);
+
+    expect(results.every((result) => result.status === "rejected")).toBe(true);
+    expect(circuitBreaker.getState()).toBe("OPEN");
+    expect(opened).toBe(1);
+  });
+
+  test("clears its timeout timer once the operation settles", async () => {
+    const circuitBreaker = new CircuitBreaker({
+      failureThreshold: 3,
+      timeout: 60_000,
+      resetTimeout: 5000,
+    });
+    const originalClearTimeout = globalThis.clearTimeout;
+    const cleared: unknown[] = [];
+    globalThis.clearTimeout = ((id?: Parameters<typeof clearTimeout>[0]) => {
+      cleared.push(id);
+      originalClearTimeout(id);
+    }) as typeof clearTimeout;
+
+    try {
+      await circuitBreaker.execute(async () => "ok");
+      await expect(
+        circuitBreaker.execute(async () => {
+          throw new Error("Service failure");
+        }),
+      ).rejects.toThrow();
+    } finally {
+      globalThis.clearTimeout = originalClearTimeout;
+    }
+
+    expect(cleared).toHaveLength(2);
+    expect(cleared.every((id) => id !== undefined)).toBe(true);
+  });
 });
 
 describe("BulkOperationHandler", () => {
