@@ -190,9 +190,10 @@ The provider's own error text is logged, never returned.
 - `sql/schema.sql` is generated from `src/tracking-schema.ts`, the options
   the store itself uses. After changing them, regenerate the file with
   `bun scripts/print-schema.ts > sql/schema.sql` and apply the change to the
-  database yourself. The schema differs from the library's default in three
-  column types, all explained in `src/tracking-schema.ts`: `TIMESTAMPTZ`
-  timestamps, `TEXT` instead of `VARCHAR(64)`, and `TEXT` instead of `JSONB`.
+  database yourself. The schema differs from the library's default only in
+  its `TIMESTAMPTZ` timestamps. `last_error` and `metadata` are `JSONB`, so
+  SQL can read them, for example
+  `SELECT message_id FROM kmsg_delivery_tracking WHERE last_error->>'code' = 'NETWORK_TIMEOUT'`.
 - The store normally runs `CREATE TABLE` and `CREATE INDEX IF NOT EXISTS` on
   first use. This Worker turns that off with `initializeSchema: false` in
   `src/tracking.ts`, so create the table before the first deploy.
