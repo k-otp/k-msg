@@ -8,7 +8,9 @@ import {
   type Provider,
   type ProviderRequestContext,
   type SendInput,
+  type SendOptions,
 } from "@k-msg/core";
+import { estimateSmsBytes } from "./index";
 import { KMsg } from "./k-msg";
 import { InMemoryMessageRepository } from "./test-utils/in-memory-message-repository";
 
@@ -1094,5 +1096,164 @@ describe("KMsg request context", () => {
     await kmsg.send({ to: "01012345678", text: "one" });
 
     expect(contexts).toEqual([undefined]);
+  });
+});
+
+describe("estimateSmsBytes", () => {
+  test("counts text the way KMsg chooses between SMS and LMS", async () => {
+    expect(estimateSmsBytes("")).toBe(0);
+    expect(estimateSmsBytes("hello")).toBe(5);
+    expect(estimateSmsBytes("안녕하세요")).toBe(10);
+    expect(estimateSmsBytes("주문 #42")).toBe(8);
+
+    const types: string[] = [];
+    const provider: Provider = {
+      id: "sms",
+      name: "SMS",
+      supportedTypes: ["SMS", "LMS"] as const,
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options) => {
+        types.push(options.type);
+        return ok({
+          messageId: options.messageId ?? "id",
+          status: "SENT" as const,
+          providerId: "sms",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+    const kmsg = new KMsg({ providers: [provider] });
+    const ninetyBytes = "가".repeat(45);
+
+    expect(estimateSmsBytes(ninetyBytes)).toBe(90);
+    await kmsg.send({ to: "01012345678", text: ninetyBytes });
+    await kmsg.send({ to: "01012345678", text: `${ninetyBytes}!` });
+    expect(types).toEqual(["SMS", "LMS"]);
+  });
+});
+
+describe("KMsg ALIMTALK fallback content", () => {
+  function createAlimTalkProvider() {
+    const sent: SendOptions[] = [];
+    const provider: Provider = {
+      id: "kakao",
+      name: "Kakao",
+      supportedTypes: ["ALIMTALK"] as const,
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options) => {
+        sent.push(options);
+        return ok({
+          messageId: options.messageId ?? "id",
+          status: "SENT" as const,
+          providerId: "kakao",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+    const failoverOf = (index: number) => {
+      const options = sent[index];
+      return options?.type === "ALIMTALK" ? options.failover : undefined;
+    };
+    return { provider, failoverOf };
+  }
+
+  test("fills the message variables into the fallback text and title", async () => {
+    const { provider, failoverOf } = createAlimTalkProvider();
+    const kmsg = new KMsg({ providers: [provider] });
+    const input: SendInput = {
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "ORDER_SHIPPED",
+      variables: { name: "Kim", orderId: 42 },
+      failover: {
+        enabled: true,
+        fallbackTitle: "#{name}, order #{orderId}",
+        fallbackContent: "#{name}, order #{orderId} has shipped #{missing}",
+      },
+    };
+
+    await kmsg.send(input);
+
+    expect(failoverOf(0)).toEqual({
+      enabled: true,
+      fallbackChannel: "sms",
+      fallbackTitle: "Kim, order 42",
+      fallbackContent: "Kim, order 42 has shipped #{missing}",
+    });
+    // The caller's input is left as it was.
+    expect(input.type === "ALIMTALK" && input.failover?.fallbackContent).toBe(
+      "#{name}, order #{orderId} has shipped #{missing}",
+    );
+  });
+
+  test("chooses SMS or LMS for the rendered fallback text when no channel is set", async () => {
+    const { provider, failoverOf } = createAlimTalkProvider();
+    const kmsg = new KMsg({ providers: [provider] });
+    const send = (fallbackContent: string, fallbackChannel?: "sms" | "lms") =>
+      kmsg.send({
+        type: "ALIMTALK",
+        to: "01012345678",
+        templateId: "NOTICE",
+        variables: { name: "홍길동" },
+        failover: {
+          enabled: true,
+          fallbackContent,
+          ...(fallbackChannel ? { fallbackChannel } : {}),
+        },
+      });
+
+    await send("a".repeat(90));
+    await send(`${"가".repeat(45)}!`);
+    // 105 bytes as written, but 90 once #{name} is filled in.
+    await send("#{name}".repeat(15));
+    // A channel the caller chose is kept.
+    await send("가".repeat(60), "sms");
+    await send("short", "lms");
+
+    expect([0, 1, 2, 3, 4].map((i) => failoverOf(i)?.fallbackChannel)).toEqual([
+      "sms",
+      "lms",
+      "sms",
+      "sms",
+      "lms",
+    ]);
+  });
+
+  test("sizes the fallback text against defaults.sms.autoLmsBytes", async () => {
+    const { provider, failoverOf } = createAlimTalkProvider();
+    const kmsg = new KMsg({
+      providers: [provider],
+      defaults: { sms: { autoLmsBytes: 50 } },
+    });
+
+    await kmsg.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "NOTICE",
+      variables: {},
+      failover: { enabled: true, fallbackContent: "a".repeat(60) },
+    });
+
+    expect(failoverOf(0)?.fallbackChannel).toBe("lms");
+  });
+
+  test("leaves failover without fallback text as it is", async () => {
+    const { provider, failoverOf } = createAlimTalkProvider();
+    const kmsg = new KMsg({ providers: [provider] });
+
+    await kmsg.send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "NOTICE",
+      variables: { name: "Kim" },
+      failover: { enabled: true, fallbackTitle: "Hi #{name}" },
+    });
+
+    expect(failoverOf(0)).toEqual({
+      enabled: true,
+      fallbackTitle: "Hi Kim",
+    });
   });
 });

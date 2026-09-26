@@ -4,7 +4,8 @@
 
 주요 공개 API를 재수출(re-export)하는 통합 패키지입니다:
 
-- `@k-msg/messaging`의 `KMsg`
+- `@k-msg/messaging`의 `KMsg`, 설정 타입(`KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`), `estimateSmsBytes`
+- `@k-msg/core`의 일부 export (`Result`, `KMsgError`, 배달 상태 헬퍼와 `DeliveryStatus` 타입 등)
 
 프로바이더 및 고급/런타임 전용 API는 각 패키지에서 직접 import 합니다.
 

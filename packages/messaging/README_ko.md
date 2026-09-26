@@ -86,6 +86,18 @@ const kmsg = new KMsg({
 await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
+### SMS와 LMS
+
+`type`을 생략하면 `KMsg`는 `defaults.sms.autoLmsBytes`(기본 90바이트)보다 긴 텍스트를 LMS로 보냅니다. ASCII 문자는 1바이트, 한글 등 그 밖의 문자는 2바이트로 셉니다. `estimateSmsBytes()`도 같은 방식으로 세므로, 보내기 전에 입력을 검사할 때 쓸 수 있습니다:
+
+```ts
+import { estimateSmsBytes } from "@k-msg/messaging";
+
+if (estimateSmsBytes(text) > 2_000) {
+  // 일반적인 LMS 한도보다 깁니다.
+}
+```
+
 ## 라우팅
 
 `routing.byType`으로 메시지 타입별 provider를 정할 수 있습니다. provider 자격 증명 없이 라우팅을 시험하려면 `MockProvider`마다 다른 id를 주세요:
@@ -106,6 +118,8 @@ const result = await kmsg.send({ to: "01012345678", text: "hello" });
 // result.value.providerId === "sms"
 ```
 
+설정 객체를 생성자 밖에서 만들 때는 내보낸 `KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`, `RoutingStrategy` 타입을 쓸 수 있습니다.
+
 ## 대량 발송
 
 배열을 넘기면 provider별로 묶어 최대 50건(provider의 배치 한도가 더 작으면 그 값) 단위로 보내고, 메시지마다 `Result`를 돌려줍니다.
@@ -122,6 +136,25 @@ const result = await kmsg.send(
 ```
 
 provider가 지원하는 항목은 `provider.transportCapabilities`(`abortSignal`, `injectableFetch`)에 선언되어 있고, 지원하지 않는 항목은 무시됩니다.
+
+## ALIMTALK 대체 문자
+
+`failover.fallbackContent`와 `failover.fallbackTitle`에도 SMS 텍스트처럼 `#{변수}`를 쓸 수 있고, 메시지의 `variables`로 채워집니다. `fallbackChannel`을 생략하면 `KMsg`가 채워진 텍스트 길이로 정합니다: `defaults.sms.autoLmsBytes`보다 길면 `lms`, 아니면 `sms`. tracking 기반 API 대체 발송도 이 채널을 따르고, 채널이 없는 레코드(`KMsg`를 거치지 않은 발송)는 90바이트를 넘으면 LMS로 보냅니다.
+
+```ts
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateId: "ORDER_SHIPPED",
+  variables: { name: "김철수", orderId: "A-1024" },
+  failover: {
+    enabled: true,
+    fallbackTitle: "배송 시작",
+    // 알림톡이 실패하면 "김철수님, 주문번호 A-1024 상품이 발송되었습니다."로 보냅니다.
+    fallbackContent: "#{name}님, 주문번호 #{orderId} 상품이 발송되었습니다.",
+  },
+});
+```
 
 ## Delivery Tracking
 

@@ -98,6 +98,18 @@ await kmsg.send({
 });
 ```
 
+### SMS or LMS
+
+When `type` is omitted, `KMsg` sends text longer than `defaults.sms.autoLmsBytes` (90 bytes by default) as LMS, counting one byte for each ASCII character and two for any other, such as Hangul. `estimateSmsBytes()` counts the same way, for example to check input before sending it:
+
+```ts
+import { estimateSmsBytes } from "@k-msg/messaging";
+
+if (estimateSmsBytes(text) > 2_000) {
+  // Longer than an LMS usually allows.
+}
+```
+
 ## Routing
 
 ```ts
@@ -150,6 +162,8 @@ const result = await kmsg.send({ to: "01012345678", text: "hello" });
 // result.value.providerId === "sms"
 ```
 
+`KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`, and `RoutingStrategy` are exported for typing configuration built outside the constructor.
+
 ## Bulk Sending
 
 Pass an array to `send()`. Messages are grouped by provider and sent in chunks of up to 50, or the provider's batch limit if it is lower, and each message gets its own `Result`.
@@ -177,6 +191,25 @@ const result = await kmsg.send(
 ```
 
 Providers declare what they honor in `provider.transportCapabilities` (`abortSignal`, `injectableFetch`); one that does not support an option ignores it.
+
+## ALIMTALK Fallback Text
+
+`failover.fallbackContent` and `failover.fallbackTitle` take the same `#{variable}` placeholders as SMS text, filled in from the message's `variables`. When `fallbackChannel` is omitted, `KMsg` sets it from the filled-in text: `lms` if it is longer than `defaults.sms.autoLmsBytes`, otherwise `sms`.
+
+```ts
+await kmsg.send({
+  type: "ALIMTALK",
+  to: "01012345678",
+  templateId: "ORDER_SHIPPED",
+  variables: { name: "Kim", orderId: "A-1024" },
+  failover: {
+    enabled: true,
+    fallbackTitle: "Order shipped",
+    // Sent as "Kim, order A-1024 has shipped." if the AlimTalk fails.
+    fallbackContent: "#{name}, order #{orderId} has shipped.",
+  },
+});
+```
 
 ## Delivery Tracking (PULL)
 
@@ -400,6 +433,7 @@ When provider-native ALIMTALK failover is unsupported or partial, you can enable
 - Triggers only for `ALIMTALK` with `failover.enabled === true`
 - Triggers only when tracking status is `FAILED` and classified as non-Kakao-user failure
 - Attempts fallback exactly once per original message
+- Sends SMS or LMS as `fallbackChannel` says; a record without one (not sent through `KMsg`) goes as LMS when its text is over 90 bytes
 - Requires providers with `getDeliveryStatus()` support
 
 ```ts
