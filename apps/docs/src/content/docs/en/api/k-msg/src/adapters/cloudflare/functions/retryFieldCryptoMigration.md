@@ -7,7 +7,7 @@ title: "retryFieldCryptoMigration"
 
 > **retryFieldCryptoMigration**(`client`, `options`): `Promise`\<[`FieldCryptoMigrationApplyResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>
 
-Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:454](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/executor.ts#L454)
+Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:461](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/executor.ts#L461)
 
 ## Parameters
 
