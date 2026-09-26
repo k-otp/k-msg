@@ -135,7 +135,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:65](https://git
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:278](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L278)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:275](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L275)
 
 #### Returns
 
