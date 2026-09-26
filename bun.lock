@@ -16,9 +16,6 @@
         "ttsc": "catalog:",
         "typescript": "catalog:",
       },
-      "peerDependencies": {
-        "typescript": "^5 || ^6 || ^7",
-      },
     },
     "apps/cli": {
       "name": "@k-msg/cli",
@@ -191,19 +188,15 @@
   },
   "catalog": {
     "@cloudflare/workers-types": "^4.20260214.0",
-    "@hono/zod-validator": "^0.4.1",
     "@ttsc/evidence": "^0.30.4",
     "@ttsc/graph": "^0.30.4",
     "@ttsc/lint": "^0.30.4",
     "@types/bun": "^1.3.14",
     "@types/node": "^26.0.1",
     "hono": "^4.8.10",
-    "honox": "^0.1.43",
     "postgres": "^3.4.7",
     "ttsc": "^0.30.4",
     "typescript": "^7.0.2",
-    "vite": "^6.3.5",
-    "wrangler": "^4.4.0",
     "zod": "^4.4.3",
   },
   "packages": {
