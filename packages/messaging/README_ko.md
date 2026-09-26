@@ -307,8 +307,8 @@ const queue = createDrizzleJobQueue({
 ```ts
 import {
   buildDeliveryTrackingSchemaSql,
-  createD1DeliveryTrackingStore,
   getDeliveryTrackingSchemaSpec,
+  HyperdriveDeliveryTrackingStore,
 } from "@k-msg/messaging/adapters/cloudflare";
 
 const trackingOptions = {
@@ -319,18 +319,57 @@ const trackingOptions = {
   },
   typeStrategy: {
     messageId: "uuid",
-    timestamp: "integer",
+    timestamp: "bigint",
   },
   storeRaw: true,
 } as const;
 
-const store = createD1DeliveryTrackingStore(env.DB, trackingOptions);
+// `client`는 Postgres용 CloudflareSqlClient입니다 (예: Hyperdrive 연결).
+const store = new HyperdriveDeliveryTrackingStore(client, trackingOptions);
 const ddl = buildDeliveryTrackingSchemaSql({
   dialect: "postgres",
   ...trackingOptions,
 });
 const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 ```
+
+`typeStrategy.timestamp`는 시간 컬럼(`requested_at`, `next_check_at` 등 `*_at` 컬럼)의 타입을 정합니다:
+
+| `timestamp` | Postgres | MySQL | SQLite / D1 |
+| --- | --- | --- | --- |
+| `bigint` (기본값) | `BIGINT` | `BIGINT` | `INTEGER` |
+| `integer` | `BIGINT` | `BIGINT` | `INTEGER` |
+| `date` | `TIMESTAMPTZ` | `BIGINT` | `INTEGER` |
+
+스토어는 숫자 시간 컬럼에 epoch 밀리초를, `TIMESTAMPTZ` 컬럼에 `Date`를 씁니다. epoch 밀리초(현재 약 1.8 × 10¹²)에는 64비트가 필요합니다. SQLite의 `INTEGER`는 64비트이지만 Postgres와 MySQL의 `INTEGER`는 32비트이므로, `integer`는 `bigint`의 별칭입니다.
+
+이전 버전은 Postgres와 MySQL에서 `integer`에 32비트 `INTEGER` 컬럼을 만들었습니다. 이 컬럼은 모든 insert를 범위 초과(out of range)로 거부합니다. strict 모드가 아닌 MySQL은 대신 2147483647을 저장하며, 이 값은 1970-01-25로 읽힙니다. `CREATE TABLE IF NOT EXISTS`는 이미 있는 테이블을 바꾸지 않으므로, 시간 컬럼을 직접 넓히세요. `tableName`과 `columnMap`을 바꿨다면 그 이름을 쓰세요:
+
+```sql
+-- Postgres
+ALTER TABLE kmsg_delivery_tracking
+  ALTER COLUMN requested_at TYPE BIGINT,
+  ALTER COLUMN status_updated_at TYPE BIGINT,
+  ALTER COLUMN next_check_at TYPE BIGINT,
+  ALTER COLUMN sent_at TYPE BIGINT,
+  ALTER COLUMN delivered_at TYPE BIGINT,
+  ALTER COLUMN failed_at TYPE BIGINT,
+  ALTER COLUMN last_checked_at TYPE BIGINT,
+  ALTER COLUMN scheduled_at TYPE BIGINT;
+
+-- MySQL: MODIFY는 컬럼 정의를 새로 쓰므로 원래 NOT NULL이던 컬럼은 NOT NULL을 유지하세요
+ALTER TABLE kmsg_delivery_tracking
+  MODIFY requested_at BIGINT NOT NULL,
+  MODIFY status_updated_at BIGINT NOT NULL,
+  MODIFY next_check_at BIGINT NOT NULL,
+  MODIFY sent_at BIGINT,
+  MODIFY delivered_at BIGINT,
+  MODIFY failed_at BIGINT,
+  MODIFY last_checked_at BIGINT,
+  MODIFY scheduled_at BIGINT;
+```
+
+`renderDrizzleSchemaSource()`로 만든 Drizzle 스키마를 쓰고 있다면 다시 생성하세요. 이제 `integer`에서도 시간 컬럼이 `bigint(..., { mode: "number" })`입니다.
 
 ### Drizzle 지원 버전
 
