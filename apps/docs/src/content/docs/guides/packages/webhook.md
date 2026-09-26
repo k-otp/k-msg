@@ -261,6 +261,15 @@ const runtime = new WebhookRuntimeService({
   엔드포인트에는 요청을 보내지 않고 `failed` 전송을 기록합니다. 유일한
   attempt에는 `httpStatus`가 없고 `error`에 이유가 담기며,
   `probeEndpoint()`도 같은 `error`를 돌려줍니다.
+- `fieldCrypto.endpoint`가 fail-open(`failMode: "open"`)일 때 저장된 secret을
+  복호화하지 못한 엔드포인트는 마스킹 값, 빈 값, 암호문 대신 `secret` 없이
+  반환되고, `secretKey`가 있어도 같은 방식으로 전송이 실패합니다. 그 수신
+  측은 자기 secret으로 검증하기 때문입니다. 새 `secret`을 지정하지 않은
+  업데이트는 저장된 secret을 그대로 둡니다. `openFallback: "plaintext"`에서는
+  암호화에 실패해 평문으로 저장된 secret을 계속 씁니다.
+
+secret은 field crypto 사용 여부와 관계없이 앞뒤 공백까지 주어진 그대로
+씁니다.
 
 자체 secret이 없는 엔드포인트들은 `secretKey`를 함께 쓰므로, 그 값을 가진
 쪽은 이 엔드포인트 모두에 보낼 요청을 서명할 수 있습니다. 수신 측이 서로
