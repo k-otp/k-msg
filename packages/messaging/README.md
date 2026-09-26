@@ -256,7 +256,7 @@ tracking.start();
 await tracking.runOnce();
 ```
 
-To react when a status changes, for example to notify a webhook, pass `onStatusChange`. It runs once per stored change; if it throws, the poll continues and the error goes to `onStatusChangeError` (or `console.error`).
+To react when a status changes, for example to notify a webhook, pass `onStatusChange`. It receives each changed record as stored, after the poll finishes; if it throws, polling continues and the error goes to `onStatusChangeError` (or `console.error`). Delivery is at least once: services polling the same store can each report a change, so make the callback idempotent, for example by message id and status.
 
 ```ts
 const tracking = new DeliveryTrackingService({
