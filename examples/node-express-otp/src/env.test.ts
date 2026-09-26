@@ -51,6 +51,8 @@ test("TRUST_PROXY refuses true and anything Express could not parse", () => {
     "0.0.0.0/0",
     "::/0",
     "10.0.0.0/abc",
+    "11",
+    "99999999999999999999",
   ]) {
     assert.throws(
       () => load({ TRUST_PROXY: value }),
