@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { FieldCryptoConfig } from "@k-msg/core";
+import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
 import { HyperdriveDeliveryTrackingStore } from "../adapters/cloudflare/hyperdrive-delivery-tracking.store";
 import { CloudflareObjectDeliveryTrackingStore } from "../adapters/cloudflare/object-delivery-tracking.store";
 import {
@@ -106,6 +106,34 @@ describe("delivery tracking field crypto policy", () => {
         { secureMode: true, compatPlainColumns: false },
       ),
     ).rejects.toThrow("unsupported failMode: close");
+  });
+
+  test("an envelope from another version is rejected before it is stored", async () => {
+    const config = createConfig({
+      provider: {
+        encrypt: async () => ({
+          ciphertext: { v: 2, alg: "X", kid: "k", iv: "i", tag: "t", ct: "c" },
+        }),
+        decrypt: async ({ ciphertext }) => ciphertext,
+        hash: async ({ value }) => `h:${value}`,
+      },
+    });
+
+    const error = await applyTrackingCryptoOnWrite(
+      createRecord(),
+      { config },
+      { tableName: "kmsg_delivery_tracking", store: "memory" },
+      { secureMode: true, compatPlainColumns: false },
+    ).then(
+      () => undefined,
+      (caught: unknown) => caught,
+    );
+
+    // Fails closed, citing the envelope check as the cause.
+    expect(error).toBeInstanceOf(FieldCryptoError);
+    expect((error as FieldCryptoError).details).toMatchObject({
+      cause: expect.stringContaining("ciphertext envelope must be v1 A256GCM"),
+    });
   });
 
   test("fail-open path emits degraded state and metric tags", async () => {

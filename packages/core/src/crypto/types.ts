@@ -1,3 +1,5 @@
+import { FieldCryptoError } from "./errors";
+
 export type FieldMode = "plain" | "encrypt" | "encrypt+hash" | "mask";
 export type FieldCryptoFailMode = "closed" | "open";
 export type FieldCryptoOpenFallback = "masked" | "plaintext" | "null";
@@ -439,8 +441,38 @@ export function createNoopFieldCryptoProvider(): FieldCryptoProvider {
   };
 }
 
+/**
+ * Throws unless `value` is a v1 envelope: `v` 1, `alg` "A256GCM", and string
+ * `kid`, `iv`, `tag`, and `ct`.
+ */
+export function assertCryptoEnvelopeV1(
+  value: unknown,
+): asserts value is CryptoEnvelope {
+  if (isCryptoEnvelope(value) && value.v === 1 && value.alg === "A256GCM") {
+    return;
+  }
+  const candidate =
+    value && typeof value === "object"
+      ? (value as Partial<CryptoEnvelope>)
+      : {};
+  throw new FieldCryptoError(
+    "policy",
+    "ciphertext envelope must be v1 A256GCM with string kid, iv, tag, and ct",
+    {
+      rule: "fieldCrypto.envelope.v1",
+      v: candidate.v,
+      alg: candidate.alg,
+    },
+  );
+}
+
+/**
+ * Serializes provider ciphertext for storage. An envelope object must be a v1
+ * envelope; a string is the provider's own serialized form and is kept as is.
+ */
 export function toCiphertextEnvelopeString(
   ciphertext: string | CryptoEnvelope,
 ): string {
+  if (typeof ciphertext !== "string") assertCryptoEnvelopeV1(ciphertext);
   return toCiphertextString(ciphertext);
 }

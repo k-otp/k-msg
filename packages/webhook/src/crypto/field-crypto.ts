@@ -4,6 +4,7 @@ import {
   type FieldCryptoConfig,
   FieldCryptoError,
   resolveFieldCryptoFailMode,
+  toCiphertextEnvelopeString,
 } from "@k-msg/core";
 import type {
   WebhookDeliveryListOptions,
@@ -81,9 +82,7 @@ async function protectValue(
       aad: input.aad,
       ...(kid ? { kid } : {}),
     });
-    return typeof encrypted.ciphertext === "string"
-      ? encrypted.ciphertext
-      : JSON.stringify(encrypted.ciphertext);
+    return toCiphertextEnvelopeString(encrypted.ciphertext);
   } catch (error) {
     if (failMode === "closed") {
       throw error;
