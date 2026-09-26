@@ -35,6 +35,9 @@ import type {
   WebhookTenantMigrationResult,
 } from "./types";
 
+const DEFAULT_BATCH_SIZE = 10;
+const DEFAULT_BATCH_TIMEOUT_MS = 5_000;
+
 function toStatusFromActive(active: boolean): WebhookEndpoint["status"] {
   return active ? "active" : "inactive";
 }
@@ -45,6 +48,16 @@ function normalizeLimit(limit: number | undefined, fallback: number): number {
   }
 
   return Math.max(0, Math.floor(limit));
+}
+
+// A batch must take at least one event, or flush() would never empty the
+// queue.
+function normalizeBatchSize(batchSize: number | undefined): number {
+  return typeof batchSize === "number" &&
+    Number.isFinite(batchSize) &&
+    batchSize >= 1
+    ? Math.floor(batchSize)
+    : DEFAULT_BATCH_SIZE;
 }
 
 function cloneEventWithValidTimestamp(event: WebhookEvent): WebhookEvent {
@@ -69,9 +82,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
   >;
   private readonly persistence: WebhookPersistence;
   private readonly fieldCrypto: WebhookRuntimeConfig["fieldCrypto"];
+  private readonly batchSize: number;
+  private readonly batchTimeoutMs: number;
+  private readonly autoStart: boolean;
 
   private readonly eventQueue: WebhookEvent[] = [];
-  private batchProcessor: ReturnType<typeof setInterval> | null = null;
+  // Pending only while emit() has queued events, so an idle runtime holds
+  // no timer.
+  private batchTimer: ReturnType<typeof setTimeout> | null = null;
   private initPromise: Promise<void> | null = null;
   // The batch currently dispatching, shared so flush() can wait for it.
   private activeBatch: Promise<void> | null = null;
@@ -85,6 +103,12 @@ export class WebhookRuntimeService implements WebhookRuntime {
     this.config = config.delivery;
     this.dispatcher = new WebhookDispatcher(config.delivery, config.httpClient);
     this.securityOptions = resolveEndpointValidationOptions(config.security);
+    this.batchSize = normalizeBatchSize(config.delivery.batchSize);
+    this.batchTimeoutMs = normalizeLimit(
+      config.delivery.batchTimeoutMs,
+      DEFAULT_BATCH_TIMEOUT_MS,
+    );
+    this.autoStart = config.autoStart ?? true;
 
     const persistence = this.resolvePersistence(config);
     this.persistence = persistence;
@@ -98,11 +122,6 @@ export class WebhookRuntimeService implements WebhookRuntime {
       persistence.deliveryStore,
       config.fieldCrypto,
     );
-
-    const autoStart = config.autoStart ?? true;
-    if (autoStart) {
-      this.startBatchProcessor();
-    }
   }
 
   // Checks the URL before queueing, so an invalid one fails at once instead
@@ -278,11 +297,15 @@ export class WebhookRuntimeService implements WebhookRuntime {
     await this.ensureInitialized();
     this.eventQueue.push(cloneEventWithValidTimestamp(event));
 
-    if (
-      this.eventQueue.length >= this.config.batchSize &&
-      this.activeBatch === null
-    ) {
-      await this.processBatch();
+    try {
+      if (
+        this.eventQueue.length >= this.batchSize &&
+        this.activeBatch === null
+      ) {
+        await this.processBatch();
+      }
+    } finally {
+      this.scheduleBatch();
     }
   }
 
@@ -316,6 +339,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     while (this.eventQueue.length > 0 || this.activeBatch !== null) {
       await this.processBatch();
     }
+    // The queue is empty, so a scheduled batch would have nothing to send.
+    this.cancelBatchTimer();
   }
 
   async listDeliveries(
@@ -349,12 +374,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
   async shutdown(): Promise<void> {
     // Endpoint writes queued before this point, such as ones behind a
     // running migration, still reach the store before it closes; later
-    // ones are refused instead of running against a closed store.
+    // ones are refused instead of running against a closed store. emit()
+    // after this point schedules no batch timer either.
     this.shuttingDown = true;
-    if (this.batchProcessor) {
-      clearInterval(this.batchProcessor);
-      this.batchProcessor = null;
-    }
+    this.cancelBatchTimer();
 
     await this.flush();
     await this.endpointWrites;
@@ -458,7 +481,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
       return Promise.resolve();
     }
 
-    const batch = this.eventQueue.splice(0, this.config.batchSize);
+    const batch = this.eventQueue.splice(0, this.batchSize);
     this.activeBatch = this.dispatchBatch(batch).finally(() => {
       this.activeBatch = null;
     });
@@ -551,18 +574,43 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return `webhook_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
-  private startBatchProcessor(): void {
-    const timeout = normalizeLimit(this.config.batchTimeoutMs, 5000);
-    this.batchProcessor = setInterval(() => {
-      if (this.activeBatch !== null) return;
-      this.processBatch().catch((error) => {
-        logger.error(
-          "Webhook batch processor error",
-          undefined,
-          error instanceof Error ? error : new Error(String(error)),
-        );
-      });
-    }, timeout);
+  // Sends the queue batchTimeoutMs after emit() queues an event, and keeps
+  // going while events remain. With nothing queued, no timer is pending.
+  private scheduleBatch(): void {
+    if (
+      !this.autoStart ||
+      this.shuttingDown ||
+      this.batchTimer !== null ||
+      this.eventQueue.length === 0
+    ) {
+      return;
+    }
+
+    this.batchTimer = setTimeout(() => {
+      this.batchTimer = null;
+      void this.runScheduledBatch();
+    }, this.batchTimeoutMs);
+  }
+
+  private async runScheduledBatch(): Promise<void> {
+    try {
+      await this.processBatch();
+    } catch (error) {
+      logger.error(
+        "Webhook batch processor error",
+        undefined,
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    }
+    // Events queued meanwhile, or re-queued after a failure, go next.
+    this.scheduleBatch();
+  }
+
+  private cancelBatchTimer(): void {
+    if (this.batchTimer !== null) {
+      clearTimeout(this.batchTimer);
+      this.batchTimer = null;
+    }
   }
 }
 

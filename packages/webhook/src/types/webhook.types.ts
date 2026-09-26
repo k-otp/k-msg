@@ -22,8 +22,18 @@ export interface WebhookConfig {
   enabledEvents: WebhookEventType[];
 
   // 배치 처리 설정
-  batchSize: number;
-  batchTimeoutMs: number;
+  /**
+   * How many events queued by `emit()` go out in one batch; `emit()` sends a
+   * batch itself once this many are queued. Defaults to 10, which also
+   * replaces a value below 1. `emitSync()` does not use it.
+   */
+  batchSize?: number;
+  /**
+   * With `autoStart`, how long in milliseconds the first event queued by
+   * `emit()` waits before its batch is sent. Defaults to 5000. `emitSync()`
+   * does not use it.
+   */
+  batchTimeoutMs?: number;
 }
 
 export enum WebhookEventType {
