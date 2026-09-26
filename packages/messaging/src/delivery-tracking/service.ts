@@ -5,6 +5,7 @@ import type {
   SendResult,
 } from "@k-msg/core";
 import type { HookContext } from "../hooks";
+import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "../sms-bytes";
 import { reconcileDeliveryStatuses } from "./reconciler";
 import type {
   DeliveryTrackingCountByField,
@@ -437,8 +438,13 @@ export class DeliveryTrackingService {
       return;
     }
 
-    const fallbackType =
-      failover.request.fallbackChannel === "lms" ? "LMS" : "SMS";
+    // KMsg records the channel it chose; size text sent some other way.
+    const fallbackChannel =
+      failover.request.fallbackChannel ??
+      (estimateSmsBytes(fallbackContent) > DEFAULT_AUTO_LMS_BYTES
+        ? "lms"
+        : "sms");
+    const fallbackType = fallbackChannel === "lms" ? "LMS" : "SMS";
     const fallbackTitle =
       typeof failover.request.fallbackTitle === "string" &&
       failover.request.fallbackTitle.trim().length > 0
