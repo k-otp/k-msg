@@ -20,6 +20,7 @@ export const providerOnboardingSpecs: Readonly<
         kind: "manual",
         severity: "blocker",
         scopes: ["doctor", "preflight"],
+        messageTypes: ["ALIMTALK"],
       },
       {
         id: "iwinv_config_required",
@@ -37,6 +38,7 @@ export const providerOnboardingSpecs: Readonly<
         kind: "capability",
         severity: "warning",
         scopes: ["doctor", "preflight"],
+        messageTypes: ["ALIMTALK"],
         capabilityMethods: [
           "listTemplates",
           "getTemplate",
@@ -51,6 +53,7 @@ export const providerOnboardingSpecs: Readonly<
         kind: "api_probe",
         severity: "warning",
         scopes: ["doctor", "preflight"],
+        messageTypes: ["ALIMTALK"],
         probeOperation: "list_templates",
       },
     ],

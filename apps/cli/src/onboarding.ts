@@ -572,6 +572,25 @@ async function evaluateSpecChecks(params: {
   for (const check of spec.checks) {
     if (!supportsScope(check, scope)) continue;
 
+    // Doctor reviews what the provider is configured to send; the AlimTalk
+    // preflight evaluates its checks regardless.
+    if (
+      scope === "doctor" &&
+      Array.isArray(check.messageTypes) &&
+      check.messageTypes.length > 0 &&
+      !check.messageTypes.some((type) => provider.supportedTypes.includes(type))
+    ) {
+      checks.push({
+        id: check.id,
+        title: check.title,
+        kind: check.kind,
+        severity: check.severity,
+        status: "skip",
+        message: `Not applicable: the provider is not configured for ${check.messageTypes.join(", ")}`,
+      });
+      continue;
+    }
+
     if (check.kind === "manual") {
       const state = getManualCheckState(runtime.config, provider.id, check.id);
       checks.push({
