@@ -13,7 +13,9 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:7](https://github.c
 
 > **failureThreshold**: `number`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L8)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L9)
+
+Consecutive failures that open the circuit.
 
 ***
 
@@ -21,7 +23,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:8](https://github.c
 
 > `optional` **onClose?**: () => `void`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L13)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L14)
 
 #### Returns
 
@@ -33,7 +35,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:13](https://github.
 
 > `optional` **onHalfOpen?**: () => `void`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L12)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L13)
 
 #### Returns
 
@@ -45,7 +47,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:12](https://github.
 
 > `optional` **onOpen?**: () => `void`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L11)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L12)
 
 #### Returns
 
@@ -57,7 +59,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:11](https://github.
 
 > **resetTimeout**: `number`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L10)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L11)
 
 ***
 
@@ -65,4 +67,4 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:10](https://github.
 
 > **timeout**: `number`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:9](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L9)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L10)
