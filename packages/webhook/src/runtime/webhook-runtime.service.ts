@@ -7,6 +7,7 @@ import {
 } from "../crypto/field-crypto";
 import {
   type HttpClient,
+  resolveSigningSecret,
   WebhookDispatcher,
 } from "../services/webhook.dispatcher";
 import {
@@ -123,10 +124,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
     );
   }
 
-  // Checks the URL before queueing, so an invalid one fails at once instead
-  // of waiting behind other endpoint writes.
+  // Checks the URL and the signing secret before queueing, so an invalid
+  // endpoint fails at once instead of waiting behind other endpoint writes.
   async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
     validateEndpointUrl(input.url, this.securityOptions);
+    this.assertSigningSecret(input, input.url);
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
       return this.insertEndpoint(input);
@@ -142,6 +144,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
     for (const [index, input] of inputs.entries()) {
       try {
         validateEndpointUrl(input.url, this.securityOptions);
+        this.assertSigningSecret(input, input.url);
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(`Webhook endpoint ${index} in the batch: ${reason}`, {
@@ -159,13 +162,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
     });
   }
 
-  // Stores a new endpoint. Callers hold the endpoint write queue. The URL is
-  // checked again here, the check that guards the store: callers check it
-  // before queueing only to fail fast.
+  // Stores a new endpoint. Callers hold the endpoint write queue. The URL and
+  // secret are checked again here, the check that guards the store: callers
+  // check them before queueing only to fail fast.
   private async insertEndpoint(
     input: WebhookEndpointInput,
   ): Promise<WebhookEndpoint> {
     validateEndpointUrl(input.url, this.securityOptions);
+    this.assertSigningSecret(input, input.url);
     const now = new Date();
     const active =
       input.active ?? (input.status ? input.status === "active" : true);
@@ -223,6 +227,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
           ? toStatusFromActive(updates.active)
           : current.status),
     };
+    this.assertSigningSecret(merged, endpointId);
 
     await this.endpointStore.update(endpointId, merged);
     return merged;
@@ -266,11 +271,15 @@ export class WebhookRuntimeService implements WebhookRuntime {
       const delivery = await this.dispatcher.dispatch(event, endpoint);
       await this.deliveryStore.add(delivery);
 
+      const success = delivery.status === "success";
       return {
         endpointId,
         url: endpoint.url,
-        success: delivery.status === "success",
+        success,
         httpStatus: delivery.attempts[0]?.httpStatus,
+        error: success
+          ? undefined
+          : delivery.attempts[delivery.attempts.length - 1]?.error,
         responseTime: Date.now() - startedAt,
         testedAt: new Date(),
       };
@@ -445,6 +454,22 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     await this.initPromise;
+  }
+
+  // The dispatcher refuses to send unsigned while security is on; rejecting
+  // the endpoint here reports the problem when it is registered instead.
+  private assertSigningSecret(
+    endpoint: Pick<WebhookEndpoint, "secret">,
+    label: string,
+  ): void {
+    if (
+      this.config.enableSecurity &&
+      resolveSigningSecret(endpoint, this.config) === undefined
+    ) {
+      throw new Error(
+        `Webhook endpoint ${label} needs a secret: enableSecurity is on and delivery.secretKey is not set`,
+      );
+    }
   }
 
   private validateEvent(event: WebhookEvent): void {
