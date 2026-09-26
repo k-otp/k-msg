@@ -20,7 +20,9 @@ function sortByCreatedAtDesc(
 ): number {
   const byTime = right.createdAt.getTime() - left.createdAt.getTime();
   if (byTime !== 0) return byTime;
-  return left.id < right.id ? 1 : left.id > right.id ? -1 : 0;
+  if (left.id < right.id) return 1;
+  if (left.id > right.id) return -1;
+  return 0;
 }
 
 /** Whether a delivery comes after the cursor in the newest-first order. */

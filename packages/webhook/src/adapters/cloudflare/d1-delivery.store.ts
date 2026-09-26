@@ -109,8 +109,8 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
 
     if (options.before) {
       const createdAt = options.before.createdAt.getTime();
-      where.push("(created_at < ? OR (created_at = ? AND id < ?))");
-      params.push(createdAt, createdAt, options.before.id);
+      where.push("(created_at, id) < (?, ?)");
+      params.push(createdAt, options.before.id);
     }
 
     const limit =
