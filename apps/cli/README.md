@@ -252,7 +252,7 @@ k-msg db tracking migrate retry --sqlite-file ./local.db
 Operational notes:
 
 - state is persisted in DB meta tables plus local snapshots under `.kmsg/migrations`
-- `retry` only replays failed chunks
+- `retry` only replays failed chunks; resume a run that stopped on a read error with `apply`
 - `apply` and `retry` encrypt with the tracking store's keys from `KMSG_FIELD_CRYPTO_KEYS` and `KMSG_ACTIVE_KID` (see `docs/security/migration-cli-runbook.md`)
 - use `status` before changing rollout flags (`compatPlainColumns`)
 

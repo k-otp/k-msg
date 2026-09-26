@@ -37,7 +37,7 @@ Stores that use another provider (for example KMS) should call `applyFieldCrypto
 1. Generate a plan and record `planId`.
 2. Apply chunks with controlled `--max-chunks`.
 3. Check status before each stage transition.
-4. Retry only failed chunks.
+4. Retry only failed chunks. A run that stopped on a read error has none; resume it with `apply`, which continues from the recorded cursor.
 5. Switch to secure-only read path after parity checks.
 
 ## Common mistakes
