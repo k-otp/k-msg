@@ -158,7 +158,7 @@ await kmsg.send({
 
 ## Delivery Tracking
 
-상태가 바뀔 때마다 처리하려면(예: webhook 알림) `onStatusChange`를 넘깁니다. 폴링이 끝난 뒤 저장된 레코드로 호출되고, 콜백이 예외를 던져도 폴링은 계속되며 에러는 `onStatusChangeError`(없으면 `console.error`)로 전달됩니다. 같은 저장소를 여러 서비스가 폴링하면 같은 변경이 두 번 이상 보고될 수 있으니(at-least-once) 메시지 id와 상태로 멱등하게 처리하세요. `await tracking.runOnce()`는 그 폴링의 변경이 모두 전달된 뒤에 끝나므로, 이를 기다리는 cron이나 요청 핸들러에서 알림이 빠지지 않습니다. 콜백 안에서 `runOnce()`를 다시 호출할 수도 있는데, 이때는 변경이 콜백 다음 순서로 전달되므로 대기열에 들어간 시점에 끝납니다. `@k-msg/provider`의 `MockProvider`는 보낸 메시지를 `DELIVERED`로 보고하므로(`setDeliveryStatus`로 변경) 실제 자격 증명 없이도 tracking을 돌려볼 수 있습니다.
+상태가 바뀔 때마다 처리하려면(예: webhook 알림) `onStatusChange`를 넘깁니다. 폴링이 끝난 뒤 저장된 레코드로 호출되고, 콜백이 예외를 던져도 폴링은 계속되며 에러는 `onStatusChangeError`(없으면 `console.error`)로 전달됩니다. 전달은 최선 노력(best effort) 방식입니다. 콜백이 예외를 던진 변경은 다시 시도하지 않고, 프로세스가 멈추기 직전에 저장된 변경은 보고되지 않을 수 있으니, 하나도 놓치면 안 된다면 저장된 레코드와 대조하세요. 같은 저장소를 여러 서비스가 폴링하면 같은 변경이 두 번 이상 보고될 수도 있으니 메시지 id와 상태로 멱등하게 처리하세요. `await tracking.runOnce()`는 그 폴링의 변경이 모두 전달된 뒤에 끝나므로, 이를 기다리는 cron이나 요청 핸들러가 알림보다 먼저 끝나지 않습니다. 콜백 안에서 `runOnce()`를 다시 호출할 수도 있는데, 이때는 변경이 콜백 다음 순서로 전달되므로 대기열에 들어간 시점에 끝납니다. `@k-msg/provider`의 `MockProvider`는 보낸 메시지를 `DELIVERED`로 보고하므로(`setDeliveryStatus`로 변경) 실제 자격 증명 없이도 tracking을 돌려볼 수 있습니다.
 
 ```ts
 import {
