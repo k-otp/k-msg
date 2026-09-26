@@ -796,4 +796,122 @@ describe("KMsg", () => {
     expect(result.total).toBe(mixedBatchInput.length);
     expect(result.results).toHaveLength(mixedBatchInput.length);
   });
+  describe("observer hook errors", () => {
+    const sentProvider = (
+      send = mock(async (options: any) =>
+        ok({
+          messageId: options.messageId,
+          status: "SENT" as const,
+          providerId: "mock",
+          type: options.type,
+          to: options.to,
+        }),
+      ),
+    ): Provider => ({
+      id: "mock",
+      name: "Mock Provider",
+      supportedTypes: ["SMS"] as const,
+      healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+      send,
+    });
+    const input: SendInput = { to: "01012345678", text: "hello" };
+
+    test("do not turn a message the provider accepted into a failure", async () => {
+      const repo = new InMemoryMessageRepository();
+      const updateSpy = mock(repo.update.bind(repo));
+      repo.update = updateSpy;
+      const send = mock(async (options: any) =>
+        ok({
+          messageId: options.messageId,
+          status: "SENT" as const,
+          providerId: "mock",
+          type: options.type,
+          to: options.to,
+        }),
+      );
+      const onError = mock(() => {});
+      const onHookError = mock(() => {});
+      const kmsg = new KMsg({
+        providers: [sentProvider(send)],
+        persistence: { strategy: "full", repo },
+        hooks: {
+          onSuccess: () => {
+            throw new Error("tracking store unavailable");
+          },
+          onFinal: async () => {
+            throw new Error("metrics down");
+          },
+          onError,
+          onHookError,
+        },
+      });
+
+      const result = await kmsg.send(input);
+
+      expect(result.isSuccess).toBe(true);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(onError).not.toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      expect((updateSpy.mock.calls[0] as unknown[])[1]).toMatchObject({
+        status: "SENT",
+      });
+      expect(
+        onHookError.mock.calls.map((call) => {
+          const [error, info] = call as unknown as [
+            Error,
+            { hook: string; context: { messageId: string } },
+          ];
+          return [info.hook, error.message, typeof info.context.messageId];
+        }),
+      ).toEqual([
+        ["onSuccess", "tracking store unavailable", "string"],
+        ["onFinal", "metrics down", "string"],
+      ]);
+    });
+
+    test("keep the provider error when a failure hook throws", async () => {
+      const providerError = new KMsgError(
+        KMsgErrorCode.MESSAGE_SEND_FAILED,
+        "provider failed",
+      );
+      const kmsg = new KMsg({
+        providers: [sentProvider(mock(async () => fail(providerError)))],
+        hooks: {
+          onError: () => {
+            throw new Error("logger down");
+          },
+          onHookError: () => {
+            throw new Error("reporter down too");
+          },
+        },
+      });
+
+      const result = await kmsg.send(input);
+
+      expect(result.isFailure).toBe(true);
+      if (result.isFailure) {
+        expect(result.error).toMatchObject({
+          code: KMsgErrorCode.MESSAGE_SEND_FAILED,
+          message: "provider failed",
+        });
+      }
+    });
+
+    test("still let onBeforeSend abort the send", async () => {
+      const send = mock(async () =>
+        fail(new KMsgError(KMsgErrorCode.UNKNOWN_ERROR, "unused")),
+      );
+      const kmsg = new KMsg({
+        providers: [sentProvider(send)],
+        hooks: {
+          onBeforeSend: () => {
+            throw new Error("blocked");
+          },
+        },
+      });
+
+      await expect(kmsg.send(input)).rejects.toThrow("blocked");
+      expect(send).not.toHaveBeenCalled();
+    });
+  });
 });

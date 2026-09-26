@@ -15,7 +15,7 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import type { HookContext, KMsgHooks } from "./hooks";
+import type { HookContext, KMsgHooks, KMsgObserverHook } from "./hooks";
 import type { BatchSendResult } from "./types/message.types";
 
 function interpolateTemplate(
@@ -519,15 +519,11 @@ export class KMsg {
 
     const providerResult = this.selectProvider(normalized);
     if (providerResult.isFailure) {
-      if (this.hooks.onError) {
-        await this.hooks.onError(context, providerResult.error);
-      }
-      if (this.hooks.onFinal) {
-        await this.hooks.onFinal(context, {
-          outcome: "failure",
-          error: providerResult.error,
-        });
-      }
+      await this.notify("onError", context, providerResult.error);
+      await this.notify("onFinal", context, {
+        outcome: "failure",
+        error: providerResult.error,
+      });
       return fail(providerResult.error);
     }
 
@@ -556,9 +552,7 @@ export class KMsg {
     try {
       const onboardingError = this.validateSendOnboarding(provider, normalized);
       if (onboardingError) {
-        if (this.hooks.onError) {
-          await this.hooks.onError(context, onboardingError);
-        }
+        await this.notify("onError", context, onboardingError);
         return fail(onboardingError);
       }
 
@@ -568,15 +562,11 @@ export class KMsg {
           const saveError = this.toKMsgError(saveResult.error, {
             providerId: provider.id,
           });
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, saveError);
-          }
-          if (this.hooks.onFinal) {
-            await this.hooks.onFinal(context, {
-              outcome: "failure",
-              error: saveError,
-            });
-          }
+          await this.notify("onError", context, saveError);
+          await this.notify("onFinal", context, {
+            outcome: "failure",
+            error: saveError,
+          });
           return fail(saveError);
         }
 
@@ -588,16 +578,12 @@ export class KMsg {
           to: normalized.to,
         };
 
-        if (this.hooks.onQueued) {
-          await this.hooks.onQueued(context, value);
-        }
+        await this.notify("onQueued", context, value);
 
-        if (this.hooks.onFinal) {
-          await this.hooks.onFinal(context, {
-            outcome: "success",
-            result: value,
-          });
-        }
+        await this.notify("onFinal", context, {
+          outcome: "success",
+          result: value,
+        });
 
         return ok(value);
       }
@@ -608,15 +594,11 @@ export class KMsg {
           const saveError = this.toKMsgError(saveResult.error, {
             providerId: provider.id,
           });
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, saveError);
-          }
-          if (this.hooks.onFinal) {
-            await this.hooks.onFinal(context, {
-              outcome: "failure",
-              error: saveError,
-            });
-          }
+          await this.notify("onError", context, saveError);
+          await this.notify("onFinal", context, {
+            outcome: "failure",
+            error: saveError,
+          });
           return fail(saveError);
         }
         persistedRecordId = saveResult.value;
@@ -640,30 +622,22 @@ export class KMsg {
               providerId: provider.id,
               persistedRecordId,
             });
-            if (this.hooks.onError) {
-              await this.hooks.onError(context, updateError);
-            }
-            if (this.hooks.onFinal) {
-              await this.hooks.onFinal(context, {
-                outcome: "failure",
-                error: updateError,
-              });
-            }
+            await this.notify("onError", context, updateError);
+            await this.notify("onFinal", context, {
+              outcome: "failure",
+              error: updateError,
+            });
             return fail(updateError);
           }
         } else {
           triggerLogPersistence();
         }
 
-        if (this.hooks.onSuccess) {
-          await this.hooks.onSuccess(context, value);
-        }
-        if (this.hooks.onFinal) {
-          await this.hooks.onFinal(context, {
-            outcome: "success",
-            result: value,
-          });
-        }
+        await this.notify("onSuccess", context, value);
+        await this.notify("onFinal", context, {
+          outcome: "success",
+          result: value,
+        });
         return ok(value);
       }
 
@@ -681,30 +655,22 @@ export class KMsg {
             providerId: provider.id,
             persistedRecordId,
           });
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, updateError);
-          }
-          if (this.hooks.onFinal) {
-            await this.hooks.onFinal(context, {
-              outcome: "failure",
-              error: updateError,
-            });
-          }
+          await this.notify("onError", context, updateError);
+          await this.notify("onFinal", context, {
+            outcome: "failure",
+            error: updateError,
+          });
           return fail(updateError);
         }
       } else {
         triggerLogPersistence();
       }
 
-      if (this.hooks.onError) {
-        await this.hooks.onError(context, error);
-      }
-      if (this.hooks.onFinal) {
-        await this.hooks.onFinal(context, {
-          outcome: "failure",
-          error,
-        });
-      }
+      await this.notify("onError", context, error);
+      await this.notify("onFinal", context, {
+        outcome: "failure",
+        error,
+      });
 
       return fail(error);
     } catch (error) {
@@ -721,15 +687,11 @@ export class KMsg {
             persistedRecordId,
           });
 
-          if (this.hooks.onError) {
-            await this.hooks.onError(context, updateError);
-          }
-          if (this.hooks.onFinal) {
-            await this.hooks.onFinal(context, {
-              outcome: "failure",
-              error: updateError,
-            });
-          }
+          await this.notify("onError", context, updateError);
+          await this.notify("onFinal", context, {
+            outcome: "failure",
+            error: updateError,
+          });
 
           return fail(updateError);
         }
@@ -737,15 +699,11 @@ export class KMsg {
         triggerLogPersistence();
       }
 
-      if (this.hooks.onError) {
-        await this.hooks.onError(context, kMsgError);
-      }
-      if (this.hooks.onFinal) {
-        await this.hooks.onFinal(context, {
-          outcome: "failure",
-          error: kMsgError,
-        });
-      }
+      await this.notify("onError", context, kMsgError);
+      await this.notify("onFinal", context, {
+        outcome: "failure",
+        error: kMsgError,
+      });
 
       return fail(kMsgError);
     }
@@ -847,6 +805,28 @@ export class KMsg {
         context,
       ),
     };
+  }
+
+  // Hooks after onBeforeSend observe a send that already happened. An error
+  // they throw must not turn a message the provider accepted into a reported
+  // failure, which invites a duplicate resend; it goes to onHookError.
+  private async notify<K extends KMsgObserverHook>(
+    hook: K,
+    ...args: Parameters<NonNullable<KMsgHooks[K]>>
+  ): Promise<void> {
+    const handler = this.hooks[hook] as
+      | ((...hookArgs: Parameters<NonNullable<KMsgHooks[K]>>) => unknown)
+      | undefined;
+    if (!handler) return;
+    try {
+      await handler(...args);
+    } catch (error) {
+      try {
+        await this.hooks.onHookError?.(error, { hook, context: args[0] });
+      } catch {
+        // The error reporter failed as well; nothing is left to report to.
+      }
+    }
   }
 
   private createHookContext(
