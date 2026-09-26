@@ -7,7 +7,7 @@ title: "loggerMiddleware"
 
 > **loggerMiddleware**(`config?`): (`c`, `next`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/logger.ts:414](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L414)
+Defined in: [packages/core/src/logger.ts:415](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L415)
 
 ## Parameters
 
