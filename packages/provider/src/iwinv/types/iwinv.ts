@@ -204,9 +204,11 @@ export interface IWINVSmsHistoryResponse {
 
 export interface IWINVConfig {
   /**
-   * IWINV AlimTalk API key (used for AUTH header).
+   * IWINV AlimTalk API key (used for AUTH header). Required for AlimTalk sends,
+   * AlimTalk history and balance, and the template APIs; SMS-only use can omit
+   * it and set `smsApiKey` and `smsAuthKey` instead.
    */
-  apiKey: string;
+  apiKey?: string;
 
   smsApiKey?: string;
   smsAuthKey?: string;

@@ -1,4 +1,4 @@
-import { KMsgErrorCode, type Template } from "@k-msg/core";
+import { KMsgError, KMsgErrorCode, type Template } from "@k-msg/core";
 import { utf8ToBase64 } from "../shared/base64";
 import type { NormalizedIwinvConfig } from "./iwinv.internal.types";
 
@@ -7,10 +7,28 @@ export function getSendEndpoint(config: NormalizedIwinvConfig): string {
   return raw.startsWith("/") ? raw : `/${raw}`;
 }
 
+/**
+ * Returns an error for an AlimTalk operation on a provider configured without
+ * the AlimTalk `apiKey` (SMS-only use), before any request is made.
+ */
+export function requireAlimTalkApiKey(
+  config: NormalizedIwinvConfig,
+  providerId: string,
+): KMsgError | undefined {
+  if (typeof config.apiKey === "string" && config.apiKey.length > 0) {
+    return undefined;
+  }
+  return new KMsgError(
+    KMsgErrorCode.INVALID_REQUEST,
+    "IWINV AlimTalk operations require `apiKey` (the AlimTalk API key)",
+    { providerId },
+  );
+}
+
 export function getAlimTalkHeaders(
   config: NormalizedIwinvConfig,
 ): Record<string, string> {
-  const auth = utf8ToBase64(config.apiKey);
+  const auth = utf8ToBase64(config.apiKey ?? "");
   const base: Record<string, string> = {
     AUTH: auth,
     "Content-Type": "application/json;charset=UTF-8",

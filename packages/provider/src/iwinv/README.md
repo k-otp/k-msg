@@ -4,6 +4,9 @@ K-Message IWINV provider with unified send API for:
 - AlimTalk
 - SMS / LMS / MMS
 
+Configure either channel alone or both: AlimTalk needs `apiKey`, and
+SMS / LMS / MMS need `smsApiKey` and `smsAuthKey`.
+
 For Korean documentation, see `README_ko.md`.
 
 ## Install
@@ -103,19 +106,19 @@ Important:
 
 Note:
 - `IWINVProvider` supports `getBalance(query?)`.
-  - default channel: `ALIMTALK` (uses AlimTalk charge API)
+  - default channel: `ALIMTALK` (uses AlimTalk charge API), or `SMS` when `apiKey` is not set
   - `SMS/LMS/MMS`: uses SMS v2 charge API (`secret` auth)
 - History endpoint remains documented here for reference.
 
 ## Environment Variables
 
-Required (AlimTalk):
+Required for AlimTalk:
 
 ```bash
 IWINV_API_KEY=your_alimtalk_api_key
 ```
 
-Required only when using SMS/LMS/MMS v2:
+Required for SMS/LMS/MMS v2 (enough on their own for SMS-only use):
 
 ```bash
 IWINV_SMS_API_KEY=your_sms_api_key
@@ -182,6 +185,13 @@ const alimtalk = await provider.send({
   from: "01000000000",
 });
 if (alimtalk.isFailure) throw alimtalk.error;
+
+// SMS/LMS/MMS only: no AlimTalk apiKey needed.
+const smsOnly = new IWINVProvider({
+  smsApiKey: process.env.IWINV_SMS_API_KEY!,
+  smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
+});
 ```
 
 ## CLI Usage

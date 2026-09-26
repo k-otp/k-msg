@@ -111,6 +111,118 @@ describe("IWINVProvider", () => {
     }
   });
 
+  test("sends SMS with only the SMS keys (no AlimTalk apiKey)", async () => {
+    let calledUrl = "";
+    let calledSecret = "";
+
+    fetchStub.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      calledSecret = new Headers(init?.headers).get("secret") || "";
+      return new Response(
+        JSON.stringify({
+          resultCode: 0,
+          message: "전송 성공",
+          requestNo: "REQ_1",
+          msgType: "SMS",
+        }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+    });
+
+    expect(provider.supportedTypes).toEqual(["SMS", "LMS", "MMS"]);
+
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      from: "01000000000",
+      text: "테스트",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/v2/send/");
+    expect(calledSecret).toBe(toBase64Utf8("sms-api-key&sms-auth-key"));
+  });
+
+  test("SMS-only config rejects AlimTalk calls without contacting IWINV", async () => {
+    let calls = 0;
+    fetchStub.fetch = async () => {
+      calls += 1;
+      return new Response("{}", { status: 200 });
+    };
+
+    const provider = new IWINVProvider({
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+    });
+
+    const results = [
+      await provider.send({
+        type: "ALIMTALK",
+        to: "01012345678",
+        templateId: "TPL_1",
+        variables: {},
+      }),
+      await provider.getDeliveryStatus({
+        providerMessageId: "17",
+        type: "ALIMTALK",
+        to: "01012345678",
+        requestedAt: new Date(),
+      }),
+      await provider.getBalance({ channel: "ALIMTALK" }),
+      await provider.listTemplates(),
+    ];
+
+    for (const result of results) {
+      expect(result.isFailure).toBe(true);
+      if (result.isFailure) {
+        expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+        expect(result.error.message).toContain("apiKey");
+      }
+    }
+    expect(calls).toBe(0);
+  });
+
+  test("SMS-only config queries the SMS balance by default", async () => {
+    let calledUrl = "";
+
+    fetchStub.fetch = async (input: RequestInfo | URL) => {
+      calledUrl = typeof input === "string" ? input : input.toString();
+      return new Response(
+        JSON.stringify({ code: 0, message: "OK", charge: 3456 }),
+        { status: 200 },
+      );
+    };
+
+    const provider = new IWINVProvider({
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+    });
+
+    const result = await provider.getBalance();
+
+    expect(calledUrl).toBe("https://sms.bizservice.iwinv.kr/api/charge/");
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.channel).toBe("SMS");
+      expect(result.value.amount).toBe(3456);
+    }
+  });
+
+  test("requires the AlimTalk apiKey or both SMS keys", () => {
+    expect(() => new IWINVProvider({})).toThrow(
+      "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
+    );
+    // A single legacy SMS key authenticates together with the AlimTalk apiKey.
+    expect(() => new IWINVProvider({ smsAuthKey: "legacy-auth-key" })).toThrow(
+      "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
+    );
+  });
+
   test("maps numeric SMS response code 202 to clear auth message", async () => {
     fetchStub.fetch = async () => new Response("202", { status: 200 });
 

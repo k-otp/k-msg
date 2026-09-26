@@ -24,6 +24,7 @@ import { TemplateContentCache } from "../shared/template-content-cache";
 import {
   getAlimTalkHeaders,
   mapIwinvCodeToKMsgErrorCode,
+  requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
 import {
@@ -99,20 +100,22 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
         { providerId: this.id },
       );
     }
-    if (!config.apiKey || config.apiKey.length === 0) {
+    this.config = normalizeIwinvConfig(config);
+
+    const canSendAlimTalk =
+      typeof config.apiKey === "string" && config.apiKey.length > 0;
+    const canSendSms = canSendSmsV2(this.config);
+    if (!canSendAlimTalk && !canSendSms) {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
-        "IWINVProvider requires `apiKey` configuration",
+        "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
         { providerId: this.id },
       );
     }
 
-    this.config = normalizeIwinvConfig(config);
-
-    const types: MessageType[] = ["ALIMTALK"];
-    if (canSendSmsV2(this.config)) {
-      types.push("SMS", "LMS", "MMS");
-    }
+    const types: MessageType[] = [];
+    if (canSendAlimTalk) types.push("ALIMTALK");
+    if (canSendSms) types.push("SMS", "LMS", "MMS");
     this.supportedTypes = types;
   }
 
@@ -225,7 +228,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
   async getBalance(
     query?: BalanceQuery,
   ): Promise<Result<BalanceResult, KMsgError>> {
-    const channel = query?.channel ?? "ALIMTALK";
+    const channel = query?.channel ?? (this.config.apiKey ? "ALIMTALK" : "SMS");
 
     switch (channel) {
       case "ALIMTALK":
@@ -248,6 +251,9 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
   private async getAlimTalkBalance(
     channel: BalanceResult["channel"],
   ): Promise<Result<BalanceResult, KMsgError>> {
+    const missingApiKey = requireAlimTalkApiKey(this.config, this.id);
+    if (missingApiKey) return fail(missingApiKey);
+
     const url = `${this.config.baseUrl}/api/charge/`;
 
     try {
@@ -431,10 +437,10 @@ export const createIWINVSendProvider = (config: IWINVConfig) =>
 export const createDefaultIWINVSendProvider = () => {
   const config = resolveDefaultIWINVConfig();
 
-  if (!config.apiKey) {
+  if (!config.apiKey && !(config.smsApiKey && config.smsAuthKey)) {
     throw new KMsgError(
       KMsgErrorCode.INVALID_REQUEST,
-      "IWINV_API_KEY environment variable is required",
+      "IWINV_API_KEY (AlimTalk), or IWINV_SMS_API_KEY and IWINV_SMS_AUTH_KEY (SMS), environment variables are required",
       { providerId: "iwinv" },
     );
   }
