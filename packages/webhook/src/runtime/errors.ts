@@ -33,13 +33,18 @@ export class WebhookEndpointConflictError extends Error {
   readonly field: "id" | "url";
   /** The taken id or URL. */
   readonly value: string;
-  /** The id of the stored endpoint that has it. */
+  /**
+   * The id of the endpoint that has it: a stored one, or one earlier in the
+   * same `addEndpoints()` batch.
+   */
   readonly endpointId: string;
 
   constructor(field: "id" | "url", value: string, endpointId: string) {
+    // The URL stays out of the message, which reaches logs, because it may
+    // carry a token; `value` holds it.
     super(
       field === "url"
-        ? `Webhook endpoint URL ${value} is already registered as ${endpointId}`
+        ? `This webhook endpoint URL is already registered as ${endpointId}`
         : `Webhook endpoint ${value} already exists`,
     );
     this.name = "WebhookEndpointConflictError";

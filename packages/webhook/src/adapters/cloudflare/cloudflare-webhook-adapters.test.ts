@@ -330,6 +330,23 @@ describe.each([
     expect((await store.get("b"))?.url).toBe("https://example.com/b");
   });
 
+  test("update keeps the stored id when the endpoint names another", async () => {
+    await store.add(
+      createStoredEndpoint({ id: "a", url: "https://example.com/a" }),
+    );
+
+    await store.update(
+      "a",
+      createStoredEndpoint({ id: "b", url: "https://example.com/a2" }),
+    );
+
+    expect(await store.get("a")).toMatchObject({
+      id: "a",
+      url: "https://example.com/a2",
+    });
+    expect(await store.get("b")).toBeNull();
+  });
+
   test("update rejects an id that is not stored", async () => {
     await expect(
       store.update(
@@ -461,6 +478,49 @@ describe.each([
         ),
       ).rejects.toThrow("not found");
       expect(await endpointStore.list()).toHaveLength(0);
+    } finally {
+      sqliteD1.close();
+    }
+  });
+});
+
+// The INSERT commits, then the client reports a failure, as a lost D1
+// connection can.
+function failAfterInsert(db: D1DatabaseLike): D1DatabaseLike {
+  return {
+    prepare(query: string) {
+      const statement = db.prepare(query);
+      if (!query.trimStart().startsWith("INSERT")) return statement;
+      return {
+        bind(...values: unknown[]) {
+          statement.bind(...values);
+          return this;
+        },
+        first: () => statement.first(),
+        all: () => statement.all(),
+        async run() {
+          await statement.run();
+          throw new Error("Network connection lost");
+        },
+      };
+    },
+  };
+}
+
+describe("D1 endpoint store errors", () => {
+  test("an insert that committed before the client failed is not reported as a conflict", async () => {
+    const sqliteD1 = createSqliteBackedD1();
+    try {
+      const { endpointStore } = createD1WebhookPersistence(
+        failAfterInsert(sqliteD1.db),
+      );
+
+      const error = await endpointStore
+        .add(createStoredEndpoint({ id: "a", url: "https://example.com/a" }))
+        .catch((caught: unknown) => caught);
+
+      expect(error).not.toBeInstanceOf(WebhookEndpointConflictError);
+      expect((error as Error).message).toBe("Network connection lost");
     } finally {
       sqliteD1.close();
     }

@@ -60,7 +60,9 @@ function matchesDeliveryOptions(
 }
 
 // Stores and returns copies, so changing an endpoint object a caller holds
-// cannot change a stored endpoint or get around the id and URL checks.
+// cannot change a stored endpoint or get around the id and URL checks. The
+// copies cost list() a structuredClone per endpoint, which dispatch pays for
+// every event: fine for the few endpoints this store is meant for.
 export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   private readonly endpoints = new Map<string, WebhookEndpoint>();
 
@@ -79,7 +81,11 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
     }
     this.assertUrlAvailable(endpoint.url, endpointId);
 
-    this.endpoints.set(endpointId, structuredClone(endpoint));
+    // The id is the key the endpoint is stored under, as in the D1 store.
+    this.endpoints.set(endpointId, {
+      ...structuredClone(endpoint),
+      id: endpointId,
+    });
   }
 
   private assertUrlAvailable(url: string, endpointId: string): void {

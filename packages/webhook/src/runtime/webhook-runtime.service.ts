@@ -25,6 +25,7 @@ import {
   resolveEndpointValidationOptions,
   validateEndpointUrl,
 } from "./endpoint-validation";
+import { WebhookEndpointConflictError } from "./errors";
 import { endpointMatchesEvent } from "./event-matcher";
 import { createInMemoryWebhookPersistence } from "./persistence";
 import type {
@@ -147,7 +148,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
     });
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
-      return this.insertEndpoint(input);
+      const endpoint = this.createEndpoint(input);
+      await this.endpointStore.add(endpoint);
+      return endpoint;
     });
   }
 
@@ -173,35 +176,18 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
+      const endpoints = inputs.map((input) => this.createEndpoint(input));
+      // Check the whole batch first, so a repeated id or URL does not leave
+      // part of it stored. The store still rejects one that races this check.
+      await this.assertNoConflicts(endpoints);
+
       const created: WebhookEndpoint[] = [];
-      for (const input of inputs) {
-        created.push(await this.insertEndpoint(input));
+      for (const endpoint of endpoints) {
+        await this.endpointStore.add(endpoint);
+        created.push(endpoint);
       }
       return created;
     });
-  }
-
-  // Stores a new endpoint. Callers hold the endpoint write queue. The URL and
-  // secret are checked again here, the check that guards the store: callers
-  // check them before queueing only to fail fast.
-  private async insertEndpoint(
-    input: WebhookEndpointInput,
-  ): Promise<WebhookEndpoint> {
-    validateEndpointUrl(input.url, this.securityOptions);
-    const now = new Date();
-
-    const endpoint: WebhookEndpoint = {
-      // A copy of an endpoint read without its secret has no secret to keep.
-      ...unmarkSecret(input),
-      id: input.id ?? this.generateEndpointId(),
-      ...resolveActivity(input),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.assertSigningSecret(endpoint);
-
-    await this.endpointStore.add(endpoint);
-    return endpoint;
   }
 
   updateEndpoint(
@@ -654,6 +640,52 @@ export class WebhookRuntimeService implements WebhookRuntime {
             ? new Date(override.timestamp as unknown as string)
             : base.timestamp,
     };
+  }
+
+  // Builds a new endpoint for a caller that holds the endpoint write queue.
+  // The URL is checked again here, the check that guards the store: callers
+  // check it before queueing only to fail fast.
+  // Builds a new endpoint for a caller that holds the endpoint write queue.
+  // The URL and secret are checked again here, the check that guards the
+  // store: callers check them before queueing only to fail fast.
+  private createEndpoint(input: WebhookEndpointInput): WebhookEndpoint {
+    validateEndpointUrl(input.url, this.securityOptions);
+    const now = new Date();
+
+    const endpoint: WebhookEndpoint = {
+      // A copy of an endpoint read without its secret has no secret to keep.
+      ...unmarkSecret(input),
+      id: input.id ?? this.generateEndpointId(),
+      ...resolveActivity(input),
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.assertSigningSecret(endpoint);
+    return endpoint;
+  }
+
+  private async assertNoConflicts(
+    endpoints: readonly WebhookEndpoint[],
+  ): Promise<void> {
+    const idOwners = new Map<string, string>();
+    const urlOwners = new Map<string, string>();
+    for (const stored of await this.endpointStore.list()) {
+      idOwners.set(stored.id, stored.id);
+      urlOwners.set(stored.url, stored.id);
+    }
+
+    for (const endpoint of endpoints) {
+      const idOwner = idOwners.get(endpoint.id);
+      if (idOwner !== undefined) {
+        throw new WebhookEndpointConflictError("id", endpoint.id, idOwner);
+      }
+      const urlOwner = urlOwners.get(endpoint.url);
+      if (urlOwner !== undefined) {
+        throw new WebhookEndpointConflictError("url", endpoint.url, urlOwner);
+      }
+      idOwners.set(endpoint.id, endpoint.id);
+      urlOwners.set(endpoint.url, endpoint.id);
+    }
   }
 
   private generateEndpointId(): string {

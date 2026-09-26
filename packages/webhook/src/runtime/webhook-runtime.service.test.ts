@@ -231,6 +231,35 @@ describe("WebhookRuntimeService", () => {
     expect(endpoints[0]?.secret).toBe("whsec_first");
   });
 
+  test("addEndpoints adds nothing when one input conflicts", async () => {
+    await runtime.addEndpoint({
+      url: "https://example.com/registered",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    // A registered URL, and a URL repeated within the batch.
+    for (const urls of [
+      ["https://example.com/new-1", "https://example.com/registered"],
+      ["https://example.com/new-2", "https://example.com/new-2"],
+    ]) {
+      await expect(
+        runtime.addEndpoints(
+          urls.map((url) => ({
+            url,
+            active: true,
+            events: [WebhookEventType.MESSAGE_SENT],
+          })),
+        ),
+      ).rejects.toBeInstanceOf(WebhookEndpointConflictError);
+    }
+
+    const stored = await runtime.listEndpoints();
+    expect(stored.map((endpoint) => endpoint.url)).toEqual([
+      "https://example.com/registered",
+    ]);
+  });
+
   test("emit + flush persists deliveries", async () => {
     const endpoint = await runtime.addEndpoint({
       url: "https://example.com/batch",
