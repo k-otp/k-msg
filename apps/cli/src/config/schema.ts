@@ -3,6 +3,7 @@ import {
   type ProviderConfigFieldSpec,
   type ProviderTypeWithConfig,
   providerConfigFieldSpecs,
+  providerConfigKeyAlternatives,
 } from "@k-msg/provider";
 import { z } from "zod";
 
@@ -71,20 +72,45 @@ function buildProviderConfigFieldSchema(
   return fieldSpec.required ? withDescription : withDescription.optional();
 }
 
-function buildProviderConfigSchema(fieldMap: ProviderConfigFieldMap) {
+function buildProviderConfigSchema(
+  fieldMap: ProviderConfigFieldMap,
+  keyAlternatives: readonly (readonly string[])[] = [],
+) {
   const shape: Record<string, z.ZodTypeAny> = {};
 
   for (const [key, fieldSpec] of Object.entries(fieldMap)) {
     shape[key] = buildProviderConfigFieldSchema(fieldSpec);
   }
 
-  return z.object(shape).passthrough().default({});
+  const schema = z.object(shape).passthrough();
+  if (keyAlternatives.length === 0) return schema.default({});
+
+  // Validation and the JSON schema both accept a config only when it holds
+  // one of the key sets in full.
+  const expected = keyAlternatives
+    .map((keys) => keys.join(" + "))
+    .join(", or ");
+  return schema
+    .superRefine((config, ctx) => {
+      const values = config as Record<string, unknown>;
+      const satisfied = keyAlternatives.some((keys) =>
+        keys.every((key) => values[key] !== undefined),
+      );
+      if (!satisfied) {
+        ctx.addIssue({ code: "custom", message: `Set ${expected}` });
+      }
+    })
+    .meta({ anyOf: keyAlternatives.map((keys) => ({ required: [...keys] })) })
+    .default({});
 }
 
 const providerConfigSchemaByType = Object.fromEntries(
   providerTypeValues.map((providerType) => [
     providerType,
-    buildProviderConfigSchema(providerConfigFieldSpecs[providerType]),
+    buildProviderConfigSchema(
+      providerConfigFieldSpecs[providerType],
+      providerConfigKeyAlternatives[providerType],
+    ),
   ]),
 ) as Record<
   ProviderTypeWithConfig,

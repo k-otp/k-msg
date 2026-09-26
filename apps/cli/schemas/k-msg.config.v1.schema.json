@@ -246,7 +246,15 @@
                     "description": "Enable debug logging"
                   }
                 },
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "anyOf": [
+                  {
+                    "required": ["apiKey"]
+                  },
+                  {
+                    "required": ["smsApiKey", "smsAuthKey"]
+                  }
+                ]
               }
             },
             "required": ["type", "id", "config"],
