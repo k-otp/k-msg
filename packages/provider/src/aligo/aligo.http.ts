@@ -11,7 +11,7 @@ import {
   toProviderTransportError,
 } from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
-import { normalizeAligoKakaoCode } from "./aligo.shared.helpers";
+import { normalizeAligoCode } from "./aligo.shared.helpers";
 
 export async function requestAligo(params: {
   host: string;
@@ -64,7 +64,7 @@ export function ensureAligoKakaoOk(params: {
   const { providerId, response: raw, fallbackMessage } = params;
   const response = isObjectRecord(raw) ? raw : {};
   const rawCode = response.code;
-  const code = normalizeAligoKakaoCode(rawCode);
+  const code = normalizeAligoCode(rawCode);
   if (code === 0) return ok(undefined);
 
   const message =

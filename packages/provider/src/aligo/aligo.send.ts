@@ -16,7 +16,7 @@ import type {
 import {
   formatAligoDate,
   getAligoEndpoint,
-  normalizeAligoKakaoCode,
+  normalizeAligoCode,
   resolveAligoTemplateMessage,
   resolveImageRef,
 } from "./aligo.shared.helpers";
@@ -114,7 +114,7 @@ async function sendSMS(
   })) as unknown as AligoResponse;
 
   // The SMS API documents `result_code` as a number; accept its string form too.
-  if (normalizeAligoKakaoCode(response.result_code) !== 1) {
+  if (normalizeAligoCode(response.result_code) !== 1) {
     return fail(mapAligoError(response, ctx.providerId));
   }
 

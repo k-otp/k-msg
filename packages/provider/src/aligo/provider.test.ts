@@ -303,6 +303,37 @@ describe("AligoProvider (send responses)", () => {
     }
   });
 
+  test.each([
+    [true],
+    [["1"]],
+    ["0x1"],
+    [null],
+  ])("rejects an SMS response with malformed result_code %p", async (resultCode) => {
+    respondWith({ result_code: resultCode, message: "", msg_id: 1 });
+
+    const result = await createSendProvider().send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isFailure).toBe(true);
+  });
+
+  test("rejects a Kakao send response that is not an object", async () => {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify([{ code: 0 }]), { status: 200 });
+
+    const result = await createSendProvider().send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { name: "Jane" },
+    });
+
+    expect(result.isFailure).toBe(true);
+  });
+
   test("maps a negative SMS result_code to its error", async () => {
     respondWith({ result_code: -101, message: "인증오류입니다." });
 
