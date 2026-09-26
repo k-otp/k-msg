@@ -252,30 +252,26 @@ export class MetricsCollector {
   }
 
   private startBatchProcessor(): void {
-    setInterval(async () => {
-      try {
-        await this.flush();
-      } catch (error) {
+    setInterval(() => {
+      this.flush().catch((error: unknown) => {
         logger.error(
           "Batch processing failed",
           {},
           error instanceof Error ? error : new Error(String(error)),
         );
-      }
+      });
     }, this.flushInterval);
 
     // 정리 작업 (매일 1회)
     setInterval(
-      async () => {
-        try {
-          await this.cleanup();
-        } catch (error) {
+      () => {
+        this.cleanup().catch((error: unknown) => {
           logger.error(
             "Cleanup failed",
             {},
             error instanceof Error ? error : new Error(String(error)),
           );
-        }
+        });
       },
       24 * 60 * 60 * 1000,
     );
