@@ -36,6 +36,13 @@ function toSqliteBindings(values: readonly unknown[]): SqliteBinding[] {
   return values.map((value) => toSqliteBinding(value));
 }
 
+// A failed run must fail the command, or automation would move on to the
+// next rollout stage with the migration incomplete. 3 is the CLI's runtime
+// failure code.
+function exitCodeForRun(result: { status: string }): number | undefined {
+  return result.status === "failed" ? 3 : undefined;
+}
+
 function toSqliteClient(filePath: string): {
   client: CloudflareSqlClient;
   close: () => void;
@@ -239,6 +246,7 @@ const applyCmd = defineCommand({
           `Applied migration ${planId}: chunks=${result.processedChunks}, rows=${result.processedRows}, failed=${result.failedChunks}, status=${result.status}`,
         );
       }
+      process.exitCode = exitCodeForRun(result) ?? process.exitCode;
     } finally {
       close();
     }
@@ -345,6 +353,7 @@ const retryCmd = defineCommand({
       console.log(
         `Retried migration ${planId}: chunks=${result.processedChunks}, rows=${result.processedRows}, failed=${result.failedChunks}, status=${result.status}`,
       );
+      process.exitCode = exitCodeForRun(result) ?? process.exitCode;
     } finally {
       close();
     }
