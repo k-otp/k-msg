@@ -259,6 +259,16 @@ without one. A delivery is never sent unsigned while `enableSecurity` is on:
   turned on, gets a `failed` delivery and no request. Its only attempt has no
   `httpStatus`, and its `error` says why; `probeEndpoint()` reports the same
   `error`.
+- With `fieldCrypto.endpoint` failing open (`failMode: "open"`), an endpoint
+  whose stored secret cannot be decrypted is returned without `secret`, not
+  with a masked, empty, or encrypted value, and its deliveries fail the same
+  way even when `secretKey` is set, since its receiver checks its own secret.
+  An update that does not set a new `secret` keeps the stored one. With
+  `openFallback: "plaintext"`, a secret stored in plaintext because
+  encryption failed is still used.
+
+Secrets are used exactly as given, surrounding whitespace included, with or
+without field crypto.
 
 Endpoints without their own secret share `secretKey`, so anyone who holds it
 can sign requests to all of them. Give each receiver its own `secret` when
