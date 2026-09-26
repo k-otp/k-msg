@@ -180,6 +180,61 @@ describe("DeliveryTrackingService (InMemory)", () => {
     expect(record?.lastError).toBeUndefined();
     expect(record?.nextCheckAt.getTime()).toBe(scheduledAt.getTime() + 1_000);
   });
+
+  test("runOnce stores the other updates when one fails, then reports it", async () => {
+    class FailingStore extends InMemoryDeliveryTrackingStore {
+      override async patch(
+        messageId: string,
+        patch: Parameters<InMemoryDeliveryTrackingStore["patch"]>[1],
+      ): Promise<void> {
+        if (messageId === "m2") {
+          throw new Error("value too long for type character varying(64)");
+        }
+        await super.patch(messageId, patch);
+      }
+    }
+
+    const provider = createMockProvider({ id: "mock", status: "DELIVERED" });
+    const store = new FailingStore();
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { initialDelayMs: 0, batchSize: 10, concurrency: 1 },
+    });
+
+    for (const messageId of ["m1", "m2", "m3"]) {
+      await service.recordSend(
+        {
+          messageId,
+          options: { type: "SMS", to: "01012345678", text: "hi" },
+          timestamp: Date.now() - 1_000,
+        },
+        {
+          messageId,
+          providerId: "mock",
+          providerMessageId: `p-${messageId}`,
+          status: "SENT",
+          type: "SMS",
+          to: "01012345678",
+        },
+      );
+    }
+
+    const failure = await service.runOnce().then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+
+    expect(failure).toBeInstanceOf(AggregateError);
+    expect((failure as AggregateError).errors).toHaveLength(1);
+    expect((failure as AggregateError).message).toContain("m2");
+    expect((failure as AggregateError).message).toContain(
+      "value too long for type character varying(64)",
+    );
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+    expect((await service.getRecord("m2"))?.status).toBe("SENT");
+    expect((await service.getRecord("m3"))?.status).toBe("DELIVERED");
+  });
 });
 
 describe("DeliveryTrackingService API failover", () => {
