@@ -121,8 +121,9 @@ export interface WebhookRuntime {
   ): Promise<WebhookDelivery[]>;
   /**
    * Re-encrypts stored endpoint secrets and delivery payloads written before
-   * ciphertext was bound to `fieldCrypto.tenantId`; see
-   * `migrateWebhookFieldCryptoToTenant`.
+   * ciphertext was bound to `fieldCrypto.tenantId`. Run it once every
+   * instance is upgraded; endpoint writes through this runtime wait until it
+   * finishes. See `migrateWebhookFieldCryptoToTenant`.
    */
   migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult>;
   shutdown(): Promise<void>;

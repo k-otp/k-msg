@@ -419,6 +419,9 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
 // Deliveries are migrated a page at a time: a delivery history can be too
 // large to load at once.
 const DELIVERY_PAGE_SIZE = 200;
+// Tries to rewrite an endpoint whose secret keeps changing under the
+// migration before giving up.
+const MAX_ENDPOINT_ATTEMPTS = 3;
 
 function failClosed(
   config: FieldCryptoConfig | undefined,
@@ -467,18 +470,75 @@ async function revealLegacy<T>(
   }
 }
 
+// Re-encrypts one endpoint's legacy secret. The endpoint is read again after
+// the slow part, the decryption and encryption, and written only if its
+// secret is still the one decrypted, with every other field as just read.
+// An update landing meanwhile re-encrypts the secret, so it is kept, and the
+// endpoint is checked again. Returns whether the secret was rewritten.
+async function migrateEndpointSecret(
+  store: WebhookEndpointStore,
+  id: string,
+  config: FieldCryptoConfig,
+  bound: WebhookRuntimeFieldCryptoOptions & { tenantId: string },
+): Promise<boolean> {
+  const legacy = { ...bound, acceptLegacyAad: true };
+  for (let attempt = 1; ; attempt += 1) {
+    // A removed endpoint is skipped.
+    const endpoint = await store.get(id);
+    if (!endpoint) return false;
+    const input = {
+      value: endpoint.secret,
+      path: "secret",
+      aad: endpointAad(endpoint),
+      tenantId: bound.tenantId,
+    };
+    if (await isTenantBound(config, input)) return false;
+    const revealed = await revealLegacy(
+      () => revealEndpoint(endpoint, legacy),
+      "endpoint",
+      id,
+      "secret",
+    );
+    const { secret } = await protectEndpoint(revealed, bound);
+
+    const current = await store.get(id);
+    if (!current) return false;
+    if (current.secret === endpoint.secret) {
+      await store.update(id, withSecret(current, secret));
+      return true;
+    }
+    if (attempt === MAX_ENDPOINT_ATTEMPTS) {
+      throw new FieldCryptoError(
+        "config",
+        `Cannot migrate webhook endpoint ${id}: its secret changed during each of ${MAX_ENDPOINT_ATTEMPTS} attempts; pause endpoint updates and run the migration again`,
+        { rule: "fieldCrypto.webhook.tenant_migration", path: "secret" },
+        { fieldPath: "secret" },
+      );
+    }
+  }
+}
+
 /**
  * Re-encrypts endpoint secrets and delivery payloads written before
  * ciphertext was bound to `options.tenantId`, so they read without
  * `acceptLegacyAad`. Pass the stores the runtime persists to, not wrapped
- * ones. Values already bound to the tenant are left as they are. The
- * migration runs fail-closed whatever `failMode` says, so a value that
- * cannot be read with either AAD stops it rather than being replaced by a
- * fallback. Each endpoint is read again just before it is rewritten, but
- * pause endpoint updates while it runs: one landing in between would be
- * overwritten. Deliveries, which the runtime never rewrites, are read a
- * page at a time with the `before` cursor and written back with the
- * delivery store's `replace()`; a custom store must support both.
+ * ones. Values already bound to the tenant are left as they are, so running
+ * it again is safe. The migration runs fail-closed whatever `failMode` says,
+ * so a value that cannot be read with either AAD stops it rather than being
+ * replaced by a fallback.
+ *
+ * Run it once every instance runs a version that binds the tenant: an
+ * instance still on an older version keeps writing tenant-less values,
+ * which this run can miss (running it again after the rollout picks them
+ * up). An endpoint is rewritten only if its secret has not changed since
+ * the migration read it, keeping its other fields as they are then, and
+ * `runtime.migrateFieldCryptoToTenant()` also holds that runtime's own
+ * endpoint writes until it finishes. An update from another process can
+ * still land between that check and the write and be lost, so pause
+ * endpoint changes elsewhere while it runs. Deliveries, which the runtime
+ * never rewrites, are read a page at a time with the `before` cursor and
+ * written back with the delivery store's `replace()`; a custom store must
+ * support both.
  */
 export async function migrateWebhookFieldCryptoToTenant(
   persistence: Pick<WebhookPersistence, "endpointStore" | "deliveryStore">,
@@ -511,7 +571,7 @@ export async function migrateWebhookFieldCryptoToTenant(
     );
   }
 
-  const bound: WebhookRuntimeFieldCryptoOptions = {
+  const bound = {
     tenantId,
     endpoint: failClosed(options.endpoint),
     delivery: failClosed(options.delivery),
@@ -521,29 +581,11 @@ export async function migrateWebhookFieldCryptoToTenant(
 
   const endpointConfig = bound.endpoint;
   if (endpointConfig && endpointConfig.enabled !== false) {
-    for (const { id } of await persistence.endpointStore.list()) {
-      // Read it again, so an update made since the list is kept and an
-      // endpoint removed since is skipped.
-      const endpoint = await persistence.endpointStore.get(id);
-      if (!endpoint) continue;
-      const input = {
-        value: endpoint.secret,
-        path: "secret",
-        aad: endpointAad(endpoint),
-        tenantId,
-      };
-      if (await isTenantBound(endpointConfig, input)) continue;
-      const revealed = await revealLegacy(
-        () => revealEndpoint(endpoint, legacy),
-        "endpoint",
-        endpoint.id,
-        "secret",
-      );
-      await persistence.endpointStore.update(
-        endpoint.id,
-        await protectEndpoint(revealed, bound),
-      );
-      result.endpoints += 1;
+    const store = persistence.endpointStore;
+    for (const { id } of await store.list()) {
+      if (await migrateEndpointSecret(store, id, endpointConfig, bound)) {
+        result.endpoints += 1;
+      }
     }
   }
 
