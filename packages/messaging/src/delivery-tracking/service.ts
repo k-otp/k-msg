@@ -157,10 +157,14 @@ export interface DeliveryTrackingServiceConfig {
    * record as stored, after the poll finishes: for example, to notify a
    * webhook when a message is delivered or fails. Calls run one at a time,
    * in the order changes were stored, each with its own copy of the record;
-   * see `runOnce()` for the one exception, in runtimes without
-   * AsyncLocalStorage. It does not stop polling if it throws. Delivery is at least once:
-   * services polling the same store can each report the same change, so
-   * make it idempotent, for example by message id and status.
+   * `runOnce()` describes the one exception, in runtimes without
+   * AsyncLocalStorage. It does not stop polling if it throws.
+   *
+   * Delivery is best effort: a change whose callback throws is not retried,
+   * and one stored just before the process stops is not reported, so
+   * reconcile with the stored records when none may be missed. Services
+   * polling the same store can also each report the same change, so make
+   * it idempotent, for example by message id and status.
    */
   onStatusChange?: (change: DeliveryStatusChange) => void | Promise<void>;
   /**
@@ -490,7 +494,9 @@ export class DeliveryTrackingService {
     return delivered;
   }
 
-  // Beside the batches being delivered, outside the queue.
+  // Beside the batches being delivered, outside the queue. With no changes
+  // it resolves at once, unlike queueNotifications: waiting for the queue
+  // here would make a callback that polls again wait for its own batch.
   private deliverNow(changes: DeliveryStatusChange[]): Promise<void> {
     return changes.length === 0 ? Promise.resolve() : this.deliverAll(changes);
   }
