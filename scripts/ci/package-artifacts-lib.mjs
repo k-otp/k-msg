@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,6 +20,29 @@ export const BUN_ONLY_EXPORTS = {
   "@k-msg/messaging": ["./adapters/bun"],
   "k-msg": ["./adapters/bun"],
 };
+
+// Runtime dependencies, by package name, that the package's artifacts still
+// inline instead of importing. Each entry is a known defect, not an
+// exemption: the consumer installs its own copy of the dependency, errors
+// from the inlined copy fail instanceof against the consumer's classes, and
+// the consumer's configuration of it, such as core's setGlobalLogger(), never
+// reaches the inlined copy. Remove an entry once the package's build marks
+// the dependency external; the gate rejects entries that no artifact inlines.
+export const INLINED_DEPENDENCIES = {
+  "@k-msg/analytics": ["@k-msg/core", "zod"],
+  "@k-msg/channel": ["@k-msg/core", "zod"],
+  "@k-msg/template": ["@k-msg/core", "zod"],
+};
+
+const RUNTIME_DEPENDENCY_FIELDS = [
+  "dependencies",
+  "optionalDependencies",
+  "peerDependencies",
+];
+// Bun ends each artifact with a comment naming its linked sourcemap.
+const SOURCE_MAPPING_URL = /\/\/[#@] sourceMappingURL=(\S+)\s*$/;
+// Sourcemap sources are URLs, so their separators are always "/".
+const NODE_MODULES_PACKAGE = /(?:^|\/)node_modules\/((?:@[^/]+\/)?[^/]+)/g;
 
 const LOADER_SCRIPT = fileURLToPath(
   new URL("./load-package-artifact.mjs", import.meta.url),
@@ -290,15 +313,93 @@ function compareConditionExports(manifest, exportNames, errors) {
   }
 }
 
+// Bun 1.4.2 writes the sources of every sourcemap relative to the build's
+// outdir, also for an entry it writes to a subdirectory of the outdir, while
+// the Source Map spec resolves them relative to the map. For example,
+// webhook's dist/toolkit/index.mjs.map listed ../../core/src/errors.ts, which
+// the spec places at packages/webhook/core/src/errors.ts. Try the map's
+// directory first, then each parent up to the package directory.
+function resolveSource(source, mapFile, packageDir) {
+  for (let base = path.dirname(mapFile); ; base = path.dirname(base)) {
+    const candidate = path.resolve(base, source);
+    if (existsSync(candidate)) return candidate;
+    if (base === packageDir || path.dirname(base) === base) return undefined;
+  }
+}
+
+function nearestPackageName(file) {
+  for (
+    let dir = path.dirname(file);
+    path.dirname(dir) !== dir;
+    dir = path.dirname(dir)
+  ) {
+    const manifestFile = path.join(dir, "package.json");
+    if (!existsSync(manifestFile)) continue;
+    const { name } = readJson(manifestFile);
+    if (typeof name === "string") return name;
+  }
+  return undefined;
+}
+
+// Counts an artifact's modules by the package that owns them, from the
+// sources of its linked sourcemap: an installed package by the path after the
+// last node_modules segment, a workspace file by its nearest package.json.
+function countModulesByPackage(artifactFile, packageDir) {
+  const url = readFileSync(artifactFile, "utf8").match(SOURCE_MAPPING_URL)?.[1];
+  if (!url) return { problem: "it links no sourcemap" };
+  const mapFile = path.resolve(path.dirname(artifactFile), url);
+  let map;
+  try {
+    map = readJson(mapFile);
+  } catch (error) {
+    return { problem: `cannot read its sourcemap: ${error.message}` };
+  }
+  if (!Array.isArray(map?.sources)) {
+    return { problem: `${path.basename(mapFile)} has no sources` };
+  }
+
+  const counts = new Map();
+  for (const source of map.sources) {
+    // Skip null sources, which mark generated code, and node: specifiers such
+    // as node:buffer, which Bun lists for the polyfills of built-in modules
+    // it inlines for its default browser target. No package owns either.
+    if (typeof source !== "string" || source.startsWith("node:")) continue;
+    let owner = [...source.matchAll(NODE_MODULES_PACKAGE)].at(-1)?.[1];
+    if (!owner) {
+      const file = resolveSource(source, mapFile, packageDir);
+      if (!file) {
+        return {
+          problem: `its sourcemap lists ${source}, which does not exist`,
+        };
+      }
+      owner = nearestPackageName(file);
+    }
+    counts.set(owner, (counts.get(owner) ?? 0) + 1);
+  }
+  return { counts };
+}
+
 export function inspectBuiltPackage(packageDir, options = {}) {
   const nodeExecutable = options.nodeExecutable ?? DEFAULT_NODE_EXECUTABLE;
   const bunOnlyExports = options.bunOnlyExports ?? BUN_ONLY_EXPORTS;
+  const inlinedDependencies =
+    options.inlinedDependencies ?? INLINED_DEPENDENCIES;
   const manifest = readJson(path.join(packageDir, "package.json"));
   const errors = [];
   const checked = { import: [], require: [] };
   const syntaxOnly = [];
+  const sourcemapChecked = [];
   const exportNames = new Map();
   const inspected = new Set();
+  // npm installs these for the consumer, so an artifact that inlines one
+  // ships a second copy of it.
+  const runtimeDependencies = new Set(
+    RUNTIME_DEPENDENCY_FIELDS.flatMap((field) =>
+      Object.keys(manifest[field] ?? {}),
+    ),
+  );
+  const knownInlined = new Set(inlinedDependencies[manifest.name] ?? []);
+  const seenInlined = new Set();
   validateLegacyEntryFields(manifest, errors);
   const bunOnlyTargets = collectBunOnlyTargets(
     manifest,
@@ -341,6 +442,32 @@ export function inspectBuiltPackage(packageDir, options = {}) {
       continue;
     }
 
+    if (runtimeDependencies.size > 0) {
+      const modules = countModulesByPackage(
+        absoluteTarget,
+        path.resolve(packageDir),
+      );
+      if (modules.problem) {
+        errors.push(
+          `${manifest.name}: cannot tell which packages ${relativeTarget} inlines (${modules.problem})`,
+        );
+      } else {
+        for (const [owner, count] of modules.counts) {
+          if (owner === manifest.name || !runtimeDependencies.has(owner)) {
+            continue;
+          }
+          if (knownInlined.has(owner)) {
+            seenInlined.add(owner);
+            continue;
+          }
+          errors.push(
+            `${manifest.name}: ${relativeTarget} inlines ${count} ${count === 1 ? "module" : "modules"} of its dependency ${owner}; mark it external in the build so the artifact imports it`,
+          );
+        }
+        sourcemapChecked.push(relativeTarget);
+      }
+    }
+
     const invalid = (detail) =>
       errors.push(
         `${manifest.name}: invalid ${format.label} artifact ${relativeTarget} (${detail})`,
@@ -367,12 +494,20 @@ export function inspectBuiltPackage(packageDir, options = {}) {
   }
 
   compareConditionExports(manifest, exportNames, errors);
+  for (const dependency of knownInlined) {
+    if (!seenInlined.has(dependency)) {
+      errors.push(
+        `${manifest.name}: INLINED_DEPENDENCIES lists ${dependency}, but no artifact inlines it; remove the entry`,
+      );
+    }
+  }
 
   return {
     checkedCjs: checked.require,
     checkedEsm: checked.import,
     errors,
     manifest,
+    sourcemapChecked,
     syntaxOnly,
   };
 }
