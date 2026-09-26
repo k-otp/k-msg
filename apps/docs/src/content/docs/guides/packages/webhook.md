@@ -195,21 +195,27 @@ function createRuntime(env: Env): WebhookRuntimeService {
 `"url"`이고, `endpointId`는 이미 등록된 엔드포인트의 id입니다.
 `updateEndpoint()`도 다른 엔드포인트가 쓰는 URL을 같은 방식으로 거절합니다.
 엔드포인트의 secret, 이벤트, URL은 `updateEndpoint()`로 바꾸세요.
+`addEndpoints()`는 저장하기 전에 배치 전체를 저장된 엔드포인트, 그리고 배치
+안끼리 확인하므로, 충돌이 나도 일부만 추가된 상태로 남지 않습니다.
+
+배포할 때마다 같은 엔드포인트를 등록하려면 이미 있는 엔드포인트를
+갱신하세요.
 
 ```ts
 import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
 
+const input = {
+  url: "https://example.com/webhooks/k-msg",
+  active: true,
+  events: [WebhookEventType.MESSAGE_SENT],
+};
+
 try {
-  await runtime.addEndpoint({
-    url: "https://example.com/webhooks/k-msg",
-    active: true,
-    events: [WebhookEventType.MESSAGE_SENT],
-  });
+  await runtime.addEndpoint(input);
 } catch (error) {
-  if (error instanceof WebhookEndpointConflictError) {
-    // 예: 409 Conflict로 응답하고 error.endpointId를 알려줍니다.
-  }
-  throw error;
+  if (!(error instanceof WebhookEndpointConflictError)) throw error;
+  // 사용자가 등록을 요청한 경우라면 409 Conflict로 응답해도 됩니다.
+  await runtime.updateEndpoint(error.endpointId, input);
 }
 ```
 
@@ -228,6 +234,10 @@ const statements = buildWebhookSchemaSql();
 // 마이그레이션 시스템에서 실행하거나:
 await initializeWebhookSchema(env.DB);
 ```
+
+D1에서 한 URL에 엔드포인트가 둘 저장되지 않게 막는 것은 엔드포인트
+테이블 `url` 컬럼의 unique index입니다. 마이그레이션을 직접 작성한다면 이
+index를 유지하세요.
 
 ## SQLite / Drizzle(Postgres) 스니펫
 

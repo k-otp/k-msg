@@ -193,22 +193,28 @@ Endpoint ids and URLs are unique, and registering never replaces an endpoint.
 `WebhookEndpointConflictError`: its `field` is `"id"` or `"url"`, and its
 `endpointId` is the registered endpoint's id. `updateEndpoint()` rejects a URL
 that another endpoint uses in the same way. Change an endpoint's secret,
-events or URL with `updateEndpoint()`.
+events or URL with `updateEndpoint()`. `addEndpoints()` checks the whole batch,
+against stored endpoints and within itself, before it stores any, so a
+conflict leaves nothing half added.
+
+To register the same endpoints on every deploy, update the one that is
+already there:
 
 ```ts
 import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
 
+const input = {
+  url: "https://example.com/webhooks/k-msg",
+  active: true,
+  events: [WebhookEventType.MESSAGE_SENT],
+};
+
 try {
-  await runtime.addEndpoint({
-    url: "https://example.com/webhooks/k-msg",
-    active: true,
-    events: [WebhookEventType.MESSAGE_SENT],
-  });
+  await runtime.addEndpoint(input);
 } catch (error) {
-  if (error instanceof WebhookEndpointConflictError) {
-    // For example, answer 409 Conflict and point at error.endpointId.
-  }
-  throw error;
+  if (!(error instanceof WebhookEndpointConflictError)) throw error;
+  // Or answer 409 Conflict, if a user asked to register it.
+  await runtime.updateEndpoint(error.endpointId, input);
 }
 ```
 
@@ -228,6 +234,10 @@ const statements = buildWebhookSchemaSql();
 // run statements in your migration system, or:
 await initializeWebhookSchema(env.DB);
 ```
+
+The unique index on the endpoint table's `url` column is what keeps D1 from
+storing two endpoints with one URL, so keep it if you write the migration
+yourself.
 
 ## SQLite / Drizzle(Postgres) snippets
 
