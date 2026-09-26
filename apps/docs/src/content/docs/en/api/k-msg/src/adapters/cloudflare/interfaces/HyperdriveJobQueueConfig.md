@@ -2,32 +2,49 @@
 editUrl: false
 next: false
 prev: false
-title: "CloudflareObjectJobQueueOptions"
+title: "HyperdriveJobQueueConfig"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L84)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
 ## Extends
 
-- [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/)\<[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)\<`T`\>\>
+- [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/)\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 ## Type Parameters
 
 ### T
 
-`T`
+`T` = `unknown`
 
 ## Properties
 
-### keyPrefix?
+### indexNames?
 
-> `optional` **keyPrefix?**: `string`
+> `optional` **indexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L88)
 
-Default: `kmsg/jobs`.
+***
+
+### initializeSchema?
+
+> `optional` **initializeSchema?**: `boolean`
+
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L96)
+
+Whether `init()` creates the table and indexes (`IF NOT EXISTS`). Each
+new queue runs those statements before its first query, which in a
+Worker means every request. Set it to `false` when migrations create the
+schema, for example from `buildJobQueueSchemaSql()`.
+
+#### Default
+
+```ts
+true
+```
 
 ***
 
@@ -70,7 +87,7 @@ does not stop the dequeue.
 
 ##### job
 
-[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)
+[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)
 
 #### Returns
 
@@ -79,3 +96,17 @@ does not stop the dequeue.
 #### Inherited from
 
 [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/).[`onLeaseExpired`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/#onleaseexpired)
+
+***
+
+### tableName?
+
+> `optional` **tableName?**: `string`
+
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L87)
+
+#### Default
+
+```ts
+"kmsg_jobs"
+```

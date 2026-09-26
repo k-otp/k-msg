@@ -261,6 +261,7 @@ Queue 테이블 (`HyperdriveJobQueue` / `createD1JobQueue` 사용 시): `kmsg_jo
 - 주요 컬럼: `type`, `data`, `status`, `priority`, `attempts`, `max_attempts`, `delay`
 - 시간 컬럼: `created_at`, `process_at`, `completed_at`, `failed_at`
 - 부가 컬럼: `error`, `metadata`
+- lease(`leaseMs`)로 처리 중인 작업의 `process_at`에는 lease가 끝나는 시각이 들어갑니다(아래 SQL 작업 큐 참고).
 
 Queue 인덱스:
 
@@ -448,6 +449,57 @@ export class SendQueue extends DurableObject<Env> {
   }
 }
 ```
+
+### SQL 작업 큐
+
+`HyperdriveJobQueue`(`createD1JobQueue()`와 `createDrizzleJobQueue()`가 반환)와 `SQLiteJobQueue`(`@k-msg/messaging/adapters/bun`)도 위 큐와 같은 `leaseMs`, `onLeaseExpired` 옵션을 받고 `nextDueAt()`, `cleanupTerminal({ olderThan })`을 제공합니다. `leaseMs`를 지정하지 않으면 lease는 꺼져 있습니다.
+
+- lease에는 새 컬럼이 필요 없습니다. lease로 처리 중인 작업의 `process_at`(과 `processAt`)에는 lease가 끝나는 시각이 들어가며, `leaseExpiresAt`도 같은 값입니다.
+- `dequeue()`는 끝난 lease를 정리하고 다음 작업을 가져오며, 다른 `dequeue()`가 같은 작업을 가져가거나 같은 lease를 정리하지 않게 합니다. 위 큐와 마찬가지로 `running`에 있는 작업은 그대로 두고, 반환할 작업을 점유하기 전에 `onLeaseExpired`를 호출합니다.
+  - Postgres: 다른 워커가 잠근 행은 건너뛰는(`FOR UPDATE SKIP LOCKED`) 한 문장으로 처리합니다. `onLeaseExpired`가 있으면 lease를 정리하는 문장과, 콜백이 끝난 뒤 작업을 가져오는 문장으로 나눕니다.
+  - SQLite와 D1: 두 문장으로 처리하며, 각 문장은 SQLite의 쓰기 잠금 아래에서 원자적으로 실행됩니다.
+  - MySQL: 바꾸는 행을 잠그는 트랜잭션으로 처리하며, 격리 수준과 관계없이 동작합니다. client에 `transaction()`을 제공하세요. 없으면 두 워커가 동시에 정리한 lease가 양쪽에 보고될 수 있고, lease 없이는 한 작업이 두 워커에게 갈 수 있습니다.
+- `leaseMs`를 설정할 때 이미 `processing`인 작업(이전 버전이나 `leaseMs` 없는 큐가 가져간 작업)은 lease가 끝난 작업과 구별되지 않아, 다음 `dequeue()`가 곧바로 다시 처리 대상으로 만듭니다. lease 없이 동작하는 워커가 작업을 처리하고 있지 않을 때 lease를 켜고, 한 테이블을 쓰는 큐는 모두 같은 설정을 쓰세요.
+- `fail()`은 완료된 작업을 다시 열지 않고 시도 횟수를 SQL에서 올리므로, 그 사이 lease 만료로 계산된 시도도 그대로 남습니다.
+- `complete(jobId, result)`는 `result`를 남기지 않습니다. 테이블에 담을 컬럼이 없습니다.
+
+예를 들어 Cron Trigger에서 발송하는 Worker:
+
+```ts
+import { createD1JobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export default {
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    const queue = createD1JobQueue<SendInput>(env.DB, {
+      initializeSchema: false,
+      // 발송은 10초 후 타임아웃되므로 1분이면 충분합니다.
+      leaseMs: 60_000,
+      onLeaseExpired: (job) => console.warn("lease expired", job.id, job.status),
+    });
+
+    for (let job = await queue.dequeue(); job; job = await queue.dequeue()) {
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (result.isSuccess) {
+        await queue.complete(job.id);
+      } else {
+        await queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // 끝난 작업은 하루 동안 조회할 수 있게 둡니다.
+    await queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+  },
+};
+```
+
+이제 이 패키지의 모든 큐가 `nextDueAt()`과 `cleanupTerminal(options)`을 제공하며, 직접 만드는 큐를 위해 `JobQueue` 인터페이스는 둘을 선택 메서드로 선언합니다. `Job`에는 `leaseExpiresAt`이 있고, `@k-msg/messaging/queue`는 `JOB_LEASE_EXPIRED`와 `JobLeaseOptions`, `JobQueueCleanupOptions` 타입을 export합니다.
 
 ### Tracking 스키마 커스터마이즈
 

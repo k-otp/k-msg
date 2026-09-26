@@ -351,6 +351,7 @@ Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
 - Main columns: `type`, `data`, `status`, `priority`, `attempts`, `max_attempts`, `delay`
 - Time columns: `created_at`, `process_at`, `completed_at`, `failed_at`
 - Meta columns: `error`, `metadata`
+- While a job is processing under a lease (`leaseMs`), `process_at` holds when the lease ends (see SQL Job Queues below).
 
 Queue indexes:
 
@@ -538,6 +539,57 @@ export class SendQueue extends DurableObject<Env> {
   }
 }
 ```
+
+### SQL Job Queues
+
+`HyperdriveJobQueue` (which `createD1JobQueue()` and `createDrizzleJobQueue()` return) and `SQLiteJobQueue` (`@k-msg/messaging/adapters/bun`) take the same `leaseMs` and `onLeaseExpired` options as the queues above, and have `nextDueAt()` and `cleanupTerminal({ olderThan })`. Leases are off unless `leaseMs` is set.
+
+- The lease needs no new column. While a job is processing under a lease, its `process_at` (and `processAt`) holds when the lease ends, as does `leaseExpiresAt`.
+- `dequeue()` settles expired leases and takes the next job so that no other `dequeue()` gets the same job or settles the same lease. As above, it leaves the jobs in `running` alone and calls `onLeaseExpired` before it leases the job it returns.
+  - Postgres: one statement, which skips rows another worker has locked (`FOR UPDATE SKIP LOCKED`). With `onLeaseExpired`, one statement settles the leases and another takes the job once the callbacks have run.
+  - SQLite and D1: two statements, each atomic under SQLite's write lock.
+  - MySQL: a transaction that locks the rows it changes, at any isolation level, so give the client `transaction()`. Without it, a lease two workers settle at once can be reported to both, and without leases a job can go to two workers.
+- A job already `processing` when you set `leaseMs`, taken by an earlier version or by a queue without `leaseMs`, looks like one whose lease has expired: the next `dequeue()` makes it due again at once. Turn leases on when no worker without them is in the middle of a job, and give every queue on a table the same setting.
+- `fail()` never reopens a completed job, and counts the attempt in SQL, so an attempt that a lease expiry counted meanwhile is kept.
+- `complete(jobId, result)` does not keep `result`: the table has no column for it.
+
+For example, a Worker that sends from a Cron Trigger:
+
+```ts
+import { createD1JobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export default {
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    const queue = createD1JobQueue<SendInput>(env.DB, {
+      initializeSchema: false,
+      // Sends time out after 10 seconds, so a minute is plenty.
+      leaseMs: 60_000,
+      onLeaseExpired: (job) => console.warn("lease expired", job.id, job.status),
+    });
+
+    for (let job = await queue.dequeue(); job; job = await queue.dequeue()) {
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (result.isSuccess) {
+        await queue.complete(job.id);
+      } else {
+        await queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // Keep finished jobs readable for a day.
+    await queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+  },
+};
+```
+
+Every queue in this package now has `nextDueAt()` and `cleanupTerminal(options)`, which the `JobQueue` interface declares as optional for queues of your own. `Job` has `leaseExpiresAt`, and `@k-msg/messaging/queue` exports `JOB_LEASE_EXPIRED` and the `JobLeaseOptions` and `JobQueueCleanupOptions` types.
 
 ### Tracking Schema Customization
 
