@@ -248,7 +248,7 @@ describe("AligoProvider (send responses)", () => {
   }
 
   function respondWith(body: Record<string, unknown>) {
-    globalThis.fetch = async () =>
+    fetchStub.fetch = async () =>
       new Response(JSON.stringify(body), { status: 200 });
   }
 
@@ -265,7 +265,7 @@ describe("AligoProvider (send responses)", () => {
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
       expect(result.error.message).toBe("포인트가 부족합니다.");
-      expect(result.error.code).toBe("INSUFFICIENT_BALANCE");
+      expect(result.error.code).toBe(KMsgErrorCode.INSUFFICIENT_BALANCE);
     }
   });
 
@@ -348,7 +348,7 @@ describe("AligoProvider (send responses)", () => {
   );
 
   test("rejects a Kakao send response that is not an object", async () => {
-    globalThis.fetch = async () =>
+    fetchStub.fetch = async () =>
       new Response(JSON.stringify([{ code: 0 }]), { status: 200 });
 
     const result = await createSendProvider().send({
@@ -372,7 +372,7 @@ describe("AligoProvider (send responses)", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("AUTHENTICATION_FAILED");
+      expect(result.error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
     }
   });
 });
