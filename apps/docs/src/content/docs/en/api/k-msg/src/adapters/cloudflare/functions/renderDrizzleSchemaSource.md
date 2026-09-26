@@ -7,7 +7,7 @@ title: "renderDrizzleSchemaSource"
 
 > **renderDrizzleSchemaSource**(`options`): `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/drizzle-schema.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/drizzle-schema.ts#L406)
+Defined in: [packages/messaging/src/adapters/cloudflare/drizzle-schema.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/drizzle-schema.ts#L403)
 
 ## Parameters
 

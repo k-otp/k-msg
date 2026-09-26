@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 > `optional` **json?**: `DeliveryTrackingJsonType`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L89)
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L97)
 
 ***
 
@@ -45,4 +45,16 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 > `optional` **timestamp?**: `DeliveryTrackingTimestampType`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L88)
+Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/delivery-tracking-schema.ts#L96)
+
+Type of the time columns. `bigint` stores epoch milliseconds in `BIGINT`
+(`INTEGER` on SQLite, which is 64-bit). `integer` is an alias of
+`bigint`, kept for compatibility: epoch milliseconds do not fit the
+32-bit `INTEGER` of Postgres and MySQL. `date` is `TIMESTAMPTZ` on
+Postgres and the same as `bigint` on MySQL and SQLite.
+
+#### Default
+
+```ts
+"bigint"
+```
