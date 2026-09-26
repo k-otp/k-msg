@@ -387,13 +387,26 @@ export class SendQueue extends DurableObject<Env> {
         if (record.expiresAt <= now) keys.push(key);
       }
       for (let index = 0; index < keys.length; index += MAX_KEYS_PER_DELETE) {
-        expired += await this.ctx.storage.delete(
+        expired += await this.deleteIfExpired(
           keys.slice(index, index + MAX_KEYS_PER_DELETE),
+          now,
         );
       }
       if (page.size < LIST_PAGE_SIZE) return expired;
       startAfter = [...page.keys()].at(-1);
     }
+  }
+
+  // Reads the keys again in the transaction that deletes them, so a key a
+  // request has reused for a new job since the scan is kept.
+  private deleteIfExpired(keys: string[], now: number): Promise<number> {
+    return this.ctx.storage.transaction(async (txn) => {
+      const current = await txn.get<IdempotencyRecord>(keys);
+      const expired = [...current]
+        .filter(([, record]) => record.expiresAt <= now)
+        .map(([key]) => key);
+      return expired.length === 0 ? 0 : txn.delete(expired);
+    });
   }
 
   /**
