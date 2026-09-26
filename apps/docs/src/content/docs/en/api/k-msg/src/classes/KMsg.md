@@ -5,7 +5,7 @@ prev: false
 title: "KMsg"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:276](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L276)
+Defined in: [packages/messaging/src/k-msg.ts:277](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L277)
 
 High-level messaging facade for sending messages through configured providers.
 
@@ -83,7 +83,7 @@ await kmsg.send({
 
 > **new KMsg**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L303)
+Defined in: [packages/messaging/src/k-msg.ts:304](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L304)
 
 Creates a new KMsg instance with the specified configuration.
 
@@ -91,7 +91,7 @@ Creates a new KMsg instance with the specified configuration.
 
 ##### config
 
-`KMsgConfig`
+[`KMsgConfig`](/en/api/k-msg/src/interfaces/kmsgconfig/)
 
 Configuration object containing providers and optional settings
 
@@ -119,7 +119,7 @@ const kmsg = new KMsg({
 
 > **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
-Defined in: [packages/messaging/src/k-msg.ts:400](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L400)
+Defined in: [packages/messaging/src/k-msg.ts:401](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L401)
 
 Performs a health check on all configured providers.
 
@@ -152,7 +152,7 @@ if (!health.healthy) {
 
 > **send**(`input`, `request?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/messaging/src/k-msg.ts:494](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L494)
+Defined in: [packages/messaging/src/k-msg.ts:495](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L495)
 
 Sends a single message and returns a Result.
 
@@ -230,7 +230,7 @@ const result = await kmsg.send(
 
 > **send**(`input`, `request?`): `Promise`\<[`BatchSendResult`](/en/api/messaging/src/interfaces/batchsendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:498](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L498)
+Defined in: [packages/messaging/src/k-msg.ts:499](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L499)
 
 Sends a single message and returns a Result.
 
@@ -310,7 +310,7 @@ const result = await kmsg.send(
 
 > **sendOrThrow**(`input`, `request?`): `Promise`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:539](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L539)
+Defined in: [packages/messaging/src/k-msg.ts:540](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L540)
 
 Sends a single message and throws on failure.
 
@@ -363,7 +363,7 @@ try {
 
 > `static` **builder**(): [`KMsgBuilder`](/en/api/messaging/src/classes/kmsgbuilder/)
 
-Defined in: [packages/messaging/src/k-msg.ts:377](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L377)
+Defined in: [packages/messaging/src/k-msg.ts:378](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L378)
 
 Creates a new fluent builder for constructing KMsg instances.
 
@@ -392,7 +392,7 @@ const kmsg = KMsg.builder()
 
 > `static` **create**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:356](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L356)
+Defined in: [packages/messaging/src/k-msg.ts:357](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L357)
 
 Creates a KMsg instance with the specified configuration.
 
@@ -403,7 +403,7 @@ functional-style code or when you prefer named factory methods.
 
 ##### config
 
-`KMsgConfig`
+[`KMsgConfig`](/en/api/k-msg/src/interfaces/kmsgconfig/)
 
 Configuration object containing providers and optional settings
 
