@@ -58,18 +58,25 @@ const SENSITIVE_CONTEXT_KEYS = [
 ] as const;
 
 // A key names a credential when it contains one of these words anywhere
-// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, or a property path
-// such as `config.password.value`, `client[secret]`, `config["password"]`,
-// or `settings.api.key`), or has an auth or authorization segment
+// (`AWS_SECRET_ACCESS_KEY`, `x-api-key`, `privateKey`, the labels `API key`
+// and `private key`, or a property path of any length such as
+// `config.password.value`, `client[secret]`, `config["password"]`, or
+// `settings.api.key`), or has an auth or authorization segment
 // (`Authorization`, `config.auth.value`, `headers['authorization']`). Auth
-// only counts as a whole segment: `author` is not a key. Each side of the
-// word is bounded, so text with long dotted runs is scanned in linear time.
-const KEY_PART = String.raw`[\w.[\]"'-]{0,64}`;
-const CREDENTIAL_KEY_SOURCE = String.raw`${KEY_PART}(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)${KEY_PART}|auth(?:orization)?(?:[.[\]"']${KEY_PART})?)`;
-const CREDENTIAL_KEY = new RegExp(`^${CREDENTIAL_KEY_SOURCE}$`, "i");
+// only counts as a whole segment: `author` is not a key.
+const KEY_CHARS = String.raw`\w.[\]"'-`;
+const CREDENTIAL_KEY = new RegExp(
+  String.raw`^[${KEY_CHARS}]*(?:(?:secret|password|passwd|passphrase|token|credential|private[-_.]?key|api[-_.]?key)[${KEY_CHARS}]*|auth(?:orization)?(?:[.[\]"'][${KEY_CHARS}]*)?)$`,
+  "i",
+);
+
+// Spaces count as a separator, as in "API key" and "private key".
+function isCredentialKey(key: string): boolean {
+  return CREDENTIAL_KEY.test(key.replace(/\s+/g, "_"));
+}
 
 function isSensitiveContextKey(rawKey: string): boolean {
-  if (CREDENTIAL_KEY.test(rawKey)) return true;
+  if (isCredentialKey(rawKey)) return true;
   const key = rawKey.toLowerCase();
   return SENSITIVE_CONTEXT_KEYS.some((candidate) =>
     key.includes(candidate.toLowerCase()),
@@ -115,7 +122,7 @@ const PHONE_NUMBER_PATTERN = new RegExp(
     .join("|"),
   "g",
 );
-// The scheme is bounded, as the key pattern below is, to keep scans linear.
+// The scheme is bounded to keep scans linear.
 const URL_PASSWORD_PATTERN =
   /(\b[a-z][\w+.-]{0,31}:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
 // Quoted values, then values quoted with an escaped quote. Only the escaped
@@ -128,27 +135,48 @@ const QUOTED_VALUE_SOURCES = [
   String.raw`\\"(?:\\\\(?:\\.|[^\\\n])|\\[^"\\\n]|[^\\\n])*(?:\\")?`,
   String.raw`\\'(?:\\\\(?:\\.|[^\\\n])|\\[^'\\\n]|[^\\\n])*(?:\\')?`,
 ];
-const CREDENTIAL_PATTERN = new RegExp(
-  String.raw`\b(${CREDENTIAL_KEY_SOURCE})((?:\\?["'])?\s*[:=]\s*)(?:${QUOTED_VALUE_SOURCES.join("|")}|((?:Bearer|Basic)\s+)?[^\s"',;&]+)`,
+// A key and its `:` or `=`. Only a whole run of key characters, or "API" or
+// "private" and a space before one, is tried as a key, so each run is
+// scanned once however long it is; the key is then checked on its own.
+const KEY_AND_SEPARATOR = new RegExp(
+  String.raw`(?<![${KEY_CHARS}])((?:["']?(?:api|private)[ \t]+)?[${KEY_CHARS}]+)((?:\\?["'])?\s*[:=]\s*)`,
   "gi",
 );
+const CREDENTIAL_VALUE = new RegExp(
+  String.raw`${QUOTED_VALUE_SOURCES.join("|")}|((?:Bearer|Basic)\s+)?[^\s"',;&]+`,
+  "iy",
+);
+
+// Redacts the value after each credential key. Values under other keys are
+// still scanned, since they can hold key/value pairs of their own.
+function redactCredentials(text: string): string {
+  let redacted = "";
+  let copied = 0;
+  for (const match of text.matchAll(KEY_AND_SEPARATOR)) {
+    const [keyAndSeparator, key = ""] = match;
+    // A key inside a value just redacted is part of that value.
+    if (match.index < copied || !isCredentialKey(key)) continue;
+    const valueStart = match.index + keyAndSeparator.length;
+    CREDENTIAL_VALUE.lastIndex = valueStart;
+    const value = CREDENTIAL_VALUE.exec(text);
+    if (!value) continue;
+    // A quoted value keeps its opening quote, escaped or not, to close it.
+    const quote = /^\\?["']/.exec(value[0])?.[0];
+    redacted += text.slice(copied, valueStart);
+    redacted += quote
+      ? `${quote}${REDACTED_TOKEN}${quote}`
+      : `${value[1] ?? ""}${REDACTED_TOKEN}`;
+    copied = valueStart + value[0].length;
+  }
+  return redacted + text.slice(copied);
+}
 
 export function redactLogText(text: string): string {
-  return text
-    .replace(URL_PASSWORD_PATTERN, `$1:${REDACTED_TOKEN}@`)
-    .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone))
-    .replace(
-      CREDENTIAL_PATTERN,
-      (match, key: string, separator: string, scheme: string | undefined) => {
-        // A quoted value keeps its opening quote, escaped or not, to close it.
-        const quote = /^\\?["']/.exec(
-          match.slice(key.length + separator.length),
-        )?.[0];
-        return quote
-          ? `${key}${separator}${quote}${REDACTED_TOKEN}${quote}`
-          : `${key}${separator}${scheme ?? ""}${REDACTED_TOKEN}`;
-      },
-    );
+  return redactCredentials(
+    text
+      .replace(URL_PASSWORD_PATTERN, `$1:${REDACTED_TOKEN}@`)
+      .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone)),
+  );
 }
 
 function sanitizeContextValue(key: string, value: unknown): unknown {
@@ -192,14 +220,16 @@ function sanitizeLogContext(context: LogContext): LogContext {
  * @evidence docs/security/field-crypto-v1.md#logging-policy
  *   Masks sensitive context keys and scrubs the message, error text, and
  *   string context values with redactLogText before output.
- * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #2d4e6e4
- *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue, and
- *   redactLogText, and ran logger.test.ts: phone numbers, key/value
- *   credentials under any key containing a credential word (compound,
- *   quoted, AWS-style, property paths, and in JSON escaped once), URL
- *   passwords, and
- *   context values under snake or kebab case credential keys stay out of
- *   messages, errors, and context in JSON and text modes.
+ * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #2665a06
+ *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue,
+ *   redactLogText, and redactCredentials, and ran logger.test.ts: phone
+ *   numbers, key/value credentials under any key containing a credential
+ *   word (compound, quoted, AWS-style, spaced API key and private key
+ *   labels, property paths of any length, auth segments but not author,
+ *   and in JSON escaped once, including pairs nested in another key's
+ *   value), URL passwords, and context values under snake, kebab, or
+ *   spaced credential keys stay out of messages, errors, and context in
+ *   JSON and text modes, with key scans in linear time.
  */
 export class Logger {
   private config: LoggerConfig;
