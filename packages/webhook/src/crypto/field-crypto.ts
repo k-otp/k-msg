@@ -3,6 +3,7 @@ import {
   createDefaultMasker,
   type FieldCryptoConfig,
   FieldCryptoError,
+  type FieldMode,
   resolveFieldCryptoFailMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
@@ -137,15 +138,37 @@ async function revealValue(
   }
 }
 
+// Webhook storage always encrypts the endpoint secret and the delivery
+// payload, which must stay recoverable to sign and resend, and stores no
+// lookup hash for them. Only the encrypt modes describe that.
+const WEBHOOK_FIELD_MODES: readonly FieldMode[] = ["encrypt", "encrypt+hash"];
+
+function assertWebhookFieldMode(
+  config: FieldCryptoConfig,
+  path: "secret" | "payload",
+): void {
+  if (config.enabled === false) return;
+  const mode = config.fields[path];
+  if (mode === undefined || WEBHOOK_FIELD_MODES.includes(mode)) return;
+  throw new FieldCryptoError(
+    "config",
+    `webhook storage always encrypts ${path}; fields.${path} must be "encrypt" or "encrypt+hash", not "${mode}"`,
+    { rule: "fieldCrypto.webhook.encrypt_only", path: `fields.${path}` },
+    { fieldPath: `fields.${path}` },
+  );
+}
+
 export function validateWebhookFieldCryptoOptions(
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): void {
   if (!options) return;
   if (options.endpoint) {
     assertFieldCryptoConfig(options.endpoint);
+    assertWebhookFieldMode(options.endpoint, "secret");
   }
   if (options.delivery) {
     assertFieldCryptoConfig(options.delivery);
+    assertWebhookFieldMode(options.delivery, "payload");
   }
 }
 

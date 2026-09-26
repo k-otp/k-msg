@@ -87,6 +87,34 @@ describe("WebhookRegistry field crypto", () => {
     ).rejects.toThrow("ciphertext envelope must be v1 A256GCM");
   });
 
+  test.each([
+    ["endpoint", { secret: "mask" }, 'fields.secret must be "encrypt"'],
+    ["endpoint", { secret: "plain" }, 'fields.secret must be "encrypt"'],
+    ["delivery", { payload: "plain" }, 'fields.payload must be "encrypt"'],
+  ] as const)(
+    "constructor rejects %s fields %o that the storage would not honor",
+    (target, fields, message) => {
+      expect(
+        () =>
+          new WebhookRegistry({
+            fieldCrypto: { [target]: createConfig({ fields }) },
+          }),
+      ).toThrow(message);
+    },
+  );
+
+  test("constructor accepts either encrypt mode", () => {
+    expect(
+      () =>
+        new WebhookRegistry({
+          fieldCrypto: {
+            endpoint: createConfig({ fields: { secret: "encrypt+hash" } }),
+            delivery: createConfig({ fields: { payload: "encrypt" } }),
+          },
+        }),
+    ).not.toThrow();
+  });
+
   test("constructor rejects invalid provider methods", () => {
     expect(
       () =>
