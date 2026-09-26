@@ -161,11 +161,7 @@ Defined in: [packages/provider/src/config-fields.ts:16](https://github.com/k-otp
 
 #### iwinv.apiKey.description
 
-> `readonly` **description**: `"IWINV AlimTalk API key (AUTH header)"` = `"IWINV AlimTalk API key (AUTH header)"`
-
-#### iwinv.apiKey.required
-
-> `readonly` **required**: `true` = `true`
+> `readonly` **description**: `"IWINV AlimTalk API key (AUTH header); omit for SMS/LMS/MMS-only use with smsApiKey and smsAuthKey"` = `"IWINV AlimTalk API key (AUTH header); omit for SMS/LMS/MMS-only use with smsApiKey and smsAuthKey"`
 
 #### iwinv.apiKey.type
 
