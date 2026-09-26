@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMigrationStatus"
 ---
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L96)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L107)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:96](https://
 
 > **chunks**: `object`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L98)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L109)
 
 #### completed
 
@@ -41,7 +41,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:98](https://
 
 > `optional` **run?**: [`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/)
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L97)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:108](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L108)
 
 ***
 
@@ -49,4 +49,4 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:97](https://
 
 > `optional` **updatedAt?**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L105)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L116)
