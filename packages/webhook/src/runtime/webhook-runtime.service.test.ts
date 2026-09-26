@@ -351,6 +351,32 @@ describe("WebhookRuntimeService batch timer", () => {
 
     expect(timers.pending()).toBe(0);
   });
+
+  test("the emit() that fills a batch sends it and cancels the timer", async () => {
+    // A timeout that cannot expire during the test.
+    const filling = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 2, batchTimeoutMs: 60_000 },
+      httpClient: client,
+    });
+
+    try {
+      await filling.addEndpoint({
+        url: "https://example.com/filled",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      await filling.emit(createEvent());
+      expect(timers.pending()).toBe(1);
+
+      // Resolves once the full batch has been sent.
+      await filling.emit(createEvent());
+
+      expect(client.calls.length).toBe(2);
+      expect(timers.pending()).toBe(0);
+    } finally {
+      await filling.shutdown();
+    }
+  });
 });
 
 // These runtimes use in-memory storage and autoStart: false, so they hold

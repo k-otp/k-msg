@@ -574,15 +574,15 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return `webhook_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
-  // Sends the queue batchTimeoutMs after emit() queues an event, and keeps
-  // going while events remain. With nothing queued, no timer is pending.
+  // Keeps a timer pending exactly while emit() has queued events: it sends
+  // the queue batchTimeoutMs after the first one, and is cleared as soon as
+  // the queue is empty, for example after emit() sent a full batch itself.
   private scheduleBatch(): void {
-    if (
-      !this.autoStart ||
-      this.shuttingDown ||
-      this.batchTimer !== null ||
-      this.eventQueue.length === 0
-    ) {
+    if (this.eventQueue.length === 0) {
+      this.cancelBatchTimer();
+      return;
+    }
+    if (!this.autoStart || this.shuttingDown || this.batchTimer !== null) {
       return;
     }
 
