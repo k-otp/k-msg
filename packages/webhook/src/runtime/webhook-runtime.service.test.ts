@@ -294,8 +294,11 @@ describe("WebhookRuntimeService batch timer", () => {
   });
 
   afterEach(async () => {
-    await runtime.shutdown();
-    timers.restore();
+    try {
+      await runtime.shutdown();
+    } finally {
+      timers.restore();
+    }
   });
 
   async function addEndpoint(): Promise<void> {
@@ -434,6 +437,15 @@ function gatedHttpClient(): {
   };
 }
 
+async function withDeadline<T>(promise: Promise<T>): Promise<T> {
+  return Promise.race([
+    promise,
+    Bun.sleep(2_000).then(() => {
+      throw new Error("did not settle within 2 s");
+    }),
+  ]);
+}
+
 async function waitUntil(condition: () => boolean): Promise<void> {
   const deadline = Date.now() + 2_000;
   while (!condition() && Date.now() < deadline) {
@@ -476,7 +488,7 @@ describe("WebhookRuntimeService batches in flight", () => {
     }
   });
 
-  test("the emit() that fills a batch during another one sends it after that one", async () => {
+  test("a full batch queued during another one goes out right after it", async () => {
     const http = gatedHttpClient();
     const runtime = new WebhookRuntimeService({
       delivery: { ...createConfig(), batchSize: 2 },
@@ -495,21 +507,70 @@ describe("WebhookRuntimeService batches in flight", () => {
     ]);
     await waitUntil(() => http.calls() === 1);
 
-    let secondResolved = false;
-    const second = Promise.all([
-      runtime.emit(createEvent()),
-      runtime.emit(createEvent()),
-    ]).then(() => {
-      secondResolved = true;
-    });
-    await Bun.sleep(10);
-    // It waits for the batch in flight instead of resolving unsent.
-    expect(secondResolved).toBe(false);
+    // Fills the next batch while the first is in flight. It does not wait
+    // for a batch it did not start: that batch could be the caller.
+    await withDeadline(
+      Promise.all([runtime.emit(createEvent()), runtime.emit(createEvent())]),
+    );
+    expect(http.calls()).toBe(1);
 
     http.release();
     await first;
-    await second;
+    // No flush() and no timer: the full batch follows the first.
+    await waitUntil(() => http.calls() === 4);
     expect(http.calls()).toBe(4);
+  });
+
+  test("an emit() made while a batch is sent does not wait for that batch", async () => {
+    const client = new RecordingHttpClient();
+    const persistence = createInMemoryWebhookPersistence();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 1 },
+      httpClient: client,
+      persistence,
+      autoStart: false,
+    });
+    const add = persistence.deliveryStore.add.bind(persistence.deliveryStore);
+    let reentered = false;
+    // A delivery store that emits an event of its own, from inside a batch.
+    persistence.deliveryStore.add = async (delivery) => {
+      await add(delivery);
+      if (!reentered) {
+        reentered = true;
+        await runtime.emit(createEvent());
+      }
+    };
+    await runtime.addEndpoint({
+      url: "https://example.com/reentrant",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    await withDeadline(runtime.emit(createEvent()));
+    await withDeadline(runtime.flush());
+
+    expect(client.calls.length).toBe(2);
+  });
+
+  test("concurrent emits send every full batch without flush()", async () => {
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 2 },
+      httpClient: client,
+      autoStart: false,
+    });
+    await runtime.addEndpoint({
+      url: "https://example.com/concurrent",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    await withDeadline(
+      Promise.all(Array.from({ length: 6 }, () => runtime.emit(createEvent()))),
+    );
+    await waitUntil(() => client.calls.length === 6);
+
+    expect(client.calls.length).toBe(6);
   });
 });
 
@@ -540,6 +601,28 @@ describe("WebhookRuntimeService batch settings", () => {
     }
     // The tenth event fills a batch of the default size, which emit() sends.
     expect(client.calls.length).toBe(10);
+
+    await runtime.flush();
+    expect(client.calls.length).toBe(12);
+  });
+
+  test("a batchSize of Infinity sends the queue only on flush()", async () => {
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: Number.POSITIVE_INFINITY },
+      httpClient: client,
+      autoStart: false,
+    });
+    await runtime.addEndpoint({
+      url: "https://example.com/unbounded",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    for (let index = 0; index < 12; index += 1) {
+      await runtime.emit(createEvent());
+    }
+    expect(client.calls.length).toBe(0);
 
     await runtime.flush();
     expect(client.calls.length).toBe(12);

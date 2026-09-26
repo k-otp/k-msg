@@ -51,11 +51,10 @@ function normalizeLimit(limit: number | undefined, fallback: number): number {
 }
 
 // A batch must take at least one event, or flush() would never empty the
-// queue.
+// queue. Infinity keeps every event queued until flush() or the timer sends
+// them all as one batch.
 function normalizeBatchSize(batchSize: number | undefined): number {
-  return typeof batchSize === "number" &&
-    Number.isFinite(batchSize) &&
-    batchSize >= 1
+  return typeof batchSize === "number" && batchSize >= 1
     ? Math.floor(batchSize)
     : DEFAULT_BATCH_SIZE;
 }
@@ -298,8 +297,13 @@ export class WebhookRuntimeService implements WebhookRuntime {
     this.eventQueue.push(cloneEventWithValidTimestamp(event));
 
     try {
-      if (this.eventQueue.length >= this.batchSize) {
-        await this.sendFullBatch();
+      // A batch in flight is not awaited: one of its delivery hooks may be
+      // this caller. A full batch queued meanwhile follows it (processBatch).
+      if (
+        this.eventQueue.length >= this.batchSize &&
+        this.activeBatch === null
+      ) {
+        await this.processBatch();
       }
     } finally {
       this.scheduleBatch();
@@ -479,10 +483,33 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     const batch = this.eventQueue.splice(0, this.batchSize);
-    this.activeBatch = this.dispatchBatch(batch).finally(() => {
+    const dispatched = this.dispatchBatch(batch);
+    this.activeBatch = dispatched.finally(() => {
       this.activeBatch = null;
     });
+    // Runs after activeBatch is cleared. Not after a failure, so a failing
+    // store is retried by the timer or the next call, not in a tight loop.
+    void dispatched.then(
+      () => this.sendQueuedFullBatch(),
+      () => undefined,
+    );
     return this.activeBatch;
+  }
+
+  // A full batch queued while another was being sent goes out right after
+  // it, since the emit() that filled it did not wait.
+  private sendQueuedFullBatch(): void {
+    if (this.eventQueue.length < this.batchSize || this.activeBatch !== null) {
+      return;
+    }
+    void this.processBatch().catch((error: unknown) => {
+      logger.error(
+        "Webhook batch processor error",
+        undefined,
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      this.scheduleBatch();
+    });
   }
 
   private async dispatchBatch(batch: WebhookEvent[]): Promise<void> {
@@ -587,15 +614,6 @@ export class WebhookRuntimeService implements WebhookRuntime {
       this.batchTimer = null;
       void this.runScheduledBatch();
     }, this.batchTimeoutMs);
-  }
-
-  // The emit() that fills a batch sends it, after any batch already in
-  // flight, so the call still resolves only once its batch has gone out.
-  private async sendFullBatch(): Promise<void> {
-    await this.waitForActiveBatch();
-    if (this.eventQueue.length >= this.batchSize && this.activeBatch === null) {
-      await this.processBatch();
-    }
   }
 
   // Whoever started a batch handles its failure; others only wait for it.

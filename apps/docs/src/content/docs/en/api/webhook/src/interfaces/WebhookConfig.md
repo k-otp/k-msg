@@ -29,12 +29,13 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:8](https://github.com/k
 
 > `optional` **batchSize?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L31)
+Defined in: [packages/webhook/src/types/webhook.types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L32)
 
 How many events queued by `emit()` go out in one batch. The `emit()` call
-that fills a batch sends it, retries included, before it resolves.
-Defaults to 10, which also replaces a value below 1. `emitSync()` does
-not use it.
+that fills a batch sends it, retries included, before it resolves, unless
+another batch is still being sent: then the full batch follows that one.
+`Infinity` leaves every event for `flush()` or the timer. Defaults to 10,
+which also replaces a value below 1. `emitSync()` does not use it.
 
 ***
 
@@ -42,7 +43,7 @@ not use it.
 
 > `optional` **batchTimeoutMs?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L37)
+Defined in: [packages/webhook/src/types/webhook.types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L38)
 
 With `autoStart`, how long in milliseconds the first event queued by
 `emit()` waits before its batch is sent. Defaults to 5000. `emitSync()`
