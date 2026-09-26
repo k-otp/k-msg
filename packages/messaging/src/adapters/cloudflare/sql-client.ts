@@ -171,28 +171,17 @@ export function createD1SqlClient(db: D1DatabaseLike): CloudflareSqlClient {
       const prepared = db.prepare(sql);
       const statement = params.length > 0 ? prepared.bind(...params) : prepared;
 
-      try {
-        const result = await statement.all<T>();
-        return {
-          rows: Array.isArray(result.results) ? result.results : [],
-          rowCount:
-            typeof result.meta?.changes === "number"
-              ? result.meta.changes
-              : undefined,
-        };
-      } catch {
-        if (typeof statement.run === "function") {
-          const result = await statement.run();
-          return {
-            rows: [],
-            rowCount:
-              typeof result.meta?.changes === "number"
-                ? result.meta.changes
-                : undefined,
-          };
-        }
-        throw new Error("D1 statement execution failed");
-      }
+      // all() runs writes as well as reads. A statement that fails is not run
+      // again: it may already have been applied, and its error is the one
+      // the caller needs.
+      const result = await statement.all<T>();
+      return {
+        rows: Array.isArray(result.results) ? result.results : [],
+        rowCount:
+          typeof result.meta?.changes === "number"
+            ? result.meta.changes
+            : undefined,
+      };
     },
   };
 }
