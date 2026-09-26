@@ -1,9 +1,6 @@
 import Database from "bun:sqlite";
 import type { DeliveryTrackingSchemaOptions } from "../../adapters/cloudflare/delivery-tracking-schema";
-import {
-  HyperdriveDeliveryTrackingStore,
-  type HyperdriveDeliveryTrackingStoreOptions,
-} from "../../adapters/cloudflare/hyperdrive-delivery-tracking.store";
+import { HyperdriveDeliveryTrackingStore } from "../../adapters/cloudflare/hyperdrive-delivery-tracking.store";
 import { createCloudflareSqlClient } from "../../adapters/cloudflare/sql-client";
 import type {
   DeliveryTrackingCountByField,
@@ -41,17 +38,6 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
   constructor(options: SqliteDeliveryTrackingStoreOptions = {}) {
     this.db = new Database(options.dbPath ?? "./kmsg.sqlite");
 
-    const schemaOptions: HyperdriveDeliveryTrackingStoreOptions = {
-      tableName: options.tableName,
-      columnMap: options.columnMap,
-      typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
-      storeRaw: options.storeRaw,
-      fieldCryptoSchema: options.fieldCryptoSchema,
-      fieldCrypto: options.fieldCrypto,
-      retention: options.retention,
-      initializeSchema: options.initializeSchema,
-    };
-
     const client = createCloudflareSqlClient({
       dialect: "sqlite",
       query: async <T = Record<string, unknown>>(
@@ -86,7 +72,7 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
       },
     });
 
-    this.delegate = new HyperdriveDeliveryTrackingStore(client, schemaOptions);
+    this.delegate = new HyperdriveDeliveryTrackingStore(client, options);
   }
 
   async init(): Promise<void> {

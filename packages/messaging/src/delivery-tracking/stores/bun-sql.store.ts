@@ -1,9 +1,6 @@
 import type { SQL } from "bun";
 import type { DeliveryTrackingSchemaOptions } from "../../adapters/cloudflare/delivery-tracking-schema";
-import {
-  HyperdriveDeliveryTrackingStore,
-  type HyperdriveDeliveryTrackingStoreOptions,
-} from "../../adapters/cloudflare/hyperdrive-delivery-tracking.store";
+import { HyperdriveDeliveryTrackingStore } from "../../adapters/cloudflare/hyperdrive-delivery-tracking.store";
 import {
   createCloudflareSqlClient,
   type SqlDialect,
@@ -49,16 +46,6 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       );
       this.ownsClient = true;
     }
-    const schemaOptions: HyperdriveDeliveryTrackingStoreOptions = {
-      tableName: options.tableName,
-      columnMap: options.columnMap,
-      typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
-      storeRaw: options.storeRaw,
-      fieldCryptoSchema: options.fieldCryptoSchema,
-      fieldCrypto: options.fieldCrypto,
-      retention: options.retention,
-      initializeSchema: options.initializeSchema,
-    };
 
     const client = createCloudflareSqlClient({
       dialect: this.inferDialect(),
@@ -79,7 +66,7 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       },
     });
 
-    this.delegate = new HyperdriveDeliveryTrackingStore(client, schemaOptions);
+    this.delegate = new HyperdriveDeliveryTrackingStore(client, options);
   }
 
   async init(): Promise<void> {

@@ -175,6 +175,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       trackingTypeStrategy: this.schema.typeStrategy,
       trackingStoreRaw: this.schema.storeRaw,
       fieldCryptoSchema: this.schema.fieldCrypto,
+      trackingIndexNames: this.schema.indexNames,
     }).catch((error) => {
       this.initPromise = undefined;
       throw error;

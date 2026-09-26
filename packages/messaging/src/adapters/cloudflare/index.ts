@@ -172,16 +172,10 @@ export function createD1DeliveryTrackingStore(
   database: D1DatabaseLike,
   options: CreateD1DeliveryTrackingStoreOptions = {},
 ): HyperdriveDeliveryTrackingStore {
-  return new HyperdriveDeliveryTrackingStore(createD1SqlClient(database), {
-    tableName: options.tableName,
-    columnMap: options.columnMap,
-    typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
-    storeRaw: options.storeRaw,
-    fieldCryptoSchema: options.fieldCryptoSchema,
-    fieldCrypto: options.fieldCrypto,
-    retention: options.retention,
-    initializeSchema: options.initializeSchema,
-  });
+  return new HyperdriveDeliveryTrackingStore(
+    createD1SqlClient(database),
+    options,
+  );
 }
 
 export function createD1JobQueue<T>(
@@ -198,16 +192,7 @@ export function createDrizzleDeliveryTrackingStore(
   options: CreateDrizzleDeliveryTrackingStoreOptions,
 ): HyperdriveDeliveryTrackingStore {
   const client = createDrizzleSqlClient(options);
-  return new HyperdriveDeliveryTrackingStore(client, {
-    tableName: options.tableName,
-    columnMap: options.columnMap,
-    typeStrategy: options.typeStrategy ?? options.trackingTypeStrategy,
-    storeRaw: options.storeRaw,
-    fieldCryptoSchema: options.fieldCryptoSchema,
-    fieldCrypto: options.fieldCrypto,
-    retention: options.retention,
-    initializeSchema: options.initializeSchema,
-  });
+  return new HyperdriveDeliveryTrackingStore(client, options);
 }
 
 export function createDrizzleJobQueue<T>(
