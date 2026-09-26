@@ -24,6 +24,10 @@ function createAligoFetch(templates: Record<string, string>) {
     }
     calls.push({ url, body });
 
+    if (url.endsWith("/akv10/template/modify/")) {
+      return Response.json({ code: 0, message: "ok" });
+    }
+
     if (url.endsWith("/akv10/template/list/")) {
       const code = body.tpl_code ?? "";
       const content = templates[code];
@@ -57,7 +61,7 @@ function createAligoFetch(templates: Record<string, string>) {
     calls.filter((call) => call.url.endsWith("/akv10/alimtalk/send/"));
   const lookups = () =>
     calls.filter((call) => call.url.endsWith("/akv10/template/list/"));
-  return { fetch, sends, lookups };
+  return { fetch, sends, lookups, templates };
 }
 
 const createProvider = () =>
@@ -190,5 +194,56 @@ describe("Aligo AlimTalk message", () => {
     expect(aligo.sends()[0]?.body.message_1).toBe(
       "공지: 점검이 완료되었습니다.",
     );
+  });
+
+  test("sends a _full_text variable as-is without a lookup", async () => {
+    const aligo = createAligoFetch({});
+
+    const result = await createProvider().send(
+      alimtalk({ variables: { _full_text: "완성된 알림톡 본문입니다." } }),
+      { fetch: aligo.fetch },
+    );
+
+    expect(result.isSuccess).toBe(true);
+    expect(aligo.lookups()).toHaveLength(0);
+    expect(aligo.sends()[0]?.body.message_1).toBe("완성된 알림톡 본문입니다.");
+  });
+
+  test("looks the template up again after updateTemplate changed it", async () => {
+    const aligo = createAligoFetch({ TPL_1: "old: #{code}" });
+    const provider = createProvider();
+    const sendCode = () =>
+      provider.send(
+        // Surrounding whitespace in the sender key and template code must
+        // still name the same kept body.
+        alimtalk({
+          variables: { code: "1" },
+          kakao: { profileId: "SENDERKEY " },
+        }),
+        { fetch: aligo.fetch },
+      );
+
+    await sendCode();
+    aligo.templates.TPL_1 = "new: #{code}";
+    // The update itself runs through the global fetch, like other template
+    // calls, so answer it here.
+    const originalFetch = globalThis.fetch;
+    (globalThis as { fetch: typeof aligo.fetch }).fetch = aligo.fetch;
+    try {
+      const updated = await provider.updateTemplate(
+        "TPL_1 ",
+        { content: "new: #{code}" },
+        { kakaoChannelSenderKey: " SENDERKEY" },
+      );
+      expect(updated.isSuccess).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+    await sendCode();
+
+    expect(aligo.sends().map((call) => call.body.message_1)).toEqual([
+      "old: 1",
+      "new: 1",
+    ]);
   });
 });

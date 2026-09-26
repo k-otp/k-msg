@@ -87,11 +87,11 @@ Interpretation notes:
 
 | Provider | Sent as |
 | --- | --- |
-| `iwinv` | `templateParam`, one value per placeholder occurrence in template order |
+| `iwinv` | `templateParam`, one value per distinct placeholder name, in order of first appearance in the content and then the button links |
 | `aligo` | `message_1`, the template text with the values filled in |
 | `solapi` | `kakaoOptions.variables`; SOLAPI fills the template |
 
-IWINV and Aligo need the template body for this. They take it from `providerOptions.templateContent`, or else look the template up (IWINV `POST /api/template/`, Aligo `/akv10/template/list/`) through the send's request context and keep the body for 10 minutes per provider instance. A placeholder missing from `variables` fails the send with `INVALID_REQUEST` before anything is sent.
+IWINV and Aligo need the template text for this. They take it from `providerOptions.templateContent`, or else look the template up (IWINV `POST /api/template/`, Aligo `/akv10/template/list/`) through the send's request context and keep it for 10 minutes per provider instance. A placeholder without a value in `variables` (no key, or `undefined`) fails the send with `INVALID_REQUEST` before anything is sent. IWINV skips the lookup when `variables` is empty and no `templateContent` is given, and sends `providerOptions.templateParam` as-is; see `src/iwinv/README.md`.
 
 ## Delivery status lookup
 
