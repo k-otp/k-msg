@@ -134,17 +134,31 @@ const kmsg = new KMsg({
 
 ## Bulk Sending
 
-Use `sendMany()` for controlled concurrency.
+Pass an array to `send()`. Messages are grouped by provider and sent in chunks of up to 50, or the provider's batch limit if it is lower, and each message gets its own `Result`.
 
 ```ts
-const results = await kmsg.sendMany(
-  [
-    { to: "01011112222", text: "hello 1" },
-    { to: "01033334444", text: "hello 2" },
-  ],
-  { concurrency: 10 },
+const batch = await kmsg.send([
+  { to: "01011112222", text: "hello 1" },
+  { to: "01033334444", text: "hello 2" },
+]);
+
+for (const result of batch.results) {
+  if (result.isFailure) console.error(result.error.code, result.error.message);
+}
+```
+
+## Timeouts and Cancellation
+
+`send()` and `sendOrThrow()` take a second argument that is passed to the provider for that call: an `AbortSignal`, and optionally a `fetch` implementation. A batch shares them.
+
+```ts
+const result = await kmsg.send(
+  { to: "01012345678", text: "hello" },
+  { signal: AbortSignal.timeout(5_000) },
 );
 ```
+
+Providers declare what they honor in `provider.transportCapabilities` (`abortSignal`, `injectableFetch`); one that does not support an option ignores it.
 
 ## Delivery Tracking (PULL)
 
