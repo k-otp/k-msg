@@ -5,7 +5,7 @@ prev: false
 title: "KMsg"
 ---
 
-Defined in: [packages/messaging/src/k-msg.ts:275](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L275)
+Defined in: [packages/messaging/src/k-msg.ts:276](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L276)
 
 High-level messaging facade for sending messages through configured providers.
 
@@ -83,7 +83,7 @@ await kmsg.send({
 
 > **new KMsg**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:302](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L302)
+Defined in: [packages/messaging/src/k-msg.ts:303](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L303)
 
 Creates a new KMsg instance with the specified configuration.
 
@@ -119,7 +119,7 @@ const kmsg = new KMsg({
 
 > **healthCheck**(): `Promise`\<\{ `healthy`: `boolean`; `issues`: `string`[]; `providers`: `Record`\<`string`, [`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>; \}\>
 
-Defined in: [packages/messaging/src/k-msg.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L399)
+Defined in: [packages/messaging/src/k-msg.ts:400](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L400)
 
 Performs a health check on all configured providers.
 
@@ -150,9 +150,9 @@ if (!health.healthy) {
 
 #### Call Signature
 
-> **send**(`input`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
+> **send**(`input`, `request?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/messaging/src/k-msg.ts:480](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L480)
+Defined in: [packages/messaging/src/k-msg.ts:494](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L494)
 
 Sends a single message and returns a Result.
 
@@ -169,6 +169,15 @@ message text are interpolated if `variables` are provided.
 The message to send. Can be a single `SendInput` or an array.
   When `type` is omitted, the message is treated as SMS and may be upgraded
   to LMS based on content length and `defaults.sms.autoLmsBytes`.
+
+###### request?
+
+[`ProviderRequestContext`](/en/api/core/src/interfaces/providerrequestcontext/)
+
+Transport options forwarded to the provider for this
+  call: a `signal` to cancel it and a `fetch` to make the request with.
+  A batch shares them. Providers that do not support one ignore it; see
+  `provider.transportCapabilities`.
 
 ##### Returns
 
@@ -209,11 +218,19 @@ const batchResult = await kmsg.send([
 console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}`);
 ```
 
+Give up on the provider after five seconds:
+```ts
+const result = await kmsg.send(
+  { to: '01012345678', text: 'Hello!' },
+  { signal: AbortSignal.timeout(5000) },
+);
+```
+
 #### Call Signature
 
-> **send**(`input`): `Promise`\<[`BatchSendResult`](/en/api/messaging/src/interfaces/batchsendresult/)\>
+> **send**(`input`, `request?`): `Promise`\<[`BatchSendResult`](/en/api/messaging/src/interfaces/batchsendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:481](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L481)
+Defined in: [packages/messaging/src/k-msg.ts:498](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L498)
 
 Sends a single message and returns a Result.
 
@@ -230,6 +247,15 @@ message text are interpolated if `variables` are provided.
 The message to send. Can be a single `SendInput` or an array.
   When `type` is omitted, the message is treated as SMS and may be upgraded
   to LMS based on content length and `defaults.sms.autoLmsBytes`.
+
+###### request?
+
+[`ProviderRequestContext`](/en/api/core/src/interfaces/providerrequestcontext/)
+
+Transport options forwarded to the provider for this
+  call: a `signal` to cancel it and a `fetch` to make the request with.
+  A batch shares them. Providers that do not support one ignore it; see
+  `provider.transportCapabilities`.
 
 ##### Returns
 
@@ -270,13 +296,21 @@ const batchResult = await kmsg.send([
 console.log(`Total: ${batchResult.total}, Results: ${batchResult.results.length}`);
 ```
 
+Give up on the provider after five seconds:
+```ts
+const result = await kmsg.send(
+  { to: '01012345678', text: 'Hello!' },
+  { signal: AbortSignal.timeout(5000) },
+);
+```
+
 ***
 
 ### sendOrThrow()
 
-> **sendOrThrow**(`input`): `Promise`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
+> **sendOrThrow**(`input`, `request?`): `Promise`\<[`SendResult`](/en/api/core/src/interfaces/sendresult/)\>
 
-Defined in: [packages/messaging/src/k-msg.ts:517](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L517)
+Defined in: [packages/messaging/src/k-msg.ts:539](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L539)
 
 Sends a single message and throws on failure.
 
@@ -292,6 +326,12 @@ checking `result.isSuccess`.
 [`SendInput`](/en/api/core/src/type-aliases/sendinput/)
 
 The message to send (single message only, not an array)
+
+##### request?
+
+[`ProviderRequestContext`](/en/api/core/src/interfaces/providerrequestcontext/)
+
+Transport options forwarded to the provider, as for `send`
 
 #### Returns
 
@@ -323,7 +363,7 @@ try {
 
 > `static` **builder**(): [`KMsgBuilder`](/en/api/messaging/src/classes/kmsgbuilder/)
 
-Defined in: [packages/messaging/src/k-msg.ts:376](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L376)
+Defined in: [packages/messaging/src/k-msg.ts:377](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L377)
 
 Creates a new fluent builder for constructing KMsg instances.
 
@@ -352,7 +392,7 @@ const kmsg = KMsg.builder()
 
 > `static` **create**(`config`): `KMsg`
 
-Defined in: [packages/messaging/src/k-msg.ts:355](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L355)
+Defined in: [packages/messaging/src/k-msg.ts:356](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/k-msg.ts#L356)
 
 Creates a KMsg instance with the specified configuration.
 
