@@ -128,11 +128,21 @@ function failNthQuery(
   const query = async (sql: string, params: readonly unknown[] = []) => {
     if (matches(sql, params)) {
       seen += 1;
-      if (seen === failAt) throw new Error("connection reset");
+      if (seen === failAt || failAt === Number.POSITIVE_INFINITY) {
+        throw new Error("connection reset");
+      }
     }
     return client.query(sql, params);
   };
   return { ...client, query: query as CloudflareSqlClient["query"] };
+}
+
+// Fails every matching query, as an unreachable database would.
+function failEveryQuery(
+  client: CloudflareSqlClient,
+  matches: (sql: string, params: readonly unknown[]) => boolean,
+): CloudflareSqlClient {
+  return failNthQuery(client, matches, Number.POSITIVE_INFINITY);
 }
 
 describe("applyFieldCryptoMigration", () => {
@@ -373,6 +383,36 @@ describe("applyFieldCryptoMigration", () => {
     expect(await applyFieldCryptoMigration(client, input)).toMatchObject({
       status: "completed",
       processedRows: 0,
+    });
+    expect(await countUnencrypted(client)).toBe(0);
+  });
+  test("returns a failed result when the failure cannot be recorded", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+    const input = {
+      planId: plan.planId,
+      trackingTableName: TABLE,
+      fieldCrypto,
+    };
+
+    const unreachable = failEveryQuery(
+      client,
+      (sql, params) =>
+        sql.includes("kmsg_crypto_migration_runs") &&
+        (params.includes("completed") || params.includes("failed")),
+    );
+    expect(await applyFieldCryptoMigration(unreachable, input)).toMatchObject({
+      status: "failed",
+      processedRows: 1,
+    });
+
+    expect(await applyFieldCryptoMigration(client, input)).toMatchObject({
+      status: "completed",
     });
     expect(await countUnencrypted(client)).toBe(0);
   });

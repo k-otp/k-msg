@@ -285,6 +285,9 @@ export async function applyFieldCryptoMigration(
   const failRun = async (
     error: unknown,
   ): Promise<FieldCryptoMigrationApplyResult> => {
+    // Best effort: when the database is what failed, recording the failure
+    // may fail too, and the caller must still get the failed result. Encrypted
+    // rows are skipped when `apply` re-reads them.
     await upsertFieldCryptoMigrationRun(
       client,
       {
@@ -299,7 +302,7 @@ export async function applyFieldCryptoMigration(
         lastError: toErrorMessage(error),
       },
       options,
-    );
+    ).catch(() => undefined);
 
     return {
       planId: run.planId,
