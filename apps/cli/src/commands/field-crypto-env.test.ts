@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   ACTIVE_KID_ENV,
+  FIELD_CRYPTO_AAD_FIELDS_ENV,
   FIELD_CRYPTO_FIELDS_ENV,
   FIELD_CRYPTO_HASH_KEYS_ENV,
   FIELD_CRYPTO_KEYS_ENV,
@@ -101,6 +102,30 @@ describe("resolveMigrationFieldCrypto", () => {
         [FIELD_CRYPTO_FIELDS_ENV]: JSON.stringify({ to: "encrypted" }),
       }),
     ).rejects.toThrow(`${FIELD_CRYPTO_FIELDS_ENV}.to`);
+  });
+
+  test("mirrors the store's AAD fields", async () => {
+    const options = await resolveMigrationFieldCrypto({
+      [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ k1: KEY }),
+      [ACTIVE_KID_ENV]: "k1",
+      [FIELD_CRYPTO_AAD_FIELDS_ENV]: "messageId, tableName,fieldPath",
+    });
+
+    expect(options.config.aadFields).toEqual([
+      "messageId",
+      "tableName",
+      "fieldPath",
+    ]);
+  });
+
+  test("rejects an AAD field list with an empty entry", async () => {
+    await expect(
+      resolveMigrationFieldCrypto({
+        [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ k1: KEY }),
+        [ACTIVE_KID_ENV]: "k1",
+        [FIELD_CRYPTO_AAD_FIELDS_ENV]: "messageId,,fieldPath",
+      }),
+    ).rejects.toThrow(FIELD_CRYPTO_AAD_FIELDS_ENV);
   });
 
   test("builds AES-GCM options from the environment", async () => {

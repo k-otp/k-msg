@@ -20,7 +20,7 @@ k-msg db tracking migrate status --sqlite-file ./local.db
 k-msg db tracking migrate retry --sqlite-file ./local.db
 ```
 
-`apply`와 `retry`는 tracking store와 같은 키로 암호화합니다. `KMSG_FIELD_CRYPTO_KEYS`(kid별 base64url AES-256 키 JSON)와 `KMSG_ACTIVE_KID`를 설정하고, store가 사용한다면 `KMSG_FIELD_CRYPTO_HASH_KEYS`, `KMSG_FIELD_CRYPTO_FIELDS`, `KMSG_FIELD_CRYPTO_TENANT_ID`도 설정합니다. 자세한 내용은 아래 런북을 참고하세요.
+`apply`와 `retry`는 tracking store와 같은 키로 암호화합니다. `KMSG_FIELD_CRYPTO_KEYS`(kid별 base64url AES-256 키 JSON)와 `KMSG_ACTIVE_KID`를 설정하고, store가 사용한다면 `KMSG_FIELD_CRYPTO_HASH_KEYS`, `KMSG_FIELD_CRYPTO_FIELDS`, `KMSG_FIELD_CRYPTO_TENANT_ID`, `KMSG_FIELD_CRYPTO_AAD_FIELDS`도 설정합니다. 자세한 내용은 아래 런북을 참고하세요.
 
 ## 운영 체크포인트
 
