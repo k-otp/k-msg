@@ -2,7 +2,6 @@ import { logger } from "@k-msg/core";
 import {
   migrateWebhookFieldCryptoToTenant,
   validateWebhookFieldCryptoOptions,
-  type WebhookTenantMigrationResult,
   wrapWebhookDeliveryStoreWithFieldCrypto,
   wrapWebhookEndpointStoreWithFieldCrypto,
 } from "../crypto/field-crypto";
@@ -33,6 +32,7 @@ import type {
   WebhookRuntimeConfig,
   WebhookRuntimeSecurityOptions,
   WebhookRuntimeTestPayload,
+  WebhookTenantMigrationResult,
 } from "./types";
 
 function toStatusFromActive(active: boolean): WebhookEndpoint["status"] {

@@ -12,6 +12,7 @@ export interface WebhookDeliveryListOptions {
   endpointId?: string;
   eventType?: WebhookEvent["type"];
   status?: WebhookDelivery["status"];
+  /** Caps the deliveries returned; the built-in stores return 100 when unset. */
   limit?: number;
 }
 
@@ -24,6 +25,7 @@ export interface WebhookEndpointStore {
 }
 
 export interface WebhookDeliveryStore {
+  /** Stores a delivery, replacing any stored delivery with the same id. */
   add(delivery: WebhookDelivery): Promise<void>;
   list(options?: WebhookDeliveryListOptions): Promise<WebhookDelivery[]>;
 }
@@ -51,6 +53,13 @@ export interface WebhookRuntimeFieldCryptoOptions {
    * value copied from another tenant's row with the same id would decrypt.
    */
   acceptLegacyAad?: boolean;
+}
+
+export interface WebhookTenantMigrationResult {
+  /** Endpoints whose secret was re-encrypted with the tenant. */
+  endpoints: number;
+  /** Deliveries whose payload was re-encrypted with the tenant. */
+  deliveries: number;
 }
 
 export type WebhookEndpointInput = Omit<
@@ -98,5 +107,11 @@ export interface WebhookRuntime {
   listDeliveries(
     options?: WebhookDeliveryListOptions,
   ): Promise<WebhookDelivery[]>;
+  /**
+   * Re-encrypts stored endpoint secrets and delivery payloads written before
+   * ciphertext was bound to `fieldCrypto.tenantId`; see
+   * `migrateWebhookFieldCryptoToTenant`.
+   */
+  migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult>;
   shutdown(): Promise<void>;
 }

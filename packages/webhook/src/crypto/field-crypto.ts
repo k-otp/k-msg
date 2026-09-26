@@ -14,6 +14,7 @@ import type {
   WebhookEndpointStore,
   WebhookPersistence,
   WebhookRuntimeFieldCryptoOptions,
+  WebhookTenantMigrationResult,
 } from "../runtime/types";
 import type { WebhookDelivery, WebhookEndpoint } from "../types/webhook.types";
 
@@ -406,12 +407,8 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
   };
 }
 
-export interface WebhookTenantMigrationResult {
-  /** Endpoints whose secret was re-encrypted with the tenant. */
-  endpoints: number;
-  /** Deliveries whose payload was re-encrypted with the tenant. */
-  deliveries: number;
-}
+// Lists every delivery: the built-in stores return 100 when no limit is set.
+const ALL_DELIVERIES = Number.MAX_SAFE_INTEGER;
 
 function failClosed(
   config: FieldCryptoConfig | undefined,
@@ -440,7 +437,8 @@ async function isTenantBound(
 }
 
 // Reads a value the tenant AAD could not, naming the record if the legacy AAD
-// cannot either.
+// cannot either. The cause may also be an outage, so the message does not
+// claim the value is corrupt.
 async function revealLegacy<T>(
   reveal: () => Promise<T>,
   kind: "endpoint" | "delivery",
@@ -452,7 +450,7 @@ async function revealLegacy<T>(
   } catch (error) {
     throw new FieldCryptoError(
       "decrypt",
-      `Cannot migrate webhook ${kind} ${id}: its ${path} decrypts with neither the tenant-bound nor the legacy AAD`,
+      `Cannot migrate webhook ${kind} ${id}: its ${path} could not be read with the tenant-bound or the legacy AAD (see causeChain)`,
       { recordId: id },
       { fieldPath: path, failMode: "closed", causeChain: [error] },
     );
@@ -465,10 +463,12 @@ async function revealLegacy<T>(
  * `acceptLegacyAad`. Pass the stores the runtime persists to, not wrapped
  * ones. Values already bound to the tenant are left as they are. The
  * migration runs fail-closed whatever `failMode` says, so a value that
- * decrypts with neither AAD stops it rather than being replaced by a
- * fallback. Deliveries are listed without a limit and written back with
- * `add`, which must replace a delivery with the same id, as the built-in
- * stores do.
+ * cannot be read with either AAD stops it rather than being replaced by a
+ * fallback. Each endpoint is read again just before it is rewritten, but
+ * pause endpoint updates while it runs: one landing in between would be
+ * overwritten. Deliveries, which the runtime never rewrites, are listed
+ * without a limit and written back with `add`, which replaces a delivery
+ * with the same id.
  */
 export async function migrateWebhookFieldCryptoToTenant(
   persistence: Pick<WebhookPersistence, "endpointStore" | "deliveryStore">,
@@ -495,7 +495,11 @@ export async function migrateWebhookFieldCryptoToTenant(
 
   const endpointConfig = bound.endpoint;
   if (endpointConfig && endpointConfig.enabled !== false) {
-    for (const endpoint of await persistence.endpointStore.list()) {
+    for (const { id } of await persistence.endpointStore.list()) {
+      // Read it again, so an update made since the list is kept and an
+      // endpoint removed since is skipped.
+      const endpoint = await persistence.endpointStore.get(id);
+      if (!endpoint) continue;
       const input = {
         value: endpoint.secret,
         path: "secret",
@@ -520,7 +524,7 @@ export async function migrateWebhookFieldCryptoToTenant(
   const deliveryConfig = bound.delivery;
   if (deliveryConfig && deliveryConfig.enabled !== false) {
     const deliveries = await persistence.deliveryStore.list({
-      limit: Number.MAX_SAFE_INTEGER,
+      limit: ALL_DELIVERIES,
     });
     for (const delivery of deliveries) {
       const input = {

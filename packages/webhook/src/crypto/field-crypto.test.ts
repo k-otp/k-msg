@@ -259,6 +259,46 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     );
   });
 
+  test("keeps an endpoint update made after the list and skips a removed endpoint", async () => {
+    const persistence = await seedLegacyRecords();
+    const listed = await persistence.endpointStore.get("ep-1");
+    if (!listed) throw new Error("seeded endpoint missing");
+    await persistence.endpointStore.add({ ...listed, id: "ep-2" });
+    const { endpointStore } = persistence;
+    // Between the migration's list and its writes, ep-1 is updated and ep-2
+    // is removed.
+    const racing = {
+      ...persistence,
+      endpointStore: {
+        ...endpointStore,
+        get: endpointStore.get.bind(endpointStore),
+        update: endpointStore.update.bind(endpointStore),
+        list: async () => {
+          const endpoints = await endpointStore.list();
+          await endpointStore.update("ep-1", {
+            ...listed,
+            url: "https://example.com/moved",
+          });
+          await endpointStore.remove("ep-2");
+          return endpoints;
+        },
+      },
+    };
+
+    expect(
+      await migrateWebhookFieldCryptoToTenant(racing, tenantOptions),
+    ).toEqual({ endpoints: 1, deliveries: 1 });
+    const endpoints = wrapWebhookEndpointStoreWithFieldCrypto(
+      endpointStore,
+      tenantOptions,
+    );
+    expect(await endpoints.get("ep-1")).toMatchObject({
+      url: "https://example.com/moved",
+      secret: "my-secret",
+    });
+    expect(await endpointStore.get("ep-2")).toBeNull();
+  });
+
   test("requires the tenant to bind to", async () => {
     await expect(
       migrateWebhookFieldCryptoToTenant(createInMemoryWebhookPersistence(), {
