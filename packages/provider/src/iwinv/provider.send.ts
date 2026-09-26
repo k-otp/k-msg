@@ -26,6 +26,7 @@ import {
   mapIwinvCodeToKMsgErrorCode,
   requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
+import { resolveIwinvMessageTypes } from "./iwinv.capabilities";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
 import {
   getAlimTalkDeliveryStatus,
@@ -102,20 +103,14 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
     }
     this.config = normalizeIwinvConfig(config);
 
-    const canSendAlimTalk =
-      typeof config.apiKey === "string" && config.apiKey.length > 0;
-    const canSendSms = canSendSmsV2(this.config);
-    if (!canSendAlimTalk && !canSendSms) {
+    const types = resolveIwinvMessageTypes(config);
+    if (types.length === 0) {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
         "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
         { providerId: this.id },
       );
     }
-
-    const types: MessageType[] = [];
-    if (canSendAlimTalk) types.push("ALIMTALK");
-    if (canSendSms) types.push("SMS", "LMS", "MMS");
     this.supportedTypes = types;
   }
 

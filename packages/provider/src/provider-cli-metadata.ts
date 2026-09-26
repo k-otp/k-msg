@@ -1,9 +1,17 @@
 import type { MessageType } from "@k-msg/core";
 import type { ProviderTypeWithConfig } from "./config-fields";
+import { resolveIwinvMessageTypes } from "./iwinv/iwinv.capabilities";
 
 export interface ProviderCliMetadata {
   label: string;
   routingSeedTypes: readonly MessageType[];
+  /**
+   * The routing seed types for one configured entry, when they depend on its
+   * credentials; `routingSeedTypes` otherwise.
+   */
+  routingSeedTypesForConfig?: (
+    config: Readonly<Record<string, unknown>>,
+  ) => readonly MessageType[];
   defaultKakaoSenderKey?: string;
 }
 
@@ -39,6 +47,9 @@ export const providerCliMetadata: Record<
   iwinv: {
     label: "IWINV",
     routingSeedTypes: ["ALIMTALK", "SMS", "LMS", "MMS"],
+    // AlimTalk needs apiKey and SMS needs the SMS keys, so an entry routes
+    // only the types its credentials can send.
+    routingSeedTypesForConfig: resolveIwinvMessageTypes,
   },
   solapi: {
     label: "SOLAPI",
