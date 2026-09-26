@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
-import { WebhookEventType } from "../types/webhook.types";
+import { type WebhookEndpoint, WebhookEventType } from "../types/webhook.types";
 import { WebhookRegistry } from "./webhook.registry";
 
 function createConfig(
@@ -311,5 +311,139 @@ describe("WebhookRegistry field crypto", () => {
     const endpoint = await registry.getEndpoint("ep-1");
     expect(endpoint?.url).toBe("https://example.com/hook");
     expect(endpoint).not.toHaveProperty("secret");
+  });
+
+  test("stores and returns a secret exactly as given", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: { endpoint: createConfig() },
+    });
+
+    await registry.addEndpoint(createEndpoint(" my-secret "));
+
+    expect((await registry.getEndpoint("ep-1"))?.secret).toBe(" my-secret ");
+  });
+});
+
+// Fails encrypt or decrypt while the matching switch is on, as during a key
+// service outage.
+function createSwitchableConfig(patch: Partial<FieldCryptoConfig> = {}) {
+  const outage = { encrypt: false, decrypt: false };
+  const config = createConfig({
+    failMode: "open",
+    openFallback: "masked",
+    provider: {
+      encrypt: async ({ value }) => {
+        if (outage.encrypt) throw new Error("key service unavailable");
+        return { ciphertext: `enc:${value}` };
+      },
+      decrypt: async ({ ciphertext }) => {
+        if (outage.decrypt) throw new Error("key service unavailable");
+        return ciphertext.replace(/^enc:/, "");
+      },
+      hash: async ({ value }) => `h:${value}`,
+    },
+    ...patch,
+  });
+  return { config, outage };
+}
+
+function createEndpoint(secret: string): WebhookEndpoint {
+  return {
+    id: "ep-1",
+    url: "https://example.com/hook",
+    active: true,
+    events: [WebhookEventType.MESSAGE_SENT],
+    secret,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: "active",
+  };
+}
+
+describe("WebhookRegistry with a secret it cannot decrypt", () => {
+  test.each(["masked", "null"] as const)(
+    "returns the endpoint without it, not its %s fallback",
+    async (openFallback) => {
+      const { config, outage } = createSwitchableConfig({ openFallback });
+      const registry = new WebhookRegistry({
+        fieldCrypto: { endpoint: config },
+      });
+      await registry.addEndpoint(createEndpoint("my-secret"));
+      outage.decrypt = true;
+
+      const endpoint = await registry.getEndpoint("ep-1");
+      const [listed] = await registry.listEndpoints();
+
+      expect(endpoint?.url).toBe("https://example.com/hook");
+      expect(endpoint).not.toHaveProperty("secret");
+      expect(listed).not.toHaveProperty("secret");
+    },
+  );
+
+  test("keeps the stored secret when the endpoint read without it is updated", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    outage.decrypt = true;
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+
+    await registry.updateEndpoint("ep-1", { ...read, name: "renamed" });
+
+    outage.decrypt = false;
+    expect(await registry.getEndpoint("ep-1")).toMatchObject({
+      name: "renamed",
+      secret: "my-secret",
+    });
+  });
+
+  test("keeps the stored secret when an endpoint read before the outage is updated", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+    outage.encrypt = true;
+    outage.decrypt = true;
+
+    await registry.updateEndpoint("ep-1", { ...read, name: "renamed" });
+
+    outage.encrypt = false;
+    outage.decrypt = false;
+    expect(await registry.getEndpoint("ep-1")).toMatchObject({
+      name: "renamed",
+      secret: "my-secret",
+    });
+  });
+
+  test("removes the secret when an update sets it to undefined", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    outage.decrypt = true;
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+
+    await registry.updateEndpoint("ep-1", { ...read, secret: undefined });
+
+    outage.decrypt = false;
+    expect((await registry.getEndpoint("ep-1"))?.secret).toBeUndefined();
+  });
+
+  test("keeps the stored secret when an update cannot encrypt it again", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+    outage.encrypt = true;
+
+    await registry.updateEndpoint("ep-1", { ...read, name: "renamed" });
+
+    outage.encrypt = false;
+    expect(await registry.getEndpoint("ep-1")).toMatchObject({
+      name: "renamed",
+      secret: "my-secret",
+    });
   });
 });

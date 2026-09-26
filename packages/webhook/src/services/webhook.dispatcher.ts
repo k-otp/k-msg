@@ -1,3 +1,4 @@
+import { hasUndecryptableSecret } from "../crypto/undecryptable-secret";
 import { RetryManager } from "../retry/retry.manager";
 import {
   SecurityManager,
@@ -103,25 +104,41 @@ export class WebhookDispatcher {
       createdAt: new Date(),
     };
 
+    // The endpoint's receiver checks its own secret, so a secret field crypto
+    // could not decrypt is not replaced with secretKey either.
+    if (this.config.enableSecurity && hasUndecryptableSecret(endpoint)) {
+      return this.notSent(
+        delivery,
+        `Not sent: enableSecurity is on, but the secret of endpoint ${endpoint.id} could not be decrypted`,
+      );
+    }
     const secret = this.config.enableSecurity
       ? resolveSigningSecret(endpoint, this.config)
       : undefined;
     if (this.config.enableSecurity && secret === undefined) {
       // Receivers expect a signature when security is on, so never send
       // without one.
-      const now = new Date();
-      delivery.attempts.push({
-        attemptNumber: 1,
-        timestamp: now,
-        latencyMs: 0,
-        error: `Not sent: enableSecurity is on, but endpoint ${endpoint.id} has no signing secret and delivery.secretKey is not set`,
-      });
-      delivery.status = "failed";
-      delivery.completedAt = now;
-      return delivery;
+      return this.notSent(
+        delivery,
+        `Not sent: enableSecurity is on, but endpoint ${endpoint.id} has no signing secret and delivery.secretKey is not set`,
+      );
     }
 
     await this.executeDelivery(delivery, endpoint, event, secret);
+    return delivery;
+  }
+
+  // Fails the delivery without a request; its only attempt says why.
+  private notSent(delivery: WebhookDelivery, error: string): WebhookDelivery {
+    const now = new Date();
+    delivery.attempts.push({
+      attemptNumber: 1,
+      timestamp: now,
+      latencyMs: 0,
+      error,
+    });
+    delivery.status = "failed";
+    delivery.completedAt = now;
     return delivery;
   }
 
