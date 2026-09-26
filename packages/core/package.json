@@ -4,7 +4,7 @@
   "packageManager": "bun@1.4.2",
   "description": "Core types and interfaces for K-Message platform",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
@@ -12,7 +12,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     }
   },
   "publishConfig": {
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[name].mjs' --external 'bun:test' --external 'zod'",
-    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].js' --external 'bun:test' --external 'zod'",
+    "build:cjs": "bun build ./src/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[name].cjs' --external 'bun:test' --external 'zod'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun run test:unit",
@@ -43,7 +43,7 @@
   },
   "peerDependencies": {},
   "files": [
-    "dist/**/*.js",
+    "dist/**/*.cjs",
     "dist/**/*.mjs",
     "dist/**/*.d.ts",
     "README.md"
