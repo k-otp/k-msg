@@ -28,6 +28,45 @@ describe("resolveMigrationFieldCrypto", () => {
     ).rejects.toThrow(message);
   });
 
+  test("requires an explicit active kid", async () => {
+    await expect(
+      resolveMigrationFieldCrypto({
+        [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ default: KEY }),
+      }),
+    ).rejects.toThrow("Set KMSG_ACTIVE_KID");
+  });
+
+  test.each([
+    ["not base64url!", "must be a base64url key of 32 bytes"],
+    [Buffer.alloc(16, 1).toString("base64url"), "of 32 bytes"],
+  ])("rejects malformed key material %p", async (key, message) => {
+    await expect(
+      resolveMigrationFieldCrypto({
+        [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ k1: key }),
+        KMSG_ACTIVE_KID: "k1",
+      }),
+    ).rejects.toThrow(message);
+  });
+
+  test("does not treat inherited properties as keys", async () => {
+    await expect(
+      resolveMigrationFieldCrypto({
+        [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ k1: KEY }),
+        KMSG_ACTIVE_KID: "constructor",
+      }),
+    ).rejects.toThrow('no key for the active kid "constructor"');
+  });
+
+  test("rejects an empty field map", async () => {
+    await expect(
+      resolveMigrationFieldCrypto({
+        [FIELD_CRYPTO_KEYS_ENV]: JSON.stringify({ k1: KEY }),
+        KMSG_ACTIVE_KID: "k1",
+        [FIELD_CRYPTO_FIELDS_ENV]: "{}",
+      }),
+    ).rejects.toThrow("at least one field path");
+  });
+
   test("requires a key for the active kid", async () => {
     await expect(
       resolveMigrationFieldCrypto({
