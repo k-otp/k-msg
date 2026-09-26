@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, spyOn, test } from "bun:test";
+import { createHmac } from "node:crypto";
 import { logger } from "@k-msg/core";
 import {
   type AggregatedMetric,
@@ -28,6 +29,7 @@ import {
   // Aggregators
   TimeSeriesAggregator,
   WebhookCollector,
+  type WebhookCollectorConfig,
   type WebhookData,
 } from "./index";
 
@@ -480,6 +482,7 @@ describe("WebhookCollector", () => {
       timestamp: new Date(),
       headers: { "x-signature": "invalid-signature" },
       body: { test: "data" },
+      rawBody: '{"test":"data"}',
     };
 
     // 잘못된 서명으로 인한 실패 예상
@@ -515,6 +518,138 @@ describe("WebhookCollector", () => {
     await expect(collector.receiveWebhook(webhook2)).rejects.toThrow(
       "Rate limit exceeded",
     );
+  });
+
+  describe("signature validation", () => {
+    const secretKey = "test-secret";
+    // Spaced like Python's json.dumps, so it differs from JSON.stringify(body):
+    // only the bytes as received can verify.
+    const rawBody = '{"messageId": "msg-123", "status": "delivered"}';
+    const sign = (payload: string, secret = secretKey) =>
+      createHmac("sha256", secret).update(payload).digest("hex");
+
+    const createCollector = (config: Partial<WebhookCollectorConfig> = {}) =>
+      new WebhookCollector({
+        secretKey,
+        allowedSources: ["test-source"],
+        ...config,
+      });
+
+    const signedWebhook = (
+      overrides: Partial<WebhookData> = {},
+    ): WebhookData => ({
+      id: "webhook-123",
+      source: "test-source",
+      timestamp: new Date(),
+      headers: { "x-signature": `sha256=${sign(rawBody)}` },
+      body: JSON.parse(rawBody),
+      rawBody,
+      ...overrides,
+    });
+
+    test("accepts an HMAC-SHA256 of the raw body", async () => {
+      const events = await createCollector().receiveWebhook(signedWebhook());
+
+      expect(events[0]?.type).toBe("message.delivered");
+    });
+
+    test("accepts the hex digest without the prefix and in upper case", async () => {
+      const collector = createCollector();
+
+      for (const signature of [
+        sign(rawBody),
+        `sha256=${sign(rawBody).toUpperCase()}`,
+      ]) {
+        const webhook = signedWebhook({
+          headers: { "x-signature": signature },
+        });
+        await expect(collector.receiveWebhook(webhook)).resolves.toHaveLength(
+          1,
+        );
+      }
+    });
+
+    test("verifies byte bodies", async () => {
+      const collector = createCollector();
+      const encoded = new TextEncoder().encode(rawBody);
+      // A view into a larger buffer, like Node's pooled Buffers.
+      const padded = new Uint8Array(encoded.length + 8);
+      padded.set(encoded, 4);
+
+      for (const bytes of [
+        Buffer.from(rawBody),
+        padded.subarray(4, 4 + encoded.length),
+        encoded.slice().buffer,
+      ]) {
+        await expect(
+          collector.receiveWebhook(signedWebhook({ rawBody: bytes })),
+        ).resolves.toHaveLength(1);
+      }
+    });
+
+    test("reads the signature header in any case", async () => {
+      const collector = createCollector({
+        signatureHeader: "X-Hub-Signature-256",
+      });
+      const webhook = signedWebhook({
+        headers: { "x-hub-signature-256": `sha256=${sign(rawBody)}` },
+      });
+
+      await expect(collector.receiveWebhook(webhook)).resolves.toHaveLength(1);
+    });
+
+    test("rejects the length-only signature of the old placeholder", async () => {
+      const forged = `sha256=${JSON.stringify(JSON.parse(rawBody)).length}_${secretKey.length}`;
+      const webhook = signedWebhook({ headers: { "x-signature": forged } });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("rejects a tampered body", async () => {
+      const tampered = rawBody.replace("delivered", "failed");
+      const webhook = signedWebhook({
+        body: JSON.parse(tampered),
+        rawBody: tampered,
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("rejects a signature made with another secret", async () => {
+      const webhook = signedWebhook({
+        headers: { "x-signature": `sha256=${sign(rawBody, "other-secret")}` },
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("needs the raw body to verify", async () => {
+      const webhook = signedWebhook({ rawBody: undefined });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "rawBody",
+      );
+    });
+
+    test("refuses to start without a secret while validation is on", () => {
+      expect(() => new WebhookCollector()).toThrow("secretKey");
+      expect(() => new WebhookCollector({ secretKey: "" })).toThrow(
+        "secretKey",
+      );
+      // An undefined option keeps its default rather than turning the check off.
+      expect(
+        () => new WebhookCollector({ enableSignatureValidation: undefined }),
+      ).toThrow("secretKey");
+      expect(
+        () => new WebhookCollector({ enableSignatureValidation: false }),
+      ).not.toThrow();
+    });
   });
 });
 
