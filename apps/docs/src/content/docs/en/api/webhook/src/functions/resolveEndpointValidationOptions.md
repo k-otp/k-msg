@@ -7,7 +7,7 @@ title: "resolveEndpointValidationOptions"
 
 > **resolveEndpointValidationOptions**(`security`): [`EndpointValidationOptions`](/en/api/webhook/src/interfaces/endpointvalidationoptions/)
 
-Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L60)
+Defined in: [packages/webhook/src/runtime/endpoint-validation.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/endpoint-validation.ts#L152)
 
 ## Parameters
 
