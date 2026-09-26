@@ -30,6 +30,9 @@ describe("Provider onboarding specs", () => {
     if (configCheck?.kind === "config") {
       expect(configCheck.configKeys).toEqual(["apiKey"]);
     }
+    // SMS-only configs have no AlimTalk apiKey, so only the AlimTalk
+    // preflight requires it.
+    expect(configCheck?.scopes).toEqual(["preflight"]);
     expect(
       spec?.checks.some(
         (check) => check.id === "channel_registered_in_console",

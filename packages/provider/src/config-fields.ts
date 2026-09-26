@@ -62,8 +62,8 @@ export const providerConfigFieldSpecs = {
   iwinv: {
     apiKey: {
       type: "string",
-      required: true,
-      description: "IWINV AlimTalk API key (AUTH header)",
+      description:
+        "IWINV AlimTalk API key (AUTH header); omit for SMS/LMS/MMS-only use with smsApiKey and smsAuthKey",
       defaultValue: "env:IWINV_API_KEY",
     },
     smsApiKey: {

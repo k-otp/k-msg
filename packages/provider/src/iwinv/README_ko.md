@@ -4,6 +4,9 @@ K-Message IWINV 프로바이더는 하나의 `send` API로 아래 채널을 통�
 - 알림톡
 - SMS / LMS / MMS
 
+한 채널만 설정해도 됩니다. 알림톡은 `apiKey`, SMS / LMS / MMS는 `smsApiKey`와
+`smsAuthKey`가 필요합니다.
+
 영문 문서는 `README.md`를 참고하세요.
 
 ## 설치
@@ -100,19 +103,19 @@ CLI 기준:
 
 참고:
 - `IWINVProvider`는 `getBalance(query?)`를 지원합니다.
-  - 기본 채널: `ALIMTALK` (알림톡 charge API 사용)
+  - 기본 채널: `ALIMTALK` (알림톡 charge API 사용), `apiKey`가 없으면 `SMS`
   - `SMS/LMS/MMS`: SMS v2 charge API(`secret` 인증) 사용
 - 전송내역(history) 엔드포인트는 참고용 문서로 유지됩니다.
 
 ## 환경변수
 
-필수(알림톡):
+알림톡 사용 시 필수:
 
 ```bash
 IWINV_API_KEY=your_alimtalk_api_key
 ```
 
-SMS/LMS/MMS v2 사용 시에만 필수:
+SMS/LMS/MMS v2 사용 시 필수(SMS만 쓸 때는 이 두 값만 있으면 됩니다):
 
 ```bash
 IWINV_SMS_API_KEY=your_sms_api_key
@@ -179,6 +182,13 @@ const alimtalk = await provider.send({
   from: "01000000000",
 });
 if (alimtalk.isFailure) throw alimtalk.error;
+
+// SMS/LMS/MMS 전용: 알림톡 apiKey 없이 사용할 수 있습니다.
+const smsOnly = new IWINVProvider({
+  smsApiKey: process.env.IWINV_SMS_API_KEY!,
+  smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
+});
 ```
 
 ## CLI 사용 예시

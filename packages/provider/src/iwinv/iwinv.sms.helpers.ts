@@ -16,8 +16,9 @@ export function buildSmsSecretHeader(config: NormalizedIwinvConfig): string {
     return utf8ToBase64(`${config.smsApiKey}&${config.smsAuthKey}`);
   }
 
+  // A single legacy SMS key authenticates together with the AlimTalk apiKey.
   const legacyAuthKey = config.smsAuthKey || config.smsApiKey;
-  if (!legacyAuthKey) return "";
+  if (!legacyAuthKey || !config.apiKey) return "";
 
   return utf8ToBase64(`${config.apiKey}&${legacyAuthKey}`);
 }

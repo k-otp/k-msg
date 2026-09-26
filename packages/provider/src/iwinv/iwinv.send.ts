@@ -25,6 +25,7 @@ import {
   getSendEndpoint,
   mapIwinvCodeToKMsgErrorCode,
   normalizeIwinvCode,
+  requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
 import {
   resolveImageFilename,
@@ -118,6 +119,9 @@ export async function sendAlimTalk(params: {
   templateContents: TemplateContentCache;
 }): Promise<Result<SendResult, KMsgError>> {
   const { providerId, config, options, context, templateContents } = params;
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
+
   const templateId = options.templateId;
 
   if (!templateId || templateId.length === 0) {

@@ -23,7 +23,7 @@ bun add solapi
 ## Built-in Providers
 
 - `SolapiProvider` (SOLAPI)
-- `IWINVProvider` (IWINV AlimTalk + optional SMS v2)
+- `IWINVProvider` (IWINV AlimTalk and/or SMS v2; see `src/iwinv/README.md`)
 - `AligoProvider` (Aligo)
 - `MockProvider` (no vendor calls, for tests and local runs). Pass `{ id }` to give each instance its own provider id, for example to try `routing.byType` with two mocks; the id defaults to `"mock"`.
 
