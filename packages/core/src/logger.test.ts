@@ -55,6 +55,22 @@ describe("redactLogText", () => {
     ["x-api-key: abc", "x-api-key: [REDACTED]"],
     ["db_passphrase=abc", "db_passphrase=[REDACTED]"],
     ["credentials=abc", "credentials=[REDACTED]"],
+    [
+      String.raw`body={\"password\":\"SECRET_SUFFIX\"}`,
+      String.raw`body={\"password\":\"[REDACTED]\"}`,
+    ],
+    [
+      String.raw`{\"password\":\"a\\\"SECRET_SUFFIX\"}`,
+      String.raw`{\"password\":\"[REDACTED]\"}`,
+    ],
+    [
+      String.raw`error: {\"apiKey\":\"abc\",\"ok\":true}`,
+      String.raw`error: {\"apiKey\":\"[REDACTED]\",\"ok\":true}`,
+    ],
+    [
+      String.raw`{\'password\': \'abc\'}`,
+      String.raw`{\'password\': \'[REDACTED]\'}`,
+    ],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });

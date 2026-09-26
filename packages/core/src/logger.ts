@@ -89,11 +89,13 @@ function maskStringValue(value: string): string {
 // Korean phone numbers (domestic, VoIP, toll-free, representative, or +82),
 // credentials written as key/value pairs under a credential key
 // (`apiKey=...`, `AWS_SECRET_ACCESS_KEY=...`, `client_secret: ...`,
-// `"password":"..."`, `password='...'`, `Authorization: Bearer ...`), and passwords in URLs
-// (`postgres://user:...@host`). A quoted value is redacted to its closing
+// `"password":"..."`, `password='...'`, `Authorization: Bearer ...`, or JSON
+// escaped once inside a string, `{\"password\":\"...\"}`), and passwords in
+// URLs (`postgres://user:...@host`). A quoted value is redacted to its closing
 // quote, or to the end of the line if it has none; a bare value only up to
-// the first space. A URL password containing a raw "/", "?", or "#" is
-// indistinguishable from a path or query string and is not matched.
+// the first space. JSON escaped more than once is not matched, and a URL
+// password containing a raw "/", "?", or "#" is indistinguishable from a
+// path or query string and is not matched.
 const PHONE_NUMBER_PATTERN = new RegExp(
   [
     // Domestic or +82 mobile, Seoul, regional, VoIP, 050x, and 080 numbers.
@@ -108,8 +110,17 @@ const PHONE_NUMBER_PATTERN = new RegExp(
   "g",
 );
 const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
+// Quoted values, then values quoted with an escaped quote. Inside an escaped
+// value, an escaped backslash pair belongs to the value, so an embedded
+// `\\\"` does not end it.
+const QUOTED_VALUE_SOURCES = [
+  String.raw`"(?:\\.|[^"\\\n])*"?`,
+  String.raw`'(?:\\.|[^'\\\n])*'?`,
+  String.raw`\\"(?:\\\\(?:\\.|[^\\\n])|[^\\\n])*(?:\\")?`,
+  String.raw`\\'(?:\\\\(?:\\.|[^\\\n])|[^\\\n])*(?:\\')?`,
+];
 const CREDENTIAL_PATTERN = new RegExp(
-  String.raw`\b(${CREDENTIAL_KEY_SOURCE})(["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)`,
+  String.raw`\b(${CREDENTIAL_KEY_SOURCE})((?:\\?["'])?\s*[:=]\s*)(?:${QUOTED_VALUE_SOURCES.join("|")}|((?:Bearer|Basic)\s+)?[^\s"',;&]+)`,
   "gi",
 );
 
@@ -120,8 +131,11 @@ export function redactLogText(text: string): string {
     .replace(
       CREDENTIAL_PATTERN,
       (match, key: string, separator: string, scheme: string | undefined) => {
-        const quote = match[key.length + separator.length];
-        return quote === '"' || quote === "'"
+        // A quoted value keeps its opening quote, escaped or not, to close it.
+        const quote = /^\\?["']/.exec(
+          match.slice(key.length + separator.length),
+        )?.[0];
+        return quote
           ? `${key}${separator}${quote}${REDACTED_TOKEN}${quote}`
           : `${key}${separator}${scheme ?? ""}${REDACTED_TOKEN}`;
       },
@@ -173,9 +187,9 @@ function sanitizeLogContext(context: LogContext): LogContext {
  *   Read formatMessage, isSensitiveContextKey, sanitizeContextValue, and
  *   redactLogText, and ran logger.test.ts: phone numbers, key/value
  *   credentials under any key containing a credential word (compound,
- *   quoted, and AWS-style keys), URL passwords, and context values under
- *   snake or kebab case credential keys stay out of messages, errors, and
- *   context in JSON and text modes.
+ *   quoted, AWS-style, and in JSON escaped once), URL passwords, and
+ *   context values under snake or kebab case credential keys stay out of
+ *   messages, errors, and context in JSON and text modes.
  */
 export class Logger {
   private config: LoggerConfig;
