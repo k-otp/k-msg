@@ -7,7 +7,7 @@ title: "applyFieldCryptoMigration"
 
 > **applyFieldCryptoMigration**(`client`, `options`): `Promise`\<[`FieldCryptoMigrationApplyResult`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationapplyresult/)\>
 
-Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:260](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/executor.ts#L260)
+Defined in: [packages/messaging/src/migration/field-crypto/executor.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/executor.ts#L306)
 
 ## Parameters
 
