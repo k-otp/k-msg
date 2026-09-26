@@ -1,11 +1,26 @@
 import express, { type ErrorRequestHandler, type Response } from "express";
 import { ErrorUtils, type KMsgError, KMsgErrorCode } from "k-msg";
 import type { OtpService } from "./otp/service.ts";
+import type { SendLimit } from "./otp/store.ts";
 import { maskPhone, normalizeMobileNumber } from "./phone.ts";
 
-export function createApp(otp: OtpService): express.Express {
+export interface AppOptions {
+  /**
+   * Express's `trust proxy` setting. Behind a proxy, it makes `req.ip` the
+   * client's address instead of the proxy's.
+   */
+  trustProxy?: number | string;
+}
+
+export function createApp(
+  otp: OtpService,
+  options: AppOptions = {},
+): express.Express {
   const app = express();
   app.disable("x-powered-by");
+  if (options.trustProxy !== undefined) {
+    app.set("trust proxy", options.trustProxy);
+  }
   app.use(express.json({ limit: "1kb" }));
 
   app.post("/otp/request", async (req, res) => {
@@ -22,7 +37,7 @@ export function createApp(otp: OtpService): express.Express {
 
     // The answer never depends on whether the number has an account, so this
     // endpoint cannot be used to find out which numbers are registered.
-    const result = await otp.request(phone);
+    const result = await otp.request(phone, req.ip ?? "unknown");
     switch (result.status) {
       case "sent":
         console.info(`[otp] code sent to ${maskPhone(phone)}`);
@@ -33,12 +48,7 @@ export function createApp(otp: OtpService): express.Express {
         return;
       case "rate_limited":
         res.set("Retry-After", String(result.retryAfterSeconds));
-        sendError(
-          res,
-          429,
-          "RATE_LIMITED",
-          "Too many codes were requested for this number. Try again later.",
-        );
+        sendRateLimited(res, result.limit);
         return;
       case "send_failed":
         console.error(
@@ -93,10 +103,48 @@ export function createApp(otp: OtpService): express.Express {
   return app;
 }
 
+function sendRateLimited(res: Response, limit: SendLimit): void {
+  switch (limit) {
+    case "number":
+      sendError(
+        res,
+        429,
+        "RATE_LIMITED",
+        "Too many codes were requested for this number. Try again later.",
+      );
+      return;
+    case "client":
+      sendError(
+        res,
+        429,
+        "RATE_LIMITED",
+        "Too many codes were requested from this address. Try again later.",
+      );
+      return;
+    case "service":
+      // Every caller gets this until the hour's count drops, so alert on it:
+      // it means heavy traffic or someone spreading requests over addresses.
+      console.warn("[otp] the service-wide hourly send limit was reached");
+      sendError(
+        res,
+        503,
+        "SERVICE_BUSY",
+        "Codes cannot be sent right now. Try again later.",
+      );
+      return;
+  }
+}
+
 // The provider's own error text stays in the server log; the client only
 // learns whether retrying later can help.
 function sendProviderFailure(res: Response, error: KMsgError): void {
   if (error.code === KMsgErrorCode.RATE_LIMIT_EXCEEDED) {
+    if (error.retryAfterMs !== undefined) {
+      res.set(
+        "Retry-After",
+        String(Math.max(1, Math.ceil(error.retryAfterMs / 1000))),
+      );
+    }
     sendError(
       res,
       429,
@@ -115,8 +163,9 @@ function sendProviderFailure(res: Response, error: KMsgError): void {
   }
 }
 
-// express.json() reports unreadable bodies as 4xx errors; anything else here
-// is a bug.
+// express.json() reports unreadable bodies as 4xx errors: 413 for a body over
+// the limit, 415 for an unsupported charset or content encoding, and 400 for
+// malformed JSON. Anything else here is a bug.
 const handleError: ErrorRequestHandler = (error: unknown, _req, res, next) => {
   if (res.headersSent) {
     next(error);
@@ -125,8 +174,15 @@ const handleError: ErrorRequestHandler = (error: unknown, _req, res, next) => {
   const status = clientErrorStatus(error);
   if (status === 413) {
     sendError(res, 413, "PAYLOAD_TOO_LARGE", "The request body is too large.");
+  } else if (status === 415) {
+    sendError(
+      res,
+      415,
+      "UNSUPPORTED_MEDIA_TYPE",
+      "Send the request body as UTF-8 JSON without a content encoding.",
+    );
   } else if (status !== undefined) {
-    sendError(res, 400, "INVALID_JSON", "The request body must be JSON.");
+    sendError(res, 400, "INVALID_JSON", "The request body must be valid JSON.");
   } else {
     console.error("[http] unhandled error", error);
     sendError(res, 500, "INTERNAL_ERROR", "Internal server error.");
