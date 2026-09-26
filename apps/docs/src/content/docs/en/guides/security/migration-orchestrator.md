@@ -20,6 +20,8 @@ k-msg db tracking migrate status --sqlite-file ./local.db
 k-msg db tracking migrate retry --sqlite-file ./local.db
 ```
 
+`apply` and `retry` encrypt with the tracking store's keys. Set `KMSG_FIELD_CRYPTO_KEYS` (a JSON object of base64url AES-256 keys by kid) and `KMSG_ACTIVE_KID`, plus `KMSG_FIELD_CRYPTO_HASH_KEYS`, `KMSG_FIELD_CRYPTO_FIELDS`, and `KMSG_FIELD_CRYPTO_TENANT_ID` when the store uses them. See the runbook below.
+
 ## Operational checkpoints
 
 1. Keep the same `planId` for resumed execution.
