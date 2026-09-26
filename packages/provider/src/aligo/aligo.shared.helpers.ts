@@ -73,13 +73,12 @@ export function formatAligoDate(date: Date): { date: string; time: string } {
   };
 }
 
-export function normalizeAligoKakaoCode(value: unknown): number | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
+// Aligo result codes are decimal integers, sent as numbers or strings.
+export function normalizeAligoCode(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isInteger(value)) return value;
   if (typeof value === "string") {
     const trimmed = value.trim();
-    if (!trimmed) return undefined;
-    const num = Number(trimmed);
-    if (Number.isFinite(num)) return num;
+    if (/^-?\d+$/.test(trimmed)) return Number(trimmed);
   }
   return undefined;
 }

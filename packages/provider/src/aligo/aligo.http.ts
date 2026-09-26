@@ -10,7 +10,8 @@ import {
   fetchWithProviderContext,
   toProviderTransportError,
 } from "../shared/provider-transport";
-import { normalizeAligoKakaoCode } from "./aligo.shared.helpers";
+import { isObjectRecord } from "../shared/type-guards";
+import { normalizeAligoCode } from "./aligo.shared.helpers";
 
 export async function requestAligo(params: {
   host: string;
@@ -55,29 +56,60 @@ export async function requestAligo(params: {
   }
 }
 
+// -99 is Aligo's catch-all Kakao failure (authentication, missing
+// parameters, insufficient points); only its message says which one. The
+// documented credential messages are "등록되지 않은 인증키 입니다." and
+// "인증오류입니다.", so match those phrases rather than "인증" alone, which
+// also appears in verification-number (인증번호) errors. Points is checked
+// first, so a message naming both is treated as a balance failure.
+const INSUFFICIENT_POINTS_KEYWORD = "포인트";
+const AUTHENTICATION_KEYWORDS = ["인증키", "인증오류"];
+
+function mapAligoKakaoErrorCode(
+  code: number | undefined,
+  providerMessage: string | undefined,
+): KMsgErrorCode {
+  if (code === -99) {
+    if (providerMessage?.includes(INSUFFICIENT_POINTS_KEYWORD)) {
+      return KMsgErrorCode.INSUFFICIENT_BALANCE;
+    }
+    if (
+      AUTHENTICATION_KEYWORDS.some((keyword) =>
+        providerMessage?.includes(keyword),
+      )
+    ) {
+      return KMsgErrorCode.AUTHENTICATION_FAILED;
+    }
+    // Stay non-retryable when the cause is unknown, as before.
+    return KMsgErrorCode.INVALID_REQUEST;
+  }
+  if (code === -101) return KMsgErrorCode.AUTHENTICATION_FAILED;
+  if (code === 509) return KMsgErrorCode.INVALID_REQUEST;
+  return KMsgErrorCode.PROVIDER_ERROR;
+}
+
 export function ensureAligoKakaoOk(params: {
   providerId: string;
-  response: Record<string, unknown>;
+  response: unknown;
   fallbackMessage: string;
 }): Result<void, KMsgError> {
-  const { providerId, response, fallbackMessage } = params;
+  const { providerId, response: raw, fallbackMessage } = params;
+  const response = isObjectRecord(raw) ? raw : {};
   const rawCode = response.code;
-  const code = normalizeAligoKakaoCode(rawCode);
+  const code = normalizeAligoCode(rawCode);
   if (code === 0) return ok(undefined);
 
-  const message =
+  const providerMessage =
     typeof response.message === "string" && response.message.length > 0
       ? response.message
-      : fallbackMessage;
-  const mapped =
-    code === 509 || code === -99
-      ? KMsgErrorCode.INVALID_REQUEST
-      : KMsgErrorCode.PROVIDER_ERROR;
+      : undefined;
+  const message = providerMessage ?? fallbackMessage;
+  const mapped = mapAligoKakaoErrorCode(code, providerMessage);
   return fail(
     new KMsgError(mapped, message, {
       providerId,
       originalCode: rawCode,
-      raw: response,
+      raw,
     }),
   );
 }
