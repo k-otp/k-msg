@@ -5,7 +5,7 @@ prev: false
 title: "WebhookVerificationError"
 ---
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:59](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L59)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L60)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/webhook/src/security/verify-webhook-request.ts:59](https:/
 
 > **new WebhookVerificationError**(`code`, `message`): `WebhookVerificationError`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L62)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L63)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ The cause of the error.
 
 > `readonly` **code**: [`WebhookVerificationErrorCode`](/en/api/webhook/src/type-aliases/webhookverificationerrorcode/)
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L60)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L61)
 
 ***
 

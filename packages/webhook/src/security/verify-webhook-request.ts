@@ -32,7 +32,8 @@ export interface VerifyWebhookRequestOptions
   /**
    * How far the signed time may be from the receiver's clock, in either
    * direction, in milliseconds: a finite number of 0 or more. Defaults to
-   * 300000 (5 minutes).
+   * 300000 (5 minutes). Signed times have one-second resolution, so a
+   * request up to a second older than this can still pass.
    */
   toleranceMs?: number;
 }
@@ -194,7 +195,10 @@ export function verifyWebhookRequest(
       ),
     );
   }
-  if (!(Math.abs(Date.now() - signedAt.getTime()) <= toleranceMs)) {
+  // Signed times are whole seconds, so a request was sent up to a second
+  // after its signed time: allow that second on the old side.
+  const ageMs = Date.now() - signedAt.getTime();
+  if (ageMs >= toleranceMs + 1000 || -ageMs > toleranceMs) {
     return fail(
       new WebhookVerificationError(
         "STALE_TIMESTAMP",

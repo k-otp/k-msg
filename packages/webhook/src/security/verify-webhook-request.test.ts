@@ -184,6 +184,26 @@ describe("verifyWebhookRequest", () => {
     ).toBe("STALE_TIMESTAMP");
   });
 
+  test("allows for the one-second resolution of the signed time", () => {
+    const signedSecond = toSeconds(SIGNED_AT);
+    const headers = signedHeaders(signedSecond);
+
+    // Sent 900 ms into the signed second and received 132 ms later.
+    setSystemTime(new Date(SIGNED_AT.getTime() + 1_032));
+    expect(
+      verifyWebhookRequest(headers, BODY, SECRET, { toleranceMs: 100 })
+        .isSuccess,
+    ).toBe(true);
+
+    // Older than the tolerance however late in the second it was sent.
+    setSystemTime(new Date(SIGNED_AT.getTime() + 1_100));
+    expect(
+      failureCode(
+        verifyWebhookRequest(headers, BODY, SECRET, { toleranceMs: 100 }),
+      ),
+    ).toBe("STALE_TIMESTAMP");
+  });
+
   test("rejects a signed timestamp that is not whole seconds", () => {
     setSystemTime(SIGNED_AT);
     const timestamp = SIGNED_AT.toISOString();

@@ -43,6 +43,15 @@ function toStatusFromActive(active: boolean): WebhookEndpoint["status"] {
   return active ? "active" : "inactive";
 }
 
+// The active flag and status a new endpoint is stored with.
+function resolveActivity(
+  input: Pick<WebhookEndpointInput, "active" | "status">,
+): Pick<WebhookEndpoint, "active" | "status"> {
+  const active =
+    input.active ?? (input.status ? input.status === "active" : true);
+  return { active, status: input.status ?? toStatusFromActive(active) };
+}
+
 function normalizeLimit(limit: number | undefined, fallback: number): number {
   if (typeof limit !== "number" || !Number.isFinite(limit)) {
     return fallback;
@@ -128,7 +137,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // endpoint fails at once instead of waiting behind other endpoint writes.
   async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
     validateEndpointUrl(input.url, this.securityOptions);
-    this.assertSigningSecret(input, input.url);
+    this.assertSigningSecret({ ...input, ...resolveActivity(input) });
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
       return this.insertEndpoint(input);
@@ -144,7 +153,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
     for (const [index, input] of inputs.entries()) {
       try {
         validateEndpointUrl(input.url, this.securityOptions);
-        this.assertSigningSecret(input, input.url);
+        this.assertSigningSecret({ ...input, ...resolveActivity(input) });
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(`Webhook endpoint ${index} in the batch: ${reason}`, {
@@ -169,20 +178,16 @@ export class WebhookRuntimeService implements WebhookRuntime {
     input: WebhookEndpointInput,
   ): Promise<WebhookEndpoint> {
     validateEndpointUrl(input.url, this.securityOptions);
-    this.assertSigningSecret(input, input.url);
     const now = new Date();
-    const active =
-      input.active ?? (input.status ? input.status === "active" : true);
-    const status = input.status ?? toStatusFromActive(active);
 
     const endpoint: WebhookEndpoint = {
       ...input,
       id: input.id ?? this.generateEndpointId(),
-      active,
-      status,
+      ...resolveActivity(input),
       createdAt: now,
       updatedAt: now,
     };
+    this.assertSigningSecret(endpoint);
 
     await this.endpointStore.add(endpoint);
     return endpoint;
@@ -457,19 +462,29 @@ export class WebhookRuntimeService implements WebhookRuntime {
   }
 
   // The dispatcher refuses to send unsigned while security is on; rejecting
-  // the endpoint here reports the problem when it is registered instead.
+  // an endpoint that would receive deliveries reports the problem when it is
+  // registered instead. A paused endpoint (see endpointMatchesEvent) needs no
+  // secret, so an unsigned one can be paused rather than deleted. The URL is
+  // left out of the message because it may carry a token.
   private assertSigningSecret(
-    endpoint: Pick<WebhookEndpoint, "secret">,
-    label: string,
+    endpoint: Pick<WebhookEndpoint, "active" | "status" | "secret">,
+    endpointId?: string,
   ): void {
     if (
-      this.config.enableSecurity &&
-      resolveSigningSecret(endpoint, this.config) === undefined
+      !this.config.enableSecurity ||
+      !endpoint.active ||
+      endpoint.status !== "active" ||
+      resolveSigningSecret(endpoint, this.config) !== undefined
     ) {
-      throw new Error(
-        `Webhook endpoint ${label} needs a secret: enableSecurity is on and delivery.secretKey is not set`,
-      );
+      return;
     }
+    const subject =
+      endpointId === undefined
+        ? "An active webhook endpoint"
+        : `Webhook endpoint ${endpointId}`;
+    throw new Error(
+      `${subject} needs a secret: enableSecurity is on and delivery.secretKey is not set`,
+    );
   }
 
   private validateEvent(event: WebhookEvent): void {

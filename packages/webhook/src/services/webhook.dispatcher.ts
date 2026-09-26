@@ -251,18 +251,26 @@ export class WebhookDispatcher {
     timestampSeconds: string,
     secret: string | undefined,
   ): Record<string, string> {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "X-Webhook-ID": event.id,
-      "X-Webhook-Event": event.type,
-      [WEBHOOK_TIMESTAMP_HEADER]: timestampSeconds,
-      "User-Agent": "K-Message-Webhook/1.0",
+    // Header names are case-insensitive, so each is keyed in lower case and a
+    // later value replaces every spelling of the same name.
+    const headers = new Map<string, [name: string, value: string]>();
+    const set = (name: string, value: string): void => {
+      headers.set(name.toLowerCase(), [name, value]);
     };
 
+    set("Content-Type", "application/json");
+    set("User-Agent", "K-Message-Webhook/1.0");
+
     // 엔드포인트별 커스텀 헤더
-    if (endpoint.headers) {
-      Object.assign(headers, endpoint.headers);
+    for (const [name, value] of Object.entries(endpoint.headers ?? {})) {
+      set(name, value);
     }
+
+    // Set last, so an endpoint's headers cannot replace what the signature
+    // covers or what receivers route on.
+    set("X-Webhook-ID", event.id);
+    set("X-Webhook-Event", event.type);
+    set(WEBHOOK_TIMESTAMP_HEADER, timestampSeconds);
 
     // Security (HMAC signature)
     if (secret !== undefined) {
@@ -271,11 +279,10 @@ export class WebhookDispatcher {
         timestampSeconds,
         secret,
       );
-      const signatureHeader = this.securityManager.getConfig().header;
-      headers[signatureHeader] = signature;
+      set(this.securityManager.getConfig().header, signature);
     }
 
-    return headers;
+    return Object.fromEntries(headers.values());
   }
 
   private calculateRetryDelay(
