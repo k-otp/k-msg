@@ -8,7 +8,10 @@ export {
   resolveRetentionDays,
   toRetentionBucketYm,
 } from "../delivery-tracking/retention";
-export type { DeliveryTrackingServiceConfig } from "../delivery-tracking/service";
+export type {
+  DeliveryStatusChange,
+  DeliveryTrackingServiceConfig,
+} from "../delivery-tracking/service";
 export { DeliveryTrackingService } from "../delivery-tracking/service";
 export type {
   DeliveryTrackingCountByField,

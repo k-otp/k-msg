@@ -8,7 +8,7 @@ import {
   type Provider,
   type SendInput,
 } from "@k-msg/core";
-import { DeliveryTrackingService } from "./service";
+import { type DeliveryStatusChange, DeliveryTrackingService } from "./service";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
@@ -808,5 +808,100 @@ describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
     const withRaw = await rawStore.get("bun-with-raw");
     expect(withRaw?.raw).toEqual({ kept: true });
     await rawStore.close();
+  });
+});
+
+describe("DeliveryTrackingService onStatusChange", () => {
+  async function recordSent(
+    service: DeliveryTrackingService,
+    messageId: string,
+  ): Promise<void> {
+    await service.recordSend(
+      {
+        messageId,
+        options: { type: "SMS", to: "01012345678", text: "hi" },
+        timestamp: Date.now(),
+      },
+      {
+        messageId,
+        providerId: "mock",
+        providerMessageId: `p-${messageId}`,
+        status: "SENT",
+        type: "SMS",
+        to: "01012345678",
+      },
+    );
+  }
+
+  const polling = {
+    initialDelayMs: 0,
+    intervalMs: 10,
+    batchSize: 10,
+    concurrency: 2,
+  };
+
+  test("reports each stored status change once", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+    await service.runOnce();
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.previousStatus).toBe("SENT");
+    expect(changes[0]?.record).toMatchObject({
+      messageId: "m1",
+      status: "DELIVERED",
+    });
+  });
+
+  test("does not report a poll that keeps the status", async () => {
+    const changes: DeliveryStatusChange[] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "SENT" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: (change) => {
+        changes.push(change);
+      },
+    });
+    await recordSent(service, "m1");
+
+    await service.runOnce();
+
+    expect(changes).toHaveLength(0);
+  });
+
+  test("keeps polling when the callback throws and reports the error", async () => {
+    const reported: Array<{ error: unknown; messageId: string }> = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: ({ record }) => {
+        if (record.messageId === "m1") throw new Error("webhook down");
+      },
+      onStatusChangeError: (error, change) => {
+        reported.push({ error, messageId: change.record.messageId });
+      },
+    });
+    await recordSent(service, "m1");
+    await recordSent(service, "m2");
+
+    await service.runOnce();
+
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+    expect((await service.getRecord("m2"))?.status).toBe("DELIVERED");
+    expect(reported).toHaveLength(1);
+    expect(reported[0]?.messageId).toBe("m1");
+    expect(String(reported[0]?.error)).toContain("webhook down");
   });
 });
