@@ -21,7 +21,7 @@ Each example is a small app built around one real use case, written the way you 
 ## Validation
 
 - `bun run typecheck` at the repository root checks every example against the current package sources, through each example's `tsconfig.workspace.json`.
-- `bun run examples:standalone` copies each example to a temporary directory, installs its dependencies from npm (the `latest` tag), and runs its `typecheck` script, as `.github/workflows/examples-standalone.yml` does:
+- `bun run examples:standalone` copies each example to a temporary directory, installs its dependencies from npm (the `latest` tag), and runs its `typecheck` script and, if it has one, its `test` script, as `.github/workflows/examples-standalone.yml` does:
 
 ```bash
 bun run examples:standalone

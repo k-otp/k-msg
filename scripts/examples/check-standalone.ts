@@ -109,6 +109,10 @@ async function validateExample(name: string): Promise<void> {
       throw new Error(`${name} does not define a typecheck script`);
     }
     await runCommand(["bun", "run", "typecheck"], temporaryExample);
+    // Tests run with the runtime the script names, such as `node --test`.
+    if (manifest.scripts?.test) {
+      await runCommand(["bun", "run", "test"], temporaryExample);
+    }
   } finally {
     await rm(temporaryRoot, { force: true, recursive: true });
   }
