@@ -7,7 +7,7 @@ title: "createAesGcmFieldCryptoProvider"
 
 > **createAesGcmFieldCryptoProvider**(`options`): [`FieldCryptoProvider`](/en/api/core/src/interfaces/fieldcryptoprovider/)
 
-Defined in: [packages/core/src/crypto/types.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L310)
+Defined in: [packages/core/src/crypto/types.ts:312](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L312)
 
 ## Parameters
 
