@@ -136,6 +136,37 @@ describe("delivery tracking field crypto policy", () => {
     });
   });
 
+  test("encrypts metadata with the resolved key, like the recipient and sender", async () => {
+    const kids: Record<string, string | undefined> = {};
+    const config = createConfig({
+      fields: { to: "encrypt+hash", from: "encrypt+hash", metadata: "encrypt" },
+      keyResolver: { resolveEncryptKey: () => ({ kid: "tenant-key" }) },
+      provider: {
+        encrypt: async ({ value, path, kid }) => {
+          kids[path] = kid;
+          return { ciphertext: value, kid };
+        },
+        decrypt: async ({ ciphertext }) => ciphertext,
+        hash: async ({ value }) => `h:${value}`,
+      },
+    });
+
+    const secured = await applyTrackingCryptoOnWrite(
+      { ...createRecord(), metadata: { campaign: "spring" } },
+      { config },
+      { tableName: "kmsg_delivery_tracking", store: "memory" },
+      { secureMode: true, compatPlainColumns: false },
+    );
+
+    expect(kids).toEqual({
+      to: "tenant-key",
+      from: "tenant-key",
+      metadata: "tenant-key",
+    });
+    expect(secured.metadataEnc).toBeDefined();
+    expect(secured.cryptoKid).toBe("tenant-key");
+  });
+
   test("fail-open path emits degraded state and metric tags", async () => {
     const events: Array<Record<string, unknown>> = [];
     const record = createRecord();
