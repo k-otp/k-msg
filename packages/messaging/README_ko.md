@@ -86,6 +86,18 @@ const kmsg = new KMsg({
 await kmsg.send({ to: "01012345678", text: "hello" });
 ```
 
+### SMS와 LMS
+
+`type`을 생략하면 `KMsg`는 `defaults.sms.autoLmsBytes`(기본 90바이트)보다 긴 텍스트를 LMS로 보냅니다. ASCII 문자는 1바이트, 한글 등 그 밖의 문자는 2바이트로 셉니다. `estimateSmsBytes()`도 같은 방식으로 세므로, 보내기 전에 입력을 검사할 때 쓸 수 있습니다:
+
+```ts
+import { estimateSmsBytes } from "@k-msg/messaging";
+
+if (estimateSmsBytes(text) > 2_000) {
+  // 일반적인 LMS 한도보다 깁니다.
+}
+```
+
 ## 라우팅
 
 `routing.byType`으로 메시지 타입별 provider를 정할 수 있습니다. provider 자격 증명 없이 라우팅을 시험하려면 `MockProvider`마다 다른 id를 주세요:
@@ -105,6 +117,8 @@ const kmsg = new KMsg({
 const result = await kmsg.send({ to: "01012345678", text: "hello" });
 // result.value.providerId === "sms"
 ```
+
+설정 객체를 생성자 밖에서 만들 때는 내보낸 `KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`, `RoutingStrategy` 타입을 쓸 수 있습니다.
 
 ## 대량 발송
 

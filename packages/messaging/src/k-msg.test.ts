@@ -9,6 +9,7 @@ import {
   type ProviderRequestContext,
   type SendInput,
 } from "@k-msg/core";
+import { estimateSmsBytes } from "./index";
 import { KMsg } from "./k-msg";
 import { InMemoryMessageRepository } from "./test-utils/in-memory-message-repository";
 
@@ -1094,5 +1095,39 @@ describe("KMsg request context", () => {
     await kmsg.send({ to: "01012345678", text: "one" });
 
     expect(contexts).toEqual([undefined]);
+  });
+});
+
+describe("estimateSmsBytes", () => {
+  test("counts text the way KMsg chooses between SMS and LMS", async () => {
+    expect(estimateSmsBytes("")).toBe(0);
+    expect(estimateSmsBytes("hello")).toBe(5);
+    expect(estimateSmsBytes("안녕하세요")).toBe(10);
+    expect(estimateSmsBytes("주문 #42")).toBe(8);
+
+    const types: string[] = [];
+    const provider: Provider = {
+      id: "sms",
+      name: "SMS",
+      supportedTypes: ["SMS", "LMS"] as const,
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options) => {
+        types.push(options.type);
+        return ok({
+          messageId: options.messageId ?? "id",
+          status: "SENT" as const,
+          providerId: "sms",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+    const kmsg = new KMsg({ providers: [provider] });
+    const ninetyBytes = "가".repeat(45);
+
+    expect(estimateSmsBytes(ninetyBytes)).toBe(90);
+    await kmsg.send({ to: "01012345678", text: ninetyBytes });
+    await kmsg.send({ to: "01012345678", text: `${ninetyBytes}!` });
+    expect(types).toEqual(["SMS", "LMS"]);
   });
 });

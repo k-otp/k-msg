@@ -22,6 +22,7 @@ import type {
   KMsgHooks,
   KMsgObserverHook,
 } from "./hooks";
+import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "./sms-bytes";
 import type { BatchSendResult } from "./types/message.types";
 
 // Hook failures must never reach the send path, even through a console
@@ -1205,13 +1206,8 @@ export class KMsg {
           ? record.messageId
           : crypto.randomUUID();
 
-      const threshold =
-        typeof this.defaults.sms?.autoLmsBytes === "number" &&
-        this.defaults.sms.autoLmsBytes > 0
-          ? this.defaults.sms.autoLmsBytes
-          : 90;
-      const estimated = this.estimateBytes(textRaw);
-      const type: "SMS" | "LMS" = estimated > threshold ? "LMS" : "SMS";
+      const type: "SMS" | "LMS" =
+        estimateSmsBytes(textRaw) > this.autoLmsBytes() ? "LMS" : "SMS";
 
       const normalized: SendOptions = {
         type,
@@ -1367,13 +1363,11 @@ export class KMsg {
     return output;
   }
 
-  private estimateBytes(text: string): number {
-    let bytes = 0;
-    for (let i = 0; i < text.length; i += 1) {
-      const code = text.charCodeAt(i);
-      bytes += code <= 0x7f ? 1 : 2;
-    }
-    return bytes;
+  private autoLmsBytes(): number {
+    const configured = this.defaults.sms?.autoLmsBytes;
+    return typeof configured === "number" && configured > 0
+      ? configured
+      : DEFAULT_AUTO_LMS_BYTES;
   }
 
   private validateSendOnboarding(

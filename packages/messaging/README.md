@@ -98,6 +98,18 @@ await kmsg.send({
 });
 ```
 
+### SMS or LMS
+
+When `type` is omitted, `KMsg` sends text longer than `defaults.sms.autoLmsBytes` (90 bytes by default) as LMS, counting one byte for each ASCII character and two for any other, such as Hangul. `estimateSmsBytes()` counts the same way, for example to check input before sending it:
+
+```ts
+import { estimateSmsBytes } from "@k-msg/messaging";
+
+if (estimateSmsBytes(text) > 2_000) {
+  // Longer than an LMS usually allows.
+}
+```
+
 ## Routing
 
 ```ts
@@ -149,6 +161,8 @@ const kmsg = new KMsg({
 const result = await kmsg.send({ to: "01012345678", text: "hello" });
 // result.value.providerId === "sms"
 ```
+
+`KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`, and `RoutingStrategy` are exported for typing configuration built outside the constructor.
 
 ## Bulk Sending
 
