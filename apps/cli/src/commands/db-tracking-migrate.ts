@@ -12,6 +12,7 @@ import {
 import { z } from "zod";
 import { defineCommand, defineGroup, option } from "../cli/command-contract";
 import { booleanFlagOption, strictBooleanFlagSchema } from "../cli/options";
+import { resolveMigrationFieldCrypto } from "./field-crypto-env";
 
 const chunkSizeSchema = z.coerce.number().int().positive().max(100_000);
 const maxChunksSchema = z.coerce.number().int().positive().max(100_000);
@@ -203,6 +204,7 @@ const applyCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     const snapshotDir = flags["snapshot-dir"] ?? ".kmsg/migrations";
+    const fieldCrypto = await resolveMigrationFieldCrypto(Bun.env);
     const sqliteFile = path.resolve(process.cwd(), flags["sqlite-file"]);
     const { client, close } = toSqliteClient(sqliteFile);
 
@@ -214,6 +216,7 @@ const applyCmd = defineCommand({
         maxChunks: flags["max-chunks"],
         runsTableName: flags["runs-table"],
         chunksTableName: flags["chunks-table"],
+        fieldCrypto,
       });
 
       const status = await getFieldCryptoMigrationStatus(client, planId, {
@@ -311,6 +314,7 @@ const retryCmd = defineCommand({
   },
   handler: async ({ flags }) => {
     const snapshotDir = flags["snapshot-dir"] ?? ".kmsg/migrations";
+    const fieldCrypto = await resolveMigrationFieldCrypto(Bun.env);
     const sqliteFile = path.resolve(process.cwd(), flags["sqlite-file"]);
     const { client, close } = toSqliteClient(sqliteFile);
 
@@ -322,6 +326,7 @@ const retryCmd = defineCommand({
         maxChunks: flags["max-chunks"],
         runsTableName: flags["runs-table"],
         chunksTableName: flags["chunks-table"],
+        fieldCrypto,
       });
 
       const status = await getFieldCryptoMigrationStatus(client, planId, {
