@@ -5,7 +5,7 @@ prev: false
 title: "CircuitBreaker"
 ---
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L16)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L17)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:16](https://github.
 
 > **new CircuitBreaker**(`options`): `CircuitBreaker`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L22)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L26)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:22](https://github.
 
 > **execute**\<`T`\>(`operation`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L24)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L28)
 
 #### Type Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:24](https://github.
 
 > **getFailureCount**(): `number`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L93)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L130)
 
 #### Returns
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:93](https://github.
 
 > **getState**(): `string`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L89)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L126)
 
 #### Returns
 
@@ -79,7 +79,7 @@ Defined in: [packages/core/src/resilience/circuit-breaker.ts:89](https://github.
 
 > **reset**(): `void`
 
-Defined in: [packages/core/src/resilience/circuit-breaker.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L97)
+Defined in: [packages/core/src/resilience/circuit-breaker.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/core/src/resilience/circuit-breaker.ts#L134)
 
 #### Returns
 
