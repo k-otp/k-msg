@@ -1,5 +1,5 @@
 export type TypecheckTarget = {
-  category: "application" | "example" | "package" | "tooling";
+  category: "application" | "evidence" | "example" | "package" | "tooling";
   label: string;
   tsconfig: string;
 };
@@ -56,6 +56,13 @@ export const typecheckTargets: readonly TypecheckTarget[] = [
     category: "tooling",
     label: "repository tooling",
     tsconfig: "tsconfig.tooling.json",
+  },
+  // Runs after the packages so a type error surfaces in its own package first;
+  // this target owns specification coverage and review expiry.
+  {
+    category: "evidence",
+    label: "specification evidence",
+    tsconfig: "tsconfig.evidence.json",
   },
   {
     category: "example",

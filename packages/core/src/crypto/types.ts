@@ -1,8 +1,25 @@
+/**
+ * Protection applied to one tracked field.
+ *
+ * @evidence docs/security/field-crypto-v1.md#field-policy-modes
+ *   Enumerates exactly the four field modes the v1 policy defines.
+ * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #62cd7ed
+ *   Compared the section's four modes with this union member by member.
+ */
 export type FieldMode = "plain" | "encrypt" | "encrypt+hash" | "mask";
 export type FieldCryptoFailMode = "closed" | "open";
 export type FieldCryptoOpenFallback = "masked" | "plaintext" | "null";
 export type MaybePromise<T> = T | Promise<T>;
 
+/**
+ * Persisted JSON form of one ciphertext.
+ *
+ * @evidence docs/security/field-crypto-v1.md#envelope-format
+ *   Declares the v1 envelope fields that ciphertext is persisted as.
+ * @evidenceReview docs/security/field-crypto-v1.md#envelope-format #74b5d59
+ *   Compared the section's JSON keys with these fields and with the envelope
+ *   createAesGcmFieldCryptoProvider emits (v 1, alg A256GCM).
+ */
 export interface CryptoEnvelope {
   v: number;
   alg: string;
@@ -31,6 +48,16 @@ export interface KeySetState {
   refreshedAt?: number;
 }
 
+/**
+ * Chooses the key id used to write and the key ids tried when reading.
+ *
+ * @evidence docs/security/field-crypto-v1.md#key-management
+ *   Separates the active encrypt kid from the multi-kid decrypt set that
+ *   key rotation relies on.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #e297ee5
+ *   Read the three bullets against this interface and the AES-GCM provider's
+ *   decrypt, which tries every candidate kid before failing.
+ */
 export interface KeyResolver {
   resolveEncryptKey(
     context: FieldCryptoKeyContext,
@@ -76,6 +103,20 @@ export interface FieldCryptoProvider {
   mask?(input: FieldCryptoMaskInput): MaybePromise<string>;
 }
 
+/**
+ * Field crypto settings shared by every storage integration.
+ *
+ * @evidence docs/security/field-crypto-v1.md#scope
+ *   The one configuration contract consumed by core, the messaging tracking
+ *   stores, and the webhook registry storage.
+ * @evidenceReview docs/security/field-crypto-v1.md#scope #3e5d08b
+ *   Confirmed the messaging tracking stores and the webhook registry import
+ *   this type.
+ * @evidenceExclude docs/security/field-crypto-v1.md#companion-docs
+ *   Links to companion documents and states no implementable requirement.
+ * @evidenceExcludeReview docs/security/field-crypto-v1.md#companion-docs #a4cb34b
+ *   Checked the section only links the other docs/security guides.
+ */
 export interface FieldCryptoConfig {
   enabled?: boolean;
   fields: Record<string, FieldMode>;
@@ -87,6 +128,14 @@ export interface FieldCryptoConfig {
   provider: FieldCryptoProvider;
 }
 
+/**
+ * Metric names emitted by field crypto operations.
+ *
+ * @evidence docs/security/field-crypto-v1.md#metrics
+ *   Names exactly the six metrics the v1 policy lists.
+ * @evidenceReview docs/security/field-crypto-v1.md#metrics #db248ba
+ *   Compared the section's six metric names with this union one by one.
+ */
 export type FieldCryptoMetricName =
   | "crypto_encrypt_ms"
   | "crypto_decrypt_ms"
@@ -260,6 +309,19 @@ export interface AesGcmFieldCryptoProviderOptions {
   algorithm?: "A256GCM";
 }
 
+/**
+ * Creates the default AES-256-GCM field crypto provider.
+ *
+ * @evidence docs/security/field-crypto-v1.md#threat-model
+ *   Encrypts with a fresh random IV and the caller's AAD as GCM additional
+ *   data, and serves lookups from a separate HMAC instead of deterministic
+ *   ciphertext.
+ * @evidenceReview docs/security/field-crypto-v1.md#threat-model #1ba61d5
+ *   Read encrypt, decrypt, and hash: a 12-byte getRandomValues IV per call,
+ *   AAD passed as additionalData on both paths, and HMAC-SHA-256 for hash.
+ *   The plaintext and logging bullets are answered by fail-policy and
+ *   logging-policy.
+ */
 export function createAesGcmFieldCryptoProvider(
   options: AesGcmFieldCryptoProviderOptions,
 ): FieldCryptoProvider {

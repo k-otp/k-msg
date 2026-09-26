@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoProvider"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L70)
+Defined in: [packages/core/src/crypto/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L97)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:70](https://github.com/k-otp/k-ms
 
 > **decrypt**(`input`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`string`\>
 
-Defined in: [packages/core/src/crypto/types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L74)
+Defined in: [packages/core/src/crypto/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L101)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/core/src/crypto/types.ts:74](https://github.com/k-otp/k-ms
 
 > **encrypt**(`input`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<\{ `ciphertext`: `string` \| [`CryptoEnvelope`](/en/api/core/src/interfaces/cryptoenvelope/); `kid?`: `string`; \}\>
 
-Defined in: [packages/core/src/crypto/types.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L71)
+Defined in: [packages/core/src/crypto/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L98)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/crypto/types.ts:71](https://github.com/k-otp/k-ms
 
 > **hash**(`input`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`string`\>
 
-Defined in: [packages/core/src/crypto/types.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L75)
+Defined in: [packages/core/src/crypto/types.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L102)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: [packages/core/src/crypto/types.ts:75](https://github.com/k-otp/k-ms
 
 > `optional` **mask**(`input`): [`MaybePromise`](/en/api/core/src/type-aliases/maybepromise/)\<`string`\>
 
-Defined in: [packages/core/src/crypto/types.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L76)
+Defined in: [packages/core/src/crypto/types.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L103)
 
 #### Parameters
 

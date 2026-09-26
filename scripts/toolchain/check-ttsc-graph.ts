@@ -17,14 +17,39 @@ type GraphEdge = {
   to: string;
 };
 
+type GraphDocTag = {
+  name: string;
+  text: string;
+};
+
+type GraphDiagnostic = {
+  category: string;
+  code: number;
+  file: string;
+  line: number;
+  message: string;
+};
+
 type TypeScriptGraph = {
+  capabilities: string[];
+  diagnostics: GraphDiagnostic[];
+  docTagsById: Map<string, GraphDocTag[]>;
   edges: GraphEdge[];
   nodes: GraphNode[];
 };
 
-const graphTimeoutMs = 120_000;
+type SpecificationCitation = {
+  acknowledgement: "cited" | "excluded";
+  section: string;
+  symbol: string;
+};
+
+// A cold machine builds the @ttsc/lint sidecar (with the evidence contributor)
+// from Go source before the graph can publish specification artifacts.
+const graphTimeoutMs = 600_000;
 const productionGraphConfig = "tsconfig.graph.json";
 const criticalTestGraphConfig = "tsconfig.graph.test.json";
+const evidenceLintConfig = "lint.evidence.config.ts";
 const criticalTestFiles = [
   "packages/core/src/errors.test.ts",
   "packages/provider/src/aligo/aligo.transport.test.ts",
@@ -111,7 +136,50 @@ function parseGraph(output: string): TypeScriptGraph {
     return { from: edge.from, kind: edge.kind, to: edge.to };
   });
 
-  return { edges, nodes };
+  const docTagsById = new Map<string, GraphDocTag[]>();
+  for (const node of parsed.nodes) {
+    if (!isRecord(node) || !Array.isArray(node.docTags)) continue;
+    const tags = node.docTags.filter(
+      (tag): tag is GraphDocTag =>
+        isRecord(tag) &&
+        typeof tag.name === "string" &&
+        typeof tag.text === "string",
+    );
+    docTagsById.set(String(node.id), tags);
+  }
+
+  const diagnostics = (
+    Array.isArray(parsed.diagnostics) ? parsed.diagnostics : []
+  ).map((diagnostic, index): GraphDiagnostic => {
+    if (
+      !isRecord(diagnostic) ||
+      typeof diagnostic.file !== "string" ||
+      typeof diagnostic.line !== "number" ||
+      typeof diagnostic.code !== "number" ||
+      typeof diagnostic.category !== "string" ||
+      typeof diagnostic.message !== "string"
+    ) {
+      throw new Error(
+        `ttsc graph diagnostic ${index} is missing file/line/code/category/message fields.`,
+      );
+    }
+    return {
+      category: diagnostic.category,
+      code: diagnostic.code,
+      file: diagnostic.file,
+      line: diagnostic.line,
+      message: diagnostic.message,
+    };
+  });
+
+  const provenance = isRecord(parsed.provenance) ? parsed.provenance : {};
+  const capabilities = Array.isArray(provenance.capabilities)
+    ? provenance.capabilities.filter(
+        (capability): capability is string => typeof capability === "string",
+      )
+    : [];
+
+  return { capabilities, diagnostics, docTagsById, edges, nodes };
 }
 
 async function loadGraph(tsconfig: string): Promise<TypeScriptGraph> {
@@ -391,6 +459,81 @@ function validateCriticalTestGraph(graph: TypeScriptGraph): void {
   }
 }
 
+// Examples need runtime-specific ambient types (Workers, Pages, Durable Objects)
+// that the shared graph program does not load; their tsconfig.workspace.json
+// overlays type-check them. Anywhere else, a compiler error means some edges
+// were resolved against an erroneous program and cannot be trusted.
+function validateCompilerDiagnostics(graph: TypeScriptGraph): void {
+  const blocking = graph.diagnostics.filter(
+    (diagnostic) =>
+      diagnostic.category === "error" &&
+      !diagnostic.file.replaceAll("\\", "/").startsWith("examples/"),
+  );
+  if (blocking.length > 0) {
+    throw new Error(
+      `The graph program has compiler errors outside examples:\n${blocking
+        .slice(0, 20)
+        .map(
+          (diagnostic) =>
+            `${diagnostic.file}:${diagnostic.line} TS${diagnostic.code} ${diagnostic.message}`,
+        )
+        .join("\n")}`,
+    );
+  }
+}
+
+function acknowledgementFor(
+  graph: TypeScriptGraph,
+  symbol: string,
+  section: string,
+): SpecificationCitation["acknowledgement"] | null {
+  for (const tag of graph.docTagsById.get(symbol) ?? []) {
+    const target = tag.text.trim().split(/\s+/, 1)[0];
+    if (target !== section) continue;
+    if (tag.name === "evidence") return "cited";
+    if (tag.name === "evidenceExclude") return "excluded";
+  }
+  return null;
+}
+
+function collectSpecificationEvidence(
+  graph: TypeScriptGraph,
+): SpecificationCitation[] {
+  const sections = new Set(
+    graph.nodes
+      .filter((node) => node.kind === "markdown_section")
+      .map((node) => node.id),
+  );
+  const citations: SpecificationCitation[] = [];
+  for (const edge of graph.edges) {
+    if (edge.kind !== "doc_ref" || !sections.has(edge.to)) continue;
+    const acknowledgement = acknowledgementFor(graph, edge.from, edge.to);
+    if (!acknowledgement) {
+      throw new Error(
+        `Graph doc_ref ${edge.from} -> ${edge.to} has no matching @evidence or @evidenceExclude tag.`,
+      );
+    }
+    citations.push({ acknowledgement, section: edge.to, symbol: edge.from });
+  }
+
+  return citations.sort(
+    (left, right) =>
+      left.section.localeCompare(right.section) ||
+      left.symbol.localeCompare(right.symbol),
+  );
+}
+
+function validateSpecificationEvidence(
+  graph: TypeScriptGraph,
+  citations: readonly SpecificationCitation[],
+): void {
+  if (!graph.capabilities.includes("artifactNodes") || citations.length === 0) {
+    throw new Error(
+      `The graph carries no specification evidence. ${productionGraphConfig} must point @ttsc/lint at ${evidenceLintConfig}, and the evidence plugin must build (run bun run typecheck for its diagnostics).`,
+    );
+  }
+}
+
 async function readSnapshot(): Promise<string> {
   try {
     return await readFile(snapshotPath, "utf8");
@@ -576,7 +719,10 @@ function validateGraph(
   }
 }
 
-function renderSnapshot(dependencies: readonly string[]): string {
+function renderSnapshot(
+  dependencies: readonly string[],
+  citations: readonly SpecificationCitation[],
+): string {
   const architectureDependencies = dependencies.filter(
     (dependency) =>
       (dependency.startsWith("packages/") ||
@@ -588,6 +734,12 @@ function renderSnapshot(dependencies: readonly string[]): string {
       const [source, target] = dependency.split(" -> ");
       return `| \`${source}\` | \`${target}\` |`;
     })
+    .join("\n");
+  const citationRows = citations
+    .map(
+      (citation) =>
+        `| \`${citation.section}\` | ${citation.acknowledgement} | \`${citation.symbol}\` |`,
+    )
     .join("\n");
 
   return `# TypeScript Architecture Graph
@@ -601,6 +753,8 @@ This file is generated by \`bun run graph:ttsc:snapshot\` from the compiler-reso
 - Built-in Provider implementations must keep their reviewed request-context and transport-capability paths.
 - Retry-policy parsing and provider-error normalization must retain status and retry-after graph connections.
 - Critical provider and retry tests are compiler-indexed through \`${criticalTestGraphConfig}\`.
+- The production graph program must be free of compiler errors outside \`examples/\`, whose runtime-specific ambient types are checked by their own overlays.
+- Specification sections governed by \`${evidenceLintConfig}\` must stay indexed as \`doc_ref\` edges from the code that answers them.
 - Architecture dependency changes must update this snapshot explicitly.
 - Edge counts are intentionally omitted so implementation-only changes do not create snapshot churn.
 
@@ -610,9 +764,17 @@ This file is generated by \`bun run graph:ttsc:snapshot\` from the compiler-reso
 | --- | --- |
 ${rows}
 
+## Specification Evidence
+
+\`bun run typecheck\` fails until every section below is acknowledged and each acknowledgement carries a review whose fingerprint matches the section's current text. This table records where those acknowledgements live.
+
+| Section | Acknowledgement | Declared on |
+| --- | --- | --- |
+${citationRows}
+
 ## Compatibility Boundary
 
-\`apps/docs\` is intentionally absent. Astro, Starlight, and TypeDoc remain on the docs-local TypeScript 6 compiler and are validated by \`bun run docs:check\`. The graph gate covers the TypeScript 7 runtime, CLI, tooling, and examples without claiming to model Markdown routes or rendered documentation UI.
+\`apps/docs\` is intentionally absent. Astro, Starlight, and TypeDoc remain on the docs-local TypeScript 6 compiler and are validated by \`bun run docs:check\`. The graph gate covers the TypeScript 7 runtime, CLI, tooling, examples, and the specification sections that evidence citations reach, without claiming to model documentation-site routes or rendered UI.
 `.trimEnd();
 }
 
@@ -624,12 +786,15 @@ async function main(): Promise<void> {
   ]);
   const dependencies = await collectDependencies(graph);
   validateGraph(graph, dependencies);
+  validateCompilerDiagnostics(graph);
   validateProviderContracts(graph);
   validateRetryPolicyContracts(graph);
+  const citations = collectSpecificationEvidence(graph);
+  validateSpecificationEvidence(graph, citations);
   await validateCriticalTestConfig();
   validateCriticalTestGraph(criticalTestGraph);
 
-  const snapshot = renderSnapshot(dependencies);
+  const snapshot = renderSnapshot(dependencies, citations);
   if (write) {
     await mkdir(path.dirname(snapshotPath), { recursive: true });
     await writeFile(snapshotPath, `${snapshot}\n`, "utf8");
@@ -644,7 +809,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `Graph valid: ${graph.nodes.length} production nodes, ${graph.edges.length} production edges, ${criticalTestGraph.nodes.length} critical-test nodes, ${criticalTestGraph.edges.length} critical-test edges, ${packageDependencies(dependencies).length} package dependencies.`,
+    `Graph valid: ${graph.nodes.length} production nodes, ${graph.edges.length} production edges, ${criticalTestGraph.nodes.length} critical-test nodes, ${criticalTestGraph.edges.length} critical-test edges, ${packageDependencies(dependencies).length} package dependencies, ${citations.length} specification acknowledgements, ${graph.diagnostics.length} tolerated compiler diagnostics.`,
   );
 }
 

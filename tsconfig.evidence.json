@@ -6,20 +6,11 @@
     "emitDeclarationOnly": false,
     "noEmit": true,
     "plugins": [
-      {
-        "transform": "@ttsc/lint",
-        "configFile": "./lint.evidence.config.ts"
-      }
+      { "transform": "@ttsc/lint", "configFile": "./lint.evidence.config.ts" }
     ]
   },
-  "include": [
-    "apps/cli/src/**/*.ts",
-    "examples/**/*.ts",
-    "packages/*/src/**/*.ts",
-    "scripts/**/*.ts"
-  ],
+  "include": ["packages/*/src/**/*.ts"],
   "exclude": [
-    "apps/docs",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/dist/**",

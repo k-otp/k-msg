@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMetricEvent"
 ---
 
-Defined in: [packages/core/src/crypto/types.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L116)
+Defined in: [packages/core/src/crypto/types.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L165)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/core/src/crypto/types.ts:116](https://github.com/k-otp/k-m
 
 > `optional` **kid?**: `string`
 
-Defined in: [packages/core/src/crypto/types.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L119)
+Defined in: [packages/core/src/crypto/types.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L168)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/core/src/crypto/types.ts:119](https://github.com/k-otp/k-m
 
 > **name**: [`FieldCryptoMetricName`](/en/api/core/src/type-aliases/fieldcryptometricname/)
 
-Defined in: [packages/core/src/crypto/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L117)
+Defined in: [packages/core/src/crypto/types.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L166)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/core/src/crypto/types.ts:117](https://github.com/k-otp/k-m
 
 > `optional` **tags?**: `Record`\<`string`, `string` \| `number` \| `boolean` \| `undefined`\>
 
-Defined in: [packages/core/src/crypto/types.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L120)
+Defined in: [packages/core/src/crypto/types.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L169)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/core/src/crypto/types.ts:120](https://github.com/k-otp/k-m
 
 > `optional` **value?**: `number`
 
-Defined in: [packages/core/src/crypto/types.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L118)
+Defined in: [packages/core/src/crypto/types.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L167)

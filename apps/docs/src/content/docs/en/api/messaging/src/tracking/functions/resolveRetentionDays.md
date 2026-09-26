@@ -7,7 +7,9 @@ title: "resolveRetentionDays"
 
 > **resolveRetentionDays**(`config`, `context`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/retention.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/retention.ts#L29)
+Defined in: [packages/messaging/src/delivery-tracking/retention.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/retention.ts#L53)
+
+Resolves how many days a tracking record is retained.
 
 ## Parameters
 

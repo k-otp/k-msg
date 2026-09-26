@@ -7,7 +7,7 @@ title: "toCiphertextEnvelopeString"
 
 > **toCiphertextEnvelopeString**(`ciphertext`): `string`
 
-Defined in: [packages/core/src/crypto/types.ts:442](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L442)
+Defined in: [packages/core/src/crypto/types.ts:504](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L504)
 
 ## Parameters
 
