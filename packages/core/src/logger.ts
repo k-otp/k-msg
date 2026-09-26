@@ -79,18 +79,30 @@ function maskStringValue(value: string): string {
 
 // Messages, error text, and free-text context values cannot be redacted by
 // key, so they are scrubbed for the values the logging policy protects:
-// Korean phone numbers (domestic, VoIP, or +82), credentials written as
+// Korean phone numbers (domestic, VoIP, toll-free, representative, or +82),
+// credentials written as
 // key/value pairs (`apiKey=...`, `client_secret: ...`, `"password":"..."`,
 // `password='...'`, `Authorization: Bearer ...`), and passwords in URLs
 // (`postgres://user:...@host`). A quoted value is redacted to its closing
 // quote, or to the end of the line if it has none; a bare value only up to
 // the first space. A URL password containing a raw "/", "?", or "#" is
 // indistinguishable from a path or query string and is not matched.
-const PHONE_NUMBER_PATTERN =
-  /(?<![\w+])(?:\+82[-.\s]?0?|0)(?:1[016789]|2|70|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\w)/g;
+const PHONE_NUMBER_PATTERN = new RegExp(
+  [
+    // Domestic or +82 mobile, Seoul, regional, VoIP, 050x, and 080 numbers.
+    String.raw`(?:\+82[-.\s]?0?|0)(?:1[016789]|2|70|80|50\d|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
+    // An area code in parentheses: (010) 1234-5678, (02) 123-4567.
+    String.raw`\(0\d{1,2}\)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
+    // Nationwide representative numbers such as 1588-1234.
+    String.raw`1[5-9]\d{2}[-.\s]\d{4}`,
+  ]
+    .map((pattern) => String.raw`(?<![\w+(])${pattern}(?!\w)`)
+    .join("|"),
+  "g",
+);
 const URL_PASSWORD_PATTERN = /(\b[a-z][\w+.-]*:\/\/[^\s/:@]*):[^\s/?#]*@/gi;
 const CREDENTIAL_PATTERN =
-  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))(["']?\s*[:=]\s*)(?:"[^"\n]*"?|'[^'\n]*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
+  /\b([\w-]*(?:api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth))(["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|((?:Bearer|Basic)\s+)?[^\s"',;&]+)/gi;
 
 export function redactLogText(text: string): string {
   return text

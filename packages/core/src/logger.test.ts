@@ -10,6 +10,9 @@ describe("redactLogText", () => {
     ["office 02-123-4567", "office 02-******67"],
     ["voip 070-1234-5678", "voip 070********78"],
     ["safe number 0505-1234-5678", "safe number 050*********78"],
+    ["call (010) 1234-5678", "call (01**********78"],
+    ["toll-free 080-123-4567", "toll-free 080*******67"],
+    ["center 1588-1234", "center 158****34"],
   ])("masks the phone number in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
@@ -33,6 +36,10 @@ describe("redactLogText", () => {
     ["password='hunter2'", "password='[REDACTED]'"],
     ["{'password': 'one two'}", "{'password': '[REDACTED]'}"],
     ['truncated apiKey="abc', 'truncated apiKey="[REDACTED]"'],
+    [
+      String.raw`{"password":"abc\"SECRET_SUFFIX"}`,
+      '{"password":"[REDACTED]"}',
+    ],
     [
       'password="oops\nretrying, see "runbook"',
       'password="[REDACTED]"\nretrying, see "runbook"',
