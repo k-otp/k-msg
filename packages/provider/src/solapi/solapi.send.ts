@@ -7,6 +7,7 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
+import { raceProviderAbort } from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   extractFileId,
@@ -607,35 +608,51 @@ export async function buildSolapiSendOneMessage(params: {
   return base as unknown as SolapiSendOneMessage;
 }
 
+/**
+ * Sends one message through the SOLAPI SDK. The SDK cannot take `signal`, so
+ * it is checked before each SDK call and raced against the calls: once it
+ * aborts, nothing more is sent, but a request the SDK already made runs on
+ * and its answer is dropped.
+ */
 export async function sendWithSolapi(params: {
   providerId: string;
   client: SolapiSdkClient;
   config: SolapiConfig;
   options: SendOptions;
+  signal?: AbortSignal;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, client, config, options } = params;
+  const { providerId, client, config, options, signal } = params;
 
   const warnings = collectSolapiSendWarnings(options, providerId);
-  const message = await buildSolapiSendOneMessage({
-    options,
-    providerId,
-    config,
-    client,
-  });
+  throwIfAborted(signal);
+  const message = await raceProviderAbort(
+    buildSolapiSendOneMessage({
+      options,
+      providerId,
+      config,
+      client,
+    }),
+    signal,
+  );
   const scheduledDate = resolveSolapiScheduledDate(options);
 
+  // An image upload may have finished just as the signal aborted.
+  throwIfAborted(signal);
   let response: unknown;
   if (typeof client.sendOne === "function") {
-    response = await client.sendOne(
-      scheduledDate
-        ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
-        : message,
-      config.appId,
+    response = await raceProviderAbort(
+      client.sendOne(
+        scheduledDate
+          ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
+          : message,
+        config.appId,
+      ),
+      signal,
     );
   } else if (typeof client.send === "function") {
-    response = await client.send(
-      message,
-      buildSolapiSendRequestConfig(config, scheduledDate),
+    response = await raceProviderAbort(
+      client.send(message, buildSolapiSendRequestConfig(config, scheduledDate)),
+      signal,
     );
   } else {
     throw new KMsgError(
@@ -653,6 +670,10 @@ export async function sendWithSolapi(params: {
       warnings,
     }),
   );
+}
+
+function throwIfAborted(signal: AbortSignal | undefined): void {
+  if (signal?.aborted) throw signal.reason;
 }
 
 function resolveSolapiScheduledDate(options: SendOptions): string | undefined {

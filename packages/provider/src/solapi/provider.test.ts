@@ -135,16 +135,11 @@ describe("SolapiProvider (SendOptions-based)", () => {
       client,
     );
 
-    const controller = new AbortController();
-    controller.abort(new Error("unsupported transport context"));
-    const result = await provider.send(
-      {
-        type: "SMS",
-        to: "01012345678",
-        text: "hello",
-      },
-      { signal: controller.signal },
-    );
+    const result = await provider.send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
 
     expect(result.isSuccess).toBe(true);
     expect(calls.sendOne).toHaveLength(1);
@@ -657,17 +652,12 @@ describe("SolapiProvider (SendOptions-based)", () => {
       client,
     );
 
-    const controller = new AbortController();
-    controller.abort(new Error("unsupported transport context"));
-    const result = await provider.getDeliveryStatus(
-      {
-        providerMessageId: "msg_404",
-        type: "SMS",
-        to: "01012345678",
-        requestedAt: new Date(),
-      },
-      { signal: controller.signal },
-    );
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "msg_404",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
 
     expect(result.isSuccess).toBe(true);
     if (result.isSuccess) {

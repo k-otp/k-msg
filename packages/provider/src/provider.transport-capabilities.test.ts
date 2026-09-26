@@ -4,6 +4,52 @@ import { AligoSendProvider } from "./aligo/provider.send";
 import { IWINVSendProvider } from "./iwinv/provider.send";
 import { MockProvider } from "./providers/mock/mock.provider";
 import { SolapiProvider } from "./solapi/provider";
+import type { SolapiSdkClient } from "./solapi/solapi.internal.types";
+
+/** A SOLAPI SDK stand-in whose calls settle only when the test says so. */
+function createPendingSolapiClient() {
+  const calls = { sendOne: 0, uploadFile: 0, getMessages: 0 };
+  const pending: Array<(value: unknown) => void> = [];
+  const hold = <T>() =>
+    new Promise<T>((resolve) => {
+      pending.push(resolve as (value: unknown) => void);
+    });
+
+  const client: SolapiSdkClient = {
+    sendOne: async () => {
+      calls.sendOne += 1;
+      return hold();
+    },
+    uploadFile: async () => {
+      calls.uploadFile += 1;
+      return hold();
+    },
+    getMessages: async () => {
+      calls.getMessages += 1;
+      return hold();
+    },
+    getBalance: async () => hold(),
+  };
+
+  return {
+    client,
+    calls,
+    /** Lets every held SDK call finish, as the real request would. */
+    releaseAll(value: unknown) {
+      for (const resolve of pending.splice(0)) resolve(value);
+    },
+  };
+}
+
+/** Lets every pending promise callback run, like an event-loop turn. */
+const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+function createSolapiProvider(client: SolapiSdkClient) {
+  return new SolapiProvider(
+    { apiKey: "api-key", apiSecret: "api-secret", defaultFrom: "01000000000" },
+    client,
+  );
+}
 
 describe("built-in provider transport capabilities", () => {
   test("declare support according to their actual transport", () => {
@@ -27,7 +73,7 @@ describe("built-in provider transport capabilities", () => {
       injectableFetch: "supported",
     });
     expect(solapi.transportCapabilities).toEqual({
-      abortSignal: "unsupported",
+      abortSignal: "supported",
       injectableFetch: "unsupported",
     });
     expect(mock.transportCapabilities).toEqual({
@@ -106,5 +152,113 @@ describe("built-in provider transport capabilities", () => {
       expect(result.error.code).toBe(KMsgErrorCode.NETWORK_TIMEOUT);
       expect(result.error.message).toBe("provider deadline exceeded");
     }
+  });
+
+  test("solapi provider rejects a pre-aborted send without calling the SDK", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+    controller.abort(new Error("cancelled before send"));
+
+    const result = await createSolapiProvider(sdk.client).send(
+      { type: "SMS", to: "01012345678", text: "message" },
+      { signal: controller.signal },
+    );
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+      expect(result.error.message).toBe("cancelled before send");
+    }
+    expect(sdk.calls.sendOne).toBe(0);
+  });
+
+  test("solapi provider stops waiting for the SDK once the signal aborts", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+    const timeout = Object.assign(new Error("provider deadline exceeded"), {
+      code: "NETWORK_TIMEOUT",
+    });
+
+    const resultPromise = createSolapiProvider(sdk.client).send(
+      { type: "SMS", to: "01012345678", text: "message" },
+      { signal: controller.signal },
+    );
+    await settle();
+    expect(sdk.calls.sendOne).toBe(1);
+
+    controller.abort(timeout);
+    const result = await resultPromise;
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.NETWORK_TIMEOUT);
+      expect(result.error.message).toBe("provider deadline exceeded");
+    }
+    // The SDK request cannot be cancelled; its late answer is ignored.
+    sdk.releaseAll({ messageId: "msg_late" });
+    await settle();
+  });
+
+  test("solapi provider does not send after an upload the signal aborted", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+
+    const resultPromise = createSolapiProvider(sdk.client).send(
+      {
+        type: "MMS",
+        to: "01012345678",
+        text: "message",
+        imageUrl: "https://example.com/image.jpg",
+      },
+      { signal: controller.signal },
+    );
+    await settle();
+    expect(sdk.calls.uploadFile).toBe(1);
+
+    controller.abort(new Error("cancelled during upload"));
+    const result = await resultPromise;
+    sdk.releaseAll({ fileId: "MMS_file_1" });
+    await settle();
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+    }
+    expect(sdk.calls.sendOne).toBe(0);
+  });
+
+  test("solapi delivery status observes the signal", async () => {
+    const sdk = createPendingSolapiClient();
+    const provider = createSolapiProvider(sdk.client);
+    const query = {
+      providerMessageId: "msg_1",
+      type: "SMS" as const,
+      to: "01012345678",
+      requestedAt: new Date(),
+    };
+
+    const preAborted = new AbortController();
+    preAborted.abort(new Error("cancelled before lookup"));
+    const skipped = await provider.getDeliveryStatus(query, {
+      signal: preAborted.signal,
+    });
+    expect(sdk.calls.getMessages).toBe(0);
+
+    const controller = new AbortController();
+    const pending = provider.getDeliveryStatus(query, {
+      signal: controller.signal,
+    });
+    await settle();
+    controller.abort(new Error("cancelled during lookup"));
+    const aborted = await pending;
+    sdk.releaseAll({ messageList: {} });
+
+    for (const result of [skipped, aborted]) {
+      expect(result.isFailure).toBe(true);
+      if (result.isFailure) {
+        expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+      }
+    }
+    expect(sdk.calls.getMessages).toBe(1);
   });
 });
