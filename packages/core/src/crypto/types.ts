@@ -1,5 +1,11 @@
 import { FieldCryptoError } from "./errors";
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#field-policy-modes
+ *   Enumerates exactly the four field modes the v1 policy defines.
+ * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #d6936dd
+ *   Compared the section's four modes with this union member by member.
+ */
 export type FieldMode = "plain" | "encrypt" | "encrypt+hash" | "mask";
 export type FieldCryptoFailMode = "closed" | "open";
 export type FieldCryptoOpenFallback = "masked" | "plaintext" | "null";
@@ -33,6 +39,14 @@ export interface KeySetState {
   refreshedAt?: number;
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#key-management
+ *   Separates the active encrypt kid from the multi-kid decrypt set that
+ *   key rotation relies on.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #e297ee5
+ *   Read the three bullets against this interface and the AES-GCM provider's
+ *   decrypt, which tries every candidate kid before failing.
+ */
 export interface KeyResolver {
   resolveEncryptKey(
     context: FieldCryptoKeyContext,
@@ -78,6 +92,18 @@ export interface FieldCryptoProvider {
   mask?(input: FieldCryptoMaskInput): MaybePromise<string>;
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#scope
+ *   The one configuration contract consumed by core, the messaging tracking
+ *   stores, and the webhook registry storage.
+ * @evidenceReview docs/security/field-crypto-v1.md#scope #3e5d08b
+ *   Confirmed the messaging tracking stores and the webhook registry storage
+ *   import this type.
+ * @evidenceExclude docs/security/field-crypto-v1.md#companion-docs
+ *   Links to companion documents and states no implementable requirement.
+ * @evidenceExcludeReview docs/security/field-crypto-v1.md#companion-docs #a4cb34b
+ *   Checked the section only links the other docs/security guides.
+ */
 export interface FieldCryptoConfig {
   enabled?: boolean;
   fields: Record<string, FieldMode>;
@@ -89,6 +115,12 @@ export interface FieldCryptoConfig {
   provider: FieldCryptoProvider;
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#metrics
+ *   Names exactly the six metrics the v1 policy lists.
+ * @evidenceReview docs/security/field-crypto-v1.md#metrics #db248ba
+ *   Compared the section's six metric names with this union one by one.
+ */
 export type FieldCryptoMetricName =
   | "crypto_encrypt_ms"
   | "crypto_decrypt_ms"
@@ -262,6 +294,19 @@ export interface AesGcmFieldCryptoProviderOptions {
   algorithm?: "A256GCM";
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#threat-model
+ *   Encrypts with a fresh random IV and the caller's AAD as GCM additional
+ *   data, and serves lookups from a separate HMAC instead of deterministic
+ *   ciphertext. The plaintext and logging bullets are answered by
+ *   fail-policy and logging-policy.
+ * @evidenceReview docs/security/field-crypto-v1.md#threat-model #1ba61d5
+ *   Read encrypt, decrypt, and hash: a 12-byte getRandomValues IV per call,
+ *   AAD passed as additionalData on both paths, and HMAC-SHA-256 for hash.
+ *   The messaging stores bind messageId, providerId, tableName, fieldPath, and
+ *   tenantId by default; webhook storage, which encrypts one field per table,
+ *   binds the table and the endpoint or delivery id.
+ */
 export function createAesGcmFieldCryptoProvider(
   options: AesGcmFieldCryptoProviderOptions,
 ): FieldCryptoProvider {
@@ -444,6 +489,15 @@ export function createNoopFieldCryptoProvider(): FieldCryptoProvider {
 /**
  * Throws unless `value` is a v1 envelope: `v` 1, `alg` "A256GCM", and string
  * `kid`, `iv`, `tag`, and `ct`.
+ *
+ * @evidence docs/security/field-crypto-v1.md#envelope-format
+ *   Rejects any envelope object but v1 A256GCM before
+ *   toCiphertextEnvelopeString persists it; the AES-GCM provider emits
+ *   exactly this shape, and string ciphertext stays the provider's own.
+ * @evidenceReview docs/security/field-crypto-v1.md#envelope-format #5d88509
+ *   Compared the section's keys and constants with this check and the
+ *   AES-GCM provider's encrypt output, and ran envelope.test.ts, which
+ *   rejects v 2, A128GCM, and a missing ct and keeps string ciphertext.
  */
 export function assertCryptoEnvelopeV1(
   value: unknown,

@@ -160,6 +160,16 @@ function assertWebhookFieldMode(
   );
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#field-policy-modes
+ *   Accepts only encrypt and encrypt+hash for the endpoint secret and the
+ *   delivery payload, which the storage always encrypts.
+ * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #d6936dd
+ *   Read assertWebhookFieldMode and protectFieldValue, which encrypts
+ *   whenever crypto is enabled and stores no hash, and ran
+ *   webhook.registry.crypto.test.ts, which rejects plain and mask for
+ *   secret and payload and accepts both encrypt modes.
+ */
 export function validateWebhookFieldCryptoOptions(
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): void {

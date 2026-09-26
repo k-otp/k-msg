@@ -34,11 +34,14 @@ Ciphertext is persisted as JSON envelope:
 }
 ```
 
+The built-in AES-GCM provider writes this envelope. An envelope object from a custom provider must match it (`v` 1, `alg` `A256GCM`, and string `kid`, `iv`, `tag`, and `ct`): the messaging tracking stores and the webhook registry storage reject any other before persisting it. A provider that returns its ciphertext as a string owns that serialization.
+
 ## Fail policy
 
 - Default: `failMode=closed`
 - Optional: `failMode=open`
 - `openFallback=plaintext` is blocked unless `unsafeAllowPlaintextStorage=true`
+- Any other `failMode` or `openFallback` value is a configuration error; at runtime anything but an explicit `failMode=open` fails closed, and an unrecognized `openFallback` falls back to `masked`
 
 ## Field policy modes
 
@@ -46,6 +49,8 @@ Ciphertext is persisted as JSON envelope:
 - `mask`: masked representation only
 - `encrypt`: encrypted + masked
 - `encrypt+hash`: encrypted + HMAC hash (recommended for lookup fields)
+
+The messaging tracking stores look records up by `to` and `from`, so they also store an HMAC hash for those two fields in `encrypt` mode. The webhook registry storage always encrypts the endpoint `secret` and the delivery `payload`, which must stay recoverable: it accepts only `encrypt` or `encrypt+hash` for them and stores no hash.
 
 ## Key management
 
@@ -65,6 +70,7 @@ Ciphertext is persisted as JSON envelope:
 ## Logging policy
 
 - Sensitive keys (`to`, `from`, `payload`, `secret`, `token`, `authorization`, etc.) are masked/redacted in core logger.
+- Log messages, error messages and stacks, and other string context values are scrubbed of Korean phone numbers and of credentials written as key/value pairs (`apiKey=...`, `Authorization: Bearer ...`).
 - Use masked values in operational diagnostics.
 
 ## Companion docs
