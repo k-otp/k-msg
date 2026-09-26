@@ -396,6 +396,54 @@ const queue = createDrizzleJobQueue({
 });
 ```
 
+### KV/R2/Durable Object 작업 큐
+
+`createDurableObjectJobQueue`, `createKvJobQueue`, `createR2JobQueue`는 각 작업(job)을 `keyPrefix`(기본값 `kmsg/jobs`) 아래에 JSON으로 저장합니다.
+
+- `dequeue()`는 반환하는 작업을 `leaseMs`(기본값 5분) 동안 점유(lease)합니다. 그때까지 완료도 실패도 되지 않으면(예: 처리 도중 워커가 멈춤) 작업은 다시 처리 대상이 되고, 잃어버린 시도는 실패한 시도로 계산됩니다(`error: "LEASE_EXPIRED"`, `JOB_LEASE_EXPIRED`로 export). 남은 시도가 없는 작업은 실패합니다. 이런 작업마다 `onLeaseExpired(job)`가 호출됩니다. `leaseMs`는 작업 하나가 걸릴 수 있는 가장 긴 시간보다 길게 잡으세요. `Infinity`이면 lease를 쓰지 않습니다.
+- `nextDueAt()`은 다음 작업의 처리 시각(대기 중인 작업의 예정 시각이나 lease 만료 시각)을 반환하므로, 폴링 대신 그 시각에 알람을 걸 수 있습니다. `size()`와 `peek()`는 지금 처리할 작업만 셉니다.
+- `complete(jobId, result)`는 `result`(예: provider 메시지 ID)를 작업에 남기고, `fail()`은 완료된 작업을 다시 열지 않습니다.
+- `cleanupTerminal({ olderThan })`은 `olderThan` 이전에 끝난 작업만 지우므로, 끝난 작업을 한동안 조회할 수 있습니다.
+- Durable Object에서는 작업마다 `get()`을 하지 않고 storage 목록 조회가 돌려준 값을 읽습니다. 그래도 `dequeue()`는 저장된 작업을 모두 읽으므로 끝난 작업은 주기적으로 정리하세요.
+
+예를 들어 알람에서 발송하는 Durable Object:
+
+```ts
+import { DurableObject } from "cloudflare:workers";
+import { createDurableObjectJobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export class SendQueue extends DurableObject<Env> {
+  private readonly queue = createDurableObjectJobQueue<SendInput>(
+    this.ctx.storage,
+    // 발송은 10초 후 타임아웃되므로 1분이면 충분합니다.
+    { leaseMs: 60_000 },
+  );
+
+  async alarm(): Promise<void> {
+    for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
+      const result = await kmsg.send(job.data);
+      if (result.isSuccess) {
+        await this.queue.complete(job.id, {
+          providerMessageId: result.value.providerMessageId,
+        });
+      } else {
+        await this.queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // 끝난 작업은 하루 동안 조회할 수 있게 둡니다.
+    await this.queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+    const next = await this.queue.nextDueAt();
+    if (next) await this.ctx.storage.setAlarm(next);
+  }
+}
+```
+
 ### Tracking 스키마 커스터마이즈
 
 `storeRaw` 기본값은 `false`입니다. provider 원본 payload 저장이 꼭 필요할 때만 `true`로 켜세요.
