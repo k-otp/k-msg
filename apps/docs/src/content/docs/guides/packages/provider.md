@@ -81,6 +81,18 @@ import 경로:
 - 여기서의 `채널 온보딩`은 vendor prerequisite path(`manual`, `api`, `none`)를 뜻하며, toolkit이 관리하는 approval state를 의미하지 않습니다.
 - CLI가 `onboarding.manualChecks`를 저장하는 경우도 외부 벤더 절차에 대한 operator evidence/note를 기록하는 용도입니다.
 
+## ALIMTALK 템플릿 변수
+
+`variables`는 템플릿의 `#{이름}` 변수에 이름으로 매칭됩니다:
+
+| Provider | 전송 방식 |
+| --- | --- |
+| `iwinv` | `templateParam`, 템플릿에 나오는 변수 하나마다 값 하나를 순서대로 |
+| `aligo` | `message_1`, 값을 채운 템플릿 본문 |
+| `solapi` | `kakaoOptions.variables`, 템플릿은 SOLAPI가 채움 |
+
+IWINV와 Aligo는 이를 위해 템플릿 본문이 필요합니다. `providerOptions.templateContent`에서 읽고, 없으면 템플릿 API(IWINV `POST /api/template/`, Aligo `/akv10/template/list/`)를 발송과 같은 request context로 조회해 provider 인스턴스마다 10분간 재사용합니다. `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
+
 ## ALIMTALK failover 책임 범위
 
 ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider별 native 매핑은 다릅니다.

@@ -81,6 +81,18 @@ Interpretation notes:
 - `channel onboarding` here describes the vendor prerequisite path (`manual`, `api`, `none`), not a toolkit-managed approval state.
 - When the CLI stores `onboarding.manualChecks`, it is recording operator evidence/notes for external vendor steps rather than becoming the approval source of truth.
 
+## ALIMTALK template variables
+
+`variables` are matched to the template's `#{name}` placeholders by name:
+
+| Provider | Sent as |
+| --- | --- |
+| `iwinv` | `templateParam`, one value per placeholder occurrence in template order |
+| `aligo` | `message_1`, the template text with the values filled in |
+| `solapi` | `kakaoOptions.variables`; SOLAPI fills the template |
+
+IWINV and Aligo need the template body for this. They take it from `providerOptions.templateContent`, or else look the template up (IWINV `POST /api/template/`, Aligo `/akv10/template/list/`) through the send's request context and keep the body for 10 minutes per provider instance. A placeholder missing from `variables` fails the send with `INVALID_REQUEST` before anything is sent.
+
 ## ALIMTALK failover responsibilities
 
 `failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.
