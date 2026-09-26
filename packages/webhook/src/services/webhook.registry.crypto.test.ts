@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { FieldCryptoConfig } from "@k-msg/core";
+import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
 import { WebhookEventType } from "../types/webhook.types";
 import { WebhookRegistry } from "./webhook.registry";
 
@@ -74,6 +74,47 @@ describe("WebhookRegistry field crypto", () => {
       kind: "encrypt",
       fieldPath: "payload",
       details: { cause: "kms unavailable" },
+    });
+  });
+
+  test("keeps a provider FieldCryptoError's metadata while naming the field", async () => {
+    const registry = new WebhookRegistry({
+      fieldCrypto: {
+        endpoint: createConfig({
+          provider: {
+            encrypt: async () => {
+              throw new FieldCryptoError(
+                "encrypt",
+                "kms throttled",
+                { reason: "throttled" },
+                { retryAfterMs: 5000, attempt: 2 },
+              );
+            },
+            decrypt: async ({ ciphertext }) => ciphertext,
+            hash: async ({ value }) => `h:${value}`,
+          },
+        }),
+      },
+    });
+
+    await expect(
+      registry.addEndpoint({
+        id: "ep-throttled",
+        url: "https://example.com/hook",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "my-secret",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "active",
+      }),
+    ).rejects.toMatchObject({
+      kind: "encrypt",
+      message: "kms throttled",
+      details: { reason: "throttled" },
+      retryAfterMs: 5000,
+      attempt: 2,
+      fieldPath: "secret",
     });
   });
 
