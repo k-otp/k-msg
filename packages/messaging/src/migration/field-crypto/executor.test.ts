@@ -464,6 +464,19 @@ describe("applyFieldCryptoMigration", () => {
       processedChunks: 1,
     });
     expect(await countUnencrypted(client)).toBe(0);
+
+    // The chunk is completed but the run still counts it as failed; the next
+    // retry reconciles the run instead of keeping it failed forever.
+    expect(
+      (await statusFieldCryptoMigration(client, plan.planId, {})).run,
+    ).toMatchObject({ status: "failed", failedChunks: 1 });
+    expect(await retryFieldCryptoMigration(client, input)).toMatchObject({
+      status: "running",
+      failedChunks: 0,
+    });
+    expect(
+      (await statusFieldCryptoMigration(client, plan.planId, {})).run,
+    ).toMatchObject({ status: "running", failedChunks: 0 });
   });
   test("encrypts the stored recipient exactly, whitespace included", async () => {
     const client = createSqliteClient();
@@ -516,7 +529,7 @@ describe("applyFieldCryptoMigration", () => {
           raced = true;
           await client.query(
             `UPDATE ${TABLE} SET to_enc = 'live-writer', crypto_state = 'encrypted' WHERE message_id = ?`,
-            [params[params.length - 1]],
+            [legacyRecord(0).messageId],
           );
         }
         return client.query(sql, params);
@@ -535,5 +548,74 @@ describe("applyFieldCryptoMigration", () => {
       `SELECT to_enc FROM ${TABLE}`,
     );
     expect(rows[0]?.to_enc).toBe("live-writer");
+  });
+  test("re-encrypts a row a live fail-open writer changed after it was read", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const record = legacyRecord(0);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+
+    // A degraded live write changes the recipient before the update lands.
+    let raced = false;
+    const racing: CloudflareSqlClient = {
+      ...client,
+      query: (async (sql: string, params: readonly unknown[] = []) => {
+        if (!raced && /^\s*UPDATE\b/i.test(sql) && sql.includes("to_enc")) {
+          raced = true;
+          await client.query(
+            `UPDATE ${TABLE} SET "to" = '01099998888', to_enc = 'masked', crypto_state = 'degraded' WHERE message_id = ?`,
+            [record.messageId],
+          );
+        }
+        return client.query(sql, params);
+      }) as CloudflareSqlClient["query"],
+    };
+
+    expect(
+      await applyFieldCryptoMigration(racing, {
+        planId: plan.planId,
+        trackingTableName: TABLE,
+        fieldCrypto,
+      }),
+    ).toMatchObject({ status: "completed" });
+    expect(raced).toBe(true);
+
+    const secureOnly = new HyperdriveDeliveryTrackingStore(client, {
+      tableName: TABLE,
+      fieldCrypto,
+      fieldCryptoSchema: {
+        enabled: true,
+        mode: "secure",
+        compatPlainColumns: false,
+      },
+    });
+    expect((await secureOnly.get(record.messageId))?.to).toBe("01099998888");
+  });
+
+  test("encrypts a whitespace-only sender as the store would", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    await client.query(`UPDATE ${TABLE} SET "from" = '   '`);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+
+    expect(
+      await applyFieldCryptoMigration(client, {
+        planId: plan.planId,
+        trackingTableName: TABLE,
+        fieldCrypto,
+      }),
+    ).toMatchObject({ status: "completed" });
+    const { rows } = await client.query<{ from_enc: string | null }>(
+      `SELECT from_enc FROM ${TABLE}`,
+    );
+    expect(rows[0]?.from_enc).toEqual(expect.stringContaining("A256GCM"));
   });
 });
