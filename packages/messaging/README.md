@@ -273,6 +273,21 @@ const tracking = new DeliveryTrackingService({
 
 `MockProvider` from `@k-msg/provider` reports each message it sent as `DELIVERED` (change it with `setDeliveryStatus`), so tracking can run without real credentials.
 
+### Recording Errors
+
+The hooks from `createDeliveryTrackingHooks` record each message a provider accepts. When recording fails, the send still succeeds but the message will not be polled; the error goes to `onRecordError`, or without it to `KMsg`'s `onHookError` (`console.error` if that is not set either). `onError` receives only failed sends, with their hook context.
+
+```ts
+const kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking, {
+    onRecordError: (error, { context }) => {
+      console.error(`Message ${context.messageId} will not be tracked`, error);
+    },
+  }),
+});
+```
+
 ### Bun SQLite Example
 
 ```ts

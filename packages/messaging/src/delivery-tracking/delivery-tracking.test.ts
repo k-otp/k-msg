@@ -8,6 +8,9 @@ import {
   type Provider,
   type SendInput,
 } from "@k-msg/core";
+import { KMsg } from "../k-msg";
+import { InMemoryMessageRepository } from "../test-utils/in-memory-message-repository";
+import { createDeliveryTrackingHooks } from "./hooks";
 import { type DeliveryStatusChange, DeliveryTrackingService } from "./service";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
@@ -1758,5 +1761,152 @@ describe("DeliveryTrackingService onStatusChange", () => {
       | Record<string, unknown>
       | undefined;
     expect(apiAttempt?.attempted).toBe(true);
+  });
+});
+
+describe("createDeliveryTrackingHooks errors", () => {
+  class OfflineStore extends InMemoryDeliveryTrackingStore {
+    override async upsert(): Promise<void> {
+      throw new Error("tracking store offline");
+    }
+  }
+
+  function smsProvider(outcome: "sent" | "rejected"): Provider {
+    return {
+      id: "sms",
+      name: "SMS",
+      supportedTypes: ["SMS"],
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options) =>
+        outcome === "sent"
+          ? ok({
+              messageId: options.messageId ?? "msg",
+              providerId: "sms",
+              providerMessageId: "p1",
+              status: "SENT",
+              type: options.type,
+              to: options.to,
+            })
+          : fail(new KMsgError(KMsgErrorCode.PROVIDER_ERROR, "rejected")),
+    };
+  }
+
+  test("report a send that could not be recorded to onRecordError, not onError", async () => {
+    const provider = smsProvider("sent");
+    const tracking = new DeliveryTrackingService({
+      providers: [provider],
+      store: new OfflineStore(),
+    });
+    const recordErrors: unknown[] = [];
+    const sendErrors: unknown[] = [];
+    const kmsg = new KMsg({
+      providers: [provider],
+      hooks: createDeliveryTrackingHooks(tracking, {
+        onRecordError: (error, { context, result }) => {
+          recordErrors.push({
+            message: error instanceof Error ? error.message : error,
+            messageId: context.messageId,
+            providerMessageId: result.providerMessageId,
+          });
+        },
+        onError: (error) => {
+          sendErrors.push(error);
+        },
+      }),
+    });
+
+    const sent = await kmsg.send({
+      messageId: "m1",
+      to: "01012345678",
+      text: "hi",
+    });
+
+    expect(sent.isSuccess).toBe(true);
+    expect(recordErrors).toEqual([
+      {
+        message: "tracking store offline",
+        messageId: "m1",
+        providerMessageId: "p1",
+      },
+    ]);
+    expect(sendErrors).toEqual([]);
+  });
+
+  test("pass a failed send to onError with its context", async () => {
+    const provider = smsProvider("rejected");
+    const tracking = new DeliveryTrackingService({ providers: [provider] });
+    const sendErrors: Array<{ code: string; messageId: string }> = [];
+    const kmsg = new KMsg({
+      providers: [provider],
+      hooks: createDeliveryTrackingHooks(tracking, {
+        onError: (error, context) => {
+          sendErrors.push({ code: error.code, messageId: context.messageId });
+        },
+      }),
+    });
+
+    await kmsg.send({ messageId: "m2", to: "01012345678", text: "hi" });
+
+    expect(sendErrors).toEqual([
+      { code: KMsgErrorCode.PROVIDER_ERROR, messageId: "m2" },
+    ]);
+  });
+
+  test("send an unrecorded send to onHookError without onRecordError", async () => {
+    const provider = smsProvider("sent");
+    const tracking = new DeliveryTrackingService({
+      providers: [provider],
+      store: new OfflineStore(),
+    });
+    const hookErrors: unknown[] = [];
+    const kmsg = new KMsg({
+      providers: [provider],
+      hooks: {
+        ...createDeliveryTrackingHooks(tracking),
+        onHookError: (error, { hook, context }) => {
+          hookErrors.push({
+            hook,
+            messageId: context.messageId,
+            message: error instanceof Error ? error.message : error,
+          });
+        },
+      },
+    });
+
+    const sent = await kmsg.send({
+      messageId: "m3",
+      to: "01012345678",
+      text: "hi",
+    });
+
+    expect(sent.isSuccess).toBe(true);
+    expect(hookErrors).toEqual([
+      { hook: "onSuccess", messageId: "m3", message: "tracking store offline" },
+    ]);
+  });
+
+  test("still call onQueued when a queued send cannot be recorded", async () => {
+    const provider = smsProvider("sent");
+    const tracking = new DeliveryTrackingService({
+      providers: [provider],
+      store: new OfflineStore(),
+    });
+    const events: string[] = [];
+    const kmsg = new KMsg({
+      providers: [provider],
+      persistence: { strategy: "queue", repo: new InMemoryMessageRepository() },
+      hooks: createDeliveryTrackingHooks(tracking, {
+        onRecordError: (_error, { context }) => {
+          events.push(`record error ${context.messageId}`);
+        },
+        onQueued: () => {
+          events.push("queued");
+        },
+      }),
+    });
+
+    await kmsg.send({ messageId: "m4", to: "01012345678", text: "hi" });
+
+    expect(events).toEqual(["record error m4", "queued"]);
   });
 });

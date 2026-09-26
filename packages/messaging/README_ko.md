@@ -186,6 +186,21 @@ await tracking.runOnce();
 
 `runOnce()`는 저장할 수 있는 갱신을 모두 저장합니다. 스토어가 한 레코드의 갱신을 거부하면(예: 컬럼에 들어가지 않는 값) 나머지는 그대로 저장되고, 거부된 레코드는 다음 백오프 지연 뒤에 다시 확인되며, 그 뒤 `runOnce()`가 실패 목록을 담은 `AggregateError`로 reject됩니다.
 
+### 기록 오류
+
+`createDeliveryTrackingHooks`의 hook은 provider가 접수한 메시지를 기록합니다. 기록에 실패해도 발송은 성공이지만 그 메시지는 폴링되지 않습니다. 이 오류는 `onRecordError`로 가고, 없으면 `KMsg`의 `onHookError`(그것도 없으면 `console.error`)로 갑니다. `onError`는 실패한 발송만, hook context와 함께 받습니다.
+
+```ts
+const kmsg = new KMsg({
+  providers,
+  hooks: createDeliveryTrackingHooks(tracking, {
+    onRecordError: (error, { context }) => {
+      console.error(`${context.messageId} 메시지는 추적되지 않습니다`, error);
+    },
+  }),
+});
+```
+
 ### Bun(SQLite) 예시
 
 ```ts
