@@ -7,7 +7,7 @@ title: "addEndpoints"
 
 > **addEndpoints**(`runtime`, `inputs`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:489](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L489)
+Defined in: [packages/webhook/src/runtime/webhook-runtime.service.ts:508](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/webhook-runtime.service.ts#L508)
 
 ## Parameters
 

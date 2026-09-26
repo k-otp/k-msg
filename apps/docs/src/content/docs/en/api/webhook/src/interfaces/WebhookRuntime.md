@@ -5,7 +5,7 @@ prev: false
 title: "WebhookRuntime"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L73)
+Defined in: [packages/webhook/src/runtime/types.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L80)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:73](https://github.com/k-otp/
 
 > **addEndpoint**(`input`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \}\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L74)
+Defined in: [packages/webhook/src/runtime/types.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L81)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:74](https://github.com/k-otp/
 
 > **addEndpoints**(`inputs`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L75)
+Defined in: [packages/webhook/src/runtime/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L82)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ readonly [`WebhookEndpointInput`](/en/api/webhook/src/type-aliases/webhookendpoi
 
 > **emit**(`event`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L88)
+Defined in: [packages/webhook/src/runtime/types.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L95)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:88](https://github.com/k-otp/
 
 > **emitSync**(`event`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L89)
+Defined in: [packages/webhook/src/runtime/types.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L96)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:89](https://github.com/k-otp/
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L90)
+Defined in: [packages/webhook/src/runtime/types.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L97)
 
 #### Returns
 
@@ -97,7 +97,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:90](https://github.com/k-otp/
 
 > **getEndpoint**(`endpointId`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L83)
+Defined in: [packages/webhook/src/runtime/types.ts:90](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L90)
 
 #### Parameters
 
@@ -115,7 +115,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:83](https://github.com/k-otp/
 
 > **listDeliveries**(`options?`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L91)
+Defined in: [packages/webhook/src/runtime/types.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L98)
 
 #### Parameters
 
@@ -133,7 +133,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:91](https://github.com/k-otp/
 
 > **listEndpoints**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L84)
+Defined in: [packages/webhook/src/runtime/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L91)
 
 #### Returns
 
@@ -145,7 +145,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:84](https://github.com/k-otp/
 
 > **probeEndpoint**(`input`): `Promise`\<[`WebhookTestResult`](/en/api/webhook/src/interfaces/webhooktestresult/)\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L85)
+Defined in: [packages/webhook/src/runtime/types.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L92)
 
 #### Parameters
 
@@ -163,7 +163,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:85](https://github.com/k-otp/
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L82)
+Defined in: [packages/webhook/src/runtime/types.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L89)
 
 #### Parameters
 
@@ -181,7 +181,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:82](https://github.com/k-otp/
 
 > **shutdown**(): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L94)
+Defined in: [packages/webhook/src/runtime/types.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L101)
 
 #### Returns
 
@@ -193,7 +193,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:94](https://github.com/k-otp/
 
 > **updateEndpoint**(`endpointId`, `updates`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \}\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L78)
+Defined in: [packages/webhook/src/runtime/types.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L85)
 
 #### Parameters
 
