@@ -299,15 +299,15 @@ export interface AesGcmFieldCryptoProviderOptions {
  *   Encrypts with a fresh random IV and the caller's AAD as GCM additional
  *   data, and serves lookups from a separate HMAC instead of deterministic
  *   ciphertext. The plaintext and logging bullets are answered by
- *   fail-policy and logging-policy.
- * @evidenceReview docs/security/field-crypto-v1.md#threat-model #1ba61d5
+ *   fail-policy and logging-policy, and the webhook legacy AAD bullet by
+ *   revealFieldValue in @k-msg/webhook.
+ * @evidenceReview docs/security/field-crypto-v1.md#threat-model #98761bf
  *   Read encrypt, decrypt, and hash: a 12-byte getRandomValues IV per call,
  *   AAD passed as additionalData on both paths, and HMAC-SHA-256 for hash.
  *   The messaging stores bind messageId, providerId, tableName, fieldPath, and
  *   tenantId by default; webhook storage, which encrypts one field per table,
  *   binds the table, the endpoint or delivery id, and the tenant when one is
- *   set; reads fall back to the tenant-less AAD for values written before
- *   tenant binding (field-crypto.test.ts in @k-msg/webhook covers both).
+ *   set.
  */
 export function createAesGcmFieldCryptoProvider(
   options: AesGcmFieldCryptoProviderOptions,

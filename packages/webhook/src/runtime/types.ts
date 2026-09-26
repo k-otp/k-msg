@@ -44,6 +44,13 @@ export interface WebhookRuntimeFieldCryptoOptions {
   tenantId?: string;
   endpoint?: FieldCryptoConfig;
   delivery?: FieldCryptoConfig;
+  /**
+   * Also reads secrets and payloads written before ciphertext was bound to
+   * `tenantId`, which are otherwise rejected. Set it only while migrating
+   * them with `migrateFieldCryptoToTenant()`, then remove it: a tenant-less
+   * value copied from another tenant's row with the same id would decrypt.
+   */
+  acceptLegacyAad?: boolean;
 }
 
 export type WebhookEndpointInput = Omit<

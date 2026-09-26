@@ -2,6 +2,10 @@
  * Runtime webhook APIs
  */
 
+export {
+  migrateWebhookFieldCryptoToTenant,
+  type WebhookTenantMigrationResult,
+} from "./crypto/field-crypto";
 export { RetryManager } from "./retry/retry.manager";
 export {
   DEFAULT_ENDPOINT_VALIDATION_OPTIONS,
