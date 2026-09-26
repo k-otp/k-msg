@@ -88,7 +88,8 @@ await runtime.shutdown();
   soon as the event is queued. The call that fills a batch sends it, retries
   included, before it resolves, unless another batch is still being sent:
   then it resolves at once, and the full batch goes out as soon as the other
-  one finishes. The timer runs only while events are queued: a runtime that
+  one finishes (if that one fails, the timer, the next call or `flush()`
+  sends it). The timer runs only while events are queued: a runtime that
   never calls `emit()` starts none, and one with an empty queue holds none.
 
 `batchSize` and `batchTimeoutMs` only affect `emit()`, so a config used with

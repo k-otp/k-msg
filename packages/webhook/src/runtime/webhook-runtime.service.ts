@@ -85,7 +85,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private readonly batchTimeoutMs: number;
   private readonly autoStart: boolean;
 
-  private readonly eventQueue: WebhookEvent[] = [];
+  private eventQueue: WebhookEvent[] = [];
   // Pending only while emit() has queued events, so an idle runtime holds
   // no timer.
   private batchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -483,6 +483,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     const batch = this.eventQueue.splice(0, this.batchSize);
+    // Never dispatch (or chain after) an empty batch, so a batch size that
+    // takes nothing cannot spin.
+    if (batch.length === 0) {
+      return Promise.resolve();
+    }
     const dispatched = this.dispatchBatch(batch);
     this.activeBatch = dispatched.finally(() => {
       this.activeBatch = null;
@@ -541,8 +546,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
       }
     } catch (error) {
       // Re-queue only what was not dispatched; earlier events already reached
-      // their endpoints and would otherwise be delivered twice.
-      this.eventQueue.unshift(...batch.slice(dispatched));
+      // their endpoints and would otherwise be delivered twice. Not spread
+      // into unshift(): a large batch would exceed the argument limit.
+      this.eventQueue = batch.slice(dispatched).concat(this.eventQueue);
       throw error;
     }
   }
@@ -625,9 +631,12 @@ export class WebhookRuntimeService implements WebhookRuntime {
 
   private async runScheduledBatch(): Promise<void> {
     try {
-      // The queue is due now: if a batch is still in flight, send it right
-      // after that one rather than a whole timeout later.
-      await this.waitForActiveBatch();
+      // The queue is due now. Wait out batches in flight, including any
+      // chained after them, whose failures their starters report, then send
+      // what is left rather than a whole timeout later.
+      while (this.activeBatch !== null) {
+        await this.waitForActiveBatch();
+      }
       await this.processBatch();
     } catch (error) {
       logger.error(

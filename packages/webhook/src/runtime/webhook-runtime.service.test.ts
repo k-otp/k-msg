@@ -552,6 +552,67 @@ describe("WebhookRuntimeService batches in flight", () => {
     expect(client.calls.length).toBe(2);
   });
 
+  test("a chained batch that fails is retried by the timer", async () => {
+    const clock = manualTimers();
+    const http = gatedHttpClient();
+    const persistence = createInMemoryWebhookPersistence();
+    const list = persistence.endpointStore.list.bind(persistence.endpointStore);
+    let failList!: () => void;
+    const listFails = new Promise<void>((resolve) => {
+      failList = resolve;
+    });
+    let listCalls = 0;
+    // The first batch looks up endpoints once per event (calls 1 and 2); the
+    // chained batch's lookup (call 3) waits, then fails.
+    persistence.endpointStore.list = async () => {
+      listCalls += 1;
+      if (listCalls !== 3) return list();
+      await listFails;
+      throw new Error("endpoint store unavailable");
+    };
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchSize: 2 },
+      httpClient: http.client,
+      persistence,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/chained",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      const first = Promise.all([
+        runtime.emit(createEvent()),
+        runtime.emit(createEvent()),
+      ]);
+      await waitUntil(() => http.calls() === 1);
+      await Promise.all([
+        runtime.emit(createEvent()),
+        runtime.emit(createEvent()),
+      ]);
+
+      http.release();
+      // The emit() that started the first batch resumes after the chained
+      // batch took the queue, finds it empty, and cancels the timer.
+      await first;
+      expect(clock.pending()).toBe(0);
+
+      failList();
+      await waitUntil(() => clock.pending() === 1);
+      expect(clock.pending()).toBe(1);
+
+      clock.fire();
+      await waitUntil(() => http.calls() === 4);
+      expect(http.calls()).toBe(4);
+    } finally {
+      failList();
+      http.release();
+      clock.restore();
+      await runtime.shutdown();
+    }
+  });
+
   test("concurrent emits send every full batch without flush()", async () => {
     const client = new RecordingHttpClient();
     const runtime = new WebhookRuntimeService({
