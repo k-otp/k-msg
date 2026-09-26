@@ -56,6 +56,7 @@ describe("IWINVProvider", () => {
       to: "01012345678",
       templateId: "TPL_1",
       variables: { code: 1234 },
+      providerOptions: { templateContent: "#{code}" },
     });
 
     expect(result.isSuccess).toBe(true);
@@ -163,6 +164,7 @@ describe("IWINVProvider", () => {
       from: "01000000000",
       templateId: "TPL_1",
       variables: { code: 1234 },
+      providerOptions: { templateContent: "#{code}" },
     });
 
     expect(calledUrl).toBe("https://alimtalk.bizservice.iwinv.kr/api/v2/send/");
@@ -202,6 +204,7 @@ describe("IWINVProvider", () => {
       from: "01000000000",
       templateId: "TPL_1",
       variables: { code: 1234 },
+      providerOptions: { templateContent: "#{code}" },
       failover: {
         enabled: true,
         fallbackChannel: "lms",
@@ -234,6 +237,7 @@ describe("IWINVProvider", () => {
       from: "01000000000",
       templateId: "TPL_1",
       variables: { code: 1234 },
+      providerOptions: { templateContent: "#{code}" },
     });
 
     expect(result.isFailure).toBe(true);

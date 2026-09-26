@@ -55,6 +55,7 @@ export const providerOnboardingSpecs: Readonly<
     notes: [
       "Channel add/auth is not available via IWINV public API in current integration.",
       "Template APIs are available and can be probed.",
+      "AlimTalk variables are matched to the template's #{name} placeholders by name; the template body comes from providerOptions.templateContent or the template API.",
     ],
   },
   aligo: {

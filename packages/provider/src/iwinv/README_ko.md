@@ -16,8 +16,8 @@ bun add @k-msg/provider @k-msg/core
 
 ## 공식 문서(IWINV) 링크
 
-- SMS API: https://docs.iwinv.kr/api/Message_api/
-- 알림톡(Kakao) API: https://docs.iwinv.kr/api/kakao_api/
+- SMS API: https://help.iwinv.kr/manual/read.html?idx=904
+- 알림톡(Kakao) API: https://help.iwinv.kr/manual/862
 
 ## 온보딩 요구사항
 
@@ -46,6 +46,14 @@ CLI 기준:
 - 응답 예:
   - 성공: `{"code":200,...}`
   - IP 미등록: `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}`
+
+템플릿 변수:
+- IWINV의 `templateParam`은 위치 기반입니다. 템플릿에 나오는 `#{변수}` 하나마다 값 하나를 순서대로 넣습니다.
+- `IWINVProvider`는 `variables`를 이름으로 매칭해 이 배열을 만듭니다. 템플릿 본문은
+  `providerOptions.templateContent`에서 읽고, 없으면 템플릿 목록 API(`POST /api/template/`)로
+  조회해 provider 인스턴스마다 10분간 재사용합니다.
+- `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
+  `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
 
 알림톡 `code` 요약:
 - `200`: 발송 성공
@@ -153,11 +161,11 @@ const sms = await provider.send({
 });
 if (sms.isFailure) throw sms.error;
 
-// 알림톡
+// 알림톡: variables는 템플릿의 #{이름} 변수에 이름으로 매칭됩니다.
 const alimtalk = await provider.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "YOUR_TEMPLATE_CODE",
+  templateId: "YOUR_TEMPLATE_CODE",
   variables: { name: "Jane" },
   // 선택: `from`을 주면 IWINV의 대체문자(reSend) 플로우가 활성화됩니다.
   from: "01000000000",

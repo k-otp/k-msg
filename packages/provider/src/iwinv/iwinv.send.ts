@@ -14,6 +14,11 @@ import {
   toProviderNetworkError,
   toProviderTransportError,
 } from "../shared/provider-transport";
+import type { TemplateContentCache } from "../shared/template-content-cache";
+import {
+  findMissingTemplateVariables,
+  listTemplatePlaceholders,
+} from "../shared/template-variables";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   getAlimTalkHeaders,
@@ -42,15 +47,77 @@ import {
   normalizePhoneNumber,
   resolveSmsBaseUrl,
 } from "./iwinv.sms.helpers";
+import { fetchIwinvTemplateContent } from "./iwinv.template-content";
 import { formatIwinvDate, formatSmsReserveDate } from "./iwinv.time";
+
+function toTemplateParamValue(value: unknown): string {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+/**
+ * Builds IWINV's `templateParam`, which IWINV applies by position: one value
+ * per `#{placeholder}` occurrence, in template order. Values are taken from
+ * `variables` by placeholder name, using the template body from
+ * `providerOptions.templateContent` or else IWINV's template API.
+ */
+async function resolveTemplateParam(params: {
+  providerId: string;
+  config: NormalizedIwinvConfig;
+  options: Extract<SendOptions, { type: "ALIMTALK" }>;
+  context?: ProviderRequestContext;
+  templateContents: TemplateContentCache;
+}): Promise<Result<string[] | undefined, KMsgError>> {
+  const { providerId, config, options, context, templateContents } = params;
+
+  const override = options.providerOptions?.templateParam;
+  if (Array.isArray(override)) {
+    return ok(override.map(toTemplateParamValue));
+  }
+
+  const variables = options.variables ?? {};
+  if (Object.keys(variables).length === 0) return ok(undefined);
+
+  const inlineContent = options.providerOptions?.templateContent;
+  const content =
+    typeof inlineContent === "string" && inlineContent.length > 0
+      ? ok(inlineContent)
+      : await templateContents.get(options.templateId, context, () =>
+          fetchIwinvTemplateContent({
+            providerId,
+            config,
+            templateCode: options.templateId,
+            context,
+          }),
+        );
+  if (content.isFailure) return content;
+
+  const placeholders = listTemplatePlaceholders(content.value);
+  const missing = findMissingTemplateVariables(placeholders, variables);
+  if (missing.length > 0) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Missing variables for IWINV template ${options.templateId}: ${missing.join(", ")}`,
+        { providerId, templateId: options.templateId, missing },
+      ),
+    );
+  }
+
+  return ok(
+    placeholders.length > 0
+      ? placeholders.map((name) => toTemplateParamValue(variables[name]))
+      : undefined,
+  );
+}
 
 export async function sendAlimTalk(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   options: Extract<SendOptions, { type: "ALIMTALK" }>;
   context?: ProviderRequestContext;
+  templateContents: TemplateContentCache;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, config, options, context } = params;
+  const { providerId, config, options, context, templateContents } = params;
   const templateId = options.templateId;
 
   if (!templateId || templateId.length === 0) {
@@ -80,14 +147,6 @@ export async function sendAlimTalk(params: {
     );
   }
 
-  const templateParamOverride = options.providerOptions?.templateParam;
-  const templateParam = Array.isArray(templateParamOverride)
-    ? templateParamOverride.map((v) =>
-        v === null || v === undefined ? "" : String(v),
-      )
-    : Object.values(options.variables || {}).map((v) =>
-        v === null || v === undefined ? "" : String(v),
-      );
   const failover = options.failover;
 
   const senderNumber =
@@ -180,6 +239,15 @@ export async function sendAlimTalk(params: {
         ? failover.fallbackContent.trim()
         : undefined;
 
+  const templateParam = await resolveTemplateParam({
+    providerId,
+    config,
+    options,
+    context,
+    templateContents,
+  });
+  if (templateParam.isFailure) return templateParam;
+
   const payload: Record<string, unknown> = {
     templateCode: templateId,
     reserve,
@@ -187,7 +255,7 @@ export async function sendAlimTalk(params: {
     list: [
       {
         phone: to,
-        templateParam: templateParam.length > 0 ? templateParam : undefined,
+        templateParam: templateParam.value,
       },
     ],
     reSend,
