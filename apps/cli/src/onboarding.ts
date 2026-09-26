@@ -748,6 +748,35 @@ async function inferPlusId(params: {
       };
 }
 
+// SOLAPI sends AlimTalk by pfId and has no template API that preflight could
+// probe it with, so preflight checks that a pfId is set.
+function evaluateKakaoSenderKeyCheck(params: {
+  config: KMsgCliConfig;
+  provider: ProviderWithCapabilities;
+  senderKey?: string;
+}): OnboardingCheckResult | null {
+  const { config, provider, senderKey } = params;
+  const entry = getProviderEntry(config, provider.id);
+  if (entry?.type !== "solapi") return null;
+
+  const providerConfig = getProviderConfig(config, provider.id);
+  const resolved =
+    hasNonEmptyString(senderKey) || hasNonEmptyString(providerConfig.kakaoPfId);
+  return {
+    id: "kakao_sender_key",
+    title: "Kakao sender key (pfId)",
+    kind: "config",
+    severity: "blocker",
+    status: resolved ? "pass" : "fail",
+    message: resolved
+      ? "A Kakao pfId is set"
+      : `Kakao pfId is not set (pass --sender-key, use a Kakao channel alias, or set ${provider.id}.config.kakaoPfId)`,
+    details: {
+      requiredAnyOf: ["senderKey", "kakaoPfId"],
+    },
+  };
+}
+
 export async function runProviderDoctor(input: {
   runtime: Runtime;
   provider: ProviderWithCapabilities;
@@ -933,6 +962,15 @@ export async function runAlimTalkPreflight(input: {
       status: "fail",
       message: `Provider '${provider.id}' does not expose onboarding spec`,
     });
+  }
+
+  const senderKeyCheck = evaluateKakaoSenderKeyCheck({
+    config: runtime.config,
+    provider,
+    senderKey,
+  });
+  if (senderKeyCheck) {
+    checks.push(senderKeyCheck);
   }
 
   const getTemplate = (provider as unknown as TemplateProvider).getTemplate;
