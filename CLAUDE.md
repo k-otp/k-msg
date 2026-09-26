@@ -119,6 +119,7 @@ bun run graph:ttsc:snapshot   # after an intended dependency or citation change
 
 - For code questions (callers, call paths, implementations, where a type is used), prefer the `ttsc-graph` MCP tool (`inspect_typescript_graph`, registered in `.mcp.json`) over grepping. Its answers are compiler-resolved; read files only for function bodies.
 - Documents listed in `lint.evidence.config.ts` (currently `docs/compliance/kr-b2b-retention.md`) are governed by `@ttsc/evidence`. When you change a governed section or a declaration that cites one, re-verify the code against the text, then update the `@evidenceReview` fingerprint and statement that `bun run typecheck` reports. Never update a fingerprint without re-checking. Details: `docs/architecture/specification-evidence.md`.
+- Biome (pinned in the root catalog) formats and syntax-lints everything; run `bun run check` (CI uses `--diagnostic-level=error`) or `bun run format`. Do not invoke `bun x biome`: that resolves an unrelated npm package.
 - Toolchain background and commands: `docs/migration/typescript-7-ttsc.md`.
 
 ### Testing Strategy
