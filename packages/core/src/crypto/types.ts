@@ -502,7 +502,8 @@ export function createNoopFieldCryptoProvider(): FieldCryptoProvider {
 export function assertCryptoEnvelopeV1(
   value: unknown,
 ): asserts value is CryptoEnvelope {
-  if (isCryptoEnvelope(value) && value.v === 1 && value.alg === "A256GCM") {
+  const shapeValid = isCryptoEnvelope(value);
+  if (shapeValid && value.v === 1 && value.alg === "A256GCM") {
     return;
   }
   const candidate =
@@ -515,7 +516,7 @@ export function assertCryptoEnvelopeV1(
     {
       rule: "fieldCrypto.envelope.v1",
       // Distinguishes a malformed envelope from a wrong version or algorithm.
-      shapeValid: isCryptoEnvelope(value),
+      shapeValid,
       v: candidate.v,
       alg: candidate.alg,
     },
