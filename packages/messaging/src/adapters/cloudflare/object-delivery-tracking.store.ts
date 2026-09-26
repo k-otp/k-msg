@@ -258,6 +258,7 @@ export class CloudflareObjectDeliveryTrackingStore
     const orderBy = options.orderBy ?? "requestedAt";
     const orderDirection = options.orderDirection ?? "desc";
     const normalizedFilter = await this.normalizeFilter(options);
+    if (!normalizedFilter) return [];
 
     const entries = readObjectEntries(this.storage, this.recordPrefix());
     const records: TrackingRecord[] = [];
@@ -285,6 +286,7 @@ export class CloudflareObjectDeliveryTrackingStore
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
     const normalizedFilter = await this.normalizeFilter(filter);
+    if (!normalizedFilter) return 0;
     const entries = readObjectEntries(this.storage, this.recordPrefix());
     let count = 0;
 
@@ -306,6 +308,7 @@ export class CloudflareObjectDeliveryTrackingStore
     if (fields.length === 0) return [];
 
     const normalizedFilter = await this.normalizeFilter(filter);
+    if (!normalizedFilter) return [];
     const entries = readObjectEntries(this.storage, this.recordPrefix());
     const buckets = new Map<
       string,
@@ -375,14 +378,19 @@ export class CloudflareObjectDeliveryTrackingStore
     await this.upsert(next);
   }
 
+  // Resolves to undefined when no record can match the filter.
   private async normalizeFilter<T extends DeliveryTrackingRecordFilter>(
     filter: T,
-  ): Promise<T> {
+  ): Promise<T | undefined> {
     return (await normalizeTrackingFilterWithHashes(
       filter,
       this.fieldCrypto,
       this.cryptoMode(),
-    )) as T;
+      {
+        tableName: "kmsg_delivery_tracking_object",
+        store: "object",
+      },
+    )) as T | undefined;
   }
 
   private patchTouchesCrypto(patch: Partial<TrackingRecord>): boolean {

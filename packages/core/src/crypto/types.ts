@@ -42,10 +42,10 @@ export interface KeySetState {
 /**
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Separates the active encrypt kid from the multi-kid decrypt set that
- *   key rotation relies on.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #e297ee5
- *   Read the three bullets against this interface and the AES-GCM provider's
- *   decrypt, which tries every candidate kid before failing.
+ *   key rotation and hash lookups rely on.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #c79fc15
+ *   Read the bullets against this interface and the AES-GCM provider: decrypt
+ *   tries every candidate kid; hash keys on the input kid, else activeKid.
  */
 export interface KeyResolver {
   resolveEncryptKey(
