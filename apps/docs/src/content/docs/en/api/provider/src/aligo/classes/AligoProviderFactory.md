@@ -5,7 +5,7 @@ prev: false
 title: "AligoProviderFactory"
 ---
 
-Defined in: [packages/provider/src/aligo/provider.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L79)
+Defined in: [packages/provider/src/aligo/provider.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L88)
 
 Aligo Provider package entrypoint
 
@@ -25,7 +25,7 @@ Aligo Provider package entrypoint
 
 > `static` **create**(`config`): [`AligoProvider`](/en/api/provider/src/aligo/classes/aligoprovider/)
 
-Defined in: [packages/provider/src/aligo/provider.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L80)
+Defined in: [packages/provider/src/aligo/provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L89)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [packages/provider/src/aligo/provider.ts:80](https://github.com/k-ot
 
 > `static` **createDefault**(): [`AligoProvider`](/en/api/provider/src/aligo/classes/aligoprovider/)
 
-Defined in: [packages/provider/src/aligo/provider.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L84)
+Defined in: [packages/provider/src/aligo/provider.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.ts#L93)
 
 #### Returns
 
