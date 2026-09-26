@@ -6,6 +6,9 @@ import type {
   CloudflareSqlClient,
   SqlDialect,
 } from "../../adapters/cloudflare/sql-client";
+import { applyTrackingCryptoOnWrite } from "../../delivery-tracking/field-crypto";
+import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
+import type { TrackingRecord } from "../../delivery-tracking/types";
 import {
   ensureFieldCryptoMigrationStateTables,
   getFieldCryptoMigrationRun,
@@ -20,6 +23,7 @@ import type {
   FieldCryptoMigrationChunkRecord,
   FieldCryptoMigrationRetryInput,
   FieldCryptoMigrationRunRecord,
+  FieldCryptoMigrationStateTables,
   FieldCryptoMigrationStatus,
 } from "./types";
 
@@ -110,12 +114,16 @@ async function selectNextRows(
     typeof cursor.messageId === "string" &&
     cursor.messageId.length > 0
   ) {
-    const p1 = placeholder(client.dialect, params.length + 1);
+    // `?` placeholders are positional, so the repeated cursor value is bound
+    // twice rather than reusing one placeholder.
+    const afterRequestedAt = placeholder(client.dialect, params.length + 1);
     params.push(cursor.requestedAt);
-    const p2 = placeholder(client.dialect, params.length + 1);
+    const sameRequestedAt = placeholder(client.dialect, params.length + 1);
+    params.push(cursor.requestedAt);
+    const afterMessageId = placeholder(client.dialect, params.length + 1);
     params.push(cursor.messageId);
     where.push(
-      `(${requestedAtColumn} > ${p1} OR (${requestedAtColumn} = ${p1} AND ${messageIdColumn} > ${p2}))`,
+      `(${requestedAtColumn} > ${afterRequestedAt} OR (${requestedAtColumn} = ${sameRequestedAt} AND ${messageIdColumn} > ${afterMessageId}))`,
     );
   }
 
@@ -136,10 +144,40 @@ async function selectNextRows(
     .filter((row) => row.messageId.length > 0);
 }
 
+function parseMetadata(value: unknown): Record<string, unknown> | undefined {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function requireFieldCrypto(
+  fieldCrypto: DeliveryTrackingFieldCryptoOptions | undefined,
+): DeliveryTrackingFieldCryptoOptions {
+  if (!fieldCrypto) {
+    throw new Error(
+      "fieldCrypto is required: the backfill encrypts legacy plaintext with the provider and keys the tracking store uses",
+    );
+  }
+  return fieldCrypto;
+}
+
+// Encrypts rows that were never protected (crypto_state NULL or "plain") or
+// were left degraded, reading the legacy plaintext columns and writing the
+// same secure columns the tracking store's write path produces.
 async function backfillChunkByMessageIds(
   client: CloudflareSqlClient,
   spec: DeliveryTrackingSchemaSpec,
   messageIds: readonly string[],
+  fieldCrypto: DeliveryTrackingFieldCryptoOptions,
 ): Promise<void> {
   if (messageIds.length === 0) return;
 
@@ -149,27 +187,68 @@ async function backfillChunkByMessageIds(
   const idPlaceholders = placeholders(client.dialect, messageIds.length).join(
     ", ",
   );
-  const assignments = [
-    `${q(columns.toEnc)} = COALESCE(${q(columns.toEnc)}, ${q(columns.to)})`,
-    `${q(columns.toHash)} = COALESCE(${q(columns.toHash)}, ${q(columns.to)})`,
-    `${q(columns.toMasked)} = COALESCE(${q(columns.toMasked)}, ${q(columns.to)})`,
-    `${q(columns.fromEnc)} = COALESCE(${q(columns.fromEnc)}, ${q(columns.from)})`,
-    `${q(columns.fromHash)} = COALESCE(${q(columns.fromHash)}, ${q(columns.from)})`,
-    `${q(columns.fromMasked)} = COALESCE(${q(columns.fromMasked)}, ${q(columns.from)})`,
-    `${q(columns.cryptoVersion)} = COALESCE(${q(columns.cryptoVersion)}, 1)`,
-    `${q(columns.cryptoState)} = COALESCE(${q(columns.cryptoState)}, 'degraded')`,
-  ];
-
-  await client.query(
-    `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} IN (${idPlaceholders})`,
+  const { rows } = await client.query<Record<string, unknown>>(
+    `SELECT ${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${q(columns.metadata)} AS metadata_plain FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND (${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`,
     messageIds,
   );
+
+  for (const row of rows) {
+    const messageId = String(row.message_id ?? "");
+    const to = toStringValue(row.to_plain);
+    if (!messageId || !to) continue;
+
+    // The write path only reads identity, recipient, sender, and metadata.
+    const record = {
+      messageId,
+      providerId: String(row.provider_id ?? ""),
+      to,
+      from: toStringValue(row.from_plain),
+      metadata: parseMetadata(row.metadata_plain),
+    } as TrackingRecord;
+    const secured = await applyTrackingCryptoOnWrite(
+      record,
+      fieldCrypto,
+      { tableName: spec.tableName, store: "sql" },
+      { secureMode: true, compatPlainColumns: true },
+    );
+    if (secured.cryptoState !== "encrypted") {
+      throw new Error(
+        `Field crypto did not encrypt message ${messageId} (state: ${secured.cryptoState ?? "unknown"}); refusing to store fallback values`,
+      );
+    }
+
+    const values: Array<[string, unknown]> = [
+      [columns.toEnc, secured.toEnc ?? null],
+      [columns.toHash, secured.toHash ?? null],
+      [columns.toMasked, secured.toMasked ?? null],
+      [columns.fromEnc, secured.fromEnc ?? null],
+      [columns.fromHash, secured.fromHash ?? null],
+      [columns.fromMasked, secured.fromMasked ?? null],
+      [columns.metadataEnc, secured.metadataEnc ?? null],
+      [
+        columns.metadataHashes,
+        secured.metadataHashes ? JSON.stringify(secured.metadataHashes) : null,
+      ],
+      [columns.cryptoKid, secured.cryptoKid ?? null],
+      [columns.cryptoVersion, secured.cryptoVersion ?? 1],
+      [columns.cryptoState, secured.cryptoState],
+    ];
+    const assignments = values.map(
+      ([column], index) =>
+        `${q(column)} = ${placeholder(client.dialect, index + 1)}`,
+    );
+    await client.query(
+      `UPDATE ${tableRef} SET ${assignments.join(", ")} WHERE ${q(columns.messageId)} = ${placeholder(client.dialect, values.length + 1)}`,
+      [...values.map(([, value]) => value), messageId],
+    );
+  }
 }
 
 export async function applyFieldCryptoMigration(
   client: CloudflareSqlClient,
   options: FieldCryptoMigrationApplyInput,
 ): Promise<FieldCryptoMigrationApplyResult> {
+  const fieldCrypto = requireFieldCrypto(options.fieldCrypto);
   await ensureFieldCryptoMigrationStateTables(client, options);
 
   const run = await getFieldCryptoMigrationRun(client, options.planId, options);
@@ -197,16 +276,51 @@ export async function applyFieldCryptoMigration(
   let cursorMessageId = run.cursorMessageId;
   let chunkNo = run.processedChunks + run.failedChunks;
 
-  while (processedChunks < maxChunks) {
-    const rows = await selectNextRows(
+  const failRun = async (
+    error: unknown,
+  ): Promise<FieldCryptoMigrationApplyResult> => {
+    await upsertFieldCryptoMigrationRun(
       client,
-      spec,
       {
-        requestedAt: cursorRequestedAt,
-        messageId: cursorMessageId,
+        ...run,
+        status: "failed",
+        failedChunks,
+        processedChunks: run.processedChunks + processedChunks,
+        processedRows: run.processedRows + processedRows,
+        cursorRequestedAt,
+        cursorMessageId,
+        updatedAt: Date.now(),
+        lastError: toErrorMessage(error),
       },
-      run.chunkSize,
+      options,
     );
+
+    return {
+      planId: run.planId,
+      processedChunks,
+      processedRows,
+      failedChunks,
+      status: "failed",
+      cursorRequestedAt,
+      cursorMessageId,
+    };
+  };
+
+  while (processedChunks < maxChunks) {
+    let rows: TrackingCursorRow[];
+    try {
+      rows = await selectNextRows(
+        client,
+        spec,
+        {
+          requestedAt: cursorRequestedAt,
+          messageId: cursorMessageId,
+        },
+        run.chunkSize,
+      );
+    } catch (error) {
+      return failRun(error);
+    }
 
     if (rows.length === 0) {
       break;
@@ -236,7 +350,7 @@ export async function applyFieldCryptoMigration(
     );
 
     try {
-      await backfillChunkByMessageIds(client, spec, messageIds);
+      await backfillChunkByMessageIds(client, spec, messageIds, fieldCrypto);
       await upsertFieldCryptoMigrationChunk(
         client,
         {
@@ -280,31 +394,7 @@ export async function applyFieldCryptoMigration(
         options,
       );
 
-      await upsertFieldCryptoMigrationRun(
-        client,
-        {
-          ...run,
-          status: "failed",
-          failedChunks,
-          processedChunks: run.processedChunks + processedChunks,
-          processedRows: run.processedRows + processedRows,
-          cursorRequestedAt,
-          cursorMessageId,
-          updatedAt: Date.now(),
-          lastError: toErrorMessage(error),
-        },
-        options,
-      );
-
-      return {
-        planId: run.planId,
-        processedChunks,
-        processedRows,
-        failedChunks,
-        status: "failed",
-        cursorRequestedAt,
-        cursorMessageId,
-      };
+      return failRun(error);
     }
   }
 
@@ -353,6 +443,7 @@ export async function retryFieldCryptoMigration(
   client: CloudflareSqlClient,
   options: FieldCryptoMigrationRetryInput,
 ): Promise<FieldCryptoMigrationApplyResult> {
+  const fieldCrypto = requireFieldCrypto(options.fieldCrypto);
   await ensureFieldCryptoMigrationStateTables(client, options);
   const run = await getFieldCryptoMigrationRun(client, options.planId, options);
   if (!run) {
@@ -380,7 +471,7 @@ export async function retryFieldCryptoMigration(
     if (messageIds.length === 0) continue;
 
     try {
-      await backfillChunkByMessageIds(client, spec, messageIds);
+      await backfillChunkByMessageIds(client, spec, messageIds, fieldCrypto);
       await upsertFieldCryptoMigrationChunk(
         client,
         {
@@ -442,7 +533,7 @@ export async function retryFieldCryptoMigration(
 export async function statusFieldCryptoMigration(
   client: CloudflareSqlClient,
   planId: string,
-  options: FieldCryptoMigrationApplyInput,
+  options: FieldCryptoMigrationStateTables,
 ): Promise<FieldCryptoMigrationStatus> {
   await ensureFieldCryptoMigrationStateTables(client, options);
   return getFieldCryptoMigrationStatus(client, planId, options);
