@@ -93,6 +93,18 @@ Interpretation notes:
 
 IWINV and Aligo need the template body for this. They take it from `providerOptions.templateContent`, or else look the template up (IWINV `POST /api/template/`, Aligo `/akv10/template/list/`) through the send's request context and keep the body for 10 minutes per provider instance. A placeholder missing from `variables` fails the send with `INVALID_REQUEST` before anything is sent.
 
+## Delivery status lookup
+
+`DeliveryTrackingService` in `@k-msg/messaging` polls `provider.getDeliveryStatus()`.
+
+| Provider | `getDeliveryStatus` |
+| --- | --- |
+| `iwinv` | AlimTalk history; SMS/LMS/MMS history needs `smsCompanyId` |
+| `solapi` | SOLAPI message list |
+| `aligo` | not implemented |
+
+Aligo has result lookups (`/akv10/history/detail/`, `/sms_list/`) but does not publish the result codes they return, so `AligoProvider` has no `getDeliveryStatus()`. Tracked Aligo messages stay `SENT` until `polling.maxTrackingDurationMs` (24 h by default) marks them `UNKNOWN`; set `polling.unsupportedProviderStrategy: "unknown"` to settle them at the first poll instead. For the same reason tracking-based API failover never resends an Aligo AlimTalk: Aligo sends its own fallback when `failover.enabled` is set.
+
 ## ALIMTALK failover responsibilities
 
 `failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.

@@ -93,6 +93,18 @@ import 경로:
 
 IWINV와 Aligo는 이를 위해 템플릿 본문이 필요합니다. `providerOptions.templateContent`에서 읽고, 없으면 템플릿 API(IWINV `POST /api/template/`, Aligo `/akv10/template/list/`)를 발송과 같은 request context로 조회해 provider 인스턴스마다 10분간 재사용합니다. `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
 
+## 전송 결과 조회
+
+`@k-msg/messaging`의 `DeliveryTrackingService`는 `provider.getDeliveryStatus()`를 폴링합니다.
+
+| Provider | `getDeliveryStatus` |
+| --- | --- |
+| `iwinv` | 알림톡 전송내역, SMS/LMS/MMS 전송내역은 `smsCompanyId` 필요 |
+| `solapi` | SOLAPI 메시지 목록 |
+| `aligo` | 미구현 |
+
+Aligo에는 결과 조회 API(`/akv10/history/detail/`, `/sms_list/`)가 있지만 반환하는 결과 코드를 공개하지 않아 `AligoProvider`에는 `getDeliveryStatus()`가 없습니다. 추적 중인 Aligo 메시지는 `polling.maxTrackingDurationMs`(기본 24시간)가 지나 `UNKNOWN`이 될 때까지 `SENT`로 남습니다. 첫 폴링에서 바로 정리하려면 `polling.unsupportedProviderStrategy: "unknown"`을 설정하세요. 같은 이유로 tracking 기반 API failover는 Aligo 알림톡을 재발송하지 않으며, `failover.enabled`이면 Aligo가 대체문자를 직접 보냅니다.
+
 ## ALIMTALK failover 책임 범위
 
 ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider별 native 매핑은 다릅니다.

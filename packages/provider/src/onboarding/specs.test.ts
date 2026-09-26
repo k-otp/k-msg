@@ -58,6 +58,16 @@ describe("Provider onboarding specs", () => {
     expect(spec?.plusIdInference).toBe("unsupported");
   });
 
+  test("aligo spec states that delivery status lookup is not implemented", () => {
+    const aligo = new AligoProvider({ apiKey: "api-key", userId: "user" });
+    const notes = getProviderOnboardingSpec("aligo")?.notes ?? [];
+
+    // Without it, DeliveryTrackingService keeps Aligo messages at SENT until
+    // they time out as UNKNOWN; the spec records that for its readers.
+    expect("getDeliveryStatus" in aligo).toBe(false);
+    expect(notes.some((note) => note.includes("getDeliveryStatus"))).toBe(true);
+  });
+
   test("provider instances expose getOnboardingSpec()", () => {
     const iwinv = new IWINVProvider({
       apiKey: "api-key",
