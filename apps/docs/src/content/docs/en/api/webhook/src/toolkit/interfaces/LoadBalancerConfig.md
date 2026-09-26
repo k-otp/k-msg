@@ -5,7 +5,7 @@ prev: false
 title: "LoadBalancerConfig"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L33)
+Defined in: [packages/webhook/src/dispatcher/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L25)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:33](https://github.com/k-o
 
 > **healthCheckInterval**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L35)
+Defined in: [packages/webhook/src/dispatcher/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L27)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:35](https://github.com/k-o
 
 > **healthCheckTimeoutMs**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L36)
+Defined in: [packages/webhook/src/dispatcher/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L28)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:36](https://github.com/k-o
 
 > **strategy**: `"round-robin"` \| `"least-connections"` \| `"weighted"` \| `"random"`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L34)
+Defined in: [packages/webhook/src/dispatcher/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L26)
 
 ***
 
@@ -37,4 +37,4 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:34](https://github.com/k-o
 
 > `optional` **weights?**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L37)
+Defined in: [packages/webhook/src/dispatcher/types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L29)

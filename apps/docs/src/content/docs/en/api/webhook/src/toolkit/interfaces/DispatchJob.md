@@ -5,7 +5,7 @@ prev: false
 title: "DispatchJob"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L40)
+Defined in: [packages/webhook/src/dispatcher/types.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L32)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:40](https://github.com/k-o
 
 > **attempts**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L47)
+Defined in: [packages/webhook/src/dispatcher/types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L39)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:47](https://github.com/k-o
 
 > **createdAt**: `Date`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L45)
+Defined in: [packages/webhook/src/dispatcher/types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L37)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:45](https://github.com/k-o
 
 > **endpoint**: `object`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L43)
+Defined in: [packages/webhook/src/dispatcher/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L35)
 
 #### active
 
@@ -117,7 +117,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:43](https://github.com/k-o
 
 > **event**: [`WebhookEvent`](/en/api/webhook/src/type-aliases/webhookevent/)
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L42)
+Defined in: [packages/webhook/src/dispatcher/types.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L34)
 
 ***
 
@@ -125,7 +125,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:42](https://github.com/k-o
 
 > **id**: `string`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L41)
+Defined in: [packages/webhook/src/dispatcher/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L33)
 
 ***
 
@@ -133,7 +133,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:41](https://github.com/k-o
 
 > **maxAttempts**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L48)
+Defined in: [packages/webhook/src/dispatcher/types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L40)
 
 ***
 
@@ -141,7 +141,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:48](https://github.com/k-o
 
 > `optional` **nextRetryAt?**: `Date`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L49)
+Defined in: [packages/webhook/src/dispatcher/types.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L41)
 
 ***
 
@@ -149,7 +149,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:49](https://github.com/k-o
 
 > **priority**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L44)
+Defined in: [packages/webhook/src/dispatcher/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L36)
 
 ***
 
@@ -157,4 +157,4 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:44](https://github.com/k-o
 
 > **scheduledAt**: `Date`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L46)
+Defined in: [packages/webhook/src/dispatcher/types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L38)
