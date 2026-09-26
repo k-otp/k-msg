@@ -18,7 +18,7 @@ export function mapSolapiStatusCode(statusCode?: string): DeliveryStatus {
   if (statusCode === "2000") return "PENDING";
   if (statusCode === "3000") return "SENT";
   if (statusCode === "4000") return "DELIVERED";
-  if (/^[123]\\d{3}$/.test(statusCode)) return "FAILED";
+  if (/^[123]\d{3}$/.test(statusCode)) return "FAILED";
   return "UNKNOWN";
 }
 
@@ -34,9 +34,9 @@ export function parseDate(value: unknown): Date | undefined {
 export function normalizePhoneNumber(phone: string): string {
   const trimmed = phone.trim();
   if (trimmed.startsWith("+")) {
-    return `+${trimmed.slice(1).replace(/\\D/g, "")}`;
+    return `+${trimmed.slice(1).replace(/\D/g, "")}`;
   }
-  return trimmed.replace(/\\D/g, "");
+  return trimmed.replace(/\D/g, "");
 }
 
 export function stringifyVariables(
