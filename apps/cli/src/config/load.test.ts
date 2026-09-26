@@ -144,7 +144,8 @@ describe("config path resolution", () => {
 
   test("does not fail when optional provider sender env vars are missing", () => {
     const previousSender = Bun.env.IWINV_SENDER_NUMBER;
-    Bun.env.IWINV_SENDER_NUMBER = undefined;
+    // Assigning undefined stores the string "undefined" in newer Bun releases.
+    delete Bun.env.IWINV_SENDER_NUMBER;
 
     try {
       const resolved = resolveKMsgConfigEnv({
@@ -167,7 +168,11 @@ describe("config path resolution", () => {
       expect(providerConfig?.senderNumber).toBeUndefined();
       expect(providerConfig?.apiKey).toBe("test-api-key");
     } finally {
-      Bun.env.IWINV_SENDER_NUMBER = previousSender;
+      if (previousSender === undefined) {
+        delete Bun.env.IWINV_SENDER_NUMBER;
+      } else {
+        Bun.env.IWINV_SENDER_NUMBER = previousSender;
+      }
     }
   });
 
