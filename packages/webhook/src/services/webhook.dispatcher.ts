@@ -99,7 +99,7 @@ export class WebhookDispatcher {
     endpoint: WebhookEndpoint,
   ): Promise<void> {
     const maxRetries =
-      endpoint.retryConfig?.maxRetries || this.config.maxRetries;
+      endpoint.retryConfig?.maxRetries ?? this.config.maxRetries;
 
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
       const attemptResult = await this.makeHttpRequest(
@@ -175,6 +175,8 @@ export class WebhookDispatcher {
         method: delivery.httpMethod,
         headers: delivery.headers,
         body: delivery.payload,
+        // A redirect could lead to a host endpoint validation would reject.
+        redirect: "manual",
         signal: AbortSignal.timeout(this.config.timeoutMs),
       });
 
