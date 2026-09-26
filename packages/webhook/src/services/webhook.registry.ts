@@ -1,11 +1,9 @@
+import type { FieldCryptoConfig } from "@k-msg/core";
 import {
-  createDefaultMasker,
-  type FieldCryptoConfig,
-  FieldCryptoError,
-  resolveFieldCryptoFailMode,
-  toCiphertextEnvelopeString,
-} from "@k-msg/core";
-import { validateWebhookFieldCryptoOptions } from "../crypto/field-crypto";
+  protectFieldValue,
+  revealFieldValue,
+  validateWebhookFieldCryptoOptions,
+} from "../crypto/field-crypto";
 import type {
   WebhookDelivery,
   WebhookEndpoint,
@@ -20,123 +18,6 @@ export interface WebhookRegistryCryptoOptions {
 
 export interface WebhookRegistryOptions {
   fieldCrypto?: WebhookRegistryCryptoOptions;
-}
-
-function normalizeString(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
-  const fallback = config.openFallback ?? "masked";
-  if (fallback === "plaintext") {
-    if (!config.unsafeAllowPlaintextStorage) {
-      throw new FieldCryptoError(
-        "policy",
-        "openFallback=plaintext requires unsafeAllowPlaintextStorage=true",
-        {
-          rule: "fieldCrypto.fail_open.plaintext_guard",
-          path: "openFallback",
-        },
-        {
-          fieldPath: "openFallback",
-          failMode: "open",
-          openFallback: "plaintext",
-        },
-      );
-    }
-    return plaintext;
-  }
-  if (fallback === "null") return "";
-  return createDefaultMasker()(plaintext);
-}
-
-async function protectValue(
-  config: FieldCryptoConfig | undefined,
-  input: {
-    value: string | undefined;
-    path: string;
-    aad: Record<string, string>;
-    tenantId?: string;
-  },
-): Promise<string | undefined> {
-  const value = normalizeString(input.value);
-  if (!value) return undefined;
-  if (!config || config.enabled === false) return value;
-
-  const failMode = resolveFieldCryptoFailMode(config);
-  const keyResolver = config.keyResolver;
-
-  try {
-    const keyContext = {
-      tenantId: input.tenantId,
-      tableName: input.aad.tableName,
-      fieldPath: input.path,
-      messageId: input.aad.messageId,
-      providerId: input.aad.providerId,
-    };
-    const kid = keyResolver
-      ? normalizeString((await keyResolver.resolveEncryptKey(keyContext)).kid)
-      : undefined;
-    const encrypted = await config.provider.encrypt({
-      value,
-      path: input.path,
-      aad: input.aad,
-      ...(kid ? { kid } : {}),
-    });
-    return toCiphertextEnvelopeString(encrypted.ciphertext);
-  } catch (error) {
-    if (failMode === "closed") {
-      throw error;
-    }
-    return toFallbackValue(config, value);
-  }
-}
-
-async function revealValue(
-  config: FieldCryptoConfig | undefined,
-  input: {
-    value: string | undefined;
-    path: string;
-    aad: Record<string, string>;
-    tenantId?: string;
-  },
-): Promise<string | undefined> {
-  const value = normalizeString(input.value);
-  if (!value) return undefined;
-  if (!config || config.enabled === false) return value;
-
-  const failMode = resolveFieldCryptoFailMode(config);
-
-  try {
-    const keyContext = {
-      tenantId: input.tenantId,
-      tableName: input.aad.tableName,
-      fieldPath: input.path,
-      messageId: input.aad.messageId,
-      providerId: input.aad.providerId,
-    };
-    const candidateKids = config.keyResolver?.resolveDecryptKeys
-      ? await config.keyResolver.resolveDecryptKeys({
-          ...keyContext,
-          ciphertext: value,
-        })
-      : undefined;
-    return await config.provider.decrypt({
-      ciphertext: value,
-      path: input.path,
-      aad: input.aad,
-      ...(Array.isArray(candidateKids) && candidateKids.length > 0
-        ? { candidateKids }
-        : {}),
-    });
-  } catch (error) {
-    if (failMode === "closed") {
-      throw error;
-    }
-    return toFallbackValue(config, value);
-  }
 }
 
 export class WebhookRegistry {
@@ -244,7 +125,7 @@ export class WebhookRegistry {
       tableName: "webhook_endpoint",
       messageId: endpoint.id,
     };
-    const secret = await protectValue(this.options.fieldCrypto?.endpoint, {
+    const secret = await protectFieldValue(this.options.fieldCrypto?.endpoint, {
       value: endpoint.secret,
       path: "secret",
       aad,
@@ -264,7 +145,7 @@ export class WebhookRegistry {
       tableName: "webhook_endpoint",
       messageId: endpoint.id,
     };
-    const secret = await revealValue(this.options.fieldCrypto?.endpoint, {
+    const secret = await revealFieldValue(this.options.fieldCrypto?.endpoint, {
       value: endpoint.secret,
       path: "secret",
       aad,
@@ -285,12 +166,15 @@ export class WebhookRegistry {
       messageId: delivery.id,
       providerId: delivery.endpointId,
     };
-    const payload = await protectValue(this.options.fieldCrypto?.delivery, {
-      value: delivery.payload,
-      path: "payload",
-      aad,
-      tenantId: this.options.fieldCrypto?.tenantId,
-    });
+    const payload = await protectFieldValue(
+      this.options.fieldCrypto?.delivery,
+      {
+        value: delivery.payload,
+        path: "payload",
+        aad,
+        tenantId: this.options.fieldCrypto?.tenantId,
+      },
+    );
 
     return {
       ...delivery,
@@ -306,7 +190,7 @@ export class WebhookRegistry {
       messageId: delivery.id,
       providerId: delivery.endpointId,
     };
-    const payload = await revealValue(this.options.fieldCrypto?.delivery, {
+    const payload = await revealFieldValue(this.options.fieldCrypto?.delivery, {
       value: delivery.payload,
       path: "payload",
       aad,

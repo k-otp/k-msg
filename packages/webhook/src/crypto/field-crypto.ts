@@ -49,7 +49,8 @@ function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
   return createDefaultMasker()(plaintext);
 }
 
-async function protectValue(
+// Shared by the runtime store wrappers and WebhookRegistry.
+export async function protectFieldValue(
   config: FieldCryptoConfig | undefined,
   input: {
     value: string | undefined;
@@ -92,7 +93,7 @@ async function protectValue(
   }
 }
 
-async function revealValue(
+export async function revealFieldValue(
   config: FieldCryptoConfig | undefined,
   input: {
     value: string | undefined;
@@ -180,7 +181,7 @@ async function protectEndpoint(
     tableName: "webhook_endpoint",
     messageId: endpoint.id,
   };
-  const secret = await protectValue(options?.endpoint, {
+  const secret = await protectFieldValue(options?.endpoint, {
     value: endpoint.secret,
     path: "secret",
     aad,
@@ -201,7 +202,7 @@ async function revealEndpoint(
     tableName: "webhook_endpoint",
     messageId: endpoint.id,
   };
-  const secret = await revealValue(options?.endpoint, {
+  const secret = await revealFieldValue(options?.endpoint, {
     value: endpoint.secret,
     path: "secret",
     aad,
@@ -223,7 +224,7 @@ async function protectDelivery(
     messageId: delivery.id,
     providerId: delivery.endpointId,
   };
-  const payload = await protectValue(options?.delivery, {
+  const payload = await protectFieldValue(options?.delivery, {
     value: delivery.payload,
     path: "payload",
     aad,
@@ -245,7 +246,7 @@ async function revealDelivery(
     messageId: delivery.id,
     providerId: delivery.endpointId,
   };
-  const payload = await revealValue(options?.delivery, {
+  const payload = await revealFieldValue(options?.delivery, {
     value: delivery.payload,
     path: "payload",
     aad,
