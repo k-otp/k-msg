@@ -967,6 +967,31 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(nested).toBe(1);
   });
 
+  test("lets the callback poll again after other awaits without deadlocking", async () => {
+    let service: DeliveryTrackingService | undefined;
+    let nested = 0;
+    service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        nested += 1;
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        await Promise.resolve();
+        await service?.runOnce();
+      },
+    });
+    await recordSent(service, "m1");
+
+    const finished = await Promise.race([
+      service.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(nested).toBe(1);
+  });
+
   test("reports the record as stored, without fields the store dropped", async () => {
     const store = new InMemoryDeliveryTrackingStore();
     // Like a SQL store with storeRaw off: raw provider payloads are not kept.
@@ -1144,7 +1169,7 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(changes[0]?.record.raw).toBeUndefined();
   });
 
-  test("delivers a later poll's change after a slow earlier callback", async () => {
+  test("delivers a later poll's change after a slow earlier callback, and waits for it", async () => {
     let status: "PENDING" | "DELIVERED" = "PENDING";
     const base = createMockProvider({ id: "mock", status: "PENDING" });
     const provider: Provider = {
@@ -1162,10 +1187,6 @@ describe("DeliveryTrackingService onStatusChange", () => {
       release = resolve;
     });
     const delivered: string[] = [];
-    let settle: () => void = () => {};
-    const bothDelivered = new Promise<void>((resolve) => {
-      settle = resolve;
-    });
     const service = new DeliveryTrackingService({
       providers: [provider],
       store: new InMemoryDeliveryTrackingStore(),
@@ -1173,7 +1194,6 @@ describe("DeliveryTrackingService onStatusChange", () => {
       onStatusChange: async ({ record }) => {
         if (record.status === "PENDING") await gate;
         delivered.push(record.status);
-        if (delivered.length === 2) settle();
       },
     });
     await recordSent(service, "m1");
@@ -1181,10 +1201,16 @@ describe("DeliveryTrackingService onStatusChange", () => {
     const first = service.runOnce();
     await new Promise((resolve) => setTimeout(resolve, 10));
     status = "DELIVERED";
-    await service.runOnce();
+    // Not called from a callback, so it waits for its own change, which is
+    // delivered after the slow callback.
+    let secondDone = false;
+    const second = service.runOnce().then(() => {
+      secondDone = true;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(secondDone).toBe(false);
     release();
-    await bothDelivered;
-    await first;
+    await Promise.all([first, second]);
 
     expect(delivered).toEqual(["PENDING", "DELIVERED"]);
   });
@@ -1226,10 +1252,6 @@ describe("DeliveryTrackingService onStatusChange", () => {
       release = resolve;
     });
     const reported: string[] = [];
-    let settle: () => void = () => {};
-    const allReported = new Promise<void>((resolve) => {
-      settle = resolve;
-    });
     const service = new DeliveryTrackingService({
       providers: [provider],
       store: new InMemoryDeliveryTrackingStore(),
@@ -1237,20 +1259,23 @@ describe("DeliveryTrackingService onStatusChange", () => {
       onStatusChange: async ({ record, previousStatus }) => {
         if (reported.length === 0) await gate;
         reported.push(`${previousStatus}->${record.status}`);
-        if (reported.length === 3) settle();
       },
     });
     await recordSent(service, "m1");
 
+    // Each later poll finishes while the first callback waits, and resolves
+    // only after its own change is reported.
+    const pause = () => new Promise((resolve) => setTimeout(resolve, 10));
     const first = service.runOnce();
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await pause();
     status = "SENT";
-    await service.runOnce();
+    const second = service.runOnce();
+    await pause();
     status = "DELIVERED";
-    await service.runOnce();
+    const third = service.runOnce();
+    await pause();
     release();
-    await allReported;
-    await first;
+    await Promise.all([first, second, third]);
 
     expect(reported).toEqual([
       "SENT->PENDING",
