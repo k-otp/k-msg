@@ -798,7 +798,7 @@ describe("KMsg", () => {
   });
   describe("observer hook errors", () => {
     const sentProvider = (
-      send = mock(async (options: any) =>
+      send: Provider["send"] = mock(async (options: any) =>
         ok({
           messageId: options.messageId,
           status: "SENT" as const,
