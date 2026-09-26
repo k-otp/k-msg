@@ -156,7 +156,7 @@ export class InsightEngine {
     return predictions;
   }
 
-  private async initializeBaselines(): Promise<void> {
+  private initializeBaselines(): void {
     // 초기 임계값 설정 (실제로는 과거 데이터 기반으로 계산)
     this.anomalyThresholds.set(MetricType.MESSAGE_SENT, {
       min: 0,
