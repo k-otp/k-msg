@@ -485,16 +485,14 @@ export class WebhookService {
   }
 
   private startBatchProcessor(): void {
-    this.batchProcessor = setInterval(async () => {
-      try {
-        await this.processBatch();
-      } catch (error) {
+    this.batchProcessor = setInterval(() => {
+      this.processBatch().catch((error: unknown) => {
         logger.error(
           "Batch processor error",
           undefined,
           error instanceof Error ? error : new Error(String(error)),
         );
-      }
+      });
     }, this.config.batchTimeoutMs);
   }
 

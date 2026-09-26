@@ -626,13 +626,12 @@ export class EventStore extends EventEmitter {
   private startCleanupTask(): void {
     // 1시간마다 정리 작업 실행
     this.cleanupInterval = setInterval(
-      async () => {
-        try {
-          await this.cleanupOldEvents();
-          await this.cleanupDuplicateEvents();
-        } catch (error) {
-          this.emit("cleanupError", error);
-        }
+      () => {
+        this.cleanupOldEvents()
+          .then(() => this.cleanupDuplicateEvents())
+          .catch((error: unknown) => {
+            this.emit("cleanupError", error);
+          });
       },
       60 * 60 * 1000,
     );
