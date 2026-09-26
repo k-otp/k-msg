@@ -1,5 +1,19 @@
 # @k-msg/provider
 
+## 0.31.0 — 2026-09-26
+
+### Minor changes
+
+- [50b28c62](https://github.com/k-otp/k-msg/commit/50b28c6279d6f0d195e6f919d499add8861642f9) `MockProvider` takes an optional `id` (`new MockProvider({ id: "mock-sms" })`), which `KMsg` routes by and which results and errors report, so two mocks can stand in for different providers, for example to try `routing.byType` without credentials. The id defaults to `"mock"`, an empty id throws, and `getOnboardingSpec()` returns the mock spec whatever the id. — Thanks @imjlk!
+- [7d016cc2](https://github.com/k-otp/k-msg/commit/7d016cc2cb191a5e956218e1477f550f6cdf9f35) `MockProvider` implements `getDeliveryStatus`: every message it sent reports `DELIVERED` until `setDeliveryStatus(providerMessageId, status, details)` changes it, and an unknown id reports not found. Delivery tracking, examples, and tests can now run end to end without real provider credentials. — Thanks @imjlk!
+
+### Patch changes
+
+- [ea626822](https://github.com/k-otp/k-msg/commit/ea626822ed249cadb86397df6434b9e1962bc587) Fix `require()` in Node. The CommonJS build shipped as `.js` files in `"type": "module"` packages, so Node loaded it as ESM and `require()` threw `ReferenceError: module is not defined in ES module scope`. The CommonJS build now ships as `.cjs`, and `main` and every `require` export condition point at it. `require()` and `import()` expose the same export names; `import` still resolves to the `.mjs` build. — Thanks @imjlk!
+- [40244ce1](https://github.com/k-otp/k-msg/commit/40244ce13221b9030bbe2d00fc11197e6925e455) Send and read IWINV and Aligo times in Korea Standard Time regardless of the host timezone. Reservation times, history query ranges, and response timestamps were formatted and parsed in the host's local zone. On a UTC host such as Cloudflare Workers or most containers, a message scheduled for 10:00 in Seoul was reserved for 01:00, and delivery and template timestamps came back nine hours off. — Thanks @imjlk!
+- [5111c0e6](https://github.com/k-otp/k-msg/commit/5111c0e665c7e6e5ee7a390b050f6c1fbb71d758) Read Aligo AlimTalk and FriendTalk results from the documented `code` and `info.mid` fields, accept the numeric SMS `result_code`, and fix Solapi phone-number normalization and failed delivery-status mapping. — Thanks @imjlk!
+- Updated dependencies: core@0.31.0, template@0.31.0
+
 ## 0.30.0 — 2026-07-21
 
 ### Minor changes

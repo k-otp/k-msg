@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/core",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "packageManager": "bun@1.4.2",
   "description": "Core types and interfaces for K-Message platform",
   "type": "module",

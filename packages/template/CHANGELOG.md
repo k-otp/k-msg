@@ -1,5 +1,17 @@
 # @k-msg/template
 
+## 0.31.0 — 2026-09-26
+
+### Minor changes
+
+- [3b439f0b](https://github.com/k-otp/k-msg/commit/3b439f0bf71150352a7733c2963b7d0a1db08535) Format template date variables in Korea Standard Time regardless of the host timezone. The `date`, `datetime`, and `time` formatters and custom `date:` patterns used the host's local zone, so on a UTC host (Cloudflare Workers, most containers) a message sent at 08:30 in Seoul showed the previous day's date. The new `timeZone` option (default `"Asia/Seoul"`) selects another zone. — Thanks @imjlk!
+
+### Patch changes
+
+- [5d94352b](https://github.com/k-otp/k-msg/commit/5d94352ba793f4d1c4bb753f88d46e6bf8c6329f) Build the published bundles with Bun 1.4.2 instead of 1.3.9. Bundles that inline `zod/mini` no longer carry zod's unused locale and JSON Schema modules and shrink by 65–93%: for example, the `@k-msg/template` ESM entry drops from 286 KB to 41 KB and `@k-msg/webhook` from 303 KB to 61 KB. Export names are unchanged. — Thanks @imjlk!
+- [ea626822](https://github.com/k-otp/k-msg/commit/ea626822ed249cadb86397df6434b9e1962bc587) Fix `require()` in Node. The CommonJS build shipped as `.js` files in `"type": "module"` packages, so Node loaded it as ESM and `require()` threw `ReferenceError: module is not defined in ES module scope`. The CommonJS build now ships as `.cjs`, and `main` and every `require` export condition point at it. `require()` and `import()` expose the same export names; `import` still resolves to the `.mjs` build. — Thanks @imjlk!
+- Updated dependencies: core@0.31.0
+
 ## 0.30.0 — 2026-07-21
 
 ### Patch changes
