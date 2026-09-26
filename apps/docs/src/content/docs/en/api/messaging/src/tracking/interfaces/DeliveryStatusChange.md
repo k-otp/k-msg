@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryStatusChange"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:139](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L139)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L140)
 
 A status a poll stored for a tracked message.
 
@@ -15,7 +15,7 @@ A status a poll stored for a tracked message.
 
 > **previousStatus**: [`DeliveryStatus`](/en/api/core/src/type-aliases/deliverystatus/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L146)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L147)
 
 The status the record had before the poll.
 
@@ -25,7 +25,7 @@ The status the record had before the poll.
 
 > **record**: [`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L144)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L145)
 
 The record as stored after the poll, or as the poll updated it, without
 `raw`, if the store cannot return it.
