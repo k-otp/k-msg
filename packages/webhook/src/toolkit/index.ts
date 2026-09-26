@@ -1,12 +1,12 @@
 /**
  * Toolkit APIs (advanced building blocks)
+ *
+ * @packageDocumentation
  */
 
-export { BatchDispatcher } from "../dispatcher/batch.dispatcher";
 export { LoadBalancer } from "../dispatcher/load-balancer";
 export { QueueManager } from "../dispatcher/queue.manager";
 export type {
-  BatchConfig,
   CircuitBreakerState,
   DispatchConfig,
   DispatchJob,
