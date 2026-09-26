@@ -70,6 +70,7 @@ The old `typecheck:ttsc:ts7`, `graph:ttsc:ts7`, and `benchmark:ttsc:ts7` names r
 The shared target registry covers:
 
 - all publishable packages under `packages/*`
+- their test files through `tsconfig.test.json`, since package tsconfigs exclude tests to keep them out of published declarations
 - `apps/cli`, after its generated command registry is refreshed
 - repository TypeScript scripts through `tsconfig.tooling.json`
 - specification evidence through `tsconfig.evidence.json`
