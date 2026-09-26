@@ -9,6 +9,7 @@ export const FIELD_CRYPTO_KEYS_ENV = "KMSG_FIELD_CRYPTO_KEYS";
 export const FIELD_CRYPTO_HASH_KEYS_ENV = "KMSG_FIELD_CRYPTO_HASH_KEYS";
 export const FIELD_CRYPTO_FIELDS_ENV = "KMSG_FIELD_CRYPTO_FIELDS";
 export const FIELD_CRYPTO_TENANT_ENV = "KMSG_FIELD_CRYPTO_TENANT_ID";
+export const FIELD_CRYPTO_AAD_FIELDS_ENV = "KMSG_FIELD_CRYPTO_AAD_FIELDS";
 export const ACTIVE_KID_ENV = "KMSG_ACTIVE_KID";
 
 const FIELD_MODES: readonly FieldMode[] = [
@@ -100,6 +101,19 @@ function parseFields(
   return parsed as Record<string, FieldMode>;
 }
 
+// Ciphertext is bound to these AAD fields, so they must match the store's
+// aadFields exactly or reads of migrated rows fail to decrypt.
+function parseAadFields(raw: string | undefined): string[] | undefined {
+  if (raw === undefined || raw.trim().length === 0) return undefined;
+  const fields = raw.split(",").map((field) => field.trim());
+  if (fields.some((field) => field.length === 0)) {
+    throw new Error(
+      `${FIELD_CRYPTO_AAD_FIELDS_ENV} must be a comma-separated list of AAD field names`,
+    );
+  }
+  return fields;
+}
+
 /**
  * Builds the field crypto options the migration backfill encrypts with,
  * using the default AES-256-GCM provider and keys from the environment.
@@ -145,6 +159,7 @@ export async function resolveMigrationFieldCrypto(
     assertKeyMaterial(hashKeys, FIELD_CRYPTO_HASH_KEYS_ENV);
   }
   const tenantId = env[FIELD_CRYPTO_TENANT_ENV]?.trim();
+  const aadFields = parseAadFields(env[FIELD_CRYPTO_AAD_FIELDS_ENV]);
 
   return {
     config: {
@@ -155,6 +170,7 @@ export async function resolveMigrationFieldCrypto(
         to: "encrypt+hash",
         from: "encrypt+hash",
       },
+      ...(aadFields ? { aadFields } : {}),
       keyResolver,
       provider: createAesGcmFieldCryptoProvider({
         keys,

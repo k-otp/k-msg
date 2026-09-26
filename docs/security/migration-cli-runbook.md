@@ -28,11 +28,12 @@ export KMSG_ACTIVE_KID=k-2026-01
 export KMSG_FIELD_CRYPTO_HASH_KEYS='{"k-2026-01":"<base64url HMAC key>"}'
 export KMSG_FIELD_CRYPTO_FIELDS='{"to":"encrypt+hash","from":"encrypt+hash"}'
 export KMSG_FIELD_CRYPTO_TENANT_ID=tenant-a
+export KMSG_FIELD_CRYPTO_AAD_FIELDS=messageId,providerId,tableName,fieldPath
 ```
 
 Keys are 32 bytes, in base64url or standard base64 like the tracking store accepts. A truncated or malformed key is rejected before any row is read.
 
-Stores that use another provider (for example KMS) should call `applyFieldCryptoMigration` with their `fieldCrypto` options instead.
+Set `KMSG_FIELD_CRYPTO_AAD_FIELDS` exactly when the store sets `aadFields`: ciphertext is bound to those fields, so any difference makes migrated rows undecryptable. The CLI builds the default AES-256-GCM provider with base64url keys; stores with other provider settings (utf8 key encodings, or another provider such as KMS) should call `applyFieldCryptoMigration` with their own `fieldCrypto` options instead.
 
 ## Operational sequence
 
