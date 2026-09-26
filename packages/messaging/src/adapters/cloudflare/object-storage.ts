@@ -46,9 +46,14 @@ export interface CloudflareDurableObjectStorageLike {
   list<T>(options?: {
     prefix?: string;
     cursor?: string;
+    /** Lists keys after this one, as Durable Object storage pages. */
+    startAfter?: string;
     limit?: number;
   }): Promise<Map<string, T>>;
 }
+
+// Durable Object storage returns at most `limit` keys per list call.
+const DURABLE_OBJECT_LIST_PAGE_SIZE = 1000;
 
 export function createKvObjectStorage(
   namespace: CloudflareKvNamespaceLike,
@@ -129,8 +134,21 @@ export function createDurableObjectStorage(
       await storage.delete(key);
     },
     async list(prefix: string): Promise<string[]> {
-      const page = await storage.list({ prefix, limit: 1000 });
-      return Array.from(page.keys());
+      // Page through with startAfter: one call stops at the limit, which
+      // left queues and stores blind to everything past the first page.
+      const keys: string[] = [];
+      let startAfter: string | undefined;
+      for (;;) {
+        const page = await storage.list({
+          prefix,
+          limit: DURABLE_OBJECT_LIST_PAGE_SIZE,
+          ...(startAfter === undefined ? {} : { startAfter }),
+        });
+        const pageKeys = Array.from(page.keys());
+        keys.push(...pageKeys);
+        if (pageKeys.length < DURABLE_OBJECT_LIST_PAGE_SIZE) return keys;
+        startAfter = pageKeys[pageKeys.length - 1];
+      }
     },
   };
 }
