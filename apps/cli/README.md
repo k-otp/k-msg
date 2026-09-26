@@ -241,10 +241,14 @@ Flags:
 - `--dialect <postgres|mysql|sqlite>`: required
 - `--target <tracking|queue|both>`: default `both`
 - `--format <drizzle|sql|both>`: default `both`
-- Pass the options your store or queue uses, so the schema is the one it expects:
+- Pass the options your store or queue uses, so the schema matches it:
   - `--message-id-type <text|uuid|varchar>`, `--id-type <text|varchar>`, `--short-text-type <text|varchar>`, `--timestamp-type <bigint|integer|date>`, `--json-type <auto|text>`: the tracking store's `typeStrategy` (defaults `text`, `text`, `varchar`, `bigint`, `auto`)
   - `--tracking-table <name>` (default `kmsg_delivery_tracking`) and `--queue-table <name>` (default `kmsg_jobs`)
   - `--store-raw`: adds the tracking `raw` column, as `storeRaw: true` does (default `false`)
+- Not covered by the flags:
+  - `columnMap`, `indexNames` and field-crypto (`fieldCryptoSchema`) schemas. For those, build the schema in code with `buildCloudflareSqlSchemaSql()` or `renderDrizzleSchemaSource()` from `@k-msg/messaging/adapters/cloudflare`, passing the store's own options.
+  - Index names stay the defaults (`idx_kmsg_delivery_*`, `idx_kmsg_jobs_*`) when a table is renamed. A second table in the same database (or Postgres schema) then skips its `CREATE INDEX IF NOT EXISTS` and gets no indexes, so give it its own `indexNames` in code.
+  - The MySQL Drizzle output always uses `varchar(255)` ids and `text` JSON columns, whatever `--id-type` and `--json-type` say; the MySQL SQL output follows them.
 - `generate` only:
   - `--out-dir <path>` default current directory
   - `--drizzle-file <name>` default `kmsg.schema.ts`
