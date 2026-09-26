@@ -7,7 +7,7 @@ title: "createDurableObjectDeliveryTrackingStore"
 
 > **createDurableObjectDeliveryTrackingStore**(`storage`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:284](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L284)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L293)
 
 ## Parameters
 

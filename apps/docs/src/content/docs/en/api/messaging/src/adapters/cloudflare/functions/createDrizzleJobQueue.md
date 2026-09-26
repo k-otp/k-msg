@@ -7,7 +7,7 @@ title: "createDrizzleJobQueue"
 
 > **createDrizzleJobQueue**\<`T`\>(`options`): [`HyperdriveJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:225](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L225)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L234)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:225](https://gi
 
 ### options
 
-[`CreateDrizzleJobQueueOptions`](/en/api/messaging/src/adapters/cloudflare/interfaces/createdrizzlejobqueueoptions/)
+[`CreateDrizzleJobQueueOptions`](/en/api/messaging/src/adapters/cloudflare/interfaces/createdrizzlejobqueueoptions/)\<`T`\>
 
 ## Returns
 

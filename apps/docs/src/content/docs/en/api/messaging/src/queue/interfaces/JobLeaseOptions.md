@@ -2,34 +2,28 @@
 editUrl: false
 next: false
 prev: false
-title: "CloudflareObjectJobQueueOptions"
+title: "JobLeaseOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L51)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
-## Extends
+## Extended by
 
-- [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/)\<[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)\<`T`\>\>
+- [`CreateD1JobQueueOptions`](/en/api/messaging/src/adapters/cloudflare/interfaces/created1jobqueueoptions/)
+- [`CreateDrizzleJobQueueOptions`](/en/api/messaging/src/adapters/cloudflare/interfaces/createdrizzlejobqueueoptions/)
+- [`SQLiteJobQueueOptions`](/en/api/k-msg/src/adapters/bun/interfaces/sqlitejobqueueoptions/)
+- [`CloudflareObjectJobQueueOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjobqueueoptions/)
+- [`HyperdriveJobQueueConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/hyperdrivejobqueueconfig/)
 
 ## Type Parameters
 
-### T
+### J
 
-`T`
+`J`
 
 ## Properties
-
-### keyPrefix?
-
-> `optional` **keyPrefix?**: `string`
-
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
-
-Default: `kmsg/jobs`.
-
-***
 
 ### leaseMs?
 
@@ -47,10 +41,6 @@ and a worker that outlives it can still complete or fail the job while
 another worker has it. `dequeue()` leaves the jobs its caller names as
 still running alone, which is how `JobProcessor` keeps a job it is
 still running from being run again or counted as lost.
-
-#### Inherited from
-
-[`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/).[`leaseMs`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/#leasems)
 
 ***
 
@@ -70,12 +60,8 @@ does not stop the dequeue.
 
 ##### job
 
-[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)
+`J`
 
 #### Returns
 
 `void` \| `Promise`\<`void`\>
-
-#### Inherited from
-
-[`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/).[`onLeaseExpired`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/#onleaseexpired)

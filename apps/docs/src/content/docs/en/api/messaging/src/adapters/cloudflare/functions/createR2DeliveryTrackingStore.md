@@ -7,7 +7,7 @@ title: "createR2DeliveryTrackingStore"
 
 > **createR2DeliveryTrackingStore**(`bucket`, `options?`): [`CloudflareObjectDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectdeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:258](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L258)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:267](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L267)
 
 ## Parameters
 
