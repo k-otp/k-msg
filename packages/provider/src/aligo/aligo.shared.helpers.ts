@@ -5,6 +5,7 @@ import {
   type Template,
   type TemplateContext,
 } from "@k-msg/core";
+import { parseKstDateTime, toKst } from "../shared/kst";
 import type { AligoConfig } from "./types/aligo";
 
 function interpolateTemplate(
@@ -61,11 +62,13 @@ export function getAligoEndpoint(
 }
 
 export function formatAligoDate(date: Date): { date: string; time: string } {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  // Aligo reads the reservation as Korea Standard Time.
+  const kst = toKst(date);
+  const year = kst.year;
+  const month = String(kst.month).padStart(2, "0");
+  const day = String(kst.day).padStart(2, "0");
+  const hours = String(kst.hour).padStart(2, "0");
+  const minutes = String(kst.minute).padStart(2, "0");
 
   return {
     date: `${year}${month}${day}`,
@@ -125,25 +128,9 @@ export function mapAligoTemplateStatus(
   }
 }
 
+// Aligo's timestamps are Korea Standard Time.
 export function parseAligoDateTime(value: unknown): Date | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-
-  const match = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(
-    trimmed,
-  );
-  if (!match) return undefined;
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const hour = Number(match[4]);
-  const minute = Number(match[5]);
-  const second = Number(match[6]);
-
-  const date = new Date(year, month - 1, day, hour, minute, second);
-  return Number.isNaN(date.getTime()) ? undefined : date;
+  return parseKstDateTime(value);
 }
 
 export function resolveAligoTemplateMessage(
