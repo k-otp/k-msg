@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { availableParallelism } from "node:os";
 import path from "node:path";
+import type { Subprocess } from "bun";
 import {
   docsTypecheckBoundary,
   type TypecheckTarget,
@@ -69,13 +70,19 @@ async function run(command: readonly string[], label: string): Promise<void> {
   }
 }
 
+type RunningTarget = {
+  child: Subprocess;
+  target: TypecheckTarget;
+};
+
 async function runTarget(
   compiler: Compiler,
   target: TypecheckTarget,
   compilerOptions: readonly string[],
+  running: Set<RunningTarget>,
 ): Promise<TargetResult> {
   const startedAt = performance.now();
-  const processHandle = Bun.spawn(
+  const child = Bun.spawn(
     [
       "bun",
       "x",
@@ -88,18 +95,24 @@ async function runTarget(
     ],
     { cwd: repoRoot, stderr: "pipe", stdout: "pipe" },
   );
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(processHandle.stdout).text(),
-    new Response(processHandle.stderr).text(),
-    processHandle.exited,
-  ]);
+  const entry = { child, target };
+  running.add(entry);
+  try {
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(child.stdout).text(),
+      new Response(child.stderr).text(),
+      child.exited,
+    ]);
 
-  return {
-    durationMs: performance.now() - startedAt,
-    exitCode,
-    output: `${stderr}${stdout}`.trimEnd(),
-    target,
-  };
+    return {
+      durationMs: performance.now() - startedAt,
+      exitCode,
+      output: `${stderr}${stdout}`.trimEnd(),
+      target,
+    };
+  } finally {
+    running.delete(entry);
+  }
 }
 
 // Targets run concurrently, but results print in registry order so the first
@@ -112,9 +125,20 @@ async function runTargets(
   const compilerOptions =
     compiler === "ttsc" ? ["--binary", resolveWorkspaceTsgoBinary()] : [];
   const results: (TargetResult | undefined)[] = [];
+  const running = new Set<RunningTarget>();
   let nextIndex = 0;
   let printed = 0;
   let failed = false;
+
+  const printResult = (result: TargetResult): void => {
+    const seconds = (result.durationMs / 1000).toFixed(1);
+    console.log(
+      `\n[typecheck:${compiler}] ${result.target.label} (${seconds}s)`,
+    );
+    if (result.output.length > 0) {
+      console.log(result.output);
+    }
+  };
 
   const printReady = (): void => {
     for (
@@ -122,25 +146,40 @@ async function runTargets(
       result !== undefined;
       result = results[printed]
     ) {
-      const seconds = (result.durationMs / 1000).toFixed(1);
-      console.log(
-        `\n[typecheck:${compiler}] ${result.target.label} (${seconds}s)`,
-      );
-      if (result.output.length > 0) {
-        console.log(result.output);
-      }
+      printResult(result);
       printed += 1;
     }
   };
+
+  // A cancelled CI job or Ctrl-C must not discard finished diagnostics that
+  // are still waiting behind a slower target, nor leave compilers running.
+  const interrupt = (signal: NodeJS.Signals): void => {
+    for (const { child } of running) {
+      child.kill();
+    }
+    for (let index = printed; index < results.length; index += 1) {
+      const result = results[index];
+      if (result) printResult(result);
+    }
+    const unfinished = [...running].map(({ target }) => target.label);
+    console.error(
+      `\n[typecheck] Interrupted by ${signal}${unfinished.length > 0 ? `; stopped ${unfinished.join(", ")}` : ""}.`,
+    );
+    process.exit(signal === "SIGINT" ? 130 : 143);
+  };
+  process.once("SIGINT", interrupt);
+  process.once("SIGTERM", interrupt);
 
   const worker = async (): Promise<void> => {
     while (!failed && nextIndex < typecheckTargets.length) {
       const index = nextIndex;
       nextIndex += 1;
-      const target = typecheckTargets[index];
-      if (!target) return;
-
-      const result = await runTarget(compiler, target, compilerOptions);
+      const result = await runTarget(
+        compiler,
+        typecheckTargets[index],
+        compilerOptions,
+        running,
+      );
       results[index] = result;
       if (result.exitCode !== 0) {
         failed = true;
@@ -149,12 +188,17 @@ async function runTargets(
     }
   };
 
-  await Promise.all(
-    Array.from(
-      { length: Math.min(concurrency, typecheckTargets.length) },
-      worker,
-    ),
-  );
+  try {
+    await Promise.all(
+      Array.from(
+        { length: Math.min(concurrency, typecheckTargets.length) },
+        worker,
+      ),
+    );
+  } finally {
+    process.off("SIGINT", interrupt);
+    process.off("SIGTERM", interrupt);
+  }
 
   return results.filter(
     (result): result is TargetResult => result !== undefined,
