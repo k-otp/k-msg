@@ -14,6 +14,12 @@ export interface WebhookDeliveryListOptions {
   status?: WebhookDelivery["status"];
   /** Caps the deliveries returned; the built-in stores return 100 when unset. */
   limit?: number;
+  /**
+   * Returns only deliveries that come after this one in the newest-first
+   * order: older, or equally old with a smaller id. Pass the last delivery of
+   * a page to read the next one.
+   */
+  before?: { createdAt: Date; id: string };
 }
 
 export interface WebhookEndpointStore {

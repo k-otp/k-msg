@@ -317,6 +317,85 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     expect(await persistence.endpointStore.get("ep-1")).toEqual(before);
   });
 
+  function legacyDelivery(index: number) {
+    return {
+      id: `d-${String(index).padStart(4, "0")}`,
+      endpointId: "ep-1",
+      eventId: `evt-${index}`,
+      eventType: WebhookEventType.MESSAGE_SENT,
+      url: "https://example.com/hook",
+      httpMethod: "POST" as const,
+      headers: {},
+      payload: `{"n":${index}}`,
+      attempts: [],
+      status: "success" as const,
+      // Several deliveries share a timestamp, so the cursor must break ties.
+      createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, Math.floor(index / 3))),
+    };
+  }
+
+  test("migrates a delivery history larger than one page", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const legacyStore = wrapWebhookDeliveryStoreWithFieldCrypto(
+      persistence.deliveryStore,
+      { ...tenantOptions, tenantId: undefined },
+    );
+    for (let index = 0; index < 450; index += 1) {
+      await legacyStore.add(legacyDelivery(index));
+    }
+
+    expect(
+      await migrateWebhookFieldCryptoToTenant(persistence, tenantOptions),
+    ).toEqual({ endpoints: 0, deliveries: 450 });
+    const deliveries = wrapWebhookDeliveryStoreWithFieldCrypto(
+      persistence.deliveryStore,
+      tenantOptions,
+    );
+    const read = await deliveries.list({ limit: 1000 });
+    expect(read).toHaveLength(450);
+    expect(new Set(read.map((delivery) => delivery.payload)).size).toBe(450);
+  });
+
+  test("refuses a delivery store that ignores the page cursor", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const legacyStore = wrapWebhookDeliveryStoreWithFieldCrypto(
+      persistence.deliveryStore,
+      { ...tenantOptions, tenantId: undefined },
+    );
+    for (let index = 0; index < 250; index += 1) {
+      await legacyStore.add(legacyDelivery(index));
+    }
+    const { deliveryStore } = persistence;
+    const replace = deliveryStore.replace?.bind(deliveryStore);
+    if (!replace) throw new Error("the in-memory store replaces deliveries");
+    const cursorBlind = {
+      ...persistence,
+      deliveryStore: {
+        add: deliveryStore.add.bind(deliveryStore),
+        replace,
+        list: (options?: { limit?: number }) =>
+          deliveryStore.list({ limit: options?.limit }),
+      },
+    };
+
+    await expect(
+      migrateWebhookFieldCryptoToTenant(cursorBlind, tenantOptions),
+    ).rejects.toThrow("honors the `before` cursor");
+  });
+
+  test("binds the tenant id exactly as configured", async () => {
+    const persistence = await seedLegacyRecords();
+    const spaced = { ...tenantOptions, tenantId: " tenant-a " };
+
+    await migrateWebhookFieldCryptoToTenant(persistence, spaced);
+
+    const endpoints = wrapWebhookEndpointStoreWithFieldCrypto(
+      persistence.endpointStore,
+      spaced,
+    );
+    expect((await endpoints.get("ep-1"))?.secret).toBe("my-secret");
+  });
+
   test("requires the tenant to bind to", async () => {
     await expect(
       migrateWebhookFieldCryptoToTenant(createInMemoryWebhookPersistence(), {

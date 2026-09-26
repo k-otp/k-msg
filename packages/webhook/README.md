@@ -184,7 +184,7 @@ const runtime = new WebhookRuntimeService({
 | Advanced classes from root | import from `@k-msg/webhook/toolkit` |
 | Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
 | `fieldCrypto.endpoint` / `fieldCrypto.delivery` without `fields.secret` / `fields.payload`, or with `plain`/`mask` | set `fields.secret` (endpoint) and `fields.payload` (delivery) to `encrypt` or `encrypt+hash`; other values now fail at startup |
-| ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before are rejected unless `fieldCrypto.acceptLegacyAad` is set. Run `runtime.migrateFieldCryptoToTenant()` once to re-encrypt them (a custom delivery store must implement `replace()`), then remove the flag |
+| ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before are rejected unless `fieldCrypto.acceptLegacyAad` is set. Run `runtime.migrateFieldCryptoToTenant()` once to re-encrypt them (a custom delivery store must implement `replace()` and page `list()` with the `before` cursor), then remove the flag |
 
 ## Toolkit subpath
 

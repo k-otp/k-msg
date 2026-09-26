@@ -107,6 +107,12 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
       params.push(options.status);
     }
 
+    if (options.before) {
+      const createdAt = options.before.createdAt.getTime();
+      where.push("(created_at < ? OR (created_at = ? AND id < ?))");
+      params.push(createdAt, createdAt, options.before.id);
+    }
+
     const limit =
       typeof options.limit === "number" && Number.isFinite(options.limit)
         ? Math.max(0, Math.floor(options.limit))
@@ -118,7 +124,7 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
 
     const rows = await queryAll<DeliveryRow>(
       this.db,
-      `SELECT * FROM ${this.tableName} ${whereClause} ORDER BY created_at DESC LIMIT ?`,
+      `SELECT * FROM ${this.tableName} ${whereClause} ORDER BY created_at DESC, id DESC LIMIT ?`,
       params,
     );
 

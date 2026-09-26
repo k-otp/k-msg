@@ -13,11 +13,24 @@ function sortByUpdatedAtDesc(
   return right.updatedAt.getTime() - left.updatedAt.getTime();
 }
 
+// Newest first, then by id, so a page cursor has one position to resume from.
 function sortByCreatedAtDesc(
   left: WebhookDelivery,
   right: WebhookDelivery,
 ): number {
-  return right.createdAt.getTime() - left.createdAt.getTime();
+  const byTime = right.createdAt.getTime() - left.createdAt.getTime();
+  if (byTime !== 0) return byTime;
+  return left.id < right.id ? 1 : left.id > right.id ? -1 : 0;
+}
+
+/** Whether a delivery comes after the cursor in the newest-first order. */
+export function isBeforeDeliveryCursor(
+  delivery: WebhookDelivery,
+  cursor: { createdAt: Date; id: string },
+): boolean {
+  const time = delivery.createdAt.getTime();
+  const cursorTime = cursor.createdAt.getTime();
+  return time < cursorTime || (time === cursorTime && delivery.id < cursor.id);
 }
 
 function matchesDeliveryOptions(
@@ -29,6 +42,10 @@ function matchesDeliveryOptions(
   }
 
   if (options.eventType && delivery.eventType !== options.eventType) {
+    return false;
+  }
+
+  if (options.before && !isBeforeDeliveryCursor(delivery, options.before)) {
     return false;
   }
 
