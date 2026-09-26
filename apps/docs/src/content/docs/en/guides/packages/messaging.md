@@ -340,8 +340,10 @@ Notes by dialect:
 
 - D1 (SQLite): JSON fields are stored as `TEXT`
 - Postgres: JSON fields are stored as `JSONB` documents, so SQL can read them (`last_error->>'code'`); `typeStrategy: { json: "text" }` stores them as `TEXT` instead. `JSONB` cannot hold NUL characters or unpaired surrogates, so those are stored as U+FFFD
-- MySQL: the SQL schema builders make JSON fields `JSON`, while `renderDrizzleSchemaSource()` makes them `text`; the store reads either. MySQL cannot index `TEXT` columns, so set `typeStrategy: { messageId: "varchar", id: "varchar" }`
-- `provider_status_message` is `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default)
+- MySQL: JSON fields are stored as `JSON` (`TEXT` with `typeStrategy: { json: "text" }`). MySQL cannot index `TEXT` columns, so the primary key and the indexed columns are `VARCHAR` whatever `typeStrategy` says:
+  - `message_id`, `provider_id`, `provider_message_id`, and with field encryption `to_hash` and `from_hash`: `VARCHAR(255)` (`message_id` is `VARCHAR(36)` with `messageId: "uuid"`)
+  - `status`, and with field encryption `retention_class`: `VARCHAR(64)`
+- `provider_status_message` is `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default), except the indexed ones on MySQL
 
 Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
 
@@ -403,6 +405,8 @@ const drizzleSource = renderDrizzleSchemaSource({
 });
 ```
 
+Given the same options, the Drizzle schema declares the same column types, keys and indexes as the SQL DDL.
+
 ### Creating the schema with migrations
 
 The `CREATE ... IF NOT EXISTS` statements a SQL tracking store runs on first use need the `CREATE` privilege even when the table exists, so a least-privilege role fails with `permission denied for schema public` or `must be owner of table`. In production, create the table with a migration and turn them off:
@@ -450,6 +454,15 @@ const store = new HyperdriveDeliveryTrackingStore(client, {
 
     With field encryption, convert `metadata_hashes` the same way.
   - `raw` and the queue's `data` may hold any JSON value, strings included, so they read back exactly as stored: an old row's value comes back as its JSON text. Convert those rows once, with the same `UPDATE` for `raw` and for `kmsg_jobs` `data` and `metadata`, after stopping the processes that run the earlier version (they cannot read converted rows) and before starting this one. Run it only on rows that postgres.js or Bun.SQL wrote, since every one of those is a JSON string. For the queue, you can instead let the old version finish its jobs first.
+
+- On MySQL, the SQL schema could not be created with the default `typeStrategy` (error 1170), so existing tables were made with `typeStrategy: { messageId: "varchar", id: "varchar" }` or from the Drizzle schema. Both keep working:
+  - The SQL schema for that `typeStrategy` has not changed. You can keep passing it, or drop it: without it, new tables with field encryption get `TEXT` instead of `VARCHAR(255)` for the columns no index covers, and existing tables work either way.
+  - The Drizzle schema of earlier versions declared `varchar(255)` for every id column and `text` for JSON columns. It now follows `typeStrategy`, so drizzle-kit generates a migration: JSON columns become `json`, and with field encryption the columns no index covers (`to_enc`, `to_masked`, `from_enc`, `from_masked`, `metadata_enc`, `crypto_kid`) become `text`. The stored values convert as they are. To keep the table as it is, pass `typeStrategy: { id: "varchar", json: "text" }` to `renderDrizzleSchemaSource()` and to the store.
+- With metadata encryption (`fields.metadata: "encrypt"`), a `VARCHAR(255)` `metadata_enc`, which both kinds of MySQL table above have, rejects encrypted metadata longer than 255 characters (error 1406); metadata JSON of about 110 characters is enough. Widen it:
+
+  ```sql
+  ALTER TABLE kmsg_delivery_tracking MODIFY metadata_enc TEXT;
+  ```
 
 ### Drizzle Adapter Factories
 
