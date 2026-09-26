@@ -886,15 +886,87 @@ describe("KMsg", () => {
         },
       });
 
-      const result = await kmsg.send(input);
+      const consoleError = spyOn(console, "error").mockImplementation(() => {});
+      try {
+        const result = await kmsg.send(input);
+
+        expect(result.isFailure).toBe(true);
+        if (result.isFailure) {
+          expect(result.error).toMatchObject({
+            code: KMsgErrorCode.MESSAGE_SEND_FAILED,
+            message: "provider failed",
+          });
+        }
+        // Both the reporter's failure and the original hook error are logged.
+        expect(consoleError).toHaveBeenCalledTimes(2);
+      } finally {
+        consoleError.mockRestore();
+      }
+    });
+
+    test("fall back to console.error without onHookError", async () => {
+      const kmsg = new KMsg({
+        providers: [sentProvider()],
+        hooks: {
+          onSuccess: () => {
+            throw new Error("logger down");
+          },
+        },
+      });
+
+      const consoleError = spyOn(console, "error").mockImplementation(() => {});
+      try {
+        expect((await kmsg.send(input)).isSuccess).toBe(true);
+        expect(consoleError).toHaveBeenCalledTimes(1);
+        expect(String(consoleError.mock.calls[0]?.[0])).toContain(
+          "onSuccess hook threw",
+        );
+      } finally {
+        consoleError.mockRestore();
+      }
+    });
+
+    test("end an onboarding failure with onFinal like every other failure", async () => {
+      const onError = mock(() => {});
+      const onFinal = mock(() => {});
+      const send = mock(async () =>
+        fail(new KMsgError(KMsgErrorCode.UNKNOWN_ERROR, "unused")),
+      );
+      const kmsg = new KMsg({
+        providers: [
+          {
+            id: "solapi",
+            name: "SOLAPI",
+            supportedTypes: ["ALIMTALK"] as const,
+            healthCheck: mock(async () => ({ healthy: true, issues: [] })),
+            send,
+            getOnboardingSpec: () => ({
+              providerId: "solapi",
+              channelOnboarding: "none",
+              templateLifecycleApi: "unavailable",
+              plusIdPolicy: "required_if_no_inference",
+              plusIdInference: "unsupported",
+              checks: [],
+            }),
+          },
+        ],
+        hooks: { onError, onFinal },
+      });
+
+      const result = await kmsg.send({
+        type: "ALIMTALK",
+        to: "01012345678",
+        templateId: "TPL_1",
+        variables: { code: "1234" },
+      });
 
       expect(result.isFailure).toBe(true);
-      if (result.isFailure) {
-        expect(result.error).toMatchObject({
-          code: KMsgErrorCode.MESSAGE_SEND_FAILED,
-          message: "provider failed",
-        });
-      }
+      expect(send).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onFinal).toHaveBeenCalledTimes(1);
+      expect((onFinal.mock.calls[0] as unknown[])[1]).toMatchObject({
+        outcome: "failure",
+      });
     });
 
     test("still let onBeforeSend abort the send", async () => {
