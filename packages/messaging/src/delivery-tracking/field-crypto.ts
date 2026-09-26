@@ -1187,38 +1187,29 @@ export async function normalizeTrackingFilterWithHashes(
   const hashOnly = mode.secureMode && !mode.compatPlainColumns;
   const next: DeliveryTrackingRecordFilter = { ...filter };
 
-  if (!next.toHash && next.to) {
-    const values = Array.isArray(next.to) ? next.to : [next.to];
+  const lookupFields = [
+    ["to", "toHash"],
+    ["from", "fromHash"],
+  ] as const;
+  for (const [path, hashKey] of lookupFields) {
+    const plain = next[path];
+    if (next[hashKey] || !plain) continue;
+
+    const values = Array.isArray(plain) ? plain : [plain];
     const hashes = await hashLookupValues(
       config,
       options,
       keyContext,
-      "to",
+      path,
       values,
     );
-    if (hashes.length === 1) next.toHash = hashes[0];
-    if (hashes.length > 1) next.toHash = hashes;
+    if (hashes.length > 0) {
+      next[hashKey] = hashes.length === 1 ? hashes[0] : hashes;
+    }
     if (hashOnly) {
       // Dropping the plain values without a hash would match every record.
       if (values.length > 0 && hashes.length === 0) return undefined;
-      next.to = undefined;
-    }
-  }
-
-  if (!next.fromHash && next.from) {
-    const values = Array.isArray(next.from) ? next.from : [next.from];
-    const hashes = await hashLookupValues(
-      config,
-      options,
-      keyContext,
-      "from",
-      values,
-    );
-    if (hashes.length === 1) next.fromHash = hashes[0];
-    if (hashes.length > 1) next.fromHash = hashes;
-    if (hashOnly) {
-      if (values.length > 0 && hashes.length === 0) return undefined;
-      next.from = undefined;
+      next[path] = undefined;
     }
   }
 
