@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJob"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L19)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L20)
 
 A job in a KV, R2 or Durable Object queue.
 
@@ -121,7 +121,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:10](https://git
 
 > `optional` **leaseExpiresAt?**: `Date`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L24)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L25)
 
 While the job is processing: when it becomes due again unless it is
 completed or failed first.
@@ -180,7 +180,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://git
 
 > `optional` **result?**: `unknown`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L26)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L27)
 
 What `complete()` was given.
 

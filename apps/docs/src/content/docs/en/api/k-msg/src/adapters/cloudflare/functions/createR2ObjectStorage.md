@@ -7,7 +7,7 @@ title: "createR2ObjectStorage"
 
 > **createR2ObjectStorage**(`bucket`): [`CloudflareObjectStorage`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L133)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L137)
 
 ## Parameters
 

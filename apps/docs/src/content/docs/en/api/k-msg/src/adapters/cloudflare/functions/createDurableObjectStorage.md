@@ -7,7 +7,7 @@ title: "createDurableObjectStorage"
 
 > **createDurableObjectStorage**(`storage`): [`CloudflareObjectStorage`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectstorage/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L166)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L170)
 
 ## Parameters
 
