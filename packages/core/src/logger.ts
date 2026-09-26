@@ -94,9 +94,9 @@ const PHONE_NUMBER_PATTERN = new RegExp(
     // An area code in parentheses: (010) 1234-5678, (02) 123-4567.
     String.raw`\(0\d{1,2}\)[-.\s]?\d{3,4}[-.\s]?\d{4}`,
     // Nationwide representative numbers such as 1588-1234.
-    String.raw`1[5-9]\d{2}[-.\s]\d{4}`,
+    String.raw`1[5-9]\d{2}[-\s]\d{4}`,
   ]
-    .map((pattern) => String.raw`(?<![\w+(])${pattern}(?!\w)`)
+    .map((pattern) => String.raw`(?<![\w+])${pattern}(?!\w)`)
     .join("|"),
   "g",
 );
