@@ -1,5 +1,17 @@
 # k-msg
 
+## 0.31.0 — 2026-09-26
+
+### Minor changes
+
+- [54cb2fb9](https://github.com/k-otp/k-msg/commit/54cb2fb991f6537a4f0718dfff88f854b12df3ce) `@k-msg/messaging` exports the `KMsgConfig`, `KMsgRoutingConfig`, `KMsgDefaultsConfig`, and `RoutingStrategy` types, so configuration built outside the `KMsg` constructor can be typed, and `estimateSmsBytes(text)`, which counts bytes the way `KMsg` does to choose between SMS and LMS (one per ASCII character, two per other character). The `k-msg` facade re-exports the three config types and `estimateSmsBytes`, and the `DeliveryStatus` type from `@k-msg/core`. — Thanks @imjlk!
+
+### Patch changes
+
+- [ea626822](https://github.com/k-otp/k-msg/commit/ea626822ed249cadb86397df6434b9e1962bc587) Fix `require()` in Node. The CommonJS build shipped as `.js` files in `"type": "module"` packages, so Node loaded it as ESM and `require()` threw `ReferenceError: module is not defined in ES module scope`. The CommonJS build now ships as `.cjs`, and `main` and every `require` export condition point at it. `require()` and `import()` expose the same export names; `import` still resolves to the `.mjs` build. — Thanks @imjlk!
+- [076c7fec](https://github.com/k-otp/k-msg/commit/076c7feceba39bf9513deeca0691627426b747a1) Stop publishing `dist/index.test.d.ts`: the package tsconfig now excludes test files from declaration output like the other packages. — Thanks @imjlk!
+- Updated dependencies: core@0.31.0, messaging@0.31.0
+
 ## 0.30.0 — 2026-07-21
 
 ### Patch changes

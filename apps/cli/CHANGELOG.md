@@ -1,5 +1,15 @@
 # @k-msg/cli
 
+## 0.10.0 — 2026-09-26
+
+### Minor changes
+
+- [b4d1b9b6](https://github.com/k-otp/k-msg/commit/b4d1b9b6ec18bc652c052e4f6ab95fb51e8e9cbd) Encrypt the field-crypto migration backfill instead of copying plaintext: `applyFieldCryptoMigration` and `retryFieldCryptoMigration` now require the tracking store's `fieldCrypto` options and encrypt rows whose `crypto_state` is empty, `plain`, or `degraded` through the same write path as the store. The backfill can run alongside live writes: it updates a row only while the row's state, recipient, sender, provider, and metadata still match what it read, re-encrypts the row's current values otherwise, and confirms each write by re-reading the row when the driver reports no affected-row count. Chunks after the first no longer fail on SQLite, D1, and MySQL, a failed row read or state write marks the run failed instead of leaving it running, and a row with no plain recipient fails its chunk instead of being skipped. `retryFieldCryptoMigration` only changes a run that has failed chunks to reprocess, so it no longer flips completed or read-failed runs back to running. The CLI `db tracking migrate apply/retry` commands read the keys from `KMSG_FIELD_CRYPTO_KEYS` and `KMSG_ACTIVE_KID`, accepting base64url or standard base64 keys and rejecting truncated ones before the backfill starts, and `KMSG_FIELD_CRYPTO_AAD_FIELDS` mirrors a store's `aadFields`. Both commands exit with code 3 when the run fails. — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: channel@0.31.0, core@0.31.0, messaging@0.31.0, provider@0.31.0, template@0.31.0, k-msg@0.31.0
+
 ## 0.9.13 — 2026-07-21
 
 ### Patch changes

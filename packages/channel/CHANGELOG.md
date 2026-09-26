@@ -1,5 +1,13 @@
 # @k-msg/channel
 
+## 0.31.0 — 2026-09-26
+
+### Patch changes
+
+- [5d94352b](https://github.com/k-otp/k-msg/commit/5d94352ba793f4d1c4bb753f88d46e6bf8c6329f) Build the published bundles with Bun 1.4.2 instead of 1.3.9. Bundles that inline `zod/mini` no longer carry zod's unused locale and JSON Schema modules and shrink by 65–93%: for example, the `@k-msg/template` ESM entry drops from 286 KB to 41 KB and `@k-msg/webhook` from 303 KB to 61 KB. Export names are unchanged. — Thanks @imjlk!
+- [ea626822](https://github.com/k-otp/k-msg/commit/ea626822ed249cadb86397df6434b9e1962bc587) Fix `require()` in Node. The CommonJS build shipped as `.js` files in `"type": "module"` packages, so Node loaded it as ESM and `require()` threw `ReferenceError: module is not defined in ES module scope`. The CommonJS build now ships as `.cjs`, and `main` and every `require` export condition point at it. `require()` and `import()` expose the same export names; `import` still resolves to the `.mjs` build. — Thanks @imjlk!
+- Updated dependencies: core@0.31.0
+
 ## 0.30.0 — 2026-07-21
 
 ### Patch changes
