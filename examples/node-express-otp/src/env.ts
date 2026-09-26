@@ -109,20 +109,23 @@ function readTrustProxy(
   const entries = value.split(",").map((entry) => entry.trim());
   if (!entries.every(isProxyEntry)) {
     problems.push(
-      "TRUST_PROXY must be a number of proxies, such as 1, or addresses, subnets (10.0.0.0/8) and presets (loopback, linklocal, uniquelocal) separated by commas",
+      `TRUST_PROXY must be a number of proxies, such as 1, or addresses, subnets (10.0.0.0/8) and presets (${PROXY_PRESETS.join(", ")}) separated by commas`,
     );
     return undefined;
   }
   return entries.join(",");
 }
 
+// A /0 subnet is refused for the same reason as `true`: it covers every
+// address, so any caller could set its own client address.
 function isProxyEntry(entry: string): boolean {
   if (PROXY_PRESETS.includes(entry)) return true;
   const [address = "", prefix, ...rest] = entry.split("/");
   const version = isIP(address);
   if (version === 0 || rest.length > 0) return false;
   if (prefix === undefined) return true;
-  return /^\d+$/.test(prefix) && Number(prefix) <= (version === 4 ? 32 : 128);
+  const bits = /^\d+$/.test(prefix) ? Number(prefix) : 0;
+  return bits >= 1 && bits <= (version === 4 ? 32 : 128);
 }
 
 function readProvider(

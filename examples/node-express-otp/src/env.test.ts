@@ -43,7 +43,14 @@ test("TRUST_PROXY takes a hop count, or addresses, subnets and presets", () => {
 
 test("TRUST_PROXY refuses true and anything Express could not parse", () => {
   assert.throws(() => load({ TRUST_PROXY: "true" }), /TRUST_PROXY=true/);
-  for (const value of ["banana", "10.0.0.999", "10.0.0.0/33", "10.0.0.0/8/1"]) {
+  for (const value of [
+    "banana",
+    "10.0.0.999",
+    "10.0.0.0/33",
+    "10.0.0.0/8/1",
+    "0.0.0.0/0",
+    "::/0",
+  ]) {
     assert.throws(
       () => load({ TRUST_PROXY: value }),
       /TRUST_PROXY must be/,
