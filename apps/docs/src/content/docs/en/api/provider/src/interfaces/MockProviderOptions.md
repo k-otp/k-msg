@@ -5,7 +5,7 @@ prev: false
 title: "MockProviderOptions"
 ---
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L89)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L92)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/provider/src/providers/mock/mock.provider.ts:89](https://g
 
 > `optional` **id?**: `string`
 
-Defined in: [packages/provider/src/providers/mock/mock.provider.ts:95](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L95)
+Defined in: [packages/provider/src/providers/mock/mock.provider.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/providers/mock/mock.provider.ts#L98)
 
 The provider id, used for routing and reported in results and errors.
 Give each mock its own id to route message types to different mocks.

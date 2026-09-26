@@ -5,7 +5,7 @@ prev: false
 title: "DeliveryTrackingService"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L77)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L141)
 
 ## Constructors
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:77](https://git
 
 > **new DeliveryTrackingService**(`config`): `DeliveryTrackingService`
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L87)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L157)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:87](https://git
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L131)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L203)
 
 #### Returns
 
@@ -43,7 +43,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:131](https://gi
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L235)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:307](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L307)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:229](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L229)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:301](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L301)
 
 #### Parameters
 
@@ -83,7 +83,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:229](https://gi
 
 > **getRecord**(`messageId`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L216)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:288](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L288)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:216](https://gi
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:112](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L112)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L184)
 
 #### Returns
 
@@ -113,7 +113,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:112](https://gi
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:221](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L221)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L293)
 
 #### Parameters
 
@@ -131,7 +131,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:221](https://gi
 
 > **recordSend**(`context`, `result`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L136)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:208](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L208)
 
 #### Parameters
 
@@ -153,7 +153,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:136](https://gi
 
 > **runOnce**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L244)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:316](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L316)
 
 #### Returns
 
@@ -165,7 +165,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:244](https://gi
 
 > **start**(): `void`
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L116)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L188)
 
 #### Returns
 
@@ -177,7 +177,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:116](https://gi
 
 > **stop**(): `void`
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L125)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:197](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L197)
 
 #### Returns
 
