@@ -7,7 +7,7 @@ title: "getLogger"
 
 > **getLogger**(): [`Logger`](/en/api/core/src/classes/logger/)
 
-Defined in: [packages/core/src/logger.ts:388](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L388)
+Defined in: [packages/core/src/logger.ts:390](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L390)
 
 ## Returns
 

@@ -7,7 +7,7 @@ title: "migrateWebhookFieldCryptoToTenant"
 
 > **migrateWebhookFieldCryptoToTenant**(`persistence`, `options`): `Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
 
-Defined in: [packages/webhook/src/crypto/field-crypto.ts:481](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/crypto/field-crypto.ts#L481)
+Defined in: [packages/webhook/src/crypto/field-crypto.ts:483](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/crypto/field-crypto.ts#L483)
 
 Re-encrypts endpoint secrets and delivery payloads written before
 ciphertext was bound to `options.tenantId`, so they read without
@@ -17,9 +17,9 @@ migration runs fail-closed whatever `failMode` says, so a value that
 cannot be read with either AAD stops it rather than being replaced by a
 fallback. Each endpoint is read again just before it is rewritten, but
 pause endpoint updates while it runs: one landing in between would be
-overwritten. Deliveries, which the runtime never rewrites, are listed
-without a limit and written back with the delivery store's `replace()`,
-which a custom store must implement for the migration to run.
+overwritten. Deliveries, which the runtime never rewrites, are read a
+page at a time with the `before` cursor and written back with the
+delivery store's `replace()`; a custom store must support both.
 
 ## Parameters
 
