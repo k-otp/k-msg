@@ -263,8 +263,11 @@ describe("ErrorUtils", () => {
 describe("retry policy parser", () => {
   test("normalizes valid policy in safe mode", () => {
     const result = validateErrorRetryPolicy({
-      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
-      nonRetryableCodes: ["INVALID_REQUEST"],
+      retryableCodes: [
+        KMsgErrorCode.NETWORK_ERROR,
+        KMsgErrorCode.PROVIDER_ERROR,
+      ],
+      nonRetryableCodes: [KMsgErrorCode.INVALID_REQUEST],
       retryableStatuses: ["503", "VENDOR_BUSY"],
       nonRetryableStatuses: ["400"],
       fallback: "retryable",
@@ -276,8 +279,11 @@ describe("retry policy parser", () => {
     });
 
     expect(result.policy).toEqual({
-      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
-      nonRetryableCodes: ["INVALID_REQUEST"],
+      retryableCodes: [
+        KMsgErrorCode.NETWORK_ERROR,
+        KMsgErrorCode.PROVIDER_ERROR,
+      ],
+      nonRetryableCodes: [KMsgErrorCode.INVALID_REQUEST],
       retryableStatuses: ["503", "VENDOR_BUSY"],
       nonRetryableStatuses: ["400"],
       fallback: "retryable",
@@ -292,13 +298,17 @@ describe("retry policy parser", () => {
 
   test("safe mode removes unknown and conflicting codes with issues", () => {
     const result = validateErrorRetryPolicy({
-      retryableCodes: ["NETWORK_ERROR", "OUT_OF_SKIN", "INVALID_REQUEST"],
-      nonRetryableCodes: ["INVALID_REQUEST"],
+      retryableCodes: [
+        KMsgErrorCode.NETWORK_ERROR,
+        "OUT_OF_SKIN",
+        KMsgErrorCode.INVALID_REQUEST,
+      ],
+      nonRetryableCodes: [KMsgErrorCode.INVALID_REQUEST],
     });
 
     expect(result.policy).toEqual({
-      retryableCodes: ["NETWORK_ERROR"],
-      nonRetryableCodes: ["INVALID_REQUEST"],
+      retryableCodes: [KMsgErrorCode.NETWORK_ERROR],
+      nonRetryableCodes: [KMsgErrorCode.INVALID_REQUEST],
     });
     expect(result.issues.some((issue) => issue.code === "unknown_code")).toBe(
       true,
@@ -326,8 +336,11 @@ describe("retry policy parser", () => {
     );
 
     expect(normalized).toEqual({
-      retryableCodes: ["NETWORK_ERROR", "PROVIDER_ERROR"],
-      nonRetryableCodes: ["INVALID_REQUEST"],
+      retryableCodes: [
+        KMsgErrorCode.NETWORK_ERROR,
+        KMsgErrorCode.PROVIDER_ERROR,
+      ],
+      nonRetryableCodes: [KMsgErrorCode.INVALID_REQUEST],
       retryableStatuses: ["503", "VENDOR_BUSY"],
       nonRetryableStatuses: ["400"],
       fallback: "non_retryable",

@@ -76,7 +76,7 @@ describe("Cloudflare SQL schema builders", () => {
         if (sql.includes("CREATE INDEX")) {
           indexFailures += 1;
           const duplicate = new Error("Duplicate key name");
-          (duplicate as { code: string }).code = "ER_DUP_KEYNAME";
+          (duplicate as Error & { code?: string }).code = "ER_DUP_KEYNAME";
           throw duplicate;
         }
         return { rows: [] };

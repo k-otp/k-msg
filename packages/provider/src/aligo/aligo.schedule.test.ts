@@ -1,10 +1,15 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { AligoProvider } from "./provider";
 
+// Bun's `typeof fetch` also declares `preconnect`, which this stub never uses.
+const fetchStub = globalThis as unknown as {
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+};
+
 const originalFetch = globalThis.fetch;
 
 afterEach(() => {
-  globalThis.fetch = originalFetch;
+  fetchStub.fetch = originalFetch;
 });
 
 async function formDataToObject(
@@ -20,10 +25,7 @@ async function formDataToObject(
 describe("AligoProvider scheduling", () => {
   test("sends the reservation as Korea Standard Time", async () => {
     let calledBody: Record<string, string> = {};
-    globalThis.fetch = async (
-      _input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    fetchStub.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
       calledBody = await formDataToObject(init?.body);
       return new Response(
         JSON.stringify({ result_code: "1", message: "success", msg_id: "7" }),

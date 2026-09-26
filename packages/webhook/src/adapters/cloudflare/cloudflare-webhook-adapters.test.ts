@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite";
+import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { afterEach, describe, expect, test } from "bun:test";
 import { WebhookRuntimeService } from "../../runtime/webhook-runtime.service";
 import type { HttpClient } from "../../services/webhook.dispatcher";
@@ -56,10 +56,10 @@ function createSqliteBackedD1(): { db: D1DatabaseLike; close: () => void } {
 
   const db: D1DatabaseLike = {
     prepare(query: string) {
-      let params: unknown[] = [];
+      let params: SQLQueryBindings[] = [];
       return {
         bind(...values: unknown[]) {
-          params = values;
+          params = values as SQLQueryBindings[];
           return this;
         },
         async first<T extends Record<string, unknown>>() {

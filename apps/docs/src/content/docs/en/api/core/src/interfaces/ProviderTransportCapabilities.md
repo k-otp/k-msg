@@ -5,7 +5,7 @@ prev: false
 title: "ProviderTransportCapabilities"
 ---
 
-Defined in: [packages/core/src/provider.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L40)
+Defined in: [packages/core/src/provider.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L47)
 
 Transport features a provider forwards to its underlying operation.
 
@@ -15,7 +15,7 @@ Transport features a provider forwards to its underlying operation.
 
 > **abortSignal**: [`ProviderTransportSupport`](/en/api/core/src/type-aliases/providertransportsupport/)
 
-Defined in: [packages/core/src/provider.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L41)
+Defined in: [packages/core/src/provider.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L48)
 
 ***
 
@@ -23,4 +23,4 @@ Defined in: [packages/core/src/provider.ts:41](https://github.com/k-otp/k-msg/bl
 
 > **injectableFetch**: [`ProviderTransportSupport`](/en/api/core/src/type-aliases/providertransportsupport/)
 
-Defined in: [packages/core/src/provider.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L42)
+Defined in: [packages/core/src/provider.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L49)
