@@ -5,7 +5,7 @@ prev: false
 title: "WebhookDeliveryStore"
 ---
 
-Defined in: [packages/webhook/src/runtime/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L27)
+Defined in: [packages/webhook/src/runtime/types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L33)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:27](https://github.com/k-otp/
 
 > **add**(`delivery`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L29)
+Defined in: [packages/webhook/src/runtime/types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L35)
 
 Stores a new delivery; ids are unique, so use replace() to overwrite.
 
@@ -83,7 +83,7 @@ Stores a new delivery; ids are unique, so use replace() to overwrite.
 
 > **list**(`options?`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L30)
+Defined in: [packages/webhook/src/runtime/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L36)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: [packages/webhook/src/runtime/types.ts:30](https://github.com/k-otp/
 
 > `optional` **replace**(`delivery`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/runtime/types.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L36)
+Defined in: [packages/webhook/src/runtime/types.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L42)
 
 Overwrites the stored delivery with the same id. Optional; the tenant
 migration needs it to re-encrypt stored payloads, and the built-in

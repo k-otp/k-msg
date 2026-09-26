@@ -7,7 +7,7 @@ title: "createLogger"
 
 > **createLogger**(`context?`, `config?`): [`Logger`](/en/api/core/src/classes/logger/)
 
-Defined in: [packages/core/src/logger.ts:381](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L381)
+Defined in: [packages/core/src/logger.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/core/src/logger.ts#L383)
 
 ## Parameters
 
