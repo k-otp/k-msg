@@ -187,6 +187,35 @@ function createRuntime(env: Env): WebhookRuntimeService {
 
 `createD1WebhookPersistence()`는 기본값으로 스키마 초기화를 자동 수행합니다.
 
+## 엔드포인트 등록
+
+엔드포인트 id와 URL은 고유하며, 등록이 기존 엔드포인트를 대체하는 일은
+없습니다. `addEndpoint()`는 이미 등록된 id나 URL을
+`WebhookEndpointConflictError`로 거절합니다. 이 에러의 `field`는 `"id"` 또는
+`"url"`이고, `endpointId`는 이미 등록된 엔드포인트의 id입니다.
+`updateEndpoint()`도 다른 엔드포인트가 쓰는 URL을 같은 방식으로 거절합니다.
+엔드포인트의 secret, 이벤트, URL은 `updateEndpoint()`로 바꾸세요.
+
+```ts
+import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
+
+try {
+  await runtime.addEndpoint({
+    url: "https://example.com/webhooks/k-msg",
+    active: true,
+    events: [WebhookEventType.MESSAGE_SENT],
+  });
+} catch (error) {
+  if (error instanceof WebhookEndpointConflictError) {
+    // 예: 409 Conflict로 응답하고 error.endpointId를 알려줍니다.
+  }
+  throw error;
+}
+```
+
+URL은 저장된 문자열 그대로 비교합니다. 대문자 호스트나 명시적인 `:443`처럼
+같은 주소가 다른 표기로 들어올 수 있다면 `new URL(url).href`로 등록하세요.
+
 ## Cloudflare 스키마 헬퍼
 
 ```ts
@@ -203,7 +232,10 @@ await initializeWebhookSchema(env.DB);
 ## SQLite / Drizzle(Postgres) 스니펫
 
 `WebhookRuntimeService`는 `endpointStore` + `deliveryStore` 주입을 지원합니다.
-동일 인터페이스만 구현하면 백엔드를 교체할 수 있습니다.
+동일 인터페이스만 구현하면 백엔드를 교체할 수 있습니다. 엔드포인트 store의
+`add()`는 이미 저장된 id나 URL을, `update()`는 다른 엔드포인트가 쓰는 URL을
+`WebhookEndpointConflictError`로 거절해야 합니다. URL 컬럼의 unique index가
+대부분을 처리해 줍니다.
 
 ```ts
 import type {
