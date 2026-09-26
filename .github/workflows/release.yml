@@ -5,11 +5,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Each job asks for what it uses. The Sampo job runs third-party code and
+# installers fetched at run time, so it never receives `id-token: write`,
+# which is enough to publish to npm through trusted publishing, nor
+# `actions: write`, which with its `contents: write` could push a branch and
+# dispatch a privileged workflow on it.
 permissions:
-  actions: write
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -20,30 +22,26 @@ env:
   NODE_VERSION: "24"
 
 jobs:
-  release:
+  plan:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_publish: ${{ steps.publish_check.outputs.should_publish }}
+      has_changesets: ${{ steps.changesets.outputs.has_changesets }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Setup Node (for npm OIDC)
-        uses: actions/setup-node@v6
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: "https://registry.npmjs.org"
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Publish check (npm OIDC)
+      - name: Publish check (npm registry)
         id: publish_check
-        run: |
-          chmod +x ./scripts/publish-oidc.sh
-          ./scripts/publish-oidc.sh --check
+        run: bash ./scripts/publish-oidc.sh --check
 
       - name: Detect pending changesets
         id: changesets
@@ -63,28 +61,34 @@ jobs:
 
           echo "has_changesets=${has_changesets}" >>"$GITHUB_OUTPUT"
 
-      - name: Install dependencies for publish validation
-        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
-        run: bun install --frozen-lockfile
+  release-pr:
+    needs: plan
+    # Keep the release PR branch up to date whenever pending changesets exist.
+    if: ${{ needs.plan.outputs.has_changesets == 'true' && needs.plan.outputs.should_publish != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # push the release PR branch
+      pull-requests: write # open or update the release PR
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
 
-      - name: Pre-publish smoke checks
-        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
-        run: |
-          set -euo pipefail
-          bun run --cwd packages/core build:types
-          bun run --cwd packages/messaging typecheck
-          bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts src/delivery-tracking/field-crypto-policy.test.ts src/delivery-tracking/crypto-control-plane.test.ts
-          bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Pre-publish npm pack smoke checks
-        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
-        run: bash ./scripts/ci/npm-pack-smoke.sh
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
 
       - name: Run Sampo (release PR only)
-        # Keep the release PR branch up to date whenever pending changesets exist.
-        if: ${{ steps.changesets.outputs.has_changesets == 'true' && steps.publish_check.outputs.should_publish != 'true' }}
         id: sampo
-        uses: bruits/sampo/crates/sampo-github-action@main
+        uses: bruits/sampo/crates/sampo-github-action@d3f4020892ba2a8fd56298e417053bb86736fa88 # cargo-sampo-github-action-v0.19.0
         with:
           command: auto
           create-github-release: false
@@ -95,34 +99,69 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Pushes made with GITHUB_TOKEN do not trigger CI, so dispatch it for the
+  # release PR branch from a job that runs no third-party code.
+  release-ci:
+    needs: release-pr
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write # dispatch CI on the release PR branch
+      contents: read
+    steps:
       - name: Trigger CI for release PR branch
-        if: ${{ steps.sampo.outcome == 'success' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code --heads origin sampo/release >/dev/null 2>&1; then
-            gh workflow run ci.yml --ref sampo/release
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/sampo/release" >/dev/null 2>&1; then
+            gh workflow run ci.yml --repo "${GITHUB_REPOSITORY}" --ref sampo/release
           else
             echo "sampo/release branch not found; skipping CI dispatch."
           fi
 
-      # Sampo may update versions/changelogs in the working tree while preparing the release PR.
-      # To ensure publishing uses the exact merged `main` commit, we re-checkout at `github.sha`
-      # into a separate directory when publishing is required.
-      - name: Checkout publish source
-        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
-        uses: actions/checkout@v5
+  publish:
+    needs: plan
+    if: ${{ needs.plan.outputs.should_publish == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # push release tags and create the GitHub release
+      id-token: write # npm trusted publishing
+    steps:
+      # Publish exactly the merged commit that triggered the run.
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
           ref: ${{ github.sha }}
-          path: publish-src
+
+      - name: Setup Node (for npm OIDC)
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies for publish validation
+        run: bun install --frozen-lockfile
+
+      - name: Pre-publish smoke checks
+        run: |
+          set -euo pipefail
+          bun run --cwd packages/core build:types
+          bun run --cwd packages/messaging typecheck
+          bun --cwd packages/messaging test src/adapters/cloudflare/cloudflare-adapters.test.ts src/adapters/cloudflare/sql-schema.test.ts src/delivery-tracking/field-crypto-policy.test.ts src/delivery-tracking/crypto-control-plane.test.ts
+          bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts
+
+      - name: Pre-publish npm pack smoke checks
+        run: bash ./scripts/ci/npm-pack-smoke.sh
 
       - name: Publish packages (npm OIDC)
-        if: ${{ steps.publish_check.outputs.should_publish == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd publish-src
-          chmod +x ./scripts/publish-oidc.sh
-          ./scripts/publish-oidc.sh
+        run: bash ./scripts/publish-oidc.sh
