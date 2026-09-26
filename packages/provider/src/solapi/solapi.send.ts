@@ -84,8 +84,17 @@ export async function buildSolapiSendOneMessage(params: {
   providerId: string;
   config: SolapiConfig;
   client: SolapiSdkClient;
+  signal?: AbortSignal;
 }): Promise<SolapiSendOneMessage> {
-  const { options, providerId, config, client } = params;
+  const { options, providerId, config, client, signal } = params;
+  // Files upload one by one: once the signal aborts, no further upload starts
+  // and the pending one is no longer awaited.
+  const uploadFile = (
+    ...args: Parameters<SolapiSdkClient["uploadFile"]>
+  ): ReturnType<SolapiSdkClient["uploadFile"]> => {
+    throwIfAborted(signal);
+    return raceProviderAbort(client.uploadFile(...args), signal);
+  };
 
   const type = toSolapiMessageType(options);
   const senderNumber =
@@ -176,7 +185,7 @@ export async function buildSolapiSendOneMessage(params: {
         );
       }
 
-      const upload = await client.uploadFile(imageRef, "MMS");
+      const upload = await uploadFile(imageRef, "MMS");
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         base.imageId = fileId;
@@ -321,12 +330,7 @@ export async function buildSolapiSendOneMessage(params: {
         );
       }
 
-      const upload = await client.uploadFile(
-        imageRef,
-        "KAKAO",
-        undefined,
-        imageLink,
-      );
+      const upload = await uploadFile(imageRef, "KAKAO", undefined, imageLink);
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         imageId = fileId;
@@ -456,7 +460,7 @@ export async function buildSolapiSendOneMessage(params: {
 
       fileIds = [];
       for (const url of fileUrls) {
-        const upload = await client.uploadFile(url, "FAX");
+        const upload = await uploadFile(url, "FAX");
         const fileId = extractFileId(upload);
         if (typeof fileId === "string" && fileId.length > 0) {
           fileIds.push(fileId);
@@ -603,7 +607,7 @@ export async function buildSolapiSendOneMessage(params: {
       providerId,
     });
     if (imageRef) {
-      const upload = await client.uploadFile(imageRef, "RCS");
+      const upload = await uploadFile(imageRef, "RCS");
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         rcsPayload.additionalBody = buildAdditionalBody(fileId);
@@ -638,18 +642,16 @@ export async function sendWithSolapi(params: {
 
   const warnings = collectSolapiSendWarnings(options, providerId, config);
   throwIfAborted(signal);
-  const message = await raceProviderAbort(
-    buildSolapiSendOneMessage({
-      options,
-      providerId,
-      config,
-      client,
-    }),
+  const message = await buildSolapiSendOneMessage({
+    options,
+    providerId,
+    config,
+    client,
     signal,
-  );
+  });
   const scheduledDate = resolveSolapiScheduledDate(options);
 
-  // An image upload may have finished just as the signal aborted.
+  // A file upload may have finished just as the signal aborted.
   throwIfAborted(signal);
   let response: unknown;
   if (typeof client.sendOne === "function") {

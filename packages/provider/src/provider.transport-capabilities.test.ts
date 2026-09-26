@@ -227,6 +227,37 @@ describe("built-in provider transport capabilities", () => {
     expect(sdk.calls.sendOne).toBe(0);
   });
 
+  test("solapi provider uploads no more fax files once the signal aborts", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+
+    const resultPromise = createSolapiProvider(sdk.client).send(
+      {
+        type: "FAX",
+        to: "01012345678",
+        fax: {
+          fileUrls: ["https://example.com/a.pdf", "https://example.com/b.pdf"],
+        },
+      },
+      { signal: controller.signal },
+    );
+    await settle();
+    expect(sdk.calls.uploadFile).toBe(1);
+
+    controller.abort(new Error("cancelled during upload"));
+    const result = await resultPromise;
+    // The pending upload finishes afterwards; the second must not start.
+    sdk.releaseAll({ fileId: "FAX_file_1" });
+    await settle();
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+    }
+    expect(sdk.calls.uploadFile).toBe(1);
+    expect(sdk.calls.sendOne).toBe(0);
+  });
+
   test("solapi delivery status observes the signal", async () => {
     const sdk = createPendingSolapiClient();
     const provider = createSolapiProvider(sdk.client);
