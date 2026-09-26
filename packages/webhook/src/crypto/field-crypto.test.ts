@@ -437,6 +437,65 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     }
   });
 
+  test("shuts down only after endpoint writes queued behind the migration", async () => {
+    const persistence = await seedLegacyRecords();
+    const { endpointStore } = persistence;
+    const events: string[] = [];
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let migrating = true;
+    const runtime = new WebhookRuntimeService({
+      delivery: {
+        maxRetries: 0,
+        retryDelayMs: 10,
+        timeoutMs: 500,
+        enableSecurity: false,
+        enabledEvents: [WebhookEventType.MESSAGE_SENT],
+        batchSize: 10,
+        batchTimeoutMs: 50,
+      },
+      persistence: {
+        ...persistence,
+        endpointStore: {
+          ...endpointStore,
+          list: endpointStore.list.bind(endpointStore),
+          get: endpointStore.get.bind(endpointStore),
+          update: async (id, endpoint) => {
+            // The migration's write waits until shutdown has been called.
+            if (migrating) {
+              migrating = false;
+              await gate;
+            }
+            await endpointStore.update(id, endpoint);
+            events.push(`update ${endpoint.url}`);
+          },
+        },
+        close: async () => {
+          events.push("close");
+        },
+      },
+      fieldCrypto: { ...tenantOptions, acceptLegacyAad: true },
+      autoStart: false,
+    });
+
+    const migration = runtime.migrateFieldCryptoToTenant();
+    const update = runtime.updateEndpoint("ep-1", {
+      url: "https://example.com/moved",
+    });
+    const shutdown = runtime.shutdown();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    release();
+    await Promise.all([migration, update, shutdown]);
+
+    expect(events).toEqual([
+      "update https://example.com/hook",
+      "update https://example.com/moved",
+      "close",
+    ]);
+  });
+
   test("refuses a delivery store without replace() before changing anything", async () => {
     const persistence = await seedLegacyRecords();
     const { deliveryStore } = persistence;

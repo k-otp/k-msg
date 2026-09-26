@@ -322,6 +322,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     await this.flush();
+    // Endpoint writes queued behind a running migration still reach the
+    // store before it closes.
+    await this.endpointWrites;
     await this.dispatcher.shutdown();
 
     if (typeof this.persistence.close === "function") {
