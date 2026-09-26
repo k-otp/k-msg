@@ -259,6 +259,29 @@ describe("AligoProvider (send responses)", () => {
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
       expect(result.error.message).toBe("포인트가 부족합니다.");
+      expect(result.error.code).toBe("INSUFFICIENT_BALANCE");
+    }
+  });
+
+  test.each([
+    ["인증오류입니다.", "AUTHENTICATION_FAILED"],
+    [
+      "발신 프로파일 키(=senderkey) 파라메더 정보가 전달되지 않았습니다.",
+      "INVALID_REQUEST",
+    ],
+  ])("classifies Kakao code -99 by its message %p", async (message, code) => {
+    respondWith({ code: -99, message });
+
+    const result = await createSendProvider().send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { name: "Jane" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(String(result.error.code)).toBe(code);
     }
   });
 
