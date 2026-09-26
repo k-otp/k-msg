@@ -1,10 +1,12 @@
 export type {
   Job,
   JobDequeueOptions,
+  JobLeaseOptions,
   JobQueue,
+  JobQueueCleanupOptions,
   JobRetryDirective,
 } from "./job-queue.interface";
-export { JobStatus } from "./job-queue.interface";
+export { JOB_LEASE_EXPIRED, JobStatus } from "./job-queue.interface";
 export type {
   BuildSendInputDetailedResult,
   BuildSendInputIssue,
