@@ -1,9 +1,21 @@
 import { describe, expect, test } from "bun:test";
 import { renderDrizzleSchemaSource } from "./drizzle-schema";
+import type { SqlDialect } from "./sql-client";
 import {
   buildCloudflareSqlSchemaSql,
   initializeCloudflareSqlSchema,
 } from "./sql-schema";
+
+const TIME_COLUMNS = [
+  "requested_at",
+  "status_updated_at",
+  "next_check_at",
+  "sent_at",
+  "delivered_at",
+  "failed_at",
+  "last_checked_at",
+  "scheduled_at",
+];
 
 describe("Cloudflare SQL schema builders", () => {
   test("buildCloudflareSqlSchemaSql renders both tracking and queue tables", () => {
@@ -66,6 +78,27 @@ describe("Cloudflare SQL schema builders", () => {
 
     expect(sql).toContain('"requested_at" TIMESTAMPTZ NOT NULL');
     expect(sql).toContain('"next_check_at" TIMESTAMPTZ NOT NULL');
+  });
+
+  test("integer timestamp strategy creates 64-bit time columns", () => {
+    const timeColumnTypes = (dialect: SqlDialect) => {
+      const sql = buildCloudflareSqlSchemaSql({
+        dialect,
+        target: "tracking",
+        typeStrategy: { timestamp: "integer" },
+      });
+      return new Set(
+        TIME_COLUMNS.map(
+          (column) => new RegExp(`[\`"]${column}[\`"] (\\w+)`).exec(sql)?.[1],
+        ),
+      );
+    };
+
+    // Epoch milliseconds overflow the 32-bit INTEGER of Postgres and MySQL.
+    expect(timeColumnTypes("postgres")).toEqual(new Set(["BIGINT"]));
+    expect(timeColumnTypes("mysql")).toEqual(new Set(["BIGINT"]));
+    // SQLite's INTEGER is 64-bit.
+    expect(timeColumnTypes("sqlite")).toEqual(new Set(["INTEGER"]));
   });
 
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
@@ -154,5 +187,20 @@ describe("Drizzle schema renderer", () => {
     expect(source).toContain(
       "import { bigint, index, integer, jsonb, pgTable, text, timestamp, uuid, varchar }",
     );
+  });
+
+  test("renders bigint time columns for the integer timestamp strategy", () => {
+    for (const dialect of ["postgres", "mysql"] as const) {
+      const source = renderDrizzleSchemaSource({
+        dialect,
+        target: "tracking",
+        typeStrategy: { timestamp: "integer" },
+      });
+
+      for (const column of TIME_COLUMNS) {
+        expect(source).toContain(`bigint("${column}", { mode: "number" })`);
+      }
+      expect(source).not.toMatch(/\bint(eger)?\("[a-z_]+_at"\)/);
+    }
   });
 });

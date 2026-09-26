@@ -402,8 +402,8 @@ const queue = createDrizzleJobQueue({
 ```ts
 import {
   buildDeliveryTrackingSchemaSql,
-  createD1DeliveryTrackingStore,
   getDeliveryTrackingSchemaSpec,
+  HyperdriveDeliveryTrackingStore,
 } from "@k-msg/messaging/adapters/cloudflare";
 
 const trackingOptions = {
@@ -414,18 +414,57 @@ const trackingOptions = {
   },
   typeStrategy: {
     messageId: "uuid",
-    timestamp: "integer",
+    timestamp: "bigint",
   },
   storeRaw: true,
 } as const;
 
-const store = createD1DeliveryTrackingStore(env.DB, trackingOptions);
+// `client` is a Postgres CloudflareSqlClient, for example over Hyperdrive.
+const store = new HyperdriveDeliveryTrackingStore(client, trackingOptions);
 const ddl = buildDeliveryTrackingSchemaSql({
   dialect: "postgres",
   ...trackingOptions,
 });
 const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 ```
+
+`typeStrategy.timestamp` sets the type of the time columns (`requested_at`, `next_check_at`, and the other `*_at` columns):
+
+| `timestamp` | Postgres | MySQL | SQLite / D1 |
+| --- | --- | --- | --- |
+| `bigint` (default) | `BIGINT` | `BIGINT` | `INTEGER` |
+| `integer` | `BIGINT` | `BIGINT` | `INTEGER` |
+| `date` | `TIMESTAMPTZ` | `BIGINT` | `INTEGER` |
+
+The stores write epoch milliseconds to numeric time columns and `Date`s to `TIMESTAMPTZ`. Epoch milliseconds (about 1.8 × 10¹² today) need 64 bits. SQLite's `INTEGER` has them, but `INTEGER` on Postgres and MySQL is 32-bit, so `integer` is an alias of `bigint`.
+
+Earlier versions gave `integer` 32-bit `INTEGER` columns on Postgres and MySQL. Those reject every insert as out of range; MySQL without strict mode stores 2147483647 instead, which reads back as 1970-01-25. `CREATE TABLE IF NOT EXISTS` leaves an existing table as it is, so widen its time columns, using your `tableName` and `columnMap` names:
+
+```sql
+-- Postgres
+ALTER TABLE kmsg_delivery_tracking
+  ALTER COLUMN requested_at TYPE BIGINT,
+  ALTER COLUMN status_updated_at TYPE BIGINT,
+  ALTER COLUMN next_check_at TYPE BIGINT,
+  ALTER COLUMN sent_at TYPE BIGINT,
+  ALTER COLUMN delivered_at TYPE BIGINT,
+  ALTER COLUMN failed_at TYPE BIGINT,
+  ALTER COLUMN last_checked_at TYPE BIGINT,
+  ALTER COLUMN scheduled_at TYPE BIGINT;
+
+-- MySQL: MODIFY restates each column, so keep NOT NULL where it was
+ALTER TABLE kmsg_delivery_tracking
+  MODIFY requested_at BIGINT NOT NULL,
+  MODIFY status_updated_at BIGINT NOT NULL,
+  MODIFY next_check_at BIGINT NOT NULL,
+  MODIFY sent_at BIGINT,
+  MODIFY delivered_at BIGINT,
+  MODIFY failed_at BIGINT,
+  MODIFY last_checked_at BIGINT,
+  MODIFY scheduled_at BIGINT;
+```
+
+If you keep a Drizzle schema rendered by `renderDrizzleSchemaSource()`, render it again: its time columns are now `bigint(..., { mode: "number" })` for `integer` too.
 
 ### Supported Drizzle Versions
 
