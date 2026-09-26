@@ -56,6 +56,22 @@ export async function requestAligo(params: {
   }
 }
 
+// -99 is Aligo's catch-all Kakao failure (authentication, missing
+// parameters, insufficient points); its message says which one.
+function mapAligoKakaoErrorCode(
+  code: number | undefined,
+  message: string,
+): KMsgErrorCode {
+  if (code === -99) {
+    if (message.includes("포인트")) return KMsgErrorCode.INSUFFICIENT_BALANCE;
+    if (message.includes("인증")) return KMsgErrorCode.AUTHENTICATION_FAILED;
+    return KMsgErrorCode.INVALID_REQUEST;
+  }
+  if (code === -101) return KMsgErrorCode.AUTHENTICATION_FAILED;
+  if (code === 509) return KMsgErrorCode.INVALID_REQUEST;
+  return KMsgErrorCode.PROVIDER_ERROR;
+}
+
 export function ensureAligoKakaoOk(params: {
   providerId: string;
   response: unknown;
@@ -71,10 +87,7 @@ export function ensureAligoKakaoOk(params: {
     typeof response.message === "string" && response.message.length > 0
       ? response.message
       : fallbackMessage;
-  const mapped =
-    code === 509 || code === -99
-      ? KMsgErrorCode.INVALID_REQUEST
-      : KMsgErrorCode.PROVIDER_ERROR;
+  const mapped = mapAligoKakaoErrorCode(code, message);
   return fail(
     new KMsgError(mapped, message, {
       providerId,
