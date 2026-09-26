@@ -26,6 +26,7 @@ bun add @k-msg/webhook
 - `createInMemoryWebhookPersistence`
 - `addEndpoints`, `probeEndpoint`
 - `validateEndpointUrl`
+- `verifyWebhookRequest` (수신 측)
 
 고급 빌딩 블록은 subpath로 분리되었습니다.
 
@@ -244,6 +245,68 @@ const runtime = new WebhookRuntimeService({
 
 - 기본적으로 private host 차단
 - `http://localhost` 류 URL은 옵션으로 명시 허용해야 사용 가능
+
+## 전송 서명과 검증
+
+`enableSecurity: true`이면 모든 전송에 HMAC 서명을 붙입니다. 엔드포인트의
+`secret`으로 서명하고, 엔드포인트에 secret이 없으면 delivery 설정의
+`secretKey`를 씁니다. `enableSecurity`가 켜져 있는 동안 서명 없이 보내는
+일은 없습니다.
+
+- `addEndpoint()`와 `updateEndpoint()`는 secret이 없게 되는 엔드포인트에
+  대해 예외를 던집니다.
+- 보안을 켜기 전에 저장된 엔드포인트처럼 secret 없이 저장된 엔드포인트에는
+  요청을 보내지 않고 `failed` 전송을 기록합니다. 유일한 attempt에는
+  `httpStatus`가 없고 `error`에 이유가 담기며, `probeEndpoint()`도 같은
+  `error`를 돌려줍니다.
+
+모든 요청에는 다음 헤더가 붙습니다.
+
+| 헤더 | 값 |
+| --- | --- |
+| `X-Webhook-ID` | 이벤트 id |
+| `X-Webhook-Event` | 이벤트 타입 |
+| `X-Webhook-Timestamp` | 해당 attempt를 보낸 시각의 Unix time(초) |
+| `X-Webhook-Signature` | `sha256=` 뒤에 `<X-Webhook-Timestamp>.<원본 body>`의 HMAC-SHA256 hex. `enableSecurity`일 때만 |
+
+timestamp는 이벤트의 `timestamp`가 아니라 각 attempt를 보낸 시각이고,
+재시도할 때마다 다시 서명합니다. 그래서 오래된 timestamp를 거절하는 수신
+측도 재시도나 큐에서 기다린 이벤트는 받아들입니다. delivery 설정의
+`signatureHeader`, `signaturePrefix`(기본값 `sha256=`), `algorithm`
+(`sha256` 또는 `sha1`)으로 서명 헤더, 접두사, 해시를 바꿀 수 있습니다.
+
+수신 측은 `verifyWebhookRequest`로 요청을 검증합니다. 서명을 constant-time으로
+비교한 뒤, 수신 측 시계와 `toleranceMs`(기본 5분) 넘게 차이 나는 timestamp를
+거절합니다.
+
+```ts
+import { verifyWebhookRequest } from "@k-msg/webhook";
+
+export async function receiveWebhook(
+  request: Request,
+  secret: string,
+): Promise<Response> {
+  // 원본 body로 검증합니다. JSON.parse와 JSON.stringify는 바이트를 바꿀 수 있습니다.
+  const body = await request.text();
+  const verified = verifyWebhookRequest(request.headers, body, secret, {
+    toleranceMs: 5 * 60 * 1000,
+  });
+  if (verified.isFailure) {
+    // MISSING_SIGNATURE, MISSING_TIMESTAMP, INVALID_SIGNATURE,
+    // INVALID_TIMESTAMP, STALE_TIMESTAMP
+    return new Response(verified.error.code, { status: 401 });
+  }
+
+  const event = JSON.parse(body);
+  // 전송은 at-least-once입니다. 이미 처리한 이벤트 id는 건너뛰세요.
+  console.log("webhook received", event.id);
+  return new Response(null, { status: 204 });
+}
+```
+
+Node 스타일 헤더 레코드(`req.headers`)와 `Uint8Array`, `ArrayBuffer` body도
+받습니다. 송신 측에서 `algorithm`, `signatureHeader`, `signaturePrefix`를
+바꿨다면 옵션에 같은 값을 넘기세요.
 
 ## 마이그레이션 (브레이킹)
 
