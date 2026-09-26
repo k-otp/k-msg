@@ -59,6 +59,8 @@ Template variables:
   (`POST /api/template/`) and keeps it for 10 minutes per provider instance.
 - A placeholder with no matching key in `variables` fails the send with `INVALID_REQUEST`
   before anything is sent. `providerOptions.templateParam` (an array) is still sent as-is.
+- With empty `variables` and no `templateContent` there is nothing to place, so no lookup is
+  made; IWINV itself refuses a template that needs values (code `508`).
 
 Fallback SMS/LMS (`reSend`):
 - `failover.fallbackContent` (or `providerOptions.resendContent`) is sent as `resendContent`

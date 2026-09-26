@@ -193,6 +193,23 @@ describe("IWINV AlimTalk template variables", () => {
     expect(iwinv.sends()).toHaveLength(0);
   });
 
+  test("checks inline template content even without variables", async () => {
+    const iwinv = createIwinvFetch({});
+    const provider = new IWINVProvider({ apiKey: "api-key" });
+
+    const result = await provider.send(
+      alimtalk({ providerOptions: { templateContent: "코드: #{code}" } }),
+      { fetch: iwinv.fetch },
+    );
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(result.error.message).toContain("code");
+    }
+    expect(iwinv.sends()).toHaveLength(0);
+  });
+
   test("sends no templateParam and skips the lookup without variables", async () => {
     const iwinv = createIwinvFetch({});
     const provider = new IWINVProvider({ apiKey: "api-key" });

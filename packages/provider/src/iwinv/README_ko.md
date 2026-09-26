@@ -57,6 +57,8 @@ CLI 기준:
   조회해 provider 인스턴스마다 10분간 재사용합니다.
 - `variables`에 없는 변수가 템플릿에 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로 실패합니다.
   `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
+- `variables`가 비어 있고 `templateContent`도 없으면 채울 값이 없으므로 조회하지 않습니다. 값이 필요한
+  템플릿은 IWINV가 거부합니다(코드 `508`).
 
 대체문자(`reSend`):
 - `failover.fallbackContent`(또는 `providerOptions.resendContent`)는 IWINV의 직접 입력 타입인
