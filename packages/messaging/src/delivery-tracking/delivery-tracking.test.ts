@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import {
   type DeliveryStatusQuery,
   fail,
@@ -903,5 +903,43 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(reported).toHaveLength(1);
     expect(reported[0]?.messageId).toBe("m1");
     expect(String(reported[0]?.error)).toContain("webhook down");
+  });
+
+  test("falls back to console.error, and survives a throwing console", async () => {
+    const logged: unknown[][] = [];
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: () => {
+        throw new Error("webhook down");
+      },
+      onStatusChangeError: () => {
+        throw new Error("reporter down");
+      },
+    });
+    await recordSent(service, "m1");
+    await recordSent(service, "m2");
+
+    const consoleError = spyOn(console, "error").mockImplementation(
+      (...args: unknown[]) => {
+        logged.push(args);
+        throw new Error("log shim down");
+      },
+    );
+    try {
+      await service.runOnce();
+    } finally {
+      consoleError.mockRestore();
+    }
+
+    // Both records are stored even though every reporter threw.
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+    expect((await service.getRecord("m2"))?.status).toBe("DELIVERED");
+    const messages = logged.map((args) => String(args[0]));
+    expect(messages.some((m) => m.includes("onStatusChangeError threw"))).toBe(
+      true,
+    );
+    expect(messages.some((m) => m.includes("onStatusChange threw"))).toBe(true);
   });
 });

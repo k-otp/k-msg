@@ -25,6 +25,16 @@ import {
   type TrackingRecord,
 } from "./types";
 
+// As KMsg does for hook failures: a console replacement that throws must not
+// break the poll.
+function logStatusChangeFailure(message: string, error: unknown): void {
+  try {
+    console.error(message, error);
+  } catch {
+    // Nothing is left to report to.
+  }
+}
+
 function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
 }
@@ -341,14 +351,14 @@ export class DeliveryTrackingService {
           await this.onStatusChangeError(error, change);
           return;
         } catch (reportError) {
-          console.error(
+          logStatusChangeFailure(
             "[k-msg] onStatusChangeError threw while reporting an onStatusChange error",
             reportError,
           );
         }
       }
       // Last resort, so a broken callback does not fail silently.
-      console.error(
+      logStatusChangeFailure(
         `[k-msg] onStatusChange threw for message ${change.record.messageId}; the stored status is unaffected`,
         error,
       );
