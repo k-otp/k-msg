@@ -101,16 +101,43 @@ describe("redactLogText", () => {
       String.raw`{\'password\': \'p@ss\w0rd\'}`,
       String.raw`{\'password\': \'[REDACTED]\'}`,
     ],
+    ["API key: TOPSECRET", "API key: [REDACTED]"],
+    ["private key=TOPSECRET", "private key=[REDACTED]"],
+    ["Private  Key = 'TOPSECRET'", "Private  Key = '[REDACTED]'"],
+    ['{"API key":"TOPSECRET"}', '{"API key":"[REDACTED]"}'],
+    [
+      `password.${"x".repeat(65)}=TOPSECRET`,
+      `password.${"x".repeat(65)}=[REDACTED]`,
+    ],
+    [
+      `config.${"nested.".repeat(20)}password=TOPSECRET`,
+      `config.${"nested.".repeat(20)}password=[REDACTED]`,
+    ],
+    [
+      'error: "login failed: password=hunter2"',
+      'error: "login failed: password=[REDACTED]"',
+    ],
   ])("redacts the credential in %p", (text, expected) => {
     expect(redactLogText(text)).toBe(expected);
   });
 
-  test("scans long runs of path-like text in linear time", () => {
-    // Took seconds before key parts were bounded: every word boundary
-    // rescanned the rest of the run.
-    const text = "config.".repeat(15_000);
+  // Each took seconds when every word boundary rescanned the rest of its
+  // run of key characters.
+  test.each([
+    ["path-like text", "config.".repeat(15_000)],
+    ["a key that never reaches a separator", "token.".repeat(20_000)],
+    ["repeated labels", "API ".repeat(25_000)],
+    ["many short pairs", "a=b ".repeat(25_000)],
+  ])("scans %s in linear time", (_, text) => {
     const started = performance.now();
     expect(redactLogText(text)).toBe(text);
+    expect(performance.now() - started).toBeLessThan(1_000);
+  });
+
+  test("redacts a credential under a key of any length in linear time", () => {
+    const key = `password.${"x".repeat(100_000)}`;
+    const started = performance.now();
+    expect(redactLogText(`${key}=TOPSECRET`)).toBe(`${key}=[REDACTED]`);
     expect(performance.now() - started).toBeLessThan(1_000);
   });
 
@@ -173,7 +200,7 @@ describe("Logger redaction", () => {
   });
 
   test.each([true, false])(
-    "masks context values under snake and kebab case credential keys (json: %p)",
+    "masks context values under snake, kebab, and spaced credential keys (json: %p)",
     (enableJson) => {
       spies = capture();
       const logger = new Logger({}, { enableJson, enableColors: false });
@@ -182,6 +209,7 @@ describe("Logger redaction", () => {
         api_key: "sk_live_abcdef123456",
         "x-api-key": "key_abcdef123456",
         private_key: "pk_abcdef123456",
+        "API key": "label_abcdef123456",
       });
 
       const output = lines.join("\n");
