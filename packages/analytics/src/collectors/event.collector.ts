@@ -433,12 +433,10 @@ export class EventCollector extends EventEmitter {
   }
 
   private startPeriodicFlush(): void {
-    setInterval(async () => {
-      try {
-        await this.flush();
-      } catch (error) {
+    setInterval(() => {
+      this.flush().catch((error: unknown) => {
         this.emit("flush:error", error);
-      }
+      });
     }, this.config.flushInterval);
   }
 

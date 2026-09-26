@@ -2,7 +2,8 @@
  * Comprehensive tests for analytics-engine package
  */
 
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
+import { logger } from "@k-msg/core";
 import {
   type AggregatedMetric,
   type AnalyticsConfig,
@@ -74,6 +75,21 @@ const createTestEvent = (type: string, payload: any = {}): EventData => ({
   source: "test-source",
   payload,
 });
+
+// Polls instead of sleeping a fixed time so timer tests stay fast locally and
+// stable on a loaded CI runner.
+async function waitFor(
+  condition: () => boolean,
+  timeoutMs = 2000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition()) {
+    if (Date.now() > deadline) {
+      throw new Error(`Condition not met within ${timeoutMs}ms`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
 
 describe("AnalyticsService", () => {
   test("should initialize with default configuration", () => {
@@ -341,6 +357,43 @@ describe("MetricAggregator", () => {
     expect(
       percentiles.find((p) => p.dimensions.percentile === "50"),
     ).toBeDefined();
+  });
+
+  // bun test fails the running test on an unhandled rejection, so a pass
+  // shows the periodic flush handled the failure.
+  test("should log a failed periodic flush and keep flushing", async () => {
+    class FlakyAggregator extends MetricAggregator {
+      failing = true;
+
+      override async aggregateByRules(
+        metrics: MetricData[],
+      ): Promise<AggregatedMetric[]> {
+        if (this.failing) {
+          throw new Error("rule engine down");
+        }
+        return super.aggregateByRules(metrics);
+      }
+    }
+
+    const aggregator = new FlakyAggregator({
+      rules: [],
+      batchSize: 100,
+      flushInterval: 10,
+    });
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      await aggregator.addMetric(createTestMetric(MetricType.MESSAGE_SENT, 1));
+      // A failed flush keeps the buffer, so later ticks retry and fail again.
+      await waitFor(() => loggerError.mock.calls.length >= 2);
+
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe("rule engine down");
+    } finally {
+      // MetricAggregator has no stop(); a successful flush empties the buffer
+      // so the interval has nothing left to report.
+      aggregator.failing = false;
+      loggerError.mockRestore();
+    }
   });
 });
 

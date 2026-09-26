@@ -57,8 +57,9 @@ async function formatWithBiome(
     },
   );
 
-  proc.stdin.write(source);
-  proc.stdin.end();
+  // FileSink returns a promise when a write has to wait for the pipe to drain.
+  await proc.stdin.write(source);
+  await proc.stdin.end();
 
   const [exitCode, stdout, stderr] = await Promise.all([
     proc.exited,
