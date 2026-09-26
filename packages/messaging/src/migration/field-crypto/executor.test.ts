@@ -118,15 +118,15 @@ async function countUnencrypted(client: CloudflareSqlClient): Promise<number> {
   return Number(rows[0]?.count);
 }
 
-// Fails the nth query whose SQL matches, as a dropped connection would.
+// Fails the nth matching query, as a dropped connection would.
 function failNthQuery(
   client: CloudflareSqlClient,
-  pattern: RegExp,
-  failAt: number,
+  matches: (sql: string, params: readonly unknown[]) => boolean,
+  failAt = 1,
 ): CloudflareSqlClient {
   let seen = 0;
-  const query = async (sql: string, params?: readonly unknown[]) => {
-    if (pattern.test(sql)) {
+  const query = async (sql: string, params: readonly unknown[] = []) => {
+    if (matches(sql, params)) {
       seen += 1;
       if (seen === failAt) throw new Error("connection reset");
     }
@@ -215,7 +215,11 @@ describe("applyFieldCryptoMigration", () => {
     };
 
     // The read that checks for more rows after the only chunk allowed fails.
-    const flaky = failNthQuery(client, /as messageId/, 2);
+    const flaky = failNthQuery(
+      client,
+      (sql) => sql.includes("as messageId"),
+      2,
+    );
     expect(
       await applyFieldCryptoMigration(flaky, { ...input, maxChunks: 1 }),
     ).toMatchObject({
@@ -308,5 +312,68 @@ describe("applyFieldCryptoMigration", () => {
       `SELECT to_enc FROM ${TABLE}`,
     );
     expect(rows[0]?.to_enc).toBeNull();
+  });
+  test("reports the backfill error when recording the failed chunk fails too", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    await client.query(`UPDATE ${TABLE} SET "to" = ''`);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+
+    const flaky = failNthQuery(
+      client,
+      (sql, params) =>
+        sql.includes("kmsg_crypto_migration_chunks") &&
+        params.includes("failed"),
+    );
+    expect(
+      await applyFieldCryptoMigration(flaky, {
+        planId: plan.planId,
+        trackingTableName: TABLE,
+        fieldCrypto,
+      }),
+    ).toMatchObject({ status: "failed", failedChunks: 1 });
+    expect(
+      (await statusFieldCryptoMigration(client, plan.planId, {})).run
+        ?.lastError,
+    ).toContain("Cannot encrypt message");
+  });
+
+  test("marks the run failed when its final state write fails", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+    const input = {
+      planId: plan.planId,
+      trackingTableName: TABLE,
+      fieldCrypto,
+    };
+
+    const flaky = failNthQuery(
+      client,
+      (sql, params) =>
+        sql.includes("kmsg_crypto_migration_runs") &&
+        params.includes("completed"),
+    );
+    expect(await applyFieldCryptoMigration(flaky, input)).toMatchObject({
+      status: "failed",
+      processedRows: 1,
+    });
+    expect(
+      (await statusFieldCryptoMigration(client, plan.planId, {})).run,
+    ).toMatchObject({ status: "failed", lastError: "connection reset" });
+
+    expect(await applyFieldCryptoMigration(client, input)).toMatchObject({
+      status: "completed",
+      processedRows: 0,
+    });
+    expect(await countUnencrypted(client)).toBe(0);
   });
 });

@@ -314,7 +314,6 @@ export async function applyFieldCryptoMigration(
 
   // Any read or state write that fails stops the run as failed. Rows up to the
   // recorded cursor are done, so `apply` resumes from there.
-  let hasMore: boolean;
   try {
     while (processedChunks < maxChunks) {
       const rows = await selectNextRows(
@@ -380,6 +379,9 @@ export async function applyFieldCryptoMigration(
         cursorMessageId = end?.messageId;
       } catch (error) {
         failedChunks += 1;
+        // Best effort: the run must report the backfill error, not a failed
+        // bookkeeping write. A chunk left "processing" is re-read by `apply`,
+        // whose cursor has not moved past it.
         await upsertFieldCryptoMigrationChunk(
           client,
           {
@@ -397,12 +399,12 @@ export async function applyFieldCryptoMigration(
             updatedAt: Date.now(),
           },
           options,
-        );
+        ).catch(() => undefined);
         throw error;
       }
     }
 
-    hasMore =
+    const hasMore =
       (
         await selectNextRows(
           client,
@@ -414,36 +416,36 @@ export async function applyFieldCryptoMigration(
           1,
         )
       ).length > 0;
+
+    const finalStatus = hasMore ? "running" : "completed";
+    await upsertFieldCryptoMigrationRun(
+      client,
+      {
+        ...run,
+        status: finalStatus,
+        failedChunks,
+        processedChunks: run.processedChunks + processedChunks,
+        processedRows: run.processedRows + processedRows,
+        cursorRequestedAt,
+        cursorMessageId,
+        updatedAt: Date.now(),
+        lastError: undefined,
+      },
+      options,
+    );
+
+    return {
+      planId: run.planId,
+      processedChunks,
+      processedRows,
+      failedChunks,
+      status: finalStatus,
+      cursorRequestedAt,
+      cursorMessageId,
+    };
   } catch (error) {
     return failRun(error);
   }
-
-  const finalStatus = hasMore ? "running" : "completed";
-  await upsertFieldCryptoMigrationRun(
-    client,
-    {
-      ...run,
-      status: finalStatus,
-      failedChunks,
-      processedChunks: run.processedChunks + processedChunks,
-      processedRows: run.processedRows + processedRows,
-      cursorRequestedAt,
-      cursorMessageId,
-      updatedAt: Date.now(),
-      lastError: undefined,
-    },
-    options,
-  );
-
-  return {
-    planId: run.planId,
-    processedChunks,
-    processedRows,
-    failedChunks,
-    status: finalStatus,
-    cursorRequestedAt,
-    cursorMessageId,
-  };
 }
 
 export async function retryFieldCryptoMigration(
