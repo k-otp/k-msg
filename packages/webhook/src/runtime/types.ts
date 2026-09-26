@@ -25,6 +25,7 @@ export interface WebhookEndpointStore {
 }
 
 export interface WebhookDeliveryStore {
+  /** Stores a new delivery; ids are unique, so use replace() to overwrite. */
   add(delivery: WebhookDelivery): Promise<void>;
   list(options?: WebhookDeliveryListOptions): Promise<WebhookDelivery[]>;
   /**
