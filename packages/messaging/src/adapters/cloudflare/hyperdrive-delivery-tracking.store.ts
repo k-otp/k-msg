@@ -34,7 +34,11 @@ import {
   getDeliveryTrackingColumnKeys,
   getDeliveryTrackingSchemaSpec,
 } from "./delivery-tracking-schema";
-import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
+import {
+  type CloudflareSqlClient,
+  runCloudflareSqlTransaction,
+  type SqlDialect,
+} from "./sql-client";
 import {
   jsonParameterSql,
   readJsonColumn,
@@ -266,6 +270,84 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       `SELECT ${this.selectListSql()} FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
       [...KMSG_TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
     );
+
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
+  }
+
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    await this.init();
+
+    const safeLimit = Number.isFinite(limit)
+      ? Math.max(0, Math.floor(limit))
+      : 0;
+    if (safeLimit === 0) return [];
+
+    if (this.client.dialect === "mysql") {
+      return await this.leaseDueInTransaction(now, safeLimit, leaseUntil);
+    }
+
+    const table = this.tableRef();
+    const messageId = this.quoteIdentifier(this.columnName("messageId"));
+    const status = this.quoteIdentifier(this.columnName("status"));
+    const nextCheckAt = this.quoteIdentifier(this.columnName("nextCheckAt"));
+    const statusPlaceholders = this.placeholders(
+      KMSG_TERMINAL_STATUSES.length,
+      2,
+    );
+    const nowPlaceholder = this.placeholder(KMSG_TERMINAL_STATUSES.length + 2);
+    const limitPlaceholder = this.placeholder(
+      KMSG_TERMINAL_STATUSES.length + 3,
+    );
+    // One statement selects and leases the rows. Postgres skips rows another
+    // poll has locked instead of waiting for them; SQLite runs the whole
+    // statement under its write lock.
+    const lock =
+      this.client.dialect === "postgres" ? " FOR UPDATE SKIP LOCKED" : "";
+
+    const { rows } = await this.client.query<TrackingRow>(
+      `UPDATE ${table} SET ${nextCheckAt} = ${this.placeholder(1)} WHERE ${messageId} IN (SELECT ${messageId} FROM ${table} WHERE ${status} NOT IN (${statusPlaceholders.join(", ")}) AND ${nextCheckAt} <= ${nowPlaceholder} ORDER BY ${nextCheckAt} ASC LIMIT ${limitPlaceholder}${lock}) RETURNING ${this.selectListSql()}`,
+      [
+        this.toDbTimestamp(leaseUntil),
+        ...KMSG_TERMINAL_STATUSES,
+        this.toDbTimestamp(now),
+        safeLimit,
+      ],
+    );
+
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
+  }
+
+  // MySQL has no UPDATE ... RETURNING. The locking read holds the rows until
+  // the lease is written, when the client runs this in a transaction.
+  private async leaseDueInTransaction(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    const table = this.tableRef();
+    const messageIdColumn = this.columnName("messageId");
+    const nextCheckAtColumn = this.columnName("nextCheckAt");
+    const status = this.quoteIdentifier(this.columnName("status"));
+    const nextCheckAt = this.quoteIdentifier(nextCheckAtColumn);
+    const leasedAt = this.toDbTimestamp(leaseUntil);
+
+    const rows = await runCloudflareSqlTransaction(this.client, async (tx) => {
+      const { rows: due } = await tx.query<TrackingRow>(
+        `SELECT ${this.selectListSql()} FROM ${table} WHERE ${status} NOT IN (${this.placeholders(KMSG_TERMINAL_STATUSES.length).join(", ")}) AND ${nextCheckAt} <= ? ORDER BY ${nextCheckAt} ASC LIMIT ? FOR UPDATE`,
+        [...KMSG_TERMINAL_STATUSES, this.toDbTimestamp(now), limit],
+      );
+      if (due.length === 0) return due;
+
+      await tx.query(
+        `UPDATE ${table} SET ${nextCheckAt} = ? WHERE ${this.quoteIdentifier(messageIdColumn)} IN (${this.placeholders(due.length).join(", ")})`,
+        [leasedAt, ...due.map((row) => row[messageIdColumn])],
+      );
+      return due.map((row) => ({ ...row, [nextCheckAtColumn]: leasedAt }));
+    });
 
     return await Promise.all(rows.map((row) => this.rowToRecord(row)));
   }

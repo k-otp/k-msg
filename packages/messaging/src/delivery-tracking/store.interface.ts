@@ -127,6 +127,17 @@ export interface DeliveryTrackingStore {
   upsert(record: TrackingRecord): Promise<void>;
   get(messageId: string): Promise<TrackingRecord | undefined>;
   listDue(now: Date, limit: number): Promise<TrackingRecord[]>;
+  /**
+   * Like `listDue`, but also leases the records it returns: in the same
+   * atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
+   * of the store skip them until the poll stores their next check or the
+   * lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
+   */
+  leaseDue?(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]>;
   listRecords?(options: DeliveryTrackingListOptions): Promise<TrackingRecord[]>;
   countRecords?(filter: DeliveryTrackingRecordFilter): Promise<number>;
   countBy?(

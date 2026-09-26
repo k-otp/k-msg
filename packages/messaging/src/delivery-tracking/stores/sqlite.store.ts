@@ -26,8 +26,11 @@ export interface SqliteDeliveryTrackingStoreOptions
   initializeSchema?: boolean;
 }
 
-function isSelectLikeStatement(statement: string): boolean {
-  return /^\s*(SELECT|WITH|PRAGMA)\b/i.test(statement);
+function returnsRows(statement: string): boolean {
+  return (
+    /^\s*(SELECT|WITH|PRAGMA)\b/i.test(statement) ||
+    /\bRETURNING\b/i.test(statement)
+  );
 }
 
 export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
@@ -46,7 +49,7 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
       ) => {
         const values = [...params];
         const bindings = values as unknown as [];
-        if (isSelectLikeStatement(statement)) {
+        if (returnsRows(statement)) {
           const rows = this.db.prepare(statement).all(...bindings) as T[];
           return { rows, rowCount: rows.length };
         }
@@ -89,6 +92,14 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
     return await this.delegate.listDue(now, limit);
+  }
+
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    return await this.delegate.leaseDue(now, limit, leaseUntil);
   }
 
   async listRecords(

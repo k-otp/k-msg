@@ -273,6 +273,29 @@ const tracking = new DeliveryTrackingService({
 
 `MockProvider` from `@k-msg/provider` reports each message it sent as `DELIVERED` (change it with `setDeliveryStatus`), so tracking can run without real credentials.
 
+### Polls with a Time Limit
+
+`runOnce()` takes the same second argument as `send()` and passes it to each status query. Its `signal` also bounds the poll: once it aborts, no more queries start, those still running are cancelled, and `runOnce()` stores the statuses it has and returns. Records it did not finish stay due for the next poll.
+
+```ts
+// For example from a cron trigger that must finish within 30 seconds.
+await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
+```
+
+### Several Pollers on One Store
+
+When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not. On MySQL the lease is atomic only when the SQL client supports transactions. A lease a poll does not hand back, because it stopped, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
+
+### Shutting Down
+
+`close()` stops the timer and stops a poll in progress as if its signal had aborted, waits for that poll to store the statuses it has, and then closes the store. When a poll that `start()` runs fails, the error is logged through the `@k-msg/core` logger and the next tick polls again.
+
+```ts
+process.once("SIGTERM", () => {
+  void tracking.close();
+});
+```
+
 ### Recording Errors
 
 The hooks from `createDeliveryTrackingHooks` record each message a provider accepts. When recording fails, the send still succeeds but the message will not be polled; the error goes to `onRecordError`, or without it to `KMsg`'s `onHookError` (`console.error` if that is not set either). `onError` receives only failed sends, with their hook context.
