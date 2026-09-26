@@ -4,6 +4,7 @@ import { WebhookRuntimeService } from "../../runtime/webhook-runtime.service";
 import type { HttpClient } from "../../services/webhook.dispatcher";
 import {
   type WebhookConfig,
+  type WebhookDelivery,
   type WebhookEvent,
   WebhookEventType,
 } from "../../types/webhook.types";
@@ -112,6 +113,31 @@ describe("webhook cloudflare adapter", () => {
     expect(sql).toContain("endpoints_custom");
     expect(sql).toContain("deliveries_custom");
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS");
+  });
+
+  test("D1 delivery store replaces a stored delivery by id", async () => {
+    const sqliteD1 = createSqliteBackedD1();
+    closers.push(sqliteD1.close);
+    const { deliveryStore } = createD1WebhookPersistence(sqliteD1.db);
+    const delivery: WebhookDelivery = {
+      id: "d-1",
+      endpointId: "ep-1",
+      eventId: "evt-1",
+      eventType: WebhookEventType.MESSAGE_SENT,
+      url: "https://example.com/hook",
+      httpMethod: "POST",
+      headers: {},
+      payload: "before",
+      attempts: [],
+      status: "success",
+      createdAt: new Date(),
+    };
+
+    await deliveryStore.add(delivery);
+    await deliveryStore.replace?.({ ...delivery, payload: "after" });
+
+    const stored = await deliveryStore.list({ endpointId: "ep-1" });
+    expect(stored.map((saved) => saved.payload)).toEqual(["after"]);
   });
 
   test("D1 persistence works with WebhookRuntimeService", async () => {

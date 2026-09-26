@@ -392,6 +392,7 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
     return store;
   }
 
+  const replace = store.replace?.bind(store);
   return {
     async add(delivery: WebhookDelivery): Promise<void> {
       await store.add(await protectDelivery(delivery, options));
@@ -404,6 +405,13 @@ export function wrapWebhookDeliveryStoreWithFieldCrypto(
         deliveries.map((delivery) => revealDelivery(delivery, options)),
       );
     },
+    ...(replace
+      ? {
+          async replace(delivery: WebhookDelivery): Promise<void> {
+            await replace(await protectDelivery(delivery, options));
+          },
+        }
+      : {}),
   };
 }
 
@@ -467,8 +475,8 @@ async function revealLegacy<T>(
  * fallback. Each endpoint is read again just before it is rewritten, but
  * pause endpoint updates while it runs: one landing in between would be
  * overwritten. Deliveries, which the runtime never rewrites, are listed
- * without a limit and written back with `add`, which replaces a delivery
- * with the same id.
+ * without a limit and written back with the delivery store's `replace()`,
+ * which a custom store must implement for the migration to run.
  */
 export async function migrateWebhookFieldCryptoToTenant(
   persistence: Pick<WebhookPersistence, "endpointStore" | "deliveryStore">,
@@ -482,6 +490,21 @@ export async function migrateWebhookFieldCryptoToTenant(
       "migrating webhook ciphertext to the tenant requires fieldCrypto.tenantId",
       { rule: "fieldCrypto.webhook.tenant_migration", path: "tenantId" },
       { fieldPath: "tenantId" },
+    );
+  }
+
+  const deliveryStore = persistence.deliveryStore;
+  const replaceDelivery = deliveryStore.replace?.bind(deliveryStore);
+  const migratesDeliveries =
+    options.delivery !== undefined && options.delivery.enabled !== false;
+  if (migratesDeliveries && !replaceDelivery) {
+    // Checked first, so a store that cannot rewrite deliveries does not
+    // leave the endpoints migrated and the deliveries not.
+    throw new FieldCryptoError(
+      "config",
+      "migrating webhook deliveries needs a delivery store with replace(); the built-in stores implement it",
+      { rule: "fieldCrypto.webhook.tenant_migration", path: "deliveryStore" },
+      { fieldPath: "deliveryStore" },
     );
   }
 
@@ -522,8 +545,8 @@ export async function migrateWebhookFieldCryptoToTenant(
   }
 
   const deliveryConfig = bound.delivery;
-  if (deliveryConfig && deliveryConfig.enabled !== false) {
-    const deliveries = await persistence.deliveryStore.list({
+  if (replaceDelivery && deliveryConfig && deliveryConfig.enabled !== false) {
+    const deliveries = await deliveryStore.list({
       limit: ALL_DELIVERIES,
     });
     for (const delivery of deliveries) {
@@ -540,9 +563,7 @@ export async function migrateWebhookFieldCryptoToTenant(
         delivery.id,
         "payload",
       );
-      await persistence.deliveryStore.add(
-        await protectDelivery(revealed, bound),
-      );
+      await replaceDelivery(await protectDelivery(revealed, bound));
       result.deliveries += 1;
     }
   }

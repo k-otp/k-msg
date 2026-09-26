@@ -74,6 +74,10 @@ export class InMemoryWebhookDeliveryStore implements WebhookDeliveryStore {
     this.deliveries.set(delivery.id, delivery);
   }
 
+  async replace(delivery: WebhookDelivery): Promise<void> {
+    this.deliveries.set(delivery.id, delivery);
+  }
+
   async list(
     options: WebhookDeliveryListOptions = {},
   ): Promise<WebhookDelivery[]> {

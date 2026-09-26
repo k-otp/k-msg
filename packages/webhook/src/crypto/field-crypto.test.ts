@@ -299,6 +299,24 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     expect(await endpointStore.get("ep-2")).toBeNull();
   });
 
+  test("refuses a delivery store without replace() before changing anything", async () => {
+    const persistence = await seedLegacyRecords();
+    const { deliveryStore } = persistence;
+    const appendOnly = {
+      ...persistence,
+      deliveryStore: {
+        add: deliveryStore.add.bind(deliveryStore),
+        list: deliveryStore.list.bind(deliveryStore),
+      },
+    };
+    const before = await persistence.endpointStore.get("ep-1");
+
+    await expect(
+      migrateWebhookFieldCryptoToTenant(appendOnly, tenantOptions),
+    ).rejects.toThrow("needs a delivery store with replace()");
+    expect(await persistence.endpointStore.get("ep-1")).toEqual(before);
+  });
+
   test("requires the tenant to bind to", async () => {
     await expect(
       migrateWebhookFieldCryptoToTenant(createInMemoryWebhookPersistence(), {

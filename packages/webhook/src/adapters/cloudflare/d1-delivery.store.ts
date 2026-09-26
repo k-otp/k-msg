@@ -49,6 +49,15 @@ export class D1WebhookDeliveryStore implements WebhookDeliveryStore {
   ) {}
 
   async add(delivery: WebhookDelivery): Promise<void> {
+    await this.write(delivery);
+  }
+
+  // INSERT OR REPLACE already overwrites by id, so add and replace share it.
+  async replace(delivery: WebhookDelivery): Promise<void> {
+    await this.write(delivery);
+  }
+
+  private async write(delivery: WebhookDelivery): Promise<void> {
     await this.ensureInitialized();
 
     await runStatement(
