@@ -126,5 +126,10 @@ export interface WebhookRuntime {
    * finishes. See `migrateWebhookFieldCryptoToTenant`.
    */
   migrateFieldCryptoToTenant(): Promise<WebhookTenantMigrationResult>;
+  /**
+   * Stops the batch timer, delivers the queued events, waits for endpoint
+   * writes already queued, and closes the persistence. Endpoint changes
+   * requested after it starts are rejected.
+   */
   shutdown(): Promise<void>;
 }
