@@ -1,5 +1,6 @@
 import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
+import { KMSG_TERMINAL_STATUSES } from "@k-msg/core";
 import { JobStatus } from "../../queue/job-queue.interface";
 import {
   HyperdriveDeliveryTrackingStore,
@@ -386,6 +387,78 @@ describe("Cloudflare SQL adapters", () => {
       },
     }).init();
     expect(indexNamesIn(drizzleStatements)).toEqual(expected);
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases due rows in one statement on postgres", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client);
+    const now = new Date("2026-09-26T00:00:00.000Z");
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+
+    await store.leaseDue(now, 50, leaseUntil);
+
+    const lease = postgres.queries.find((query) =>
+      query.sql.startsWith("UPDATE"),
+    );
+    expect(lease?.sql).toStartWith(
+      `UPDATE "kmsg_delivery_tracking" SET "next_check_at" = $1 WHERE "message_id" IN (SELECT "message_id" FROM "kmsg_delivery_tracking" WHERE "status" NOT IN ($2, $3, $4, $5) AND "next_check_at" <= $6 ORDER BY "next_check_at" ASC LIMIT $7 FOR UPDATE SKIP LOCKED) RETURNING "message_id", `,
+    );
+    // Rows come back as listDue reads them, JSON columns as JSON text.
+    expect(lease?.sql).toContain(`CAST("metadata" AS TEXT) AS "metadata"`);
+    expect(lease?.params).toEqual([
+      leaseUntil.getTime(),
+      ...KMSG_TERMINAL_STATUSES,
+      now.getTime(),
+      50,
+    ]);
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases due rows inside a transaction on mysql", async () => {
+    const statements: string[] = [];
+    let transactions = 0;
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+    const client: CloudflareSqlClient = {
+      dialect: "mysql",
+      query: (async (sql: string) => {
+        statements.push(sql);
+        if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+          return {
+            rows: [
+              {
+                message_id: "m1",
+                provider_id: "mock",
+                provider_message_id: "p1",
+                type: "SMS",
+                to: "01012345678",
+                status: "SENT",
+                requested_at: 1,
+                status_updated_at: 1,
+                attempt_count: 0,
+                next_check_at: 1,
+              },
+            ],
+          };
+        }
+        return { rows: [] };
+      }) as CloudflareSqlClient["query"],
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(client);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client);
+
+    const leased = await store.leaseDue(new Date(10), 50, leaseUntil);
+
+    expect(transactions).toBe(1);
+    expect(statements.slice(-2)).toEqual([
+      expect.stringMatching(
+        /^SELECT `message_id`, .*CAST\(`metadata` AS CHAR\) AS `metadata`.* FROM `kmsg_delivery_tracking` WHERE `status` NOT IN \(\?, \?, \?, \?\) AND `next_check_at` <= \? ORDER BY `next_check_at` ASC LIMIT \? FOR UPDATE$/,
+      ),
+      "UPDATE `kmsg_delivery_tracking` SET `next_check_at` = ? WHERE `message_id` IN (?)",
+    ]);
+    expect(leased.map((record) => record.messageId)).toEqual(["m1"]);
+    expect(leased[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
   });
 
   test("HyperdriveDeliveryTrackingStore uses dialect-specific upsert SQL", async () => {

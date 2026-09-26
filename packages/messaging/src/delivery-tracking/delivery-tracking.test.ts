@@ -1,17 +1,21 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import {
   type DeliveryStatusQuery,
+  type DeliveryStatusResult,
   fail,
   KMsgError,
   KMsgErrorCode,
+  logger,
   ok,
   type Provider,
+  type ProviderRequestContext,
   type SendInput,
 } from "@k-msg/core";
 import { KMsg } from "../k-msg";
 import { InMemoryMessageRepository } from "../test-utils/in-memory-message-repository";
 import { createDeliveryTrackingHooks } from "./hooks";
 import { type DeliveryStatusChange, DeliveryTrackingService } from "./service";
+import type { DeliveryTrackingStore } from "./store.interface";
 import { BunSqlDeliveryTrackingStore } from "./stores/bun-sql.store";
 import { InMemoryDeliveryTrackingStore } from "./stores/memory.store";
 import { SqliteDeliveryTrackingStore } from "./stores/sqlite.store";
@@ -51,6 +55,102 @@ function createMockProvider(params: {
         raw: params.raw ?? { providerMessageId: query.providerMessageId },
       }),
   };
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function waitFor(condition: () => boolean, timeoutMs = 2000) {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition()) {
+    if (Date.now() > deadline) {
+      throw new Error(`Condition not met within ${timeoutMs}ms`);
+    }
+    await wait(5);
+  }
+}
+
+// Resolves when the signal aborts, or after `fallbackMs` for a query that was
+// given no signal, so a test that expects cancellation fails instead of
+// hanging where queries cannot be cancelled.
+function untilAborted(signal: AbortSignal | undefined, fallbackMs: number) {
+  return new Promise<void>((resolve) => {
+    if (signal?.aborted) return resolve();
+    const timer = setTimeout(resolve, fallbackMs);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
+function delivered(
+  query: DeliveryStatusQuery,
+  providerId = "mock",
+): DeliveryStatusResult {
+  return {
+    providerId,
+    providerMessageId: query.providerMessageId,
+    status: "DELIVERED",
+    statusCode: "OK",
+  };
+}
+
+function cancelled(): KMsgError {
+  return new KMsgError(KMsgErrorCode.REQUEST_ABORTED, "status query cancelled");
+}
+
+// A provider whose status queries the test answers through `query`.
+function createQueryProvider(
+  query: (
+    query: DeliveryStatusQuery,
+    context?: ProviderRequestContext,
+  ) => Promise<DeliveryStatusResult | KMsgError>,
+  id = "mock",
+): Provider {
+  return {
+    id,
+    name: id,
+    supportedTypes: ["SMS"],
+    healthCheck: async () => ({ healthy: true, issues: [] }),
+    send: async (options) =>
+      ok({
+        messageId: options.messageId ?? "msg",
+        providerId: id,
+        status: "SENT",
+        type: options.type,
+        to: options.to,
+      }),
+    getDeliveryStatus: async (statusQuery, context) => {
+      const answer = await query(statusQuery, context);
+      return answer instanceof KMsgError ? fail(answer) : ok(answer);
+    },
+  };
+}
+
+async function recordSms(
+  service: DeliveryTrackingService,
+  messageId: string,
+  requestedAt = Date.now(),
+): Promise<void> {
+  await service.recordSend(
+    {
+      messageId,
+      options: { type: "SMS", to: "01012345678", text: "hi" },
+      timestamp: requestedAt,
+    },
+    {
+      messageId,
+      providerId: "mock",
+      providerMessageId: `p-${messageId}`,
+      status: "SENT",
+      type: "SMS",
+      to: "01012345678",
+    },
+  );
 }
 
 function getFailoverMetadata(
@@ -1764,6 +1864,287 @@ describe("DeliveryTrackingService onStatusChange", () => {
   });
 });
 
+describe("DeliveryTrackingService bounded polls", () => {
+  test("forwards the caller's signal and fetch to each status query", async () => {
+    const controller = new AbortController();
+    const fetchImpl = async () => new Response("{}");
+    const seen: Array<{ fetch: unknown; abortedWithCaller?: boolean }> = [];
+    const provider = createQueryProvider(async (query, context) => {
+      controller.abort();
+      seen.push({
+        fetch: context?.fetch,
+        abortedWithCaller: context?.signal?.aborted,
+      });
+      return delivered(query);
+    });
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(service, "m1");
+
+    await service.runOnce({ signal: controller.signal, fetch: fetchImpl });
+
+    expect(seen).toEqual([{ fetch: fetchImpl, abortedWithCaller: true }]);
+  });
+
+  test("stores what an aborted poll has and leaves the rest due", async () => {
+    const controller = new AbortController();
+    const queried: string[] = [];
+    let cancelledOnce = false;
+    const provider = createQueryProvider(async (query, context) => {
+      queried.push(query.providerMessageId);
+      if (query.providerMessageId === "p-m2" && !cancelledOnce) {
+        cancelledOnce = true;
+        controller.abort();
+        await untilAborted(context?.signal, 200);
+        if (context?.signal?.aborted) return cancelled();
+      }
+      return delivered(query);
+    });
+    const store = new InMemoryDeliveryTrackingStore();
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { initialDelayMs: 0, concurrency: 1 },
+    });
+    const now = Date.now();
+    await recordSms(service, "m1", now - 3000);
+    await recordSms(service, "m2", now - 2000);
+    await recordSms(service, "m3", now - 1000);
+
+    await service.runOnce({ signal: controller.signal });
+
+    // m1 was answered; m2's query was cancelled; m3 was never queried.
+    expect(queried).toEqual(["p-m1", "p-m2"]);
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+    for (const messageId of ["m2", "m3"]) {
+      const record = await store.get(messageId);
+      expect(record?.status).toBe("SENT");
+      expect(record?.attemptCount).toBe(0);
+      expect(record?.lastError).toBeUndefined();
+      expect(record?.nextCheckAt.getTime()).toBeLessThanOrEqual(Date.now());
+    }
+
+    // The next poll takes them straight away.
+    await service.runOnce();
+    expect(queried).toEqual(["p-m1", "p-m2", "p-m2", "p-m3"]);
+    expect((await store.get("m3"))?.status).toBe("DELIVERED");
+  });
+
+  test("does nothing with a signal that has already aborted", async () => {
+    const queried: string[] = [];
+    const provider = createQueryProvider(async (query) => {
+      queried.push(query.providerMessageId);
+      return delivered(query);
+    });
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(service, "m1");
+
+    await service.runOnce({ signal: AbortSignal.abort() });
+
+    expect(queried).toEqual([]);
+    expect((await service.getRecord("m1"))?.status).toBe("SENT");
+  });
+
+  test("returns from a poll it joined when its own signal aborts", async () => {
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let queries = 0;
+    const provider = createQueryProvider(async (query) => {
+      queries += 1;
+      await released;
+      return delivered(query);
+    });
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(service, "m1");
+
+    const first = service.runOnce();
+    await waitFor(() => queries === 1);
+    const controller = new AbortController();
+    const second = service.runOnce({ signal: controller.signal });
+    controller.abort();
+
+    const outcome = await Promise.race([
+      second.then(() => "returned"),
+      wait(100).then(() => "still waiting"),
+    ]);
+    expect(outcome).toBe("returned");
+
+    release();
+    await first;
+    expect((await service.getRecord("m1"))?.status).toBe("DELIVERED");
+  });
+});
+
+describe("DeliveryTrackingService leases", () => {
+  test("two services polling one store do not query the same record at once", async () => {
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const queriedByA: string[] = [];
+    const queriedByB: string[] = [];
+    const store = new InMemoryDeliveryTrackingStore();
+    const a = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queriedByA.push(query.providerMessageId);
+          await released;
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+    });
+    const b = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queriedByB.push(query.providerMessageId);
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(a, "m1");
+
+    const pollA = a.runOnce();
+    await waitFor(() => queriedByA.length === 1);
+    await b.runOnce();
+    release();
+    await pollA;
+
+    expect(queriedByA).toEqual(["p-m1"]);
+    expect(queriedByB).toEqual([]);
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+  });
+
+  test("leaseMs: 0 turns leasing off", async () => {
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const queried: string[] = [];
+    const store = new InMemoryDeliveryTrackingStore();
+    const provider = createQueryProvider(async (query) => {
+      queried.push(query.providerMessageId);
+      if (queried.length === 1) await released;
+      return delivered(query);
+    });
+    const polling = { initialDelayMs: 0, leaseMs: 0 };
+    const a = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling,
+    });
+    const b = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling,
+    });
+    await recordSms(a, "m1");
+
+    const pollA = a.runOnce();
+    await waitFor(() => queried.length === 1);
+    await b.runOnce();
+    release();
+    await pollA;
+
+    expect(queried).toEqual(["p-m1", "p-m1"]);
+  });
+});
+
+describe("DeliveryTrackingService shutdown", () => {
+  test("close cancels a poll in progress and waits for it before closing the store", async () => {
+    const events: string[] = [];
+    class ObservedStore extends InMemoryDeliveryTrackingStore {
+      override async patch(
+        messageId: string,
+        patch: Partial<TrackingRecord>,
+      ): Promise<void> {
+        events.push(`patch ${messageId}`);
+        await super.patch(messageId, patch);
+      }
+
+      async close(): Promise<void> {
+        events.push("close");
+      }
+    }
+    const store = new ObservedStore();
+    let queries = 0;
+    const provider = createQueryProvider(async (query, context) => {
+      queries += 1;
+      await untilAborted(context?.signal, 200);
+      return context?.signal?.aborted ? cancelled() : delivered(query);
+    });
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(service, "m1");
+
+    const poll = service.runOnce();
+    await waitFor(() => queries === 1);
+    await service.close();
+    await poll;
+
+    // Nothing wrote to the store after it was closed.
+    expect(events.at(-1)).toBe("close");
+    const record = await store.get("m1");
+    expect(record?.status).toBe("SENT");
+    expect(record?.nextCheckAt.getTime()).toBeLessThanOrEqual(Date.now());
+
+    // A closed service does not poll again.
+    await service.runOnce();
+    expect(queries).toBe(1);
+  });
+
+  test("logs a failed poll that the timer started and keeps polling", async () => {
+    let polls = 0;
+    const store: DeliveryTrackingStore = {
+      init: async () => {},
+      upsert: async () => {},
+      get: async () => undefined,
+      listDue: async () => {
+        polls += 1;
+        throw new Error("tracking store offline");
+      },
+      patch: async () => {},
+    };
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store,
+      polling: { intervalMs: 5 },
+    });
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      service.start();
+      await waitFor(() => polls >= 2);
+      expect(loggerError).toHaveBeenCalled();
+      expect(loggerError.mock.calls[0]?.[0]).toBe(
+        "Delivery tracking poll failed",
+      );
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe(
+        "tracking store offline",
+      );
+    } finally {
+      service.stop();
+      loggerError.mockRestore();
+    }
+  });
+});
+
 describe("createDeliveryTrackingHooks errors", () => {
   class OfflineStore extends InMemoryDeliveryTrackingStore {
     override async upsert(): Promise<void> {
@@ -1908,5 +2289,92 @@ describe("createDeliveryTrackingHooks errors", () => {
     await kmsg.send({ messageId: "m4", to: "01012345678", text: "hi" });
 
     expect(events).toEqual(["record error m4", "queued"]);
+  });
+});
+
+describe("DeliveryTrackingStore leases", () => {
+  type LeasingStore = DeliveryTrackingStore & {
+    leaseDue?: (
+      now: Date,
+      limit: number,
+      leaseUntil: Date,
+    ) => Promise<TrackingRecord[]>;
+  };
+
+  async function expectLeases(store: LeasingStore): Promise<void> {
+    await store.init();
+    const base = Date.now();
+    const at = (offset: number) => new Date(base + offset);
+    const rows: Array<[string, number, TrackingRecord["status"]]> = [
+      ["m1", -3000, "SENT"],
+      ["m2", -2000, "PENDING"],
+      ["m3", -1000, "DELIVERED"],
+      ["m4", 3_600_000, "SENT"],
+    ];
+    for (const [messageId, offset, status] of rows) {
+      await store.upsert({
+        messageId,
+        providerId: "mock",
+        providerMessageId: `p-${messageId}`,
+        type: "SMS",
+        to: "01012345678",
+        requestedAt: at(-5000),
+        status,
+        statusUpdatedAt: at(-5000),
+        attemptCount: 0,
+        nextCheckAt: at(offset),
+      });
+    }
+    const leaseUntil = at(300_000);
+    const lease = (now: Date, limit: number, until = leaseUntil) => {
+      if (!store.leaseDue) throw new Error("store cannot lease");
+      return store.leaseDue(now, limit, until);
+    };
+    const ids = (records: TrackingRecord[]) =>
+      records.map((record) => record.messageId).sort();
+
+    // The oldest due record first, up to the limit.
+    const first = await lease(at(0), 1);
+    expect(ids(first)).toEqual(["m1"]);
+    expect(first[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
+    expect((await store.get("m1"))?.nextCheckAt.getTime()).toBe(
+      leaseUntil.getTime(),
+    );
+
+    // A leased record is not due for anyone else; terminal and future ones
+    // never are.
+    expect(ids(await lease(at(0), 10))).toEqual(["m2"]);
+    expect(await lease(at(0), 10)).toEqual([]);
+    expect(await store.listDue(at(0), 10)).toEqual([]);
+
+    // Once the lease runs out the records are due again.
+    expect(ids(await lease(at(300_001), 10, at(600_000)))).toEqual([
+      "m1",
+      "m2",
+    ]);
+  }
+
+  test("InMemoryDeliveryTrackingStore", async () => {
+    await expectLeases(new InMemoryDeliveryTrackingStore());
+  });
+
+  test("SqliteDeliveryTrackingStore", async () => {
+    const store = new SqliteDeliveryTrackingStore({ dbPath: ":memory:" });
+    try {
+      await expectLeases(store);
+    } finally {
+      store.close();
+    }
+  });
+
+  test("BunSqlDeliveryTrackingStore (sqlite)", async () => {
+    const store = new BunSqlDeliveryTrackingStore({
+      options: { adapter: "sqlite", filename: ":memory:" },
+    });
+    try {
+      await expectLeases(store);
+    } finally {
+      await store.close();
+    }
   });
 });

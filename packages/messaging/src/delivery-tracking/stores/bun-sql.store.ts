@@ -85,6 +85,14 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     return await this.delegate.listDue(now, limit);
   }
 
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    return await this.delegate.leaseDue(now, limit, leaseUntil);
+  }
+
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {

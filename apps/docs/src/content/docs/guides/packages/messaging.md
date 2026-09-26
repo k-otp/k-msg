@@ -186,6 +186,29 @@ await tracking.runOnce();
 
 `runOnce()`는 저장할 수 있는 갱신을 모두 저장합니다. 스토어가 한 레코드의 갱신을 거부하면(예: 컬럼에 들어가지 않는 값) 나머지는 그대로 저장되고, 거부된 레코드는 다음 백오프 지연 뒤에 다시 확인되며, 그 뒤 `runOnce()`가 실패 목록을 담은 `AggregateError`로 reject됩니다.
 
+### 시간 제한이 있는 폴링
+
+`runOnce()`는 `send()`와 같은 두 번째 인자를 받아 상태 조회마다 전달합니다. 그 `signal`은 폴링 자체의 한도이기도 합니다: signal이 abort되면 새 조회를 시작하지 않고, 진행 중인 조회는 취소하며, 그때까지 받은 상태를 저장하고 반환합니다. 끝내지 못한 레코드는 다음 폴링 대상으로 남습니다.
+
+```ts
+// 예: 30초 안에 끝나야 하는 크론 트리거에서
+await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
+```
+
+### 한 스토어를 여러 곳에서 폴링할 때
+
+인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. MySQL에서는 SQL client가 트랜잭션을 지원할 때만 임대가 원자적입니다. 폴링이 중단되어 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
+
+### 종료
+
+`close()`는 타이머를 멈추고, 진행 중인 폴링을 signal이 abort된 것처럼 멈춘 뒤 그 폴링이 받은 상태를 저장하기를 기다렸다가 스토어를 닫습니다. `start()`로 돌린 폴링이 실패하면 `@k-msg/core` logger로 기록하고 다음 주기에 다시 폴링합니다.
+
+```ts
+process.once("SIGTERM", () => {
+  void tracking.close();
+});
+```
+
 ### 기록 오류
 
 `createDeliveryTrackingHooks`의 hook은 provider가 접수한 메시지를 기록합니다. 기록에 실패해도 발송은 성공이지만 그 메시지는 폴링되지 않습니다. 이 오류는 `onRecordError`로 가고, 없으면 `KMsg`의 `onHookError`(그것도 없으면 `console.error`)로 갑니다. `onError`는 실패한 발송만, hook context와 함께 받습니다.
