@@ -59,9 +59,8 @@ export class BulkMessageSender {
 
     this.activeBulkJobs.set(requestId, bulkJob);
 
-    // Process batches asynchronously. processBatchesAsync records its own
-    // failures on the job; the catch keeps a future regression from becoming
-    // an unhandled rejection.
+    // Process batches asynchronously. A failed loop marks the job failed and
+    // then rejects, so the error is logged here instead of being lost.
     this.processBatchesAsync(bulkJob, batches, batchDelay).catch(
       (error: unknown) => {
         logBackgroundFailure("Bulk send processing failed", error, {
@@ -148,9 +147,10 @@ export class BulkMessageSender {
 
       bulkJob.status = "completed";
       bulkJob.result.completedAt = new Date();
-    } catch (_error) {
+    } catch (error) {
       bulkJob.status = "failed";
       bulkJob.result.completedAt = new Date();
+      throw error;
     }
   }
 

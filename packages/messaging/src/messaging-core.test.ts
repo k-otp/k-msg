@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, spyOn, test } from "bun:test";
-import { logger } from "@k-msg/core";
+import { logger, ok, type SendInput } from "@k-msg/core";
 import { TemplatePersonalizer, TemplateVariableUtils } from "@k-msg/template";
 import {
   DeliveryTracker,
@@ -11,12 +11,14 @@ import {
   MessageJobProcessor,
   MessageRetryHandler,
 } from "./adapters/node/index";
+import type { KMsg } from "./k-msg";
 import {
   type Job,
   type JobQueue,
   type JobRetryDirective,
   JobStatus,
 } from "./queue/job-queue.interface";
+import { BulkMessageSender } from "./sender/index";
 import {
   type DeliveryReport,
   MessageEventType,
@@ -975,6 +977,58 @@ describe("DeliveryTracker", () => {
     } finally {
       tracker.stop();
       fetchSpy.mockRestore();
+      loggerError.mockRestore();
+    }
+  });
+});
+
+describe("BulkMessageSender", () => {
+  const sentKMsg = {
+    send: async (inputs: SendInput[]) => ({
+      total: inputs.length,
+      results: inputs.map((input) =>
+        ok({
+          messageId: `msg_${input.to}`,
+          providerId: "mock",
+          status: "SENT" as const,
+          type: input.type,
+          to: input.to,
+        }),
+      ),
+    }),
+  } as unknown as KMsg;
+
+  test("should log a failed batch loop and finish the job", async () => {
+    const sender = new BulkMessageSender(sentKMsg);
+    // The pause between batches is the loop's only step outside the
+    // per-batch error handling, so failing it fails the loop itself.
+    Object.assign(sender, {
+      delay: async () => {
+        throw new Error("timer unavailable");
+      },
+    });
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      const result = await sender.sendBulk({
+        templateId: "test_template",
+        recipients: [
+          { phoneNumber: "01011112222", variables: {} },
+          { phoneNumber: "01033334444", variables: {} },
+        ],
+        options: { batchSize: 1, batchDelay: 1 },
+      });
+      await waitFor(() => loggerError.mock.calls.length > 0);
+
+      expect(loggerError).toHaveBeenCalledTimes(1);
+      expect(loggerError.mock.calls[0]?.[1]).toMatchObject({
+        bulkRequestId: result.requestId,
+      });
+      expect(loggerError.mock.calls[0]?.[2]?.message).toBe("timer unavailable");
+      const status = await sender.getBulkStatus(result.requestId);
+      expect(status?.batches).toHaveLength(1);
+      expect(status?.completedAt).toBeInstanceOf(Date);
+    } finally {
       loggerError.mockRestore();
     }
   });
