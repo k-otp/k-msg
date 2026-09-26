@@ -77,6 +77,26 @@ function maskStringValue(value: string): string {
   return `${head}${"*".repeat(Math.max(1, trimmed.length - 5))}${tail}`;
 }
 
+// Messages, error text, and free-text context values cannot be redacted by
+// key, so they are scrubbed for the values the logging policy protects:
+// Korean phone numbers (domestic or +82) and credentials written as key/value
+// pairs, such as `apiKey=...`, `"secret":"..."`, or
+// `Authorization: Bearer ...`.
+const PHONE_NUMBER_PATTERN =
+  /(?<![\w+])(?:\+82[-.\s]?0?|0)(?:1[016789]|2|[3-6]\d)[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\w)/g;
+const CREDENTIAL_PATTERN =
+  /\b(api[-_]?key|api[-_]?secret|access[-_]?token|refresh[-_]?token|token|secret|password|passwd|authorization|auth)("?\s*[:=]\s*"?)((?:Bearer|Basic)\s+)?[^\s"',;&]+/gi;
+
+export function redactLogText(text: string): string {
+  return text
+    .replace(PHONE_NUMBER_PATTERN, (phone) => maskStringValue(phone))
+    .replace(
+      CREDENTIAL_PATTERN,
+      (_match, key: string, separator: string, scheme = "") =>
+        `${key}${separator}${scheme}${REDACTED_TOKEN}`,
+    );
+}
+
 function sanitizeContextValue(key: string, value: unknown): unknown {
   if (value === undefined || value === null) return value;
 
@@ -100,6 +120,8 @@ function sanitizeContextValue(key: string, value: unknown): unknown {
     }
     return next;
   }
+
+  if (typeof value === "string") return redactLogText(value);
 
   return value;
 }
@@ -139,20 +161,23 @@ export class Logger {
 
   private formatMessage(entry: LogEntry): string {
     const context = sanitizeLogContext(entry.context);
+    const text = redactLogText(entry.message);
+    const error = entry.error && {
+      name: entry.error.name,
+      message: redactLogText(entry.error.message),
+      stack:
+        entry.error.stack === undefined
+          ? undefined
+          : redactLogText(entry.error.stack),
+    };
 
     if (this.config.enableJson) {
       return JSON.stringify({
         level: entry.level,
-        message: entry.message,
+        message: text,
         timestamp: entry.timestamp.toISOString(),
         context,
-        ...(entry.error && {
-          error: {
-            name: entry.error.name,
-            message: entry.error.message,
-            stack: entry.error.stack,
-          },
-        }),
+        ...(error && { error }),
         ...(entry.duration && { duration: entry.duration }),
       });
     }
@@ -168,14 +193,14 @@ export class Logger {
             .join(", ")}]`
         : "";
 
-    let message = `${timestamp} ${level}${contextStr}: ${entry.message}`;
+    let message = `${timestamp} ${level}${contextStr}: ${text}`;
 
     if (entry.duration !== undefined) {
       message += ` (${entry.duration}ms)`;
     }
 
-    if (entry.error) {
-      message += `\n${entry.error.stack}`;
+    if (error) {
+      message += `\n${error.stack ?? `${error.name}: ${error.message}`}`;
     }
 
     return message;
