@@ -446,20 +446,41 @@ export function getDeliveryTrackingSchemaSpec(
   };
 }
 
+/**
+ * The kinds of tracking column. `indexedId` and `indexedShortText` are `id`
+ * and `shortText` columns in an index.
+ */
+export type DeliveryTrackingSqlTypeKind =
+  | "messageId"
+  | "id"
+  | "indexedId"
+  | "shortText"
+  | "indexedShortText"
+  | "text"
+  | "timestamp"
+  | "attemptCount"
+  | "json";
+
 export function resolveDeliveryTrackingSqlType(
   dialect: SqlDialect,
-  kind:
-    | "messageId"
-    | "id"
-    | "shortText"
-    | "text"
-    | "timestamp"
-    | "attemptCount"
-    | "json",
+  kind: DeliveryTrackingSqlTypeKind,
   strategy: ResolvedDeliveryTrackingTypeStrategy = DEFAULT_TYPE_STRATEGY,
 ): string {
   // Unbounded text, such as a provider's status message.
   if (kind === "text") return "TEXT";
+
+  // MySQL cannot index a TEXT column without a prefix length (error 1170),
+  // so there the primary key and indexed columns are VARCHAR even when the
+  // strategy says text.
+  if (dialect === "mysql") {
+    if (kind === "messageId" && strategy.messageId === "text") {
+      return "VARCHAR(255)";
+    }
+    if (kind === "indexedId" && strategy.id === "text") return "VARCHAR(255)";
+    if (kind === "indexedShortText" && strategy.shortText === "text") {
+      return "VARCHAR(64)";
+    }
+  }
 
   if (kind === "messageId") {
     if (strategy.messageId === "uuid") {
@@ -474,14 +495,14 @@ export function resolveDeliveryTrackingSqlType(
     return "TEXT";
   }
 
-  if (kind === "id") {
+  if (kind === "id" || kind === "indexedId") {
     if (strategy.id === "varchar" && dialect !== "sqlite") {
       return "VARCHAR(255)";
     }
     return "TEXT";
   }
 
-  if (kind === "shortText") {
+  if (kind === "shortText" || kind === "indexedShortText") {
     if (dialect === "sqlite") return "TEXT";
     return strategy.shortText === "text" ? "TEXT" : "VARCHAR(64)";
   }
