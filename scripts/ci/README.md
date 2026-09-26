@@ -34,7 +34,8 @@ Validates publishable package tarballs with `npm pack --dry-run --json`.
   - package tarball generation succeeds
   - every `exports`, `main`, `module`, and `types` artifact is present
   - package tarball excludes sourcemap files (`.map`)
-  - built ESM entrypoints pass the package artifact contract below
+  - built ESM and CommonJS entrypoints pass the package artifact contract
+    below
 
 ## `check-package-artifacts.mjs`
 
@@ -42,19 +43,31 @@ Validates the built files that are referenced by each publishable package
 manifest.
 
 - Script path: `scripts/ci/check-package-artifacts.mjs`
+- Artifact loader: `scripts/ci/load-package-artifact.mjs`
 - Unit tests: `scripts/ci/package-artifacts-lib.test.mjs`
 - Canonical gate: `bun run check:package-artifacts` (included in `check:ci`)
 - Enforces:
   - root `main`, `module`, and `types` fields agree with the matching root
     `exports` conditions
   - every public artifact target exists
-  - every ESM target uses the project `.mjs` convention and passes
-    `node --check`
+  - every `import` target is named `.mjs` and every `require` target `.cjs`
+  - every runtime target loads in a fresh Node process, with `import()` for
+    `import` targets and `require()` for `require` targets, has at least one
+    export, and every export reads as a defined value
+  - the `import` and `require` targets of each export subpath expose the
+    same export names
   - every export target is included by `npm pack --dry-run`
 
-The `.mjs` check is intentional. Published packages reserve `.mjs` for the
-`import` condition and `.js` for the separately built CommonJS `require`
-condition, even though package manifests use `"type": "module"`.
+Published packages keep `"type": "module"`, so each runtime artifact carries
+its format in its extension: `.mjs` for the `import` condition and `.cjs` for
+the separately built CommonJS `require` condition. Node loads a `.js` file in
+a `"type": "module"` package as ESM, so a CommonJS build named `.js` throws
+`ReferenceError: module is not defined in ES module scope` under `require()`.
+
+`@k-msg/messaging/adapters/bun` and `k-msg/adapters/bun` import `bun:sqlite`,
+which Node cannot load. `BUN_ONLY_EXPORTS` in `package-artifacts-lib.mjs`
+lists them, and the gate only syntax-checks their artifacts with
+`node --check`.
 
 ### Bun build baseline
 
@@ -64,9 +77,10 @@ re-export (`export { x } from "./x"`) in packages that declare
 entrypoint as a barrel, skips the re-exported modules, and still emits the
 export clause ([oven-sh/bun#40578](https://github.com/oven-sh/bun/issues/40578)).
 Source tests and TypeScript checks still pass. The ESM output exports
-undeclared identifiers, which `node --check` rejects; the CommonJS output is
-broken the same way but only throws a `ReferenceError` at runtime, which this
-gate does not detect. No `--minify*` or `--splitting` flag avoids it. Bun
+undeclared identifiers, which Node rejects when it parses the file; the
+CommonJS output is broken the same way but only throws a `ReferenceError` when
+an export is read, which this gate catches because it reads every export. No
+`--minify*` or `--splitting` flag avoids it. Bun
 `1.4.1` fixed it ([oven-sh/bun#40580](https://github.com/oven-sh/bun/pull/40580)),
 and Bun `1.4.2` is the verified builder pinned in package manifests and
 workflows.

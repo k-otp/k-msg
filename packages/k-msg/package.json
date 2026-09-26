@@ -4,7 +4,7 @@
   "packageManager": "bun@1.4.2",
   "description": "K-Message: Korean Multi-Channel Messaging Platform - Unified Package",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "sideEffects": false,
@@ -12,33 +12,33 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./core": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.mjs",
-      "require": "./dist/core/index.js"
+      "require": "./dist/core/index.cjs"
     },
     "./adapters/bun": {
       "types": "./dist/adapters/bun/index.d.ts",
       "import": "./dist/adapters/bun/index.mjs",
-      "require": "./dist/adapters/bun/index.js"
+      "require": "./dist/adapters/bun/index.cjs"
     },
     "./adapters/node": {
       "types": "./dist/adapters/node/index.d.ts",
       "import": "./dist/adapters/node/index.mjs",
-      "require": "./dist/adapters/node/index.js"
+      "require": "./dist/adapters/node/index.cjs"
     },
     "./adapters/cloudflare": {
       "types": "./dist/adapters/cloudflare/index.d.ts",
       "import": "./dist/adapters/cloudflare/index.mjs",
-      "require": "./dist/adapters/cloudflare/index.js"
+      "require": "./dist/adapters/cloudflare/index.cjs"
     }
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:esm": "bun build ./src/index.ts ./src/core/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external '@k-msg/*'",
-    "build:cjs": "bun build ./src/index.ts ./src/core/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].js' --external 'bun:test' --external '@k-msg/*'",
+    "build:cjs": "bun build ./src/index.ts ./src/core/index.ts ./src/adapters/bun/index.ts ./src/adapters/node/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].cjs' --external 'bun:test' --external '@k-msg/*'",
     "build:types": "tsc",
     "typecheck": "ttsc --noEmit",
     "dev": "bun --watch src/index.ts",
@@ -67,7 +67,7 @@
     }
   },
   "files": [
-    "dist/**/*.js",
+    "dist/**/*.cjs",
     "dist/**/*.mjs",
     "dist/**/*.d.ts",
     "README.md"

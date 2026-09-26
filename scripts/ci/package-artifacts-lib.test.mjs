@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  BUN_ONLY_EXPORTS,
   collectPackageArtifactTargets,
   inspectBuiltPackage,
   inspectPackedPackage,
@@ -21,20 +28,20 @@ function createFixture() {
     JSON.stringify({
       name: "@k-msg/fixture",
       type: "module",
-      main: "./dist/index.js",
+      main: "./dist/index.cjs",
       module: "./dist/index.mjs",
       types: "./dist/index.d.ts",
       exports: {
         ".": {
           types: "./dist/index.d.ts",
           import: "./dist/index.mjs",
-          require: "./dist/index.js",
+          require: "./dist/index.cjs",
         },
       },
     }),
   );
   writeFileSync(path.join(root, "dist/index.mjs"), "export const ok = true;\n");
-  writeFileSync(path.join(root, "dist/index.js"), "exports.ok = true;\n");
+  writeFileSync(path.join(root, "dist/index.cjs"), "exports.ok = true;\n");
   writeFileSync(
     path.join(root, "dist/index.d.ts"),
     "export declare const ok: true;\n",
@@ -42,9 +49,47 @@ function createFixture() {
   return root;
 }
 
+function withFixture(run) {
+  const root = createFixture();
+  try {
+    run(root);
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+}
+
+function updateManifest(root, update) {
+  const file = path.join(root, "package.json");
+  const manifest = JSON.parse(readFileSync(file, "utf8"));
+  update(manifest);
+  writeFileSync(file, JSON.stringify(manifest));
+}
+
+function addBunOnlyExport(root) {
+  updateManifest(root, (manifest) => {
+    manifest.exports["./adapters/bun"] = {
+      types: "./dist/bun.d.ts",
+      import: "./dist/bun.mjs",
+      require: "./dist/bun.cjs",
+    };
+  });
+  writeFileSync(
+    path.join(root, "dist/bun.mjs"),
+    'import { Database } from "bun:sqlite";\nexport { Database };\n',
+  );
+  writeFileSync(
+    path.join(root, "dist/bun.cjs"),
+    'exports.Database = require("bun:sqlite").Database;\n',
+  );
+  writeFileSync(
+    path.join(root, "dist/bun.d.ts"),
+    "export declare const Database: unknown;\n",
+  );
+}
+
 test("collects condition-specific and legacy artifact targets", () => {
   const targets = collectPackageArtifactTargets({
-    main: "dist/index.js",
+    main: "dist/index.cjs",
     module: "dist/index.mjs",
     exports: {
       ".": {
@@ -133,6 +178,166 @@ test("detects invalid ESM exports in built artifacts", () => {
   }
 });
 
+test("loads ESM exports with import() and CommonJS exports with require()", () => {
+  withFixture((root) => {
+    const result = inspectBuiltPackage(root);
+    assert.deepEqual(result.errors, []);
+    assert.deepEqual(result.checkedEsm, ["dist/index.mjs"]);
+    assert.deepEqual(result.checkedCjs, ["dist/index.cjs"]);
+  });
+});
+
+test("rejects CommonJS exports that are not named .cjs", () => {
+  withFixture((root) => {
+    updateManifest(root, (manifest) => {
+      manifest.main = "dist/index.js";
+      manifest.exports["."].require = "./dist/index.js";
+    });
+    writeFileSync(path.join(root, "dist/index.js"), "exports.ok = true;\n");
+    assert.deepEqual(inspectBuiltPackage(root).errors, [
+      "@k-msg/fixture: CommonJS export must use .cjs: dist/index.js",
+    ]);
+  });
+});
+
+test("reports CommonJS artifacts that fail under require()", () => {
+  for (const [source, problem] of [
+    ["export const ok = true;\n", /require\(\) threw SyntaxError/],
+    ["module.exports = {};\n", /\(no exports\)/],
+    ["exports.ok = undefined;\n", /\(export ok is undefined\)/],
+    [
+      // Bun 1.3.10 through 1.4.0 emitted getters for bindings they dropped.
+      'Object.defineProperty(exports, "ok", { enumerable: true, get: () => dropped });\n',
+      /reading export ok threw ReferenceError: dropped is not defined/,
+    ],
+  ]) {
+    withFixture((root) => {
+      writeFileSync(path.join(root, "dist/index.cjs"), source);
+      const errors = inspectBuiltPackage(root).errors.join("\n");
+      assert.match(errors, /invalid CommonJS artifact dist\/index\.cjs/);
+      assert.match(errors, problem);
+    });
+  }
+});
+
+test("reports ESM artifacts that throw under import()", () => {
+  withFixture((root) => {
+    writeFileSync(
+      path.join(root, "dist/index.mjs"),
+      'export const ok = true;\nthrow new Error("boom");\n',
+    );
+    assert.match(
+      inspectBuiltPackage(root).errors.join("\n"),
+      /invalid ESM artifact dist\/index\.mjs \(import\(\) threw Error: boom\)/,
+    );
+  });
+});
+
+test("requires import() and require() to expose the same export names", () => {
+  withFixture((root) => {
+    writeFileSync(
+      path.join(root, "dist/index.mjs"),
+      "export const ok = true;\nexport const extra = 1;\n",
+    );
+    assert.deepEqual(inspectBuiltPackage(root).errors, [
+      "@k-msg/fixture: exports[.].require (dist/index.cjs) is missing extra exported by dist/index.mjs",
+    ]);
+
+    writeFileSync(
+      path.join(root, "dist/index.mjs"),
+      "export const ok = true;\n",
+    );
+    writeFileSync(
+      path.join(root, "dist/index.cjs"),
+      "exports.ok = true;\nexports.extra = 1;\n",
+    );
+    assert.deepEqual(inspectBuiltPackage(root).errors, [
+      "@k-msg/fixture: exports[.].import (dist/index.mjs) is missing extra exported by dist/index.cjs",
+    ]);
+  });
+});
+
+test("ignores output that a module prints while loading", () => {
+  withFixture((root) => {
+    writeFileSync(
+      path.join(root, "dist/index.cjs"),
+      'console.log("loaded");\nexports.ok = true;\n',
+    );
+    assert.deepEqual(inspectBuiltPackage(root).errors, []);
+  });
+});
+
+test("reports a module that exits before the loader reports", () => {
+  withFixture((root) => {
+    writeFileSync(path.join(root, "dist/index.cjs"), "process.exit(0);\n");
+    assert.match(
+      inspectBuiltPackage(root).errors.join("\n"),
+      /invalid CommonJS artifact dist\/index\.cjs \(the artifact loader printed no result\)/,
+    );
+  });
+});
+
+test("syntax-checks Bun-only exports instead of loading them in Node", () => {
+  withFixture((root) => {
+    addBunOnlyExport(root);
+    const unlisted = inspectBuiltPackage(root, { bunOnlyExports: {} });
+    const unlistedErrors = unlisted.errors.join("\n");
+    assert.match(
+      unlistedErrors,
+      /invalid ESM artifact dist\/bun\.mjs \(import\(\) threw/,
+    );
+    assert.match(
+      unlistedErrors,
+      /invalid CommonJS artifact dist\/bun\.cjs \(require\(\) threw/,
+    );
+
+    const bunOnlyExports = { "@k-msg/fixture": ["./adapters/bun"] };
+    const listed = inspectBuiltPackage(root, { bunOnlyExports });
+    assert.deepEqual(listed.errors, []);
+    assert.deepEqual(listed.syntaxOnly, ["dist/bun.mjs", "dist/bun.cjs"]);
+    assert.deepEqual(listed.checkedEsm, ["dist/index.mjs"]);
+    assert.deepEqual(listed.checkedCjs, ["dist/index.cjs"]);
+
+    writeFileSync(path.join(root, "dist/bun.mjs"), "export { missing };\n");
+    assert.match(
+      inspectBuiltPackage(root, { bunOnlyExports }).errors.join("\n"),
+      /invalid ESM artifact dist\/bun\.mjs \(SyntaxError: Export 'missing' is not defined/,
+    );
+  });
+});
+
+test("rejects Bun-only entries for subpaths the package does not export", () => {
+  withFixture((root) => {
+    const bunOnlyExports = { "@k-msg/fixture": ["./adapters/bun"] };
+    assert.deepEqual(inspectBuiltPackage(root, { bunOnlyExports }).errors, [
+      "@k-msg/fixture: Bun-only export ./adapters/bun is not in exports",
+    ]);
+  });
+});
+
+test("lists only Bun-only subpaths that workspace packages export", () => {
+  const repositoryRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../..",
+  );
+  const manifests = new Map(
+    listPublishablePackageDirs(repositoryRoot).map((packageDir) => {
+      const manifest = JSON.parse(
+        readFileSync(path.join(packageDir, "package.json"), "utf8"),
+      );
+      return [manifest.name, manifest];
+    }),
+  );
+  for (const [name, subpaths] of Object.entries(BUN_ONLY_EXPORTS)) {
+    for (const subpath of subpaths) {
+      assert.ok(
+        manifests.get(name)?.exports?.[subpath],
+        `${name} does not export ${subpath}`,
+      );
+    }
+  }
+});
+
 test("requires every export target and excludes sourcemaps from npm packs", () => {
   const root = createFixture();
   try {
@@ -145,7 +350,7 @@ test("requires every export target and excludes sourcemaps from npm packs", () =
     });
     const errors = result.errors.join("\n");
     assert.match(errors, /sourcemap must not be published/);
-    assert.match(errors, /packed artifact is missing.*dist\/index\.js/);
+    assert.match(errors, /packed artifact is missing.*dist\/index\.cjs/);
     assert.match(errors, /packed artifact is missing.*dist\/index\.d\.ts/);
   } finally {
     rmSync(root, { force: true, recursive: true });
@@ -185,7 +390,7 @@ test("resolves relative npm pack JSON paths from the repository root", () => {
         files: [
           { path: "package.json" },
           { path: "dist/index.mjs" },
-          { path: "dist/index.js" },
+          { path: "dist/index.cjs" },
           { path: "dist/index.d.ts" },
         ],
       },
