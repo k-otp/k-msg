@@ -5,6 +5,7 @@ import {
   type WebhookEvent,
   WebhookEventType,
 } from "../types/webhook.types";
+import { WebhookEndpointConflictError } from "./errors";
 import { createInMemoryWebhookPersistence } from "./persistence";
 import { WebhookRuntimeService } from "./webhook-runtime.service";
 
@@ -206,6 +207,28 @@ describe("WebhookRuntimeService", () => {
     expect(deliveries.length).toBe(1);
     expect(deliveries[0]?.endpointId).toBe(open.id);
     expect(deliveries[0]?.endpointId).not.toBe(filtered.id);
+  });
+
+  test("addEndpoint rejects a URL that is already registered", async () => {
+    const first = await runtime.addEndpoint({
+      url: "https://example.com/once",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+      secret: "whsec_first",
+    });
+
+    await expect(
+      runtime.addEndpoint({
+        url: "https://example.com/once",
+        active: true,
+        events: [WebhookEventType.MESSAGE_FAILED],
+        secret: "whsec_second",
+      }),
+    ).rejects.toBeInstanceOf(WebhookEndpointConflictError);
+
+    const endpoints = await runtime.listEndpoints();
+    expect(endpoints.map((endpoint) => endpoint.id)).toEqual([first.id]);
+    expect(endpoints[0]?.secret).toBe("whsec_first");
   });
 
   test("emit + flush persists deliveries", async () => {

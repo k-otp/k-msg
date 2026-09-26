@@ -6,6 +6,7 @@ describe("webhook export boundaries", () => {
 
     expect(typeof root.WebhookRuntimeService).toBe("function");
     expect(typeof root.createInMemoryWebhookPersistence).toBe("function");
+    expect(typeof root.WebhookEndpointConflictError).toBe("function");
 
     expect("BatchDispatcher" in root).toBe(false);
     expect("LoadBalancer" in root).toBe(false);
