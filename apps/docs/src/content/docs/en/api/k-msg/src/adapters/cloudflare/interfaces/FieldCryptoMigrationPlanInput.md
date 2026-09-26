@@ -5,7 +5,7 @@ prev: false
 title: "FieldCryptoMigrationPlanInput"
 ---
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L20)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L21)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:20](https://
 
 > `optional` **chunkSize?**: `number`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L23)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L24)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:23](https://
 
 > `optional` **chunksTableName?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L18)
 
 #### Inherited from
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://
 
 > `optional` **fieldCryptoSchema?**: `DeliveryTrackingFieldCryptoSchemaOptions`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L24)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L25)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:24](https://
 
 > `optional` **runsTableName?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L16)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L17)
 
 #### Inherited from
 
@@ -57,4 +57,4 @@ Defined in: [packages/messaging/src/migration/field-crypto/types.ts:16](https://
 
 > `optional` **trackingTableName?**: `string`
 
-Defined in: [packages/messaging/src/migration/field-crypto/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L22)
+Defined in: [packages/messaging/src/migration/field-crypto/types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/types.ts#L23)
