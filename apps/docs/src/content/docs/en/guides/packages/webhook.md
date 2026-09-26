@@ -183,6 +183,8 @@ const runtime = new WebhookRuntimeService({
 | `registerEndpoint()` auto test call | `addEndpoint()` only; test with `probeEndpoint()` |
 | Advanced classes from root | import from `@k-msg/webhook/toolkit` |
 | Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
+| `fieldCrypto.endpoint` / `fieldCrypto.delivery` without `fields.secret` / `fields.payload`, or with `plain`/`mask` | set `fields.secret` (endpoint) and `fields.payload` (delivery) to `encrypt` or `encrypt+hash`; other values now fail at startup |
+| ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before still read through the legacy AAD until the record is saved again |
 
 ## Toolkit subpath
 
