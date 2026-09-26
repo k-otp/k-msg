@@ -28,12 +28,19 @@ describe("WebhookEndpointConflictError", () => {
   });
 
   test("the message leaves out the URL, which may hold a token", () => {
-    const url = "https://hooks.example.com/services/T0/B0/token-abc123";
+    // Built at run time: Bun.inspect() of an error also prints the source
+    // lines around where it was created.
+    const token = ["token", "abc123"].join("-");
+    const url = `https://hooks.example.com/services/T0/B0/${token}`;
     const error = new WebhookEndpointConflictError("url", url, "first");
 
-    expect(error.message).not.toContain("token-abc123");
+    expect(error.message).not.toContain(token);
     expect(error.message).toContain("first");
     expect(error.value).toBe(url);
+    // Loggers print an error's own enumerable properties as well.
+    expect(Object.keys(error)).not.toContain("value");
+    expect(JSON.stringify(error)).not.toContain(token);
+    expect(Bun.inspect(error)).not.toContain(token);
   });
 
   test("instanceof rejects other errors", () => {

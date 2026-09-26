@@ -31,12 +31,12 @@ export class WebhookEndpointConflictError extends Error {
 
   /** Which value is already taken. */
   readonly field: "id" | "url";
-  /** The taken id or URL. */
-  readonly value: string;
   /**
-   * The id of the endpoint that has it: a stored one, or one earlier in the
-   * same `addEndpoints()` batch.
+   * The taken id or URL. It is not enumerable, so loggers that print an
+   * error's properties do not print a URL that may carry a token.
    */
+  declare readonly value: string;
+  /** The id of the stored endpoint that has it. */
   readonly endpointId: string;
 
   constructor(field: "id" | "url", value: string, endpointId: string) {
@@ -49,7 +49,7 @@ export class WebhookEndpointConflictError extends Error {
     );
     this.name = "WebhookEndpointConflictError";
     this.field = field;
-    this.value = value;
+    Object.defineProperty(this, "value", { value, enumerable: false });
     this.endpointId = endpointId;
     Object.defineProperty(this, CONFLICT_ERROR_BRAND, { value: true });
   }

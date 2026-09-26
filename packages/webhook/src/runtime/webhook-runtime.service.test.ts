@@ -232,32 +232,157 @@ describe("WebhookRuntimeService", () => {
   });
 
   test("addEndpoints adds nothing when one input conflicts", async () => {
-    await runtime.addEndpoint({
+    const registered = await runtime.addEndpoint({
       url: "https://example.com/registered",
       active: true,
       events: [WebhookEventType.MESSAGE_SENT],
     });
 
-    // A registered URL, and a URL repeated within the batch.
-    for (const urls of [
-      ["https://example.com/new-1", "https://example.com/registered"],
-      ["https://example.com/new-2", "https://example.com/new-2"],
-    ]) {
-      await expect(
-        runtime.addEndpoints(
-          urls.map((url) => ({
+    const error = await runtime
+      .addEndpoints(
+        ["https://example.com/new-1", "https://example.com/registered"].map(
+          (url) => ({
             url,
             active: true,
             events: [WebhookEventType.MESSAGE_SENT],
-          })),
+          }),
         ),
-      ).rejects.toBeInstanceOf(WebhookEndpointConflictError);
-    }
+      )
+      .catch((caught: unknown) => caught);
 
-    const stored = await runtime.listEndpoints();
-    expect(stored.map((endpoint) => endpoint.url)).toEqual([
-      "https://example.com/registered",
+    expect(error).toBeInstanceOf(WebhookEndpointConflictError);
+    expect(error).toMatchObject({ endpointId: registered.id });
+    expect(
+      (await runtime.listEndpoints()).map((endpoint) => endpoint.url),
+    ).toEqual(["https://example.com/registered"]);
+  });
+
+  test("addEndpoints rejects a URL given twice as bad input, adding nothing", async () => {
+    const error = await runtime
+      .addEndpoints(
+        ["https://example.com/twice", "https://example.com/twice"].map(
+          (url) => ({
+            url,
+            active: true,
+            events: [WebhookEventType.MESSAGE_SENT],
+          }),
+        ),
+      )
+      .catch((caught: unknown) => caught);
+
+    // Not a conflict: nothing stored has the URL for error.endpointId to name.
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(WebhookEndpointConflictError);
+    expect(await runtime.listEndpoints()).toHaveLength(0);
+  });
+
+  test("addEndpoints removes what it added when a later write fails", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const add = persistence.endpointStore.add.bind(persistence.endpointStore);
+    let writes = 0;
+    persistence.endpointStore.add = async (endpoint) => {
+      writes += 1;
+      if (writes === 2) throw new Error("store unavailable");
+      await add(endpoint);
+    };
+    const batchRuntime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      persistence,
+      autoStart: false,
+    });
+    const inputs = ["https://example.com/one", "https://example.com/two"].map(
+      (url) => ({
+        url,
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      }),
+    );
+
+    await expect(batchRuntime.addEndpoints(inputs)).rejects.toThrow(
+      "store unavailable",
+    );
+    expect(await batchRuntime.listEndpoints()).toHaveLength(0);
+
+    // The same batch can simply be retried.
+    await batchRuntime.addEndpoints(inputs);
+    expect(await batchRuntime.listEndpoints()).toHaveLength(2);
+  });
+
+  test("of two batches racing for one URL, only one is stored", async () => {
+    const batch = (prefix: string) =>
+      [`https://example.com/${prefix}`, "https://example.com/shared"].map(
+        (url) => ({
+          url,
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        }),
+      );
+
+    const results = await Promise.allSettled([
+      runtime.addEndpoints(batch("a")),
+      runtime.addEndpoints(batch("c")),
     ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual([
+      "fulfilled",
+      "rejected",
+    ]);
+    const winner = results.find((result) => result.status === "fulfilled");
+    const stored = (await runtime.listEndpoints()).map((e) => e.url).sort();
+    expect(stored).toEqual(
+      winner?.status === "fulfilled"
+        ? winner.value.map((endpoint) => endpoint.url).sort()
+        : [],
+    );
+  });
+
+  test("addEndpoints does not need to read stored secrets", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const now = new Date();
+    // A secret whose key is gone: reading it back fails in closed mode.
+    await persistence.endpointStore.add({
+      id: "old",
+      url: "https://example.com/old",
+      active: true,
+      status: "active",
+      events: [WebhookEventType.MESSAGE_SENT],
+      secret: "enc:unreadable",
+      createdAt: now,
+      updatedAt: now,
+    });
+    const cryptoRuntime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      persistence,
+      autoStart: false,
+      fieldCrypto: {
+        endpoint: {
+          enabled: true,
+          failMode: "closed",
+          fields: { secret: "encrypt" },
+          provider: {
+            encrypt: async ({ value }) => ({ ciphertext: `enc:${value}` }),
+            decrypt: async () => {
+              throw new Error("key not found");
+            },
+            hash: async ({ value }) => `h:${value}`,
+          },
+        },
+      },
+    });
+
+    await cryptoRuntime.addEndpoints([
+      {
+        url: "https://example.com/new",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      },
+    ]);
+
+    expect(
+      (await persistence.endpointStore.list()).map((e) => e.url).sort(),
+    ).toEqual(["https://example.com/new", "https://example.com/old"]);
   });
 
   test("emit + flush persists deliveries", async () => {
