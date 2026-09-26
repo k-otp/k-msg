@@ -493,6 +493,15 @@ function toFallbackValue(
   return "";
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#field-policy-modes
+ *   Applies each field's mode when a tracking record is written, and also
+ *   hashes to and from in encrypt mode for recipient and sender lookups.
+ * @evidenceReview docs/security/field-crypto-v1.md#field-policy-modes #d6936dd
+ *   Read protectScalar: plain and mask write no ciphertext, encrypt and
+ *   encrypt+hash add the mask, and the hash is written for encrypt+hash and,
+ *   for to and from, for encrypt too; metadata hashes need encrypt+hash.
+ */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
   options: DeliveryTrackingFieldCryptoOptions | undefined,

@@ -79,6 +79,17 @@ export function resolveFieldCryptoOpenFallback(
     : "masked";
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#fail-policy
+ *   Rejects unknown failMode and openFallback values and
+ *   openFallback=plaintext without unsafeAllowPlaintextStorage;
+ *   resolveFieldCryptoFailMode and resolveFieldCryptoOpenFallback apply the
+ *   closed and masked runtime defaults.
+ * @evidenceReview docs/security/field-crypto-v1.md#fail-policy #b4dd0b8
+ *   Read the four bullets against this function and both resolvers, and ran
+ *   policy.test.ts, which covers the plaintext guard, the rejected unknown
+ *   values, and the closed and masked defaults.
+ */
 export function validateFieldCryptoConfig(
   config: FieldCryptoConfig,
   options: FieldCryptoPolicyOptions = {},

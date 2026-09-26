@@ -134,6 +134,15 @@ function sanitizeLogContext(context: LogContext): LogContext {
   return sanitized;
 }
 
+/**
+ * @evidence docs/security/field-crypto-v1.md#logging-policy
+ *   Masks sensitive context keys and scrubs the message, error text, and
+ *   string context values with redactLogText before output.
+ * @evidenceReview docs/security/field-crypto-v1.md#logging-policy #7fe97f3
+ *   Read formatMessage and sanitizeContextValue, and ran logger.test.ts in
+ *   JSON and text modes: phone numbers and apiKey values in the message,
+ *   error, and context stay out of the output.
+ */
 export class Logger {
   private config: LoggerConfig;
   private context: LogContext;

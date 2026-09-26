@@ -6,11 +6,12 @@
 
 | Document | Units | Claim hosts | Why it is governed |
 | --- | --- | --- | --- |
+| [`docs/security/field-crypto-v1.md`](../security/field-crypto-v1.md) | every H2 | `packages/core/src/crypto`, `packages/core/src/logger.ts`, and the messaging and webhook `field-crypto.ts` modules | The policy contract for encryption, envelopes, fail modes, field modes, and log redaction must hold in every package that stores protected fields. |
 | [`docs/compliance/kr-b2b-retention.md`](../compliance/kr-b2b-retention.md) | every H2 | `packages/messaging/src/delivery-tracking/retention.ts` | Compliance baseline numbers must match the shipped preset. |
 
-The reference sets `requireReview`, so each acknowledgement carries a fingerprint of the section it cites.
+Both references set `requireReview`, so each acknowledgement carries a fingerprint of the section it cites.
 
-Only a document the code fully implements should be governed: an acknowledgement certifies the whole section. The field crypto v1 policy joins once its implementation gaps are closed. The generated [citation map](./typescript-graph.md#specification-evidence) shows which declaration answers each section.
+Only a document the code fully implements should be governed: an acknowledgement certifies the whole section. A section several packages implement, such as the field policy modes, is cited from each implementing declaration. The generated [citation map](./typescript-graph.md#specification-evidence) shows which declaration answers each section.
 
 ## Wiring
 
