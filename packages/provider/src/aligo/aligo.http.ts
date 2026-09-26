@@ -57,14 +57,23 @@ export async function requestAligo(params: {
 }
 
 // -99 is Aligo's catch-all Kakao failure (authentication, missing
-// parameters, insufficient points); its message says which one.
+// parameters, insufficient points); only its message says which one. Points
+// is checked first, so a message naming both is treated as a balance failure.
+const INSUFFICIENT_POINTS_KEYWORD = "포인트";
+const AUTHENTICATION_KEYWORD = "인증";
+
 function mapAligoKakaoErrorCode(
   code: number | undefined,
-  message: string,
+  providerMessage: string | undefined,
 ): KMsgErrorCode {
   if (code === -99) {
-    if (message.includes("포인트")) return KMsgErrorCode.INSUFFICIENT_BALANCE;
-    if (message.includes("인증")) return KMsgErrorCode.AUTHENTICATION_FAILED;
+    if (providerMessage?.includes(INSUFFICIENT_POINTS_KEYWORD)) {
+      return KMsgErrorCode.INSUFFICIENT_BALANCE;
+    }
+    if (providerMessage?.includes(AUTHENTICATION_KEYWORD)) {
+      return KMsgErrorCode.AUTHENTICATION_FAILED;
+    }
+    // Stay non-retryable when the cause is unknown, as before.
     return KMsgErrorCode.INVALID_REQUEST;
   }
   if (code === -101) return KMsgErrorCode.AUTHENTICATION_FAILED;
@@ -83,11 +92,12 @@ export function ensureAligoKakaoOk(params: {
   const code = normalizeAligoCode(rawCode);
   if (code === 0) return ok(undefined);
 
-  const message =
+  const providerMessage =
     typeof response.message === "string" && response.message.length > 0
       ? response.message
-      : fallbackMessage;
-  const mapped = mapAligoKakaoErrorCode(code, message);
+      : undefined;
+  const message = providerMessage ?? fallbackMessage;
+  const mapped = mapAligoKakaoErrorCode(code, providerMessage);
   return fail(
     new KMsgError(mapped, message, {
       providerId,
