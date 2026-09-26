@@ -226,6 +226,189 @@ describe("WebhookRuntimeService", () => {
   });
 });
 
+// Tracks timers scheduled through the globals that are still pending: a
+// timeout that has neither fired nor been cleared, or an uncleared interval.
+function trackTimers(): { pending(): number; restore(): void } {
+  const original = {
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+    setInterval: globalThis.setInterval,
+    clearInterval: globalThis.clearInterval,
+  };
+  const live = new Set<unknown>();
+
+  globalThis.setTimeout = ((
+    handler: (...args: unknown[]) => void,
+    ms?: number,
+    ...args: unknown[]
+  ) => {
+    const id = original.setTimeout(
+      (...callbackArgs: unknown[]) => {
+        live.delete(id);
+        handler(...callbackArgs);
+      },
+      ms,
+      ...args,
+    );
+    live.add(id);
+    return id;
+  }) as unknown as typeof setTimeout;
+  globalThis.setInterval = ((
+    handler: (...args: unknown[]) => void,
+    ms?: number,
+    ...args: unknown[]
+  ) => {
+    const id = original.setInterval(handler, ms, ...args);
+    live.add(id);
+    return id;
+  }) as unknown as typeof setInterval;
+  globalThis.clearTimeout = ((id: Parameters<typeof clearTimeout>[0]) => {
+    live.delete(id);
+    original.clearTimeout(id);
+  }) as typeof clearTimeout;
+  globalThis.clearInterval = ((id: Parameters<typeof clearInterval>[0]) => {
+    live.delete(id);
+    original.clearInterval(id);
+  }) as typeof clearInterval;
+
+  return {
+    pending: () => live.size,
+    restore: () => {
+      Object.assign(globalThis, original);
+    },
+  };
+}
+
+describe("WebhookRuntimeService batch timer", () => {
+  let timers: ReturnType<typeof trackTimers>;
+  let client: RecordingHttpClient;
+  let runtime: WebhookRuntimeService;
+
+  beforeEach(() => {
+    timers = trackTimers();
+    client = new RecordingHttpClient();
+    runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), batchTimeoutMs: 20 },
+      httpClient: client,
+    });
+  });
+
+  afterEach(async () => {
+    await runtime.shutdown();
+    timers.restore();
+  });
+
+  async function addEndpoint(): Promise<void> {
+    await runtime.addEndpoint({
+      url: "https://example.com/batched",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+  }
+
+  test("starts no timer unless emit() queues an event", async () => {
+    await addEndpoint();
+    await runtime.emitSync(createEvent());
+
+    expect(client.calls.length).toBe(1);
+    expect(timers.pending()).toBe(0);
+  });
+
+  test("emit() sends the queue after batchTimeoutMs, then leaves no timer", async () => {
+    await addEndpoint();
+
+    await runtime.emit(createEvent());
+    expect(timers.pending()).toBe(1);
+    expect(client.calls.length).toBe(0);
+
+    // Wait for the stored delivery, which the timer's batch writes last.
+    const deadline = Date.now() + 2_000;
+    while (
+      (await runtime.listDeliveries()).length === 0 &&
+      Date.now() < deadline
+    ) {
+      await Bun.sleep(5);
+    }
+    expect(client.calls.length).toBe(1);
+    expect(timers.pending()).toBe(0);
+  });
+
+  test("flush() sends the queue and cancels the timer", async () => {
+    await addEndpoint();
+    await runtime.emit(createEvent());
+
+    await runtime.flush();
+
+    expect(client.calls.length).toBe(1);
+    expect(timers.pending()).toBe(0);
+  });
+
+  test("emit() after shutdown() starts no timer", async () => {
+    await addEndpoint();
+    await runtime.shutdown();
+
+    await runtime.emit(createEvent());
+
+    expect(timers.pending()).toBe(0);
+  });
+});
+
+// These runtimes use in-memory storage and autoStart: false, so they hold
+// nothing that needs shutdown(). Skipping it keeps a broken batch size from
+// hanging the test run in flush().
+describe("WebhookRuntimeService batch settings", () => {
+  test("emit() and flush() work without batchSize or batchTimeoutMs", async () => {
+    const {
+      batchSize: _size,
+      batchTimeoutMs: _timeout,
+      ...delivery
+    } = createConfig();
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery,
+      httpClient: client,
+      autoStart: false,
+    });
+    await runtime.addEndpoint({
+      url: "https://example.com/defaults",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    });
+
+    for (let index = 0; index < 12; index += 1) {
+      await runtime.emit(createEvent());
+    }
+    // The tenth event fills a batch of the default size, which emit() sends.
+    expect(client.calls.length).toBe(10);
+
+    await runtime.flush();
+    expect(client.calls.length).toBe(12);
+  });
+
+  test.each([0, -1, 0.5, Number.NaN])(
+    "a batchSize of %p falls back to the default",
+    async (batchSize) => {
+      const client = new RecordingHttpClient();
+      const runtime = new WebhookRuntimeService({
+        delivery: { ...createConfig(), batchSize },
+        httpClient: client,
+        autoStart: false,
+      });
+      await runtime.addEndpoint({
+        url: "https://example.com/invalid-size",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+
+      for (let index = 0; index < 10; index += 1) {
+        await runtime.emit(createEvent());
+      }
+
+      expect(client.calls.length).toBe(10);
+    },
+  );
+});
+
 describe("WebhookRuntimeService message status events", () => {
   test.each([
     [WebhookEventType.MESSAGE_CANCELLED, "message.cancelled"],

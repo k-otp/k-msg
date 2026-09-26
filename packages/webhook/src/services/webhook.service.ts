@@ -118,7 +118,7 @@ export class WebhookService {
     this.eventQueue.push(event);
 
     // 배치 크기에 도달한 경우 즉시 처리
-    if (this.eventQueue.length >= this.config.batchSize) {
+    if (this.eventQueue.length >= (this.config.batchSize ?? 10)) {
       await this.processBatch();
     }
   }
@@ -341,7 +341,7 @@ export class WebhookService {
       return;
     }
 
-    const batch = this.eventQueue.splice(0, this.config.batchSize);
+    const batch = this.eventQueue.splice(0, this.config.batchSize ?? 10);
 
     try {
       for (const event of batch) {
@@ -493,7 +493,7 @@ export class WebhookService {
           error instanceof Error ? error : new Error(String(error)),
         );
       });
-    }, this.config.batchTimeoutMs);
+    }, this.config.batchTimeoutMs ?? 5_000);
   }
 
   /**
