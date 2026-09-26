@@ -135,7 +135,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules/.cache/ttsc
-          key: ttsc-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock', 'lint.config.ts') }}
+          key: ttsc-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock', 'lint.config.ts', 'lint.evidence.config.ts') }}
           restore-keys: |
             ttsc-${{ runner.os }}-${{ runner.arch }}-
 

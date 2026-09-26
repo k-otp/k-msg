@@ -15,7 +15,7 @@
   "devDependencies": {
     "@types/bun": "^1.3.14",
     "@types/node": "^26.1.1",
-    "ttsc": "^0.18.4",
+    "ttsc": "^0.30.4",
     "typescript": "^7.0.2"
   }
 }

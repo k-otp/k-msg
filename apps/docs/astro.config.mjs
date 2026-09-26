@@ -7,8 +7,17 @@ import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
+import { OptionDefaults } from "typedoc";
 import syncTypeDocLocales from "./plugins/sync-typedoc-locales.mjs";
 import typedocEntryPoints from "./typedoc.entrypoints.json";
+
+// @ttsc/evidence tags are build-time verification metadata, not API docs.
+const evidenceTags = [
+  "@evidence",
+  "@evidenceReview",
+  "@evidenceExclude",
+  "@evidenceExcludeReview",
+];
 
 const docsContentRoot = fileURLToPath(
   new URL("./src/content/docs", import.meta.url),
@@ -295,6 +304,8 @@ export default defineConfig({
             label: "API",
           },
           typeDoc: {
+            blockTags: [...OptionDefaults.blockTags, ...evidenceTags],
+            excludeTags: [...OptionDefaults.excludeTags, ...evidenceTags],
             excludePrivate: true,
             excludeProtected: true,
             excludeInternal: true,
