@@ -46,7 +46,7 @@ fields: {
 ## 4. Query migration
 
 - Legacy lookup: `WHERE to = ?`
-- Secure lookup: `WHERE to_hash = HMAC(normalized(to))`
+- Secure lookup: `WHERE to_hash IN (HMAC_kid(normalized(to)), ...)`, one hash for each `kid` a record may carry: the encrypt `kid` and every `kid` from `resolveDecryptKeys`
 
 ## 5. Rollback strategy
 

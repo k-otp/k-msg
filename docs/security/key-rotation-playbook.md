@@ -23,9 +23,11 @@ Without multi-kid decrypt, historical rows fail to decrypt during rollout.
 - Enabling new active key before decrypt set includes both old and new keys.
 - Removing the old key immediately after rollout start.
 - Skipping per-tenant rollout controls.
+- Listing a `kid` in the decrypt set before the provider has its keys: `to`/`from` lookups hash under every listed `kid` and, under `failMode=closed`, fail when they cannot.
 
 ## Runbook checks
 
 - `key_kid_usage` shows expected active `kid`.
 - `crypto_fail_count` does not spike on decrypt.
 - `crypto_circuit_state` remains `closed` for healthy scopes.
+- Lookups by `to`/`from` return records written under both the old and the new `kid`.
