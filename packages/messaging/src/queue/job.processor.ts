@@ -9,6 +9,7 @@ import {
   type SendOptions,
 } from "@k-msg/core";
 import { EventEmitter } from "../shared/event-emitter";
+import { logBackgroundFailure } from "../shared/log-background-failure";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -225,7 +226,9 @@ export class JobProcessor extends EventEmitter {
     }
 
     this.pollTimer = setTimeout(() => {
-      this.processJobs();
+      this.processJobs().catch((error: unknown) => {
+        logBackgroundFailure("Job queue poll failed", error);
+      });
       this.scheduleNextPoll();
     }, this.options.pollInterval);
   }
@@ -242,7 +245,14 @@ export class JobProcessor extends EventEmitter {
         break;
       }
       this.processing.add(job.id);
-      this.processJob(job);
+      // Jobs run concurrently. processJob frees the slot before any step that
+      // can reject, so a failure here only needs to be reported.
+      this.processJob(job).catch((error: unknown) => {
+        logBackgroundFailure("Job processing failed", error, {
+          jobId: job.id,
+          jobType: job.type,
+        });
+      });
     }
   }
 

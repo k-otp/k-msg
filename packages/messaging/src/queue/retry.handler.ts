@@ -3,6 +3,7 @@
  */
 
 import { EventEmitter } from "../shared/event-emitter";
+import { logBackgroundFailure } from "../shared/log-background-failure";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -239,7 +240,9 @@ export class MessageRetryHandler extends EventEmitter {
     }
 
     this.checkTimer = setTimeout(() => {
-      this.processRetryQueue();
+      this.processRetryQueue().catch((error: unknown) => {
+        logBackgroundFailure("Retry queue check failed", error);
+      });
       this.scheduleNextCheck();
     }, this.options.checkInterval);
   }
@@ -255,7 +258,14 @@ export class MessageRetryHandler extends EventEmitter {
     );
 
     for (const item of readyItems) {
-      this.processRetryItem(item);
+      // Items run concurrently. processRetryItem frees the item's processing
+      // slot before any step that can reject, so a failure here (a throwing
+      // callback or listener) only needs to be reported.
+      this.processRetryItem(item).catch((error: unknown) => {
+        logBackgroundFailure("Retry item processing failed", error, {
+          retryItemId: item.id,
+        });
+      });
     }
   }
 

@@ -3,6 +3,7 @@
  */
 
 import { EventEmitter } from "../shared/event-emitter";
+import { logBackgroundFailure } from "../shared/log-background-failure";
 import {
   type DeliveryReport,
   type MessageEvent,
@@ -494,8 +495,12 @@ export class DeliveryTracker extends EventEmitter {
     }
 
     this.trackingTimer = setTimeout(() => {
-      this.processTracking();
-      this.processWebhookQueue();
+      this.processTracking().catch((error: unknown) => {
+        logBackgroundFailure("Delivery tracking tick failed", error);
+      });
+      this.processWebhookQueue().catch((error: unknown) => {
+        logBackgroundFailure("Delivery webhook queue processing failed", error);
+      });
       this.scheduleTracking();
     }, this.options.trackingInterval);
   }
@@ -522,7 +527,14 @@ export class DeliveryTracker extends EventEmitter {
     for (const { record, event } of batch) {
       for (const webhook of record.webhooks) {
         if (webhook.events.includes(event.type)) {
-          this.deliverWebhook(webhook, event);
+          // Deliveries run concurrently; deliverWebhook only rejects when a
+          // "webhook:failed" listener throws.
+          this.deliverWebhook(webhook, event).catch((error: unknown) => {
+            logBackgroundFailure("Delivery webhook dispatch failed", error, {
+              eventId: event.id,
+              eventType: event.type,
+            });
+          });
         }
       }
     }
