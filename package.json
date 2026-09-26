@@ -34,7 +34,6 @@
     "test": "bun run test:unit",
     "test:unit": "bun run --filter='./packages/*' test:unit",
     "test:integration": "bun run --filter='./packages/*' test:integration",
-    "test:e2e": "bun run --filter='./packages/*' test:e2e",
     "test:all": "bun run test:unit && bun run test:integration",
     "test:coverage": "bun run --filter='./packages/*' test:coverage",
     "test:watch": "bun run --filter='./packages/*' test:watch",
