@@ -12,6 +12,8 @@ fieldCryptoSchema: {
 }
 ```
 
+An existing table keeps its schema: the tracking store only creates the secure columns for new tables. Add them as nullable columns before migrating (`to_enc`, `to_hash`, `to_masked`, `from_enc`, `from_hash`, `from_masked`, `metadata_enc`, `metadata_hashes`, `crypto_kid`, `crypto_version INTEGER NOT NULL DEFAULT 1`, `crypto_state`, `retention_class`, `retention_bucket_ym`).
+
 For staged migration:
 
 ```ts
@@ -36,7 +38,7 @@ fields: {
 ## 3. Backfill order
 
 1. Add secure columns and indexes
-2. Backfill `to_enc`, `to_hash`, `from_enc`, `from_hash`
+2. Backfill `to_enc`, `to_hash`, `from_enc`, `from_hash` with `applyFieldCryptoMigration`, passing the tracking store's `fieldCrypto` options. Rows whose `crypto_state` is empty, `plain`, or `degraded` are encrypted from the plain columns; a row that cannot be encrypted fails its chunk instead of storing fallback values
 3. Switch read path to secure mode
 4. Disable plain compatibility (`compatPlainColumns=false`)
 5. Optionally drop legacy plain columns

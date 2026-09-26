@@ -253,6 +253,7 @@ Operational notes:
 
 - state is persisted in DB meta tables plus local snapshots under `.kmsg/migrations`
 - `retry` only replays failed chunks
+- `apply` and `retry` encrypt with the tracking store's keys from `KMSG_FIELD_CRYPTO_KEYS` and `KMSG_ACTIVE_KID` (see `docs/security/migration-cli-runbook.md`)
 - use `status` before changing rollout flags (`compatPlainColumns`)
 
 ## Recommended AlimTalk flow
