@@ -113,6 +113,7 @@ describe("webhook cloudflare adapter", () => {
     expect(sql).toContain("endpoints_custom");
     expect(sql).toContain("deliveries_custom");
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS");
+    expect(sql).toContain("ON deliveries_custom(created_at DESC, id DESC)");
   });
 
   test("D1 delivery store replaces a stored delivery by id", async () => {

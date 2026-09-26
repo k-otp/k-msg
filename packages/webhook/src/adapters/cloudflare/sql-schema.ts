@@ -61,6 +61,9 @@ export function buildWebhookSchemaSql(
       ON ${tables.deliveryTable}(endpoint_id)`,
     `CREATE INDEX IF NOT EXISTS idx_${tables.deliveryTable}_created_at
       ON ${tables.deliveryTable}(created_at DESC)`,
+    // Serves list()'s newest-first order and its before cursor as a seek.
+    `CREATE INDEX IF NOT EXISTS idx_${tables.deliveryTable}_created_at_id
+      ON ${tables.deliveryTable}(created_at DESC, id DESC)`,
   ];
 }
 
