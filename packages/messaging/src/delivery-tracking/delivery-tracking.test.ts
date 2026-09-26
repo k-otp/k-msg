@@ -992,6 +992,84 @@ describe("DeliveryTrackingService onStatusChange", () => {
     expect(nested).toBe(1);
   });
 
+  test("lets callbacks of two services poll each other without deadlocking", async () => {
+    let first: DeliveryTrackingService | undefined;
+    let second: DeliveryTrackingService | undefined;
+    const calls: string[] = [];
+    first = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        calls.push("first");
+        await second?.runOnce();
+      },
+    });
+    second = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        calls.push("second");
+        await first?.runOnce();
+      },
+    });
+    await recordSent(first, "a1");
+    await recordSent(second, "b1");
+
+    const finished = await Promise.race([
+      first.runOnce().then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+    expect(calls).toEqual(["first", "second"]);
+  });
+
+  test("lets callbacks of two services that run side by side poll each other", async () => {
+    let first: DeliveryTrackingService | undefined;
+    let second: DeliveryTrackingService | undefined;
+    // Both callbacks start before either polls the other, so both services
+    // are delivering at once rather than one inside the other.
+    let started = 0;
+    let bothStarted: () => void = () => {};
+    const together = new Promise<void>((resolve) => {
+      bothStarted = resolve;
+    });
+    const arrive = async () => {
+      started += 1;
+      if (started === 2) bothStarted();
+      await together;
+    };
+    first = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        await arrive();
+        await second?.runOnce();
+      },
+    });
+    second = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store: new InMemoryDeliveryTrackingStore(),
+      polling,
+      onStatusChange: async () => {
+        await arrive();
+        await first?.runOnce();
+      },
+    });
+    await recordSent(first, "a1");
+    await recordSent(second, "b1");
+
+    const finished = await Promise.race([
+      Promise.all([first.runOnce(), second.runOnce()]).then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
+    ]);
+
+    expect(finished).toBe(true);
+  });
+
   test("reports the record as stored, without fields the store dropped", async () => {
     const store = new InMemoryDeliveryTrackingStore();
     // Like a SQL store with storeRaw off: raw provider payloads are not kept.
