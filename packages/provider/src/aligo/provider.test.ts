@@ -186,8 +186,9 @@ describe("AligoProvider (send)", () => {
       calledBody = await formDataToObject(init?.body);
       return new Response(
         JSON.stringify({
-          result_code: "0",
-          msg_id: "ALIGO_MSG_1",
+          code: 0,
+          message: "성공적으로 전송요청 하였습니다.",
+          info: { type: "AT", mid: 123456789, scnt: 1, fcnt: 0 },
         }),
         { status: 200 },
       );
@@ -219,9 +220,153 @@ describe("AligoProvider (send)", () => {
     expect(calledBody.fmessage_1).toBe("fallback body");
     expect(result.isSuccess).toBe(true);
     if (result.isSuccess) {
+      expect(result.value.providerMessageId).toBe("123456789");
       expect(result.value.warnings?.[0]?.code).toBe(
         "FAILOVER_PARTIAL_PROVIDER",
       );
+    }
+  });
+});
+
+// Response shapes follow the Aligo API documentation: the Kakao endpoints
+// answer `{ code, message, info: { mid } }` and the SMS endpoint answers
+// `{ result_code, message, msg_id }` with numeric codes.
+describe("AligoProvider (send responses)", () => {
+  function createSendProvider() {
+    return new AligoProvider({
+      apiKey: "api-key",
+      userId: "user",
+      senderKey: "SENDERKEY",
+      sender: "01000000000",
+    });
+  }
+
+  function respondWith(body: Record<string, unknown>) {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify(body), { status: 200 });
+  }
+
+  test("rejects an ALIMTALK send the Kakao API refused", async () => {
+    respondWith({ code: -99, message: "포인트가 부족합니다." });
+
+    const result = await createSendProvider().send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { name: "Jane" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.message).toBe("포인트가 부족합니다.");
+      expect(result.error.code).toBe("INSUFFICIENT_BALANCE");
+    }
+  });
+
+  test.each([
+    ["인증오류입니다.", "AUTHENTICATION_FAILED"],
+    [
+      "발신 프로파일 키(=senderkey) 파라메더 정보가 전달되지 않았습니다.",
+      "INVALID_REQUEST",
+    ],
+  ])("classifies Kakao code -99 by its message %p", async (message, code) => {
+    respondWith({ code: -99, message });
+
+    const result = await createSendProvider().send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { name: "Jane" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(String(result.error.code)).toBe(code);
+    }
+  });
+
+  test("accepts a FRIENDTALK send with code 0 and reads info.mid", async () => {
+    respondWith({
+      code: 0,
+      message: "성공적으로 전송요청 하였습니다.",
+      info: { type: "FT", mid: 987654321, scnt: 1, fcnt: 0 },
+    });
+
+    const result = await createSendProvider().send({
+      type: "FRIENDTALK",
+      to: "01012345678",
+      text: "friend message",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.providerMessageId).toBe("987654321");
+    }
+  });
+
+  test("accepts an SMS send with a numeric result_code", async () => {
+    respondWith({
+      result_code: 1,
+      message: "",
+      msg_id: 123456789,
+      success_cnt: 1,
+      error_cnt: 0,
+      msg_type: "SMS",
+    });
+
+    const result = await createSendProvider().send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value.providerMessageId).toBe("123456789");
+    }
+  });
+
+  test.each([[true], [["1"]], ["0x1"], [null]])(
+    "rejects an SMS response with malformed result_code %p",
+    async (resultCode) => {
+      respondWith({ result_code: resultCode, message: "", msg_id: 1 });
+
+      const result = await createSendProvider().send({
+        type: "SMS",
+        to: "01012345678",
+        text: "hello",
+      });
+
+      expect(result.isFailure).toBe(true);
+    },
+  );
+
+  test("rejects a Kakao send response that is not an object", async () => {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify([{ code: 0 }]), { status: 200 });
+
+    const result = await createSendProvider().send({
+      type: "ALIMTALK",
+      to: "01012345678",
+      templateId: "TPL_1",
+      variables: { name: "Jane" },
+    });
+
+    expect(result.isFailure).toBe(true);
+  });
+
+  test("maps a negative SMS result_code to its error", async () => {
+    respondWith({ result_code: -101, message: "인증오류입니다." });
+
+    const result = await createSendProvider().send({
+      type: "SMS",
+      to: "01012345678",
+      text: "hello",
+    });
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe("AUTHENTICATION_FAILED");
     }
   });
 });

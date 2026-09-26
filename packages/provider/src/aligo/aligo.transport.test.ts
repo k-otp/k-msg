@@ -53,11 +53,11 @@ describe("Aligo transport context", () => {
       observedSignals.push(init?.signal);
       const isSms = String(input).includes("apis.aligo.in");
       return new Response(
-        JSON.stringify({
-          result_code: isSms ? "1" : "0",
-          message: "ok",
-          msg_id: "message-1",
-        }),
+        JSON.stringify(
+          isSms
+            ? { result_code: 1, message: "", msg_id: 1 }
+            : { code: 0, message: "ok", info: { mid: 1 } },
+        ),
         { status: 200 },
       );
     };

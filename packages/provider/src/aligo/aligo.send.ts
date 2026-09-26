@@ -8,7 +8,7 @@ import {
   type SendResult,
 } from "@k-msg/core";
 import { mapAligoError } from "./aligo.error";
-import { requestAligo } from "./aligo.http";
+import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
 import type {
   AligoMessageType,
   AligoRuntimeContext,
@@ -16,10 +16,22 @@ import type {
 import {
   formatAligoDate,
   getAligoEndpoint,
+  normalizeAligoCode,
   resolveAligoTemplateMessage,
   resolveImageRef,
 } from "./aligo.shared.helpers";
-import type { AligoResponse, AligoSMSRequest } from "./types/aligo";
+import type {
+  AligoKakaoSendResponse,
+  AligoResponse,
+  AligoSMSRequest,
+} from "./types/aligo";
+
+function toProviderMessageId(
+  value: number | string | null | undefined,
+): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  return String(value);
+}
 
 export function collectSendWarnings(
   options: SendOptions,
@@ -101,14 +113,15 @@ async function sendSMS(
     context: ctx.requestContext,
   })) as unknown as AligoResponse;
 
-  if (response.result_code !== "1") {
+  // The SMS API documents `result_code` as a number; accept its string form too.
+  if (normalizeAligoCode(response.result_code) !== 1) {
     return fail(mapAligoError(response, ctx.providerId));
   }
 
   return ok({
     messageId: options.messageId || crypto.randomUUID(),
     providerId: ctx.providerId,
-    providerMessageId: response.msg_id,
+    providerMessageId: toProviderMessageId(response.msg_id),
     status: "PENDING",
     type: options.type,
     to: options.to,
@@ -231,16 +244,19 @@ async function sendAlimTalk(
     data: body,
     providerId: ctx.providerId,
     context: ctx.requestContext,
-  })) as unknown as AligoResponse;
+  })) as unknown as AligoKakaoSendResponse;
 
-  if (response.result_code !== "0") {
-    return fail(mapAligoError(response, ctx.providerId));
-  }
+  const accepted = ensureAligoKakaoOk({
+    providerId: ctx.providerId,
+    response,
+    fallbackMessage: "Aligo AlimTalk send failed",
+  });
+  if (accepted.isFailure) return accepted;
 
   return ok({
     messageId: options.messageId || crypto.randomUUID(),
     providerId: ctx.providerId,
-    providerMessageId: response.msg_id,
+    providerMessageId: toProviderMessageId(response.info?.mid),
     status: "PENDING",
     type: options.type,
     to: options.to,
@@ -319,16 +335,19 @@ async function sendFriendTalk(
     data: body,
     providerId: ctx.providerId,
     context: ctx.requestContext,
-  })) as unknown as AligoResponse;
+  })) as unknown as AligoKakaoSendResponse;
 
-  if (response.result_code !== "0") {
-    return fail(mapAligoError(response, ctx.providerId));
-  }
+  const accepted = ensureAligoKakaoOk({
+    providerId: ctx.providerId,
+    response,
+    fallbackMessage: "Aligo FriendTalk send failed",
+  });
+  if (accepted.isFailure) return accepted;
 
   return ok({
     messageId: options.messageId || crypto.randomUUID(),
     providerId: ctx.providerId,
-    providerMessageId: response.msg_id,
+    providerMessageId: toProviderMessageId(response.info?.mid),
     status: "PENDING",
     type: options.type,
     to: options.to,

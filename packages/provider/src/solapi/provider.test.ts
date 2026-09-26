@@ -714,6 +714,68 @@ describe("SolapiProvider (SendOptions-based)", () => {
     }
   });
 
+  test("getDeliveryStatus maps failure status codes to FAILED", async () => {
+    const { client, setGetMessagesResponse } = createStubClient();
+    setGetMessagesResponse({
+      messageList: {
+        msg_1: { messageId: "msg_1", statusCode: "3059" },
+      },
+    });
+
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.getDeliveryStatus({
+      providerMessageId: "msg_1",
+      type: "SMS",
+      to: "01012345678",
+      requestedAt: new Date(),
+    });
+
+    expect(result.isSuccess).toBe(true);
+    if (result.isSuccess) {
+      expect(result.value?.status).toBe("FAILED");
+    }
+  });
+
+  test("normalizes formatted phone numbers before sending", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        defaultFrom: "02-123-4567",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const domestic = await provider.send({
+      type: "SMS",
+      to: "010-1234-5678",
+      text: "hello",
+    });
+    const international = await provider.send({
+      type: "SMS",
+      to: "+82 10-1234-5678",
+      text: "hello",
+    });
+
+    expect(domestic.isSuccess).toBe(true);
+    expect(international.isSuccess).toBe(true);
+    expect(calls.sendOne[0]?.message?.to).toBe("01012345678");
+    expect(calls.sendOne[0]?.message?.from).toBe("021234567");
+    expect(calls.sendOne[1]?.message?.to).toBe("+821012345678");
+  });
+
   test("getBalance maps SOLAPI balance response", async () => {
     const { client, calls, setGetBalanceResponse } = createStubClient();
     setGetBalanceResponse({

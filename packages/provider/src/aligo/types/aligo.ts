@@ -38,13 +38,29 @@ export interface AligoAlimTalkRequest {
   testMode?: "Y" | "N";
 }
 
+/** SMS/LMS/MMS send response; `result_code` is `1` on success. */
 export interface AligoResponse {
-  result_code: string;
+  result_code: number | string;
   message: string;
-  msg_id?: string;
+  msg_id?: number | string;
   success_cnt?: number;
   error_cnt?: number;
   msg_type?: string;
+}
+
+/** Kakao (AlimTalk/FriendTalk) send response; `code` is `0` on success. */
+export interface AligoKakaoSendResponse {
+  code: number | string;
+  message?: string;
+  info?: {
+    type?: string;
+    mid?: number | string;
+    current?: number | string;
+    unit?: number | string;
+    total?: number | string;
+    scnt?: number;
+    fcnt?: number;
+  };
 }
 
 export interface AligoTemplateListRequest {
