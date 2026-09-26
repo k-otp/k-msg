@@ -1,4 +1,3 @@
-import { interpolate } from "@k-msg/template";
 import type { KMsg, KMsgError, Result, SendInput, SendResult } from "k-msg";
 import type { ShippedOrder } from "./orders";
 
@@ -23,7 +22,7 @@ export interface ShippingNotifierOptions {
   senderNumber: string | undefined;
 }
 
-/** Tells customers their order shipped: AlimTalk, with an LMS fallback. */
+/** Tells customers their order shipped: AlimTalk, with a text fallback. */
 export class ShippingNotifier {
   private readonly kmsg: KMsg;
   private readonly templateId: string;
@@ -64,12 +63,12 @@ export class ShippingNotifier {
       from: this.senderNumber,
       templateId: this.templateId,
       variables,
-      // Customers without KakaoTalk get the same text as an LMS.
+      // Customers without KakaoTalk get the same text. KMsg fills in the
+      // variables and sends it as an SMS, or as an LMS when it is too long.
       failover: {
         enabled: true,
-        fallbackChannel: "lms",
         fallbackTitle: "Order shipped",
-        fallbackContent: interpolate(SHIPPED_TEMPLATE, variables),
+        fallbackContent: SHIPPED_TEMPLATE,
       },
       // Aligo sends the rendered template text rather than the variables;
       // the other providers ignore this option.

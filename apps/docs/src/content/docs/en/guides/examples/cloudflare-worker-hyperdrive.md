@@ -192,8 +192,8 @@ The provider's own error text is logged, never returned.
   column types, all explained in `src/tracking-schema.ts`: `TIMESTAMPTZ`
   timestamps, `TEXT` instead of `VARCHAR(64)`, and `TEXT` instead of `JSONB`.
 - The store normally runs `CREATE TABLE` and `CREATE INDEX IF NOT EXISTS` on
-  first use. This Worker turns that off (`MigratedTrackingStore` in
-  `src/tracking.ts`), so create the table before the first deploy.
+  first use. This Worker turns that off with `initializeSchema: false` in
+  `src/tracking.ts`, so create the table before the first deploy.
 
 ## Deploy
 

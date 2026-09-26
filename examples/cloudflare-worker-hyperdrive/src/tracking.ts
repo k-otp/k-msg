@@ -24,18 +24,6 @@ export interface TrackingRuntime {
 }
 
 /**
- * The store would run CREATE TABLE and CREATE INDEX IF NOT EXISTS on first
- * use, in every request. The schema comes from sql/schema.sql instead, so
- * requests make no DDL round trips and the database role needs no CREATE
- * privilege.
- */
-class MigratedTrackingStore extends HyperdriveDeliveryTrackingStore {
-  override async init(): Promise<void> {
-    // Nothing to create: apply sql/schema.sql before deploying.
-  }
-}
-
-/**
  * Builds what one request or cron run needs. Workers cannot share I/O
  * objects between requests, and Hyperdrive pools the real connections, so
  * each run opens its own postgres.js client and closes it when done.
@@ -53,7 +41,12 @@ export async function openTrackingRuntime(
 
   const tracking = new DeliveryTrackingService({
     providers: [provider],
-    store: new MigratedTrackingStore(postgresClient(sql), TRACKING_SCHEMA),
+    // The schema comes from sql/schema.sql, so requests make no DDL round
+    // trips and the database role needs no CREATE privilege.
+    store: new HyperdriveDeliveryTrackingStore(postgresClient(sql), {
+      ...TRACKING_SCHEMA,
+      initializeSchema: false,
+    }),
     polling: {
       // Aligo has no status lookup. Mark its messages UNKNOWN at the first
       // poll instead of polling them for a day.
