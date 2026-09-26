@@ -219,6 +219,32 @@ describe("verifyWebhookRequest", () => {
     ).toBe(true);
   });
 
+  test("rejects a byte body that is not valid UTF-8", () => {
+    setSystemTime(SIGNED_AT);
+    const timestamp = toSeconds(SIGNED_AT);
+    // U+FFFD is EF BF BD in UTF-8; a lone FF byte decodes to the same
+    // character when decoding replaces malformed input.
+    const signedBody = JSON.stringify({ id: "evt_1", note: "�" });
+    const headers = new Headers({
+      "X-Webhook-Timestamp": timestamp,
+      "X-Webhook-Signature": sign(timestamp, signedBody),
+    });
+    const signedBytes = new TextEncoder().encode(signedBody);
+    const marker = signedBytes.indexOf(0xef);
+    const forgedBytes = new Uint8Array([
+      ...signedBytes.subarray(0, marker),
+      0xff,
+      ...signedBytes.subarray(marker + 3),
+    ]);
+
+    expect(verifyWebhookRequest(headers, signedBytes, SECRET).isSuccess).toBe(
+      true,
+    );
+    expect(
+      failureCode(verifyWebhookRequest(headers, forgedBytes, SECRET)),
+    ).toBe("INVALID_SIGNATURE");
+  });
+
   test("uses the sender's signature header, prefix, and algorithm", () => {
     setSystemTime(SIGNED_AT);
     const timestamp = toSeconds(SIGNED_AT);

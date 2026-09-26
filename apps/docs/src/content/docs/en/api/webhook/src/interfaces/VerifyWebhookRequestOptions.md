@@ -5,7 +5,7 @@ prev: false
 title: "VerifyWebhookRequestOptions"
 ---
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L26)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L27)
 
 Options for [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhookrequest/). `algorithm`, `signatureHeader`,
 and `signaturePrefix` must match the sender's `WebhookConfig`, so the same
@@ -57,7 +57,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:25](https://github.com/
 
 > `optional` **toleranceMs?**: `number`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L36)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L37)
 
 How far the signed time may be from the receiver's clock, in either
 direction, in milliseconds: a finite number of 0 or more. Defaults to

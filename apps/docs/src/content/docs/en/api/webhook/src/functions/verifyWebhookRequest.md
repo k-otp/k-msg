@@ -7,7 +7,7 @@ title: "verifyWebhookRequest"
 
 > **verifyWebhookRequest**(`headers`, `body`, `secret`, `options?`): [`Result`](/en/api/core/src/type-aliases/result/)\<[`VerifiedWebhookRequest`](/en/api/webhook/src/interfaces/verifiedwebhookrequest/), [`WebhookVerificationError`](/en/api/webhook/src/classes/webhookverificationerror/)\>
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L129)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L138)
 
 Checks that a webhook request came from a k-msg sender that holds `secret`
 and was signed recently.
