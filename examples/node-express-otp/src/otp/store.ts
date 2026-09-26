@@ -7,23 +7,36 @@ export interface OtpChallenge {
 }
 
 export interface SendLimits {
+  /** Minimum time between two codes to the same number. */
   cooldownMs: number;
+  /** Codes per number per hour. */
   maxPerHour: number;
+  /** Codes one client address may request per hour, across all numbers. */
+  maxPerClientPerHour: number;
+  /** Codes the whole service sends per hour, a ceiling on SMS spend. */
+  maxTotalPerHour: number;
 }
+
+/** Which limit refused a send. */
+export type SendLimit = "number" | "client" | "service";
 
 export type SendReservation =
   | { allowed: true }
-  | { allowed: false; retryAfterMs: number };
+  | { allowed: false; limit: SendLimit; retryAfterMs: number };
 
 /**
- * Where challenges and send counts live. Each method must be atomic for a
- * phone number, because concurrent requests race on the same number. A Redis
+ * Where challenges and send counts live. Each method must be atomic, because
+ * concurrent requests race on the same number and the same counters. A Redis
  * store would implement each one as a Lua script or a MULTI transaction.
  */
 export interface OtpStore {
-  /** Counts a send if the cooldown and the hourly cap allow it. */
+  /**
+   * Counts a send to `phone` requested by `client` if every limit allows it,
+   * and counts nothing otherwise.
+   */
   reserveSend(
     phone: string,
+    client: string,
     now: number,
     limits: SendLimits,
   ): Promise<SendReservation>;
@@ -56,28 +69,43 @@ interface Entry {
  */
 export class InMemoryOtpStore implements OtpStore {
   private readonly entries = new Map<string, Entry>();
+  /** Send times in the last hour, per client address and for the service. */
+  private readonly clientSends = new Map<string, number[]>();
+  private serviceSends: number[] = [];
   private lastSweep = 0;
 
   async reserveSend(
     phone: string,
+    client: string,
     now: number,
     limits: SendLimits,
   ): Promise<SendReservation> {
     this.sweep(now);
     const entry = this.entries.get(phone) ?? { sentAt: [] };
-    const sentAt = entry.sentAt.filter((time) => now - time < HOUR_MS);
+    const phoneSends = lastHour(entry.sentAt, now);
+    const clientSends = lastHour(this.clientSends.get(client) ?? [], now);
+    const serviceSends = lastHour(this.serviceSends, now);
 
-    const last = sentAt.at(-1);
+    const last = phoneSends.at(-1);
     if (last !== undefined && now - last < limits.cooldownMs) {
-      return { allowed: false, retryAfterMs: last + limits.cooldownMs - now };
+      return {
+        allowed: false,
+        limit: "number",
+        retryAfterMs: last + limits.cooldownMs - now,
+      };
     }
-    const first = sentAt[0];
-    if (first !== undefined && sentAt.length >= limits.maxPerHour) {
-      return { allowed: false, retryAfterMs: first + HOUR_MS - now };
-    }
+    const refused =
+      overLimit(phoneSends, limits.maxPerHour, "number", now) ??
+      overLimit(clientSends, limits.maxPerClientPerHour, "client", now) ??
+      overLimit(serviceSends, limits.maxTotalPerHour, "service", now);
+    if (refused !== undefined) return refused;
 
-    sentAt.push(now);
-    this.entries.set(phone, { ...entry, sentAt });
+    phoneSends.push(now);
+    clientSends.push(now);
+    serviceSends.push(now);
+    this.entries.set(phone, { ...entry, sentAt: phoneSends });
+    this.clientSends.set(client, clientSends);
+    this.serviceSends = serviceSends;
     return { allowed: true };
   }
 
@@ -105,10 +133,12 @@ export class InMemoryOtpStore implements OtpStore {
 
   async close(): Promise<void> {
     this.entries.clear();
+    this.clientSends.clear();
+    this.serviceSends = [];
   }
 
-  // Forget numbers with nothing left to enforce, so memory stays bounded by
-  // the traffic of the last hour.
+  // Forget numbers and clients with nothing left to enforce, so memory stays
+  // bounded by the traffic of the last hour.
   private sweep(now: number): void {
     if (now - this.lastSweep < SWEEP_INTERVAL_MS) return;
     this.lastSweep = now;
@@ -117,5 +147,27 @@ export class InMemoryOtpStore implements OtpStore {
       const recentSend = entry.sentAt.some((time) => now - time < HOUR_MS);
       if (!liveChallenge && !recentSend) this.entries.delete(phone);
     }
+    for (const [client, sentAt] of this.clientSends) {
+      if (!sentAt.some((time) => now - time < HOUR_MS)) {
+        this.clientSends.delete(client);
+      }
+    }
   }
+}
+
+function lastHour(sentAt: readonly number[], now: number): number[] {
+  return sentAt.filter((time) => now - time < HOUR_MS);
+}
+
+/** Refuses a send when `sentAt`, oldest first, already holds `max` sends. */
+function overLimit(
+  sentAt: readonly number[],
+  max: number,
+  limit: SendLimit,
+  now: number,
+): SendReservation | undefined {
+  if (sentAt.length < max) return undefined;
+  // The send that frees a slot is the one `max` places from the end.
+  const freesSlot = sentAt[sentAt.length - max] ?? now;
+  return { allowed: false, limit, retryAfterMs: freesSlot + HOUR_MS - now };
 }

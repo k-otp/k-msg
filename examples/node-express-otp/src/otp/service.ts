@@ -1,16 +1,19 @@
 import { Buffer } from "node:buffer";
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import type { KMsg, KMsgError } from "k-msg";
-import type { OtpStore, SendLimits } from "./store.ts";
+import type { OtpStore, SendLimit, SendLimits } from "./store.ts";
 
 const CODE_TTL_MS = 5 * 60 * 1000;
 const MAX_VERIFY_ATTEMPTS = 5;
-const SEND_LIMITS: SendLimits = { cooldownMs: 60 * 1000, maxPerHour: 5 };
+const COOLDOWN_MS = 60 * 1000;
+const MAX_PER_NUMBER_PER_HOUR = 5;
+// Generous, because carrier NAT puts many phones behind one address.
+const MAX_PER_CLIENT_PER_HOUR = 20;
 const PROVIDER_TIMEOUT_MS = 10_000;
 
 export type RequestResult =
   | { status: "sent"; expiresInSeconds: number; resendAfterSeconds: number }
-  | { status: "rate_limited"; retryAfterSeconds: number }
+  | { status: "rate_limited"; limit: SendLimit; retryAfterSeconds: number }
   | { status: "send_failed"; error: KMsgError };
 
 export type VerifyResult = "verified" | "invalid_code" | "too_many_attempts";
@@ -22,6 +25,8 @@ export interface OtpServiceOptions {
   secret: string;
   /** Registered sender number; undefined only with the mock provider. */
   senderNumber: string | undefined;
+  /** Codes the whole service sends per hour, a ceiling on SMS spend. */
+  maxSendsPerHour: number;
 }
 
 /** Issues and checks one-time codes for normalized mobile numbers. */
@@ -30,22 +35,39 @@ export class OtpService {
   private readonly store: OtpStore;
   private readonly secret: string;
   private readonly senderNumber: string | undefined;
+  private readonly limits: SendLimits;
 
   constructor(options: OtpServiceOptions) {
     this.kmsg = options.kmsg;
     this.store = options.store;
     this.secret = options.secret;
     this.senderNumber = options.senderNumber;
+    this.limits = {
+      cooldownMs: COOLDOWN_MS,
+      maxPerHour: MAX_PER_NUMBER_PER_HOUR,
+      maxPerClientPerHour: MAX_PER_CLIENT_PER_HOUR,
+      maxTotalPerHour: options.maxSendsPerHour,
+    };
   }
 
-  async request(phone: string): Promise<RequestResult> {
+  /**
+   * Texts a new code to `phone`. `client` identifies the caller, such as its
+   * IP address, so one caller cannot spread requests over many numbers.
+   */
+  async request(phone: string, client: string): Promise<RequestResult> {
     const now = Date.now();
     // Counted before sending, and kept even if the send fails, so a client
     // cannot hammer a failing provider.
-    const reservation = await this.store.reserveSend(phone, now, SEND_LIMITS);
+    const reservation = await this.store.reserveSend(
+      phone,
+      client,
+      now,
+      this.limits,
+    );
     if (!reservation.allowed) {
       return {
         status: "rate_limited",
+        limit: reservation.limit,
         retryAfterSeconds: Math.ceil(reservation.retryAfterMs / 1000),
       };
     }
@@ -71,7 +93,7 @@ export class OtpService {
     return {
       status: "sent",
       expiresInSeconds: CODE_TTL_MS / 1000,
-      resendAfterSeconds: SEND_LIMITS.cooldownMs / 1000,
+      resendAfterSeconds: COOLDOWN_MS / 1000,
     };
   }
 

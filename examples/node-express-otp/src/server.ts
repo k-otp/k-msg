@@ -19,9 +19,11 @@ const otp = new OtpService({
   store,
   secret: config.otpSecret,
   senderNumber: config.senderNumber,
+  maxSendsPerHour: config.maxSendsPerHour,
 });
 
-const server = createApp(otp).listen(config.port, (error) => {
+const app = createApp(otp, { trustProxy: config.trustProxy });
+const server = app.listen(config.port, (error) => {
   if (error) {
     console.error(`[server] cannot listen on port ${config.port}:`, error);
     process.exit(1);

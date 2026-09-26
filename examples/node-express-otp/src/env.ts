@@ -15,6 +15,10 @@ export interface Config {
   senderNumber: string | undefined;
   /** HMAC key for stored codes. */
   otpSecret: string;
+  /** Codes the whole service sends per hour, a ceiling on SMS spend. */
+  maxSendsPerHour: number;
+  /** Express's `trust proxy`: a hop count, or addresses and subnets. */
+  trustProxy: number | string | undefined;
 }
 
 type Env = Readonly<Record<string, string | undefined>>;
@@ -58,10 +62,46 @@ export function loadConfig(env: Env): Config {
     );
   }
 
+  const maxSendsPerHour = Number(
+    read.optional("OTP_MAX_SENDS_PER_HOUR") ?? "1000",
+  );
+  if (!Number.isInteger(maxSendsPerHour) || maxSendsPerHour < 1) {
+    problems.push("OTP_MAX_SENDS_PER_HOUR must be a positive integer");
+  }
+
+  const trustProxy = readTrustProxy(read.optional("TRUST_PROXY"), problems);
+
   if (problems.length > 0) {
     throw new Error(`Invalid configuration:\n  - ${problems.join("\n  - ")}`);
   }
-  return { port, provider, senderNumber, otpSecret };
+  return {
+    port,
+    provider,
+    senderNumber,
+    otpSecret,
+    maxSendsPerHour,
+    trustProxy,
+  };
+}
+
+/**
+ * A hop count such as `1`, or what Express accepts as a list, such as
+ * `loopback` or `10.0.0.0/8`. `true` is refused: it would take the client
+ * address from X-Forwarded-For, which any caller can set, and so let one
+ * caller dodge the per-client limit.
+ */
+function readTrustProxy(
+  value: string | undefined,
+  problems: string[],
+): number | string | undefined {
+  if (value === undefined || value === "false") return undefined;
+  if (value === "true") {
+    problems.push(
+      "TRUST_PROXY=true trusts X-Forwarded-For from any caller; set the number of proxies in front of the server, such as 1",
+    );
+    return undefined;
+  }
+  return /^\d+$/.test(value) ? Number(value) : value;
 }
 
 function readProvider(
