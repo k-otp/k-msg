@@ -110,6 +110,9 @@ export const providerOnboardingSpecs: Readonly<
         probeOperation: "list_templates",
       },
     ],
+    notes: [
+      "AlimTalk message_1 is the template body with variables filled in by name; the body comes from providerOptions.templateContent or the template list API.",
+    ],
   },
   solapi: {
     providerId: "solapi",

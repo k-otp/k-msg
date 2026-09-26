@@ -165,7 +165,7 @@ export SOLAPI_KAKAO_PF_ID="..."     # Kakao profileId(pfId)
 | Provider | 채널 | 필수 config 키 | 발송 시 필수값 | 참고 |
 | --- | --- | --- | --- | --- |
 | `aligo` | `SMS/LMS/MMS` | `apiKey`, `userId` | `to`, `text`, 발신번호 (`--from` 또는 `aligo.config.sender`) | MMS는 이미지 입력도 필요 |
-| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), 발신번호 (`--from` 또는 `aligo.config.sender`) | `preflight`에서 채널/템플릿 접근성 확인 |
+| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), 발신번호 (`--from` 또는 `aligo.config.sender`) | `preflight`에서 채널/템플릿 접근성 확인, 메시지는 `vars`를 이름으로 채운 템플릿 본문 |
 | `iwinv` | `SMS/LMS/MMS` | `smsApiKey`, `smsAuthKey` | `to`, `text`, 발신번호 (`--from` 또는 `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS는 바이너리 이미지 입력 필요, `apiKey`는 알림톡에만 필요 (`config provider add`가 기본값으로 넣으므로 SMS만 쓸 때는 `apiKey`와 `ALIMTALK` 라우트를 지우세요) |
 | `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | `vars`는 템플릿의 `#{이름}` 변수에 이름으로 매칭. failover/reSend 활성화 시 callback 발신번호 필요 (`--from` 또는 config sender) |
 | `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, 발신번호 (`--from` 또는 `solapi.config.defaultFrom`) | MMS는 이미지 입력도 필요 |

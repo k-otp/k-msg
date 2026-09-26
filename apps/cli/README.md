@@ -165,7 +165,7 @@ Required values by provider/channel:
 | Provider | Channel | Required config keys | Required send-time values | Notes |
 | --- | --- | --- | --- | --- |
 | `aligo` | `SMS/LMS/MMS` | `apiKey`, `userId` | `to`, `text`, sender (`--from` or `aligo.config.sender`) | MMS also needs image input |
-| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), sender (`--from` or `aligo.config.sender`) | `preflight` validates channel/template access |
+| `aligo` | `ALIMTALK` | `apiKey`, `userId` | `to`, `template-id`, `vars`, senderKey (`--sender-key`/`--channel` alias/`aligo.config.senderKey`), sender (`--from` or `aligo.config.sender`) | `preflight` validates channel/template access; the message is the template body with `vars` filled in by name |
 | `iwinv` | `SMS/LMS/MMS` | `smsApiKey`, `smsAuthKey` | `to`, `text`, sender (`--from` or `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS requires image binary input; `apiKey` is only needed for AlimTalk (`config provider add` fills it in by default, so remove it and the `ALIMTALK` route for SMS-only use) |
 | `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | `vars` are matched to the template's `#{name}` placeholders by name. If failover/reSend is enabled, sender callback is required (`--from` or sender number in config) |
 | `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, sender (`--from` or `solapi.config.defaultFrom`) | MMS also needs image input |

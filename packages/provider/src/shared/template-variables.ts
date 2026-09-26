@@ -10,6 +10,17 @@ export function listTemplatePlaceholders(content: string): string[] {
   );
 }
 
+/** Replaces every `#{name}` with `variables[name]`; null or undefined become "". */
+export function fillTemplatePlaceholders(
+  content: string,
+  variables: Readonly<Record<string, unknown>>,
+): string {
+  return content.replace(PLACEHOLDER_PATTERN, (_match, name: string) => {
+    const value = variables[name.trim()];
+    return value === null || value === undefined ? "" : String(value);
+  });
+}
+
 /**
  * Placeholder names that `variables` has no value for, each listed once. A key
  * set to `undefined` counts as missing, as it would after a JSON round trip
