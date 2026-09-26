@@ -147,6 +147,8 @@ Generated on \`${new Date().toISOString()}\` for \`${process.platform}-${process
 
 - Bun: \`${Bun.version}\`
 - \`ttsc\`: \`${ttscVersion}\`
+- \`@ttsc/lint\`: \`${lintVersion}\`
+- \`@ttsc/evidence\`: \`${evidenceVersion}\`
 - \`@ttsc/graph\`: \`${graphVersion}\`
 - \`typescript\`: \`${typescriptVersion}\`
 
@@ -156,17 +158,21 @@ ${rows}
 
 ## Interpretation
 
-- \`bun run typecheck\` is the canonical CI path. It covers packages, CLI, repository tooling, and TypeScript examples, and includes type-aware \`@ttsc/lint\` diagnostics.
+- \`bun run typecheck\` is the canonical CI path. It covers packages, CLI, repository tooling, the specification evidence project, and TypeScript examples, and includes type-aware \`@ttsc/lint\` diagnostics.
 - \`bun run typecheck:tsc\` is a parity and incident fallback. It checks the same target registry without running ttsc plugins.
 - The fallback is faster in this snapshot because \`ttsc\` starts the semantic plugin host for each project. The default selects combined diagnostics and architecture guarantees rather than claiming a raw compiler-speed win.
+- Workspace rows run the target registry concurrently (default: available cores, capped at 8; \`--concurrency <n>\` overrides it) and still print results in dependency order. Machines with fewer cores, such as CI runners, take proportionally longer.
 - Focused package rows estimate the feedback loop for a small library edit without CLI generation or workspace traversal.
-- The graph gate validates package dependency direction, cycles, and the checked-in architecture snapshot; it does not replace typechecking.
+- The evidence gate checks that every governed specification section is acknowledged and that each review fingerprint still matches the cited text.
+- The graph gate validates package dependency direction, cycles, compiler diagnostics, the specification citation map, and the checked-in architecture snapshot; it does not replace typechecking.
 - \`apps/docs\` remains on its local TypeScript 6 compatibility boundary, so docs generation/build timings are reported separately.
 - Absolute timings depend on cache and machine state. Re-run \`bun run benchmark:ttsc\` after toolchain or target-scope changes.
 `;
 }
 
 const ttscVersion = await packageVersion("ttsc");
+const lintVersion = await packageVersion("@ttsc/lint");
+const evidenceVersion = await packageVersion("@ttsc/evidence");
 const graphVersion = await packageVersion("@ttsc/graph");
 const typescriptVersion = await packageVersion("typescript");
 
@@ -214,6 +220,19 @@ records.push(
     notes: "Small-package edit feedback through the fallback compiler",
     runs: validationRuns,
     title: "Focused core tsc",
+  }),
+  await measure({
+    command: [
+      "bun",
+      "x",
+      "ttsc",
+      "--noEmit",
+      "--project",
+      "tsconfig.evidence.json",
+    ],
+    notes: "Specification coverage and review expiry over the runtime packages",
+    runs: validationRuns,
+    title: "Evidence gate",
   }),
   await measure({
     command: ["bun", "run", "graph:ttsc:check"],
