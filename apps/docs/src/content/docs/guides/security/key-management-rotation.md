@@ -9,7 +9,7 @@ description: "KeyResolver와 KMS/Vault/ENV 어댑터로 무중단 키 교체를 
 - 한 줄 정의: `KeyResolver`는 암호화 키 선택 로직을 앱 코드에서 분리하는 인터페이스입니다.
 - 왜 필요한가: 키 수명주기(생성/활성/폐기)와 비즈니스 로직을 분리해 운영 리스크를 줄입니다.
 - 설정 예시(`safe`): encrypt는 active `kid`, decrypt는 old/new/new2 순으로 다중 키 시도
-- 흔한 실수: 새 키 활성화 직후 구키를 decrypt 후보에서 제거
+- 흔한 실수: 새 키 활성화 직후 구키를 decrypt 후보에서 제거. 그 키로 쓰인 레코드는 복호화에 실패하고, `to`/`from` 조회에서도 더 이상 찾을 수 없습니다.
 
 ## 운영 레시피
 
