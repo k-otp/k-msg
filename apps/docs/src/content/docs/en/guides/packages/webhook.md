@@ -251,12 +251,18 @@ With `enableSecurity: true`, every delivery is signed with HMAC, using the
 endpoint's `secret`, or the delivery config's `secretKey` for an endpoint
 without one. A delivery is never sent unsigned while `enableSecurity` is on:
 
-- `addEndpoint()` and `updateEndpoint()` throw for an endpoint that would have
-  no secret.
-- An endpoint stored without one, for example before security was turned on,
-  gets a `failed` delivery and no request. Its only attempt has no
+- `addEndpoint()` and `updateEndpoint()` throw for an active endpoint that
+  would have no secret. An inactive one needs none, so an endpoint without a
+  secret can be paused with `updateEndpoint(id, { active: false })` instead of
+  deleted.
+- An active endpoint stored without one, for example before security was
+  turned on, gets a `failed` delivery and no request. Its only attempt has no
   `httpStatus`, and its `error` says why; `probeEndpoint()` reports the same
   `error`.
+
+Endpoints without their own secret share `secretKey`, so anyone who holds it
+can sign requests to all of them. Give each receiver its own `secret` when
+they are different parties.
 
 Each request carries these headers:
 
@@ -267,15 +273,24 @@ Each request carries these headers:
 | `X-Webhook-Timestamp` | Unix time, in seconds, when this attempt was sent |
 | `X-Webhook-Signature` | `sha256=` and the hex HMAC-SHA256 of `<X-Webhook-Timestamp>.<raw body>`; only with `enableSecurity` |
 
+An endpoint's own `headers` are sent as well, but cannot replace these. Only
+the raw body and `X-Webhook-Timestamp` are signed: `X-Webhook-ID` and
+`X-Webhook-Event` are not, so deduplicate and route on the `id` and `type` in
+the body.
+
 The timestamp is the send time of each attempt, not the event's `timestamp`,
 and every retry is signed again, so a receiver that rejects old timestamps
 still accepts retries and events that waited in the queue. `signatureHeader`,
-`signaturePrefix` (default `sha256=`), and `algorithm` (`sha256` or `sha1`) in
-the delivery config change the signature header, its prefix, and the hash.
+`signaturePrefix` and `algorithm` (`sha256` or `sha1`) in the delivery config
+change the signature header, its prefix, and the hash. The prefix defaults to
+`sha256=` with either algorithm, and an empty `signaturePrefix` keeps that
+default.
 
 Receivers verify a request with `verifyWebhookRequest`. It compares the
 signature in constant time, then rejects a timestamp more than `toleranceMs`
-(default five minutes) from the receiver's clock:
+(default five minutes) from the receiver's clock. Timestamps have one-second
+resolution, so a request up to a second older than `toleranceMs` can still
+pass:
 
 ```ts
 import { verifyWebhookRequest } from "@k-msg/webhook";

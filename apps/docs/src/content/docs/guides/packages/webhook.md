@@ -253,12 +253,18 @@ const runtime = new WebhookRuntimeService({
 `secretKey`를 씁니다. `enableSecurity`가 켜져 있는 동안 서명 없이 보내는
 일은 없습니다.
 
-- `addEndpoint()`와 `updateEndpoint()`는 secret이 없게 되는 엔드포인트에
-  대해 예외를 던집니다.
-- 보안을 켜기 전에 저장된 엔드포인트처럼 secret 없이 저장된 엔드포인트에는
-  요청을 보내지 않고 `failed` 전송을 기록합니다. 유일한 attempt에는
-  `httpStatus`가 없고 `error`에 이유가 담기며, `probeEndpoint()`도 같은
-  `error`를 돌려줍니다.
+- `addEndpoint()`와 `updateEndpoint()`는 secret이 없게 되는 활성 엔드포인트에
+  대해 예외를 던집니다. 비활성 엔드포인트에는 secret이 필요 없으므로, secret
+  없는 엔드포인트는 삭제하는 대신 `updateEndpoint(id, { active: false })`로
+  멈춰 둘 수 있습니다.
+- 보안을 켜기 전에 저장된 엔드포인트처럼 secret 없이 저장된 활성
+  엔드포인트에는 요청을 보내지 않고 `failed` 전송을 기록합니다. 유일한
+  attempt에는 `httpStatus`가 없고 `error`에 이유가 담기며,
+  `probeEndpoint()`도 같은 `error`를 돌려줍니다.
+
+자체 secret이 없는 엔드포인트들은 `secretKey`를 함께 쓰므로, 그 값을 가진
+쪽은 이 엔드포인트 모두에 보낼 요청을 서명할 수 있습니다. 수신 측이 서로
+다른 주체라면 엔드포인트마다 `secret`을 따로 두세요.
 
 모든 요청에는 다음 헤더가 붙습니다.
 
@@ -269,15 +275,22 @@ const runtime = new WebhookRuntimeService({
 | `X-Webhook-Timestamp` | 해당 attempt를 보낸 시각의 Unix time(초) |
 | `X-Webhook-Signature` | `sha256=` 뒤에 `<X-Webhook-Timestamp>.<원본 body>`의 HMAC-SHA256 hex. `enableSecurity`일 때만 |
 
+엔드포인트에 지정한 `headers`도 함께 보내지만 위 헤더를 덮어쓰지는
+못합니다. 서명 대상은 원본 body와 `X-Webhook-Timestamp`뿐이고
+`X-Webhook-ID`와 `X-Webhook-Event`는 서명되지 않으므로, 중복 제거와
+라우팅에는 body의 `id`와 `type`을 쓰세요.
+
 timestamp는 이벤트의 `timestamp`가 아니라 각 attempt를 보낸 시각이고,
 재시도할 때마다 다시 서명합니다. 그래서 오래된 timestamp를 거절하는 수신
 측도 재시도나 큐에서 기다린 이벤트는 받아들입니다. delivery 설정의
-`signatureHeader`, `signaturePrefix`(기본값 `sha256=`), `algorithm`
-(`sha256` 또는 `sha1`)으로 서명 헤더, 접두사, 해시를 바꿀 수 있습니다.
+`signatureHeader`, `signaturePrefix`, `algorithm`(`sha256` 또는 `sha1`)으로
+서명 헤더, 접두사, 해시를 바꿀 수 있습니다. 접두사 기본값은 알고리즘과
+관계없이 `sha256=`이며, 빈 문자열을 지정해도 기본값이 쓰입니다.
 
 수신 측은 `verifyWebhookRequest`로 요청을 검증합니다. 서명을 constant-time으로
 비교한 뒤, 수신 측 시계와 `toleranceMs`(기본 5분) 넘게 차이 나는 timestamp를
-거절합니다.
+거절합니다. timestamp의 해상도는 1초라서 `toleranceMs`보다 최대 1초 더 오래된
+요청도 통과할 수 있습니다.
 
 ```ts
 import { verifyWebhookRequest } from "@k-msg/webhook";
