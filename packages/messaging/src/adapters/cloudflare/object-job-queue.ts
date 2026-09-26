@@ -4,7 +4,10 @@ import type {
   JobRetryDirective,
 } from "../../queue/job-queue.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
-import type { CloudflareObjectStorage } from "./object-storage";
+import {
+  type CloudflareObjectStorage,
+  readObjectEntries,
+} from "./object-storage";
 
 interface StoredJob<T> {
   id: string;
@@ -208,17 +211,14 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   }
 
   private async readAllJobs(): Promise<Job<T>[]> {
-    const keys = await this.storage.list(this.jobsPrefix());
     const jobs: Job<T>[] = [];
-
-    for (const key of keys) {
-      const raw = await this.storage.get(key);
-      if (!raw) continue;
+    for (const [, raw] of await readObjectEntries(
+      this.storage,
+      this.jobsPrefix(),
+    )) {
       const parsed = this.deserialize(raw);
-      if (!parsed) continue;
-      jobs.push(parsed);
+      if (parsed) jobs.push(parsed);
     }
-
     return jobs;
   }
 
