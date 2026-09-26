@@ -50,6 +50,17 @@ function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
   return createDefaultMasker()(plaintext);
 }
 
+// Name the field in a fail-closed error, since this storage encrypts both the
+// endpoint secret and the delivery payload.
+function withFieldPath(error: unknown, path: string): unknown {
+  if (!(error instanceof FieldCryptoError) || error.fieldPath) return error;
+  return new FieldCryptoError(error.kind, error.message, error.details, {
+    fieldPath: path,
+    failMode: "closed",
+    causeChain: [error],
+  });
+}
+
 // Shared by the runtime store wrappers and WebhookRegistry.
 export async function protectFieldValue(
   config: FieldCryptoConfig | undefined,
@@ -88,7 +99,7 @@ export async function protectFieldValue(
     return toCiphertextEnvelopeString(encrypted.ciphertext);
   } catch (error) {
     if (failMode === "closed") {
-      throw error;
+      throw withFieldPath(error, input.path);
     }
     return toFallbackValue(config, value);
   }
@@ -134,7 +145,7 @@ export async function revealFieldValue(
     });
   } catch (error) {
     if (failMode === "closed") {
-      throw error;
+      throw withFieldPath(error, input.path);
     }
     return toFallbackValue(config, value);
   }

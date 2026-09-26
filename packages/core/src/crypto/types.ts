@@ -514,6 +514,8 @@ export function assertCryptoEnvelopeV1(
     "ciphertext envelope must be v1 A256GCM with string kid, iv, tag, and ct",
     {
       rule: "fieldCrypto.envelope.v1",
+      // Distinguishes a malformed envelope from a wrong version or algorithm.
+      shapeValid: isCryptoEnvelope(value),
       v: candidate.v,
       alg: candidate.alg,
     },

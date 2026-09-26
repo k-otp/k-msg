@@ -84,7 +84,13 @@ describe("WebhookRegistry field crypto", () => {
         updatedAt: new Date(),
         status: "active",
       }),
-    ).rejects.toThrow("ciphertext envelope must be v1 A256GCM");
+    ).rejects.toMatchObject({
+      message: expect.stringContaining(
+        "ciphertext envelope must be v1 A256GCM",
+      ),
+      fieldPath: "secret",
+      details: expect.objectContaining({ shapeValid: true, v: 2 }),
+    });
   });
 
   test.each([
