@@ -5,7 +5,7 @@ prev: false
 title: "ProviderHealthStatus"
 ---
 
-Defined in: [packages/core/src/provider.ts:196](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L196)
+Defined in: [packages/core/src/provider.ts:203](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L203)
 
 Health check result from a provider.
 
@@ -15,7 +15,7 @@ Health check result from a provider.
 
 > `optional` **data?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/provider.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L204)
+Defined in: [packages/core/src/provider.ts:211](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L211)
 
 Provider-specific health details.
 
@@ -25,7 +25,7 @@ Provider-specific health details.
 
 > **healthy**: `boolean`
 
-Defined in: [packages/core/src/provider.ts:198](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L198)
+Defined in: [packages/core/src/provider.ts:205](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L205)
 
 Whether the provider is operational.
 
@@ -35,7 +35,7 @@ Whether the provider is operational.
 
 > **issues**: `string`[]
 
-Defined in: [packages/core/src/provider.ts:200](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L200)
+Defined in: [packages/core/src/provider.ts:207](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L207)
 
 List of issues if not healthy.
 
@@ -45,6 +45,6 @@ List of issues if not healthy.
 
 > `optional` **latencyMs?**: `number`
 
-Defined in: [packages/core/src/provider.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L202)
+Defined in: [packages/core/src/provider.ts:209](https://github.com/k-otp/k-msg/blob/main/packages/core/src/provider.ts#L209)
 
 Response latency in milliseconds.

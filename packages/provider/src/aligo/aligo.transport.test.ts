@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { ProviderFetch, SendOptions } from "@k-msg/core";
+import { KMsgErrorCode } from "@k-msg/core";
 import { AligoSendProvider } from "./provider.send";
 
 const createProvider = () =>
@@ -106,7 +107,7 @@ describe("Aligo transport context", () => {
     expect(fetchRejected).toBe(true);
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("REQUEST_ABORTED");
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
       expect(result.error.message).toBe("provider deadline exceeded");
     }
   });
@@ -122,7 +123,7 @@ describe("Aligo transport context", () => {
           controller.abort(new Error("response body cancelled"));
           throw new DOMException("Aborted", "AbortError");
         },
-      }) as Response;
+      }) as unknown as Response;
 
     const result = await provider.send(sendInputs[0] as SendOptions, {
       signal: controller.signal,
@@ -131,7 +132,7 @@ describe("Aligo transport context", () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) {
-      expect(result.error.code).toBe("REQUEST_ABORTED");
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
       expect(result.error.message).toBe("response body cancelled");
     }
   });

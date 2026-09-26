@@ -49,8 +49,11 @@ describe("WebhookRegistry field crypto", () => {
               enabled: true,
               fields: { secret: "encrypt" },
               provider: {
-                encrypt: async ({ value }) => ({ ciphertext: value }),
-                decrypt: async ({ ciphertext }) => ciphertext,
+                encrypt: async ({ value }: { value: string }) => ({
+                  ciphertext: value,
+                }),
+                decrypt: async ({ ciphertext }: { ciphertext: string }) =>
+                  ciphertext,
               } as never,
             },
           },

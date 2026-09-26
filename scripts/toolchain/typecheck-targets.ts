@@ -1,5 +1,11 @@
 export type TypecheckTarget = {
-  category: "application" | "evidence" | "example" | "package" | "tooling";
+  category:
+    | "application"
+    | "evidence"
+    | "example"
+    | "package"
+    | "test"
+    | "tooling";
   label: string;
   tsconfig: string;
 };
@@ -46,6 +52,13 @@ export const typecheckTargets: readonly TypecheckTarget[] = [
     category: "package",
     label: "k-msg",
     tsconfig: "packages/k-msg/tsconfig.json",
+  },
+  // Package tsconfigs exclude tests so they never reach published declarations;
+  // this target type-checks them instead.
+  {
+    category: "test",
+    label: "package tests",
+    tsconfig: "tsconfig.test.json",
   },
   {
     category: "application",

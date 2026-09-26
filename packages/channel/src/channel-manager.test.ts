@@ -52,7 +52,9 @@ describe("KakaoChannelManager", () => {
     expect(channel.name).toBe("테스트 채널");
     expect(channel.type).toBe(ChannelType.KAKAO_ALIMTALK);
     expect(channel.status).toBe(ChannelStatus.ACTIVE);
-    expect("verification" in (channel as Record<string, unknown>)).toBe(false);
+    expect(
+      "verification" in (channel as unknown as Record<string, unknown>),
+    ).toBe(false);
   });
 
   test("should validate Plus Friend ID format", async () => {
@@ -162,7 +164,8 @@ describe("KakaoSenderNumberManager", () => {
     expect(senderNumber.phoneNumber).toBe("01012345678");
     expect(senderNumber.status).toBe(SenderNumberStatus.PENDING);
     expect(
-      "verificationCode" in (senderNumber as Record<string, unknown>),
+      "verificationCode" in
+        (senderNumber as unknown as Record<string, unknown>),
     ).toBe(false);
   });
 

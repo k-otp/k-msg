@@ -5,7 +5,9 @@ import { SqliteDeliveryTrackingStore } from "./sqlite.store";
 describe("Delivery tracking store init behavior", () => {
   test("SqliteDeliveryTrackingStore retries init after failure and self-inits", async () => {
     const store = new SqliteDeliveryTrackingStore({ dbPath: ":memory:" });
-    const sqlite = (store as { db: { exec: (sql: string) => unknown } }).db;
+    const sqlite = (
+      store as unknown as { db: { exec: (sql: string) => unknown } }
+    ).db;
     const originalExec = sqlite.exec.bind(sqlite);
 
     let shouldFail = true;
