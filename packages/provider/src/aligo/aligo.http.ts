@@ -10,6 +10,7 @@ import {
   fetchWithProviderContext,
   toProviderTransportError,
 } from "../shared/provider-transport";
+import { isObjectRecord } from "../shared/type-guards";
 import { normalizeAligoKakaoCode } from "./aligo.shared.helpers";
 
 export async function requestAligo(params: {
@@ -57,10 +58,11 @@ export async function requestAligo(params: {
 
 export function ensureAligoKakaoOk(params: {
   providerId: string;
-  response: Record<string, unknown>;
+  response: unknown;
   fallbackMessage: string;
 }): Result<void, KMsgError> {
-  const { providerId, response, fallbackMessage } = params;
+  const { providerId, response: raw, fallbackMessage } = params;
+  const response = isObjectRecord(raw) ? raw : {};
   const rawCode = response.code;
   const code = normalizeAligoKakaoCode(rawCode);
   if (code === 0) return ok(undefined);
@@ -77,7 +79,7 @@ export function ensureAligoKakaoOk(params: {
     new KMsgError(mapped, message, {
       providerId,
       originalCode: rawCode,
-      raw: response,
+      raw,
     }),
   );
 }
