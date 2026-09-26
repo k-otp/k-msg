@@ -78,9 +78,9 @@ npm installs a package's `dependencies`, `optionalDependencies`, and
 `peerDependencies` for the consumer, so an artifact that also inlines one
 ships a second copy. An error thrown by an inlined copy of `@k-msg/core`
 fails `instanceof KMsgError` in the consumer's code, and the consumer's
-`setGlobalLogger()` never reaches the inlined logger. Each package's
-`build:esm` and `build:cjs` scripts pass `--external` for its runtime
-dependencies instead, for example `--external '@k-msg/*' --external 'zod'`.
+`setGlobalLogger()` never reaches the inlined logger. A package's
+`build:esm` and `build:cjs` scripts must therefore pass `--external` for its
+runtime dependencies, for example `--external '@k-msg/*' --external 'zod'`.
 
 The gate reads which packages a runtime target inlines from its linked
 sourcemap, so a package with runtime dependencies must build with
