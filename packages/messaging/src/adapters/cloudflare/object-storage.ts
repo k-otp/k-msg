@@ -145,9 +145,13 @@ export function createDurableObjectStorage(
           ...(startAfter === undefined ? {} : { startAfter }),
         });
         const pageKeys = Array.from(page.keys());
+        const lastKey = pageKeys.at(-1);
+        // Only an empty page ends the listing: storage may also cut a page
+        // short at a size cap. A page ending where the previous one did means
+        // the storage ignored startAfter, so stop rather than loop forever.
+        if (lastKey === undefined || lastKey === startAfter) return keys;
         keys.push(...pageKeys);
-        if (pageKeys.length < DURABLE_OBJECT_LIST_PAGE_SIZE) return keys;
-        startAfter = pageKeys[pageKeys.length - 1];
+        startAfter = lastKey;
       }
     },
   };
