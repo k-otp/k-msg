@@ -21,7 +21,7 @@ TypeScript 7 moves the compiler and language service to the native implementatio
 - specification coverage through `@ttsc/evidence`, which fails the build when a governed document section is unanswered or its review has expired
 - compiler-resolved architecture data through `@ttsc/graph`, served to CI and to coding agents
 
-Biome remains the repository-wide formatter and syntax linter. It covers JavaScript, JSON, JSONC, and other assets that a TypeScript compiler plugin does not own. `@ttsc/lint` is intentionally limited to high-signal semantic rules:
+Biome remains the repository-wide formatter and syntax linter for TypeScript, JavaScript, JSON, and JSONC. The root catalog pins its exact version, so `bun run check`, editors, and CI format and lint identically. `@ttsc/lint` is intentionally limited to high-signal semantic rules:
 
 - reject `await` on non-thenable values
 - reject `for...in` over arrays and tuples
@@ -115,6 +115,15 @@ args = ["run", "--silent", "--cwd", "/path/to/k-msg", "graph:ttsc"]
 ```
 
 The server keeps one resident graph and refreshes changed shards after edits, so a session pays the cold index once.
+
+## Formatting And Syntax Lint
+
+`@ttsc/lint` also ships a formatter (`ttsc format`) and ports of many ESLint rules. At 0.30.4 neither replaces Biome:
+
+- `ttsc format` fixes indentation, statement and block layout, semicolons, quotes, quoted keys, arrow parentheses, bracket spacing, and trailing commas, but leaves the spacing between tokens as written (`{ x:1,y :  [1,2,3] }` and `if(a===1)` survive) and does not wrap an over-long expression. Checking its rules during `bun run typecheck` also panics on mapped types in `format/trailing-comma`.
+- About a dozen of Biome's error-level rules, such as `noUnsafeOptionalChaining`, `noAssignInExpressions`, and `useIterableCallbackReturn`, have no working `@ttsc/lint` equivalent, and nothing replaces Biome's unused-import and unused-variable warnings. The ports of `no-unsafe-optional-chaining`, `typescript/no-empty-object-type`, and `typescript/no-explicit-any` make the lint sidecar resolve project references to unbuilt `dist` output (TS6305).
+
+Two formatters would fight over the layouts they disagree on, so Biome keeps both jobs until `ttsc format` normalizes whitespace. Biome does not format Markdown, so Markdown has no formatter.
 
 ## Other ttsc Plugins
 
