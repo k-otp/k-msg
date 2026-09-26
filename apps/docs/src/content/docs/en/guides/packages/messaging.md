@@ -452,7 +452,7 @@ When provider-native ALIMTALK failover is unsupported or partial, you can enable
 - Sends SMS or LMS as `fallbackChannel` says; a record without one (not sent through `KMsg`) goes as LMS when its text is over 90 bytes
 - Requires providers with `getDeliveryStatus()` support
 
-Providers that send the fallback themselves do not return those warnings, so the service never sends the customer a second one: IWINV always, and SOLAPI when the AlimTalk has a sender number (`from` or `defaultFrom`). The example below leaves SOLAPI without one and adds it to the fallback instead.
+The service does not resend what a provider already sent itself: IWINV, and SOLAPI when the AlimTalk has a sender number (`from` or `defaultFrom`), return no such warning; Aligo returns one but has no `getDeliveryStatus()`, so its records never reach `FAILED`. The example below leaves SOLAPI without a sender and adds it to the fallback instead.
 
 ```ts
 import {
@@ -468,6 +468,7 @@ const providers = [
   new SolapiProvider({
     apiKey: process.env.SOLAPI_API_KEY!,
     apiSecret: process.env.SOLAPI_API_SECRET!,
+    kakaoPfId: process.env.SOLAPI_KAKAO_PF_ID!,
   }),
 ];
 
