@@ -7,7 +7,7 @@ title: "WebhookVerificationErrorCode"
 
 > **WebhookVerificationErrorCode** = `"MISSING_SIGNATURE"` \| `"MISSING_TIMESTAMP"` \| `"INVALID_SIGNATURE"` \| `"INVALID_TIMESTAMP"` \| `"STALE_TIMESTAMP"`
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L53)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L54)
 
 Why [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhookrequest/) rejected a request:
 
@@ -18,4 +18,5 @@ Why [verifyWebhookRequest](/en/api/webhook/src/functions/verifywebhookrequest/) 
 - `INVALID_TIMESTAMP`: the signed timestamp is not a whole number of
   seconds.
 - `STALE_TIMESTAMP`: the signed time is further from now than
-  `toleranceMs`.
+  `toleranceMs` allows, counting the second the signed time was
+  rounded down from.
