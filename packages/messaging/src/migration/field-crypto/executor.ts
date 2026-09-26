@@ -513,6 +513,7 @@ export async function retryFieldCryptoMigration(
       processedRows += messageIds.length;
       remainingFailed = Math.max(0, remainingFailed - 1);
     } catch (error) {
+      // Best effort, as in apply: the chunk is already recorded as failed.
       await upsertFieldCryptoMigrationChunk(
         client,
         {
@@ -523,14 +524,16 @@ export async function retryFieldCryptoMigration(
           lastError: toErrorMessage(error),
         },
         options,
-      );
+      ).catch(() => undefined);
     }
   }
 
   const status: FieldCryptoMigrationApplyResult["status"] =
     remainingFailed > 0 ? "failed" : "running";
 
-  await upsertFieldCryptoMigrationRun(
+  // When the run state cannot be recorded, report the retry as failed so it
+  // is run again; chunks it completed are skipped then.
+  const recorded = await upsertFieldCryptoMigrationRun(
     client,
     {
       ...run,
@@ -542,6 +545,9 @@ export async function retryFieldCryptoMigration(
       lastError: remainingFailed > 0 ? run.lastError : undefined,
     },
     options,
+  ).then(
+    () => true,
+    () => false,
   );
 
   return {
@@ -549,7 +555,7 @@ export async function retryFieldCryptoMigration(
     processedChunks: retriedChunks,
     processedRows,
     failedChunks: remainingFailed,
-    status,
+    status: recorded ? status : "failed",
     cursorRequestedAt: run.cursorRequestedAt,
     cursorMessageId: run.cursorMessageId,
   };

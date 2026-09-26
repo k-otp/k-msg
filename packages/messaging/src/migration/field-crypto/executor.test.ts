@@ -137,6 +137,13 @@ function failNthQuery(
   return { ...client, query: query as CloudflareSqlClient["query"] };
 }
 
+function isStateWrite(sql: string, table: "runs" | "chunks"): boolean {
+  return (
+    /^\s*(INSERT|UPDATE)\b/i.test(sql) &&
+    sql.includes(`kmsg_crypto_migration_${table}`)
+  );
+}
+
 // Fails every matching query, as an unreachable database would.
 function failEveryQuery(
   client: CloudflareSqlClient,
@@ -413,6 +420,48 @@ describe("applyFieldCryptoMigration", () => {
 
     expect(await applyFieldCryptoMigration(client, input)).toMatchObject({
       status: "completed",
+    });
+    expect(await countUnencrypted(client)).toBe(0);
+  });
+  test("retry returns a result when its state writes fail", async () => {
+    const client = createSqliteClient();
+    const fieldCrypto = createFieldCrypto();
+    await seedLegacyRows(client, fieldCrypto, 1);
+    const record = legacyRecord(0);
+    await client.query(`UPDATE ${TABLE} SET "to" = ''`);
+    const plan = await planFieldCryptoMigration({
+      client,
+      trackingTableName: TABLE,
+    });
+    const input = {
+      planId: plan.planId,
+      trackingTableName: TABLE,
+      fieldCrypto,
+    };
+    expect(await applyFieldCryptoMigration(client, input)).toMatchObject({
+      status: "failed",
+      failedChunks: 1,
+    });
+
+    // The chunk fails again and neither failure can be recorded.
+    const unreachable = failEveryQuery(client, (sql, params) =>
+      isStateWrite(sql, "chunks") || isStateWrite(sql, "runs")
+        ? params.includes("failed")
+        : false,
+    );
+    expect(await retryFieldCryptoMigration(unreachable, input)).toMatchObject({
+      status: "failed",
+      failedChunks: 1,
+    });
+
+    // The chunk now succeeds, but the run state cannot be recorded.
+    await client.query(`UPDATE ${TABLE} SET "to" = ?`, [record.to]);
+    const runStateDown = failEveryQuery(client, (sql) =>
+      isStateWrite(sql, "runs"),
+    );
+    expect(await retryFieldCryptoMigration(runStateDown, input)).toMatchObject({
+      status: "failed",
+      processedChunks: 1,
     });
     expect(await countUnencrypted(client)).toBe(0);
   });
