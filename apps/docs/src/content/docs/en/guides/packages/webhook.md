@@ -85,13 +85,15 @@ await runtime.shutdown();
   10) go out together when that many are queued, when you call `flush()` or
   `shutdown()`, or, with `autoStart` (the default), `batchTimeoutMs`
   (default 5000 ms) after the first event is queued. Most calls resolve as
-  soon as the event is queued, but the call that fills a batch sends it,
-  retries included, before it resolves. The timer runs only while events are
-  queued: a runtime that never calls `emit()` starts none, and one with an
-  empty queue holds none.
+  soon as the event is queued. The call that fills a batch sends it, retries
+  included, before it resolves, unless another batch is still being sent:
+  then it resolves at once, and the full batch goes out as soon as the other
+  one finishes. The timer runs only while events are queued: a runtime that
+  never calls `emit()` starts none, and one with an empty queue holds none.
 
 `batchSize` and `batchTimeoutMs` only affect `emit()`, so a config used with
-`emitSync()` can leave them out.
+`emitSync()` can leave them out. A `batchSize` of `Infinity` keeps every event
+queued until `flush()` or the timer sends them as one batch.
 
 ### Cloudflare Workers and other serverless runtimes
 
@@ -128,7 +130,10 @@ export default {
 ## Message events
 
 The message events match the delivery statuses of `@k-msg/messaging`
-delivery tracking:
+delivery tracking. No package sends them by itself: map each status change,
+for example from `DeliveryTrackingService`'s `onStatusChange`, to its event
+and emit it. `PENDING`, the status before a provider accepts a message, has
+none.
 
 | Delivery status | Event |
 | --- | --- |
@@ -155,9 +160,10 @@ type Env = {
 };
 
 const config: WebhookConfig = {
-  maxRetries: 3,
+  // Small enough to finish inside the invocation (see above).
+  maxRetries: 2,
   retryDelayMs: 1_000,
-  timeoutMs: 30_000,
+  timeoutMs: 5_000,
   enableSecurity: false,
   enabledEvents: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
 };
