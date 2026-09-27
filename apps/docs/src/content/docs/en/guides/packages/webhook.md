@@ -263,9 +263,11 @@ without one. A delivery is never sent unsigned while `enableSecurity` is on:
   whose stored secret cannot be decrypted is returned without `secret`, not
   with a masked, empty, or encrypted value, and its deliveries fail the same
   way even when `secretKey` is set, since its receiver checks its own secret.
-  An update that does not set a new `secret` keeps the stored one. With
-  `openFallback: "plaintext"`, a secret stored in plaintext because
-  encryption failed is still used.
+  That includes `openFallback: "plaintext"`: a value that does not decrypt
+  cannot be told apart from ciphertext, so a secret that fallback stored in
+  plaintext is not used until it is set again. An update that does not set
+  `secret` keeps the stored one, and an update whose `secret` can be neither
+  encrypted nor compared with the stored one fails rather than guessing.
 
 Secrets are used exactly as given, surrounding whitespace included, with or
 without field crypto.
