@@ -7,7 +7,7 @@ title: "createD1JobQueue"
 
 > **createD1JobQueue**\<`T`\>(`database`, `options?`): [`HyperdriveJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/hyperdrivejobqueue/)\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:187](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L187)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L181)
 
 ## Type Parameters
 
