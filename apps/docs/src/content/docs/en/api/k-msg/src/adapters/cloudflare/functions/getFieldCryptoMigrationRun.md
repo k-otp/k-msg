@@ -7,7 +7,7 @@ title: "getFieldCryptoMigrationRun"
 
 > **getFieldCryptoMigrationRun**(`client`, `planId`, `options?`): `Promise`\<[`FieldCryptoMigrationRunRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationrunrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/migration/field-crypto/state.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L256)
+Defined in: [packages/messaging/src/migration/field-crypto/state.ts:285](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L285)
 
 ## Parameters
 
