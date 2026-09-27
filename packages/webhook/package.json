@@ -29,8 +29,8 @@
   },
   "scripts": {
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts ./src/toolkit/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test'",
-    "build:cjs": "bun build ./src/index.ts ./src/toolkit/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].cjs' --external 'bun:test'",
+    "build:esm": "bun build ./src/index.ts ./src/toolkit/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format esm --minify --sourcemap --entry-naming '[dir]/[name].mjs' --external 'bun:test' --external '@k-msg/*' --external 'zod' --external '@noble/hashes'",
+    "build:cjs": "bun build ./src/index.ts ./src/toolkit/index.ts ./src/adapters/cloudflare/index.ts --outdir ./dist --format cjs --minify --sourcemap --entry-naming '[dir]/[name].cjs' --external 'bun:test' --external '@k-msg/*' --external 'zod' --external '@noble/hashes'",
     "build:types": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",
