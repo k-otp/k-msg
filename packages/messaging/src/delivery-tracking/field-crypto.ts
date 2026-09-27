@@ -273,14 +273,55 @@ function normalizeKidList(kids: unknown): string[] {
     .filter((kid) => kid.length > 0);
 }
 
+type LookupScope = Pick<FieldCryptoKeyContext, "providerId" | "messageId">;
+
+function distinctScopeValues(value: string | string[] | undefined): string[] {
+  if (value === undefined) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return [
+    ...new Set(
+      values.filter(
+        (item): item is string => typeof item === "string" && item.length > 0,
+      ),
+    ),
+  ];
+}
+
+// A write resolves its keys with the record's providerId and messageId, and a
+// resolver may scope keys by either. A lookup spans records, so it resolves
+// keys for each provider and message the filter pins (each pair when it pins
+// both), then for the whole store. Scoped contexts go first, so a resolver
+// that caches one key set does not answer them with the unscoped one.
+function resolveLookupScopes(
+  filter: DeliveryTrackingRecordFilter,
+): LookupScope[] {
+  const providerIds = distinctScopeValues(filter.providerId);
+  const messageIds = distinctScopeValues(filter.messageId);
+  const scopes: LookupScope[] = [];
+  if (providerIds.length > 0 && messageIds.length > 0) {
+    for (const providerId of providerIds) {
+      for (const messageId of messageIds) {
+        scopes.push({ providerId, messageId });
+      }
+    }
+  } else {
+    for (const providerId of providerIds) scopes.push({ providerId });
+    for (const messageId of messageIds) scopes.push({ messageId });
+  }
+  scopes.push({});
+  return scopes;
+}
+
 // A record's hashes use the kid that encrypted it, which a lookup cannot know,
 // so it tries every key a record's hash may use: the kid a write resolves now,
-// the decrypt set, and the provider's default hash key (`undefined`), which
-// writes use without a resolved kid. Each source resolves on its own, so a
-// failing one, reported through onError, drops only its own candidates.
+// the decrypt set, each for every scope, and the provider's default hash key
+// (`undefined`), which writes use without a resolved kid. Each source resolves
+// on its own, so a failing one, reported through onError, drops only its own
+// candidates.
 async function resolveLookupKids(
   config: FieldCryptoConfig,
   context: FieldCryptoKeyContext,
+  scopes: readonly LookupScope[],
   onError: (error: unknown) => void,
 ): Promise<Array<string | undefined>> {
   const kids: Array<string | undefined> = [];
@@ -290,17 +331,20 @@ async function resolveLookupKids(
 
   const resolver = config.keyResolver;
   if (resolver) {
-    try {
-      add(await resolveEncryptKid(config, context));
-    } catch (error) {
-      onError(error);
-    }
-    if (resolver.resolveDecryptKeys) {
+    for (const scope of scopes) {
+      const scoped = { ...context, ...scope };
       try {
-        const decryptKids = await resolver.resolveDecryptKeys(context);
-        for (const kid of normalizeKidList(decryptKids)) add(kid);
+        add(await resolveEncryptKid(config, scoped));
       } catch (error) {
         onError(error);
+      }
+      if (resolver.resolveDecryptKeys) {
+        try {
+          const decryptKids = await resolver.resolveDecryptKeys(scoped);
+          for (const kid of normalizeKidList(decryptKids)) add(kid);
+        } catch (error) {
+          onError(error);
+        }
       }
     }
   }
@@ -604,11 +648,12 @@ function toFallbackValue(
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Encrypts and hashes each field under the kid resolveEncryptKey returns for
  *   it, and has a degraded write hash to and from under the same kids.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #85ceff4
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
  *   Read protectScalar, buildMetadataHashes, and hashDegradedField: hashes use
- *   the kid resolved for to, from, or metadata, else the default key, and the
- *   fallback retries with the default key before storing an empty to hash.
- *   Ran the tenant-key, metadata, and degraded-write tests on both stores.
+ *   the kid resolved, with the record's providerId and messageId, for to, from,
+ *   or metadata, else the default key, and the fallback retries with the
+ *   default key before storing an empty to hash. Ran the tenant-key, metadata,
+ *   and degraded-write tests on both stores.
  */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
@@ -1125,6 +1170,7 @@ async function hashLookupValues(
     tableName: string;
     store: "sql" | "object" | "memory";
   },
+  scopes: readonly LookupScope[],
   path: "to" | "from",
   values: readonly string[],
 ): Promise<string[]> {
@@ -1136,6 +1182,7 @@ async function hashLookupValues(
   const kids = await resolveLookupKids(
     config,
     { ...context, fieldPath: path },
+    scopes,
     onError,
   );
   const results = await Promise.allSettled(
@@ -1181,14 +1228,16 @@ async function hashLookupValues(
  * could not be hashed under failMode=open.
  *
  * @evidence docs/security/field-crypto-v1.md#key-management
- *   Hashes each to and from filter value under the encrypt kid, the decrypt
- *   set, and the provider's default key, and handles a key or hash it cannot
+ *   Hashes each to and from filter value under the encrypt kid and the decrypt
+ *   set, resolved for every scope the filter pins and for the whole store, and
+ *   under the provider's default key, and handles a key or hash it cannot
  *   resolve or compute as the fail mode directs.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #85ceff4
- *   Read resolveLookupKids and hashLookupValues against the lookup and failure
- *   paragraphs: three key sources resolved independently, no empty hash, and
- *   no records from either store for an undefined filter. Ran the rotation,
- *   pre-resolver, candidate, and fail-mode lookup tests.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ *   Read resolveLookupScopes, resolveLookupKids, and hashLookupValues against
+ *   the lookup and failure paragraphs: pinned scopes first, then the store,
+ *   each key source resolved on its own, no empty hash, and no records for an
+ *   undefined filter. Ran the scoped, rotation, pre-resolver, candidate, and
+ *   fail-mode lookup tests.
  */
 export async function normalizeTrackingFilterWithHashes(
   filter: DeliveryTrackingRecordFilter,
@@ -1202,12 +1251,11 @@ export async function normalizeTrackingFilterWithHashes(
   const config = resolveConfig(options);
   if (!config) return filter;
 
-  // A lookup spans records, so it resolves keys for the store rather than
-  // for one message: no messageId or providerId.
   const keyContext = {
     ...context,
     tenantId: options?.tenantId ?? context.tenantId,
   };
+  const scopes = resolveLookupScopes(filter);
   // Secure mode without plain columns can match only by hash.
   const hashOnly = mode.secureMode && !mode.compatPlainColumns;
   const next: DeliveryTrackingRecordFilter = { ...filter };
@@ -1225,6 +1273,7 @@ export async function normalizeTrackingFilterWithHashes(
       config,
       options,
       keyContext,
+      scopes,
       path,
       values,
     );

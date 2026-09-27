@@ -16,6 +16,7 @@ import {
 } from "./field-crypto";
 import type {
   DeliveryTrackingFieldCryptoOptions,
+  DeliveryTrackingRecordFilter,
   DeliveryTrackingStore,
 } from "./store.interface";
 import type { TrackingRecord } from "./types";
@@ -488,6 +489,60 @@ describe("tracking hash lookups", () => {
     // so does the lookup.
     const withoutResolver = await normalize(undefined, "01012345678");
     expect(withoutResolver?.toHash).toBe("provider-default:01012345678");
+  });
+
+  test("resolves lookup keys for the providers and messages a filter pins, as writes do", async () => {
+    // Keys scoped per provider, none of them listed for the whole store.
+    const providerKids: Record<string, string> = {
+      iwinv: "k-2026-01",
+      aligo: "k-2026-02",
+    };
+    const kidFor = (providerId?: string) =>
+      (providerId && providerKids[providerId]) || "tenant-a";
+    const scopes: Array<Record<string, unknown>> = [];
+    const store = createSecureObjectStore({
+      enabled: true,
+      fields: { to: "encrypt+hash", from: "encrypt+hash" },
+      keyResolver: {
+        resolveEncryptKey: ({ providerId, messageId }) => {
+          scopes.push({ providerId, messageId });
+          return { kid: kidFor(providerId) };
+        },
+        resolveDecryptKeys: ({ providerId }) => [kidFor(providerId)],
+      },
+      provider: createKeyedProvider(),
+    });
+    await store.upsert({
+      ...trackingRecord(1, "01011110001"),
+      providerId: "iwinv",
+    });
+    await store.upsert({
+      ...trackingRecord(2, "01011110001"),
+      providerId: "aligo",
+    });
+    const lookup = async (
+      scope: Pick<DeliveryTrackingRecordFilter, "providerId" | "messageId">,
+    ) =>
+      (await store.listRecords({ to: "01011110001", limit: 10, ...scope }))
+        .map((record) => record.messageId)
+        .sort();
+
+    expect(await lookup({})).toEqual([]);
+    expect(await lookup({ providerId: "iwinv" })).toEqual(["m-1"]);
+    expect(await lookup({ providerId: ["iwinv", "aligo"] })).toEqual([
+      "m-1",
+      "m-2",
+    ]);
+
+    scopes.length = 0;
+    expect(await lookup({ providerId: "aligo", messageId: "m-2" })).toEqual([
+      "m-2",
+    ]);
+    // The pinned pair resolves first, then the whole store.
+    expect(scopes).toEqual([
+      { providerId: "aligo", messageId: "m-2" },
+      { providerId: undefined, messageId: undefined },
+    ]);
   });
 
   test("hashes metadata under the key that encrypts it", async () => {
