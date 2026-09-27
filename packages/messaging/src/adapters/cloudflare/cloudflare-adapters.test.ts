@@ -411,6 +411,36 @@ describe("Cloudflare SQL adapters", () => {
       now.getTime(),
       50,
     ]);
+
+    await store.releaseLeases(["m1", "m2"], leaseUntil, now);
+    const release = postgres.queries.at(-1);
+    expect(release?.sql).toBe(
+      `UPDATE "kmsg_delivery_tracking" SET "next_check_at" = $1 WHERE "next_check_at" = $2 AND "message_id" IN ($3, $4)`,
+    );
+    expect(release?.params).toEqual([
+      now.getTime(),
+      leaseUntil.getTime(),
+      "m1",
+      "m2",
+    ]);
+  });
+
+  test("HyperdriveDeliveryTrackingStore releases leases in statements D1 can bind", async () => {
+    const sqlite = createCapturingSqlClient("sqlite");
+    const store = new HyperdriveDeliveryTrackingStore(sqlite.client, {
+      initializeSchema: false,
+    });
+    const messageIds = Array.from({ length: 120 }, (_, index) => `m${index}`);
+
+    await store.releaseLeases(messageIds, new Date(2), new Date(1));
+
+    // D1 binds at most 100 parameters per statement.
+    expect(sqlite.queries.map((query) => query.params.length)).toEqual([
+      52, 52, 22,
+    ]);
+    expect(sqlite.queries.flatMap((query) => query.params.slice(2))).toEqual(
+      messageIds,
+    );
   });
 
   test("HyperdriveDeliveryTrackingStore leases due rows inside a transaction on mysql", async () => {

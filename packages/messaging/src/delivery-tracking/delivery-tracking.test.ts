@@ -131,6 +131,51 @@ function createQueryProvider(
   };
 }
 
+function failedForNonKakaoUser(
+  query: DeliveryStatusQuery,
+): DeliveryStatusResult {
+  return {
+    providerId: "solapi",
+    providerMessageId: query.providerMessageId,
+    status: "FAILED",
+    statusCode: "3104",
+    statusMessage: "카카오톡 미사용자",
+  };
+}
+
+async function recordAlimTalkWithFallback(
+  service: DeliveryTrackingService,
+  messageId: string,
+): Promise<void> {
+  await service.recordSend(
+    {
+      messageId,
+      options: {
+        type: "ALIMTALK",
+        to: "01012345678",
+        from: "01000000000",
+        templateId: "TPL_1",
+        variables: { code: "1234" },
+        failover: {
+          enabled: true,
+          fallbackChannel: "sms",
+          fallbackContent: "fallback body",
+        },
+      },
+      timestamp: Date.now(),
+    },
+    {
+      messageId,
+      providerId: "solapi",
+      providerMessageId: `p-${messageId}`,
+      status: "SENT",
+      type: "ALIMTALK",
+      to: "01012345678",
+      warnings: [{ code: "FAILOVER_PARTIAL_PROVIDER", message: "partial" }],
+    },
+  );
+}
+
 async function recordSms(
   service: DeliveryTrackingService,
   messageId: string,
@@ -2028,6 +2073,66 @@ describe("DeliveryTrackingService leases", () => {
     expect((await store.get("m1"))?.status).toBe("DELIVERED");
   });
 
+  test("a poll that outlived its lease leaves a lease another poll took", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    const queried = { a: 0, b: 0, c: 0 };
+    let releaseB!: () => void;
+    const gateB = new Promise<void>((resolve) => {
+      releaseB = resolve;
+    });
+    // A's lease runs out while its query hangs; B then leases the record.
+    const a = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (_query, context) => {
+          queried.a += 1;
+          await untilAborted(context?.signal, 2000);
+          return cancelled();
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0, leaseMs: 20 },
+    });
+    const b = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queried.b += 1;
+          await gateB;
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0, leaseMs: 60_000 },
+    });
+    const c = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queried.c += 1;
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+    });
+    await recordSms(a, "m1");
+
+    const stopA = new AbortController();
+    const pollA = a.runOnce({ signal: stopA.signal });
+    await waitFor(() => queried.a === 1);
+    await wait(40);
+    const pollB = b.runOnce();
+    await waitFor(() => queried.b === 1);
+
+    // A gives back what it did not finish, but the record is B's now.
+    stopA.abort();
+    await pollA;
+    await c.runOnce();
+    expect(queried.c).toBe(0);
+
+    releaseB();
+    await pollB;
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+  });
+
   test("leaseMs: 0 turns leasing off", async () => {
     let release!: () => void;
     const released = new Promise<void>((resolve) => {
@@ -2064,6 +2169,79 @@ describe("DeliveryTrackingService leases", () => {
 });
 
 describe("DeliveryTrackingService shutdown", () => {
+  test("close() cancels a fallback send in progress through the sender's signal", async () => {
+    let sending = false;
+    const service = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(
+          async (query) => failedForNonKakaoUser(query),
+          "solapi",
+        ),
+      ],
+      polling: { initialDelayMs: 0 },
+      apiFailover: {
+        sender: async (_input, context) => {
+          sending = true;
+          await untilAborted(context.signal, 1000);
+          return fail(cancelled());
+        },
+      },
+    });
+    await recordAlimTalkWithFallback(service, "m1");
+
+    const poll = service.runOnce();
+    await waitFor(() => sending);
+    const outcome = await Promise.race([
+      service.close().then(() => "closed"),
+      wait(200).then(() => "still waiting"),
+    ]);
+    expect(outcome).toBe("closed");
+    await poll;
+  });
+
+  test("a stopped poll leaves a failure that needs a fallback to the next poll", async () => {
+    const stop = new AbortController();
+    const sent: string[] = [];
+    const store = new InMemoryDeliveryTrackingStore();
+    const service = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          // The poll is stopped while this answer comes in.
+          stop.abort();
+          return failedForNonKakaoUser(query);
+        }, "solapi"),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+      apiFailover: {
+        sender: async (_input, context) => {
+          sent.push(context.originalMessageId);
+          return ok({
+            messageId: context.fallbackMessageId,
+            providerId: "sms",
+            status: "SENT",
+            type: context.fallbackType,
+            to: "01012345678",
+          });
+        },
+      },
+    });
+    await recordAlimTalkWithFallback(service, "m1");
+
+    await service.runOnce({ signal: stop.signal });
+
+    // Storing FAILED without sending would lose the fallback: a failed
+    // record is not polled again.
+    expect(sent).toEqual([]);
+    const held = await store.get("m1");
+    expect(held?.status).toBe("SENT");
+    expect(held?.nextCheckAt.getTime()).toBeLessThanOrEqual(Date.now());
+
+    await service.runOnce();
+    expect(sent).toEqual(["m1"]);
+    expect((await store.get("m1"))?.status).toBe("FAILED");
+  });
+
   test("close cancels a poll in progress and waits for it before closing the store", async () => {
     const events: string[] = [];
     class ObservedStore extends InMemoryDeliveryTrackingStore {
@@ -2329,6 +2507,11 @@ describe("DeliveryTrackingStore leases", () => {
       limit: number,
       leaseUntil: Date,
     ) => Promise<TrackingRecord[]>;
+    releaseLeases?: (
+      messageIds: readonly string[],
+      leaseUntil: Date,
+      nextCheckAt: Date,
+    ) => Promise<void>;
   };
 
   async function expectLeases(store: LeasingStore): Promise<void> {
@@ -2376,6 +2559,16 @@ describe("DeliveryTrackingStore leases", () => {
     expect(ids(await lease(at(0), 10))).toEqual(["m2"]);
     expect(await lease(at(0), 10)).toEqual([]);
     expect(await store.listDue(at(0), 10)).toEqual([]);
+
+    // A lease is given back only by the lease that holds it.
+    const release = (messageIds: string[], until: Date) => {
+      if (!store.releaseLeases) throw new Error("store cannot release");
+      return store.releaseLeases(messageIds, until, at(0));
+    };
+    await release(["m1", "m2"], at(1));
+    expect(await store.listDue(at(0), 10)).toEqual([]);
+    await release(["m1"], leaseUntil);
+    expect(ids(await store.listDue(at(0), 10))).toEqual(["m1"]);
 
     // Once the lease runs out the records are due again.
     expect(ids(await lease(at(300_001), 10, at(600_000)))).toEqual([

@@ -523,13 +523,13 @@ export class DeliveryTrackingService {
       if (signal.aborted) return;
 
       const now = new Date();
-      const { due, leased } = await this.takeDue(now);
+      const { due, leaseUntil } = await this.takeDue(now);
       if (due.length === 0) return;
       const dueByMessageId = new Map(
         due.map((record) => [record.messageId, record]),
       );
       // Leased records the poll has not stored a next check for yet.
-      const held = new Set(leased ? dueByMessageId.keys() : []);
+      const held = new Set(leaseUntil ? dueByMessageId.keys() : []);
 
       try {
         const { updates } = await reconcileDeliveryStatuses(
@@ -549,6 +549,20 @@ export class DeliveryTrackingService {
             patch.nextCheckAt = now;
           }
 
+          const originalRecord = dueByMessageId.get(update.messageId);
+          const mergedRecord: TrackingRecord | undefined = originalRecord && {
+            ...originalRecord,
+            ...patch,
+            messageId: originalRecord.messageId,
+          };
+          const failover =
+            mergedRecord !== undefined &&
+            this.shouldAttemptApiFailover(mergedRecord);
+          // A stopped poll starts no fallback send. Storing the failure
+          // without one would lose it, since a failed record is not polled
+          // again, so the record stays as it was for the next poll.
+          if (failover && signal.aborted) continue;
+
           // A record the store rejects is retried by a later poll; the rest
           // of the batch is still stored.
           let stored = false;
@@ -557,13 +571,7 @@ export class DeliveryTrackingService {
             stored = true;
             held.delete(update.messageId);
 
-            const originalRecord = dueByMessageId.get(update.messageId);
-            if (!originalRecord) continue;
-            const mergedRecord: TrackingRecord = {
-              ...originalRecord,
-              ...patch,
-              messageId: originalRecord.messageId,
-            };
+            if (!originalRecord || !mergedRecord) continue;
 
             if (
               this.onStatusChange &&
@@ -575,8 +583,8 @@ export class DeliveryTrackingService {
               });
             }
 
-            if (this.shouldAttemptApiFailover(mergedRecord)) {
-              await this.attemptApiFailover(mergedRecord, now);
+            if (failover) {
+              await this.attemptApiFailover(mergedRecord, now, signal);
             }
           } catch (error) {
             failures.push({ messageId: update.messageId, error });
@@ -606,7 +614,7 @@ export class DeliveryTrackingService {
           );
         }
       } finally {
-        await this.releaseLeases(held, now);
+        if (leaseUntil) await this.releaseLeases(held, leaseUntil, now);
       }
     } finally {
       link.unlink();
@@ -616,37 +624,32 @@ export class DeliveryTrackingService {
   // Due records, leased when the store can lease them.
   private async takeDue(
     now: Date,
-  ): Promise<{ due: TrackingRecord[]; leased: boolean }> {
+  ): Promise<{ due: TrackingRecord[]; leaseUntil?: Date }> {
     const leaseMs = this.polling.leaseMs ?? 0;
     if (leaseMs > 0 && this.store.leaseDue) {
       const leaseUntil = new Date(now.getTime() + leaseMs);
       return {
         due: await this.store.leaseDue(now, this.polling.batchSize, leaseUntil),
-        leased: true,
+        leaseUntil,
       };
     }
-    return {
-      due: await this.store.listDue(now, this.polling.batchSize),
-      leased: false,
-    };
+    return { due: await this.store.listDue(now, this.polling.batchSize) };
   }
 
-  // Makes the records a poll leased but did not finish due again now, rather
-  // than when their lease runs out.
+  // Makes the records a poll leased but did not finish due again now,
+  // rather than when their lease runs out. The store gives back only leases
+  // the poll still holds; without releaseLeases they run out.
   private async releaseLeases(
-    messageIds: Iterable<string>,
+    messageIds: Set<string>,
+    leaseUntil: Date,
     now: Date,
   ): Promise<void> {
-    for (const messageId of messageIds) {
-      try {
-        await this.store.patch(messageId, { nextCheckAt: now });
-      } catch (error) {
-        // The rest are due again when their lease runs out.
-        logBackgroundFailure("Delivery tracking lease release failed", error, {
-          messageId,
-        });
-        return;
-      }
+    if (messageIds.size === 0 || !this.store.releaseLeases) return;
+    try {
+      await this.store.releaseLeases([...messageIds], leaseUntil, now);
+    } catch (error) {
+      // They are due again when their lease runs out.
+      logBackgroundFailure("Delivery tracking lease release failed", error);
     }
   }
 
@@ -863,6 +866,7 @@ export class DeliveryTrackingService {
   private async attemptApiFailover(
     record: TrackingRecord,
     now: Date,
+    signal: AbortSignal,
   ): Promise<void> {
     const apiFailover = this.apiFailover;
     if (!apiFailover) return;
@@ -935,6 +939,7 @@ export class DeliveryTrackingService {
       fallbackMessageId,
       fallbackType,
       record,
+      signal,
     };
 
     try {

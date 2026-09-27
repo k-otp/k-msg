@@ -284,11 +284,11 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### Several Pollers on One Store
 
-When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not. On MySQL the lease is atomic only when the SQL client supports transactions. A lease a poll does not hand back, because it stopped, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
+When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. A poll that stops early hands back the records it did not finish, except those another poll has leased since. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not, and a custom store can by implementing `leaseDue` and `releaseLeases`. On MySQL the lease is atomic only when the SQL client supports transactions. A lease a poll cannot hand back, for example because its process died, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
 
 ### Shutting Down
 
-`close()` stops the timer and stops a poll in progress as if its signal had aborted, waits for that poll to store the statuses it has, and then closes the store. When a poll that `start()` runs fails, the error is logged through the `@k-msg/core` logger and the next tick polls again.
+`close()` stops the timer and stops a poll in progress as if its signal had aborted, waits for that poll to store the statuses it has, and then closes the store. It does not wait for status changes still being delivered to `onStatusChange`, and it waits for a fallback send in progress unless the sender passes on the signal it is given (see below). When a poll that `start()` runs fails, the error is logged through the `@k-msg/core` logger and the next tick polls again.
 
 ```ts
 process.once("SIGTERM", () => {
@@ -730,6 +730,8 @@ When provider-native ALIMTALK failover is unsupported or partial, you can enable
 - Triggers only when tracking status is `FAILED` and classified as non-Kakao-user failure
 - Attempts fallback exactly once per original message
 - Sends SMS or LMS as `fallbackChannel` says; a record without one (not sent through `KMsg`) goes as LMS when its text is over 90 bytes
+- A stopped poll (its signal aborted, or `close()`) starts no fallback send: the record stays as it was, and the next poll sends it
+- The sender's second argument has a `signal` that aborts when the poll is stopped. Pass it to the send so that `close()` does not wait for it; a send cancelled that way is recorded as a failed attempt
 - Requires providers with `getDeliveryStatus()` support
 
 The service does not resend what a provider already sent itself: IWINV, and SOLAPI when the AlimTalk has a sender number (`from` or `defaultFrom`), return no such warning; Aligo returns one but has no `getDeliveryStatus()`, so its records never reach `FAILED`. The example below leaves SOLAPI without a sender and adds it to the fallback instead.
@@ -756,8 +758,13 @@ let kmsg!: KMsg;
 const tracking = new DeliveryTrackingService({
   providers,
   apiFailover: {
-    // Re-send fallback SMS/LMS through the same KMsg pipeline
-    sender: (input) => kmsg.send({ ...input, from: "01000000000" }),
+    // Re-send fallback SMS/LMS through the same KMsg pipeline, with a time
+    // limit so a stalled send cannot hold a poll.
+    sender: (input) =>
+      kmsg.send(
+        { ...input, from: "01000000000" },
+        { signal: AbortSignal.timeout(10_000) },
+      ),
   },
 });
 

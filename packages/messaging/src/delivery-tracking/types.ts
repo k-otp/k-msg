@@ -74,6 +74,13 @@ export interface ApiFailoverAttemptContext {
   fallbackMessageId: string;
   fallbackType: "SMS" | "LMS";
   record: TrackingRecord;
+  /**
+   * Aborts when the poll is stopped, by the signal given to `runOnce()` or
+   * by `close()`. Pass it to the send so that `close()` does not wait for a
+   * send in progress; a send cancelled this way is recorded as a failed
+   * attempt and not tried again.
+   */
+  signal?: AbortSignal;
 }
 
 export type ApiFailoverSender = (

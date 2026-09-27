@@ -138,6 +138,17 @@ export interface DeliveryTrackingStore {
     limit: number,
     leaseUntil: Date,
   ): Promise<TrackingRecord[]>;
+  /**
+   * Hands back leases a poll did not finish: moves `nextCheckAt` to the
+   * given time on those records whose `nextCheckAt` is still `leaseUntil`.
+   * A record another poll has leased since is left alone. Without it,
+   * `DeliveryTrackingService` lets such leases run out.
+   */
+  releaseLeases?(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void>;
   listRecords?(options: DeliveryTrackingListOptions): Promise<TrackingRecord[]>;
   countRecords?(filter: DeliveryTrackingRecordFilter): Promise<number>;
   countBy?(

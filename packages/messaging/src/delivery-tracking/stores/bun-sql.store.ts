@@ -93,6 +93,14 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
     return await this.delegate.leaseDue(now, limit, leaseUntil);
   }
 
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    await this.delegate.releaseLeases(messageIds, leaseUntil, nextCheckAt);
+  }
+
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {
