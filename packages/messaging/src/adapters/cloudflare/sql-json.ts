@@ -19,6 +19,36 @@ function parseJson(text: string): unknown {
   }
 }
 
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// JSONB rejects NUL characters and unpaired surrogates; U+FFFD replaces them.
+const UNPAIRED_SURROGATE =
+  /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
+
+function toJsonbString(value: string): string {
+  return value.replaceAll("\u0000", "�").replace(UNPAIRED_SURROGATE, "�");
+}
+
+function jsonbReplacer(_key: string, value: unknown): unknown {
+  if (typeof value === "string") return toJsonbString(value);
+  if (!isJsonObject(value)) return value;
+  const keys = Object.keys(value);
+  if (keys.every((key) => toJsonbString(key) === key)) return value;
+  return Object.fromEntries(
+    keys.map((key) => [toJsonbString(key), value[key]]),
+  );
+}
+
+/**
+ * The JSON text to bind for a JSON column. A JSONB column cannot hold NUL
+ * characters or unpaired surrogates, so for one they become U+FFFD.
+ */
+export function toJsonText(value: unknown, jsonb: boolean): string {
+  return jsonb ? JSON.stringify(value, jsonbReplacer) : JSON.stringify(value);
+}
+
 /**
  * The value placeholder for a JSON parameter: on Postgres, JSON text typed
  * as text and cast to JSONB, so drivers bind it as is.
@@ -48,23 +78,30 @@ export function selectJsonAsTextSql(
 }
 
 /**
- * Reads a JSON column selected with `selectJsonAsTextSql`. Returns
- * `undefined` for SQL NULL and for text that is not JSON.
- *
- * With `nativeJson` (a JSON or JSONB column), a JSON string holding a JSON
- * object or array is read as that object or array: postgres.js and Bun.SQL
- * stored JSON that way before JSON parameters were cast.
+ * Reads a JSON column selected with `selectJsonAsTextSql`, exactly as it
+ * was stored. Returns `undefined` for SQL NULL and for text that is not
+ * JSON.
  */
-export function readJsonColumn(value: unknown, nativeJson: boolean): unknown {
+export function readJsonColumn(value: unknown): unknown {
   if (value === null || value === undefined) return undefined;
   // A client that decoded the value anyway.
   if (typeof value !== "string") return value;
-
   const parsed = parseJson(value);
-  if (parsed === NOT_JSON) return undefined;
-  if (nativeJson && typeof parsed === "string") {
+  return parsed === NOT_JSON ? undefined : parsed;
+}
+
+/**
+ * Reads a JSON column that always holds an object. Rows that postgres.js or
+ * Bun.SQL wrote into JSONB columns before JSON parameters were cast hold the
+ * object's JSON text as a JSON string; that string is read as its object.
+ */
+export function readJsonObjectColumn(
+  value: unknown,
+): Record<string, unknown> | undefined {
+  let parsed = readJsonColumn(value);
+  if (typeof parsed === "string") {
     const inner = parseJson(parsed);
-    if (typeof inner === "object" && inner !== null) return inner;
+    parsed = inner === NOT_JSON ? undefined : inner;
   }
-  return parsed;
+  return isJsonObject(parsed) ? parsed : undefined;
 }

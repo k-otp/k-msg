@@ -161,15 +161,36 @@ describe.skipIf(!url)("SQL adapters on a real Postgres", () => {
       jobsTable,
     );
     const job = await queue.enqueue("send", { to: "01012345678" });
-    const text = await queue.enqueue("send", "01012345678");
 
     const [row] = await admin.unsafe(
       `SELECT "data"->>'to' AS "to" FROM "${jobsTable}" WHERE "id" = $1`,
       [job.id],
     );
     expect(row?.to).toBe("01012345678");
+    // The only due job, so the dequeue order of same-millisecond jobs does
+    // not matter.
     expect((await queue.dequeue())?.data).toEqual({ to: "01012345678" });
-    expect((await queue.getJob(text.id))?.data).toBe("01012345678");
+
+    // Strings, including ones that look like JSON, read back as strings.
+    for (const data of ["01012345678", '{"x":1}', "[1,2]", "12345", "true"]) {
+      const text = await queue.enqueue("send", data);
+      expect((await queue.getJob(text.id))?.data).toBe(data);
+    }
+  });
+
+  test("postgres.js: NUL and unpaired surrogates are stored as U+FFFD", async () => {
+    const store = new HyperdriveDeliveryTrackingStore(postgresJsClient(admin), {
+      tableName: trackingTable,
+    });
+    await store.upsert({
+      ...record("m-nul"),
+      lastError: { code: "E1", message: "bad\uD800byte" },
+      metadata: { note: "a\u0000b" },
+    });
+
+    const stored = await store.get("m-nul");
+    expect(stored?.lastError).toEqual({ code: "E1", message: "bad\uFFFDbyte" });
+    expect(stored?.metadata).toEqual({ note: "a\uFFFDb" });
   });
 
   test("initializeSchema: false works for a role that cannot create tables", async () => {
