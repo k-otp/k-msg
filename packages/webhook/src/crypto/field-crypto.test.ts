@@ -263,7 +263,12 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     const persistence = await seedLegacyRecords();
     const listed = await persistence.endpointStore.get("ep-1");
     if (!listed) throw new Error("seeded endpoint missing");
-    await persistence.endpointStore.add({ ...listed, id: "ep-2" });
+    // Endpoint URLs are unique, so the copy gets its own.
+    await persistence.endpointStore.add({
+      ...listed,
+      id: "ep-2",
+      url: "https://example.com/copy",
+    });
     const { endpointStore } = persistence;
     // Between the migration's list and its writes, ep-1 is updated and ep-2
     // is removed.

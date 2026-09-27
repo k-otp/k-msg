@@ -1,6 +1,8 @@
+import { WebhookEndpointConflictError } from "../../runtime/errors";
 import type { WebhookEndpointStore } from "../../runtime/types";
 import type { WebhookEndpoint } from "../../types/webhook.types";
 import {
+  changedRows,
   type D1DatabaseLike,
   type D1Row,
   queryAll,
@@ -29,6 +31,55 @@ interface EndpointRow extends D1Row {
   status?: unknown;
 }
 
+// Every column except id, in the order toColumnValues() returns them.
+const ENDPOINT_COLUMNS = [
+  "url",
+  "name",
+  "description",
+  "active",
+  "events_json",
+  "headers_json",
+  "secret",
+  "retry_config_json",
+  "filters_json",
+  "created_at",
+  "updated_at",
+  "last_triggered_at",
+  "status",
+] as const;
+
+function toColumnValues(endpoint: WebhookEndpoint): unknown[] {
+  return [
+    endpoint.url,
+    endpoint.name ?? null,
+    endpoint.description ?? null,
+    endpoint.active ? 1 : 0,
+    JSON.stringify(endpoint.events),
+    endpoint.headers ? JSON.stringify(endpoint.headers) : null,
+    endpoint.secret ?? null,
+    endpoint.retryConfig ? JSON.stringify(endpoint.retryConfig) : null,
+    endpoint.filters ? JSON.stringify(endpoint.filters) : null,
+    endpoint.createdAt.getTime(),
+    endpoint.updatedAt.getTime(),
+    endpoint.lastTriggeredAt ? endpoint.lastTriggeredAt.getTime() : null,
+    endpoint.status,
+  ];
+}
+
+// D1 and SQLite report a violated primary key or unique index as "UNIQUE
+// constraint failed: <table>.<column>" (SQLITE_CONSTRAINT). Such an INSERT did
+// not commit, so no row it finds can be its own.
+function isConstraintViolation(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /constraint failed|SQLITE_CONSTRAINT/i.test(error.message)
+  );
+}
+
+// How many times in all a write is tried when a constraint rejects it but no
+// stored endpoint holds its id or URL by the time the store looks.
+const MAX_WRITE_ATTEMPTS = 3;
+
 export class D1WebhookEndpointStore implements WebhookEndpointStore {
   constructor(
     private readonly db: D1DatabaseLike,
@@ -39,40 +90,44 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
   async add(endpoint: WebhookEndpoint): Promise<void> {
     await this.ensureInitialized();
 
-    await runStatement(
-      this.db,
-      `INSERT OR REPLACE INTO ${this.tableName} (
-        id, url, name, description, active, events_json, headers_json, secret,
-        retry_config_json, filters_json, created_at, updated_at, last_triggered_at, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        endpoint.id,
-        endpoint.url,
-        endpoint.name ?? null,
-        endpoint.description ?? null,
-        endpoint.active ? 1 : 0,
-        JSON.stringify(endpoint.events),
-        endpoint.headers ? JSON.stringify(endpoint.headers) : null,
-        endpoint.secret ?? null,
-        endpoint.retryConfig ? JSON.stringify(endpoint.retryConfig) : null,
-        endpoint.filters ? JSON.stringify(endpoint.filters) : null,
-        endpoint.createdAt.getTime(),
-        endpoint.updatedAt.getTime(),
-        endpoint.lastTriggeredAt ? endpoint.lastTriggeredAt.getTime() : null,
-        endpoint.status,
-      ],
+    await this.writeUnique(
+      () =>
+        runStatement(
+          this.db,
+          `INSERT INTO ${this.tableName} (id, ${ENDPOINT_COLUMNS.join(", ")})
+          VALUES (?, ${ENDPOINT_COLUMNS.map(() => "?").join(", ")})`,
+          [endpoint.id, ...toColumnValues(endpoint)],
+        ),
+      (error) => this.findConflict(endpoint, !isConstraintViolation(error)),
     );
   }
 
   async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
     await this.ensureInitialized();
 
-    const existing = await this.get(endpointId);
-    if (!existing) {
+    const result = await this.writeUnique(
+      () =>
+        runStatement(
+          this.db,
+          `UPDATE ${this.tableName}
+          SET ${ENDPOINT_COLUMNS.map((column) => `${column} = ?`).join(", ")}
+          WHERE id = ?`,
+          [...toColumnValues(endpoint), endpointId],
+        ),
+      () => this.findUrlConflict(endpoint.url, endpointId),
+    );
+
+    // D1 counts the rows the UPDATE changed, so an endpoint removed after the
+    // caller read it is caught by the same statement. A client that does not
+    // report changes gets a read-back instead.
+    const changes = changedRows(result);
+    const missing =
+      changes === undefined
+        ? (await this.get(endpointId)) === null
+        : changes === 0;
+    if (missing) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
     }
-
-    await this.add(endpoint);
   }
 
   async remove(endpointId: string): Promise<void> {
@@ -103,6 +158,78 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
     );
 
     return rows.map((row) => this.toEndpoint(row));
+  }
+
+  // Runs a write that the primary key or the unique url index can reject,
+  // and reports a rejection as a conflict with the stored endpoint that
+  // holds the id or URL. If that lookup fails too, the write's own error is
+  // the better report. If a constraint rejected the write but the lookup
+  // finds no such endpoint, another writer removed it in between, so the id
+  // or URL is free and the write is tried again, MAX_WRITE_ATTEMPTS times in
+  // all: a unique index this store does not know about fails every time.
+  private async writeUnique<T>(
+    write: () => Promise<T>,
+    findConflict: (
+      error: unknown,
+    ) => Promise<WebhookEndpointConflictError | undefined>,
+  ): Promise<T> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await write();
+      } catch (error) {
+        let conflict: WebhookEndpointConflictError | undefined;
+        try {
+          conflict = await findConflict(error);
+        } catch {
+          throw error;
+        }
+        if (conflict) throw conflict;
+        if (!isConstraintViolation(error) || attempt >= MAX_WRITE_ATTEMPTS) {
+          throw error;
+        }
+      }
+    }
+  }
+
+  private async findConflict(
+    endpoint: WebhookEndpoint,
+    mayBeOwnRow: boolean,
+  ): Promise<WebhookEndpointConflictError | undefined> {
+    const row = await queryFirst<EndpointRow>(
+      this.db,
+      `SELECT id, url, created_at FROM ${this.tableName} WHERE id = ? OR url = ? LIMIT 1`,
+      [endpoint.id, endpoint.url],
+    );
+    if (!row) return undefined;
+
+    const storedId = toStringValue(row.id);
+    // D1 can report a failure after the INSERT committed. The row found is
+    // then this endpoint, and the original error is the one to report.
+    if (
+      mayBeOwnRow &&
+      storedId === endpoint.id &&
+      toStringValue(row.url) === endpoint.url &&
+      toNumber(row.created_at, Number.NaN) === endpoint.createdAt.getTime()
+    ) {
+      return undefined;
+    }
+    return storedId === endpoint.id
+      ? new WebhookEndpointConflictError("id", endpoint.id, storedId)
+      : new WebhookEndpointConflictError("url", endpoint.url, storedId);
+  }
+
+  private async findUrlConflict(
+    url: string,
+    endpointId: string,
+  ): Promise<WebhookEndpointConflictError | undefined> {
+    const row = await queryFirst<EndpointRow>(
+      this.db,
+      `SELECT id FROM ${this.tableName} WHERE url = ? AND id <> ? LIMIT 1`,
+      [url, endpointId],
+    );
+    return row
+      ? new WebhookEndpointConflictError("url", url, toStringValue(row.id))
+      : undefined;
   }
 
   private toEndpoint(row: EndpointRow): WebhookEndpoint {

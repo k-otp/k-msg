@@ -22,8 +22,22 @@ export interface WebhookDeliveryListOptions {
   before?: { createdAt: Date; id: string };
 }
 
+/**
+ * Stores webhook endpoints. Ids and URLs are unique: a store never replaces
+ * one endpoint with another, so a re-registered URL cannot silently get a
+ * new id and secret.
+ */
 export interface WebhookEndpointStore {
+  /**
+   * Stores a new endpoint. Rejects with `WebhookEndpointConflictError` when
+   * an endpoint with the same id or URL is already stored.
+   */
   add(endpoint: WebhookEndpoint): Promise<void>;
+  /**
+   * Replaces the endpoint stored under `endpointId`. Rejects when there is
+   * none, and with `WebhookEndpointConflictError` when another endpoint has
+   * the new URL.
+   */
   update(endpointId: string, endpoint: WebhookEndpoint): Promise<void>;
   remove(endpointId: string): Promise<void>;
   get(endpointId: string): Promise<WebhookEndpoint | null>;
