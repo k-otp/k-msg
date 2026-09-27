@@ -438,7 +438,7 @@ const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 
 The stores write epoch milliseconds to numeric time columns and `Date`s to `TIMESTAMPTZ`. Epoch milliseconds (about 1.8 × 10¹² today) need 64 bits. SQLite's `INTEGER` has them, but `INTEGER` on Postgres and MySQL is 32-bit, so `integer` is an alias of `bigint`.
 
-Earlier versions gave `integer` 32-bit `INTEGER` columns on Postgres and MySQL. Those reject every insert as out of range; MySQL without strict mode stores 2147483647 instead, which reads back as 1970-01-25. `CREATE TABLE IF NOT EXISTS` leaves an existing table as it is, so widen its time columns, using your `tableName` and `columnMap` names:
+Earlier versions gave `integer` 32-bit `INTEGER` columns on Postgres and MySQL, which reject every insert as out of range. `CREATE TABLE IF NOT EXISTS` leaves an existing table as it is, so widen its time columns, using your `tableName` and `columnMap` names:
 
 ```sql
 -- Postgres
@@ -462,6 +462,13 @@ ALTER TABLE kmsg_delivery_tracking
   MODIFY failed_at BIGINT,
   MODIFY last_checked_at BIGINT,
   MODIFY scheduled_at BIGINT;
+```
+
+MySQL without strict mode did not reject those inserts: it stored every time as 2147483647, which reads back as 1970-01-25, and widening the columns keeps that value. Polling marks each such row that is not yet final `UNKNOWN` (`TRACKING_TIMEOUT`) without asking the provider, because its `requested_at` reads as older than `maxTrackingDurationMs`. The real times are lost, so in the same migration delete those rows, or restore them from your own send records:
+
+```sql
+-- MySQL without strict mode: rows whose times were clamped
+DELETE FROM kmsg_delivery_tracking WHERE requested_at = 2147483647;
 ```
 
 If you keep a Drizzle schema rendered by `renderDrizzleSchemaSource()`, render it again: its time columns are now `bigint(..., { mode: "number" })` for `integer` too.
