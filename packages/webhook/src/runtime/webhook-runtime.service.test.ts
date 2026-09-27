@@ -284,46 +284,90 @@ describe("WebhookRuntimeService", () => {
   });
 
   test.each([
-    ["addEndpoints", 2],
-    ["addEndpoint", 1],
+    ["before writing", false, ["one"]],
+    ["after writing", true, ["one", "two"]],
   ])(
-    "%s leaves nothing stored when an add fails after writing",
-    async (method, failOn) => {
+    "a batch whose second add fails %s names what it stored and removes nothing",
+    async (_label, writesFirst, storedNames) => {
       const persistence = createInMemoryWebhookPersistence();
       const add = persistence.endpointStore.add.bind(persistence.endpointStore);
       let writes = 0;
-      // The store keeps the endpoint, then reports a failure, as D1 can when
-      // the connection drops after the INSERT commits.
+      // The second add fails; with writesFirst the store keeps the endpoint
+      // anyway, as D1 can when the connection drops after the INSERT commits.
       persistence.endpointStore.add = async (endpoint) => {
         writes += 1;
+        if (writes === 2 && !writesFirst) {
+          throw new Error("network connection lost");
+        }
         await add(endpoint);
-        if (writes === failOn) throw new Error("network connection lost");
+        if (writes === 2) throw new Error("network connection lost");
       };
-      const committed = new WebhookRuntimeService({
+      const batchRuntime = new WebhookRuntimeService({
         delivery: createConfig(),
         httpClient: client,
         persistence,
         autoStart: false,
       });
-      const inputs = ["https://example.com/one", "https://example.com/two"].map(
-        (url) => ({
-          url,
-          active: true,
-          events: [WebhookEventType.MESSAGE_SENT],
-        }),
-      );
+      const inputs = ["one", "two"].map((name) => ({
+        id: name,
+        url: `https://example.com/${name}`,
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      }));
 
-      const attempt =
-        method === "addEndpoints"
-          ? committed.addEndpoints(inputs)
-          : committed.addEndpoint(inputs[0] as (typeof inputs)[number]);
-      await expect(attempt).rejects.toThrow("network connection lost");
+      const error = await batchRuntime
+        .addEndpoints(inputs)
+        .catch((caught: unknown) => caught);
 
-      expect(await committed.listEndpoints()).toEqual([]);
+      expect(error).toBeInstanceOf(Error);
+      const { message, cause } = error as Error;
+      expect(message).toStartWith("Webhook endpoint 1 in the batch:");
+      expect(message).toContain(`stored: ${storedNames.join(", ")}`);
+      expect((cause as Error).message).toBe("network connection lost");
+      expect(
+        (await batchRuntime.listEndpoints()).map((e) => e.id).sort(),
+      ).toEqual(storedNames);
     },
   );
 
-  test("a rollback leaves an endpoint another writer put in place of one it added", async () => {
+  test.each([
+    [
+      "a conflict",
+      new WebhookEndpointConflictError("url", "https://example.com/one", "x"),
+    ],
+    ["a store error", new Error("store unavailable")],
+  ])(
+    "a batch that stored nothing passes %s on as it is",
+    async (_label, failure) => {
+      const persistence = createInMemoryWebhookPersistence();
+      // The first add fails, as when another process registers the URL
+      // after the batch was checked.
+      persistence.endpointStore.add = async () => {
+        throw failure;
+      };
+      const batchRuntime = new WebhookRuntimeService({
+        delivery: createConfig(),
+        httpClient: client,
+        persistence,
+        autoStart: false,
+      });
+
+      const error = await batchRuntime
+        .addEndpoints(
+          ["https://example.com/one", "https://example.com/two"].map((url) => ({
+            url,
+            active: true,
+            events: [WebhookEventType.MESSAGE_SENT],
+          })),
+        )
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBe(failure);
+      expect(await batchRuntime.listEndpoints()).toHaveLength(0);
+    },
+  );
+
+  test("a failed batch removes nothing, so another writer's replacement stays", async () => {
     const persistence = createInMemoryWebhookPersistence();
     const store = persistence.endpointStore;
     const add = store.add.bind(store);
@@ -401,39 +445,6 @@ describe("WebhookRuntimeService", () => {
     } finally {
       setSystemTime();
     }
-  });
-
-  test("addEndpoints removes what it added when a later write fails", async () => {
-    const persistence = createInMemoryWebhookPersistence();
-    const add = persistence.endpointStore.add.bind(persistence.endpointStore);
-    let writes = 0;
-    persistence.endpointStore.add = async (endpoint) => {
-      writes += 1;
-      if (writes === 2) throw new Error("store unavailable");
-      await add(endpoint);
-    };
-    const batchRuntime = new WebhookRuntimeService({
-      delivery: createConfig(),
-      httpClient: client,
-      persistence,
-      autoStart: false,
-    });
-    const inputs = ["https://example.com/one", "https://example.com/two"].map(
-      (url) => ({
-        url,
-        active: true,
-        events: [WebhookEventType.MESSAGE_SENT],
-      }),
-    );
-
-    await expect(batchRuntime.addEndpoints(inputs)).rejects.toThrow(
-      "store unavailable",
-    );
-    expect(await batchRuntime.listEndpoints()).toHaveLength(0);
-
-    // The same batch can simply be retried.
-    await batchRuntime.addEndpoints(inputs);
-    expect(await batchRuntime.listEndpoints()).toHaveLength(2);
   });
 
   test("of two batches racing for one URL, only one is stored", async () => {
