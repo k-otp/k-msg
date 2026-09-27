@@ -343,7 +343,7 @@ Notes by dialect:
 - MySQL: JSON fields are stored as `JSON` (`TEXT` with `typeStrategy: { json: "text" }`). MySQL cannot index `TEXT` columns, so the primary key and the indexed columns are `VARCHAR` whatever `typeStrategy` says:
   - `message_id`, `provider_id`, `provider_message_id`, and with field encryption `to_hash` and `from_hash`: `VARCHAR(255)` (`message_id` is `VARCHAR(36)` with `messageId: "uuid"`)
   - `status`, and with field encryption `retention_class`: `VARCHAR(64)`
-- `provider_status_message` is `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default), except the indexed ones on MySQL
+- `provider_status_message` and `metadata_enc` (encrypted metadata) are `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default), except the indexed ones on MySQL
 
 Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
 
@@ -456,11 +456,14 @@ const store = new HyperdriveDeliveryTrackingStore(client, {
   - `raw` and the queue's `data` may hold any JSON value, strings included, so they read back exactly as stored: an old row's value comes back as its JSON text. Convert those rows once, with the same `UPDATE` for `raw` and for `kmsg_jobs` `data` and `metadata`, after stopping the processes that run the earlier version (they cannot read converted rows) and before starting this one. Run it only on rows that postgres.js or Bun.SQL wrote, since every one of those is a JSON string. For the queue, you can instead let the old version finish its jobs first.
 
 - On MySQL, the SQL schema could not be created with the default `typeStrategy` (error 1170), so existing tables were made with `typeStrategy: { messageId: "varchar", id: "varchar" }` or from the Drizzle schema. Both keep working:
-  - The SQL schema for that `typeStrategy` has not changed. You can keep passing it, or drop it: without it, new tables with field encryption get `TEXT` instead of `VARCHAR(255)` for the columns no index covers, and existing tables work either way.
-  - The Drizzle schema of earlier versions declared `varchar(255)` for every id column and `text` for JSON columns. It now follows `typeStrategy`, so drizzle-kit generates a migration: JSON columns become `json`, and with field encryption the columns no index covers (`to_enc`, `to_masked`, `from_enc`, `from_masked`, `metadata_enc`, `crypto_kid`) become `text`. The stored values convert as they are. To keep the table as it is, pass `typeStrategy: { id: "varchar", json: "text" }` to `renderDrizzleSchemaSource()` and to the store.
-- With metadata encryption (`fields.metadata: "encrypt"`), a `VARCHAR(255)` `metadata_enc`, which both kinds of MySQL table above have, rejects encrypted metadata longer than 255 characters (error 1406); metadata JSON of about 110 characters is enough. Widen it:
+  - The SQL schema for that `typeStrategy` has not changed, apart from `metadata_enc` (below). You can keep passing it, or drop it: without it, new tables with field encryption get `TEXT` instead of `VARCHAR(255)` for the columns no index covers, and existing tables work either way.
+  - The Drizzle schema of earlier versions declared `varchar(255)` for every id column and `text` for JSON columns. It now follows `typeStrategy`, so drizzle-kit generates a migration: JSON columns become `json`, and with field encryption the columns no index covers (`to_enc`, `to_masked`, `from_enc`, `from_masked`, `metadata_enc`, `crypto_kid`) become `text`. The stored values convert as they are. To keep the rest of the table as it is, pass `typeStrategy: { id: "varchar", json: "text" }` to `renderDrizzleSchemaSource()` and to the store.
+- `metadata_enc` followed `typeStrategy.id`, so it was `VARCHAR(255)` with `id: "varchar"` on Postgres and MySQL, and in both kinds of MySQL table above. With metadata encryption (`fields.metadata: "encrypt"`), that rejects encrypted metadata longer than 255 characters (MySQL error 1406, Postgres `value too long`); metadata JSON of about 110 characters is enough. The column is now `TEXT` whatever `typeStrategy` says. Widen existing tables:
 
   ```sql
+  -- Postgres
+  ALTER TABLE kmsg_delivery_tracking ALTER COLUMN metadata_enc TYPE TEXT;
+  -- MySQL
   ALTER TABLE kmsg_delivery_tracking MODIFY metadata_enc TEXT;
   ```
 
