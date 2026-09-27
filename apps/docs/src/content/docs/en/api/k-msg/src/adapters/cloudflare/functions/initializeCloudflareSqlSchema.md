@@ -7,7 +7,7 @@ title: "initializeCloudflareSqlSchema"
 
 > **initializeCloudflareSqlSchema**(`client`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:570](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L570)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:573](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L573)
 
 ## Parameters
 
