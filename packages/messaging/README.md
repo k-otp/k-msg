@@ -288,7 +288,7 @@ When services share a store, as several instances or overlapping cron runs do, e
 
 ### Shutting Down
 
-`close()` stops the timer and stops a poll in progress as if its signal had aborted, waits for that poll to store the statuses it has, and then closes the store. It does not wait for status changes still being delivered to `onStatusChange`, and it waits for a fallback send in progress unless the sender passes on the signal it is given (see below). When a poll that `start()` runs fails, the error is logged through the `@k-msg/core` logger and the next tick polls again.
+`close()` stops the timer and stops a poll in progress, including one still setting up the store, as if its signal had aborted, waits for that poll to store the statuses it has, and then closes the store. It does not wait for status changes still being delivered to `onStatusChange`, and it waits for a fallback send in progress unless the sender passes on the signal it is given (see below). When a poll that `start()` runs fails, the error is logged once through the `@k-msg/core` logger and the next tick polls again; a tick that comes while a poll is still running is skipped.
 
 ```ts
 process.once("SIGTERM", () => {
@@ -758,13 +758,16 @@ let kmsg!: KMsg;
 const tracking = new DeliveryTrackingService({
   providers,
   apiFailover: {
-    // Re-send fallback SMS/LMS through the same KMsg pipeline, with a time
-    // limit so a stalled send cannot hold a poll.
-    sender: (input) =>
-      kmsg.send(
+    // Re-send fallback SMS/LMS through the same KMsg pipeline. The poll's
+    // signal lets close() cancel the send, and the timeout keeps a stalled
+    // send from holding a poll.
+    sender: (input, { signal }) => {
+      const timeout = AbortSignal.timeout(10_000);
+      return kmsg.send(
         { ...input, from: "01000000000" },
-        { signal: AbortSignal.timeout(10_000) },
-      ),
+        { signal: signal ? AbortSignal.any([signal, timeout]) : timeout },
+      );
+    },
   },
 });
 

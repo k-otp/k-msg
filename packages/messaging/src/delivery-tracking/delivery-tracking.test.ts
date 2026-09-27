@@ -2534,6 +2534,46 @@ describe("DeliveryTrackingService shutdown", () => {
     expect(queries).toBe(1);
   });
 
+  test("close waits for a poll still setting up the store", async () => {
+    const events: string[] = [];
+    let finishInit!: () => void;
+    const initialized = new Promise<void>((resolve) => {
+      finishInit = resolve;
+    });
+    const store: DeliveryTrackingStore = {
+      init: async () => {
+        events.push("init");
+        await initialized;
+        events.push("initialized");
+      },
+      upsert: async () => {},
+      get: async () => undefined,
+      listDue: async () => {
+        events.push("listDue");
+        return [];
+      },
+      patch: async () => {},
+      close: async () => {
+        events.push("close");
+      },
+    };
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store,
+    });
+
+    const poll = service.runOnce();
+    await waitFor(() => events.includes("init"));
+    const closed = service.close();
+    await wait(20);
+    expect(events).toEqual(["init"]);
+
+    finishInit();
+    await closed;
+    await poll;
+    expect(events).toEqual(["init", "initialized", "close"]);
+  });
+
   test("a closed service leaves its store alone", async () => {
     const calls: string[] = [];
     const store: DeliveryTrackingStore = {
@@ -2593,6 +2633,48 @@ describe("DeliveryTrackingService shutdown", () => {
       expect(loggerError.mock.calls[0]?.[2]?.message).toBe(
         "tracking store offline",
       );
+    } finally {
+      service.stop();
+      loggerError.mockRestore();
+    }
+  });
+
+  test("logs a timer poll's failure once, however many ticks it outlasts", async () => {
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let polls = 0;
+    const store: DeliveryTrackingStore = {
+      init: async () => {},
+      upsert: async () => {},
+      get: async () => undefined,
+      listDue: async () => {
+        polls += 1;
+        await released;
+        throw new Error("tracking store offline");
+      },
+      patch: async () => {},
+    };
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store,
+      polling: { intervalMs: 5 },
+    });
+    const loggerError = spyOn(logger, "error").mockImplementation(() => {});
+
+    try {
+      service.start();
+      await waitFor(() => polls === 1);
+      // The timer ticks about ten times while the poll hangs.
+      await wait(50);
+      service.stop();
+      release();
+      await waitFor(() => loggerError.mock.calls.length > 0);
+      await wait(20);
+
+      expect(polls).toBe(1);
+      expect(loggerError).toHaveBeenCalledTimes(1);
     } finally {
       service.stop();
       loggerError.mockRestore();

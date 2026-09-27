@@ -283,6 +283,9 @@ export class DeliveryTrackingService {
   start(): void {
     if (this.timer || this.closing.signal.aborted) return;
     this.timer = setInterval(() => {
+      // A tick while a poll runs would only join it, and log its failure
+      // once more.
+      if (this.runOnceInFlight) return;
       // Delivery tracking must not crash the host process; the next tick
       // polls again.
       void this.runOnce().catch((error: unknown) => {
@@ -298,10 +301,11 @@ export class DeliveryTrackingService {
   }
 
   /**
-   * Stops polling and closes the store. A poll in progress stops as if its
-   * signal had aborted, and close() waits for it to store the statuses it
-   * has before closing the store; status changes still being delivered to
-   * `onStatusChange` are not waited for. The service does not poll again.
+   * Stops polling and closes the store. A poll in progress, including one
+   * still setting up the store, stops as if its signal had aborted, and
+   * close() waits for it to store the statuses it has before closing the
+   * store; status changes still being delivered to `onStatusChange` are not
+   * waited for. The service does not poll again.
    */
   async close(): Promise<void> {
     this.stop();
@@ -447,7 +451,8 @@ export class DeliveryTrackingService {
     // Checked before any await, while the caller's context is current.
     const fromCallback = this.calledFromCallback();
     if (this.closing.signal.aborted) return;
-    await this.ensureInit();
+    // A poll counts as running while it sets up the store, so close() waits
+    // for that too.
     const joined = this.runOnceInFlight;
     const run = joined ?? this.startRun(request);
     const done = fromCallback ? run.polled : run.delivered;
@@ -471,6 +476,7 @@ export class DeliveryTrackingService {
     let delivery: Promise<void> = Promise.resolve();
     const polled = (async () => {
       try {
+        await this.ensureInit();
         await this.poll(changes, request);
       } finally {
         // Changes stored before a failure are still reported, each as this
