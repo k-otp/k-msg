@@ -1,6 +1,7 @@
 import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
 import { KMSG_TERMINAL_STATUSES } from "@k-msg/core";
+import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
 import {
   HyperdriveDeliveryTrackingStore,
@@ -47,6 +48,17 @@ function stubSqlClient(
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Field crypto that marks what it encrypts, so it can be read back.
+const testFieldCryptoConfig: DeliveryTrackingFieldCryptoOptions["config"] = {
+  enabled: true,
+  fields: { to: "encrypt+hash", from: "encrypt+hash", metadata: "encrypt" },
+  provider: {
+    encrypt: async ({ value }) => ({ ciphertext: `enc:${value}` }),
+    decrypt: async ({ ciphertext }) => ciphertext.slice(4),
+    hash: async ({ value }) => `h:${value}`,
+  },
+};
 
 function readRenderedDrizzleQuery(
   query: unknown,
@@ -445,6 +457,124 @@ describe("Cloudflare SQL adapters", () => {
     expect(stored).toBe(false);
   });
 
+  test("HyperdriveDeliveryTrackingStore stores an encrypted leased patch only under that lease", async () => {
+    const database = createMemoryHyperdriveJobSqlClient();
+    // Runs once, right after the next SELECT returns.
+    let afterRead: (() => Promise<unknown>) | undefined;
+    const client: CloudflareSqlClient = {
+      dialect: database.dialect,
+      query: (async (sql: string, params?: readonly unknown[]) => {
+        const result = await database.query(sql, params);
+        const run = afterRead;
+        if (run && sql.startsWith("SELECT ")) {
+          afterRead = undefined;
+          await run();
+        }
+        return result;
+      }) as CloudflareSqlClient["query"],
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      fieldCrypto: { config: testFieldCryptoConfig },
+    });
+    const at = (offset: number) => new Date(1_790_000_000_000 + offset);
+    await store.upsert({
+      messageId: "m1",
+      providerId: "mock",
+      providerMessageId: "p-m1",
+      type: "SMS",
+      to: "01012345678",
+      status: "SENT",
+      requestedAt: at(-5000),
+      statusUpdatedAt: at(-5000),
+      attemptCount: 0,
+      nextCheckAt: at(0),
+      metadata: { note: "sent" },
+    });
+    const leaseA = at(1000);
+    expect((await store.leaseDue(at(0), 10, leaseA))?.length).toBe(1);
+
+    // A's lease runs out, and B leases the record while A reads it to
+    // rewrite its encrypted fields.
+    const leaseB = at(5000);
+    afterRead = () => store.leaseDue(at(2000), 10, leaseB);
+    expect(
+      await store.patchLeased("m1", leaseA, {
+        status: "FAILED",
+        metadata: { note: "stale" },
+      }),
+    ).toBe(false);
+    const held = await store.get("m1");
+    expect(held?.nextCheckAt.getTime()).toBe(leaseB.getTime());
+    expect(held?.status).toBe("SENT");
+    expect(held?.metadata).toEqual({ note: "sent" });
+
+    expect(
+      await store.patchLeased("m1", leaseB, {
+        status: "FAILED",
+        metadata: { note: "failed" },
+      }),
+    ).toBe(true);
+    const stored = await store.get("m1");
+    expect(stored?.status).toBe("FAILED");
+    expect(stored?.metadata).toEqual({ note: "failed" });
+    expect(stored?.to).toBe("01012345678");
+  });
+
+  test("HyperdriveDeliveryTrackingStore rewrites an encrypted leased patch on MySQL under the row lock", async () => {
+    const statements: string[] = [];
+    let transactions = 0;
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+    const client: CloudflareSqlClient = {
+      dialect: "mysql",
+      query: (async (sql: string) => {
+        statements.push(`${transactions}: ${sql}`);
+        if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+          return {
+            rows: [
+              {
+                message_id: "m1",
+                provider_id: "mock",
+                provider_message_id: "p1",
+                type: "SMS",
+                to_enc: "enc:01012345678",
+                to_hash: "h:01012345678",
+                status: "SENT",
+                requested_at: 1,
+                status_updated_at: 1,
+                attempt_count: 0,
+                next_check_at: leaseUntil.getTime(),
+              },
+            ],
+          };
+        }
+        return { rows: [] };
+      }) as CloudflareSqlClient["query"],
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(client);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      initializeSchema: false,
+      fieldCrypto: { config: testFieldCryptoConfig },
+    });
+
+    expect(
+      await store.patchLeased("m1", leaseUntil, { metadata: { note: "x" } }),
+    ).toBe(true);
+
+    // Read and written in one transaction, which holds the row between them.
+    expect(transactions).toBe(1);
+    expect(statements).toEqual([
+      expect.stringMatching(
+        /^1: SELECT `message_id`, .* FROM `kmsg_delivery_tracking` WHERE `message_id` = \? FOR UPDATE$/,
+      ),
+      expect.stringMatching(
+        /^1: UPDATE `kmsg_delivery_tracking` SET `provider_id` = \?, .*`metadata_enc` = \?.* WHERE `message_id` = \?$/,
+      ),
+    ]);
+  });
+
   test("HyperdriveDeliveryTrackingStore leases on MySQL only through a transaction", async () => {
     const statements: string[] = [];
     const query = (async (sql: string) => {
@@ -463,6 +593,9 @@ describe("Cloudflare SQL adapters", () => {
     expect(
       await plain.leaseDue(new Date(10), 50, new Date(300_000)),
     ).toBeUndefined();
+    await expect(
+      plain.patchLeased("m1", new Date(300_000), { status: "SENT" }),
+    ).rejects.toThrow("transaction");
     expect(statements).toEqual([]);
 
     let transactions = 0;

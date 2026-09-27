@@ -284,7 +284,7 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### Several Pollers on One Store
 
-When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. A poll stores each result only while it still holds the record, so one that ran past its lease cannot overwrite a newer result, and a poll that stops early hands back the records it did not finish. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not, and a custom store can by implementing `leaseDue`, `patchLeased`, and optionally `releaseLeases`. On MySQL a lease needs a transaction: `BunSqlDeliveryTrackingStore` runs one, and with a client passed to `HyperdriveDeliveryTrackingStore` that has no `transaction` function, polls do not lease. A lease a poll cannot hand back, for example because its process died, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
+When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. A poll stores each result only while it still holds the record, so one that ran past its lease cannot overwrite a newer result, and a poll that stops early hands back the records it did not finish. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not, and a custom store can by implementing `leaseDue`, `patchLeased`, and optionally `releaseLeases`. On MySQL a lease needs a transaction: `BunSqlDeliveryTrackingStore` runs one, and with a client passed to `HyperdriveDeliveryTrackingStore` that has no `transaction` function, polls do not lease and `patchLeased()` rejects. A lease a poll cannot hand back, for example because its process died, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off. A lease that runs out before the store even returns the records holds nothing, so that poll leaves them and `runOnce()` rejects; raise `leaseMs` if it keeps happening.
 
 ### Shutting Down
 
@@ -730,7 +730,7 @@ When provider-native ALIMTALK failover is unsupported or partial, you can enable
 - Triggers only when tracking status is `FAILED` and classified as non-Kakao-user failure
 - Attempts fallback exactly once per original message
 - Sends SMS or LMS as `fallbackChannel` says; a record without one (not sent through `KMsg`) goes as LMS when its text is over 90 bytes
-- A stopped poll (its signal aborted, or `close()`) starts no fallback send: the record stays as it was, and the next poll sends it
+- A stopped poll (its signal aborted, or `close()`) starts no fallback send: the record stays as the poll found it, or is put back that way if the poll had already stored the failure, and the next poll sends it
 - The sender's second argument has a `signal` that aborts when the poll is stopped. Pass it to the send so that `close()` does not wait for it; a send cancelled that way is recorded as a failed attempt
 - Requires providers with `getDeliveryStatus()` support
 

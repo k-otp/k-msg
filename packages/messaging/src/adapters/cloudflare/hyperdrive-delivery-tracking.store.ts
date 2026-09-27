@@ -517,33 +517,39 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
   ): Promise<boolean> {
     await this.init();
 
-    if (this.patchTouchesCrypto(patch)) {
-      // Encrypted fields are rewritten from the whole record, so this is a
-      // read and a write. A poll's results never change them.
-      const current = await this.get(messageId);
-      if (current?.nextCheckAt.getTime() !== leaseUntil.getTime()) {
-        return false;
-      }
-      await this.upsert({ ...current, ...patch, messageId: current.messageId });
-      return true;
-    }
-
-    const updates = this.patchColumns(patch);
     const table = this.tableRef();
     const messageIdColumn = this.quoteIdentifier(this.columnName("messageId"));
     const nextCheckAtColumn = this.quoteIdentifier(
       this.columnName("nextCheckAt"),
     );
+    // Encrypted fields are rewritten from the whole record, so such a patch
+    // writes the stored record with the patch applied.
+    const rewrite = this.patchTouchesCrypto(patch);
 
     if (this.client.dialect === "mysql") {
+      // Autocommitted, the locking read would release the row before the
+      // write.
+      if (typeof this.client.transaction !== "function") {
+        throw new Error(
+          "patchLeased on MySQL needs a CloudflareSqlClient with transaction()",
+        );
+      }
       // No UPDATE ... RETURNING: read the lease under a lock, then write.
       return await runCloudflareSqlTransaction(this.client, async (tx) => {
         const { rows } = await tx.query<TrackingRow>(
-          `SELECT ${nextCheckAtColumn} FROM ${table} WHERE ${messageIdColumn} = ? FOR UPDATE`,
+          `SELECT ${rewrite ? this.selectListSql() : nextCheckAtColumn} FROM ${table} WHERE ${messageIdColumn} = ? FOR UPDATE`,
           [messageId],
         );
-        const current = toDate(rows[0]?.[this.columnName("nextCheckAt")]);
-        if (current?.getTime() !== leaseUntil.getTime()) return false;
+        const row = rows[0];
+        const current = toDate(row?.[this.columnName("nextCheckAt")]);
+        if (!row || current?.getTime() !== leaseUntil.getTime()) return false;
+        const updates = rewrite
+          ? await this.recordColumns({
+              ...(await this.rowToRecord(row)),
+              ...patch,
+              messageId,
+            })
+          : this.patchColumns(patch);
         if (updates.length > 0) {
           await tx.query(
             `UPDATE ${table} SET ${this.setClauseSql(updates)} WHERE ${messageIdColumn} = ?`,
@@ -551,6 +557,21 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
           );
         }
         return true;
+      });
+    }
+
+    let updates = this.patchColumns(patch);
+    if (rewrite) {
+      const current = await this.get(messageId);
+      if (current?.nextCheckAt.getTime() !== leaseUntil.getTime()) {
+        return false;
+      }
+      // The write checks the lease again: another poll may lease the record
+      // while this one reads and encrypts it.
+      updates = await this.recordColumns({
+        ...current,
+        ...patch,
+        messageId: current.messageId,
       });
     }
 
@@ -680,6 +701,17 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     }
 
     return updates;
+  }
+
+  // Every column of a record but its message id, with its database value,
+  // encrypted as upsert() stores it.
+  private async recordColumns(
+    record: TrackingRecord,
+  ): Promise<Array<{ key: DeliveryTrackingColumnKey; value: unknown }>> {
+    const prepared = await this.prepareRecordForStorage(record);
+    return getDeliveryTrackingColumnKeys(this.schema)
+      .filter((key) => key !== "messageId")
+      .map((key) => ({ key, value: this.recordValueForKey(prepared, key) }));
   }
 
   // `column = placeholder` for each update, numbered from 1.

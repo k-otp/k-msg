@@ -2233,6 +2233,46 @@ describe("DeliveryTrackingService leases", () => {
     expect(reported).toEqual([]);
   });
 
+  test("a poll whose lease ran out before the store returned it queries nothing", async () => {
+    const queried: string[] = [];
+    // The store returns the records only after the poll's lease ran out.
+    class SlowStore extends InMemoryDeliveryTrackingStore {
+      slow = true;
+
+      override async leaseDue(
+        now: Date,
+        limit: number,
+        leaseUntil: Date,
+      ): Promise<TrackingRecord[]> {
+        const due = await super.leaseDue(now, limit, leaseUntil);
+        if (this.slow) await wait(leaseUntil.getTime() - Date.now() + 5);
+        return due;
+      }
+    }
+    const store = new SlowStore();
+    const service = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queried.push(query.providerMessageId);
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0, leaseMs: 20 },
+    });
+    await recordSms(service, "m1");
+
+    // Another poll may have leased the records by then.
+    await expect(service.runOnce()).rejects.toThrow("lease ran out");
+    expect(queried).toEqual([]);
+
+    // They are due again at once.
+    store.slow = false;
+    await service.runOnce();
+    expect(queried).toEqual(["p-m1"]);
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+  });
+
   test("a failed status query ends the poll only after the others settle", async () => {
     const store = new InMemoryDeliveryTrackingStore();
     let releaseM2!: () => void;
@@ -2389,6 +2429,64 @@ describe("DeliveryTrackingService shutdown", () => {
     await service.runOnce();
     expect(sent).toEqual(["m1"]);
     expect((await store.get("m1"))?.status).toBe("FAILED");
+  });
+
+  test("a poll stopped as it starts a fallback puts the record back for the next poll", async () => {
+    const stop = new AbortController();
+    const sent: string[] = [];
+    const reported: string[] = [];
+    // The poll is stopped after it stored the failure, while it marks the
+    // fallback as being attempted.
+    class StoppingStore extends InMemoryDeliveryTrackingStore {
+      override async patch(
+        messageId: string,
+        patch: Partial<TrackingRecord>,
+      ): Promise<void> {
+        await super.patch(messageId, patch);
+        if (getFailoverMetadata(patch).apiAttempt) stop.abort();
+      }
+    }
+    const store = new StoppingStore();
+    const service = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(
+          async (query) => failedForNonKakaoUser(query),
+          "solapi",
+        ),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+      apiFailover: {
+        sender: async (_input, context) => {
+          sent.push(context.originalMessageId);
+          return ok({
+            messageId: context.fallbackMessageId,
+            providerId: "sms",
+            status: "SENT",
+            type: context.fallbackType,
+            to: "01012345678",
+          });
+        },
+      },
+      onStatusChange: ({ record }) => {
+        reported.push(record.status);
+      },
+    });
+    await recordAlimTalkWithFallback(service, "m1");
+    const found = await store.get("m1");
+    if (!found) throw new Error("m1 was not recorded");
+
+    await service.runOnce({ signal: stop.signal });
+
+    expect(sent).toEqual([]);
+    expect(reported).toEqual([]);
+    const putBack = await store.get("m1");
+    expect(putBack).toEqual({ ...found, nextCheckAt: expect.any(Date) });
+    expect(putBack?.nextCheckAt.getTime()).toBeLessThanOrEqual(Date.now());
+
+    await service.runOnce();
+    expect(sent).toEqual(["m1"]);
+    expect(reported).toEqual(["FAILED"]);
   });
 
   test("close cancels a poll in progress and waits for it before closing the store", async () => {
