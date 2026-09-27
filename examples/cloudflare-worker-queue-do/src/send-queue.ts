@@ -258,10 +258,22 @@ export class SendQueue extends DurableObject<Env> {
 
   /**
    * Takes the next due job and leases it. In the same transaction, jobs whose
-   * lease ran out mid-send are due again or failed (see jobQueue()).
+   * lease ran out mid-send are due again or failed (see jobQueue()). They
+   * are logged once the transaction commits: storage may run the transaction
+   * again, and only the attempt that commits happened.
    */
-  private claimNextJob(): Promise<CloudflareObjectJob<SendJob> | undefined> {
-    return this.transaction((queue) => queue.dequeue());
+  private async claimNextJob(): Promise<
+    CloudflareObjectJob<SendJob> | undefined
+  > {
+    let interrupted: InterruptedJob[] = [];
+    const job = await this.ctx.storage.transaction((txn) => {
+      interrupted = [];
+      return jobQueue(txn, interrupted).dequeue();
+    });
+    for (const fields of interrupted) {
+      log("warn", "job was interrupted mid-send", fields);
+    }
+    return job;
   }
 
   private async send(job: CloudflareObjectJob<SendJob>): Promise<Outcome> {
@@ -433,12 +445,21 @@ async function createSender(env: Env): Promise<Sender> {
   return { config, kmsg: new KMsg({ providers: [provider] }) };
 }
 
+/** A job whose send was interrupted, as logged once its claim commits. */
+type InterruptedJob = {
+  jobId: string;
+  /** Whether the job is due again, rather than failed. */
+  retry: boolean;
+};
+
 /**
  * The queue over this object's storage, or over a transaction so that its
- * changes commit with the bookkeeping around them.
+ * changes commit with the bookkeeping around them. Jobs whose lease ran out
+ * are counted in the same storage and added to `interrupted`.
  */
 function jobQueue(
   storage: DurableObjectStorage | DurableObjectTransaction,
+  interrupted: InterruptedJob[] = [],
 ): SendJobQueue {
   return createDurableObjectJobQueue<SendJob>(storage, {
     keyPrefix: QUEUE_KEY_PREFIX,
@@ -454,7 +475,7 @@ function jobQueue(
       } else {
         await count(storage, "interrupted", "failed");
       }
-      log("warn", "job was interrupted mid-send", { jobId: job.id, retry });
+      interrupted.push({ jobId: job.id, retry });
     },
   });
 }
