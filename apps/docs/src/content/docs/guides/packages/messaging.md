@@ -343,7 +343,7 @@ const spec = getDeliveryTrackingSchemaSpec(trackingOptions);
 
 스토어는 숫자 시간 컬럼에 epoch 밀리초를, `TIMESTAMPTZ` 컬럼에 `Date`를 씁니다. epoch 밀리초(현재 약 1.8 × 10¹²)에는 64비트가 필요합니다. SQLite의 `INTEGER`는 64비트이지만 Postgres와 MySQL의 `INTEGER`는 32비트이므로, `integer`는 `bigint`의 별칭입니다.
 
-이전 버전은 Postgres와 MySQL에서 `integer`에 32비트 `INTEGER` 컬럼을 만들었습니다. 이 컬럼은 모든 insert를 범위 초과(out of range)로 거부합니다. strict 모드가 아닌 MySQL은 대신 2147483647을 저장하며, 이 값은 1970-01-25로 읽힙니다. `CREATE TABLE IF NOT EXISTS`는 이미 있는 테이블을 바꾸지 않으므로, 시간 컬럼을 직접 넓히세요. `tableName`과 `columnMap`을 바꿨다면 그 이름을 쓰세요:
+이전 버전은 Postgres와 MySQL에서 `integer`에 32비트 `INTEGER` 컬럼을 만들었고, 이 컬럼은 모든 insert를 범위 초과(out of range)로 거부합니다. `CREATE TABLE IF NOT EXISTS`는 이미 있는 테이블을 바꾸지 않으므로, 시간 컬럼을 직접 넓히세요. `tableName`과 `columnMap`을 바꿨다면 그 이름을 쓰세요:
 
 ```sql
 -- Postgres
@@ -367,6 +367,13 @@ ALTER TABLE kmsg_delivery_tracking
   MODIFY failed_at BIGINT,
   MODIFY last_checked_at BIGINT,
   MODIFY scheduled_at BIGINT;
+```
+
+strict 모드가 아닌 MySQL은 이 insert를 거부하지 않고 모든 시간을 2147483647로 저장했으며, 이 값은 1970-01-25로 읽힙니다. 컬럼을 넓혀도 이 값은 그대로 남습니다. 폴링은 아직 최종 상태가 아닌 이런 행을 provider에 묻지 않고 `UNKNOWN`(`TRACKING_TIMEOUT`)으로 바꿉니다. `requested_at`이 `maxTrackingDurationMs`보다 오래전으로 읽히기 때문입니다. 원래 시간은 복구할 수 없으므로, 같은 마이그레이션에서 이 행을 지우거나 직접 보관한 발송 기록으로 되살리세요:
+
+```sql
+-- strict 모드가 아닌 MySQL: 시간이 2147483647로 잘린 행
+DELETE FROM kmsg_delivery_tracking WHERE requested_at = 2147483647;
 ```
 
 `renderDrizzleSchemaSource()`로 만든 Drizzle 스키마를 쓰고 있다면 다시 생성하세요. 이제 `integer`에서도 시간 컬럼이 `bigint(..., { mode: "number" })`입니다.
