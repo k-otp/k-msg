@@ -81,6 +81,30 @@ Interpretation notes:
 - `channel onboarding` here describes the vendor prerequisite path (`manual`, `api`, `none`), not a toolkit-managed approval state.
 - When the CLI stores `onboarding.manualChecks`, it is recording operator evidence/notes for external vendor steps rather than becoming the approval source of truth.
 
+## ALIMTALK template variables
+
+`variables` are matched to the template's `#{name}` placeholders by name:
+
+| Provider | Sent as |
+| --- | --- |
+| `iwinv` | `templateParam`, one value per distinct placeholder name, in order of first appearance in the content and then the button links |
+| `aligo` | `message_1`, the template text with the values filled in |
+| `solapi` | `kakaoOptions.variables`; SOLAPI fills the template |
+
+IWINV and Aligo need the template text for this. They take it from `providerOptions.templateContent`, or else look the template up (IWINV `POST /api/template/`, Aligo `/akv10/template/list/`) through the send's request context and keep it for 10 minutes per provider instance. A placeholder without a value in `variables` (no key, or `undefined`) fails the send with `INVALID_REQUEST` before anything is sent. IWINV skips the lookup when `variables` is empty and no `templateContent` is given, and sends `providerOptions.templateParam` as-is; see `src/iwinv/README.md`.
+
+## Delivery status lookup
+
+`DeliveryTrackingService` in `@k-msg/messaging` polls `provider.getDeliveryStatus()`.
+
+| Provider | `getDeliveryStatus` |
+| --- | --- |
+| `iwinv` | AlimTalk history; SMS/LMS/MMS history needs `smsCompanyId` |
+| `solapi` | SOLAPI message list |
+| `aligo` | not implemented |
+
+Aligo has result lookups (`/akv10/history/detail/`, `/sms_list/`) but does not publish the result codes they return, so `AligoProvider` has no `getDeliveryStatus()`. Tracked Aligo messages stay `SENT` until `polling.maxTrackingDurationMs` (24 h by default) marks them `UNKNOWN`; set `polling.unsupportedProviderStrategy: "unknown"` to settle them at the first poll instead. For the same reason tracking-based API failover never resends an Aligo AlimTalk: Aligo sends its own fallback when `failover.enabled` is set.
+
 ## ALIMTALK failover responsibilities
 
 `failover` on ALIMTALK is standardized in `@k-msg/core`, but provider-native mapping differs.

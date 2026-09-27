@@ -7,6 +7,11 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
+import {
+  fillTemplatePlaceholders,
+  findMissingTemplateVariables,
+  listTemplatePlaceholders,
+} from "../shared/template-variables";
 import { mapAligoError } from "./aligo.error";
 import { ensureAligoKakaoOk, requestAligo } from "./aligo.http";
 import type {
@@ -17,9 +22,12 @@ import {
   formatAligoDate,
   getAligoEndpoint,
   normalizeAligoCode,
-  resolveAligoTemplateMessage,
   resolveImageRef,
 } from "./aligo.shared.helpers";
+import {
+  aligoTemplateContentKey,
+  fetchAligoTemplateContent,
+} from "./aligo.template-content";
 import type {
   AligoKakaoSendResponse,
   AligoResponse,
@@ -129,6 +137,54 @@ async function sendSMS(
   });
 }
 
+/**
+ * Aligo's `message_1` must be the approved template's text with its variables
+ * filled in, line breaks included; Kakao rejects a message that does not match
+ * the template. The body comes from `providerOptions.templateContent`, or else
+ * Aligo's template list API. A `_full_text` variable is sent as-is.
+ */
+async function resolveAlimTalkMessage(
+  ctx: AligoRuntimeContext,
+  options: Extract<SendOptions, { type: "ALIMTALK" }>,
+  senderKey: string,
+): Promise<Result<string, KMsgError>> {
+  const variables: Record<string, unknown> = options.variables ?? {};
+  const fullText = variables._full_text;
+  if (fullText !== undefined && fullText !== null) return ok(String(fullText));
+
+  const templateCode = options.templateId;
+  const lookup = () =>
+    fetchAligoTemplateContent(ctx, { senderKey, templateCode });
+  const inlineContent = options.providerOptions?.templateContent;
+  const content =
+    typeof inlineContent === "string" && inlineContent.length > 0
+      ? ok(inlineContent)
+      : ctx.templateContents
+        ? await ctx.templateContents.get(
+            aligoTemplateContentKey(senderKey, templateCode),
+            ctx.requestContext,
+            lookup,
+          )
+        : await lookup();
+  if (content.isFailure) return content;
+
+  const missing = findMissingTemplateVariables(
+    listTemplatePlaceholders(content.value),
+    variables,
+  );
+  if (missing.length > 0) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Missing variables for Aligo template ${templateCode}: ${missing.join(", ")}`,
+        { providerId: ctx.providerId, templateId: templateCode, missing },
+      ),
+    );
+  }
+
+  return ok(fillTemplatePlaceholders(content.value, variables));
+}
+
 async function sendAlimTalk(
   ctx: AligoRuntimeContext,
   options: Extract<SendOptions, { type: "ALIMTALK" }>,
@@ -159,7 +215,6 @@ async function sendAlimTalk(
     );
   }
 
-  const variables = options.variables as Record<string, unknown>;
   const templateId = options.templateId;
   if (!templateId || templateId.length === 0) {
     return fail(
@@ -170,10 +225,9 @@ async function sendAlimTalk(
       ),
     );
   }
-  const templateContent =
-    typeof options.providerOptions?.templateContent === "string"
-      ? options.providerOptions.templateContent
-      : undefined;
+
+  const message = await resolveAlimTalkMessage(ctx, options, senderKey);
+  if (message.isFailure) return message;
 
   const body: Record<string, unknown> = {
     apikey: ctx.config.apiKey,
@@ -183,7 +237,7 @@ async function sendAlimTalk(
     sender,
     receiver_1: options.to,
     subject_1: "알림톡",
-    message_1: resolveAligoTemplateMessage(variables, templateContent),
+    message_1: message.value,
     testMode: ctx.config.testMode ? "Y" : "N",
   };
 

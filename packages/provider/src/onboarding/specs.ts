@@ -110,6 +110,10 @@ export const providerOnboardingSpecs: Readonly<
         probeOperation: "list_templates",
       },
     ],
+    notes: [
+      "AlimTalk message_1 is the template body with variables filled in by name; the body comes from providerOptions.templateContent or the template list API.",
+      'Delivery status lookup is not implemented (no getDeliveryStatus()): Aligo documents its result lookups but not their result codes. DeliveryTrackingService keeps tracked Aligo messages at SENT (PENDING when scheduled) until polling.maxTrackingDurationMs (24 h by default) marks them UNKNOWN; polling.unsupportedProviderStrategy "unknown" settles them at the first poll.',
+    ],
   },
   solapi: {
     providerId: "solapi",

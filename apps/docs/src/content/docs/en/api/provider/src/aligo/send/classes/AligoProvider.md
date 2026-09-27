@@ -5,7 +5,7 @@ prev: false
 title: "AligoProvider"
 ---
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L39)
+Defined in: [packages/provider/src/aligo/provider.send.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L42)
 
 Aligo send/channel focused entrypoint.
 
@@ -24,7 +24,7 @@ Aligo send/channel focused entrypoint.
 
 > **new AligoProvider**(`config`): `AligoSendProvider`
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L66)
+Defined in: [packages/provider/src/aligo/provider.send.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L71)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/provider/src/aligo/provider.send.ts:66](https://github.com
 
 > `readonly` **id**: `"aligo"` = `"aligo"`
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L40)
+Defined in: [packages/provider/src/aligo/provider.send.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L43)
 
 Unique identifier for this provider instance.
 Used for routing and logging.
@@ -63,7 +63,7 @@ Used for routing and logging.
 
 > `readonly` **name**: `"Aligo Smart SMS"` = `"Aligo Smart SMS"`
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L41)
+Defined in: [packages/provider/src/aligo/provider.send.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L44)
 
 Human-readable name for display purposes.
 
@@ -83,7 +83,7 @@ Human-readable name for display purposes.
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L42)
+Defined in: [packages/provider/src/aligo/provider.send.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L45)
 
 Message types this provider supports.
 Messages of unsupported types will be rejected.
@@ -98,7 +98,7 @@ Messages of unsupported types will be rejected.
 
 > `readonly` **transportCapabilities**: `object`
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L49)
+Defined in: [packages/provider/src/aligo/provider.send.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L52)
 
 Per-operation transport features supported by this provider.
 Missing declarations must be treated as unsupported.
@@ -121,7 +121,7 @@ Missing declarations must be treated as unsupported.
 
 > **addKakaoChannel**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L162)
+Defined in: [packages/provider/src/aligo/provider.send.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L178)
 
 Add a Kakao channel after authentication.
 
@@ -159,7 +159,7 @@ Add a Kakao channel after authentication.
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:58](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L58)
+Defined in: [packages/provider/src/aligo/provider.send.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L63)
 
 Get the onboarding specification for this provider.
 Used by tooling to guide provider configuration.
@@ -178,7 +178,7 @@ Used by tooling to guide provider configuration.
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:94](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L94)
+Defined in: [packages/provider/src/aligo/provider.send.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L110)
 
 Check if the provider is operational.
 Used for health monitoring and circuit breaker decisions.
@@ -197,7 +197,7 @@ Used for health monitoring and circuit breaker decisions.
 
 > **listKakaoChannelCategories**(): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannelCategories`](/en/api/core/src/interfaces/kakaochannelcategories/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L149)
+Defined in: [packages/provider/src/aligo/provider.send.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L165)
 
 List available channel categories for registration.
 
@@ -215,7 +215,7 @@ List available channel categories for registration.
 
 > **listKakaoChannels**(`params?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`KakaoChannel`](/en/api/core/src/interfaces/kakaochannel/)[], [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L142)
+Defined in: [packages/provider/src/aligo/provider.send.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L158)
 
 List registered Kakao channels.
 
@@ -245,7 +245,7 @@ List registered Kakao channels.
 
 > **requestKakaoChannelAuth**(`params`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<`void`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L155)
+Defined in: [packages/provider/src/aligo/provider.send.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L171)
 
 Request authentication SMS for channel registration.
 
@@ -275,7 +275,7 @@ Request authentication SMS for channel registration.
 
 > **send**(`options`, `context?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/aligo/provider.send.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L133)
+Defined in: [packages/provider/src/aligo/provider.send.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/aligo/provider.send.ts#L149)
 
 Send a message through this provider.
 
