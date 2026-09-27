@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:114
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L185)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L218)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L177)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L210)
 
 #### Parameters
 
@@ -109,6 +109,41 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:117
 
 ***
 
+### leaseDue()
+
+> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L134)
+
+Like `listDue`, but also leases the records it returns: in the same
+atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
+of the store skip them until the poll stores their next check or the
+lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
+
+#### Parameters
+
+##### now
+
+`Date`
+
+##### limit
+
+`number`
+
+##### leaseUntil
+
+`Date`
+
+#### Returns
+
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`leaseDue`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#leasedue)
+
+***
+
 ### listDue()
 
 > **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
@@ -139,7 +174,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:130
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L147)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L180)
 
 #### Parameters
 
@@ -161,7 +196,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:147
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L220)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L253)
 
 #### Parameters
 
@@ -180,6 +215,41 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:220
 #### Implementation of
 
 [`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patch`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patch)
+
+***
+
+### releaseLeases()
+
+> **releaseLeases**(`messageIds`, `leaseUntil`, `nextCheckAt`): `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L148)
+
+Hands back leases a poll did not finish: moves `nextCheckAt` to the
+given time on those records whose `nextCheckAt` is still `leaseUntil`.
+A record another poll has leased since is left alone. Without it,
+`DeliveryTrackingService` lets such leases run out.
+
+#### Parameters
+
+##### messageIds
+
+readonly `string`[]
+
+##### leaseUntil
+
+`Date`
+
+##### nextCheckAt
+
+`Date`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`releaseLeases`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#releaseleases)
 
 ***
 
