@@ -43,7 +43,7 @@ bun add solapi
 | --- | --- | --- | --- |
 | `iwinv` | supported | supported | `send`와 `getDeliveryStatus`의 모든 내부 요청에 context 전달 |
 | `aligo` | supported | supported | 모든 send 채널이 공통 fetch transport 사용 |
-| `solapi` | unsupported | unsupported | upstream SOLAPI SDK가 호출 단위 signal/fetch hook을 제공하지 않음 |
+| `solapi` | supported | unsupported | SOLAPI SDK가 signal/fetch를 받지 않으므로 SDK 호출 전마다 signal을 확인하고, abort되면 기다리지 않고 반환합니다. SDK가 이미 보낸 발송 요청은 취소할 수 없어 SOLAPI가 그 메시지를 보낼 수 있으므로, 이 경우는 타임아웃이라도 `REQUEST_ABORTED`(기본적으로 재시도하지 않음)를 반환합니다 |
 | `mock` | supported | unsupported | 모의 지연은 signal을 따르며 HTTP transport는 사용하지 않음 |
 
 ```ts
@@ -68,7 +68,7 @@ import 경로:
 | --- | --- | --- | --- | --- | --- |
 | `iwinv` | 수동(콘솔) | 가능 | optional | unsupported | supported |
 | `aligo` | API | 가능 | required_if_no_inference | supported | supported |
-| `solapi` | 없음(벤더 메타 의존) | 미지원 | required_if_no_inference | unsupported | partial |
+| `solapi` | 없음(벤더 메타 의존) | 미지원 | optional | unsupported | partial |
 | `mock` | API(테스트용) | 가능 | optional | supported | none |
 
 런타임 접근:
@@ -88,7 +88,7 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 | Provider | Native mapping | Warning |
 | --- | --- | --- |
 | `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` | none (native로 처리) |
-| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` |
+| `solapi` | `kakao.disableSms`, `text`, `subject` | 발신번호가 없을 때만 `FAILOVER_PARTIAL_PROVIDER` |
 | `aligo` | `failover`, `fmessage_1`, `fsubject_1` | `FAILOVER_PARTIAL_PROVIDER` |
 | `mock` | native 매핑 없음 | `FAILOVER_UNSUPPORTED_PROVIDER` |
 
@@ -96,7 +96,8 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 
 - provider 패키지는 벤더 native 필드로 매핑하고 warning 메타데이터를 반환합니다.
 - `iwinv`는 `failover.fallbackContent`를 `resendContent`(`resendType: "N"`)로 보내고, 없으면 IWINV가 알림톡 내용을 대체문자로 보냅니다. SMS/LMS는 내용 길이로 IWINV가 정합니다.
-- tracking 기반 API 레벨 fallback retry(배달 폴링 + SMS/LMS 재발송)는 `@k-msg/messaging`에서 처리합니다.
+- tracking 기반 API 레벨 fallback retry(배달 폴링 + SMS/LMS 재발송)는 `@k-msg/messaging`에서 처리하며, 위 warning을 반환한 발송에만 적용됩니다.
+- `solapi`는 알림톡에 발신번호(`from` 또는 `defaultFrom`)가 있으면 대체문자를 직접 보내므로(`kakao.disableSms: false`) warning을 반환하지 않습니다. 발신번호가 없으면 SOLAPI가 대체발송할 수 없어 API 레벨 fallback 대상으로 표시됩니다.
 
 ## 사용 예시 (KMsg와 함께)
 

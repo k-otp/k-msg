@@ -337,7 +337,7 @@ CLI의 provider readiness는 generic channel verification state가 아니라, �
 | --- | --- | --- | --- |
 | `iwinv` | 벤더 콘솔 수동 승인 | config 값, `onboarding.manualChecks.iwinv` evidence, template probe | Kakao 승인 절차를 콘솔에서 별도로 관리할 수 있을 때 적합 |
 | `aligo` | API 기반 Kakao channel path | config 값, Kakao channel probe, template probe, plusId inference guidance | Kakao 관련 API 가시성이 더 필요할 때 적합 |
-| `solapi` | 외부 메타데이터 + explicit binding | config 값, explicit `pfId/profileId`, inference 불가 시 explicit `plusId` | Kakao 온보딩 API보다 채널 범위가 더 중요할 때 적합 |
+| `solapi` | 외부 메타데이터 + explicit binding | config 값, explicit `pfId/profileId` (`plusId` 불필요) | Kakao 온보딩 API보다 채널 범위가 더 중요할 때 적합 |
 
 권장 CLI 순서:
 

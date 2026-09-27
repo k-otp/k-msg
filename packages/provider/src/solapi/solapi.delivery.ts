@@ -7,6 +7,10 @@ import {
   ok,
   type Result,
 } from "@k-msg/core";
+import {
+  raceProviderAbort,
+  toProviderAbortError,
+} from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import { mapSolapiError } from "./solapi.error";
 import { mapSolapiStatusCode, parseDate } from "./solapi.helpers";
@@ -16,8 +20,9 @@ export async function getSolapiDeliveryStatus(params: {
   providerId: string;
   client: SolapiSdkClient;
   query: DeliveryStatusQuery;
+  signal?: AbortSignal;
 }): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
-  const { providerId, client, query } = params;
+  const { providerId, client, query, signal } = params;
   const providerMessageId = query.providerMessageId.trim();
   if (!providerMessageId) {
     return fail(
@@ -30,10 +35,15 @@ export async function getSolapiDeliveryStatus(params: {
   }
 
   try {
-    const response = await client.getMessages({
-      messageId: providerMessageId,
-      limit: 1,
-    });
+    // The SDK cannot take the signal, so observe it around the call.
+    if (signal?.aborted) throw signal.reason;
+    const response = await raceProviderAbort(
+      client.getMessages({
+        messageId: providerMessageId,
+        limit: 1,
+      }),
+      signal,
+    );
 
     const record = (isObjectRecord(response) ? response : {}) as Record<
       string,
@@ -86,6 +96,9 @@ export async function getSolapiDeliveryStatus(params: {
       raw: message,
     });
   } catch (error) {
-    return fail(mapSolapiError(error, providerId));
+    return fail(
+      toProviderAbortError(error, signal, providerId) ??
+        mapSolapiError(error, providerId),
+    );
   }
 }
