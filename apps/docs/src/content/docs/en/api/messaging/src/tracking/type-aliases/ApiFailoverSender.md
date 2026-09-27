@@ -7,7 +7,7 @@ title: "ApiFailoverSender"
 
 > **ApiFailoverSender** = (`input`, `context`) => `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L79)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L86)
 
 ## Parameters
 
