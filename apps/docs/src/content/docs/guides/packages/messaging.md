@@ -201,7 +201,7 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### 종료
 
-`close()`는 타이머를 멈추고, 진행 중인 폴링을 signal이 abort된 것처럼 멈춘 뒤 그 폴링이 받은 상태를 저장하기를 기다렸다가 스토어를 닫습니다. `onStatusChange`로 전달 중인 상태 변경은 기다리지 않고, 진행 중인 대체 발송은 sender가 받은 signal을 발송에 넘기지 않는 한 기다립니다. `start()`로 돌린 폴링이 실패하면 `@k-msg/core` logger로 기록하고 다음 주기에 다시 폴링합니다.
+`close()`는 타이머를 멈추고, 진행 중인 폴링(아직 스토어를 준비하는 폴링 포함)을 signal이 abort된 것처럼 멈춘 뒤 그 폴링이 받은 상태를 저장하기를 기다렸다가 스토어를 닫습니다. `onStatusChange`로 전달 중인 상태 변경은 기다리지 않고, 진행 중인 대체 발송은 sender가 받은 signal을 발송에 넘기지 않는 한 기다립니다. `start()`로 돌린 폴링이 실패하면 `@k-msg/core` logger로 한 번 기록하고 다음 주기에 다시 폴링합니다. 폴링이 아직 진행 중일 때 온 주기는 건너뜁니다.
 
 ```ts
 process.once("SIGTERM", () => {
