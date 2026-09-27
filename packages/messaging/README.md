@@ -364,6 +364,18 @@ const otpQueue = createD1JobQueue(env.DB, {
 });
 ```
 
+`delay` holds milliseconds, so it is `BIGINT` on Postgres and MySQL (`INTEGER` on SQLite, which is 64-bit). Earlier versions made it a 32-bit `INTEGER` there, so a job delayed by 2^31 ms (about 24.9 days) or more could not be enqueued: the insert failed as out of range. `CREATE TABLE IF NOT EXISTS` leaves an existing table as it is, so widen the column:
+
+```sql
+-- Postgres
+ALTER TABLE kmsg_jobs ALTER COLUMN delay TYPE BIGINT;
+
+-- MySQL: MODIFY restates the column, so keep NOT NULL and the default
+ALTER TABLE kmsg_jobs MODIFY delay BIGINT NOT NULL DEFAULT 0;
+```
+
+MySQL without strict mode stored such delays as 2147483647 instead. Those jobs still run on time, since `process_at` is `BIGINT`; only the `delay` they report is wrong.
+
 ### Schema Utility API (Cloudflare Adapter)
 
 ```ts

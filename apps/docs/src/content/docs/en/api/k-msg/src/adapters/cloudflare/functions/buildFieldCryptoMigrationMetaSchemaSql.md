@@ -7,7 +7,7 @@ title: "buildFieldCryptoMigrationMetaSchemaSql"
 
 > **buildFieldCryptoMigrationMetaSchemaSql**(`options`): `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:507](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L507)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:510](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L510)
 
 ## Parameters
 
