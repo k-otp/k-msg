@@ -256,7 +256,7 @@ tracking.start();
 await tracking.runOnce();
 ```
 
-`runOnce()` stores every update it can. If the store rejects one record's update (for example, a value its column cannot hold), that record stays due for the next poll, the rest of the batch is still stored, and `runOnce()` then rejects with an `AggregateError` listing the failures.
+`runOnce()` stores every update it can. If the store rejects one record's update (for example, a value its column cannot hold), the rest of the batch is still stored, the rejected record is checked again after its next backoff delay, and `runOnce()` then rejects with an `AggregateError` listing the failures.
 
 To react when a status changes, for example to notify a webhook, pass `onStatusChange`. It receives a copy of each changed record as stored, one at a time and in order, after the poll finishes; if it throws, polling continues and the error goes to `onStatusChangeError` (or `console.error`). Delivery is best effort: a change whose callback throws is not retried, and one stored just before the process stops is not reported, so reconcile with the stored records when none may be missed. Services polling the same store can also each report a change, so make the callback idempotent, for example by message id and status. `await tracking.runOnce()` resolves once its changes have been delivered, so a cron or request handler that awaits it does not end before they run. A callback can call `runOnce()` itself; that call resolves once the poll's changes are queued, since they are delivered after the callback.
 
@@ -339,8 +339,8 @@ Tracking table/index defaults are generated from the adapter schema spec:
 Notes by dialect:
 
 - D1 (SQLite): JSON fields are stored as `TEXT`
-- Postgres: JSON fields are stored as `JSONB` documents, so SQL can read them (`last_error->>'code'`); `typeStrategy: { json: "text" }` stores them as `TEXT` instead
-- MySQL: JSON fields are stored as `JSON`. MySQL cannot index `TEXT` columns, so set `typeStrategy: { messageId: "varchar", id: "varchar" }`
+- Postgres: JSON fields are stored as `JSONB` documents, so SQL can read them (`last_error->>'code'`); `typeStrategy: { json: "text" }` stores them as `TEXT` instead. `JSONB` cannot hold NUL characters or unpaired surrogates, so those are stored as U+FFFD
+- MySQL: the SQL schema builders make JSON fields `JSON`, while `renderDrizzleSchemaSource()` makes them `text`; the store reads either. MySQL cannot index `TEXT` columns, so set `typeStrategy: { messageId: "varchar", id: "varchar" }`
 - `provider_status_message` is `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default)
 
 Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
@@ -414,19 +414,21 @@ const store = new HyperdriveDeliveryTrackingStore(client, {
   ALTER TABLE kmsg_delivery_tracking MODIFY provider_status_message TEXT;
   ```
 
-- On Postgres, rows written through postgres.js or Bun.SQL hold each `JSONB` value as a JSON string containing the JSON text, which SQL JSON operators cannot read. The store and queue read both forms, so nothing breaks, but to query old rows in SQL, convert them:
+- On Postgres, rows written through postgres.js or Bun.SQL hold each `JSONB` value as a JSON string containing the JSON text, which SQL JSON operators cannot read.
+  - `last_error`, `metadata`, `metadata_hashes` and the queue's `metadata` always hold objects, so the store and queue read those old strings as the objects they contain. To query old rows in SQL, convert them:
 
-  ```sql
-  UPDATE kmsg_delivery_tracking
-  SET last_error = (last_error #>> '{}')::jsonb
-  WHERE jsonb_typeof(last_error) = 'string';
+    ```sql
+    UPDATE kmsg_delivery_tracking
+    SET last_error = (last_error #>> '{}')::jsonb
+    WHERE jsonb_typeof(last_error) = 'string';
 
-  UPDATE kmsg_delivery_tracking
-  SET metadata = (metadata #>> '{}')::jsonb
-  WHERE jsonb_typeof(metadata) = 'string';
-  ```
+    UPDATE kmsg_delivery_tracking
+    SET metadata = (metadata #>> '{}')::jsonb
+    WHERE jsonb_typeof(metadata) = 'string';
+    ```
 
-  With field encryption, convert `metadata_hashes` the same way. `raw` and the queue's `data` may hold genuine strings, so leave them as they are: jobs are short-lived, and both forms are read.
+    With field encryption, convert `metadata_hashes` the same way.
+  - `raw` and the queue's `data` may hold any JSON value, strings included, so they read back exactly as stored: an old row's value comes back as its JSON text. Convert those rows once, with the same `UPDATE` for `raw` and for `kmsg_jobs` `data` and `metadata`, after stopping the processes that run the earlier version (they cannot read converted rows) and before starting this one. Run it only on rows that postgres.js or Bun.SQL wrote, since every one of those is a JSON string. For the queue, you can instead let the old version finish its jobs first.
 
 ### Drizzle Adapter Factories
 
