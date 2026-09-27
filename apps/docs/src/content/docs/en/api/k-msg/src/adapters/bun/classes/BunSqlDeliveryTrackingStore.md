@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:40
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L142)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L150)
 
 #### Returns
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:14
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L128)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L136)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L124)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:132](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L132)
 
 #### Parameters
 
@@ -135,14 +135,16 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:86
 
 ### leaseDue()
 
-> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[] \| `undefined`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:102](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L102)
 
 Like `listDue`, but also leases the records it returns: in the same
 atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
 of the store skip them until the poll stores their next check or the
-lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
+lease runs out. It resolves `undefined` when this store cannot lease
+atomically. `DeliveryTrackingService` leases only with a store that has
+both this and `patchLeased`, and otherwise uses `listDue`.
 
 #### Parameters
 
@@ -160,7 +162,7 @@ lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[] \| `undefined`\>
 
 #### Implementation of
 
@@ -198,7 +200,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:98
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L118)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L126)
 
 #### Parameters
 
@@ -220,7 +222,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:11
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L135)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L143)
 
 #### Parameters
 
@@ -242,11 +244,46 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:13
 
 ***
 
+### patchLeased()
+
+> **patchLeased**(`messageId`, `leaseUntil`, `patch`): `Promise`\<`boolean`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L110)
+
+Applies `patch` only while the record is still leased until `leaseUntil`
+(its `nextCheckAt` equals it), and resolves whether it did. A poll
+stores its results this way, so one that ran past its lease cannot
+overwrite what another poll stored since.
+
+#### Parameters
+
+##### messageId
+
+`string`
+
+##### leaseUntil
+
+`Date`
+
+##### patch
+
+`Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patchLeased`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patchleased)
+
+***
+
 ### releaseLeases()
 
 > **releaseLeases**(`messageIds`, `leaseUntil`, `nextCheckAt`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:110](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L110)
+Defined in: [packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts:118](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/bun-sql.store.ts#L118)
 
 Hands back leases a poll did not finish: moves `nextCheckAt` to the
 given time on those records whose `nextCheckAt` is still `leaseUntil`.
