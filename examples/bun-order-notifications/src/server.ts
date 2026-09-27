@@ -32,10 +32,13 @@ const tracking = new DeliveryTrackingService({
   // tracking sends the fallback once through kmsg, which routes it to the SMS
   // provider.
   apiFailover: {
-    sender: (input) =>
-      kmsg.send(input, {
-        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
-      }),
+    // Stops with the poll (tracking.close()) as well as on its own timeout.
+    sender: (input, { signal }) => {
+      const timeout = AbortSignal.timeout(PROVIDER_TIMEOUT_MS);
+      return kmsg.send(input, {
+        signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+      });
+    },
   },
   onStatusChange: ({ record, previousStatus }) => {
     console.info(
