@@ -194,6 +194,21 @@ The provider's own error text is logged, never returned.
   its `TIMESTAMPTZ` timestamps. `last_error` and `metadata` are `JSONB`, so
   SQL can read them, for example
   `SELECT message_id FROM kmsg_delivery_tracking WHERE last_error->>'code' = 'NETWORK_TIMEOUT'`.
+- A table created by an earlier version of this example keeps `last_error`
+  and `metadata` as `TEXT`, because `CREATE TABLE IF NOT EXISTS` leaves an
+  existing table alone. The Worker still works with it, since Postgres stores
+  the `JSONB` values it writes to a `TEXT` column as text, but the query above
+  needs `JSONB`. Convert the two columns once, as the table's owner. This
+  rewrites the table and blocks writes while it runs:
+
+  ```sql
+  ALTER TABLE kmsg_delivery_tracking
+    ALTER COLUMN last_error TYPE JSONB USING last_error::jsonb,
+    ALTER COLUMN metadata TYPE JSONB USING metadata::jsonb;
+  ```
+
+  Its other `TEXT` columns can stay: they hold anything the `VARCHAR(64)`
+  columns of the current schema do.
 - The store normally runs `CREATE TABLE` and `CREATE INDEX IF NOT EXISTS` on
   first use. This Worker turns that off with `initializeSchema: false` in
   `src/tracking.ts`, so create the table before the first deploy.
