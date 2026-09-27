@@ -17,6 +17,12 @@ Before this runbook, read `./field-crypto-basics.md` for plain-language context.
 2. Confirm ciphertext envelope `kid` is expected.
 3. Validate AAD consistency (`messageId/providerId/tableName/fieldPath`).
 
+## Alarm: `to`/`from` lookups miss records
+
+1. Compare the missing records' `crypto_kid` with the kids `resolveDecryptKeys` returns for the store's `tenantId`: lookups search only under those kids, the active one, and the provider's default key, and pass a `providerId` or `messageId` only when the filter pins one.
+2. Confirm the provider has a hash key for each of those kids.
+3. Check `crypto_fail_count` with `operation=hash`: under `failMode=open`, a lookup skips a key it cannot hash.
+
 ## Backfill stalled
 
 1. Pause write cutover (`compatPlainColumns=true`).

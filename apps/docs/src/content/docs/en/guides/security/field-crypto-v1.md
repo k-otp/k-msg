@@ -28,6 +28,7 @@ If terms are unfamiliar, start with [Security Glossary](./glossary) and [Securit
 - Phone lookup does not rely on deterministic encryption.
 - Use hash indexes such as `to_hash` and `from_hash`.
 - Hashing uses `HMAC-SHA256(normalizedValue)`.
+- A record's hash uses the key of the `kid` that encrypts it. A lookup hashes the value under the active `kid`, every `kid` from `resolveDecryptKeys`, and the provider's default key, so records written under a tenant key, before a rotation, or before a `keyResolver` was configured stay findable while their key stays in that set.
 
 ## AAD and key rotation
 
