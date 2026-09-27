@@ -10,6 +10,7 @@ export {
   resolveEndpointValidationOptions,
   validateEndpointUrl,
 } from "./runtime/endpoint-validation";
+export { WebhookEndpointConflictError } from "./runtime/errors";
 export { endpointMatchesEvent } from "./runtime/event-matcher";
 export { createInMemoryWebhookPersistence } from "./runtime/persistence";
 export type {

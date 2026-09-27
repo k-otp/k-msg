@@ -1,4 +1,5 @@
 import type { WebhookDelivery, WebhookEndpoint } from "../types/webhook.types";
+import { WebhookEndpointConflictError } from "./errors";
 import type {
   WebhookDeliveryListOptions,
   WebhookDeliveryStore,
@@ -58,19 +59,41 @@ function matchesDeliveryOptions(
   return true;
 }
 
+// Stores and returns copies, so changing an endpoint object a caller holds
+// cannot change a stored endpoint or get around the id and URL checks. The
+// copies cost list() a structuredClone per endpoint, which dispatch pays for
+// every event: fine for the few endpoints this store is meant for.
 export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   private readonly endpoints = new Map<string, WebhookEndpoint>();
 
   async add(endpoint: WebhookEndpoint): Promise<void> {
-    this.endpoints.set(endpoint.id, endpoint);
+    if (this.endpoints.has(endpoint.id)) {
+      throw new WebhookEndpointConflictError("id", endpoint.id, endpoint.id);
+    }
+    this.assertUrlAvailable(endpoint.url, endpoint.id);
+
+    this.endpoints.set(endpoint.id, structuredClone(endpoint));
   }
 
   async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
     if (!this.endpoints.has(endpointId)) {
       throw new Error(`Webhook endpoint ${endpointId} not found`);
     }
+    this.assertUrlAvailable(endpoint.url, endpointId);
 
-    this.endpoints.set(endpointId, endpoint);
+    // The id is the key the endpoint is stored under, as in the D1 store.
+    this.endpoints.set(endpointId, {
+      ...structuredClone(endpoint),
+      id: endpointId,
+    });
+  }
+
+  private assertUrlAvailable(url: string, endpointId: string): void {
+    for (const [storedId, stored] of this.endpoints) {
+      if (storedId !== endpointId && stored.url === url) {
+        throw new WebhookEndpointConflictError("url", url, storedId);
+      }
+    }
   }
 
   async remove(endpointId: string): Promise<void> {
@@ -78,11 +101,14 @@ export class InMemoryWebhookEndpointStore implements WebhookEndpointStore {
   }
 
   async get(endpointId: string): Promise<WebhookEndpoint | null> {
-    return this.endpoints.get(endpointId) ?? null;
+    const endpoint = this.endpoints.get(endpointId);
+    return endpoint ? structuredClone(endpoint) : null;
   }
 
   async list(): Promise<WebhookEndpoint[]> {
-    return Array.from(this.endpoints.values()).sort(sortByUpdatedAtDesc);
+    return Array.from(this.endpoints.values(), (endpoint) =>
+      structuredClone(endpoint),
+    ).sort(sortByUpdatedAtDesc);
   }
 }
 

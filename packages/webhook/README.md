@@ -186,6 +186,51 @@ function createRuntime(env: Env): WebhookRuntimeService {
 
 `createD1WebhookPersistence()` initializes schema automatically by default.
 
+## Registering endpoints
+
+Endpoint ids and URLs are unique, and registering never replaces an endpoint.
+`addEndpoint()` rejects an id or URL that is already registered with
+`WebhookEndpointConflictError`: its `field` is `"id"` or `"url"`, and its
+`endpointId` is the registered endpoint's id. `updateEndpoint()` rejects a URL
+that another endpoint uses in the same way. Change an endpoint's secret,
+events or URL with `updateEndpoint()`.
+
+`addEndpoints()` checks the whole batch against stored endpoints before it
+stores any of them, and throws the same `WebhookEndpointConflictError` if one
+conflicts. An id or URL given twice in one call is bad input and throws a
+plain `Error`, not a conflict. A write can still fail partway, for example
+when the store fails or another process registers one of the URLs after the
+check. The endpoints stored before it are then kept, since removing them could
+delete an endpoint another writer has put under the same id, and the error
+names them: `Webhook endpoint <n> in the batch: <reason>; stored: <ids>`, with
+the store's error as its `cause`. If none was stored, the store's error is
+thrown as it is.
+
+To register the same endpoints on every deploy, update the one that is
+already there:
+
+```ts
+import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
+
+const input = {
+  url: "https://example.com/webhooks/k-msg",
+  active: true,
+  events: [WebhookEventType.MESSAGE_SENT],
+};
+
+try {
+  await runtime.addEndpoint(input);
+} catch (error) {
+  if (!(error instanceof WebhookEndpointConflictError)) throw error;
+  // Or answer 409 Conflict, if a user asked to register it.
+  await runtime.updateEndpoint(error.endpointId, input);
+}
+```
+
+URLs are compared exactly as stored. If the same address can reach you
+spelled differently, such as with an uppercase host or an explicit `:443`,
+register `new URL(url).href`.
+
 ## Schema helpers (Cloudflare)
 
 ```ts
@@ -199,10 +244,17 @@ const statements = buildWebhookSchemaSql();
 await initializeWebhookSchema(env.DB);
 ```
 
+The unique index on the endpoint table's `url` column is what keeps D1 from
+storing two endpoints with one URL, so keep it if you write the migration
+yourself.
+
 ## SQLite / Drizzle(Postgres) snippets
 
 `WebhookRuntimeService` accepts custom stores via `endpointStore` + `deliveryStore`.
-Implement the same interfaces to plug any backend:
+Implement the same interfaces to plug any backend. An endpoint store's `add()`
+must reject an id or URL that is already stored, and its `update()` a URL that
+another endpoint uses, with `WebhookEndpointConflictError`; a unique index on
+the URL column does most of the work.
 
 ```ts
 import type {

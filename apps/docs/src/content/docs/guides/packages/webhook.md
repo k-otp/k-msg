@@ -187,6 +187,50 @@ function createRuntime(env: Env): WebhookRuntimeService {
 
 `createD1WebhookPersistence()`는 기본값으로 스키마 초기화를 자동 수행합니다.
 
+## 엔드포인트 등록
+
+엔드포인트 id와 URL은 고유하며, 등록이 기존 엔드포인트를 대체하는 일은
+없습니다. `addEndpoint()`는 이미 등록된 id나 URL을
+`WebhookEndpointConflictError`로 거절합니다. 이 에러의 `field`는 `"id"` 또는
+`"url"`이고, `endpointId`는 이미 등록된 엔드포인트의 id입니다.
+`updateEndpoint()`도 다른 엔드포인트가 쓰는 URL을 같은 방식으로 거절합니다.
+엔드포인트의 secret, 이벤트, URL은 `updateEndpoint()`로 바꾸세요.
+
+`addEndpoints()`는 하나라도 저장하기 전에 배치 전체를 저장된 엔드포인트와
+비교하고, 충돌하는 것이 있으면 같은 `WebhookEndpointConflictError`를
+던집니다. 한 번의 호출에 같은 id나 URL을 두 번 넣으면 충돌이 아니라 잘못된
+입력이므로 일반 `Error`를 던집니다. 저장소 오류나, 확인 뒤 다른 프로세스가
+같은 URL을 등록하는 경우처럼 쓰기가 중간에 실패할 수도 있습니다. 그러면 그
+앞에 저장된 엔드포인트는 그대로 남습니다. 이를 지우면 다른 쪽이 같은 id로
+저장한 엔드포인트를 지울 수 있기 때문입니다. 이때 오류는 저장된 것을
+알려 주고(`Webhook endpoint <n> in the batch: <reason>; stored: <ids>`),
+`cause`에 저장소의 오류가 담깁니다. 저장된 것이 없으면 저장소의 오류를
+그대로 던집니다.
+
+배포할 때마다 같은 엔드포인트를 등록하려면 이미 있는 엔드포인트를
+갱신하세요.
+
+```ts
+import { WebhookEndpointConflictError, WebhookEventType } from "@k-msg/webhook";
+
+const input = {
+  url: "https://example.com/webhooks/k-msg",
+  active: true,
+  events: [WebhookEventType.MESSAGE_SENT],
+};
+
+try {
+  await runtime.addEndpoint(input);
+} catch (error) {
+  if (!(error instanceof WebhookEndpointConflictError)) throw error;
+  // 사용자가 등록을 요청한 경우라면 409 Conflict로 응답해도 됩니다.
+  await runtime.updateEndpoint(error.endpointId, input);
+}
+```
+
+URL은 저장된 문자열 그대로 비교합니다. 대문자 호스트나 명시적인 `:443`처럼
+같은 주소가 다른 표기로 들어올 수 있다면 `new URL(url).href`로 등록하세요.
+
 ## Cloudflare 스키마 헬퍼
 
 ```ts
@@ -200,10 +244,17 @@ const statements = buildWebhookSchemaSql();
 await initializeWebhookSchema(env.DB);
 ```
 
+D1에서 한 URL에 엔드포인트가 둘 저장되지 않게 막는 것은 엔드포인트
+테이블 `url` 컬럼의 unique index입니다. 마이그레이션을 직접 작성한다면 이
+index를 유지하세요.
+
 ## SQLite / Drizzle(Postgres) 스니펫
 
 `WebhookRuntimeService`는 `endpointStore` + `deliveryStore` 주입을 지원합니다.
-동일 인터페이스만 구현하면 백엔드를 교체할 수 있습니다.
+동일 인터페이스만 구현하면 백엔드를 교체할 수 있습니다. 엔드포인트 store의
+`add()`는 이미 저장된 id나 URL을, `update()`는 다른 엔드포인트가 쓰는 URL을
+`WebhookEndpointConflictError`로 거절해야 합니다. URL 컬럼의 unique index가
+대부분을 처리해 줍니다.
 
 ```ts
 import type {

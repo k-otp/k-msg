@@ -25,6 +25,7 @@ import {
   resolveEndpointValidationOptions,
   validateEndpointUrl,
 } from "./endpoint-validation";
+import { WebhookEndpointConflictError } from "./errors";
 import { endpointMatchesEvent } from "./event-matcher";
 import { createInMemoryWebhookPersistence } from "./persistence";
 import type {
@@ -83,6 +84,26 @@ function cloneEventWithValidTimestamp(event: WebhookEvent): WebhookEvent {
     ...event,
     timestamp: Number.isNaN(timestamp.getTime()) ? new Date() : timestamp,
   };
+}
+
+// Repeating an id or URL within one addEndpoints() call is bad input, not a
+// conflict: no stored endpoint has it for the error to name.
+function assertDistinctEndpoints(endpoints: readonly WebhookEndpoint[]): void {
+  const ids = new Set<string>();
+  const urls = new Set<string>();
+  for (const endpoint of endpoints) {
+    if (ids.has(endpoint.id)) {
+      throw new Error(
+        `addEndpoints() was given endpoint id ${endpoint.id} more than once`,
+      );
+    }
+    if (urls.has(endpoint.url)) {
+      // The URL stays out of the message; it may carry a token.
+      throw new Error("addEndpoints() was given the same URL more than once");
+    }
+    ids.add(endpoint.id);
+    urls.add(endpoint.url);
+  }
 }
 
 export class WebhookRuntimeService implements WebhookRuntime {
@@ -147,13 +168,17 @@ export class WebhookRuntimeService implements WebhookRuntime {
     });
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
-      return this.insertEndpoint(input);
+      const endpoint = this.createEndpoint(input);
+      await this.storeEndpoints([endpoint]);
+      return endpoint;
     });
   }
 
   // Queued as one write, so a shutdown cannot leave the batch half added.
   // Every URL is checked first, so an invalid one adds none of them; the
-  // error names its position, not the URL, which may carry a token.
+  // error names its position, not the URL, which may carry a token. The
+  // whole batch is then checked against stored endpoints before any is
+  // stored (see storeEndpoints for a failure after that).
   async addEndpoints(
     inputs: readonly WebhookEndpointInput[],
   ): Promise<WebhookEndpoint[]> {
@@ -173,35 +198,64 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
-      const created: WebhookEndpoint[] = [];
-      for (const input of inputs) {
-        created.push(await this.insertEndpoint(input));
-      }
-      return created;
+      const endpoints = inputs.map((input) => this.createEndpoint(input));
+      // Check the whole batch first, so a repeated id or URL does not leave
+      // part of it stored.
+      assertDistinctEndpoints(endpoints);
+      await this.assertNoConflicts(endpoints);
+
+      await this.storeEndpoints(endpoints);
+      return endpoints;
     });
   }
 
-  // Stores a new endpoint. Callers hold the endpoint write queue. The URL and
-  // secret are checked again here, the check that guards the store: callers
-  // check them before queueing only to fail fast.
-  private async insertEndpoint(
-    input: WebhookEndpointInput,
-  ): Promise<WebhookEndpoint> {
-    validateEndpointUrl(input.url, this.securityOptions);
-    const now = new Date();
+  // Adds endpoints to the store in order, and never removes one on the way
+  // out: the store has no compare-and-delete, so a rollback could delete an
+  // endpoint another writer has since stored under the same id, and it can
+  // fail in the same outage as the add. When a write fails partway, for
+  // example because the store fails or another process took an id or URL
+  // after the batch was checked, the endpoints before it stay stored and the
+  // error names them, with the store's error as its cause. It names the
+  // failed one too if the store kept it anyway, as D1 can when it fails
+  // after committing. When none of a batch was stored, the store's error is
+  // passed on as it is, as it always is for a single endpoint.
+  private async storeEndpoints(
+    endpoints: readonly WebhookEndpoint[],
+  ): Promise<void> {
+    for (const [index, endpoint] of endpoints.entries()) {
+      try {
+        await this.endpointStore.add(endpoint);
+      } catch (error) {
+        const stored = endpoints.slice(0, index).map(({ id }) => id);
+        if (
+          endpoints.length > 1 &&
+          !(error instanceof WebhookEndpointConflictError) &&
+          (await this.holdsEndpoint(endpoint))
+        ) {
+          stored.push(endpoint.id);
+        }
+        if (stored.length === 0) throw error;
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(
+          `Webhook endpoint ${index} in the batch: ${reason}; stored: ${stored.join(", ")}`,
+          { cause: error },
+        );
+      }
+    }
+  }
 
-    const endpoint: WebhookEndpoint = {
-      // A copy of an endpoint read without its secret has no secret to keep.
-      ...unmarkSecret(input),
-      id: input.id ?? this.generateEndpointId(),
-      ...resolveActivity(input),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.assertSigningSecret(endpoint);
-
-    await this.endpointStore.add(endpoint);
-    return endpoint;
+  // Whether the store holds this endpoint itself: the row with its id has
+  // its URL and creation time. Read without field crypto, which these
+  // fields do not use.
+  private async holdsEndpoint(endpoint: WebhookEndpoint): Promise<boolean> {
+    const stored = await this.persistence.endpointStore
+      .get(endpoint.id)
+      .catch(() => null);
+    return (
+      stored !== null &&
+      stored.url === endpoint.url &&
+      stored.createdAt.getTime() === endpoint.createdAt.getTime()
+    );
   }
 
   updateEndpoint(
@@ -654,6 +708,47 @@ export class WebhookRuntimeService implements WebhookRuntime {
             ? new Date(override.timestamp as unknown as string)
             : base.timestamp,
     };
+  }
+
+  // Builds a new endpoint for a caller that holds the endpoint write queue.
+  // The URL and secret are checked again here, the check that guards the
+  // store: callers check them before queueing only to fail fast.
+  private createEndpoint(input: WebhookEndpointInput): WebhookEndpoint {
+    validateEndpointUrl(input.url, this.securityOptions);
+    const now = new Date();
+
+    const endpoint: WebhookEndpoint = {
+      // A copy of an endpoint read without its secret has no secret to keep.
+      ...unmarkSecret(input),
+      id: input.id ?? this.generateEndpointId(),
+      ...resolveActivity(input),
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.assertSigningSecret(endpoint);
+    return endpoint;
+  }
+
+  private async assertNoConflicts(
+    endpoints: readonly WebhookEndpoint[],
+  ): Promise<void> {
+    // Only ids and URLs are compared, so read the store without field crypto:
+    // a secret that cannot be decrypted must not block registration.
+    const stored = await this.persistence.endpointStore.list();
+    const idOwners = new Set(stored.map((endpoint) => endpoint.id));
+    const urlOwners = new Map(
+      stored.map((endpoint) => [endpoint.url, endpoint.id] as const),
+    );
+
+    for (const endpoint of endpoints) {
+      if (idOwners.has(endpoint.id)) {
+        throw new WebhookEndpointConflictError("id", endpoint.id, endpoint.id);
+      }
+      const urlOwner = urlOwners.get(endpoint.url);
+      if (urlOwner !== undefined) {
+        throw new WebhookEndpointConflictError("url", endpoint.url, urlOwner);
+      }
+    }
   }
 
   private generateEndpointId(): string {
