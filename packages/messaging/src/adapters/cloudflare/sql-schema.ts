@@ -304,6 +304,9 @@ function buildJobQueueSchemaStatements(
   const queueType = options.dialect === "mysql" ? "VARCHAR(128)" : "TEXT";
   const statusType = options.dialect === "mysql" ? "VARCHAR(32)" : "TEXT";
   const jsonType = options.dialect === "postgres" ? "JSONB" : "TEXT";
+  // Milliseconds; 2^31 ms (about 24.9 days) overflows the 32-bit INTEGER of
+  // Postgres and MySQL. SQLite's INTEGER is 64-bit.
+  const delayType = options.dialect === "sqlite" ? "INTEGER" : "BIGINT";
 
   const tableSql = `
 CREATE TABLE IF NOT EXISTS ${tableRef} (
@@ -314,7 +317,7 @@ CREATE TABLE IF NOT EXISTS ${tableRef} (
   ${q("priority")} INTEGER NOT NULL DEFAULT 0,
   ${q("attempts")} INTEGER NOT NULL DEFAULT 0,
   ${q("max_attempts")} INTEGER NOT NULL DEFAULT 3,
-  ${q("delay")} INTEGER NOT NULL DEFAULT 0,
+  ${q("delay")} ${delayType} NOT NULL DEFAULT 0,
   ${q("created_at")} BIGINT NOT NULL,
   ${q("process_at")} BIGINT NOT NULL,
   ${q("completed_at")} BIGINT,

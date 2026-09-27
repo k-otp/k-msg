@@ -81,6 +81,39 @@ function createCapturingSqlClient(dialect: CloudflareSqlClient["dialect"]): {
   return { client, queries };
 }
 
+type InsertedColumn = { column: string; type: string; value: unknown };
+
+// Each column of the first captured INSERT, with the type the captured
+// CREATE TABLE gives it and the value bound to it.
+function readInsertedColumns(
+  queries: readonly CapturedQuery[],
+): InsertedColumn[] {
+  const ddl =
+    queries.find((query) => query.sql.includes("CREATE TABLE"))?.sql ?? "";
+  const insert = queries.find((query) => query.sql.includes("INSERT INTO"));
+  const columns = (/\(([^)]*)\) VALUES/.exec(insert?.sql ?? "")?.[1] ?? "")
+    .split(", ")
+    .map((column) => column.slice(1, -1));
+  return columns.map((column, index) => ({
+    column,
+    type: new RegExp(`[\`"]${column}[\`"] (\\w+)`).exec(ddl)?.[1] ?? "",
+    value: insert?.params[index],
+  }));
+}
+
+// INTEGER is 32-bit on Postgres and MySQL, 64-bit on SQLite.
+function fitsColumn(
+  dialect: CloudflareSqlClient["dialect"],
+  { type, value }: InsertedColumn,
+): boolean {
+  if (type === "TIMESTAMPTZ") return value instanceof Date;
+  if (typeof value !== "number" || !Number.isSafeInteger(value)) return false;
+  return (
+    type === "BIGINT" ||
+    (type === "INTEGER" && (dialect === "sqlite" || Math.abs(value) < 2 ** 31))
+  );
+}
+
 function createMemoryHyperdriveJobSqlClient(): {
   client: CloudflareSqlClient;
   rows: Map<string, Record<string, unknown>>;
@@ -495,19 +528,6 @@ describe("Cloudflare SQL adapters", () => {
   });
 
   test("HyperdriveDeliveryTrackingStore binds times that fit the columns it creates", async () => {
-    // INTEGER is 32-bit on Postgres and MySQL, 64-bit on SQLite.
-    const fits = (dialect: string, type: string, value: unknown): boolean => {
-      if (type === "TIMESTAMPTZ") return value instanceof Date;
-      if (typeof value !== "number" || !Number.isSafeInteger(value)) {
-        return false;
-      }
-      return (
-        type === "BIGINT" ||
-        (type === "INTEGER" &&
-          (dialect === "sqlite" || Math.abs(value) < 2 ** 31))
-      );
-    };
-
     const now = new Date();
     const mismatches: string[] = [];
     for (const dialect of ["postgres", "mysql", "sqlite"] as const) {
@@ -534,24 +554,39 @@ describe("Cloudflare SQL adapters", () => {
           nextCheckAt: now,
         });
 
-        const ddl =
-          queries.find((query) => query.sql.includes("CREATE TABLE"))?.sql ??
-          "";
-        const insert = queries.find((query) =>
-          query.sql.includes("INSERT INTO"),
-        );
-        const columns = (
-          /\(([^)]*)\) VALUES/.exec(insert?.sql ?? "")?.[1] ?? ""
-        )
-          .split(", ")
-          .map((column) => column.slice(1, -1));
-        for (const column of columns.filter((name) => name.endsWith("_at"))) {
-          const type =
-            new RegExp(`[\`"]${column}[\`"] (\\w+)`).exec(ddl)?.[1] ?? "";
-          const value = insert?.params[columns.indexOf(column)];
-          if (!fits(dialect, type, value)) {
-            mismatches.push(`${dialect}/${timestamp}: ${column} ${type}`);
+        for (const inserted of readInsertedColumns(queries)) {
+          if (
+            inserted.column.endsWith("_at") &&
+            !fitsColumn(dialect, inserted)
+          ) {
+            mismatches.push(
+              `${dialect}/${timestamp}: ${inserted.column} ${inserted.type}`,
+            );
           }
+        }
+      }
+    }
+
+    expect(mismatches).toEqual([]);
+  });
+
+  test("HyperdriveJobQueue binds numbers that fit the columns it creates", async () => {
+    const mismatches: string[] = [];
+    for (const dialect of ["postgres", "mysql", "sqlite"] as const) {
+      const { client, queries } = createCapturingSqlClient(dialect);
+      // Thirty days, past the 2^31 ms a 32-bit INTEGER holds.
+      await new HyperdriveJobQueue(client).enqueue(
+        "send",
+        { to: "01012345678" },
+        { delay: 30 * 86_400_000, priority: 5 },
+      );
+
+      for (const inserted of readInsertedColumns(queries)) {
+        if (
+          typeof inserted.value === "number" &&
+          !fitsColumn(dialect, inserted)
+        ) {
+          mismatches.push(`${dialect}: ${inserted.column} ${inserted.type}`);
         }
       }
     }

@@ -175,6 +175,20 @@ describe("Cloudflare SQL schema builders", () => {
     ).toEqual(["otp_jobs_dequeue", "idx_kmsg_jobs_id"]);
   });
 
+  test("job queue delay column holds 64-bit milliseconds", () => {
+    const delayType = (dialect: SqlDialect) =>
+      /[`"]delay[`"] (\w+)/.exec(
+        buildCloudflareSqlSchemaSql({ dialect, target: "queue" }),
+      )?.[1];
+
+    // A delay of 2^31 ms (about 24.9 days) overflows the 32-bit INTEGER of
+    // Postgres and MySQL.
+    expect(delayType("postgres")).toBe("BIGINT");
+    expect(delayType("mysql")).toBe("BIGINT");
+    // SQLite's INTEGER is 64-bit.
+    expect(delayType("sqlite")).toBe("INTEGER");
+  });
+
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
     let indexFailures = 0;
     const client = {
@@ -304,5 +318,19 @@ describe("Drizzle schema renderer", () => {
       expect(source).toContain('index("otp_jobs_id")');
       expect(source).not.toContain("idx_kmsg_jobs");
     }
+  });
+
+  test("renders a bigint job queue delay column", () => {
+    for (const dialect of ["postgres", "mysql"] as const) {
+      const source = renderDrizzleSchemaSource({ dialect, target: "queue" });
+
+      expect(source).toContain(
+        'delay: bigint("delay", { mode: "number" }).notNull().default(0),',
+      );
+    }
+    // SQLite's integer() is 64-bit.
+    expect(
+      renderDrizzleSchemaSource({ dialect: "sqlite", target: "queue" }),
+    ).toContain('delay: integer("delay").notNull().default(0),');
   });
 });
