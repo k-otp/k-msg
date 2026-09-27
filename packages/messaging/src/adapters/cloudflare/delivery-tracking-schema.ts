@@ -466,7 +466,7 @@ export function resolveDeliveryTrackingSqlType(
   kind: DeliveryTrackingSqlTypeKind,
   strategy: ResolvedDeliveryTrackingTypeStrategy = DEFAULT_TYPE_STRATEGY,
 ): string {
-  // Unbounded text, such as a provider's status message.
+  // Unbounded text, such as a provider's status message or encrypted metadata.
   if (kind === "text") return "TEXT";
 
   // MySQL cannot index a TEXT column without a prefix length (error 1170),

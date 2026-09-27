@@ -418,8 +418,7 @@ describe("Cloudflare SQL schema builders", () => {
     });
 
     // The hashes are looked up through indexes. The encrypted values are not,
-    // and encrypted metadata passes 255 characters once its JSON passes
-    // about 110, so they keep the id strategy's TEXT.
+    // so they keep the id strategy's type.
     const secure = { enabled: true, mode: "secure" } as const;
     expect(mySqlTrackingColumns({ fieldCryptoSchema: secure })).toMatchObject({
       to_hash: "varchar(255) not null",
@@ -437,10 +436,31 @@ describe("Cloudflare SQL schema builders", () => {
     ).toMatchObject({
       to_hash: "varchar(255) not null",
       to_enc: "varchar(255) not null",
-      metadata_enc: "varchar(255)",
       retention_class: "varchar(64)",
       crypto_state: "text",
     });
+  });
+
+  // Encrypted metadata passes 255 characters once its JSON passes about 110,
+  // so metadata_enc is TEXT even when the id columns are VARCHAR(255).
+  test("metadata_enc is TEXT whatever the id type", () => {
+    for (const dialect of ["postgres", "mysql"] as const) {
+      const table = readSqlTable(
+        dialect,
+        buildCloudflareSqlSchemaSql({
+          dialect,
+          target: "tracking",
+          typeStrategy: { id: "varchar" },
+          fieldCryptoSchema: { enabled: true, mode: "secure" },
+        }),
+      );
+
+      expect({ dialect, ...table.columns }).toMatchObject({
+        dialect,
+        to_enc: "varchar(255) not null",
+        metadata_enc: "text",
+      });
+    }
   });
 
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
