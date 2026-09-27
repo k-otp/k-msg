@@ -7,7 +7,7 @@ title: "buildDeliveryTrackingSchemaSql"
 
 > **buildDeliveryTrackingSchemaSql**(`options`): `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:490](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L490)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:366](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L366)
 
 ## Parameters
 

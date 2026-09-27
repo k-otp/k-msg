@@ -7,7 +7,7 @@ title: "getFieldCryptoMigrationStatus"
 
 > **getFieldCryptoMigrationStatus**(`client`, `planId`, `options?`): `Promise`\<[`FieldCryptoMigrationStatus`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationstatus/)\>
 
-Defined in: [packages/messaging/src/migration/field-crypto/state.ts:374](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L374)
+Defined in: [packages/messaging/src/migration/field-crypto/state.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L403)
 
 ## Parameters
 
