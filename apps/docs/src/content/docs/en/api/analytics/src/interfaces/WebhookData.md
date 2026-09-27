@@ -9,11 +9,16 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://g
 
 ## Properties
 
-### body
+### body?
 
-> **body**: `any`
+> `optional` **body?**: `any`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L14)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L20)
+
+The parsed payload that the transformers read, required while signature
+validation is off. While it is on, the collector parses it from the
+verified `rawBody` instead, so it can be omitted and a value passed here
+is replaced.
 
 ***
 
@@ -33,11 +38,28 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 ***
 
+### rawBody?
+
+> `optional` **rawBody?**: `string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>
+
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L29)
+
+The request body exactly as received, before any parsing: the bytes the
+sender signed. Prefer bytes, such as `await request.arrayBuffer()`;
+`request.text()` drops a leading BOM and replaces invalid UTF-8.
+Required while signature validation is on, and then it must be UTF-8
+JSON. Its size in bytes counts against `maxPayloadSize` before the
+signature is checked.
+
+***
+
 ### signature?
 
 > `optional` **signature?**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L15)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L31)
+
+The signature to check when the signature header is missing.
 
 ***
 

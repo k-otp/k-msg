@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, spyOn, test } from "bun:test";
+import { createHmac } from "node:crypto";
 import { logger } from "@k-msg/core";
 import {
   type AggregatedMetric,
@@ -28,6 +29,7 @@ import {
   // Aggregators
   TimeSeriesAggregator,
   WebhookCollector,
+  type WebhookCollectorConfig,
   type WebhookData,
 } from "./index";
 
@@ -480,6 +482,7 @@ describe("WebhookCollector", () => {
       timestamp: new Date(),
       headers: { "x-signature": "invalid-signature" },
       body: { test: "data" },
+      rawBody: '{"test":"data"}',
     };
 
     // 잘못된 서명으로 인한 실패 예상
@@ -515,6 +518,311 @@ describe("WebhookCollector", () => {
     await expect(collector.receiveWebhook(webhook2)).rejects.toThrow(
       "Rate limit exceeded",
     );
+  });
+
+  describe("signature validation", () => {
+    const secretKey = "test-secret";
+    // Spaced like Python's json.dumps, so it differs from JSON.stringify(body):
+    // only the bytes as received can verify.
+    const rawBody = '{"messageId": "msg-123", "status": "delivered"}';
+    const sign = (payload: string | Uint8Array, secret = secretKey) =>
+      createHmac("sha256", secret).update(payload).digest("hex");
+
+    const createCollector = (config: Partial<WebhookCollectorConfig> = {}) =>
+      new WebhookCollector({
+        secretKey,
+        allowedSources: ["test-source"],
+        ...config,
+      });
+
+    const signedWebhook = (
+      overrides: Partial<WebhookData> = {},
+    ): WebhookData => ({
+      id: "webhook-123",
+      source: "test-source",
+      timestamp: new Date(),
+      headers: { "x-signature": `sha256=${sign(rawBody)}` },
+      body: JSON.parse(rawBody),
+      rawBody,
+      ...overrides,
+    });
+
+    // A webhook whose valid signature covers `payload`.
+    const signedAs = (
+      payload: string | Uint8Array | ArrayBuffer,
+      overrides: Partial<WebhookData> = {},
+    ): WebhookData =>
+      signedWebhook({
+        headers: {
+          "x-signature": `sha256=${sign(typeof payload === "string" ? payload : new Uint8Array(payload))}`,
+        },
+        body: undefined,
+        rawBody: payload,
+        ...overrides,
+      });
+
+    test("accepts an HMAC-SHA256 of the raw body", async () => {
+      const events = await createCollector().receiveWebhook(signedWebhook());
+
+      expect(events[0]?.type).toBe("message.delivered");
+    });
+
+    test("accepts the hex digest without the prefix and in upper case", async () => {
+      const collector = createCollector();
+
+      for (const signature of [
+        sign(rawBody),
+        `sha256=${sign(rawBody).toUpperCase()}`,
+      ]) {
+        const webhook = signedWebhook({
+          headers: { "x-signature": signature },
+        });
+        await expect(collector.receiveWebhook(webhook)).resolves.toHaveLength(
+          1,
+        );
+      }
+    });
+
+    test("verifies byte bodies", async () => {
+      const collector = createCollector();
+      const encoded = new TextEncoder().encode(rawBody);
+      // A view into a larger buffer, like Node's pooled Buffers.
+      const padded = new Uint8Array(encoded.length + 8);
+      padded.set(encoded, 4);
+
+      for (const bytes of [
+        Buffer.from(rawBody),
+        padded.subarray(4, 4 + encoded.length),
+        encoded.slice().buffer,
+      ]) {
+        await expect(
+          collector.receiveWebhook(signedWebhook({ rawBody: bytes })),
+        ).resolves.toHaveLength(1);
+      }
+    });
+
+    test("reads the signature header in any case", async () => {
+      const collector = createCollector({
+        signatureHeader: "X-Hub-Signature-256",
+      });
+      const webhook = signedWebhook({
+        headers: { "x-hub-signature-256": `sha256=${sign(rawBody)}` },
+      });
+
+      await expect(collector.receiveWebhook(webhook)).resolves.toHaveLength(1);
+    });
+
+    test("rejects the length-only signature of the old placeholder", async () => {
+      const forged = `sha256=${JSON.stringify(JSON.parse(rawBody)).length}_${secretKey.length}`;
+      const webhook = signedWebhook({ headers: { "x-signature": forged } });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("rejects a tampered body", async () => {
+      const tampered = rawBody.replace("delivered", "failed");
+      const webhook = signedWebhook({
+        body: JSON.parse(tampered),
+        rawBody: tampered,
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("rejects a signature made with another secret", async () => {
+      const webhook = signedWebhook({
+        headers: { "x-signature": `sha256=${sign(rawBody, "other-secret")}` },
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "Invalid webhook signature",
+      );
+    });
+
+    test("needs the raw body to verify", async () => {
+      const webhook = signedWebhook({ rawBody: undefined });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "rawBody",
+      );
+    });
+
+    test("collects the signed body, not a body passed alongside", async () => {
+      const failed = '{"messageId": "msg-123", "status": "failed"}';
+      const collector = createCollector();
+
+      // For example, middleware changed the parsed body after it was signed.
+      const events = await collector.receiveWebhook(
+        signedAs(failed, {
+          body: { messageId: "msg-123", status: "delivered" },
+        }),
+      );
+
+      expect(events.map((event) => event.type)).toEqual(["message.failed"]);
+      expect(collector.getProcessedWebhooks()[0]?.body).toEqual(
+        JSON.parse(failed),
+      );
+    });
+
+    test("parses body from the signed bytes when it is omitted", async () => {
+      const webhook = signedAs(new TextEncoder().encode(rawBody));
+
+      const events = await createCollector().receiveWebhook(webhook);
+
+      expect(events.map((event) => event.type)).toEqual(["message.delivered"]);
+    });
+
+    test("still needs body while validation is off", async () => {
+      const collector = new WebhookCollector({
+        enableSignatureValidation: false,
+      });
+
+      // Nothing verified the raw body, so it is not parsed in place of body.
+      for (const rawBodyOnly of [undefined, rawBody]) {
+        await expect(
+          collector.receiveWebhook(
+            signedWebhook({ body: undefined, rawBody: rawBodyOnly }),
+          ),
+        ).rejects.toThrow("body is required");
+      }
+    });
+
+    test("rejects a signed body that is not UTF-8 JSON", async () => {
+      const collector = createCollector();
+      const encoder = new TextEncoder();
+
+      for (const payload of [
+        "messageId=msg-123&status=delivered",
+        // JSON only if the byte that is never UTF-8 were replaced with U+FFFD.
+        new Uint8Array([
+          ...encoder.encode('{"note": "'),
+          0xff,
+          ...encoder.encode('"}'),
+        ]),
+      ]) {
+        await expect(
+          collector.receiveWebhook(signedAs(payload, { body: {} })),
+        ).rejects.toThrow("rawBody must be UTF-8 JSON");
+      }
+    });
+
+    test("counts rawBody against maxPayloadSize in UTF-8 bytes", async () => {
+      // Hangul takes 3 UTF-8 bytes per UTF-16 code unit.
+      const korean =
+        '{"messageId": "msg-123", "status": "delivered", "note": "배송 완료"}';
+      const bytes = new TextEncoder().encode(korean);
+      const body = JSON.parse(korean);
+
+      await expect(
+        createCollector({ maxPayloadSize: bytes.length }).receiveWebhook(
+          signedAs(korean, { body }),
+        ),
+      ).resolves.toHaveLength(1);
+      for (const payload of [korean, bytes]) {
+        await expect(
+          createCollector({ maxPayloadSize: bytes.length - 1 }).receiveWebhook(
+            signedAs(payload, { body }),
+          ),
+        ).rejects.toThrow("maxPayloadSize");
+      }
+    });
+
+    test("refuses an oversized rawBody before checking its signature", async () => {
+      // Small once parsed, but a megabyte of whitespace to hash.
+      const padded = `${" ".repeat(1024 * 1024)}${rawBody}`;
+      const webhook = signedWebhook({
+        headers: { "x-signature": `sha256=${"0".repeat(64)}` },
+        rawBody: padded,
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "maxPayloadSize",
+      );
+    });
+
+    test("refuses to start without a secret while validation is on", () => {
+      expect(() => new WebhookCollector()).toThrow("secretKey");
+      expect(() => new WebhookCollector({ secretKey: "" })).toThrow(
+        "secretKey",
+      );
+      // An undefined option keeps its default rather than turning the check off.
+      expect(
+        () => new WebhookCollector({ enableSignatureValidation: undefined }),
+      ).toThrow("secretKey");
+      expect(
+        () => new WebhookCollector({ enableSignatureValidation: false }),
+      ).not.toThrow();
+    });
+
+    test("treats every value but false as validation on", async () => {
+      // What JavaScript callers or JSON-derived config can pass.
+      for (const value of [null, 0, ""]) {
+        const enableSignatureValidation = value as unknown as boolean;
+
+        expect(
+          () => new WebhookCollector({ enableSignatureValidation }),
+        ).toThrow("secretKey");
+        await expect(
+          createCollector({ enableSignatureValidation }).receiveWebhook(
+            signedWebhook({ headers: {} }),
+          ),
+        ).rejects.toThrow("Missing signature");
+      }
+    });
+
+    test("uses the rawBody it was called with", async () => {
+      const collector = createCollector();
+      const webhook = signedWebhook();
+
+      const received = collector.receiveWebhook(webhook);
+      // Replaced while the signature check awaits WebCrypto.
+      webhook.rawBody = rawBody.replace('"delivered"', '"failed"   ');
+      const events = await received;
+
+      expect(events.map((event) => event.type)).toEqual(["message.delivered"]);
+      expect(collector.getProcessedWebhooks()[0]?.rawBody).toBe(rawBody);
+    });
+
+    test("copies byte bodies before verifying them", async () => {
+      const collector = createCollector();
+      const encoder = new TextEncoder();
+      const forged = encoder.encode(
+        rawBody.replace('"delivered"', '"failed"   '),
+      );
+
+      for (const asBody of [
+        (bytes: Uint8Array<ArrayBuffer>) => bytes,
+        (bytes: Uint8Array<ArrayBuffer>) => bytes.buffer,
+      ]) {
+        // slice() gives the view a buffer of exactly its own size.
+        const bytes = encoder.encode(rawBody).slice();
+
+        const received = collector.receiveWebhook(signedAs(asBody(bytes)));
+        // Overwritten in place while the signature check awaits WebCrypto.
+        bytes.set(forged);
+
+        await expect(received).resolves.toMatchObject([
+          { type: "message.delivered" },
+        ]);
+      }
+    });
+
+    test("parses a signed byte body with a leading BOM", async () => {
+      const bytes = new Uint8Array([
+        0xef,
+        0xbb,
+        0xbf,
+        ...new TextEncoder().encode(rawBody),
+      ]);
+
+      await expect(
+        createCollector().receiveWebhook(signedAs(bytes)),
+      ).resolves.toMatchObject([{ type: "message.delivered" }]);
+    });
   });
 });
 
