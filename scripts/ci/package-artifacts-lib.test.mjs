@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import {
   BUN_ONLY_EXPORTS,
   collectPackageArtifactTargets,
+  INLINED_DEPENDENCIES,
   inspectBuiltPackage,
   inspectPackedPackage,
   listPublishablePackageDirs,
@@ -84,6 +85,53 @@ function addBunOnlyExport(root) {
   writeFileSync(
     path.join(root, "dist/bun.d.ts"),
     "export declare const Database: unknown;\n",
+  );
+}
+
+// Declares runtime dependencies on zod and on @k-msg/dep, a workspace package
+// beside the fixture's own src/.
+function addDependencies(root) {
+  updateManifest(root, (manifest) => {
+    manifest.dependencies = { "@k-msg/dep": "1.0.0", zod: "^4.0.0" };
+    manifest.devDependencies = { "dev-only": "1.0.0" };
+  });
+  mkdirSync(path.join(root, "src"));
+  writeFileSync(path.join(root, "src/index.ts"), "export const ok = true;\n");
+  mkdirSync(path.join(root, "workspace/dep/src"), { recursive: true });
+  writeFileSync(
+    path.join(root, "workspace/dep/package.json"),
+    JSON.stringify({ name: "@k-msg/dep" }),
+  );
+  writeFileSync(
+    path.join(root, "workspace/dep/src/index.ts"),
+    "export const dep = 1;\n",
+  );
+}
+
+function linkSourcemap(root, artifact, sources) {
+  const file = path.join(root, artifact);
+  writeFileSync(
+    file,
+    `${readFileSync(file, "utf8")}//# sourceMappingURL=${path.basename(file)}.map\n`,
+  );
+  writeFileSync(
+    `${file}.map`,
+    JSON.stringify({ version: 3, sources, mappings: "" }),
+  );
+}
+
+function readWorkspaceManifests() {
+  const repositoryRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../..",
+  );
+  return new Map(
+    listPublishablePackageDirs(repositoryRoot).map((packageDir) => {
+      const manifest = JSON.parse(
+        readFileSync(path.join(packageDir, "package.json"), "utf8"),
+      );
+      return [manifest.name, manifest];
+    }),
   );
 }
 
@@ -316,23 +364,150 @@ test("rejects Bun-only entries for subpaths the package does not export", () => 
 });
 
 test("lists only Bun-only subpaths that workspace packages export", () => {
-  const repositoryRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../..",
-  );
-  const manifests = new Map(
-    listPublishablePackageDirs(repositoryRoot).map((packageDir) => {
-      const manifest = JSON.parse(
-        readFileSync(path.join(packageDir, "package.json"), "utf8"),
-      );
-      return [manifest.name, manifest];
-    }),
-  );
+  const manifests = readWorkspaceManifests();
   for (const [name, subpaths] of Object.entries(BUN_ONLY_EXPORTS)) {
     for (const subpath of subpaths) {
       assert.ok(
         manifests.get(name)?.exports?.[subpath],
         `${name} does not export ${subpath}`,
+      );
+    }
+  }
+});
+
+test("reports runtime dependencies that an artifact inlines", () => {
+  withFixture((root) => {
+    addDependencies(root);
+    for (const artifact of ["dist/index.mjs", "dist/index.cjs"]) {
+      linkSourcemap(root, artifact, [
+        "../src/index.ts",
+        "../workspace/dep/src/index.ts",
+        "../node_modules/.bun/zod@4.4.3/node_modules/zod/v4/core/core.js",
+        "../node_modules/.bun/zod@4.4.3/node_modules/zod/v4/mini/schemas.js",
+        // Not runtime dependencies: a devDependency, a Bun polyfill, and
+        // generated code.
+        "../node_modules/dev-only/index.js",
+        "node:buffer",
+        null,
+      ]);
+    }
+    const fix = "mark it external in the build so the artifact imports it";
+    const result = inspectBuiltPackage(root);
+    assert.deepEqual(result.errors, [
+      `@k-msg/fixture: dist/index.mjs inlines 1 module of its dependency @k-msg/dep; ${fix}`,
+      `@k-msg/fixture: dist/index.mjs inlines 2 modules of its dependency zod; ${fix}`,
+      `@k-msg/fixture: dist/index.cjs inlines 1 module of its dependency @k-msg/dep; ${fix}`,
+      `@k-msg/fixture: dist/index.cjs inlines 2 modules of its dependency zod; ${fix}`,
+    ]);
+    assert.deepEqual(result.sourcemapChecked, [
+      "dist/index.mjs",
+      "dist/index.cjs",
+    ]);
+  });
+});
+
+test("resolves nested artifacts' sources as Bun writes them and as the spec does", () => {
+  withFixture((root) => {
+    addDependencies(root);
+    updateManifest(root, (manifest) => {
+      manifest.exports["./toolkit"] = {
+        import: "./dist/toolkit/index.mjs",
+        require: "./dist/toolkit/index.cjs",
+      };
+    });
+    mkdirSync(path.join(root, "dist/toolkit"));
+    writeFileSync(
+      path.join(root, "dist/toolkit/index.mjs"),
+      "export const ok = true;\n",
+    );
+    writeFileSync(
+      path.join(root, "dist/toolkit/index.cjs"),
+      "exports.ok = true;\n",
+    );
+    linkSourcemap(root, "dist/index.mjs", ["../src/index.ts"]);
+    linkSourcemap(root, "dist/index.cjs", ["../src/index.ts"]);
+    // Bun 1.4.2 writes these relative to dist/, not to dist/toolkit/.
+    linkSourcemap(root, "dist/toolkit/index.mjs", [
+      "../src/index.ts",
+      "../workspace/dep/src/index.ts",
+    ]);
+    // The Source Map spec resolves these relative to dist/toolkit/.
+    linkSourcemap(root, "dist/toolkit/index.cjs", [
+      "../../src/index.ts",
+      "../../workspace/dep/src/index.ts",
+    ]);
+    const fix = "mark it external in the build so the artifact imports it";
+    assert.deepEqual(inspectBuiltPackage(root).errors, [
+      `@k-msg/fixture: dist/toolkit/index.mjs inlines 1 module of its dependency @k-msg/dep; ${fix}`,
+      `@k-msg/fixture: dist/toolkit/index.cjs inlines 1 module of its dependency @k-msg/dep; ${fix}`,
+    ]);
+  });
+});
+
+test("reports artifacts whose inlined packages the gate cannot tell", () => {
+  for (const { sources, map, problem } of [
+    { problem: "it links no sourcemap" },
+    {
+      sources: ["../src/missing.ts"],
+      problem: "its sourcemap lists ../src/missing.ts, which does not exist",
+    },
+    // Only node: specifiers name no file, so other URLs must resolve too.
+    {
+      sources: ["file:///src/index.ts"],
+      problem: "its sourcemap lists file:///src/index.ts, which does not exist",
+    },
+    {
+      sources: [],
+      map: { version: 3, mappings: "" },
+      problem: "index.mjs.map has no sources",
+    },
+  ]) {
+    withFixture((root) => {
+      addDependencies(root);
+      if (sources) linkSourcemap(root, "dist/index.mjs", sources);
+      if (map) {
+        writeFileSync(
+          path.join(root, "dist/index.mjs.map"),
+          JSON.stringify(map),
+        );
+      }
+      linkSourcemap(root, "dist/index.cjs", ["../src/index.ts"]);
+      assert.deepEqual(inspectBuiltPackage(root).errors, [
+        `@k-msg/fixture: cannot tell which packages dist/index.mjs inlines (${problem})`,
+      ]);
+    });
+  }
+});
+
+test("accepts listed inlined dependencies and rejects entries no artifact inlines", () => {
+  withFixture((root) => {
+    addDependencies(root);
+    linkSourcemap(root, "dist/index.mjs", [
+      "../src/index.ts",
+      "../workspace/dep/src/index.ts",
+    ]);
+    linkSourcemap(root, "dist/index.cjs", ["../src/index.ts"]);
+    const inlinedDependencies = { "@k-msg/fixture": ["@k-msg/dep", "zod"] };
+    assert.deepEqual(
+      inspectBuiltPackage(root, { inlinedDependencies }).errors,
+      [
+        "@k-msg/fixture: INLINED_DEPENDENCIES lists zod, but no artifact inlines it; remove the entry",
+      ],
+    );
+  });
+});
+
+test("lists only inlined dependencies that workspace packages declare", () => {
+  const manifests = readWorkspaceManifests();
+  for (const [name, dependencies] of Object.entries(INLINED_DEPENDENCIES)) {
+    const manifest = manifests.get(name);
+    assert.ok(manifest, `${name} is not a publishable workspace package`);
+    for (const dependency of dependencies) {
+      assert.ok(
+        manifest.dependencies?.[dependency] ??
+          manifest.optionalDependencies?.[dependency] ??
+          manifest.peerDependencies?.[dependency],
+        `${name} does not declare ${dependency}`,
       );
     }
   }
