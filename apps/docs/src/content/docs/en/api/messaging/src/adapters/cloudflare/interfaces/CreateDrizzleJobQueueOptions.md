@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L166)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L176)
 
 ## Extends
 
@@ -50,6 +50,23 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 #### Inherited from
 
 [`CreateDrizzleSqlClientOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/).[`dialect`](/en/api/k-msg/src/adapters/cloudflare/interfaces/createdrizzlesqlclientoptions/#dialect)
+
+***
+
+### initializeSchema?
+
+> `optional` **initializeSchema?**: `boolean`
+
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L184)
+
+Whether the queue creates its table and indexes on first use. Set it to
+`false` when migrations create the schema.
+
+#### Default
+
+```ts
+true
+```
 
 ***
 
@@ -149,4 +166,4 @@ readonly `unknown`[]
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L168)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L178)

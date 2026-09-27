@@ -7,7 +7,7 @@ title: "createDrizzleDeliveryTrackingStore"
 
 > **createDrizzleDeliveryTrackingStore**(`options`): [`HyperdriveDeliveryTrackingStore`](/en/api/k-msg/src/adapters/cloudflare/classes/hyperdrivedeliverytrackingstore/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L191)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:204](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L204)
 
 ## Parameters
 
