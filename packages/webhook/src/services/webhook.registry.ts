@@ -38,9 +38,12 @@ export class WebhookRegistry {
   }
 
   /**
-   * Replaces the endpoint. With field crypto failing open, the stored secret
-   * is kept when the endpoint was read without it because it could not be
-   * decrypted, or when its unchanged secret cannot be encrypted again.
+   * Replaces the endpoint. With endpoint field crypto, an endpoint without a
+   * `secret` of its own keeps the stored secret, for example one read while
+   * it could not be decrypted; set `secret`, even to `undefined`, to replace
+   * or remove it. A secret that cannot be encrypted in open mode is kept if
+   * it is the stored one, and fails the update if the stored one cannot be
+   * read to tell.
    */
   async updateEndpoint(
     endpointId: string,
