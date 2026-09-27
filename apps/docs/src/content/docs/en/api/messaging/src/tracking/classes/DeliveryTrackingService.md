@@ -31,12 +31,13 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:251](https://gi
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L306)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:310](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L310)
 
-Stops polling and closes the store. A poll in progress stops as if its
-signal had aborted, and close() waits for it to store the statuses it
-has before closing the store; status changes still being delivered to
-`onStatusChange` are not waited for. The service does not poll again.
+Stops polling and closes the store. A poll in progress, including one
+still setting up the store, stops as if its signal had aborted, and
+close() waits for it to store the statuses it has before closing the
+store; status changes still being delivered to `onStatusChange` are not
+waited for. The service does not poll again.
 
 #### Returns
 
@@ -48,7 +49,7 @@ has before closing the store; status changes still being delivered to
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:414](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L414)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:418](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L418)
 
 #### Parameters
 
@@ -70,7 +71,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:408](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L408)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:412](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L412)
 
 #### Parameters
 
@@ -88,7 +89,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:408](https://gi
 
 > **getRecord**(`messageId`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/) \| `undefined`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:395](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L395)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L399)
 
 #### Parameters
 
@@ -118,7 +119,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:279](https://gi
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:400](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L400)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:404](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L404)
 
 #### Parameters
 
@@ -136,7 +137,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:400](https://gi
 
 > **recordSend**(`context`, `result`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:315](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L315)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:319](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L319)
 
 #### Parameters
 
@@ -158,7 +159,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:315](https://gi
 
 > **runOnce**(`request?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:446](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L446)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:450](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L450)
 
 Polls the records that are due once, or joins a poll already running.
 It resolves once the poll's status changes have been delivered to
@@ -210,7 +211,7 @@ Defined in: [packages/messaging/src/delivery-tracking/service.ts:283](https://gi
 
 > **stop**(): `void`
 
-Defined in: [packages/messaging/src/delivery-tracking/service.ts:294](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L294)
+Defined in: [packages/messaging/src/delivery-tracking/service.ts:297](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/service.ts#L297)
 
 #### Returns
 
