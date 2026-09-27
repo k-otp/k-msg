@@ -87,7 +87,12 @@ collecting it. The check is on by default (`enableSignatureValidation: true`):
 - The raw body is `webhook.rawBody`: the request body exactly as received, as
   a string, `Uint8Array`, or `ArrayBuffer`. A webhook without it is rejected,
   because `JSON.parse` followed by `JSON.stringify` rarely gives back the bytes
-  the sender signed. Parse `body` from the same bytes.
+  the sender signed.
+- The collector parses `body` from the verified raw body, which must be UTF-8
+  JSON, so only signed data reaches the transformers. `body` can be left out;
+  one passed alongside is replaced.
+- `maxPayloadSize` (default 1 MB) applies to the raw body's size in bytes
+  before the signature is checked.
 
 ```ts
 import { WebhookCollector } from "@k-msg/analytics";
@@ -98,7 +103,7 @@ const collector = new WebhookCollector({
 });
 
 export async function receiveWebhook(request: Request) {
-  // Verify the body as received; JSON.parse and JSON.stringify can change the bytes.
+  // Pass the body as received: the collector verifies it, then parses it.
   const rawBody = await request.text();
   // Rejects with "Invalid webhook signature" when the signature does not match.
   return collector.receiveWebhook({
@@ -106,7 +111,6 @@ export async function receiveWebhook(request: Request) {
     source: "sms-provider",
     timestamp: new Date(),
     headers: Object.fromEntries(request.headers),
-    body: JSON.parse(rawBody),
     rawBody,
   });
 }

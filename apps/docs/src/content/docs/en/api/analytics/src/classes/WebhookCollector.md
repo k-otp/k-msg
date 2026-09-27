@@ -5,7 +5,7 @@ prev: false
 title: "WebhookCollector"
 ---
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L113)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L149)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:113](https:/
 
 > **new WebhookCollector**(`config?`): `WebhookCollector`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L128)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L164)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:44](https://github.c
 
 > **getProcessedWebhooks**(`since?`): [`WebhookData`](/en/api/analytics/src/interfaces/webhookdata/)[]
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:202](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L202)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:253](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L253)
 
 처리된 웹훅 조회
 
@@ -111,7 +111,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:202](https:/
 
 > **getWebhookStats**(): `object`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:213](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L213)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:264](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L264)
 
 웹훅 통계
 
@@ -219,7 +219,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.c
 
 > **receiveWebhook**(`webhook`): `Promise`\<[`EventData`](/en/api/analytics/src/interfaces/eventdata/)[]\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L148)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L184)
 
 웹훅 수신 처리
 
@@ -239,7 +239,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:148](https:/
 
 > **registerTransformer**(`name`, `transformer`): `void`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:183](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L183)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L234)
 
 웹훅 변환기 등록
 
@@ -311,7 +311,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:31](https://github.c
 
 > **unregisterTransformer**(`name`): `boolean`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L191)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:242](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L242)
 
 웹훅 변환기 제거
 

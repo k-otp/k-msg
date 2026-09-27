@@ -9,11 +9,15 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://g
 
 ## Properties
 
-### body
+### body?
 
-> **body**: `any`
+> `optional` **body?**: `any`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L14)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L19)
+
+The parsed payload that the transformers read. While signature
+validation is on, the collector parses it from the verified `rawBody`
+instead, so it can be omitted and a value passed here is replaced.
 
 ***
 
@@ -37,12 +41,12 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 > `optional` **rawBody?**: `string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L21)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L26)
 
-The request body exactly as received, before JSON parsing: the bytes the
-sender signed. Required while signature validation is on, because
-re-serializing `body` rarely reproduces those bytes. `body` should be
-parsed from these same bytes.
+The request body exactly as received, before any parsing: the bytes the
+sender signed. Required while signature validation is on, and then it
+must be UTF-8 JSON. Its size in bytes counts against `maxPayloadSize`
+before the signature is checked.
 
 ***
 
@@ -50,7 +54,7 @@ parsed from these same bytes.
 
 > `optional` **signature?**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L23)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L28)
 
 The signature to check when the signature header is missing.
 

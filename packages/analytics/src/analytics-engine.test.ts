@@ -525,7 +525,7 @@ describe("WebhookCollector", () => {
     // Spaced like Python's json.dumps, so it differs from JSON.stringify(body):
     // only the bytes as received can verify.
     const rawBody = '{"messageId": "msg-123", "status": "delivered"}';
-    const sign = (payload: string, secret = secretKey) =>
+    const sign = (payload: string | Uint8Array, secret = secretKey) =>
       createHmac("sha256", secret).update(payload).digest("hex");
 
     const createCollector = (config: Partial<WebhookCollectorConfig> = {}) =>
@@ -546,6 +546,18 @@ describe("WebhookCollector", () => {
       rawBody,
       ...overrides,
     });
+
+    // A webhook whose valid signature covers `payload`.
+    const signedAs = (
+      payload: string | Uint8Array,
+      overrides: Partial<WebhookData> = {},
+    ): WebhookData =>
+      signedWebhook({
+        headers: { "x-signature": `sha256=${sign(payload)}` },
+        body: undefined,
+        rawBody: payload,
+        ...overrides,
+      });
 
     test("accepts an HMAC-SHA256 of the raw body", async () => {
       const events = await createCollector().receiveWebhook(signedWebhook());
@@ -634,6 +646,84 @@ describe("WebhookCollector", () => {
 
       await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
         "rawBody",
+      );
+    });
+
+    test("collects the signed body, not a body passed alongside", async () => {
+      const failed = '{"messageId": "msg-123", "status": "failed"}';
+      const collector = createCollector();
+
+      // For example, middleware changed the parsed body after it was signed.
+      const events = await collector.receiveWebhook(
+        signedAs(failed, {
+          body: { messageId: "msg-123", status: "delivered" },
+        }),
+      );
+
+      expect(events.map((event) => event.type)).toEqual(["message.failed"]);
+      expect(collector.getProcessedWebhooks()[0]?.body).toEqual(
+        JSON.parse(failed),
+      );
+    });
+
+    test("parses body from the signed bytes when it is omitted", async () => {
+      const webhook = signedAs(new TextEncoder().encode(rawBody));
+
+      const events = await createCollector().receiveWebhook(webhook);
+
+      expect(events.map((event) => event.type)).toEqual(["message.delivered"]);
+    });
+
+    test("rejects a signed body that is not UTF-8 JSON", async () => {
+      const collector = createCollector();
+      const encoder = new TextEncoder();
+
+      for (const payload of [
+        "messageId=msg-123&status=delivered",
+        // JSON only if the byte that is never UTF-8 were replaced with U+FFFD.
+        new Uint8Array([
+          ...encoder.encode('{"note": "'),
+          0xff,
+          ...encoder.encode('"}'),
+        ]),
+      ]) {
+        await expect(
+          collector.receiveWebhook(signedAs(payload, { body: {} })),
+        ).rejects.toThrow("rawBody must be UTF-8 JSON");
+      }
+    });
+
+    test("counts rawBody against maxPayloadSize in UTF-8 bytes", async () => {
+      // Hangul takes 3 UTF-8 bytes per UTF-16 code unit.
+      const korean =
+        '{"messageId": "msg-123", "status": "delivered", "note": "배송 완료"}';
+      const bytes = new TextEncoder().encode(korean);
+      const body = JSON.parse(korean);
+
+      await expect(
+        createCollector({ maxPayloadSize: bytes.length }).receiveWebhook(
+          signedAs(korean, { body }),
+        ),
+      ).resolves.toHaveLength(1);
+      for (const payload of [korean, bytes]) {
+        await expect(
+          createCollector({ maxPayloadSize: bytes.length - 1 }).receiveWebhook(
+            signedAs(payload, { body }),
+          ),
+        ).rejects.toThrow("maxPayloadSize");
+      }
+    });
+
+    test("refuses an oversized rawBody before checking its signature", async () => {
+      // Small once parsed, but a megabyte of whitespace to hash.
+      const padded = `${" ".repeat(1024 * 1024)}${rawBody}`;
+      const webhook = signedWebhook({
+        headers: { "x-signature": `sha256=${"0".repeat(64)}` },
+        rawBody: padded,
+      });
+
+      await expect(createCollector().receiveWebhook(webhook)).rejects.toThrow(
+        "maxPayloadSize",
       );
     });
 

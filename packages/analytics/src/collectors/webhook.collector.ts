@@ -11,12 +11,17 @@ export interface WebhookData {
   source: string;
   timestamp: Date;
   headers: Record<string, string>;
-  body: any;
   /**
-   * The request body exactly as received, before JSON parsing: the bytes the
-   * sender signed. Required while signature validation is on, because
-   * re-serializing `body` rarely reproduces those bytes. `body` should be
-   * parsed from these same bytes.
+   * The parsed payload that the transformers read. While signature
+   * validation is on, the collector parses it from the verified `rawBody`
+   * instead, so it can be omitted and a value passed here is replaced.
+   */
+  body?: any;
+  /**
+   * The request body exactly as received, before any parsing: the bytes the
+   * sender signed. Required while signature validation is on, and then it
+   * must be UTF-8 JSON. Its size in bytes counts against `maxPayloadSize`
+   * before the signature is checked.
    */
   rawBody?: string | Uint8Array | ArrayBuffer;
   /** The signature to check when the signature header is missing. */
@@ -38,7 +43,11 @@ export interface WebhookCollectorConfig {
   /** The shared signing secret. Required while signature validation is on. */
   secretKey?: string;
   allowedSources: string[];
-  maxPayloadSize: number; // bytes
+  /**
+   * The largest payload accepted, in bytes: `rawBody` is measured before its
+   * signature is checked, then `body` by the length of its JSON.
+   */
+  maxPayloadSize: number;
   rateLimitPerMinute: number;
 }
 
@@ -110,6 +119,33 @@ function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return diff === 0;
 }
 
+// Every UTF-16 code unit takes at least one UTF-8 byte, so a string longer
+// than `max` is refused without being encoded.
+function exceedsBytes(
+  rawBody: string | Uint8Array | ArrayBuffer,
+  max: number,
+): boolean {
+  if (typeof rawBody !== "string") return rawBody.byteLength > max;
+  return (
+    rawBody.length > max || new TextEncoder().encode(rawBody).byteLength > max
+  );
+}
+
+// JSON on the wire is UTF-8, so malformed bytes are refused, not replaced.
+function parseSignedJson(rawBody: string | Uint8Array | ArrayBuffer): unknown {
+  try {
+    const text =
+      typeof rawBody === "string"
+        ? rawBody
+        : new TextDecoder("utf-8", { fatal: true }).decode(rawBody);
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      "rawBody must be UTF-8 JSON while signature validation is on",
+    );
+  }
+}
+
 export class WebhookCollector extends EventEmitter {
   private config: WebhookCollectorConfig;
   private transformers: Map<string, WebhookTransformer> = new Map();
@@ -151,11 +187,23 @@ export class WebhookCollector extends EventEmitter {
       throw new Error(`Rate limit exceeded for source: ${webhook.source}`);
     }
 
-    // 웹훅 검증
-    await this.validateWebhook(webhook);
+    // 원본 본문 크기 확인: 해시하거나 저장하기 전에
+    if (
+      webhook.rawBody !== undefined &&
+      webhook.rawBody !== null &&
+      exceedsBytes(webhook.rawBody, this.config.maxPayloadSize)
+    ) {
+      throw new Error(
+        `rawBody is larger than maxPayloadSize (${this.config.maxPayloadSize} bytes)`,
+      );
+    }
+
+    // 웹훅 검증 (서명 검증 시 body는 검증된 rawBody에서 파싱)
+    const accepted = await this.validateWebhook(webhook);
 
     // 페이로드 크기 확인
-    const payloadSize = JSON.stringify(webhook.body).length;
+    const payloadSize =
+      accepted.body === undefined ? 0 : JSON.stringify(accepted.body).length;
     if (payloadSize > this.config.maxPayloadSize) {
       throw new Error(
         `Payload size ${payloadSize} exceeds maximum ${this.config.maxPayloadSize}`,
@@ -163,17 +211,20 @@ export class WebhookCollector extends EventEmitter {
     }
 
     // 이벤트 변환
-    const events = await this.transformWebhook(webhook);
+    const events = await this.transformWebhook(accepted);
 
     // 웹훅 저장 (감사 목적)
-    this.processedWebhooks.push(webhook);
+    this.processedWebhooks.push(accepted);
 
     // 최근 1000개만 유지
     if (this.processedWebhooks.length > 1000) {
       this.processedWebhooks = this.processedWebhooks.slice(-500);
     }
 
-    this.emit("webhook:received", { webhook, eventCount: events.length });
+    this.emit("webhook:received", {
+      webhook: accepted,
+      eventCount: events.length,
+    });
     return events;
   }
 
@@ -236,7 +287,7 @@ export class WebhookCollector extends EventEmitter {
     };
   }
 
-  private async validateWebhook(webhook: WebhookData): Promise<void> {
+  private async validateWebhook(webhook: WebhookData): Promise<WebhookData> {
     // 소스 검증
     if (
       this.config.allowedSources.length > 0 &&
@@ -245,10 +296,11 @@ export class WebhookCollector extends EventEmitter {
       throw new Error(`Source ${webhook.source} is not allowed`);
     }
 
-    // 서명 검증
-    if (this.config.enableSignatureValidation) {
-      await this.validateSignature(webhook);
-    }
+    // 서명 검증: body를 서명된 바이트에서 파싱해, 서명되지 않은 body가
+    // 변환기에 닿지 않게 한다
+    const accepted = this.config.enableSignatureValidation
+      ? { ...webhook, body: await this.validateSignature(webhook) }
+      : webhook;
 
     // 기본 필드 검증
     if (!webhook.id) {
@@ -262,9 +314,12 @@ export class WebhookCollector extends EventEmitter {
     if (!webhook.timestamp || !(webhook.timestamp instanceof Date)) {
       throw new Error("Valid webhook timestamp is required");
     }
+
+    return accepted;
   }
 
-  private async validateSignature(webhook: WebhookData): Promise<void> {
+  /** Verifies the signature, then returns the JSON body it covers. */
+  private async validateSignature(webhook: WebhookData): Promise<unknown> {
     const signature =
       findHeader(webhook.headers, this.config.signatureHeader) ||
       webhook.signature;
@@ -289,6 +344,8 @@ export class WebhookCollector extends EventEmitter {
     if (!(await verifySha256Signature(webhook.rawBody, signature, secretKey))) {
       throw new Error("Invalid webhook signature");
     }
+
+    return parseSignedJson(webhook.rawBody);
   }
 
   private checkRateLimit(source: string): boolean {
