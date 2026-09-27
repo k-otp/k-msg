@@ -12,9 +12,10 @@ export interface WebhookData {
   timestamp: Date;
   headers: Record<string, string>;
   /**
-   * The parsed payload that the transformers read. While signature
-   * validation is on, the collector parses it from the verified `rawBody`
-   * instead, so it can be omitted and a value passed here is replaced.
+   * The parsed payload that the transformers read, required while signature
+   * validation is off. While it is on, the collector parses it from the
+   * verified `rawBody` instead, so it can be omitted and a value passed here
+   * is replaced.
    */
   body?: any;
   /**
@@ -229,8 +230,7 @@ export class WebhookCollector extends EventEmitter {
     const accepted = await this.validateWebhook(received);
 
     // 페이로드 크기 확인
-    const payloadSize =
-      accepted.body === undefined ? 0 : JSON.stringify(accepted.body).length;
+    const payloadSize = JSON.stringify(accepted.body).length;
     if (payloadSize > this.config.maxPayloadSize) {
       throw new Error(
         `Payload size ${payloadSize} exceeds maximum ${this.config.maxPayloadSize}`,
@@ -340,6 +340,13 @@ export class WebhookCollector extends EventEmitter {
 
     if (!webhook.timestamp || !(webhook.timestamp instanceof Date)) {
       throw new Error("Valid webhook timestamp is required");
+    }
+
+    // 서명 검증 중에는 항상 파싱된 값이 있으므로, 검증을 끈 경우에만 걸린다
+    if (accepted.body === undefined) {
+      throw new Error(
+        "Webhook body is required while signature validation is off",
+      );
     }
 
     return accepted;

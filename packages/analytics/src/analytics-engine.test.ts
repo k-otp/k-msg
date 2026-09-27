@@ -676,6 +676,21 @@ describe("WebhookCollector", () => {
       expect(events.map((event) => event.type)).toEqual(["message.delivered"]);
     });
 
+    test("still needs body while validation is off", async () => {
+      const collector = new WebhookCollector({
+        enableSignatureValidation: false,
+      });
+
+      // Nothing verified the raw body, so it is not parsed in place of body.
+      for (const rawBodyOnly of [undefined, rawBody]) {
+        await expect(
+          collector.receiveWebhook(
+            signedWebhook({ body: undefined, rawBody: rawBodyOnly }),
+          ),
+        ).rejects.toThrow("body is required");
+      }
+    });
+
     test("rejects a signed body that is not UTF-8 JSON", async () => {
       const collector = createCollector();
       const encoder = new TextEncoder();

@@ -13,11 +13,12 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:9](https://g
 
 > `optional` **body?**: `any`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L19)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L20)
 
-The parsed payload that the transformers read. While signature
-validation is on, the collector parses it from the verified `rawBody`
-instead, so it can be omitted and a value passed here is replaced.
+The parsed payload that the transformers read, required while signature
+validation is off. While it is on, the collector parses it from the
+verified `rawBody` instead, so it can be omitted and a value passed here
+is replaced.
 
 ***
 
@@ -41,7 +42,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 > `optional` **rawBody?**: `string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L28)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L29)
 
 The request body exactly as received, before any parsing: the bytes the
 sender signed. Prefer bytes, such as `await request.arrayBuffer()`;
@@ -56,7 +57,7 @@ signature is checked.
 
 > `optional` **signature?**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L30)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L31)
 
 The signature to check when the signature header is missing.
 
