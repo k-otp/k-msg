@@ -177,7 +177,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // Queued as one write, so a shutdown cannot leave the batch half added.
   // Every URL is checked first, so an invalid one adds none of them; the
   // error names its position, not the URL, which may carry a token. The
-  // batch is stored all or none.
+  // whole batch is then checked against stored endpoints before any is
+  // stored (see storeEndpoints for a failure after that).
   async addEndpoints(
     inputs: readonly WebhookEndpointInput[],
   ): Promise<WebhookEndpoint[]> {
@@ -208,37 +209,38 @@ export class WebhookRuntimeService implements WebhookRuntime {
     });
   }
 
-  // Adds endpoints to the store, all or none. When one fails, for example
-  // because a writer outside this runtime took its id or URL, the ones
-  // already added are removed. So is the failed one if the store kept it
-  // anyway, as D1 can when it fails after committing; a conflict error means
-  // it was not stored, and its id may be another endpoint's. Each is removed
-  // only while the store still holds it, not a row another writer has put
-  // under its id since. The store has no conditional delete, so that check
-  // narrows the race rather than closing it. If a removal fails too, the
-  // original error is still the one to report.
+  // Adds endpoints to the store in order, and never removes one on the way
+  // out: the store has no compare-and-delete, so a rollback could delete an
+  // endpoint another writer has since stored under the same id, and it can
+  // fail in the same outage as the add. When a write fails partway, for
+  // example because the store fails or another process took an id or URL
+  // after the batch was checked, the endpoints before it stay stored and the
+  // error names them, with the store's error as its cause. It names the
+  // failed one too if the store kept it anyway, as D1 can when it fails
+  // after committing. When none of a batch was stored, the store's error is
+  // passed on as it is, as it always is for a single endpoint.
   private async storeEndpoints(
     endpoints: readonly WebhookEndpoint[],
   ): Promise<void> {
-    const added: WebhookEndpoint[] = [];
-    for (const endpoint of endpoints) {
+    for (const [index, endpoint] of endpoints.entries()) {
       try {
         await this.endpointStore.add(endpoint);
       } catch (error) {
-        const written =
-          error instanceof WebhookEndpointConflictError
-            ? added
-            : [...added, endpoint];
-        for (const candidate of written) {
-          if (await this.holdsEndpoint(candidate)) {
-            await this.endpointStore
-              .remove(candidate.id)
-              .catch(() => undefined);
-          }
+        const stored = endpoints.slice(0, index).map(({ id }) => id);
+        if (
+          endpoints.length > 1 &&
+          !(error instanceof WebhookEndpointConflictError) &&
+          (await this.holdsEndpoint(endpoint))
+        ) {
+          stored.push(endpoint.id);
         }
-        throw error;
+        if (stored.length === 0) throw error;
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(
+          `Webhook endpoint ${index} in the batch: ${reason}; stored: ${stored.join(", ")}`,
+          { cause: error },
+        );
       }
-      added.push(endpoint);
     }
   }
 
