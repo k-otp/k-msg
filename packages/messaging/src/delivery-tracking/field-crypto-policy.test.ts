@@ -393,7 +393,36 @@ describe("tracking hash lookups", () => {
     expect(await messageIdsTo(retired, "01011110002")).toEqual(["m-2"]);
   });
 
-  test("resolves lookup candidates for the store: the encrypt kid first, then the decrypt set", async () => {
+  test("keeps records written before a key resolver was configured findable", async () => {
+    const client = createSqliteClient();
+    const provider = createKeyedProvider();
+    const openStore = (keyResolver?: FieldCryptoConfig["keyResolver"]) =>
+      new HyperdriveDeliveryTrackingStore(client, {
+        tableName: "kmsg_delivery_tracking",
+        fieldCrypto: {
+          tenantId: "tenant-a",
+          config: {
+            enabled: true,
+            fields: { to: "encrypt+hash", from: "encrypt+hash" },
+            ...(keyResolver ? { keyResolver } : {}),
+            provider,
+          },
+        },
+      });
+
+    // Hashed with the provider's default key, as every write was before.
+    await openStore().upsert(trackingRecord(1, "01011110001"));
+
+    const withResolver = openStore(
+      createStaticKeyResolver({ activeKid: "tenant-a" }),
+    );
+    await withResolver.upsert(trackingRecord(2, "01011110002"));
+    expect(await messageIdsTo(withResolver, "01011110001")).toEqual(["m-1"]);
+    expect(await messageIdsTo(withResolver, "01011110002")).toEqual(["m-2"]);
+    expect((await withResolver.get("m-1"))?.to).toBe("01011110001");
+  });
+
+  test("resolves lookup candidates for the store: the encrypt kid, the decrypt set, and the provider's default key", async () => {
     const contexts: Array<Record<string, unknown>> = [];
     const provider: FieldCryptoProvider = {
       encrypt: async ({ value }) => ({ ciphertext: value }),
@@ -432,6 +461,7 @@ describe("tracking hash lookups", () => {
       "k-2026-02:01012345678",
       "k-2026-01:01012345678",
       "k-2025-12:01012345678",
+      "provider-default:01012345678",
     ]);
     expect(withDecryptSet?.to).toBeUndefined();
     // A lookup spans records, so no message or provider id reaches the resolver.
@@ -449,7 +479,10 @@ describe("tracking hash lookups", () => {
       { resolveEncryptKey: () => ({ kid: "tenant-a" }) },
       "01012345678",
     );
-    expect(encryptKidOnly?.toHash).toBe("tenant-a:01012345678");
+    expect(encryptKidOnly?.toHash).toEqual([
+      "tenant-a:01012345678",
+      "provider-default:01012345678",
+    ]);
 
     // Without a resolver a write hashes with the provider's default key, and
     // so does the lookup.
@@ -531,45 +564,48 @@ describe("tracking hash lookups", () => {
     expect(await store.countRecords({ from: record.from })).toBe(1);
   });
 
-  test("stores a degraded write without the hash it cannot compute", async () => {
-    const failures: Array<Partial<FieldCryptoConfig>> = [
-      {
-        keyResolver: {
-          resolveEncryptKey: () => {
-            throw new Error("key service unavailable");
-          },
-        },
-      },
-      {
-        provider: {
-          encrypt: async ({ value }) => ({ ciphertext: value }),
-          decrypt: async ({ ciphertext }) => ciphertext,
-          hash: async () => {
-            throw new Error("hash service unavailable");
-          },
-        },
-      },
-    ];
-
-    for (const failure of failures) {
-      const secured = await applyTrackingCryptoOnWrite(
+  test("falls back to the provider's default key, then to no hash, for a degraded write", async () => {
+    const degrade = (patch: Partial<FieldCryptoConfig>) =>
+      applyTrackingCryptoOnWrite(
         createRecord(),
         {
           config: createConfig({
             failMode: "open",
             openFallback: "masked",
-            ...failure,
+            ...patch,
           }),
         },
         { tableName: "kmsg_delivery_tracking", store: "memory" },
         { secureMode: true, compatPlainColumns: false },
       );
 
-      expect(secured.cryptoState).toBe("degraded");
-      expect(secured.toMasked).toBe("010******78");
-      expect(secured.toHash).toBeUndefined();
-      expect(secured.fromHash).toBeUndefined();
-    }
+    // The key service is down: the provider's default key stands in.
+    const keyServiceDown = await degrade({
+      keyResolver: {
+        resolveEncryptKey: () => {
+          throw new Error("key service unavailable");
+        },
+      },
+    });
+    expect(keyServiceDown.cryptoState).toBe("degraded");
+    expect(keyServiceDown.toHash).toBe("h:01012345678");
+    expect(keyServiceDown.fromHash).toBe("h:01011112222");
+
+    // Nothing can hash: the recipient hash is empty, as the secure SQL schema
+    // still requires one, and the optional sender hash is left out.
+    const hashServiceDown = await degrade({
+      provider: {
+        encrypt: async ({ value }) => ({ ciphertext: value }),
+        decrypt: async ({ ciphertext }) => ciphertext,
+        hash: async () => {
+          throw new Error("hash service unavailable");
+        },
+      },
+    });
+    expect(hashServiceDown.cryptoState).toBe("degraded");
+    expect(hashServiceDown.toMasked).toBe("010******78");
+    expect(hashServiceDown.toHash).toBe("");
+    expect(hashServiceDown.fromHash).toBeUndefined();
   });
 
   const openSecureStores: Record<
@@ -590,7 +626,8 @@ describe("tracking hash lookups", () => {
   };
 
   for (const [kind, openStore] of Object.entries(openSecureStores)) {
-    test(`an open-mode lookup skips a hash it cannot compute and matches no records without one (${kind} store)`, async () => {
+    test(`an open-mode lookup skips what it cannot resolve or hash and keeps what it can (${kind} store)`, async () => {
+      let encryptKid = (): { kid: string } => ({ kid: "tenant-a" });
       let decryptKids = (): string[] => ["tenant-a"];
       const hashFailures: unknown[] = [];
       const store = openStore({
@@ -600,7 +637,7 @@ describe("tracking hash lookups", () => {
           fields: { to: "encrypt+hash", from: "encrypt+hash" },
           failMode: "open",
           keyResolver: {
-            resolveEncryptKey: () => ({ kid: "tenant-a" }),
+            resolveEncryptKey: () => encryptKid(),
             resolveDecryptKeys: () => decryptKids(),
           },
           provider: createKeyedProvider(),
@@ -621,9 +658,16 @@ describe("tracking hash lookups", () => {
       decryptKids = () => ["tenant-a", "k-unknown"];
       expect(await messageIdsTo(store, "01011110001")).toEqual(["m-1"]);
 
-      // With the key service down no hash is left: the lookup matches no
-      // record rather than dropping the filter and matching every record.
+      // The decrypt set fails to load: records under the encrypt kid are
+      // still found.
       decryptKids = () => {
+        throw new Error("key service unavailable");
+      };
+      expect(await messageIdsTo(store, "01011110001")).toEqual(["m-1"]);
+
+      // With the whole key service down only the provider's default key is
+      // left, and these records were not hashed under it.
+      encryptKid = () => {
         throw new Error("key service unavailable");
       };
       expect(await messageIdsTo(store, "01011110001")).toEqual([]);
@@ -631,7 +675,74 @@ describe("tracking hash lookups", () => {
       expect(
         await store.countBy?.({ from: createRecord().from }, ["type"]),
       ).toEqual([]);
-      expect(hashFailures).toHaveLength(4);
+      expect(hashFailures).toHaveLength(5);
+    });
+
+    test(`stores a degraded write while the key service is down and still finds it (${kind} store)`, async () => {
+      const keyed = createKeyedProvider();
+      let keyServiceDown = false;
+      const store = openStore({
+        tenantId: "tenant-a",
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          failMode: "open",
+          keyResolver: {
+            resolveEncryptKey: () => {
+              if (keyServiceDown) throw new Error("key service unavailable");
+              return { kid: "tenant-a" };
+            },
+            resolveDecryptKeys: () => ["tenant-a"],
+          },
+          provider: keyed,
+        },
+      });
+      await store.upsert(trackingRecord(1, "01011110001"));
+
+      keyServiceDown = true;
+      await store.upsert(trackingRecord(2, "01011110002"));
+      const degraded = await store.get("m-2");
+      expect(degraded?.cryptoState).toBe("degraded");
+      expect(degraded?.toHash).toBe(
+        await keyed.hash({ value: "01011110002", path: "to" }),
+      );
+
+      expect(await messageIdsTo(store, "01011110002")).toEqual(["m-2"]);
+      expect(await messageIdsTo(store, "01011110001")).toEqual(["m-1"]);
+      keyServiceDown = false;
+      expect(await messageIdsTo(store, "01011110002")).toEqual(["m-2"]);
+    });
+
+    test(`stores a degraded write it cannot hash without matching any lookup (${kind} store)`, async () => {
+      const keyed = createKeyedProvider();
+      let hashServiceDown = false;
+      const store = openStore({
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          failMode: "open",
+          provider: {
+            ...keyed,
+            hash: (input) => {
+              if (hashServiceDown) {
+                throw new Error("hash service unavailable");
+              }
+              return keyed.hash(input);
+            },
+          },
+        },
+      });
+      await store.upsert(trackingRecord(1, "01011110001"));
+
+      hashServiceDown = true;
+      await store.upsert(trackingRecord(2, "01011110002"));
+      hashServiceDown = false;
+
+      const degraded = await store.get("m-2");
+      expect(degraded?.cryptoState).toBe("degraded");
+      expect(degraded?.toHash).toBeUndefined();
+      expect(await messageIdsTo(store, "01011110002")).toEqual([]);
+      expect(await messageIdsTo(store, "01011110001")).toEqual(["m-1"]);
     });
 
     test(`an open-mode lookup whose hash fails matches no records instead of every record (${kind} store)`, async () => {
