@@ -128,6 +128,51 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
   }
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
+    return this.selectDue(now, limit).map(cloneRecord);
+  }
+
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    // Selected and leased without awaiting in between, so a concurrent call
+    // cannot take the same records.
+    const due = this.selectDue(now, limit);
+    for (const record of due) {
+      record.nextCheckAt = new Date(leaseUntil);
+    }
+    return due.map(cloneRecord);
+  }
+
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    const record = this.records.get(messageId);
+    // Checked and written without awaiting in between.
+    if (record?.nextCheckAt.getTime() !== leaseUntil.getTime()) return false;
+    await this.patch(messageId, patch);
+    return true;
+  }
+
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    for (const messageId of messageIds) {
+      const record = this.records.get(messageId);
+      // Still this lease: another poll may have leased the record since.
+      if (record?.nextCheckAt.getTime() === leaseUntil.getTime()) {
+        record.nextCheckAt = new Date(nextCheckAt);
+      }
+    }
+  }
+
+  // The stored records themselves, not copies.
+  private selectDue(now: Date, limit: number): TrackingRecord[] {
     const due: TrackingRecord[] = [];
     const nowMs = now.getTime();
     const safeLimit = Number.isFinite(limit)
@@ -137,7 +182,7 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
     for (const record of this.records.values()) {
       if (isTerminalDeliveryStatus(record.status)) continue;
       if (record.nextCheckAt.getTime() > nowMs) continue;
-      due.push(cloneRecord(record));
+      due.push(record);
     }
 
     due.sort((a, b) => a.nextCheckAt.getTime() - b.nextCheckAt.getTime());

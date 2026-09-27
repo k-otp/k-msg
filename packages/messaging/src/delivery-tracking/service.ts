@@ -1,10 +1,12 @@
 import type {
   DeliveryStatus,
   Provider,
+  ProviderRequestContext,
   SendInput,
   SendResult,
 } from "@k-msg/core";
 import type { HookContext } from "../hooks";
+import { logBackgroundFailure } from "../shared/log-background-failure";
 import { logFallbackFailure } from "../shared/log-fallback";
 import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "../sms-bytes";
 import { computeNextCheckAt, reconcileDeliveryStatuses } from "./reconciler";
@@ -102,6 +104,55 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+// A signal that aborts when any of the given ones does. unlink() removes its
+// listeners, so a long-lived signal does not collect one per poll.
+function linkSignals(...signals: Array<AbortSignal | undefined>): {
+  signal: AbortSignal;
+  unlink(): void;
+} {
+  const controller = new AbortController();
+  const unlinks: Array<() => void> = [];
+  for (const signal of signals) {
+    if (!signal) continue;
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      break;
+    }
+    const onAbort = () => controller.abort(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    unlinks.push(() => signal.removeEventListener("abort", onAbort));
+  }
+  return {
+    signal: controller.signal,
+    unlink: () => {
+      for (const unlink of unlinks) unlink();
+    },
+  };
+}
+
+// Waits for a poll, or only until `signal` aborts.
+function waitForPoll(
+  poll: Promise<void>,
+  signal: AbortSignal | undefined,
+): Promise<void> {
+  if (!signal) return poll;
+  if (signal.aborted) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const onAbort = () => resolve();
+    signal.addEventListener("abort", onAbort, { once: true });
+    void poll.then(
+      () => {
+        signal.removeEventListener("abort", onAbort);
+        resolve();
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      },
+    );
+  });
+}
+
 type ApiFailoverOutcome = "sent" | "failed" | "skipped";
 type ApiFailoverAttemptStatus = "not_attempted" | "attempting";
 
@@ -194,6 +245,8 @@ export class DeliveryTrackingService {
   // Batches of changes being delivered: queued ones, and in a runtime
   // without AsyncLocalStorage, ones delivered at once.
   private activeDeliveries = 0;
+  // Aborted by close(): it stops a poll in progress and every later one.
+  private readonly closing = new AbortController();
 
   constructor(config: DeliveryTrackingServiceConfig) {
     if (!config || typeof config !== "object") {
@@ -219,6 +272,7 @@ export class DeliveryTrackingService {
       unsupportedProviderStrategy:
         polling.unsupportedProviderStrategy ??
         DEFAULT_POLLING_CONFIG.unsupportedProviderStrategy,
+      leaseMs: polling.leaseMs ?? DEFAULT_POLLING_CONFIG.leaseMs,
     };
   }
 
@@ -227,10 +281,15 @@ export class DeliveryTrackingService {
   }
 
   start(): void {
-    if (this.timer) return;
+    if (this.timer || this.closing.signal.aborted) return;
     this.timer = setInterval(() => {
-      void this.runOnce().catch(() => {
-        // Best-effort polling. Delivery tracking must not crash the host process.
+      // A tick while a poll runs would only join it, and log its failure
+      // once more.
+      if (this.runOnceInFlight) return;
+      // Delivery tracking must not crash the host process; the next tick
+      // polls again.
+      void this.runOnce().catch((error: unknown) => {
+        logBackgroundFailure("Delivery tracking poll failed", error);
       });
     }, this.polling.intervalMs);
   }
@@ -241,8 +300,19 @@ export class DeliveryTrackingService {
     this.timer = undefined;
   }
 
+  /**
+   * Stops polling and closes the store. A poll in progress, including one
+   * still setting up the store, stops as if its signal had aborted, and
+   * close() waits for it to store the statuses it has before closing the
+   * store; status changes still being delivered to `onStatusChange` are not
+   * waited for. The service does not poll again.
+   */
   async close(): Promise<void> {
     this.stop();
+    this.closing.abort();
+    // A failed poll is reported to whoever started it: the runOnce() caller,
+    // or the timer, which logs it.
+    await this.runOnceInFlight?.polled.catch(() => undefined);
     await this.store.close?.();
   }
 
@@ -368,13 +438,25 @@ export class DeliveryTrackingService {
    * from others. There, a poll that ends while callbacks run delivers its
    * changes at once, beside them rather than after them, and every call
    * waits until its changes are delivered.
+   *
+   * `request` goes to each status query of the poll this call starts, as
+   * `KMsg.send()` passes it to the provider: a `signal` to cancel it and a
+   * `fetch` to make it with. The signal also bounds the poll: once it
+   * aborts, no more queries start, those still running are cancelled, and
+   * the poll stores the statuses it has and ends. The records it did not
+   * finish stay due. A call that joins a poll already running stops waiting
+   * for it when its own signal aborts. After `close()`, it does nothing.
    */
-  async runOnce(): Promise<void> {
+  async runOnce(request?: ProviderRequestContext): Promise<void> {
     // Checked before any await, while the caller's context is current.
     const fromCallback = this.calledFromCallback();
-    await this.ensureInit();
-    const run = this.runOnceInFlight ?? this.startRun();
-    await (fromCallback ? run.polled : run.delivered);
+    if (this.closing.signal.aborted) return;
+    // A poll counts as running while it sets up the store, so close() waits
+    // for that too.
+    const joined = this.runOnceInFlight;
+    const run = joined ?? this.startRun(request);
+    const done = fromCallback ? run.polled : run.delivered;
+    await (joined ? waitForPoll(done, request?.signal) : done);
   }
 
   // A callback that waited for notifications queued behind itself would
@@ -387,14 +469,15 @@ export class DeliveryTrackingService {
     return callbackContext.getStore() === true;
   }
 
-  private startRun(): PollRun {
+  private startRun(request?: ProviderRequestContext): PollRun {
     // Reported once the poll is done, so a callback can call runOnce itself
     // and cannot change a record that API failover still has to read.
     const changes: DeliveryStatusChange[] = [];
     let delivery: Promise<void> = Promise.resolve();
     const polled = (async () => {
       try {
-        await this.poll(changes);
+        await this.ensureInit();
+        await this.poll(changes, request);
       } finally {
         // Changes stored before a failure are still reported, each as this
         // poll left it. The snapshots are read while this run still holds
@@ -436,105 +519,220 @@ export class DeliveryTrackingService {
     return run;
   }
 
-  private async poll(changes: DeliveryStatusChange[]): Promise<void> {
-    const now = new Date();
-    const due = await this.store.listDue(now, this.polling.batchSize);
-    if (due.length === 0) return;
-    const dueByMessageId = new Map(
-      due.map((record) => [record.messageId, record]),
-    );
+  private async poll(
+    changes: DeliveryStatusChange[],
+    request?: ProviderRequestContext,
+  ): Promise<void> {
+    const link = linkSignals(request?.signal, this.closing.signal);
+    try {
+      const { signal } = link;
+      if (signal.aborted) return;
 
-    const { updates } = await reconcileDeliveryStatuses(
-      this.providers,
-      due,
-      now,
-      this.polling,
-    );
+      const now = new Date();
+      const { due, leaseUntil } = await this.takeDue(now);
+      if (due.length === 0) return;
+      const dueByMessageId = new Map(
+        due.map((record) => [record.messageId, record]),
+      );
+      // Leased records the poll has not stored a next check for yet.
+      const held = new Set(leaseUntil ? dueByMessageId.keys() : []);
 
-    const failures: Array<{ messageId: string; error: unknown }> = [];
-    for (const update of updates) {
-      const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
-
-      // If the record is terminal, keep it out of the due list.
-      if (patch.status && isTerminalDeliveryStatus(patch.status)) {
-        patch.nextCheckAt = now;
-      }
-
-      // A record the store rejects is retried by a later poll; the rest of
-      // the batch is still stored.
-      let stored = false;
       try {
-        await this.store.patch(update.messageId, patch);
-        stored = true;
+        const { updates } = await reconcileDeliveryStatuses(
+          this.providers,
+          due,
+          now,
+          this.polling,
+          { ...(request?.fetch ? { fetch: request.fetch } : {}), signal },
+        );
 
-        const originalRecord = dueByMessageId.get(update.messageId);
-        if (!originalRecord) continue;
-        const mergedRecord: TrackingRecord = {
-          ...originalRecord,
-          ...patch,
-          messageId: originalRecord.messageId,
-        };
+        const failures: Array<{ messageId: string; error: unknown }> = [];
+        for (const update of updates) {
+          const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
 
-        if (
-          this.onStatusChange &&
-          mergedRecord.status !== originalRecord.status
-        ) {
-          changes.push({
-            record: mergedRecord,
-            previousStatus: originalRecord.status,
-          });
+          // If the record is terminal, keep it out of the due list.
+          if (patch.status && isTerminalDeliveryStatus(patch.status)) {
+            patch.nextCheckAt = now;
+          }
+
+          const originalRecord = dueByMessageId.get(update.messageId);
+          const mergedRecord: TrackingRecord | undefined = originalRecord && {
+            ...originalRecord,
+            ...patch,
+            messageId: originalRecord.messageId,
+          };
+          const failover =
+            mergedRecord !== undefined &&
+            this.shouldAttemptApiFailover(mergedRecord);
+          // A stopped poll starts no fallback send. Storing the failure
+          // without one would lose it, since a failed record is not polled
+          // again, so the record stays as it was for the next poll.
+          if (failover && signal.aborted) continue;
+
+          // A record the store rejects is retried by a later poll; the rest
+          // of the batch is still stored.
+          let stored = false;
+          try {
+            const current = await this.storeResult(
+              update.messageId,
+              patch,
+              leaseUntil,
+            );
+            held.delete(update.messageId);
+            // The poll ran past its lease and another poll has taken the
+            // record: its result stands, and this one is dropped.
+            if (!current) continue;
+            stored = true;
+
+            if (!originalRecord || !mergedRecord) continue;
+
+            // A record put back by a poll stopped before its fallback send
+            // has no change to report.
+            let putBack = false;
+            try {
+              if (failover) {
+                putBack = !(await this.attemptApiFailover(
+                  mergedRecord,
+                  originalRecord,
+                  now,
+                  signal,
+                ));
+              }
+            } finally {
+              if (
+                !putBack &&
+                this.onStatusChange &&
+                mergedRecord.status !== originalRecord.status
+              ) {
+                changes.push({
+                  record: mergedRecord,
+                  previousStatus: originalRecord.status,
+                });
+              }
+            }
+          } catch (error) {
+            failures.push({ messageId: update.messageId, error });
+            if (
+              !stored &&
+              (await this.deferRejectedUpdate(
+                update.messageId,
+                patch.attemptCount ??
+                  (dueByMessageId.get(update.messageId)?.attemptCount ?? 0) + 1,
+                now,
+                leaseUntil,
+              ))
+            ) {
+              held.delete(update.messageId);
+            }
+          }
         }
 
-        if (this.shouldAttemptApiFailover(mergedRecord)) {
-          await this.attemptApiFailover(mergedRecord, now);
-        }
-      } catch (error) {
-        failures.push({ messageId: update.messageId, error });
-        if (!stored) {
-          await this.deferRejectedUpdate(
-            update.messageId,
-            patch.attemptCount ??
-              (dueByMessageId.get(update.messageId)?.attemptCount ?? 0) + 1,
-            now,
+        const [first] = failures;
+        if (first) {
+          const reason =
+            first.error instanceof Error
+              ? first.error.message
+              : String(first.error);
+          throw new AggregateError(
+            failures.map((failure) => failure.error),
+            `Delivery tracking could not update ${failures.length} of ${updates.length} polled messages; ${first.messageId}: ${reason}`,
           );
         }
+      } finally {
+        if (leaseUntil) await this.releaseLeases(held, leaseUntil, now);
       }
+    } finally {
+      link.unlink();
     }
+  }
 
-    const [first] = failures;
-    if (first) {
-      const reason =
-        first.error instanceof Error
-          ? first.error.message
-          : String(first.error);
-      throw new AggregateError(
-        failures.map((failure) => failure.error),
-        `Delivery tracking could not update ${failures.length} of ${updates.length} polled messages; ${first.messageId}: ${reason}`,
+  // Due records, leased when the store can lease them. A lease is only as
+  // good as the writes that end it, so it takes patchLeased too.
+  private async takeDue(
+    now: Date,
+  ): Promise<{ due: TrackingRecord[]; leaseUntil?: Date }> {
+    const leaseMs = this.polling.leaseMs ?? 0;
+    if (leaseMs > 0 && this.store.leaseDue && this.store.patchLeased) {
+      const leaseUntil = new Date(now.getTime() + leaseMs);
+      const due = await this.store.leaseDue(
+        now,
+        this.polling.batchSize,
+        leaseUntil,
       );
+      // A lease that ran out while the store took it holds nothing: another
+      // poll may have leased the records since. They are due again.
+      if (due && due.length > 0 && Date.now() >= leaseUntil.getTime()) {
+        throw new Error(
+          `The ${leaseMs} ms delivery tracking lease ran out before the store returned the due messages, so the poll left them for the next one; raise polling.leaseMs if this repeats`,
+        );
+      }
+      if (due) return { due, leaseUntil };
+    }
+    return { due: await this.store.listDue(now, this.polling.batchSize) };
+  }
+
+  // Stores a poll's result for a record, and resolves whether it did. Under
+  // a lease, only while the poll still holds the record: a poll that ran
+  // past its lease leaves alone what another poll has stored since.
+  private async storeResult(
+    messageId: string,
+    patch: Partial<TrackingRecord>,
+    leaseUntil: Date | undefined,
+  ): Promise<boolean> {
+    if (leaseUntil && this.store.patchLeased) {
+      return await this.store.patchLeased(messageId, leaseUntil, patch);
+    }
+    await this.store.patch(messageId, patch);
+    return true;
+  }
+
+  // Makes the records a poll leased but did not finish due again now,
+  // rather than when their lease runs out. The store gives back only leases
+  // the poll still holds; without releaseLeases they run out.
+  private async releaseLeases(
+    messageIds: Set<string>,
+    leaseUntil: Date,
+    now: Date,
+  ): Promise<void> {
+    if (messageIds.size === 0 || !this.store.releaseLeases) return;
+    try {
+      await this.store.releaseLeases([...messageIds], leaseUntil, now);
+    } catch (error) {
+      // They are due again when their lease runs out.
+      logBackgroundFailure("Delivery tracking lease release failed", error);
     }
   }
 
   // The store rejected a record's update, for example a value too long for
   // its column. Count the check and move the record along its backoff
   // anyway, so a record the store keeps rejecting cannot take a batch slot
-  // on every poll and keep the others from being polled.
+  // on every poll and keep the others from being polled. Reports whether
+  // the poll is done with the record: the backoff was stored, or another
+  // poll holds it now.
   private async deferRejectedUpdate(
     messageId: string,
     attemptCount: number,
     now: Date,
-  ): Promise<void> {
+    leaseUntil: Date | undefined,
+  ): Promise<boolean> {
     try {
-      await this.store.patch(messageId, {
-        attemptCount,
-        lastCheckedAt: now,
-        nextCheckAt: computeNextCheckAt(
-          now,
+      await this.storeResult(
+        messageId,
+        {
           attemptCount,
-          this.polling.backoffMs,
-        ),
-      });
+          lastCheckedAt: now,
+          nextCheckAt: computeNextCheckAt(
+            now,
+            attemptCount,
+            this.polling.backoffMs,
+          ),
+        },
+        leaseUntil,
+      );
+      return true;
     } catch {
       // runOnce() reports the update's failure; the record stays due.
+      return false;
     }
   }
 
@@ -721,12 +919,16 @@ export class DeliveryTrackingService {
     return false;
   }
 
+  // Resolves false when the poll was stopped before the send and put the
+  // record back as it found it.
   private async attemptApiFailover(
     record: TrackingRecord,
+    found: TrackingRecord,
     now: Date,
-  ): Promise<void> {
+    signal: AbortSignal,
+  ): Promise<boolean> {
     const apiFailover = this.apiFailover;
-    if (!apiFailover) return;
+    if (!apiFailover) return true;
 
     const failover = this.readFailoverMetadata(record.metadata);
     const attemptedAt = now.toISOString();
@@ -748,7 +950,7 @@ export class DeliveryTrackingService {
           warningMessage: "apiFailover.sender is not configured",
         }),
       });
-      return;
+      return true;
     }
 
     const fallbackContent = failover.request.fallbackContent?.trim() ?? "";
@@ -761,7 +963,7 @@ export class DeliveryTrackingService {
             "failover.fallbackContent is required for API-level fallback",
         }),
       });
-      return;
+      return true;
     }
 
     // KMsg records the channel it chose; size text sent some other way.
@@ -796,7 +998,16 @@ export class DeliveryTrackingService {
       fallbackMessageId,
       fallbackType,
       record,
+      signal,
     };
+
+    // The poll was stopped while it stored the failure. A failed record is
+    // not polled again, so the poll puts the record back as it found it, due
+    // now: the next poll finds the failure again and sends the fallback.
+    if (signal.aborted) {
+      await this.store.upsert({ ...found, nextCheckAt: now });
+      return false;
+    }
 
     try {
       const sendResult = await apiFailover.sender(sendInput, attemptContext);
@@ -808,7 +1019,7 @@ export class DeliveryTrackingService {
             fallbackProviderId: sendResult.value.providerId,
           }),
         });
-        return;
+        return true;
       }
 
       await this.store.patch(record.messageId, {
@@ -827,6 +1038,7 @@ export class DeliveryTrackingService {
         }),
       });
     }
+    return true;
   }
 
   private readFailoverMetadata(

@@ -7,7 +7,7 @@ title: "createDeliveryTrackingHooks"
 
 > **createDeliveryTrackingHooks**(`service`, `options?`): [`KMsgHooks`](/en/api/messaging/src/interfaces/kmsghooks/)
 
-Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/hooks.ts#L4)
+Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/hooks.ts#L27)
 
 ## Parameters
 
@@ -17,21 +17,7 @@ Defined in: [packages/messaging/src/delivery-tracking/hooks.ts:4](https://github
 
 ### options?
 
-#### onError?
-
-(`error`) => `void` \| `Promise`\<`void`\>
-
-#### onFinal?
-
-(`context`, `state`) => `void` \| `Promise`\<`void`\>
-
-#### onQueued?
-
-(`context`) => `void` \| `Promise`\<`void`\>
-
-#### onRetryScheduled?
-
-(`context`, `error`, `metadata`) => `void` \| `Promise`\<`void`\>
+[`DeliveryTrackingHooksOptions`](/en/api/messaging/src/tracking/interfaces/deliverytrackinghooksoptions/) = `{}`
 
 ## Returns
 
