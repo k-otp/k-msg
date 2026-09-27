@@ -104,7 +104,7 @@ function renderPostgresTrackingSchema(
     ? `\n    toEnc: ${idField(c.toEnc)},\n    toHash: ${idField(c.toHash)},\n    toMasked: ${idField(c.toMasked)},\n    fromEnc: ${s.id === "varchar" ? `varchar(${q(c.fromEnc)}, { length: 255 })` : `text(${q(c.fromEnc)})`},\n    fromHash: ${s.id === "varchar" ? `varchar(${q(c.fromHash)}, { length: 255 })` : `text(${q(c.fromHash)})`},\n    fromMasked: ${s.id === "varchar" ? `varchar(${q(c.fromMasked)}, { length: 255 })` : `text(${q(c.fromMasked)})`},`
     : "";
   const secureMetaFields = secureOnly
-    ? `\n    metadataEnc: ${s.id === "varchar" ? `varchar(${q(c.metadataEnc)}, { length: 255 })` : `text(${q(c.metadataEnc)})`},\n    metadataHashes: ${jsonField(c.metadataHashes)},\n    cryptoKid: ${s.id === "varchar" ? `varchar(${q(c.cryptoKid)}, { length: 255 })` : `text(${q(c.cryptoKid)})`},\n    cryptoVersion: integer(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: ${shortTextField(c.cryptoState, false)},\n    retentionClass: ${shortTextField(c.retentionClass, false)},\n    retentionBucketYm: integer(${q(c.retentionBucketYm)}),`
+    ? `\n    metadataEnc: text(${q(c.metadataEnc)}),\n    metadataHashes: ${jsonField(c.metadataHashes)},\n    cryptoKid: ${s.id === "varchar" ? `varchar(${q(c.cryptoKid)}, { length: 255 })` : `text(${q(c.cryptoKid)})`},\n    cryptoVersion: integer(${q(c.cryptoVersion)}).notNull().default(1),\n    cryptoState: ${shortTextField(c.cryptoState, false)},\n    retentionClass: ${shortTextField(c.retentionClass, false)},\n    retentionBucketYm: integer(${q(c.retentionBucketYm)}),`
     : "";
   const plainMetadataField = includePlainColumns
     ? `\n    metadata: ${jsonField(c.metadata)},`
@@ -234,7 +234,7 @@ function renderMySqlTrackingSchema(
     ? `\n    toEnc: ${field("id", c.toEnc)}.notNull(),\n    toHash: ${field("indexedId", c.toHash)}.notNull(),\n    toMasked: ${field("id", c.toMasked)}.notNull(),\n    fromEnc: ${field("id", c.fromEnc)},\n    fromHash: ${field("indexedId", c.fromHash)},\n    fromMasked: ${field("id", c.fromMasked)},`
     : "";
   const secureMetaFields = secureOnly
-    ? `\n    metadataEnc: ${field("id", c.metadataEnc)},\n    metadataHashes: ${field("json", c.metadataHashes)},\n    cryptoKid: ${field("id", c.cryptoKid)},\n    cryptoVersion: ${field("attemptCount", c.cryptoVersion)}.notNull().default(1),\n    cryptoState: ${field("shortText", c.cryptoState)},\n    retentionClass: ${field("indexedShortText", c.retentionClass)},\n    retentionBucketYm: ${field("attemptCount", c.retentionBucketYm)},`
+    ? `\n    metadataEnc: ${field("text", c.metadataEnc)},\n    metadataHashes: ${field("json", c.metadataHashes)},\n    cryptoKid: ${field("id", c.cryptoKid)},\n    cryptoVersion: ${field("attemptCount", c.cryptoVersion)}.notNull().default(1),\n    cryptoState: ${field("shortText", c.cryptoState)},\n    retentionClass: ${field("indexedShortText", c.retentionClass)},\n    retentionBucketYm: ${field("attemptCount", c.retentionBucketYm)},`
     : "";
   const plainMetadataField = includePlainColumns
     ? `\n    metadata: ${field("json", c.metadata)},`

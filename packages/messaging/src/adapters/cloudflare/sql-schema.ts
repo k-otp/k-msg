@@ -222,7 +222,7 @@ function buildDeliveryTrackingSchemaStatements(
 
   if (secureOnly) {
     tableColumns.push(
-      `${q(columns.metadataEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
+      `${q(columns.metadataEnc)} ${resolveDeliveryTrackingSqlType(options.dialect, "text", strategy)}`,
       `${q(columns.metadataHashes)} ${resolveDeliveryTrackingSqlType(options.dialect, "json", strategy)}`,
       `${q(columns.cryptoKid)} ${resolveDeliveryTrackingSqlType(options.dialect, "id", strategy)}`,
       `${q(columns.cryptoVersion)} ${resolveDeliveryTrackingSqlType(options.dialect, "attemptCount", strategy)} NOT NULL DEFAULT 1`,
