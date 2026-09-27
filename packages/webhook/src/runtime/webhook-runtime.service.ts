@@ -212,8 +212,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // because a writer outside this runtime took its id or URL, the ones
   // already added are removed. So is the failed one if the store kept it
   // anyway, as D1 can when it fails after committing; a conflict error means
-  // it was not stored, and its id may be another endpoint's. If a removal
-  // fails too, the original error is still the one to report.
+  // it was not stored, and its id may be another endpoint's. Each is removed
+  // only while the store still holds it, not a row another writer has put
+  // under its id since. The store has no conditional delete, so that check
+  // narrows the race rather than closing it. If a removal fails too, the
+  // original error is still the one to report.
   private async storeEndpoints(
     endpoints: readonly WebhookEndpoint[],
   ): Promise<void> {
@@ -222,14 +225,16 @@ export class WebhookRuntimeService implements WebhookRuntime {
       try {
         await this.endpointStore.add(endpoint);
       } catch (error) {
-        if (
-          !(error instanceof WebhookEndpointConflictError) &&
-          (await this.holdsEndpoint(endpoint))
-        ) {
-          added.push(endpoint);
-        }
-        for (const stored of added) {
-          await this.endpointStore.remove(stored.id).catch(() => undefined);
+        const written =
+          error instanceof WebhookEndpointConflictError
+            ? added
+            : [...added, endpoint];
+        for (const candidate of written) {
+          if (await this.holdsEndpoint(candidate)) {
+            await this.endpointStore
+              .remove(candidate.id)
+              .catch(() => undefined);
+          }
         }
         throw error;
       }
@@ -703,9 +708,6 @@ export class WebhookRuntimeService implements WebhookRuntime {
     };
   }
 
-  // Builds a new endpoint for a caller that holds the endpoint write queue.
-  // The URL is checked again here, the check that guards the store: callers
-  // check it before queueing only to fail fast.
   // Builds a new endpoint for a caller that holds the endpoint write queue.
   // The URL and secret are checked again here, the check that guards the
   // store: callers check them before queueing only to fail fast.

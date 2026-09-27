@@ -323,6 +323,51 @@ describe("WebhookRuntimeService", () => {
     },
   );
 
+  test("a rollback leaves an endpoint another writer put in place of one it added", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const store = persistence.endpointStore;
+    const add = store.add.bind(store);
+    let writes = 0;
+    persistence.endpointStore.add = async (endpoint) => {
+      writes += 1;
+      if (writes === 2) {
+        // Meanwhile another writer removes the first endpoint of the batch
+        // and stores its own under the same id.
+        const [first] = await store.list();
+        if (first) {
+          await store.remove(first.id);
+          await add({
+            ...first,
+            url: "https://example.com/replacement",
+            createdAt: new Date(first.createdAt.getTime() + 1),
+          });
+        }
+        throw new Error("store unavailable");
+      }
+      await add(endpoint);
+    };
+    const batchRuntime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      persistence,
+      autoStart: false,
+    });
+
+    await expect(
+      batchRuntime.addEndpoints(
+        ["https://example.com/one", "https://example.com/two"].map((url) => ({
+          url,
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        })),
+      ),
+    ).rejects.toThrow("store unavailable");
+
+    expect((await store.list()).map((endpoint) => endpoint.url)).toEqual([
+      "https://example.com/replacement",
+    ]);
+  });
+
   test("a conflict never removes the endpoint that caused it", async () => {
     // Two runtimes add the same id and URL in the same millisecond, so the
     // stored endpoint looks exactly like the one that failed.
