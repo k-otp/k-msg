@@ -76,6 +76,10 @@ function isConstraintViolation(error: unknown): boolean {
   );
 }
 
+// How many times in all a write is tried when a constraint rejects it but no
+// stored endpoint holds its id or URL by the time the store looks.
+const MAX_WRITE_ATTEMPTS = 3;
+
 export class D1WebhookEndpointStore implements WebhookEndpointStore {
   constructor(
     private readonly db: D1DatabaseLike,
@@ -86,44 +90,32 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
   async add(endpoint: WebhookEndpoint): Promise<void> {
     await this.ensureInitialized();
 
-    try {
-      await runStatement(
-        this.db,
-        `INSERT INTO ${this.tableName} (id, ${ENDPOINT_COLUMNS.join(", ")})
-        VALUES (?, ${ENDPOINT_COLUMNS.map(() => "?").join(", ")})`,
-        [endpoint.id, ...toColumnValues(endpoint)],
-      );
-    } catch (error) {
-      // The primary key and the unique url index reject a duplicate; say
-      // which stored endpoint holds the id or URL. If that lookup fails too,
-      // the original error is the better report.
-      const conflict = await this.findConflict(
-        endpoint,
-        !isConstraintViolation(error),
-      ).catch(() => undefined);
-      throw conflict ?? error;
-    }
+    await this.writeUnique(
+      () =>
+        runStatement(
+          this.db,
+          `INSERT INTO ${this.tableName} (id, ${ENDPOINT_COLUMNS.join(", ")})
+          VALUES (?, ${ENDPOINT_COLUMNS.map(() => "?").join(", ")})`,
+          [endpoint.id, ...toColumnValues(endpoint)],
+        ),
+      (error) => this.findConflict(endpoint, !isConstraintViolation(error)),
+    );
   }
 
   async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
     await this.ensureInitialized();
 
-    let result: unknown;
-    try {
-      result = await runStatement(
-        this.db,
-        `UPDATE ${this.tableName}
-        SET ${ENDPOINT_COLUMNS.map((column) => `${column} = ?`).join(", ")}
-        WHERE id = ?`,
-        [...toColumnValues(endpoint), endpointId],
-      );
-    } catch (error) {
-      const conflict = await this.findUrlConflict(
-        endpoint.url,
-        endpointId,
-      ).catch(() => undefined);
-      throw conflict ?? error;
-    }
+    const result = await this.writeUnique(
+      () =>
+        runStatement(
+          this.db,
+          `UPDATE ${this.tableName}
+          SET ${ENDPOINT_COLUMNS.map((column) => `${column} = ?`).join(", ")}
+          WHERE id = ?`,
+          [...toColumnValues(endpoint), endpointId],
+        ),
+      () => this.findUrlConflict(endpoint.url, endpointId),
+    );
 
     // D1 counts the rows the UPDATE changed, so an endpoint removed after the
     // caller read it is caught by the same statement. A client that does not
@@ -166,6 +158,37 @@ export class D1WebhookEndpointStore implements WebhookEndpointStore {
     );
 
     return rows.map((row) => this.toEndpoint(row));
+  }
+
+  // Runs a write that the primary key or the unique url index can reject,
+  // and reports a rejection as a conflict with the stored endpoint that
+  // holds the id or URL. If that lookup fails too, the write's own error is
+  // the better report. If a constraint rejected the write but the lookup
+  // finds no such endpoint, another writer removed it in between, so the id
+  // or URL is free and the write is tried again, MAX_WRITE_ATTEMPTS times in
+  // all: a unique index this store does not know about fails every time.
+  private async writeUnique<T>(
+    write: () => Promise<T>,
+    findConflict: (
+      error: unknown,
+    ) => Promise<WebhookEndpointConflictError | undefined>,
+  ): Promise<T> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await write();
+      } catch (error) {
+        let conflict: WebhookEndpointConflictError | undefined;
+        try {
+          conflict = await findConflict(error);
+        } catch {
+          throw error;
+        }
+        if (conflict) throw conflict;
+        if (!isConstraintViolation(error) || attempt >= MAX_WRITE_ATTEMPTS) {
+          throw error;
+        }
+      }
+    }
   }
 
   private async findConflict(

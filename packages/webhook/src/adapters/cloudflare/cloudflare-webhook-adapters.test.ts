@@ -534,6 +534,150 @@ describe("D1 endpoint store errors", () => {
   });
 });
 
+// The database rejects this store's INSERT or UPDATE, and another request
+// removes the endpoint that held the id or URL before the store looks it up.
+function removeOwnerAfterRejection(
+  db: D1DatabaseLike,
+  ownerId: string,
+): D1DatabaseLike {
+  let removed = false;
+  return {
+    prepare(query: string) {
+      const statement = db.prepare(query);
+      if (!/^\s*(INSERT|UPDATE)\b/.test(query)) return statement;
+      return {
+        bind(...values: unknown[]) {
+          statement.bind(...values);
+          return this;
+        },
+        first: () => statement.first(),
+        all: () => statement.all(),
+        async run() {
+          try {
+            return await statement.run();
+          } catch (error) {
+            if (!removed) {
+              removed = true;
+              await db
+                .prepare("DELETE FROM kmsg_webhook_endpoints WHERE id = ?")
+                .bind(ownerId)
+                .run();
+            }
+            throw error;
+          }
+        },
+      };
+    },
+  };
+}
+
+describe("D1 endpoint store when the endpoint holding an id or URL is removed in between", () => {
+  const closers: Array<() => void> = [];
+
+  afterEach(() => {
+    while (closers.length > 0) closers.pop()?.();
+  });
+
+  function setUp(stored: WebhookEndpoint[], ownerId: string) {
+    const sqliteD1 = createSqliteBackedD1();
+    closers.push(sqliteD1.close);
+    const { endpointStore } = createD1WebhookPersistence(sqliteD1.db);
+    const racing = createD1WebhookPersistence(
+      removeOwnerAfterRejection(sqliteD1.db, ownerId),
+    ).endpointStore;
+    return {
+      racing,
+      async seed() {
+        for (const endpoint of stored) await endpointStore.add(endpoint);
+      },
+      async rows() {
+        return (await endpointStore.list())
+          .map((endpoint) => [endpoint.id, endpoint.url])
+          .sort();
+      },
+    };
+  }
+
+  test.each([
+    ["URL", "first", "second", "https://example.com/hook"],
+    ["id", "hook", "hook", "https://example.com/new"],
+  ])(
+    "add stores the endpoint once the %s is free again",
+    async (_field, ownerId, id, url) => {
+      const { racing, seed, rows } = setUp(
+        [
+          createStoredEndpoint({
+            id: ownerId,
+            url: "https://example.com/hook",
+          }),
+        ],
+        ownerId,
+      );
+      await seed();
+
+      await racing.add(createStoredEndpoint({ id, url }));
+
+      expect(await rows()).toEqual([[id, url]]);
+    },
+  );
+
+  test("update moves the endpoint once the URL is free again", async () => {
+    const { racing, seed, rows } = setUp(
+      [
+        createStoredEndpoint({ id: "a", url: "https://example.com/a" }),
+        createStoredEndpoint({ id: "b", url: "https://example.com/b" }),
+      ],
+      "b",
+    );
+    await seed();
+
+    await racing.update(
+      "a",
+      createStoredEndpoint({ id: "a", url: "https://example.com/b" }),
+    );
+
+    expect(await rows()).toEqual([["a", "https://example.com/b"]]);
+  });
+
+  test("a rejection that no stored id or URL explains is reported after a few tries", async () => {
+    const sqliteD1 = createSqliteBackedD1();
+    closers.push(sqliteD1.close);
+    const { endpointStore } = createD1WebhookPersistence(sqliteD1.db);
+    await endpointStore.add(
+      createStoredEndpoint({
+        id: "a",
+        url: "https://example.com/a",
+        name: "shared",
+      }),
+    );
+    // A unique index the store does not know about, as a custom schema can add.
+    await sqliteD1.db.exec?.(
+      "CREATE UNIQUE INDEX kmsg_webhook_endpoints_name ON kmsg_webhook_endpoints (name)",
+    );
+    let inserts = 0;
+    const counting: D1DatabaseLike = {
+      prepare(query: string) {
+        if (query.trimStart().startsWith("INSERT")) inserts += 1;
+        return sqliteD1.db.prepare(query);
+      },
+    };
+
+    const error = await createD1WebhookPersistence(counting)
+      .endpointStore.add(
+        createStoredEndpoint({
+          id: "b",
+          url: "https://example.com/b",
+          name: "shared",
+        }),
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).not.toBeInstanceOf(WebhookEndpointConflictError);
+    expect((error as Error).message).toContain("UNIQUE constraint failed");
+    expect(inserts).toBe(3);
+  });
+});
+
 describe("D1 endpoint store conflicts in the same millisecond", () => {
   afterEach(() => {
     setSystemTime();
