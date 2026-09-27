@@ -425,6 +425,73 @@ describe("Cloudflare SQL adapters", () => {
     ]);
   });
 
+  test("HyperdriveDeliveryTrackingStore stores a leased result only under that lease", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      initializeSchema: false,
+    });
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+
+    const stored = await store.patchLeased("m1", leaseUntil, {
+      status: "DELIVERED",
+      attemptCount: 1,
+    });
+
+    expect(postgres.queries.at(-1)).toEqual({
+      sql: `UPDATE "kmsg_delivery_tracking" SET "status" = $1, "attempt_count" = $2 WHERE "message_id" = $3 AND "next_check_at" = $4 RETURNING "message_id"`,
+      params: ["DELIVERED", 1, "m1", leaseUntil.getTime()],
+    });
+    // The capturing client returns no rows: the lease is gone.
+    expect(stored).toBe(false);
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases on MySQL only through a transaction", async () => {
+    const statements: string[] = [];
+    const query = (async (sql: string) => {
+      statements.push(sql);
+      if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+        return { rows: [{ next_check_at: 300_000 }] };
+      }
+      return { rows: [] };
+    }) as CloudflareSqlClient["query"];
+    const withoutTransaction: CloudflareSqlClient = { dialect: "mysql", query };
+
+    // Autocommitted statements would let two polls take the same rows.
+    const plain = new HyperdriveDeliveryTrackingStore(withoutTransaction, {
+      initializeSchema: false,
+    });
+    expect(
+      await plain.leaseDue(new Date(10), 50, new Date(300_000)),
+    ).toBeUndefined();
+    expect(statements).toEqual([]);
+
+    let transactions = 0;
+    const withTransaction: CloudflareSqlClient = {
+      dialect: "mysql",
+      query,
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(withTransaction);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(withTransaction, {
+      initializeSchema: false,
+    });
+
+    expect(
+      await store.patchLeased("m1", new Date(300_000), { status: "SENT" }),
+    ).toBe(true);
+    expect(
+      await store.patchLeased("m1", new Date(300_001), { status: "SENT" }),
+    ).toBe(false);
+    expect(transactions).toBe(2);
+    expect(statements).toEqual([
+      "SELECT `next_check_at` FROM `kmsg_delivery_tracking` WHERE `message_id` = ? FOR UPDATE",
+      "UPDATE `kmsg_delivery_tracking` SET `status` = ? WHERE `message_id` = ?",
+      "SELECT `next_check_at` FROM `kmsg_delivery_tracking` WHERE `message_id` = ? FOR UPDATE",
+    ]);
+  });
+
   test("HyperdriveDeliveryTrackingStore releases leases in statements D1 can bind", async () => {
     const sqlite = createCapturingSqlClient("sqlite");
     const store = new HyperdriveDeliveryTrackingStore(sqlite.client, {
@@ -487,8 +554,8 @@ describe("Cloudflare SQL adapters", () => {
       ),
       "UPDATE `kmsg_delivery_tracking` SET `next_check_at` = ? WHERE `message_id` IN (?)",
     ]);
-    expect(leased.map((record) => record.messageId)).toEqual(["m1"]);
-    expect(leased[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
+    expect(leased?.map((record) => record.messageId)).toEqual(["m1"]);
+    expect(leased?.[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
   });
 
   test("HyperdriveDeliveryTrackingStore uses dialect-specific upsert SQL", async () => {

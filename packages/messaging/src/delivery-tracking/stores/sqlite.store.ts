@@ -98,8 +98,16 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
     now: Date,
     limit: number,
     leaseUntil: Date,
-  ): Promise<TrackingRecord[]> {
+  ): Promise<TrackingRecord[] | undefined> {
     return await this.delegate.leaseDue(now, limit, leaseUntil);
+  }
+
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    return await this.delegate.patchLeased(messageId, leaseUntil, patch);
   }
 
   async releaseLeases(

@@ -131,13 +131,26 @@ export interface DeliveryTrackingStore {
    * Like `listDue`, but also leases the records it returns: in the same
    * atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
    * of the store skip them until the poll stores their next check or the
-   * lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
+   * lease runs out. It resolves `undefined` when this store cannot lease
+   * atomically. `DeliveryTrackingService` leases only with a store that has
+   * both this and `patchLeased`, and otherwise uses `listDue`.
    */
   leaseDue?(
     now: Date,
     limit: number,
     leaseUntil: Date,
-  ): Promise<TrackingRecord[]>;
+  ): Promise<TrackingRecord[] | undefined>;
+  /**
+   * Applies `patch` only while the record is still leased until `leaseUntil`
+   * (its `nextCheckAt` equals it), and resolves whether it did. A poll
+   * stores its results this way, so one that ran past its lease cannot
+   * overwrite what another poll stored since.
+   */
+  patchLeased?(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean>;
   /**
    * Hands back leases a poll did not finish: moves `nextCheckAt` to the
    * given time on those records whose `nextCheckAt` is still `leaseUntil`.

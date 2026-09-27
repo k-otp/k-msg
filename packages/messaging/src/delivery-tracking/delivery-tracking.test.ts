@@ -2165,6 +2165,123 @@ describe("DeliveryTrackingService leases", () => {
     expect((await store.get("m1"))?.status).toBe("DELIVERED");
   });
 
+  test("a poll that ran past its lease does not overwrite a newer result", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    let releaseA!: () => void;
+    const gateA = new Promise<void>((resolve) => {
+      releaseA = resolve;
+    });
+    let queriedByA = 0;
+    const sent: string[] = [];
+    const reported: string[] = [];
+    const apiFailover = {
+      sender: async (
+        _input: unknown,
+        context: { fallbackMessageId: string; fallbackType: "SMS" | "LMS" },
+      ) => {
+        sent.push(context.fallbackMessageId);
+        return ok({
+          messageId: context.fallbackMessageId,
+          providerId: "sms",
+          status: "SENT" as const,
+          type: context.fallbackType,
+          to: "01012345678",
+        });
+      },
+    };
+    // A's query answers FAILED only after its lease ran out and B stored
+    // DELIVERED.
+    const a = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queriedByA += 1;
+          await gateA;
+          return failedForNonKakaoUser(query);
+        }, "solapi"),
+      ],
+      store,
+      polling: { initialDelayMs: 0, leaseMs: 20 },
+      apiFailover,
+      onStatusChange: ({ record }) => {
+        reported.push(`a:${record.status}`);
+      },
+    });
+    const b = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(
+          async (query) => delivered(query, "solapi"),
+          "solapi",
+        ),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+      apiFailover,
+    });
+    await recordAlimTalkWithFallback(a, "m1");
+
+    const pollA = a.runOnce();
+    await waitFor(() => queriedByA === 1);
+    await wait(40);
+    await b.runOnce();
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+
+    releaseA();
+    await pollA;
+
+    expect((await store.get("m1"))?.status).toBe("DELIVERED");
+    expect(sent).toEqual([]);
+    expect(reported).toEqual([]);
+  });
+
+  test("a failed status query ends the poll only after the others settle", async () => {
+    const store = new InMemoryDeliveryTrackingStore();
+    let releaseM2!: () => void;
+    const gateM2 = new Promise<void>((resolve) => {
+      releaseM2 = resolve;
+    });
+    const queried: string[] = [];
+    const a = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queried.push(`a:${query.providerMessageId}`);
+          if (query.providerMessageId === "p-m1") {
+            throw new Error("provider exploded");
+          }
+          await gateM2;
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0, concurrency: 2 },
+    });
+    const c = new DeliveryTrackingService({
+      providers: [
+        createQueryProvider(async (query) => {
+          queried.push(`c:${query.providerMessageId}`);
+          return delivered(query);
+        }),
+      ],
+      store,
+      polling: { initialDelayMs: 0 },
+    });
+    const now = Date.now();
+    await recordSms(a, "m1", now - 2000);
+    await recordSms(a, "m2", now - 1000);
+
+    const pollA = a.runOnce();
+    const failed = pollA.then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    await waitFor(() => queried.includes("a:p-m2"));
+    // m2's query is still running, so A still holds its lease.
+    await c.runOnce();
+    expect(queried).not.toContain("c:p-m2");
+
+    releaseM2();
+    expect(await failed).toEqual(new Error("provider exploded"));
+  });
+
   test("leaseMs: 0 turns leasing off", async () => {
     let release!: () => void;
     const released = new Promise<void>((resolve) => {
@@ -2538,12 +2655,17 @@ describe("DeliveryTrackingStore leases", () => {
       now: Date,
       limit: number,
       leaseUntil: Date,
-    ) => Promise<TrackingRecord[]>;
+    ) => Promise<TrackingRecord[] | undefined>;
     releaseLeases?: (
       messageIds: readonly string[],
       leaseUntil: Date,
       nextCheckAt: Date,
     ) => Promise<void>;
+    patchLeased?: (
+      messageId: string,
+      leaseUntil: Date,
+      patch: Partial<TrackingRecord>,
+    ) => Promise<boolean>;
   };
 
   async function expectLeases(store: LeasingStore): Promise<void> {
@@ -2580,15 +2702,32 @@ describe("DeliveryTrackingStore leases", () => {
 
     // The oldest due record first, up to the limit.
     const first = await lease(at(0), 1);
-    expect(ids(first)).toEqual(["m1"]);
-    expect(first[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
+    expect(ids(first ?? [])).toEqual(["m1"]);
+    expect(first?.[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
     expect((await store.get("m1"))?.nextCheckAt.getTime()).toBe(
       leaseUntil.getTime(),
     );
 
+    // A result is stored only under the lease that holds the record.
+    const patchLeased = (until: Date, patch: Partial<TrackingRecord>) => {
+      if (!store.patchLeased) throw new Error("store cannot patch leases");
+      return store.patchLeased("m1", until, patch);
+    };
+    expect(await patchLeased(at(1), { providerStatusCode: "late" })).toBe(
+      false,
+    );
+    expect((await store.get("m1"))?.providerStatusCode).toBeUndefined();
+    expect(
+      await patchLeased(leaseUntil, {
+        providerStatusCode: "held",
+        nextCheckAt: leaseUntil,
+      }),
+    ).toBe(true);
+    expect((await store.get("m1"))?.providerStatusCode).toBe("held");
+
     // A leased record is not due for anyone else; terminal and future ones
     // never are.
-    expect(ids(await lease(at(0), 10))).toEqual(["m2"]);
+    expect(ids((await lease(at(0), 10)) ?? [])).toEqual(["m2"]);
     expect(await lease(at(0), 10)).toEqual([]);
     expect(await store.listDue(at(0), 10)).toEqual([]);
 
@@ -2603,7 +2742,7 @@ describe("DeliveryTrackingStore leases", () => {
     expect(ids(await store.listDue(at(0), 10))).toEqual(["m1"]);
 
     // Once the lease runs out the records are due again.
-    expect(ids(await lease(at(300_001), 10, at(600_000)))).toEqual([
+    expect(ids((await lease(at(300_001), 10, at(600_000))) ?? [])).toEqual([
       "m1",
       "m2",
     ]);

@@ -325,13 +325,21 @@ export async function reconcileDeliveryStatuses(
     });
   };
 
+  // A thrown error stops the other workers from starting records, but it is
+  // rethrown only once their queries in flight have settled: the caller
+  // hands back its leases then, and no record may be queried twice at once.
+  let thrown: { error: unknown } | undefined;
   const worker = async () => {
-    while (!request?.signal?.aborted) {
+    while (!request?.signal?.aborted && !thrown) {
       const current = idx++;
       if (current >= records.length) return;
       const record = records[current];
       if (!record) return;
-      await processOne(record);
+      try {
+        await processOne(record);
+      } catch (error) {
+        thrown ??= { error };
+      }
     }
   };
 
@@ -339,6 +347,7 @@ export async function reconcileDeliveryStatuses(
     .fill(null)
     .map(() => worker());
   await Promise.all(workers);
+  if (thrown) throw thrown.error;
 
   return { updates, errors };
 }
