@@ -240,13 +240,14 @@ export class JobProcessor extends EventEmitter {
     }
 
     for (let i = 0; i < availableSlots; i++) {
-      const job = await this.queue.dequeue();
+      // A queue that leases jobs keeps the ones still running here, even
+      // once their lease has run out, rather than counting them as lost.
+      const job = await this.queue.dequeue({ running: this.processing });
       if (!job) {
         break;
       }
-      // A queue hands out a job again once its lease on it runs out, even
-      // while this processor is still running it; running it twice would
-      // repeat the work.
+      // A queue that ignores `running` hands such a job out again; running
+      // it twice would repeat the work.
       if (this.processing.has(job.id)) {
         continue;
       }
