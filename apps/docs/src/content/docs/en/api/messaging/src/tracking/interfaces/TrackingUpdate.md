@@ -5,7 +5,7 @@ prev: false
 title: "TrackingUpdate"
 ---
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:122](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L122)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L141)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:122](https://gith
 
 > **messageId**: `string`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L123)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L142)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:123](https://gith
 
 > **nextCheckAt**: `Date`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L125)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L144)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:125](https://gith
 
 > **patch**: `Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L124)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L143)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:124](https://gith
 
 > `optional` **raw?**: `unknown`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L127)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L146)
 
 ***
 
@@ -45,4 +45,4 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:127](https://gith
 
 > **terminal**: `boolean`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:126](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L126)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L145)

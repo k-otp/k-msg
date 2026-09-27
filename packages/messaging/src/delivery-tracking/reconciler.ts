@@ -1,8 +1,12 @@
 import {
   type DeliveryStatus,
   type DeliveryStatusQuery,
+  type DeliveryStatusResult,
   ErrorUtils,
+  type KMsgError,
   type Provider,
+  type ProviderRequestContext,
+  type Result,
 } from "@k-msg/core";
 import {
   DEFAULT_POLLING_CONFIG,
@@ -39,11 +43,18 @@ function getTrackingStartTime(
   return new Date(record.scheduledAt.getTime() + scheduledGraceMs);
 }
 
+/**
+ * Queries the status of each record and returns the updates to store.
+ * `request` goes to every status query. Once its signal aborts, no more
+ * queries start, and a record whose query failed because of it gets no
+ * update, so it is polled again as it was.
+ */
 export async function reconcileDeliveryStatuses(
   providers: Provider[],
   records: TrackingRecord[],
   now: Date,
   polling = DEFAULT_POLLING_CONFIG,
+  request?: ProviderRequestContext,
 ): Promise<TrackingReconcileResult> {
   const updates: TrackingUpdate[] = [];
   const errors: TrackingReconcileResult["errors"] = [];
@@ -208,7 +219,18 @@ export async function reconcileDeliveryStatuses(
         : {}),
     };
 
-    const result = await provider.getDeliveryStatus(query);
+    let result: Result<DeliveryStatusResult | null, KMsgError>;
+    try {
+      result = request
+        ? await provider.getDeliveryStatus(query, request)
+        : await provider.getDeliveryStatus(query);
+    } catch (error) {
+      // Some providers throw when their request is cancelled.
+      if (request?.signal?.aborted) return;
+      throw error;
+    }
+    // Cancelled, not answered: the attempt does not count.
+    if (result.isFailure && request?.signal?.aborted) return;
     if (result.isFailure) {
       errors.push({ messageId: record.messageId, error: result.error });
 
@@ -303,13 +325,21 @@ export async function reconcileDeliveryStatuses(
     });
   };
 
+  // A thrown error stops the other workers from starting records, but it is
+  // rethrown only once their queries in flight have settled: the caller
+  // hands back its leases then, and no record may be queried twice at once.
+  let thrown: { error: unknown } | undefined;
   const worker = async () => {
-    while (true) {
+    while (!request?.signal?.aborted && !thrown) {
       const current = idx++;
       if (current >= records.length) return;
       const record = records[current];
       if (!record) return;
-      await processOne(record);
+      try {
+        await processOne(record);
+      } catch (error) {
+        thrown ??= { error };
+      }
     }
   };
 
@@ -317,6 +347,7 @@ export async function reconcileDeliveryStatuses(
     .fill(null)
     .map(() => worker());
   await Promise.all(workers);
+  if (thrown) throw thrown.error;
 
   return { updates, errors };
 }

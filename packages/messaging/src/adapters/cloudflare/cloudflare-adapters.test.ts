@@ -1,5 +1,7 @@
 import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
+import { KMSG_TERMINAL_STATUSES } from "@k-msg/core";
+import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
 import { JobStatus } from "../../queue/job-queue.interface";
 import {
   HyperdriveDeliveryTrackingStore,
@@ -46,6 +48,17 @@ function stubSqlClient(
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Field crypto that marks what it encrypts, so it can be read back.
+const testFieldCryptoConfig: DeliveryTrackingFieldCryptoOptions["config"] = {
+  enabled: true,
+  fields: { to: "encrypt+hash", from: "encrypt+hash", metadata: "encrypt" },
+  provider: {
+    encrypt: async ({ value }) => ({ ciphertext: `enc:${value}` }),
+    decrypt: async ({ ciphertext }) => ciphertext.slice(4),
+    hash: async ({ value }) => `h:${value}`,
+  },
+};
 
 function readRenderedDrizzleQuery(
   query: unknown,
@@ -386,6 +399,296 @@ describe("Cloudflare SQL adapters", () => {
       },
     }).init();
     expect(indexNamesIn(drizzleStatements)).toEqual(expected);
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases due rows in one statement on postgres", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client);
+    const now = new Date("2026-09-26T00:00:00.000Z");
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+
+    await store.leaseDue(now, 50, leaseUntil);
+
+    const lease = postgres.queries.find((query) =>
+      query.sql.startsWith("UPDATE"),
+    );
+    expect(lease?.sql).toStartWith(
+      `UPDATE "kmsg_delivery_tracking" SET "next_check_at" = $1 WHERE "message_id" IN (SELECT "message_id" FROM "kmsg_delivery_tracking" WHERE "status" NOT IN ($2, $3, $4, $5) AND "next_check_at" <= $6 ORDER BY "next_check_at" ASC LIMIT $7 FOR UPDATE SKIP LOCKED) RETURNING "message_id", `,
+    );
+    // Rows come back as listDue reads them, JSON columns as JSON text.
+    expect(lease?.sql).toContain(`CAST("metadata" AS TEXT) AS "metadata"`);
+    expect(lease?.params).toEqual([
+      leaseUntil.getTime(),
+      ...KMSG_TERMINAL_STATUSES,
+      now.getTime(),
+      50,
+    ]);
+
+    await store.releaseLeases(["m1", "m2"], leaseUntil, now);
+    const release = postgres.queries.at(-1);
+    expect(release?.sql).toBe(
+      `UPDATE "kmsg_delivery_tracking" SET "next_check_at" = $1 WHERE "next_check_at" = $2 AND "message_id" IN ($3, $4)`,
+    );
+    expect(release?.params).toEqual([
+      now.getTime(),
+      leaseUntil.getTime(),
+      "m1",
+      "m2",
+    ]);
+  });
+
+  test("HyperdriveDeliveryTrackingStore stores a leased result only under that lease", async () => {
+    const postgres = createCapturingSqlClient("postgres");
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      initializeSchema: false,
+    });
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+
+    const stored = await store.patchLeased("m1", leaseUntil, {
+      status: "DELIVERED",
+      attemptCount: 1,
+    });
+
+    expect(postgres.queries.at(-1)).toEqual({
+      sql: `UPDATE "kmsg_delivery_tracking" SET "status" = $1, "attempt_count" = $2 WHERE "message_id" = $3 AND "next_check_at" = $4 RETURNING "message_id"`,
+      params: ["DELIVERED", 1, "m1", leaseUntil.getTime()],
+    });
+    // The capturing client returns no rows: the lease is gone.
+    expect(stored).toBe(false);
+  });
+
+  test("HyperdriveDeliveryTrackingStore stores an encrypted leased patch only under that lease", async () => {
+    const database = createMemoryHyperdriveJobSqlClient();
+    // Runs once, right after the next SELECT returns.
+    let afterRead: (() => Promise<unknown>) | undefined;
+    const client: CloudflareSqlClient = {
+      dialect: database.dialect,
+      query: (async (sql: string, params?: readonly unknown[]) => {
+        const result = await database.query(sql, params);
+        const run = afterRead;
+        if (run && sql.startsWith("SELECT ")) {
+          afterRead = undefined;
+          await run();
+        }
+        return result;
+      }) as CloudflareSqlClient["query"],
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      fieldCrypto: { config: testFieldCryptoConfig },
+    });
+    const at = (offset: number) => new Date(1_790_000_000_000 + offset);
+    await store.upsert({
+      messageId: "m1",
+      providerId: "mock",
+      providerMessageId: "p-m1",
+      type: "SMS",
+      to: "01012345678",
+      status: "SENT",
+      requestedAt: at(-5000),
+      statusUpdatedAt: at(-5000),
+      attemptCount: 0,
+      nextCheckAt: at(0),
+      metadata: { note: "sent" },
+    });
+    const leaseA = at(1000);
+    expect((await store.leaseDue(at(0), 10, leaseA))?.length).toBe(1);
+
+    // A's lease runs out, and B leases the record while A reads it to
+    // rewrite its encrypted fields.
+    const leaseB = at(5000);
+    afterRead = () => store.leaseDue(at(2000), 10, leaseB);
+    expect(
+      await store.patchLeased("m1", leaseA, {
+        status: "FAILED",
+        metadata: { note: "stale" },
+      }),
+    ).toBe(false);
+    const held = await store.get("m1");
+    expect(held?.nextCheckAt.getTime()).toBe(leaseB.getTime());
+    expect(held?.status).toBe("SENT");
+    expect(held?.metadata).toEqual({ note: "sent" });
+
+    expect(
+      await store.patchLeased("m1", leaseB, {
+        status: "FAILED",
+        metadata: { note: "failed" },
+      }),
+    ).toBe(true);
+    const stored = await store.get("m1");
+    expect(stored?.status).toBe("FAILED");
+    expect(stored?.metadata).toEqual({ note: "failed" });
+    expect(stored?.to).toBe("01012345678");
+  });
+
+  test("HyperdriveDeliveryTrackingStore rewrites an encrypted leased patch on MySQL under the row lock", async () => {
+    const statements: string[] = [];
+    let transactions = 0;
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+    const client: CloudflareSqlClient = {
+      dialect: "mysql",
+      query: (async (sql: string) => {
+        statements.push(`${transactions}: ${sql}`);
+        if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+          return {
+            rows: [
+              {
+                message_id: "m1",
+                provider_id: "mock",
+                provider_message_id: "p1",
+                type: "SMS",
+                to_enc: "enc:01012345678",
+                to_hash: "h:01012345678",
+                status: "SENT",
+                requested_at: 1,
+                status_updated_at: 1,
+                attempt_count: 0,
+                next_check_at: leaseUntil.getTime(),
+              },
+            ],
+          };
+        }
+        return { rows: [] };
+      }) as CloudflareSqlClient["query"],
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(client);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      initializeSchema: false,
+      fieldCrypto: { config: testFieldCryptoConfig },
+    });
+
+    expect(
+      await store.patchLeased("m1", leaseUntil, { metadata: { note: "x" } }),
+    ).toBe(true);
+
+    // Read and written in one transaction, which holds the row between them.
+    expect(transactions).toBe(1);
+    expect(statements).toEqual([
+      expect.stringMatching(
+        /^1: SELECT `message_id`, .* FROM `kmsg_delivery_tracking` WHERE `message_id` = \? FOR UPDATE$/,
+      ),
+      expect.stringMatching(
+        /^1: UPDATE `kmsg_delivery_tracking` SET `provider_id` = \?, .*`metadata_enc` = \?.* WHERE `message_id` = \?$/,
+      ),
+    ]);
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases on MySQL only through a transaction", async () => {
+    const statements: string[] = [];
+    const query = (async (sql: string) => {
+      statements.push(sql);
+      if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+        return { rows: [{ next_check_at: 300_000 }] };
+      }
+      return { rows: [] };
+    }) as CloudflareSqlClient["query"];
+    const withoutTransaction: CloudflareSqlClient = { dialect: "mysql", query };
+
+    // Autocommitted statements would let two polls take the same rows.
+    const plain = new HyperdriveDeliveryTrackingStore(withoutTransaction, {
+      initializeSchema: false,
+    });
+    expect(
+      await plain.leaseDue(new Date(10), 50, new Date(300_000)),
+    ).toBeUndefined();
+    await expect(
+      plain.patchLeased("m1", new Date(300_000), { status: "SENT" }),
+    ).rejects.toThrow("transaction");
+    expect(statements).toEqual([]);
+
+    let transactions = 0;
+    const withTransaction: CloudflareSqlClient = {
+      dialect: "mysql",
+      query,
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(withTransaction);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(withTransaction, {
+      initializeSchema: false,
+    });
+
+    expect(
+      await store.patchLeased("m1", new Date(300_000), { status: "SENT" }),
+    ).toBe(true);
+    expect(
+      await store.patchLeased("m1", new Date(300_001), { status: "SENT" }),
+    ).toBe(false);
+    expect(transactions).toBe(2);
+    expect(statements).toEqual([
+      "SELECT `next_check_at` FROM `kmsg_delivery_tracking` WHERE `message_id` = ? FOR UPDATE",
+      "UPDATE `kmsg_delivery_tracking` SET `status` = ? WHERE `message_id` = ?",
+      "SELECT `next_check_at` FROM `kmsg_delivery_tracking` WHERE `message_id` = ? FOR UPDATE",
+    ]);
+  });
+
+  test("HyperdriveDeliveryTrackingStore releases leases in statements D1 can bind", async () => {
+    const sqlite = createCapturingSqlClient("sqlite");
+    const store = new HyperdriveDeliveryTrackingStore(sqlite.client, {
+      initializeSchema: false,
+    });
+    const messageIds = Array.from({ length: 120 }, (_, index) => `m${index}`);
+
+    await store.releaseLeases(messageIds, new Date(2), new Date(1));
+
+    // D1 binds at most 100 parameters per statement.
+    expect(sqlite.queries.map((query) => query.params.length)).toEqual([
+      52, 52, 22,
+    ]);
+    expect(sqlite.queries.flatMap((query) => query.params.slice(2))).toEqual(
+      messageIds,
+    );
+  });
+
+  test("HyperdriveDeliveryTrackingStore leases due rows inside a transaction on mysql", async () => {
+    const statements: string[] = [];
+    let transactions = 0;
+    const leaseUntil = new Date("2026-09-26T00:05:00.000Z");
+    const client: CloudflareSqlClient = {
+      dialect: "mysql",
+      query: (async (sql: string) => {
+        statements.push(sql);
+        if (sql.startsWith("SELECT ") && sql.endsWith(" FOR UPDATE")) {
+          return {
+            rows: [
+              {
+                message_id: "m1",
+                provider_id: "mock",
+                provider_message_id: "p1",
+                type: "SMS",
+                to: "01012345678",
+                status: "SENT",
+                requested_at: 1,
+                status_updated_at: 1,
+                attempt_count: 0,
+                next_check_at: 1,
+              },
+            ],
+          };
+        }
+        return { rows: [] };
+      }) as CloudflareSqlClient["query"],
+      transaction: async (fn) => {
+        transactions += 1;
+        return await fn(client);
+      },
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client);
+
+    const leased = await store.leaseDue(new Date(10), 50, leaseUntil);
+
+    expect(transactions).toBe(1);
+    expect(statements.slice(-2)).toEqual([
+      expect.stringMatching(
+        /^SELECT `message_id`, .*CAST\(`metadata` AS CHAR\) AS `metadata`.* FROM `kmsg_delivery_tracking` WHERE `status` NOT IN \(\?, \?, \?, \?\) AND `next_check_at` <= \? ORDER BY `next_check_at` ASC LIMIT \? FOR UPDATE$/,
+      ),
+      "UPDATE `kmsg_delivery_tracking` SET `next_check_at` = ? WHERE `message_id` IN (?)",
+    ]);
+    expect(leased?.map((record) => record.messageId)).toEqual(["m1"]);
+    expect(leased?.[0]?.nextCheckAt.getTime()).toBe(leaseUntil.getTime());
   });
 
   test("HyperdriveDeliveryTrackingStore uses dialect-specific upsert SQL", async () => {

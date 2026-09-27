@@ -26,8 +26,11 @@ export interface SqliteDeliveryTrackingStoreOptions
   initializeSchema?: boolean;
 }
 
-function isSelectLikeStatement(statement: string): boolean {
-  return /^\s*(SELECT|WITH|PRAGMA)\b/i.test(statement);
+function returnsRows(statement: string): boolean {
+  return (
+    /^\s*(SELECT|WITH|PRAGMA)\b/i.test(statement) ||
+    /\bRETURNING\b/i.test(statement)
+  );
 }
 
 export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
@@ -46,7 +49,7 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
       ) => {
         const values = [...params];
         const bindings = values as unknown as [];
-        if (isSelectLikeStatement(statement)) {
+        if (returnsRows(statement)) {
           const rows = this.db.prepare(statement).all(...bindings) as T[];
           return { rows, rowCount: rows.length };
         }
@@ -89,6 +92,30 @@ export class SqliteDeliveryTrackingStore implements DeliveryTrackingStore {
 
   async listDue(now: Date, limit: number): Promise<TrackingRecord[]> {
     return await this.delegate.listDue(now, limit);
+  }
+
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[] | undefined> {
+    return await this.delegate.leaseDue(now, limit, leaseUntil);
+  }
+
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    return await this.delegate.patchLeased(messageId, leaseUntil, patch);
+  }
+
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    await this.delegate.releaseLeases(messageIds, leaseUntil, nextCheckAt);
   }
 
   async listRecords(

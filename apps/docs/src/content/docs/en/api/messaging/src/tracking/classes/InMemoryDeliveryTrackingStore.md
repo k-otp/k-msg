@@ -27,7 +27,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:114
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:185](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L185)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L230)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L177)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L222)
 
 #### Parameters
 
@@ -109,6 +109,43 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:117
 
 ***
 
+### leaseDue()
+
+> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L134)
+
+Like `listDue`, but also leases the records it returns: in the same
+atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
+of the store skip them until the poll stores their next check or the
+lease runs out. It resolves `undefined` when this store cannot lease
+atomically. `DeliveryTrackingService` leases only with a store that has
+both this and `patchLeased`, and otherwise uses `listDue`.
+
+#### Parameters
+
+##### now
+
+`Date`
+
+##### limit
+
+`number`
+
+##### leaseUntil
+
+`Date`
+
+#### Returns
+
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`leaseDue`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#leasedue)
+
+***
+
 ### listDue()
 
 > **listDue**(`now`, `limit`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
@@ -139,7 +176,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:130
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L147)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L192)
 
 #### Parameters
 
@@ -161,7 +198,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:147
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:220](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L220)
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:265](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L265)
 
 #### Parameters
 
@@ -180,6 +217,76 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:220
 #### Implementation of
 
 [`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patch`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patch)
+
+***
+
+### patchLeased()
+
+> **patchLeased**(`messageId`, `leaseUntil`, `patch`): `Promise`\<`boolean`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:148](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L148)
+
+Applies `patch` only while the record is still leased until `leaseUntil`
+(its `nextCheckAt` equals it), and resolves whether it did. A poll
+stores its results this way, so one that ran past its lease cannot
+overwrite what another poll stored since.
+
+#### Parameters
+
+##### messageId
+
+`string`
+
+##### leaseUntil
+
+`Date`
+
+##### patch
+
+`Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patchLeased`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patchleased)
+
+***
+
+### releaseLeases()
+
+> **releaseLeases**(`messageIds`, `leaseUntil`, `nextCheckAt`): `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/memory.store.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/memory.store.ts#L160)
+
+Hands back leases a poll did not finish: moves `nextCheckAt` to the
+given time on those records whose `nextCheckAt` is still `leaseUntil`.
+A record another poll has leased since is left alone. Without it,
+`DeliveryTrackingService` lets such leases run out.
+
+#### Parameters
+
+##### messageIds
+
+readonly `string`[]
+
+##### leaseUntil
+
+`Date`
+
+##### nextCheckAt
+
+`Date`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`releaseLeases`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#releaseleases)
 
 ***
 

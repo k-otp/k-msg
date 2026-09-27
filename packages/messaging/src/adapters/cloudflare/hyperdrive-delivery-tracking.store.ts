@@ -34,7 +34,11 @@ import {
   getDeliveryTrackingColumnKeys,
   getDeliveryTrackingSchemaSpec,
 } from "./delivery-tracking-schema";
-import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
+import {
+  type CloudflareSqlClient,
+  runCloudflareSqlTransaction,
+  type SqlDialect,
+} from "./sql-client";
 import {
   jsonParameterSql,
   readJsonColumn,
@@ -45,6 +49,9 @@ import {
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type TrackingRow = Record<string, unknown>;
+
+// D1 binds at most 100 parameters per statement.
+const RELEASE_BATCH_SIZE = 50;
 
 type WhereSql = {
   sql: string;
@@ -270,6 +277,119 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     return await Promise.all(rows.map((row) => this.rowToRecord(row)));
   }
 
+  async leaseDue(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[] | undefined> {
+    if (this.client.dialect === "mysql") {
+      // Autocommitted, the locking read would release its rows before the
+      // lease is written, and two polls could take the same ones.
+      if (typeof this.client.transaction !== "function") return undefined;
+    }
+    await this.init();
+
+    const safeLimit = Number.isFinite(limit)
+      ? Math.max(0, Math.floor(limit))
+      : 0;
+    if (safeLimit === 0) return [];
+
+    if (this.client.dialect === "mysql") {
+      return await this.leaseDueInTransaction(now, safeLimit, leaseUntil);
+    }
+
+    const table = this.tableRef();
+    const messageId = this.quoteIdentifier(this.columnName("messageId"));
+    const status = this.quoteIdentifier(this.columnName("status"));
+    const nextCheckAt = this.quoteIdentifier(this.columnName("nextCheckAt"));
+    const statusPlaceholders = this.placeholders(
+      KMSG_TERMINAL_STATUSES.length,
+      2,
+    );
+    const nowPlaceholder = this.placeholder(KMSG_TERMINAL_STATUSES.length + 2);
+    const limitPlaceholder = this.placeholder(
+      KMSG_TERMINAL_STATUSES.length + 3,
+    );
+    // One statement selects and leases the rows. Postgres skips rows another
+    // poll has locked instead of waiting for them; SQLite runs the whole
+    // statement under its write lock.
+    const lock =
+      this.client.dialect === "postgres" ? " FOR UPDATE SKIP LOCKED" : "";
+
+    const { rows } = await this.client.query<TrackingRow>(
+      `UPDATE ${table} SET ${nextCheckAt} = ${this.placeholder(1)} WHERE ${messageId} IN (SELECT ${messageId} FROM ${table} WHERE ${status} NOT IN (${statusPlaceholders.join(", ")}) AND ${nextCheckAt} <= ${nowPlaceholder} ORDER BY ${nextCheckAt} ASC LIMIT ${limitPlaceholder}${lock}) RETURNING ${this.selectListSql()}`,
+      [
+        this.toDbTimestamp(leaseUntil),
+        ...KMSG_TERMINAL_STATUSES,
+        this.toDbTimestamp(now),
+        safeLimit,
+      ],
+    );
+
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
+  }
+
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    await this.init();
+
+    const table = this.tableRef();
+    const messageId = this.quoteIdentifier(this.columnName("messageId"));
+    const nextCheckAtColumn = this.quoteIdentifier(
+      this.columnName("nextCheckAt"),
+    );
+    for (
+      let start = 0;
+      start < messageIds.length;
+      start += RELEASE_BATCH_SIZE
+    ) {
+      const batch = messageIds.slice(start, start + RELEASE_BATCH_SIZE);
+      // Only rows still under this lease: another poll may hold one now.
+      await this.client.query(
+        `UPDATE ${table} SET ${nextCheckAtColumn} = ${this.placeholder(1)} WHERE ${nextCheckAtColumn} = ${this.placeholder(2)} AND ${messageId} IN (${this.placeholders(batch.length, 3).join(", ")})`,
+        [
+          this.toDbTimestamp(nextCheckAt),
+          this.toDbTimestamp(leaseUntil),
+          ...batch,
+        ],
+      );
+    }
+  }
+
+  // MySQL has no UPDATE ... RETURNING. The locking read holds the rows, in
+  // the client's transaction, until the lease is written.
+  private async leaseDueInTransaction(
+    now: Date,
+    limit: number,
+    leaseUntil: Date,
+  ): Promise<TrackingRecord[]> {
+    const table = this.tableRef();
+    const messageIdColumn = this.columnName("messageId");
+    const nextCheckAtColumn = this.columnName("nextCheckAt");
+    const status = this.quoteIdentifier(this.columnName("status"));
+    const nextCheckAt = this.quoteIdentifier(nextCheckAtColumn);
+    const leasedAt = this.toDbTimestamp(leaseUntil);
+
+    const rows = await runCloudflareSqlTransaction(this.client, async (tx) => {
+      const { rows: due } = await tx.query<TrackingRow>(
+        `SELECT ${this.selectListSql()} FROM ${table} WHERE ${status} NOT IN (${this.placeholders(KMSG_TERMINAL_STATUSES.length).join(", ")}) AND ${nextCheckAt} <= ? ORDER BY ${nextCheckAt} ASC LIMIT ? FOR UPDATE`,
+        [...KMSG_TERMINAL_STATUSES, this.toDbTimestamp(now), limit],
+      );
+      if (due.length === 0) return due;
+
+      await tx.query(
+        `UPDATE ${table} SET ${nextCheckAt} = ? WHERE ${this.quoteIdentifier(messageIdColumn)} IN (${this.placeholders(due.length).join(", ")})`,
+        [leasedAt, ...due.map((row) => row[messageIdColumn])],
+      );
+      return due.map((row) => ({ ...row, [nextCheckAtColumn]: leasedAt }));
+    });
+
+    return await Promise.all(rows.map((row) => this.rowToRecord(row)));
+  }
+
   async listRecords(
     options: DeliveryTrackingListOptions,
   ): Promise<TrackingRecord[]> {
@@ -381,6 +501,99 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       return;
     }
 
+    const updates = this.patchColumns(patch);
+    if (updates.length === 0) return;
+
+    await this.client.query(
+      `UPDATE ${this.tableRef()} SET ${this.setClauseSql(updates)} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${this.placeholder(updates.length + 1)}`,
+      [...updates.map((update) => update.value), messageId],
+    );
+  }
+
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    await this.init();
+
+    const table = this.tableRef();
+    const messageIdColumn = this.quoteIdentifier(this.columnName("messageId"));
+    const nextCheckAtColumn = this.quoteIdentifier(
+      this.columnName("nextCheckAt"),
+    );
+    // Encrypted fields are rewritten from the whole record, so such a patch
+    // writes the stored record with the patch applied.
+    const rewrite = this.patchTouchesCrypto(patch);
+
+    if (this.client.dialect === "mysql") {
+      // Autocommitted, the locking read would release the row before the
+      // write.
+      if (typeof this.client.transaction !== "function") {
+        throw new Error(
+          "patchLeased on MySQL needs a CloudflareSqlClient with transaction()",
+        );
+      }
+      // No UPDATE ... RETURNING: read the lease under a lock, then write.
+      return await runCloudflareSqlTransaction(this.client, async (tx) => {
+        const { rows } = await tx.query<TrackingRow>(
+          `SELECT ${rewrite ? this.selectListSql() : nextCheckAtColumn} FROM ${table} WHERE ${messageIdColumn} = ? FOR UPDATE`,
+          [messageId],
+        );
+        const row = rows[0];
+        const current = toDate(row?.[this.columnName("nextCheckAt")]);
+        if (!row || current?.getTime() !== leaseUntil.getTime()) return false;
+        const updates = rewrite
+          ? await this.recordColumns({
+              ...(await this.rowToRecord(row)),
+              ...patch,
+              messageId,
+            })
+          : this.patchColumns(patch);
+        if (updates.length > 0) {
+          await tx.query(
+            `UPDATE ${table} SET ${this.setClauseSql(updates)} WHERE ${messageIdColumn} = ?`,
+            [...updates.map((update) => update.value), messageId],
+          );
+        }
+        return true;
+      });
+    }
+
+    let updates = this.patchColumns(patch);
+    if (rewrite) {
+      const current = await this.get(messageId);
+      if (current?.nextCheckAt.getTime() !== leaseUntil.getTime()) {
+        return false;
+      }
+      // The write checks the lease again: another poll may lease the record
+      // while this one reads and encrypts it.
+      updates = await this.recordColumns({
+        ...current,
+        ...patch,
+        messageId: current.messageId,
+      });
+    }
+
+    if (updates.length === 0) {
+      const current = await this.get(messageId);
+      return current?.nextCheckAt.getTime() === leaseUntil.getTime();
+    }
+    const { rows } = await this.client.query<TrackingRow>(
+      `UPDATE ${table} SET ${this.setClauseSql(updates)} WHERE ${messageIdColumn} = ${this.placeholder(updates.length + 1)} AND ${nextCheckAtColumn} = ${this.placeholder(updates.length + 2)} RETURNING ${messageIdColumn}`,
+      [
+        ...updates.map((update) => update.value),
+        messageId,
+        this.toDbTimestamp(leaseUntil),
+      ],
+    );
+    return rows.length > 0;
+  }
+
+  // The columns a patch sets, with their database values.
+  private patchColumns(
+    patch: Partial<TrackingRecord>,
+  ): Array<{ key: DeliveryTrackingColumnKey; value: unknown }> {
     const updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }> =
       [];
 
@@ -487,21 +700,30 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       });
     }
 
-    if (updates.length === 0) return;
+    return updates;
+  }
 
-    const setSql = updates
+  // Every column of a record but its message id, with its database value,
+  // encrypted as upsert() stores it.
+  private async recordColumns(
+    record: TrackingRecord,
+  ): Promise<Array<{ key: DeliveryTrackingColumnKey; value: unknown }>> {
+    const prepared = await this.prepareRecordForStorage(record);
+    return getDeliveryTrackingColumnKeys(this.schema)
+      .filter((key) => key !== "messageId")
+      .map((key) => ({ key, value: this.recordValueForKey(prepared, key) }));
+  }
+
+  // `column = placeholder` for each update, numbered from 1.
+  private setClauseSql(
+    updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }>,
+  ): string {
+    return updates
       .map(
         (update, index) =>
           `${this.quoteIdentifier(this.columnName(update.key))} = ${this.valueSql(update.key, this.placeholder(index + 1))}`,
       )
       .join(", ");
-
-    const wherePlaceholder = this.placeholder(updates.length + 1);
-
-    await this.client.query(
-      `UPDATE ${this.tableRef()} SET ${setSql} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${wherePlaceholder}`,
-      [...updates.map((update) => update.value), messageId],
-    );
   }
 
   async close(): Promise<void> {
