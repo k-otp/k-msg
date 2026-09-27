@@ -251,9 +251,10 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:138
 Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L105)
 
 Applies `patch` only while the record is still leased until `leaseUntil`
-(its `nextCheckAt` equals it), and resolves whether it did. A poll
-stores its results this way, so one that ran past its lease cannot
-overwrite what another poll stored since.
+(its `nextCheckAt` equals it), and resolves whether it did. The check
+and the write are one atomic step, as in `leaseDue`. A poll stores its
+results this way, so one that ran past its lease cannot overwrite what
+another poll stored since.
 
 #### Parameters
 
