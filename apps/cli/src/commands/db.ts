@@ -40,7 +40,7 @@ const schemaShapeOptions = {
   }),
   "json-type": option(z.enum(["auto", "text"]).optional(), {
     description:
-      "Tracking JSON column type: auto (Postgres JSONB; MySQL JSON in the SQL output) | text (default: auto)",
+      "Tracking JSON column type: auto (Postgres JSONB, MySQL JSON) | text (default: auto)",
   }),
   "tracking-table": option(tableNameSchema.optional(), {
     description: "Tracking table name (default: kmsg_delivery_tracking)",
