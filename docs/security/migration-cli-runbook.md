@@ -37,11 +37,12 @@ Set `KMSG_FIELD_CRYPTO_AAD_FIELDS` exactly when the store sets `aadFields`: ciph
 
 ## Operational sequence
 
-1. Generate a plan and record `planId`.
-2. Apply chunks with controlled `--max-chunks`. The tracking store can keep writing: a row that changes while its chunk runs is re-read and encrypted from its current values, and one that keeps changing fails its chunk for `retry`.
-3. Check status before each stage transition.
-4. Retry only failed chunks. A run that stopped on a read error has none; resume it with `apply`, which continues from the recorded cursor.
-5. Switch to secure-only read path after parity checks.
+1. Add the secure columns to the tracking table (`to_enc`, `to_hash`, `to_masked`, `from_enc`, `from_hash`, `from_masked`, `metadata_enc`, `metadata_hashes`, `crypto_kid`, `crypto_version`, `crypto_state`, `retention_class`, `retention_bucket_ym`); `buildDeliveryTrackingSchemaSql()` with `fieldCryptoSchema: { enabled: true, mode: "secure" }` lists their types. On MySQL, make the indexed `to_hash` and `from_hash` `VARCHAR(255)` and `retention_class` `VARCHAR(64)`, since MySQL cannot index `TEXT`.
+2. Generate a plan and record `planId`.
+3. Apply chunks with controlled `--max-chunks`. The tracking store can keep writing: a row that changes while its chunk runs is re-read and encrypted from its current values, and one that keeps changing fails its chunk for `retry`.
+4. Check status before each stage transition.
+5. Retry only failed chunks. A run that stopped on a read error has none; resume it with `apply`, which continues from the recorded cursor.
+6. Switch to secure-only read path after parity checks.
 
 ## Common mistakes
 

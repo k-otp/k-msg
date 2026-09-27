@@ -5,7 +5,7 @@ prev: false
 title: "JobQueueIndexNames"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L26)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L27)
 
 Names of the job queue indexes. SQLite and D1 need index names to be unique
 per database, and Postgres per schema, so each queue table sharing one needs
@@ -17,7 +17,7 @@ its own names.
 
 > **dequeue**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L28)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L29)
 
 #### Default
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:28](https:
 
 > **id**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L31)
 
 #### Default
 

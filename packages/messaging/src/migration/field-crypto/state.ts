@@ -1,6 +1,7 @@
-import type {
-  CloudflareSqlClient,
-  SqlDialect,
+import {
+  type CloudflareSqlClient,
+  isDuplicateOrExistsSchemaError,
+  type SqlDialect,
 } from "../../adapters/cloudflare/sql-client";
 import type {
   FieldCryptoMigrationChunkRecord,
@@ -132,18 +133,27 @@ function toChunkRecord(row: MigrationRow): FieldCryptoMigrationChunkRecord {
   };
 }
 
-export async function ensureFieldCryptoMigrationStateTables(
-  client: CloudflareSqlClient,
-  options: FieldCryptoMigrationStateTables = {},
-): Promise<void> {
+/**
+ * The CREATE statements of the migration state tables:
+ * `ensureFieldCryptoMigrationStateTables` runs them, and
+ * `buildFieldCryptoMigrationMetaSchemaSql` renders them.
+ */
+export function buildFieldCryptoMigrationStateStatements(
+  dialect: SqlDialect,
+  options: FieldCryptoMigrationStateTables & { includeIndexes?: boolean } = {},
+): { tableStatements: string[]; indexStatements: string[] } {
   const tables = resolveStateTables(options);
-  const q = (name: string) => quoteIdentifier(client.dialect, name);
+  const q = (name: string) => quoteIdentifier(dialect, name);
   const runsTable = q(tables.runsTableName);
   const chunksTable = q(tables.chunksTableName);
+  // MySQL cannot index a TEXT column without a prefix length (error 1170),
+  // so there the key columns are VARCHAR.
+  const keyText = (length: number) =>
+    dialect === "mysql" ? `VARCHAR(${length})` : "TEXT";
 
   const createRuns = `
 CREATE TABLE IF NOT EXISTS ${runsTable} (
-  ${q("plan_id")} TEXT PRIMARY KEY,
+  ${q("plan_id")} ${keyText(255)} PRIMARY KEY,
   ${q("tracking_table_name")} TEXT NOT NULL,
   ${q("schema_fingerprint")} TEXT NOT NULL,
   ${q("status")} TEXT NOT NULL,
@@ -162,9 +172,9 @@ CREATE TABLE IF NOT EXISTS ${runsTable} (
 
   const createChunks = `
 CREATE TABLE IF NOT EXISTS ${chunksTable} (
-  ${q("plan_id")} TEXT NOT NULL,
+  ${q("plan_id")} ${keyText(255)} NOT NULL,
   ${q("chunk_no")} INTEGER NOT NULL,
-  ${q("status")} TEXT NOT NULL,
+  ${q("status")} ${keyText(32)} NOT NULL,
   ${q("start_requested_at")} BIGINT,
   ${q("start_message_id")} TEXT,
   ${q("end_requested_at")} BIGINT,
@@ -177,14 +187,33 @@ CREATE TABLE IF NOT EXISTS ${chunksTable} (
   PRIMARY KEY (${q("plan_id")}, ${q("chunk_no")})
 )`;
 
-  const createChunksStatusIndex =
-    client.dialect === "mysql"
-      ? `CREATE INDEX ${q(`${tables.chunksTableName}_status_idx`)} ON ${chunksTable} (${q("plan_id")}, ${q("status")})`
-      : `CREATE INDEX IF NOT EXISTS ${q(`${tables.chunksTableName}_status_idx`)} ON ${chunksTable} (${q("plan_id")}, ${q("status")})`;
+  // MySQL has no CREATE INDEX IF NOT EXISTS.
+  const ifNotExists = dialect === "mysql" ? "" : "IF NOT EXISTS ";
+  const createChunksStatusIndex = `CREATE INDEX ${ifNotExists}${q(`${tables.chunksTableName}_status_idx`)} ON ${chunksTable} (${q("plan_id")}, ${q("status")})`;
 
-  await client.query(createRuns);
-  await client.query(createChunks);
-  await client.query(createChunksStatusIndex);
+  return {
+    tableStatements: [createRuns, createChunks],
+    indexStatements:
+      options.includeIndexes === false ? [] : [createChunksStatusIndex],
+  };
+}
+
+export async function ensureFieldCryptoMigrationStateTables(
+  client: CloudflareSqlClient,
+  options: FieldCryptoMigrationStateTables = {},
+): Promise<void> {
+  const { tableStatements, indexStatements } =
+    buildFieldCryptoMigrationStateStatements(client.dialect, options);
+
+  for (const statement of [...tableStatements, ...indexStatements]) {
+    try {
+      await client.query(statement);
+    } catch (error) {
+      // On MySQL, the index exists once a migration has run.
+      if (isDuplicateOrExistsSchemaError(client.dialect, error)) continue;
+      throw error;
+    }
+  }
 }
 
 export async function upsertFieldCryptoMigrationRun(

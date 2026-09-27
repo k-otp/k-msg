@@ -1,7 +1,4 @@
-import {
-  DEFAULT_CRYPTO_MIGRATION_CHUNKS_TABLE,
-  DEFAULT_CRYPTO_MIGRATION_RUNS_TABLE,
-} from "../../migration/field-crypto/state";
+import { buildFieldCryptoMigrationStateStatements } from "../../migration/field-crypto/state";
 import {
   DEFAULT_DELIVERY_TRACKING_TABLE as DEFAULT_DELIVERY_TRACKING_TABLE_NAME,
   type DeliveryTrackingColumnMap,
@@ -12,7 +9,11 @@ import {
   getDeliveryTrackingSchemaSpec,
   resolveDeliveryTrackingSqlType,
 } from "./delivery-tracking-schema";
-import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
+import {
+  type CloudflareSqlClient,
+  isDuplicateOrExistsSchemaError,
+  type SqlDialect,
+} from "./sql-client";
 
 export const DEFAULT_DELIVERY_TRACKING_TABLE =
   DEFAULT_DELIVERY_TRACKING_TABLE_NAME;
@@ -113,14 +114,6 @@ export interface BuildFieldCryptoMigrationMetaSchemaSqlOptions {
 type SchemaStatements = {
   tableStatements: string[];
   indexStatements: string[];
-};
-
-type SqlErrorLike = {
-  code?: unknown;
-  errno?: unknown;
-  sqlState?: unknown;
-  message?: unknown;
-  cause?: unknown;
 };
 
 function quoteIdentifier(dialect: SqlDialect, identifier: string): string {
@@ -358,65 +351,7 @@ CREATE TABLE IF NOT EXISTS ${tableRef} (
 function buildFieldCryptoMigrationMetaSchemaStatements(
   options: BuildFieldCryptoMigrationMetaSchemaSqlOptions,
 ): SchemaStatements {
-  const runsTableName =
-    options.runsTableName ?? DEFAULT_CRYPTO_MIGRATION_RUNS_TABLE;
-  const chunksTableName =
-    options.chunksTableName ?? DEFAULT_CRYPTO_MIGRATION_CHUNKS_TABLE;
-  const includeIndexes = options.includeIndexes ?? true;
-  const q = (column: string) => quoteIdentifier(options.dialect, column);
-  const runsTableRef = quoteIdentifier(options.dialect, runsTableName);
-  const chunksTableRef = quoteIdentifier(options.dialect, chunksTableName);
-
-  const runsSql = `
-CREATE TABLE IF NOT EXISTS ${runsTableRef} (
-  ${q("plan_id")} TEXT PRIMARY KEY,
-  ${q("tracking_table_name")} TEXT NOT NULL,
-  ${q("schema_fingerprint")} TEXT NOT NULL,
-  ${q("status")} TEXT NOT NULL,
-  ${q("chunk_size")} INTEGER NOT NULL,
-  ${q("total_rows")} INTEGER NOT NULL DEFAULT 0,
-  ${q("total_chunks")} INTEGER NOT NULL DEFAULT 0,
-  ${q("processed_rows")} INTEGER NOT NULL DEFAULT 0,
-  ${q("processed_chunks")} INTEGER NOT NULL DEFAULT 0,
-  ${q("failed_chunks")} INTEGER NOT NULL DEFAULT 0,
-  ${q("cursor_requested_at")} BIGINT,
-  ${q("cursor_message_id")} TEXT,
-  ${q("created_at")} BIGINT NOT NULL,
-  ${q("updated_at")} BIGINT NOT NULL,
-  ${q("last_error")} TEXT
-)`;
-
-  const chunksSql = `
-CREATE TABLE IF NOT EXISTS ${chunksTableRef} (
-  ${q("plan_id")} TEXT NOT NULL,
-  ${q("chunk_no")} INTEGER NOT NULL,
-  ${q("status")} TEXT NOT NULL,
-  ${q("start_requested_at")} BIGINT,
-  ${q("start_message_id")} TEXT,
-  ${q("end_requested_at")} BIGINT,
-  ${q("end_message_id")} TEXT,
-  ${q("processed_rows")} INTEGER NOT NULL DEFAULT 0,
-  ${q("attempts")} INTEGER NOT NULL DEFAULT 0,
-  ${q("message_ids_json")} TEXT,
-  ${q("last_error")} TEXT,
-  ${q("updated_at")} BIGINT NOT NULL,
-  PRIMARY KEY (${q("plan_id")}, ${q("chunk_no")})
-)`;
-
-  const statusIndexName = `${chunksTableName}_status_idx`;
-  const indexStatements =
-    includeIndexes === false
-      ? []
-      : [
-          options.dialect === "mysql"
-            ? `CREATE INDEX ${quoteIdentifier(options.dialect, statusIndexName)} ON ${chunksTableRef} (${q("plan_id")}, ${q("status")})`
-            : `CREATE INDEX IF NOT EXISTS ${quoteIdentifier(options.dialect, statusIndexName)} ON ${chunksTableRef} (${q("plan_id")}, ${q("status")})`,
-        ];
-
-  return {
-    tableStatements: [runsSql, chunksSql],
-    indexStatements,
-  };
+  return buildFieldCryptoMigrationStateStatements(options.dialect, options);
 }
 
 function mergeSchemaStatements(
@@ -426,65 +361,6 @@ function mergeSchemaStatements(
     tableStatements: schemas.flatMap((schema) => schema.tableStatements),
     indexStatements: schemas.flatMap((schema) => schema.indexStatements),
   };
-}
-
-function toErrorLike(error: unknown): SqlErrorLike | undefined {
-  if (!error || typeof error !== "object") return undefined;
-  return error as SqlErrorLike;
-}
-
-function asNumber(value: unknown): number | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return undefined;
-}
-
-function hasDuplicateMessage(value: unknown): boolean {
-  if (typeof value !== "string") return false;
-  const normalized = value.toLowerCase();
-  return (
-    normalized.includes("already exists") ||
-    normalized.includes("duplicate key name") ||
-    normalized.includes("duplicate object")
-  );
-}
-
-export function isDuplicateOrExistsSchemaError(
-  dialect: SqlDialect,
-  error: unknown,
-): boolean {
-  const parsed = toErrorLike(error);
-  const code =
-    typeof parsed?.code === "string" ? parsed.code.toUpperCase() : undefined;
-  const errno = asNumber(parsed?.errno);
-  const sqlState =
-    typeof parsed?.sqlState === "string"
-      ? parsed.sqlState.toUpperCase()
-      : undefined;
-  const message = parsed?.message;
-
-  if (dialect === "postgres") {
-    if (code === "42P07" || code === "42710") return true;
-    return hasDuplicateMessage(message);
-  }
-
-  if (dialect === "mysql") {
-    if (code === "ER_DUP_KEYNAME" || code === "ER_TABLE_EXISTS_ERROR") {
-      return true;
-    }
-    if (errno === 1061 || errno === 1050) return true;
-    if (sqlState === "42S01") return true;
-    return hasDuplicateMessage(message);
-  }
-
-  if (dialect === "sqlite") {
-    return hasDuplicateMessage(message);
-  }
-
-  return false;
 }
 
 export function buildDeliveryTrackingSchemaSql(
