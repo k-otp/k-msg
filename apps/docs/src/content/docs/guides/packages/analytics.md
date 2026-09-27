@@ -87,7 +87,9 @@ await analytics.init();
 - raw body는 `webhook.rawBody`로 넘깁니다. 받은 그대로의 요청 본문을 문자열,
   `Uint8Array`, `ArrayBuffer` 중 하나로 넘겨야 하며, 없으면 거부합니다.
   `JSON.parse` 후 `JSON.stringify`를 거치면 보낸 쪽이 서명한 바이트가 거의
-  재현되지 않기 때문입니다.
+  재현되지 않기 때문입니다. 가능하면 바이트(`await request.arrayBuffer()`,
+  Node의 raw `Buffer`)로 넘기세요. `request.text()`는 앞의 BOM을 지우고 잘못된
+  UTF-8을 치환하므로 서명된 내용이 달라집니다.
 - collector는 검증된 raw body(UTF-8 JSON이어야 합니다)에서 `body`를
   파싱하므로, 서명된 데이터만 변환기에 전달됩니다. `body`는 생략할 수 있고,
   함께 넘긴 값은 대체됩니다.
@@ -103,8 +105,8 @@ const collector = new WebhookCollector({
 });
 
 export async function receiveWebhook(request: Request) {
-  // 받은 그대로의 본문을 넘기면 collector가 검증한 뒤 파싱합니다.
-  const rawBody = await request.text();
+  // 받은 그대로의 바이트를 넘기면 collector가 검증한 뒤 파싱합니다.
+  const rawBody = await request.arrayBuffer();
   // 서명이 맞지 않으면 "Invalid webhook signature"로 reject됩니다.
   return collector.receiveWebhook({
     id: crypto.randomUUID(),

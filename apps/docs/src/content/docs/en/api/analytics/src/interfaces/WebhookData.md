@@ -41,12 +41,14 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:10](https://
 
 > `optional` **rawBody?**: `string` \| `ArrayBuffer` \| `Uint8Array`\<`ArrayBufferLike`\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L26)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L28)
 
 The request body exactly as received, before any parsing: the bytes the
-sender signed. Required while signature validation is on, and then it
-must be UTF-8 JSON. Its size in bytes counts against `maxPayloadSize`
-before the signature is checked.
+sender signed. Prefer bytes, such as `await request.arrayBuffer()`;
+`request.text()` drops a leading BOM and replaces invalid UTF-8.
+Required while signature validation is on, and then it must be UTF-8
+JSON. Its size in bytes counts against `maxPayloadSize` before the
+signature is checked.
 
 ***
 
@@ -54,7 +56,7 @@ before the signature is checked.
 
 > `optional` **signature?**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L28)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L30)
 
 The signature to check when the signature header is missing.
 

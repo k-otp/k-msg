@@ -549,11 +549,13 @@ describe("WebhookCollector", () => {
 
     // A webhook whose valid signature covers `payload`.
     const signedAs = (
-      payload: string | Uint8Array,
+      payload: string | Uint8Array | ArrayBuffer,
       overrides: Partial<WebhookData> = {},
     ): WebhookData =>
       signedWebhook({
-        headers: { "x-signature": `sha256=${sign(payload)}` },
+        headers: {
+          "x-signature": `sha256=${sign(typeof payload === "string" ? payload : new Uint8Array(payload))}`,
+        },
         body: undefined,
         rawBody: payload,
         ...overrides,
@@ -739,6 +741,72 @@ describe("WebhookCollector", () => {
       expect(
         () => new WebhookCollector({ enableSignatureValidation: false }),
       ).not.toThrow();
+    });
+
+    test("treats every value but false as validation on", async () => {
+      // What JavaScript callers or JSON-derived config can pass.
+      for (const value of [null, 0, ""]) {
+        const enableSignatureValidation = value as unknown as boolean;
+
+        expect(
+          () => new WebhookCollector({ enableSignatureValidation }),
+        ).toThrow("secretKey");
+        await expect(
+          createCollector({ enableSignatureValidation }).receiveWebhook(
+            signedWebhook({ headers: {} }),
+          ),
+        ).rejects.toThrow("Missing signature");
+      }
+    });
+
+    test("uses the rawBody it was called with", async () => {
+      const collector = createCollector();
+      const webhook = signedWebhook();
+
+      const received = collector.receiveWebhook(webhook);
+      // Replaced while the signature check awaits WebCrypto.
+      webhook.rawBody = rawBody.replace('"delivered"', '"failed"   ');
+      const events = await received;
+
+      expect(events.map((event) => event.type)).toEqual(["message.delivered"]);
+      expect(collector.getProcessedWebhooks()[0]?.rawBody).toBe(rawBody);
+    });
+
+    test("copies byte bodies before verifying them", async () => {
+      const collector = createCollector();
+      const encoder = new TextEncoder();
+      const forged = encoder.encode(
+        rawBody.replace('"delivered"', '"failed"   '),
+      );
+
+      for (const asBody of [
+        (bytes: Uint8Array<ArrayBuffer>) => bytes,
+        (bytes: Uint8Array<ArrayBuffer>) => bytes.buffer,
+      ]) {
+        // slice() gives the view a buffer of exactly its own size.
+        const bytes = encoder.encode(rawBody).slice();
+
+        const received = collector.receiveWebhook(signedAs(asBody(bytes)));
+        // Overwritten in place while the signature check awaits WebCrypto.
+        bytes.set(forged);
+
+        await expect(received).resolves.toMatchObject([
+          { type: "message.delivered" },
+        ]);
+      }
+    });
+
+    test("parses a signed byte body with a leading BOM", async () => {
+      const bytes = new Uint8Array([
+        0xef,
+        0xbb,
+        0xbf,
+        ...new TextEncoder().encode(rawBody),
+      ]);
+
+      await expect(
+        createCollector().receiveWebhook(signedAs(bytes)),
+      ).resolves.toMatchObject([{ type: "message.delivered" }]);
     });
   });
 });
