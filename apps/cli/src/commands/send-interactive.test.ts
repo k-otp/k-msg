@@ -437,6 +437,37 @@ describe("interactive send helpers", () => {
     });
   });
 
+  test("does not reuse the default Kakao channel of another provider", async () => {
+    const prompt = new FakePrompt({
+      textAnswers: [
+        "01012345678",
+        "TPL_001",
+        '{"name":"Jane"}',
+        "",
+        "",
+        "SOLAPI_PROFILE",
+        "@solapi-brand",
+      ],
+    });
+
+    // The default channel alias "main" is bound to aligo.
+    const input = await buildInteractiveAlimTalkInput({
+      draft: {
+        provider: "solapi",
+      },
+      prompt,
+      runtime: createRuntime(),
+    });
+
+    expect(
+      prompt.texts.some((message) => message.includes("senderKey/profileId")),
+    ).toBe(true);
+    expect(input.kakao).toEqual({
+      plusId: "@solapi-brand",
+      profileId: "SOLAPI_PROFILE",
+    });
+  });
+
   test("manual Kakao selection bypasses default aliases", async () => {
     const prompt = new FakePrompt({
       textAnswers: [

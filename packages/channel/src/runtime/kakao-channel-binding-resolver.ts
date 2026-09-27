@@ -67,6 +67,20 @@ function selectSingleProviderId(
   return readString(providers[0]?.id);
 }
 
+// An alias bound to another provider names that provider's channel, so its
+// senderKey and plusId would point this provider at the wrong channel.
+function isBoundToOtherProvider(
+  entry: KakaoChannelAliasEntry | undefined,
+  providerId: string | undefined,
+): boolean {
+  const aliasProviderId = readString(entry?.providerId);
+  return (
+    providerId !== undefined &&
+    aliasProviderId !== undefined &&
+    aliasProviderId !== providerId
+  );
+}
+
 export class KakaoChannelBindingResolver {
   constructor(private readonly config: KakaoChannelResolverConfig) {}
 
@@ -208,16 +222,26 @@ export class KakaoChannelBindingResolver {
       ? extractProviderBindingHint(providerEntry)
       : {};
 
+    const aliasBinding = isBoundToOtherProvider(aliasEntry, providerId)
+      ? undefined
+      : aliasEntry;
+    const defaultAliasBinding = isBoundToOtherProvider(
+      defaultAliasEntry,
+      providerId,
+    )
+      ? undefined
+      : defaultAliasEntry;
+
     const explicitSenderKey = readString(input?.senderKey);
-    const aliasSenderKey = readString(aliasEntry?.senderKey);
+    const aliasSenderKey = readString(aliasBinding?.senderKey);
     const defaultsSenderKey = readString(defaultsKakao?.senderKey);
-    const defaultAliasSenderKey = readString(defaultAliasEntry?.senderKey);
+    const defaultAliasSenderKey = readString(defaultAliasBinding?.senderKey);
     const providerHintSenderKey = readString(providerHint.senderKey);
 
     const explicitPlusId = readString(input?.plusId);
-    const aliasPlusId = readString(aliasEntry?.plusId);
+    const aliasPlusId = readString(aliasBinding?.plusId);
     const defaultsPlusId = readString(defaultsKakao?.plusId);
-    const defaultAliasPlusId = readString(defaultAliasEntry?.plusId);
+    const defaultAliasPlusId = readString(defaultAliasBinding?.plusId);
     const providerHintPlusId = readString(providerHint.plusId);
 
     let senderKey: string | undefined;
@@ -268,10 +292,10 @@ export class KakaoChannelBindingResolver {
         : {}),
       ...(senderKey ? { senderKey } : {}),
       ...(plusId ? { plusId } : {}),
-      ...(readString(aliasEntry?.name)
-        ? { name: readString(aliasEntry?.name) }
-        : readString(defaultAliasEntry?.name)
-          ? { name: readString(defaultAliasEntry?.name) }
+      ...(readString(aliasBinding?.name)
+        ? { name: readString(aliasBinding?.name) }
+        : readString(defaultAliasBinding?.name)
+          ? { name: readString(defaultAliasBinding?.name) }
           : {}),
       providerIdSource,
       ...(senderKeySource ? { senderKeySource } : {}),

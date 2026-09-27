@@ -1113,6 +1113,88 @@ describe("k-msg CLI E2E", () => {
   );
 
   test(
+    "alimtalk preflight skips a default Kakao channel of another provider",
+    async () => {
+      // Stands in for Aligo's Kakao API, which scopes channels and templates
+      // by sender key.
+      const aligoSenderKey = "ALIGO_SENDER_KEY";
+      const receivedSenderKeys: string[] = [];
+      const aligoApi = Bun.serve({
+        hostname: "127.0.0.1",
+        port: 0,
+        async fetch(request) {
+          const senderKey = (await request.formData()).get("senderkey");
+          if (typeof senderKey === "string") {
+            receivedSenderKeys.push(senderKey);
+          }
+          const list =
+            senderKey !== aligoSenderKey
+              ? []
+              : new URL(request.url).pathname === "/akv10/profile/list/"
+                ? [{ senderKey: aligoSenderKey, uuid: "@aligo_channel" }]
+                : [{ templtCode: "TPL_1", templtName: "Welcome" }];
+          return Response.json({ code: 0, message: "ok", list });
+        },
+      });
+
+      try {
+        const configPath = await createTempConfigFromObject({
+          version: 1,
+          providers: [
+            { type: "mock", id: "mock", config: {} },
+            {
+              type: "aligo",
+              id: "aligo",
+              config: {
+                apiKey: "api-key",
+                userId: "user-id",
+                senderKey: aligoSenderKey,
+                alimtalkBaseUrl: aligoApi.url.origin,
+              },
+            },
+          ],
+          routing: { defaultProviderId: "mock", strategy: "first" },
+          defaults: { kakao: { channel: "seed" } },
+          aliases: {
+            kakaoChannels: {
+              seed: {
+                providerId: "mock",
+                senderKey: "mock-sender-seed",
+                plusId: "@mock",
+              },
+            },
+          },
+        });
+
+        const preflight = expectCommand(
+          await runCli([
+            "alimtalk",
+            "preflight",
+            "--config",
+            configPath,
+            "--provider",
+            "aligo",
+            "--template-id",
+            "TPL_1",
+            "--json",
+            "true",
+          ]),
+        );
+        preflight.toHaveSucceeded();
+        const payload = JSON.parse(preflight.stdout) as {
+          result: { inferredPlusId?: string };
+        };
+        // The plusId comes from Aligo's own channel, not the mock alias.
+        expect(payload.result.inferredPlusId).toBe("@aligo_channel");
+        expect([...new Set(receivedSenderKeys)]).toEqual([aligoSenderKey]);
+      } finally {
+        aligoApi.stop(true);
+      }
+    },
+    TEST_TIMEOUT,
+  );
+
+  test(
     "AI env auto-enables JSON output",
     async () => {
       const configPath = await createTempConfig();
