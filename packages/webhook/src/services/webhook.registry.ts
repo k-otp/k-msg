@@ -2,6 +2,7 @@ import type { FieldCryptoConfig } from "@k-msg/core";
 import {
   protectDelivery,
   protectEndpoint,
+  protectEndpointUpdate,
   revealDelivery,
   revealEndpoint,
   validateWebhookFieldCryptoOptions,
@@ -36,14 +37,30 @@ export class WebhookRegistry {
     this.endpoints.set(endpoint.id, await this.protectEndpoint(endpoint));
   }
 
+  /**
+   * Replaces the endpoint. With endpoint field crypto, an endpoint without a
+   * `secret` of its own keeps the stored secret, for example one read while
+   * it could not be decrypted; set `secret`, even to `undefined`, to replace
+   * or remove it. A secret that cannot be encrypted in open mode is kept if
+   * it is the stored one, and fails the update if the stored one cannot be
+   * read to tell.
+   */
   async updateEndpoint(
     endpointId: string,
     endpoint: WebhookEndpoint,
   ): Promise<void> {
-    if (!this.endpoints.has(endpointId)) {
+    const stored = this.endpoints.get(endpointId);
+    if (!stored) {
       throw new Error(`Endpoint ${endpointId} not found`);
     }
-    this.endpoints.set(endpointId, await this.protectEndpoint(endpoint));
+    this.endpoints.set(
+      endpointId,
+      await protectEndpointUpdate(
+        endpoint,
+        async () => stored,
+        this.options.fieldCrypto,
+      ),
+    );
   }
 
   async removeEndpoint(endpointId: string): Promise<void> {

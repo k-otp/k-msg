@@ -6,6 +6,10 @@ import {
   wrapWebhookEndpointStoreWithFieldCrypto,
 } from "../crypto/field-crypto";
 import {
+  hasUndecryptableSecret,
+  unmarkSecret,
+} from "../crypto/undecryptable-secret";
+import {
   type HttpClient,
   resolveSigningSecret,
   WebhookDispatcher,
@@ -137,7 +141,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // endpoint fails at once instead of waiting behind other endpoint writes.
   async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
     validateEndpointUrl(input.url, this.securityOptions);
-    this.assertSigningSecret({ ...input, ...resolveActivity(input) });
+    this.assertSigningSecret({
+      ...unmarkSecret(input),
+      ...resolveActivity(input),
+    });
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
       return this.insertEndpoint(input);
@@ -153,7 +160,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
     for (const [index, input] of inputs.entries()) {
       try {
         validateEndpointUrl(input.url, this.securityOptions);
-        this.assertSigningSecret({ ...input, ...resolveActivity(input) });
+        this.assertSigningSecret({
+          ...unmarkSecret(input),
+          ...resolveActivity(input),
+        });
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(`Webhook endpoint ${index} in the batch: ${reason}`, {
@@ -181,7 +191,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     const now = new Date();
 
     const endpoint: WebhookEndpoint = {
-      ...input,
+      // A copy of an endpoint read without its secret has no secret to keep.
+      ...unmarkSecret(input),
       id: input.id ?? this.generateEndpointId(),
       ...resolveActivity(input),
       createdAt: now,
@@ -217,6 +228,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     const now = new Date();
+    // Unless the update sets `secret`, the store keeps the stored one, even
+    // when `current` was read without it because it could not be decrypted.
     const merged: WebhookEndpoint = {
       ...current,
       ...updates,
@@ -234,7 +247,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     };
     this.assertSigningSecret(merged, endpointId);
 
-    await this.endpointStore.update(endpointId, merged);
+    // The flag describes this read of the endpoint and is never stored.
+    await this.endpointStore.update(endpointId, unmarkSecret(merged));
     return merged;
   }
 
@@ -464,8 +478,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // The dispatcher refuses to send unsigned while security is on; rejecting
   // an endpoint that would receive deliveries reports the problem when it is
   // registered instead. A paused endpoint (see endpointMatchesEvent) needs no
-  // secret, so an unsigned one can be paused rather than deleted. The URL is
-  // left out of the message because it may carry a token.
+  // secret, so an unsigned one can be paused rather than deleted. An update
+  // keeps a stored secret that could not be decrypted, so it has one. The URL
+  // is left out of the message because it may carry a token.
   private assertSigningSecret(
     endpoint: Pick<WebhookEndpoint, "active" | "status" | "secret">,
     endpointId?: string,
@@ -474,6 +489,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
       !this.config.enableSecurity ||
       !endpoint.active ||
       endpoint.status !== "active" ||
+      hasUndecryptableSecret(endpoint) ||
       resolveSigningSecret(endpoint, this.config) !== undefined
     ) {
       return;

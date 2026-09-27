@@ -18,11 +18,22 @@ import type {
   WebhookTenantMigrationResult,
 } from "../runtime/types";
 import type { WebhookDelivery, WebhookEndpoint } from "../types/webhook.types";
+import {
+  hasUndecryptableSecret,
+  markSecretUndecryptable,
+  unmarkSecret,
+} from "./undecryptable-secret";
 
 function normalizeString(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+// Values are encrypted and returned exactly as given, not trimmed: a secret
+// with surrounding whitespace still signs as it is without field crypto.
+function nonEmptyString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function toFallbackValue(config: FieldCryptoConfig, plaintext: string): string {
@@ -103,7 +114,7 @@ export async function protectFieldValue(
     tenantId?: string;
   },
 ): Promise<string | undefined> {
-  const value = normalizeString(input.value);
+  const value = nonEmptyString(input.value);
   if (!value) return undefined;
   if (!config || config.enabled === false) return value;
 
@@ -159,7 +170,7 @@ export async function revealFieldValue(
     acceptLegacyAad?: boolean;
   },
 ): Promise<string | undefined> {
-  const value = normalizeString(input.value);
+  const value = nonEmptyString(input.value);
   if (!value) return undefined;
   if (!config || config.enabled === false) return value;
 
@@ -300,20 +311,111 @@ export async function protectEndpoint(
     tenantId: options?.tenantId,
   });
 
-  return withSecret(endpoint, secret);
+  return withSecret(unmarkSecret(endpoint), secret);
 }
 
+/**
+ * Protects an endpoint that replaces the stored one, which `readStored`
+ * returns as stored, without ever writing an open-mode fallback over a
+ * stored secret. An endpoint without a `secret` of its own keeps the stored
+ * one: it was read without it because it could not be decrypted, or lost it
+ * on the way, for example in JSON; setting `secret`, even to `undefined`,
+ * replaces it. When the secret cannot be encrypted, the stored one is kept
+ * if it is the same, and the update fails if the stored one cannot be read
+ * to tell. Only a secret known to be new gets the fallback.
+ */
+export async function protectEndpointUpdate(
+  endpoint: WebhookEndpoint,
+  readStored: () => Promise<WebhookEndpoint | null | undefined>,
+  options: WebhookRuntimeFieldCryptoOptions | undefined,
+): Promise<WebhookEndpoint> {
+  const config = options?.endpoint;
+  if (!config || config.enabled === false) {
+    return protectEndpoint(endpoint, options);
+  }
+  if (!Object.hasOwn(endpoint, "secret")) {
+    return withStoredSecret(endpoint, await readStored());
+  }
+
+  try {
+    return await protectEndpoint(endpoint, {
+      ...options,
+      endpoint: failClosed(config),
+    });
+  } catch (error) {
+    if (resolveFieldCryptoFailMode(config) !== "open") throw error;
+    const stored = await readStored();
+    const revealed = stored ? await revealEndpoint(stored, options) : null;
+    if (stored && revealed && hasUndecryptableSecret(revealed)) {
+      // The fallback would destroy a secret that may only be unavailable,
+      // and keeping that secret would drop the one this update sets.
+      throw new FieldCryptoError(
+        "encrypt",
+        `Cannot update the secret of webhook endpoint ${stored.id}: it could not be encrypted, and the stored secret could not be decrypted to tell whether it changed`,
+        { recordId: stored.id },
+        {
+          fieldPath: "secret",
+          failMode: "open",
+          openFallback: resolveFieldCryptoOpenFallback(config),
+          causeChain: [error],
+        },
+      );
+    }
+    if (revealed?.secret !== undefined && revealed.secret === endpoint.secret) {
+      return withStoredSecret(endpoint, stored);
+    }
+    // A new secret gets the open-mode fallback, as on any other write.
+    return protectEndpoint(endpoint, options);
+  }
+}
+
+function withStoredSecret(
+  endpoint: WebhookEndpoint,
+  stored: WebhookEndpoint | null | undefined,
+): WebhookEndpoint {
+  return withSecret(unmarkSecret(endpoint), stored?.secret ?? "");
+}
+
+/**
+ * Decrypts the endpoint's secret. When that fails in open mode, no fallback
+ * is used as the secret, since it would sign deliveries that every receiver
+ * rejects: the endpoint is returned without it and marked, so nothing is
+ * sent to it while security is on and an update keeps the stored secret.
+ * That includes the plaintext fallback: a stored value that does not decrypt
+ * cannot be told apart from ciphertext a provider could not decrypt.
+ *
+ * @evidence docs/security/field-crypto-v1.md#fail-policy
+ *   Answers the webhook secret bullet: a secret that fails to decrypt in
+ *   open mode is left out and marked whatever the fallback, and
+ *   protectEndpointUpdate never writes a fallback over a stored secret.
+ * @evidenceReview docs/security/field-crypto-v1.md#fail-policy #f3d7757
+ *   Read the webhook secret bullet against revealEndpoint,
+ *   protectEndpointUpdate, and the dispatcher's check for a marked endpoint,
+ *   and ran webhook-runtime.crypto.test.ts, webhook.registry.crypto.test.ts,
+ *   and field-crypto.test.ts: with the masked, null, or plaintext fallback a
+ *   value that does not decrypt is left out and nothing is sent, even with
+ *   secretKey; an endpoint without its own secret keeps the stored one, also
+ *   after JSON; an unchanged secret that cannot be encrypted is kept; and an
+ *   update whose secret can be neither encrypted nor compared fails.
+ */
 export async function revealEndpoint(
   endpoint: WebhookEndpoint,
   options: WebhookRuntimeFieldCryptoOptions | undefined,
 ): Promise<WebhookEndpoint> {
-  const secret = await revealFieldValue(options?.endpoint, {
-    value: endpoint.secret,
-    path: "secret",
-    aad: endpointAad(endpoint),
-    tenantId: options?.tenantId,
-    acceptLegacyAad: options?.acceptLegacyAad,
-  });
+  const config = options?.endpoint;
+  let secret: string | undefined;
+  try {
+    secret = await revealFieldValue(failClosed(config), {
+      value: endpoint.secret,
+      path: "secret",
+      aad: endpointAad(endpoint),
+      tenantId: options?.tenantId,
+      acceptLegacyAad: options?.acceptLegacyAad,
+    });
+  } catch (error) {
+    if (!config || resolveFieldCryptoFailMode(config) !== "open") throw error;
+    return markSecretUndecryptable(endpoint);
+  }
 
   return withSecret(endpoint, secret);
 }
@@ -366,7 +468,14 @@ export function wrapWebhookEndpointStoreWithFieldCrypto(
       await store.add(await protectEndpoint(endpoint, options));
     },
     async update(endpointId: string, endpoint: WebhookEndpoint): Promise<void> {
-      await store.update(endpointId, await protectEndpoint(endpoint, options));
+      await store.update(
+        endpointId,
+        await protectEndpointUpdate(
+          endpoint,
+          () => store.get(endpointId),
+          options,
+        ),
+      );
     },
     async remove(endpointId: string): Promise<void> {
       await store.remove(endpointId);

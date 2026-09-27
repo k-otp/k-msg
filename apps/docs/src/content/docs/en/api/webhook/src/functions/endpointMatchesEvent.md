@@ -81,6 +81,10 @@ Defined in: [packages/webhook/src/runtime/event-matcher.ts:18](https://github.co
 
 `string` = `...`
 
+#### secretUndecryptable?
+
+`true` = `...`
+
 #### status
 
 `"error"` \| `"active"` \| `"inactive"` \| `"suspended"` = `...`

@@ -43,6 +43,7 @@ The built-in AES-GCM provider writes this envelope. An envelope object from a cu
 - Optional: `failMode=open`
 - `openFallback=plaintext` is blocked unless `unsafeAllowPlaintextStorage=true`
 - Any other `failMode` or `openFallback` value is a configuration error; at runtime anything but an explicit `failMode=open` fails closed, and an unrecognized `openFallback` falls back to `masked`
+- A webhook endpoint secret is never read as a fallback value, which would sign deliveries that receivers reject. With `failMode=open`, an endpoint whose secret cannot be decrypted is returned without it and gets no signed deliveries, not even with the shared `secretKey`. That includes `openFallback=plaintext`, since a stored value that does not decrypt cannot be told apart from ciphertext. An endpoint update never writes a fallback over a stored secret: an endpoint without a `secret` of its own keeps the stored one, an unchanged secret that cannot be encrypted again is kept, and an update whose secret can be neither encrypted nor compared with the stored one fails.
 
 ## Field policy modes
 
