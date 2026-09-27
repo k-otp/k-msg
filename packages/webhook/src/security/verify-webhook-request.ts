@@ -13,9 +13,11 @@ export type WebhookRequestHeaders =
   | Readonly<Record<string, string | readonly string[] | undefined>>;
 
 /**
- * The raw request body, exactly as received. Parsing and re-serializing JSON
- * changes the bytes and breaks the signature. Bytes are checked exactly, so
- * they must be valid UTF-8, as the sender's always are.
+ * The raw request body, exactly as received: prefer the bytes, such as
+ * `await request.arrayBuffer()`. Bytes are checked exactly, so they must be
+ * valid UTF-8, as the sender's always are. A string is trusted as given, but
+ * `request.text()` drops a leading BOM and replaces malformed bytes before
+ * any check, and parsing and re-serializing JSON changes the body.
  */
 export type WebhookRequestBody = string | Uint8Array | ArrayBuffer;
 
@@ -117,7 +119,8 @@ function readBody(body: WebhookRequestBody): string | undefined {
  * at least once, so skip event ids you have already processed.
  *
  * @param headers - The request headers.
- * @param body - The raw request body, before any JSON parsing.
+ * @param body - The raw request body, preferably its bytes, before any
+ *   decoding or JSON parsing.
  * @param secret - The endpoint's signing secret (or the sender's shared
  *   `secretKey`).
  * @returns The signed time, or a {@link WebhookVerificationError} whose
@@ -127,14 +130,16 @@ function readBody(body: WebhookRequestBody): string | undefined {
  *
  * @example
  * ```ts
+ * const body = await request.arrayBuffer();
  * const verified = verifyWebhookRequest(
  *   request.headers,
- *   await request.text(),
+ *   body,
  *   env.WEBHOOK_SECRET,
  * );
  * if (verified.isFailure) {
  *   return new Response(verified.error.code, { status: 401 });
  * }
+ * const event = JSON.parse(new TextDecoder().decode(body));
  * ```
  */
 export function verifyWebhookRequest(

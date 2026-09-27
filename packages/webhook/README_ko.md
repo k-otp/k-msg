@@ -299,8 +299,9 @@ export async function receiveWebhook(
   request: Request,
   secret: string,
 ): Promise<Response> {
-  // 원본 body로 검증합니다. JSON.parse와 JSON.stringify는 바이트를 바꿀 수 있습니다.
-  const body = await request.text();
+  // 받은 바이트 그대로 검증합니다. request.text()는 앞의 BOM을 지우고 잘못된
+  // 바이트를 바꾸며, JSON 변환도 body를 바꿀 수 있습니다.
+  const body = await request.arrayBuffer();
   const verified = verifyWebhookRequest(request.headers, body, secret, {
     toleranceMs: 5 * 60 * 1000,
   });
@@ -310,16 +311,17 @@ export async function receiveWebhook(
     return new Response(verified.error.code, { status: 401 });
   }
 
-  const event = JSON.parse(body);
+  const event = JSON.parse(new TextDecoder().decode(body));
   // 전송은 at-least-once입니다. 이미 처리한 이벤트 id는 건너뛰세요.
   console.log("webhook received", event.id);
   return new Response(null, { status: 204 });
 }
 ```
 
-Node 스타일 헤더 레코드(`req.headers`)와 `Uint8Array`, `ArrayBuffer` body도
-받습니다. 송신 측에서 `algorithm`, `signatureHeader`, `signaturePrefix`를
-바꿨다면 옵션에 같은 값을 넘기세요.
+Node 스타일 헤더 레코드(`req.headers`)와 `express.raw()`의 `Buffer` 같은
+`Uint8Array` body도 받습니다. 문자열 body는 주어진 그대로 검증합니다. 송신
+측에서 `algorithm`, `signatureHeader`, `signaturePrefix`를 바꿨다면 옵션에 같은
+값을 넘기세요.
 
 ## 마이그레이션 (브레이킹)
 

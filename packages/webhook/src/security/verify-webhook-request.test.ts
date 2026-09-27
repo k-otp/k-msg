@@ -265,6 +265,21 @@ describe("verifyWebhookRequest", () => {
     ).toBe("INVALID_SIGNATURE");
   });
 
+  test("rejects a BOM prepended to a signed byte body", () => {
+    setSystemTime(SIGNED_AT);
+    const signed = new TextEncoder().encode(BODY);
+    const withBom = new Uint8Array([0xef, 0xbb, 0xbf, ...signed]);
+
+    // Request.text() would drop these three bytes before any check, so
+    // verify the bytes themselves.
+    expect(
+      verifyWebhookRequest(signedHeaders(), signed, SECRET).isSuccess,
+    ).toBe(true);
+    expect(
+      failureCode(verifyWebhookRequest(signedHeaders(), withBom, SECRET)),
+    ).toBe("INVALID_SIGNATURE");
+  });
+
   test("uses the sender's signature header, prefix, and algorithm", () => {
     setSystemTime(SIGNED_AT);
     const timestamp = toSeconds(SIGNED_AT);
