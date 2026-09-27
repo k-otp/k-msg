@@ -238,3 +238,61 @@ export function createDrizzleSqlClient(
 
   return client;
 }
+
+type SqlErrorLike = {
+  code?: unknown;
+  errno?: unknown;
+  sqlState?: unknown;
+  message?: unknown;
+  cause?: unknown;
+};
+
+function toErrorLike(error: unknown): SqlErrorLike | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  return error as SqlErrorLike;
+}
+
+function hasDuplicateMessage(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const normalized = value.toLowerCase();
+  return (
+    normalized.includes("already exists") ||
+    normalized.includes("duplicate key name") ||
+    normalized.includes("duplicate object")
+  );
+}
+
+export function isDuplicateOrExistsSchemaError(
+  dialect: SqlDialect,
+  error: unknown,
+): boolean {
+  const parsed = toErrorLike(error);
+  const code =
+    typeof parsed?.code === "string" ? parsed.code.toUpperCase() : undefined;
+  const errno = toNumber(parsed?.errno);
+  const sqlState =
+    typeof parsed?.sqlState === "string"
+      ? parsed.sqlState.toUpperCase()
+      : undefined;
+  const message = parsed?.message;
+
+  if (dialect === "postgres") {
+    if (code === "42P07" || code === "42710") return true;
+    return hasDuplicateMessage(message);
+  }
+
+  if (dialect === "mysql") {
+    if (code === "ER_DUP_KEYNAME" || code === "ER_TABLE_EXISTS_ERROR") {
+      return true;
+    }
+    if (errno === 1061 || errno === 1050) return true;
+    if (sqlState === "42S01") return true;
+    return hasDuplicateMessage(message);
+  }
+
+  if (dialect === "sqlite") {
+    return hasDuplicateMessage(message);
+  }
+
+  return false;
+}
