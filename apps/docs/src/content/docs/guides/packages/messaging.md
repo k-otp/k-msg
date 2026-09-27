@@ -265,6 +265,15 @@ Queue 인덱스:
 - `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
 - `idx_kmsg_jobs_id(id)`
 
+SQLite와 D1은 데이터베이스 안에서, Postgres는 스키마 안에서 인덱스 이름이 겹치면 안 됩니다. 같은 곳에 두 번째 큐 테이블을 두려면 별도의 이름이 필요하며, 그렇지 않으면 `CREATE INDEX IF NOT EXISTS`가 첫 번째 테이블의 인덱스를 보고 건너뜁니다. 큐(와 `buildJobQueueSchemaSql()`)에는 `indexNames`를, `buildCloudflareSqlSchemaSql()`, `initializeCloudflareSqlSchema()`, `renderDrizzleSchemaSource()`에는 `queueIndexNames`를 넘기세요.
+
+```ts
+const otpQueue = createD1JobQueue(env.DB, {
+  tableName: "otp_jobs",
+  indexNames: { dequeue: "idx_otp_jobs_dequeue", id: "idx_otp_jobs_id" },
+});
+```
+
 ### Cloudflare 스키마 유틸 API
 
 ```ts

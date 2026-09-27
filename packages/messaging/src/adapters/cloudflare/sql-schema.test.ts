@@ -3,6 +3,7 @@ import { renderDrizzleSchemaSource } from "./drizzle-schema";
 import type { SqlDialect } from "./sql-client";
 import {
   buildCloudflareSqlSchemaSql,
+  buildJobQueueSchemaSql,
   initializeCloudflareSqlSchema,
 } from "./sql-schema";
 
@@ -16,6 +17,8 @@ const TIME_COLUMNS = [
   "last_checked_at",
   "scheduled_at",
 ];
+
+const queueIndexNames = { dequeue: "otp_jobs_dequeue", id: "otp_jobs_id" };
 
 describe("Cloudflare SQL schema builders", () => {
   test("buildCloudflareSqlSchemaSql renders both tracking and queue tables", () => {
@@ -114,6 +117,62 @@ describe("Cloudflare SQL schema builders", () => {
         expect(sql).toContain(`${quote}provider_status_message${quote} TEXT,`);
       }
     }
+  });
+
+  test("queue schema creates its indexes under the configured names", async () => {
+    const indexNamesIn = (sql: string) =>
+      Array.from(
+        sql.matchAll(/CREATE INDEX (?:IF NOT EXISTS )?["`]([^"`]+)["`]/g),
+        (match) => match[1],
+      );
+
+    for (const dialect of ["sqlite", "postgres", "mysql"] as const) {
+      expect(
+        indexNamesIn(
+          buildJobQueueSchemaSql({
+            dialect,
+            tableName: "otp_jobs",
+            indexNames: queueIndexNames,
+          }),
+        ),
+      ).toEqual(["otp_jobs_dequeue", "otp_jobs_id"]);
+    }
+    expect(
+      indexNamesIn(
+        buildCloudflareSqlSchemaSql({
+          dialect: "postgres",
+          target: "queue",
+          queueTableName: "otp_jobs",
+          queueIndexNames,
+        }),
+      ),
+    ).toEqual(["otp_jobs_dequeue", "otp_jobs_id"]);
+
+    const statements: string[] = [];
+    await initializeCloudflareSqlSchema(
+      {
+        dialect: "postgres",
+        async query(sql: string) {
+          statements.push(sql);
+          return { rows: [] };
+        },
+      },
+      { target: "queue", queueTableName: "otp_jobs", queueIndexNames },
+    );
+    expect(indexNamesIn(statements.join("\n"))).toEqual([
+      "otp_jobs_dequeue",
+      "otp_jobs_id",
+    ]);
+
+    // A name that is left out or empty keeps its default.
+    expect(
+      indexNamesIn(
+        buildJobQueueSchemaSql({
+          dialect: "sqlite",
+          indexNames: { dequeue: "otp_jobs_dequeue", id: " " },
+        }),
+      ),
+    ).toEqual(["otp_jobs_dequeue", "idx_kmsg_jobs_id"]);
   });
 
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
@@ -229,6 +288,21 @@ describe("Drizzle schema renderer", () => {
         expect(source).toContain(`bigint("${column}", { mode: "number" })`);
       }
       expect(source).not.toMatch(/\bint(eger)?\("[a-z_]+_at"\)/);
+    }
+  });
+
+  test("renders the configured queue index names", () => {
+    for (const dialect of ["sqlite", "postgres", "mysql"] as const) {
+      const source = renderDrizzleSchemaSource({
+        dialect,
+        target: "queue",
+        queueTableName: "otp_jobs",
+        queueIndexNames,
+      });
+
+      expect(source).toContain('index("otp_jobs_dequeue")');
+      expect(source).toContain('index("otp_jobs_id")');
+      expect(source).not.toContain("idx_kmsg_jobs");
     }
   });
 });
