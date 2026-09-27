@@ -197,7 +197,7 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### 한 스토어를 여러 곳에서 폴링할 때
 
-인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. 일찍 멈춘 폴링은 끝내지 못한 레코드의 임대를 돌려주되, 그 사이 다른 폴링이 임대한 레코드는 건드리지 않습니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. 직접 만든 스토어는 `leaseDue`와 `releaseLeases`를 구현하면 됩니다. MySQL에서는 SQL client가 트랜잭션을 지원할 때만 임대가 원자적입니다. 프로세스가 죽는 등으로 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
+인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. 일찍 멈춘 폴링은 끝내지 못한 레코드의 임대를 돌려주되, 그 사이 다른 폴링이 임대한 레코드는 건드리지 않습니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. 직접 만든 스토어는 `leaseDue`와 `releaseLeases`를 구현하면 됩니다. MySQL에서는 트랜잭션 안에서만 임대가 원자적입니다: `BunSqlDeliveryTrackingStore`는 트랜잭션을 쓰고, `HyperdriveDeliveryTrackingStore`에 넘기는 client에는 `transaction` 함수가 있어야 합니다. 프로세스가 죽는 등으로 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
 
 ### 종료
 

@@ -284,7 +284,7 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### Several Pollers on One Store
 
-When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. A poll that stops early hands back the records it did not finish, except those another poll has leased since. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not, and a custom store can by implementing `leaseDue` and `releaseLeases`. On MySQL the lease is atomic only when the SQL client supports transactions. A lease a poll cannot hand back, for example because its process died, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
+When services share a store, as several instances or overlapping cron runs do, each poll leases the records it takes: until it stores their next check, other polls skip them, so a message is not queried, or sent a fallback, twice at once. A poll that stops early hands back the records it did not finish, except those another poll has leased since. The SQL stores and `InMemoryDeliveryTrackingStore` lease records; the KV, R2, and Durable Object stores do not, and a custom store can by implementing `leaseDue` and `releaseLeases`. On MySQL a lease is atomic only inside a transaction: `BunSqlDeliveryTrackingStore` runs one, and a client passed to `HyperdriveDeliveryTrackingStore` needs a `transaction` function. A lease a poll cannot hand back, for example because its process died, runs out after `polling.leaseMs` (5 minutes); `leaseMs: 0` turns leasing off.
 
 ### Shutting Down
 
