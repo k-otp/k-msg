@@ -788,4 +788,55 @@ describe("tracking hash lookups", () => {
       store.listRecords({ to: "01012345678", limit: 10 }),
     ).rejects.toThrow("Field crypto hash failed for to");
   });
+
+  test("binds a many-key hash lookup as one parameter, within D1's limit", async () => {
+    const sqlite = createSqliteClient();
+    const bound: number[] = [];
+    // D1 rejects a statement that binds more than 100 parameters.
+    const client: CloudflareSqlClient = {
+      dialect: "sqlite",
+      query: ((sql: string, params: readonly unknown[] = []) => {
+        bound.push(params.length);
+        if (params.length > 100) {
+          return Promise.reject(new Error("too many SQL variables"));
+        }
+        return sqlite.query(sql, params);
+      }) as CloudflareSqlClient["query"],
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      tableName: "kmsg_delivery_tracking",
+      fieldCrypto: {
+        tenantId: "tenant-a",
+        config: {
+          enabled: true,
+          fields: { to: "encrypt+hash", from: "encrypt+hash" },
+          // Mid-rotation, each value hashes under three keys: the active kid,
+          // the previous one, and the provider's default key.
+          keyResolver: createStaticKeyResolver({
+            activeKid: "k-2026-02",
+            decryptKids: ["k-2026-01"],
+          }),
+          provider: createKeyedProvider(),
+        },
+      },
+    });
+    const recipients = Array.from(
+      { length: 40 },
+      (_, index) => `0101111${String(index).padStart(4, "0")}`,
+    );
+    for (const [index, to] of recipients.entries()) {
+      await store.upsert(trackingRecord(index, to));
+    }
+
+    bound.length = 0;
+    expect(await store.countRecords({ to: recipients })).toBe(40);
+    expect(await store.listRecords({ to: recipients, limit: 50 })).toHaveLength(
+      40,
+    );
+    expect(await store.countBy({ to: recipients }, ["providerId"])).toEqual([
+      { key: { providerId: "p-1" }, count: 40 },
+    ]);
+    // The 120 hashes travel as one JSON parameter, next to limit and offset.
+    expect(Math.max(...bound)).toBe(3);
+  });
 });
