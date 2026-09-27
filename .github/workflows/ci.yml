@@ -225,7 +225,7 @@ jobs:
         run: bun --cwd packages/messaging test src/delivery-tracking/field-crypto-policy.test.ts src/delivery-tracking/crypto-control-plane.test.ts
 
       - name: Webhook crypto regression tests
-        run: bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts
+        run: bun --cwd packages/webhook test src/services/webhook.registry.crypto.test.ts src/runtime/webhook-runtime.crypto.test.ts
 
   drizzle-compat:
     if: github.event_name == 'workflow_dispatch'
