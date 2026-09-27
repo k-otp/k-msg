@@ -5,11 +5,11 @@ CREATE TABLE IF NOT EXISTS "kmsg_delivery_tracking" (
   "message_id" TEXT PRIMARY KEY,
   "provider_id" TEXT NOT NULL,
   "provider_message_id" TEXT NOT NULL,
-  "type" TEXT NOT NULL,
-  "to" TEXT NOT NULL,
-  "from" TEXT,
-  "status" TEXT NOT NULL,
-  "provider_status_code" TEXT,
+  "type" VARCHAR(64) NOT NULL,
+  "to" VARCHAR(64) NOT NULL,
+  "from" VARCHAR(64),
+  "status" VARCHAR(64) NOT NULL,
+  "provider_status_code" VARCHAR(64),
   "provider_status_message" TEXT,
   "sent_at" TIMESTAMPTZ,
   "delivered_at" TIMESTAMPTZ,
@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS "kmsg_delivery_tracking" (
   "attempt_count" INTEGER NOT NULL DEFAULT 0,
   "last_checked_at" TIMESTAMPTZ,
   "next_check_at" TIMESTAMPTZ NOT NULL,
-  "last_error" TEXT,
-  "metadata" TEXT
+  "last_error" JSONB,
+  "metadata" JSONB
 );
 
 CREATE INDEX IF NOT EXISTS "idx_kmsg_delivery_due" ON "kmsg_delivery_tracking" ("status", "next_check_at");

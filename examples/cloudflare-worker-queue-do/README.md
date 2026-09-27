@@ -14,10 +14,13 @@ failures that can be retried, and cleans up after itself.
   timeout. Errors that `ErrorUtils.isRetryable` accepts are retried with
   exponential backoff capped at 5 minutes, never sooner than the provider's
   `retryAfterMs`; after `SEND_MAX_ATTEMPTS` attempts the job fails.
-- A job interrupted mid-send, for example by a deploy, is detected and retried
-  instead of staying stuck.
-- `cleanupTerminal()` and a sweep of expired idempotency keys run every 10
-  minutes, so storage does not grow without bound.
+- A job interrupted mid-send, for example by a deploy, is retried when its
+  lease runs out instead of staying stuck.
+- The alarm is set for the queue's `nextDueAt()`, so a retry runs when it is
+  due, without polling.
+- Every 10 minutes, `cleanupTerminal({ olderThan })` deletes jobs that
+  finished over an hour ago and expired idempotency keys are swept, so storage
+  does not grow without bound.
 - Every endpoint requires a bearer token, compared in constant time. The
   sender number comes from configuration, never from the request.
 - `KMSG_PROVIDER` selects the provider: `mock` (the default; it sends
@@ -76,7 +79,7 @@ curl http://localhost:8787/messages/job_1790430000499_14869ec7 \
 ```
 
 ```json
-{"jobId":"job_1790430000499_14869ec7","status":"completed","failedAttempts":0,"maxAttempts":5,"createdAt":"2026-09-26T13:40:00.499Z","nextAttemptAt":null,"completedAt":"2026-09-26T13:40:00.509Z","failedAt":null,"lastError":null}
+{"jobId":"job_1790430000499_14869ec7","status":"completed","failedAttempts":0,"maxAttempts":5,"createdAt":"2026-09-26T13:40:00.499Z","nextAttemptAt":null,"completedAt":"2026-09-26T13:40:00.509Z","failedAt":null,"lastError":null,"providerId":"mock","providerMessageId":"mock-1790430000508-g9t3isjax"}
 ```
 
 See the queue's counters, and run a pass without waiting for the alarm:
@@ -140,9 +143,11 @@ is at most 2,000 bytes with non-ASCII characters counted as 2, and a text over
 UUID; reuse it whenever you retry the same message.
 
 A job has `status` `pending`, `processing`, `completed` or `failed`, plus
-`failedAttempts`, `maxAttempts`, `nextAttemptAt` (while pending) and
+`failedAttempts`, `maxAttempts`, `nextAttemptAt` (while pending),
 `lastError`: the `KMsgErrorCode` of the last failed attempt, or
-`INTERRUPTED`. It never includes the recipient or the text.
+`LEASE_EXPIRED` when the object stopped mid-send, and, once the provider
+accepted the message, `providerId` and `providerMessageId`. It never includes
+the recipient or the text.
 
 | Status | Code | When |
 | --- | --- | --- |
@@ -162,23 +167,22 @@ so they show up as the job's `lastError` and in the logs.
 
 ## How the queue sends
 
-- The alarm handles up to 25 due jobs per pass, one at a time, and sets
-  itself to run again at once when a pass is full.
-- A job is marked in flight while it is being sent. If the object stops
-  mid-send, the next pass counts that attempt as failed (`INTERRUPTED`) and
-  retries the job.
+- The alarm handles up to 25 due jobs per pass, one at a time, and then sets
+  itself for `nextDueAt()`: the next retry or lease expiry, or at once when a
+  full pass left jobs due.
+- Each job being sent is leased for 5 minutes. If the object stops mid-send,
+  the job is due again when the lease runs out, and that attempt counts as
+  failed (`LEASE_EXPIRED`).
 - Retryable errors (by default `NETWORK_ERROR`, `NETWORK_TIMEOUT`,
   `NETWORK_SERVICE_UNAVAILABLE`, `RATE_LIMIT_EXCEEDED`, `PROVIDER_ERROR` and
   `UNKNOWN_ERROR`) wait 2, 4, 8 seconds and so on, capped at 5 minutes, with
   jitter; if the provider sent `retryAfterMs`, at least that long (up to one
   hour). Other errors, such as `INVALID_REQUEST`, `AUTHENTICATION_FAILED` or
   `INSUFFICIENT_BALANCE`, fail the job at once.
-- A retry runs when it is due or up to 10 seconds later: the library queue
-  cannot say when its next delayed job is due, so while jobs wait the object
-  checks every 10 seconds.
-- Every 10 minutes, starting 10 minutes after the first job, finished jobs are
-  deleted with `cleanupTerminal()` and idempotency keys older than 24 hours are
-  removed. A finished job can be looked up until the next cleanup.
+- Every 10 minutes, starting 10 minutes after the first job, jobs that
+  finished over an hour ago are deleted with `cleanupTerminal({ olderThan })`
+  and idempotency keys older than 24 hours are removed. A finished job can be
+  looked up for at least an hour.
 
 The Durable Object logs `message sent`, `send failed; retry scheduled`,
 `send failed; giving up`, `job was interrupted mid-send` and
@@ -213,9 +217,10 @@ The first deploy applies the `v1` migration, which creates the SQLite-backed
   recipient can occasionally get a message twice. Lower `SEND_MAX_ATTEMPTS` if
   a duplicate is worse than a missed message.
 - One Durable Object sends one message at a time, and the library queue reads
-  every stored job each time it takes one. For more volume, spread messages
-  over several named queues (`getByName`) and keep the cleanup frequent.
-- Finished jobs are deleted by the next cleanup. Keep Workers Logs (enabled by
+  every stored job, in one storage listing, each time it takes one. For more
+  volume, spread messages over several named queues (`getByName`) and keep
+  finished jobs for a shorter time.
+- Finished jobs are deleted an hour after they finish. Keep Workers Logs (enabled by
   `observability` in `wrangler.jsonc`), or add delivery tracking as in
   `cloudflare-worker-hyperdrive`, if you need a lasting record.
 - The SOLAPI SDK ignores the abort signal, so the 10-second timeout does not
