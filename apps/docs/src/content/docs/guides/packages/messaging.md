@@ -274,6 +274,18 @@ const otpQueue = createD1JobQueue(env.DB, {
 });
 ```
 
+`delay`는 밀리초를 담으므로 Postgres와 MySQL에서는 `BIGINT`입니다(SQLite는 64비트인 `INTEGER`). 이전 버전은 이 컬럼을 32비트 `INTEGER`로 만들었기 때문에, 2^31ms(약 24.9일) 이상 지연된 작업은 insert가 범위 초과(out of range)로 실패해 큐에 넣을 수 없었습니다. `CREATE TABLE IF NOT EXISTS`는 이미 있는 테이블을 바꾸지 않으므로 컬럼을 직접 넓히세요:
+
+```sql
+-- Postgres
+ALTER TABLE kmsg_jobs ALTER COLUMN delay TYPE BIGINT;
+
+-- MySQL: MODIFY는 컬럼 정의를 새로 쓰므로 NOT NULL과 기본값을 유지하세요
+ALTER TABLE kmsg_jobs MODIFY delay BIGINT NOT NULL DEFAULT 0;
+```
+
+strict 모드가 아닌 MySQL은 이런 지연을 대신 2147483647로 저장했습니다. `process_at`은 `BIGINT`이므로 작업은 제시간에 실행되고, 작업이 보고하는 `delay` 값만 틀립니다.
+
 ### Cloudflare 스키마 유틸 API
 
 ```ts

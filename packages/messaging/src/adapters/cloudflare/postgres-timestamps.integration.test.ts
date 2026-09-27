@@ -3,11 +3,15 @@ import postgres from "postgres";
 import { BunSqlDeliveryTrackingStore } from "../../delivery-tracking/stores/bun-sql.store";
 import type { TrackingRecord } from "../../delivery-tracking/types";
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
+import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import {
   type CloudflareSqlClient,
   createCloudflareSqlClient,
 } from "./sql-client";
-import { buildDeliveryTrackingSchemaSql } from "./sql-schema";
+import {
+  buildDeliveryTrackingSchemaSql,
+  buildJobQueueSchemaSql,
+} from "./sql-schema";
 
 // Runs against a real Postgres when KMSG_TEST_POSTGRES_URL names one. The
 // tests create, and then drop, their own schema.
@@ -28,6 +32,9 @@ const TIME_COLUMNS = [
 // About 1.8e12, far past the 32-bit INTEGER maximum of 2147483647.
 const requestedAt = new Date("2026-09-27T01:02:03.456Z");
 const later = (ms: number) => new Date(requestedAt.getTime() + ms);
+
+// A job delay of 2.592e9 ms, also past that maximum.
+const THIRTY_DAYS_MS = 30 * 86_400_000;
 
 function record(messageId: string): TrackingRecord {
   return {
@@ -58,7 +65,7 @@ function postgresJsClient(sql: postgres.Sql): CloudflareSqlClient {
   });
 }
 
-describe.skipIf(!url)("timestamp: integer on a real Postgres", () => {
+describe.skipIf(!url)("64-bit millisecond columns on a real Postgres", () => {
   let admin: postgres.Sql;
 
   beforeAll(async () => {
@@ -182,5 +189,53 @@ describe.skipIf(!url)("timestamp: integer on a real Postgres", () => {
 
     await expectMillisecondRoundTrip(store, "m-int4");
     expect(await timeColumnTypes("tracking_int4")).toEqual(["bigint"]);
+  });
+
+  async function delayColumnType(table: string): Promise<string | undefined> {
+    const [row] = await admin.unsafe<{ data_type: string }[]>(
+      `SELECT data_type FROM information_schema.columns
+       WHERE table_schema = $1 AND table_name = $2 AND column_name = 'delay'`,
+      [schema, table],
+    );
+    return row?.data_type;
+  }
+
+  test("postgres.js: the job queue stores a delay past 2^31 ms", async () => {
+    const queue = new HyperdriveJobQueue<{ to: string }>(
+      postgresJsClient(admin),
+      "jobs",
+    );
+    const job = await queue.enqueue(
+      "send",
+      { to: "01012345678" },
+      { delay: THIRTY_DAYS_MS },
+    );
+
+    expect((await queue.getJob(job.id))?.delay).toBe(THIRTY_DAYS_MS);
+    expect(await queue.dequeue()).toBeUndefined();
+    expect(await delayColumnType("jobs")).toBe("bigint");
+  });
+
+  test("a queue table with a 32-bit delay works once it is widened", async () => {
+    // Earlier versions built the queue table with an INTEGER delay.
+    await admin.unsafe(
+      buildJobQueueSchemaSql({
+        dialect: "postgres",
+        tableName: "jobs_int4",
+      }).replace('"delay" BIGINT', '"delay" INTEGER'),
+    );
+    expect(await delayColumnType("jobs_int4")).toBe("integer");
+    const queue = new HyperdriveJobQueue(postgresJsClient(admin), "jobs_int4");
+    await expect(
+      queue.enqueue("send", {}, { delay: THIRTY_DAYS_MS }),
+    ).rejects.toThrow("out of range");
+
+    // The upgrade the README gives for these tables.
+    await admin.unsafe(
+      `ALTER TABLE "jobs_int4" ALTER COLUMN "delay" TYPE BIGINT`,
+    );
+
+    const job = await queue.enqueue("send", {}, { delay: THIRTY_DAYS_MS });
+    expect((await queue.getJob(job.id))?.delay).toBe(THIRTY_DAYS_MS);
   });
 });
