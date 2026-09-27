@@ -310,6 +310,38 @@ describe("CloudflareObjectJobQueue leases", () => {
     expect(calls).toBe(2);
   });
 
+  test("dequeue() keeps leaving alone a job that finishes while it scans", async () => {
+    setSystemTime(at(0));
+    const { storage, queue } = queueWith<{ to: string }>({ leaseMs: 1_000 });
+    const job = await queue.enqueue("send", { to: "01012345678" });
+    await queue.dequeue();
+    const running = new Set([job.id]);
+
+    setSystemTime(at(5_000));
+    // The listing still has the job processing when its handler finishes,
+    // as JobProcessor finishes one: completion stored, then the id removed.
+    storage.onList = () => {
+      storage.onList = undefined;
+      queueMicrotask(() => {
+        const key = `kmsg/jobs/jobs/${job.id}`;
+        const stored = JSON.parse(String(storage.data.get(key)));
+        storage.data.set(
+          key,
+          JSON.stringify({
+            ...stored,
+            status: JobStatus.COMPLETED,
+            completedAt: Date.now(),
+            leaseExpiresAt: undefined,
+          }),
+        );
+        running.delete(job.id);
+      });
+    };
+
+    expect(await queue.dequeue({ running })).toBeUndefined();
+    expect((await queue.getJob(job.id))?.status).toBe(JobStatus.COMPLETED);
+  });
+
   test("dequeue() leaves the jobs its caller is still running alone, even once their lease expired", async () => {
     setSystemTime(at(0));
     const expired: string[] = [];

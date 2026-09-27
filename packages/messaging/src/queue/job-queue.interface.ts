@@ -32,7 +32,9 @@ export interface JobDequeueOptions {
   /**
    * Ids of the jobs the caller is still running. A queue that leases jobs
    * leaves them alone, even once their lease has run out: it does not hand
-   * them out again or count the lease as a lost attempt.
+   * them out again or count the lease as a lost attempt. It reads the set
+   * once, when `dequeue()` starts, so a job that finishes during the call
+   * is still left alone.
    */
   running?: ReadonlySet<string>;
 }
