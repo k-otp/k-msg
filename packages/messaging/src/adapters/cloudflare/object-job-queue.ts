@@ -1,5 +1,6 @@
 import type {
   Job,
+  JobDequeueOptions,
   JobQueue,
   JobRetryDirective,
 } from "../../queue/job-queue.interface";
@@ -38,16 +39,17 @@ export interface CloudflareObjectJobQueueOptions<T> {
    * and makes the job due again, or fails it when no attempts are left.
    * Set it above the longest time a job can take: a lease is not renewed,
    * and a worker that outlives it can still complete or fail the job while
-   * another worker has it.
+   * another worker has it. `dequeue()` leaves the jobs its caller names as
+   * still running alone, which is how `JobProcessor` keeps a job it is
+   * still running from being run again or counted as lost.
    */
   leaseMs?: number;
   /**
-   * Called by `dequeue()` for each job whose lease had expired, once
-   * `dequeue()` has stored its changes: with the job pending again (the same
-   * `dequeue()` may have taken it again) or failed if it had no attempts
-   * left. What it throws is logged and does not stop the dequeue. It runs
-   * before `dequeue()` returns, so keep it short: the job `dequeue()`
-   * returns is already leased.
+   * Called by `dequeue()` for each job whose lease had expired, once the job
+   * is stored pending again or, with no attempts left, failed. `dequeue()`
+   * waits for it before it leases the job it returns, which may be the same
+   * one, so it does not shorten that lease. What it throws is logged and
+   * does not stop the dequeue.
    */
   onLeaseExpired?: (job: CloudflareObjectJob<T>) => void | Promise<void>;
 }
@@ -159,58 +161,81 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   /**
    * Takes the next due job and, with `leaseMs`, leases it. Jobs whose lease
    * expired are due again first, or fail when they have no attempts left.
+   * Jobs in `options.running` are left as they are.
    */
-  async dequeue(): Promise<CloudflareObjectJob<T> | undefined> {
-    const now = Date.now();
-    const changed = new Map<string, CloudflareObjectJob<T>>();
-    const unleased: CloudflareObjectJob<T>[] = [];
-    const released: CloudflareObjectJob<T>[] = [];
-    let next: CloudflareObjectJob<T> | undefined;
+  async dequeue(
+    options: JobDequeueOptions = {},
+  ): Promise<CloudflareObjectJob<T> | undefined> {
+    // A second look only follows a first one whose job another dequeue()
+    // took while onLeaseExpired ran; KV, which may read its own writes late,
+    // could otherwise keep looking.
+    for (let look = 0; look < 2; look += 1) {
+      const now = Date.now();
+      const changed = new Map<string, CloudflareObjectJob<T>>();
+      const unleased: CloudflareObjectJob<T>[] = [];
+      const released: CloudflareObjectJob<T>[] = [];
+      let next: CloudflareObjectJob<T> | undefined;
 
-    for await (const stored of this.readJobs()) {
-      let job = stored;
-      if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
-        if (job.leaseExpiresAt === undefined) {
-          // Left processing by an earlier version or a queue without leases,
-          // and maybe still being worked on: it gets a lease below.
-          unleased.push(job);
-          continue;
+      for await (const stored of this.readJobs()) {
+        // Its caller will still complete or fail it, so its lease stands.
+        if (options.running?.has(stored.id)) continue;
+        let job = stored;
+        if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
+          if (job.leaseExpiresAt === undefined) {
+            // Left processing by an earlier version or a queue without
+            // leases, and maybe still being worked on: it gets a lease below.
+            unleased.push(job);
+            continue;
+          }
+          const recovered = this.releaseExpiredLease(job, now);
+          if (recovered) {
+            changed.set(recovered.id, recovered);
+            released.push(recovered);
+            job = recovered;
+          }
         }
-        const recovered = this.releaseExpiredLease(job, now);
-        if (recovered) {
-          changed.set(recovered.id, recovered);
-          released.push(recovered);
-          job = recovered;
-        }
+        if (!isDue(job, now)) continue;
+        if (!next || compareJobs(job, next) < 0) next = job;
       }
-      if (!isDue(job, now)) continue;
-      if (!next || compareJobs(job, next) < 0) next = job;
-    }
 
-    // Leases start when they are stored, not when the scan began, so a long
-    // scan does not shorten them.
-    const leasedAt = Date.now();
-    for (const job of unleased) {
-      changed.set(job.id, {
-        ...job,
-        leaseExpiresAt: this.leaseExpiry(leasedAt),
-      });
+      // Leases start when they are stored, not when the scan began, so a
+      // long scan does not shorten them.
+      const stampedAt = Date.now();
+      for (const job of unleased) {
+        changed.set(job.id, {
+          ...job,
+          leaseExpiresAt: this.leaseExpiry(stampedAt),
+        });
+      }
+
+      if (released.length > 0 && this.onLeaseExpired) {
+        // The callbacks run once the released jobs are stored and before the
+        // next job is leased, so they cannot shorten its lease. One that
+        // waits on anything but storage lets a Durable Object run another
+        // dequeue() in between, which may take that job first.
+        for (const job of changed.values()) await this.write(job);
+        for (const job of released) await this.notifyLeaseExpired(job);
+        if (!next) return undefined;
+        const current = await this.getJob(next.id);
+        if (!current || !isDue(current, Date.now())) continue;
+        next = current;
+        changed.clear();
+      }
+
+      let leased: CloudflareObjectJob<T> | undefined;
+      if (next) {
+        leased = {
+          ...next,
+          status: JobStatus.PROCESSING,
+          leaseExpiresAt: this.leaseExpiry(Date.now()),
+        };
+        // One write per job, even for a released job taken again at once.
+        changed.set(leased.id, leased);
+      }
+      for (const job of changed.values()) await this.write(job);
+      return leased;
     }
-    let leased: CloudflareObjectJob<T> | undefined;
-    if (next) {
-      leased = {
-        ...next,
-        status: JobStatus.PROCESSING,
-        leaseExpiresAt: this.leaseExpiry(leasedAt),
-      };
-      // One write per job, even for a released job taken again at once.
-      changed.set(leased.id, leased);
-    }
-    for (const job of changed.values()) await this.write(job);
-    // Only after every write: a callback that waits on anything but storage
-    // would let a Durable Object run another dequeue() in between.
-    for (const job of released) await this.notifyLeaseExpired(job);
-    return leased;
+    return undefined;
   }
 
   /**

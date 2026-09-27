@@ -28,6 +28,15 @@ export interface JobRetryDirective {
   delayMs?: number;
 }
 
+export interface JobDequeueOptions {
+  /**
+   * Ids of the jobs the caller is still running. A queue that leases jobs
+   * leaves them alone, even once their lease has run out: it does not hand
+   * them out again or count the lease as a lost attempt.
+   */
+  running?: ReadonlySet<string>;
+}
+
 export interface JobQueue<T> {
   enqueue(
     type: string,
@@ -40,7 +49,7 @@ export interface JobQueue<T> {
     },
   ): Promise<Job<T>>;
 
-  dequeue(): Promise<Job<T> | undefined>;
+  dequeue(options?: JobDequeueOptions): Promise<Job<T> | undefined>;
 
   complete(jobId: string, result?: any): Promise<void>;
 
