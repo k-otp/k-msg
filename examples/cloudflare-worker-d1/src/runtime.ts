@@ -45,20 +45,18 @@ export async function createRuntime(config: Config): Promise<Runtime> {
     },
   });
 
-  const trackingHooks = createDeliveryTrackingHooks(tracking, {
-    // The provider accepted the message, so the send still succeeds, but it
-    // has no tracking record and no webhook will follow for it.
-    onError: (error) => {
-      log("error", "could not record a sent message", errorFields(error));
-    },
-  });
-
   const kmsg = new KMsg({
     providers: [provider],
-    // createDeliveryTrackingHooks also hands every failed send to the onError
-    // above. The routes report send failures themselves, so drop that hook
-    // and keep onError for tracking write failures.
-    hooks: { ...trackingHooks, onError: undefined },
+    hooks: createDeliveryTrackingHooks(tracking, {
+      // The provider accepted the message, so the send still succeeds, but
+      // it has no tracking record and no webhook will follow for it.
+      onRecordError: (error, { result }) => {
+        log("error", "could not record a sent message", {
+          messageId: result.messageId,
+          ...errorFields(error),
+        });
+      },
+    }),
   });
 
   return { kmsg, tracking, webhooks };

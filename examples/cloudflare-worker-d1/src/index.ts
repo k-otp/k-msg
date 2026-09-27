@@ -1,3 +1,7 @@
+import {
+  type WebhookEndpoint,
+  WebhookEndpointConflictError,
+} from "@k-msg/webhook";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { ConfigError, type Env, readConfig } from "./env";
@@ -112,27 +116,31 @@ app.post("/webhook-endpoints", requireAdmin, async (c) => {
   }
 
   const webhooks = createWebhookRuntime(config);
-  // The D1 store writes endpoints with INSERT OR REPLACE and the url column
-  // is unique, so adding a registered URL would replace that endpoint and its
-  // secret. This check refuses a duplicate, but two registrations of the same
-  // URL at the same moment can both pass it.
-  const endpoints = await webhooks.listEndpoints();
-  if (endpoints.some((endpoint) => endpoint.url === url)) {
-    throw new ApiError(
-      409,
-      "ENDPOINT_EXISTS",
-      "This URL is already registered",
-    );
-  }
-
   const secret = generateEndpointSecret();
-  const endpoint = await webhooks.addEndpoint({
-    id: crypto.randomUUID(),
-    url,
-    events: input.events,
-    active: true,
-    secret,
-  });
+  let endpoint: WebhookEndpoint;
+  try {
+    endpoint = await webhooks.addEndpoint({
+      id: crypto.randomUUID(),
+      url,
+      events: input.events,
+      active: true,
+      secret,
+    });
+  } catch (error) {
+    // The unique url index refuses a registered URL in the insert itself,
+    // so two registrations of one URL at the same moment cannot both win.
+    if (
+      error instanceof WebhookEndpointConflictError &&
+      error.field === "url"
+    ) {
+      throw new ApiError(
+        409,
+        "ENDPOINT_EXISTS",
+        "This URL is already registered",
+      );
+    }
+    throw error;
+  }
 
   // The only response that contains the secret; the receiver must keep it.
   return c.json(
