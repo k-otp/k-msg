@@ -31,7 +31,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:31](https://githu
 
 > **addDelivery**(`delivery`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L81)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L84)
 
 #### Parameters
 
@@ -195,7 +195,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:36](https://githu
 
 > **getDeliveries**(`endpointId?`, `timeRange?`, `eventType?`, `status?`, `limit?`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L85)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L88)
 
 #### Parameters
 
@@ -235,7 +235,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:85](https://githu
 
 > **getEndpoint**(`endpointId`): `Promise`\<\{ `active`: `boolean`; `createdAt`: `Date`; `description?`: `string`; `events`: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]; `filters?`: \{ `channelId?`: `string`[]; `providerId?`: `string`[]; `templateId?`: `string`[]; \}; `headers?`: `Record`\<`string`, `string`\>; `id`: `string`; `lastTriggeredAt?`: `Date`; `name?`: `string`; `retryConfig?`: \{ `backoffMultiplier`: `number`; `maxRetries`: `number`; `retryDelayMs`: `number`; \}; `secret?`: `string`; `status`: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`; `updatedAt`: `Date`; `url`: `string`; \} \| `null`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L67)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L70)
 
 #### Parameters
 
@@ -253,7 +253,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:67](https://githu
 
 > **getFailedDeliveries**(`endpointId?`, `eventType?`): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L121)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:124](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L124)
 
 #### Parameters
 
@@ -275,7 +275,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:121](https://gith
 
 > **listEndpoints**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L73)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L76)
 
 #### Returns
 
@@ -287,7 +287,7 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:73](https://githu
 
 > **removeEndpoint**(`endpointId`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L63)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L66)
 
 #### Parameters
 
@@ -305,11 +305,14 @@ Defined in: [packages/webhook/src/services/webhook.registry.ts:63](https://githu
 
 > **updateEndpoint**(`endpointId`, `endpoint`): `Promise`\<`void`\>
 
-Defined in: [packages/webhook/src/services/webhook.registry.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L45)
+Defined in: [packages/webhook/src/services/webhook.registry.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.registry.ts#L48)
 
-Replaces the endpoint. With field crypto failing open, the stored secret
-is kept when the endpoint was read without it because it could not be
-decrypted, or when its unchanged secret cannot be encrypted again.
+Replaces the endpoint. With endpoint field crypto, an endpoint without a
+`secret` of its own keeps the stored secret, for example one read while
+it could not be decrypted; set `secret`, even to `undefined`, to replace
+or remove it. A secret that cannot be encrypted in open mode is kept if
+it is the stored one, and fails the update if the stored one cannot be
+read to tell.
 
 #### Parameters
 
