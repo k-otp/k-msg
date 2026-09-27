@@ -284,6 +284,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       : 0;
 
     const normalizedFilter = await this.normalizeFilterForCrypto(options);
+    if (!normalizedFilter) return [];
     const where = this.buildWhere(normalizedFilter);
     const orderBy =
       options.orderBy === "statusUpdatedAt"
@@ -307,6 +308,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     await this.init();
 
     const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    if (!normalizedFilter) return 0;
     const where = this.buildWhere(normalizedFilter);
     const { rows } = await this.client.query<{ count?: number | string }>(
       `SELECT COUNT(1) as count FROM ${this.tableRef()} ${where.sql}`,
@@ -338,6 +340,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       .join(", ");
 
     const normalizedFilter = await this.normalizeFilterForCrypto(filter);
+    if (!normalizedFilter) return [];
     const where = this.buildWhere(normalizedFilter);
 
     const { rows } = await this.client.query<Record<string, unknown>>(
@@ -828,15 +831,20 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     };
   }
 
+  // Resolves to undefined when no record can match the filter.
   private async normalizeFilterForCrypto<
     T extends DeliveryTrackingRecordFilter,
-  >(filter: T): Promise<T> {
+  >(filter: T): Promise<T | undefined> {
     const normalized = await normalizeTrackingFilterWithHashes(
       filter,
       this.fieldCrypto,
       this.cryptoMode(),
+      {
+        tableName: this.schema.tableName,
+        store: "sql",
+      },
     );
-    return normalized as T;
+    return normalized as T | undefined;
   }
 
   private patchTouchesCrypto(patch: Partial<TrackingRecord>): boolean {
@@ -897,14 +905,34 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       params.push(...values);
     };
 
+    // A hash lookup multiplies its values by the candidate keys, and D1 binds
+    // at most 100 parameters per statement, so SQLite takes a hash list as one
+    // JSON parameter.
+    const addHashEquals = (
+      column: string,
+      value: string | string[] | undefined,
+    ): void => {
+      const values = toArray(value)?.filter(
+        (item) => item !== undefined && item !== null,
+      );
+      if (this.client.dialect !== "sqlite" || !values || values.length < 2) {
+        addEquals(column, value);
+        return;
+      }
+      clauses.push(
+        `${this.quoteIdentifier(column)} IN (SELECT value FROM json_each(${this.placeholder(params.length + 1)}))`,
+      );
+      params.push(JSON.stringify(values));
+    };
+
     addEquals(this.columnName("messageId"), filter.messageId);
     addEquals(this.columnName("providerId"), filter.providerId);
     addEquals(this.columnName("providerMessageId"), filter.providerMessageId);
     addEquals(this.columnName("type"), filter.type);
     addEquals(this.columnName("status"), filter.status);
     if (this.schema.fieldCrypto.enabled) {
-      addEquals(this.columnName("toHash"), filter.toHash);
-      addEquals(this.columnName("fromHash"), filter.fromHash);
+      addHashEquals(this.columnName("toHash"), filter.toHash);
+      addHashEquals(this.columnName("fromHash"), filter.fromHash);
       if (this.hasPlainColumns()) {
         addEquals(this.columnName("to"), filter.to);
         addEquals(this.columnName("from"), filter.from);

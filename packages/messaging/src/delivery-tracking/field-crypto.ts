@@ -233,6 +233,125 @@ async function resolveEncryptKid(
   return resolved.kid.trim();
 }
 
+/** Resolves a field's encrypt kid for one write, at most once per field. */
+type FieldKidResolver = (fieldPath: string) => Promise<string | undefined>;
+
+function createFieldKidResolver(
+  config: FieldCryptoConfig,
+  context: FieldCryptoKeyContext,
+): FieldKidResolver {
+  const kids = new Map<string, Promise<string | undefined>>();
+  return (fieldPath) => {
+    let kid = kids.get(fieldPath);
+    if (!kid) {
+      kid = resolveEncryptKid(config, { ...context, fieldPath });
+      kids.set(fieldPath, kid);
+    }
+    return kid;
+  };
+}
+
+// The hash a record stores for `to` or `from` and the hash a lookup compares
+// with it: both must come from here so they cannot drift apart.
+function hashFieldValue(
+  config: FieldCryptoConfig,
+  path: string,
+  value: string,
+  kid: string | undefined,
+): Promise<string> | string {
+  return config.provider.hash({
+    value: normalizePhoneForHash(value),
+    path,
+    ...(kid ? { kid } : {}),
+  });
+}
+
+function normalizeKidList(kids: unknown): string[] {
+  return (Array.isArray(kids) ? kids : [])
+    .filter((kid): kid is string => typeof kid === "string")
+    .map((kid) => kid.trim())
+    .filter((kid) => kid.length > 0);
+}
+
+type LookupScope = Pick<FieldCryptoKeyContext, "providerId" | "messageId">;
+
+function distinctScopeValues(value: string | string[] | undefined): string[] {
+  if (value === undefined) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return [
+    ...new Set(
+      values.filter(
+        (item): item is string => typeof item === "string" && item.length > 0,
+      ),
+    ),
+  ];
+}
+
+// A write resolves its keys with the record's providerId and messageId, and a
+// resolver may scope keys by either. A lookup spans records, so it resolves
+// keys for each provider and message the filter pins (each pair when it pins
+// both), then for the whole store. Scoped contexts go first, so a resolver
+// that caches one key set does not answer them with the unscoped one.
+function resolveLookupScopes(
+  filter: DeliveryTrackingRecordFilter,
+): LookupScope[] {
+  const providerIds = distinctScopeValues(filter.providerId);
+  const messageIds = distinctScopeValues(filter.messageId);
+  const scopes: LookupScope[] = [];
+  if (providerIds.length > 0 && messageIds.length > 0) {
+    for (const providerId of providerIds) {
+      for (const messageId of messageIds) {
+        scopes.push({ providerId, messageId });
+      }
+    }
+  } else {
+    for (const providerId of providerIds) scopes.push({ providerId });
+    for (const messageId of messageIds) scopes.push({ messageId });
+  }
+  scopes.push({});
+  return scopes;
+}
+
+// A record's hashes use the kid that encrypted it, which a lookup cannot know,
+// so it tries every key a record's hash may use: the kid a write resolves now,
+// the decrypt set, each for every scope, and the provider's default hash key
+// (`undefined`), which writes use without a resolved kid. Each source resolves
+// on its own, so a failing one, reported through onError, drops only its own
+// candidates.
+async function resolveLookupKids(
+  config: FieldCryptoConfig,
+  context: FieldCryptoKeyContext,
+  scopes: readonly LookupScope[],
+  onError: (error: unknown) => void,
+): Promise<Array<string | undefined>> {
+  const kids: Array<string | undefined> = [];
+  const add = (kid: string | undefined) => {
+    if (!kids.includes(kid)) kids.push(kid);
+  };
+
+  const resolver = config.keyResolver;
+  if (resolver) {
+    for (const scope of scopes) {
+      const scoped = { ...context, ...scope };
+      try {
+        add(await resolveEncryptKid(config, scoped));
+      } catch (error) {
+        onError(error);
+      }
+      if (resolver.resolveDecryptKeys) {
+        try {
+          const decryptKids = await resolver.resolveDecryptKeys(scoped);
+          for (const kid of normalizeKidList(decryptKids)) add(kid);
+        } catch (error) {
+          onError(error);
+        }
+      }
+    }
+  }
+  add(undefined);
+  return kids;
+}
+
 function extractEnvelopeKid(ciphertext: unknown): string | undefined {
   if (typeof ciphertext !== "string" || ciphertext.length === 0) {
     return undefined;
@@ -259,10 +378,7 @@ async function resolveDecryptKids(
   }
 
   const resolved = await config.keyResolver.resolveDecryptKeys(context);
-  const normalized = (Array.isArray(resolved) ? resolved : [])
-    .filter((kid): kid is string => typeof kid === "string")
-    .map((kid) => kid.trim())
-    .filter((kid) => kid.length > 0);
+  const normalized = normalizeKidList(resolved);
 
   if (envelopeKid && !normalized.includes(envelopeKid)) {
     normalized.unshift(envelopeKid);
@@ -336,17 +452,25 @@ function failOrOpen(
   );
 }
 
-async function protectScalar(
+function resolveScalarMode(
   config: FieldCryptoConfig,
-  context: FieldCryptoKeyContext & Record<string, unknown>,
-  path: string,
-  value: string,
-): Promise<ScalarProtection> {
-  const mode = resolveFieldMode(
+  path: "to" | "from",
+): FieldMode {
+  return resolveFieldMode(
     config,
     path,
     path === "to" ? DEFAULT_TO_MODE : DEFAULT_FROM_MODE,
   );
+}
+
+async function protectScalar(
+  config: FieldCryptoConfig,
+  context: FieldCryptoKeyContext & Record<string, unknown>,
+  path: "to" | "from",
+  value: string,
+  resolveKid: FieldKidResolver,
+): Promise<ScalarProtection> {
+  const mode = resolveScalarMode(config, path);
 
   if (mode === "plain") {
     return {
@@ -364,10 +488,7 @@ async function protectScalar(
   }
 
   const aad = buildAad(config, context, path);
-  const kid = await resolveEncryptKid(config, {
-    ...context,
-    fieldPath: path,
-  });
+  const kid = await resolveKid(path);
 
   const encrypted = await config.provider.encrypt({
     value,
@@ -378,11 +499,7 @@ async function protectScalar(
 
   const hash =
     shouldHash(mode) || path === "to" || path === "from"
-      ? await config.provider.hash({
-          value: normalizePhoneForHash(value),
-          path,
-          ...(kid ? { kid } : {}),
-        })
+      ? await hashFieldValue(config, path, value, kid)
       : undefined;
   const masked = await maskValue(config, path, value);
 
@@ -462,6 +579,7 @@ function collectPathValues(
 async function buildMetadataHashes(
   config: FieldCryptoConfig,
   metadata: Record<string, unknown>,
+  resolveKid: FieldKidResolver,
 ): Promise<Record<string, string> | undefined> {
   const hashes: Record<string, string> = {};
   for (const [path, mode] of Object.entries(config.fields)) {
@@ -475,12 +593,38 @@ async function buildMetadataHashes(
     const joined = values
       .map((value) => normalizePhoneForHash(value))
       .join(",");
+    // Hashed under the key that encrypts metadata, as `to` and `from` are
+    // under theirs, so a tenant or rotated key covers every hash in a record.
+    const kid = await resolveKid("metadata");
     hashes[path] = await config.provider.hash({
       value: joined,
       path,
+      ...(kid ? { kid } : {}),
     });
   }
   return Object.keys(hashes).length > 0 ? hashes : undefined;
+}
+
+// A degraded row keeps the lookup hash a normal write would store, under the
+// same kid, so lookups still find it. When the kid does not resolve or cannot
+// hash, the provider's default key, which lookups also search, stands in. The
+// fallback must not throw, so a hash it cannot compute at all is left out.
+async function hashDegradedField(
+  config: FieldCryptoConfig,
+  path: "to" | "from",
+  value: string,
+  resolveKid: FieldKidResolver,
+): Promise<string | undefined> {
+  if (!shouldEncrypt(resolveScalarMode(config, path))) return undefined;
+  const kid = await resolveKid(path).catch(() => undefined);
+  for (const candidate of kid ? [kid, undefined] : [undefined]) {
+    try {
+      return await hashFieldValue(config, path, value, candidate);
+    } catch {
+      // Try the next key.
+    }
+  }
+  return undefined;
 }
 
 function toFallbackValue(
@@ -501,6 +645,15 @@ function toFallbackValue(
  *   Read protectScalar: plain and mask write no ciphertext, encrypt and
  *   encrypt+hash add the mask, and the hash is written for encrypt+hash and,
  *   for to and from, for encrypt too; metadata hashes need encrypt+hash.
+ * @evidence docs/security/field-crypto-v1.md#key-management
+ *   Encrypts and hashes each field under the kid resolveEncryptKey returns for
+ *   it, and has a degraded write hash to and from under the same kids.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ *   Read protectScalar, buildMetadataHashes, and hashDegradedField: hashes use
+ *   the kid resolved, with the record's providerId and messageId, for to, from,
+ *   or metadata, else the default key, and the fallback retries with the
+ *   default key before storing an empty to hash. Ran the tenant-key, metadata,
+ *   and degraded-write tests on both stores.
  */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
@@ -575,6 +728,9 @@ export async function applyTrackingCryptoOnWrite(
   }
 
   let activeKid: string | undefined;
+  // Shared with the fail-open fallback below, so a degraded row hashes under
+  // the kid this write resolved.
+  const resolveKid = createFieldKidResolver(config, keyContext);
 
   try {
     const toProtected = await protectScalar(
@@ -582,6 +738,7 @@ export async function applyTrackingCryptoOnWrite(
       keyContext,
       "to",
       record.to,
+      resolveKid,
     );
     if (toProtected.kid) {
       activeKid = toProtected.kid;
@@ -599,7 +756,13 @@ export async function applyTrackingCryptoOnWrite(
 
     const fromProtected =
       typeof record.from === "string" && record.from.length > 0
-        ? await protectScalar(config, keyContext, "from", record.from)
+        ? await protectScalar(
+            config,
+            keyContext,
+            "from",
+            record.from,
+            resolveKid,
+          )
         : undefined;
 
     const metadataMode = resolveFieldMode(
@@ -609,7 +772,7 @@ export async function applyTrackingCryptoOnWrite(
     );
     const metadataHashes =
       record.metadata && isObject(record.metadata)
-        ? await buildMetadataHashes(config, record.metadata)
+        ? await buildMetadataHashes(config, record.metadata, resolveKid)
         : undefined;
 
     let metadataEnc: string | undefined;
@@ -617,10 +780,7 @@ export async function applyTrackingCryptoOnWrite(
       const metadataString = JSON.stringify(record.metadata);
       // Metadata takes the resolved key like the recipient and sender, or a
       // tenant or rotated key would cover only some of the record.
-      const kid = await resolveEncryptKid(config, {
-        ...keyContext,
-        fieldPath: "metadata",
-      });
+      const kid = await resolveKid("metadata");
       const encrypted = await config.provider.encrypt({
         value: metadataString,
         aad: buildAad(config, keyContext, "metadata"),
@@ -746,18 +906,16 @@ export async function applyTrackingCryptoOnWrite(
 
     return {
       toEnc,
-      toHash: await config.provider.hash({
-        value: normalizePhoneForHash(record.to),
-        path: "to",
-      }),
+      // The secure SQL schema requires a recipient hash as it does a
+      // ciphertext. Like the "null" fallback's empty ciphertext, an empty hash
+      // keeps the row storable, and no lookup matches it.
+      toHash:
+        (await hashDegradedField(config, "to", record.to, resolveKid)) ?? "",
       toMasked,
       fromEnc,
       fromHash:
         fromPlain.length > 0
-          ? await config.provider.hash({
-              value: normalizePhoneForHash(fromPlain),
-              path: "from",
-            })
+          ? await hashDegradedField(config, "from", fromPlain, resolveKid)
           : undefined,
       fromMasked,
       metadata: mode.compatPlainColumns ? record.metadata : undefined,
@@ -1002,58 +1160,130 @@ export async function restoreTrackingCryptoOnRead(
   }
 }
 
-async function hashFilterValue(
+// Hashes each lookup value under every candidate kid. Under failMode=open a
+// candidate or hash that cannot be computed is skipped, so the lookup may find
+// fewer records; under failMode=closed it fails the lookup.
+async function hashLookupValues(
   config: FieldCryptoConfig,
+  options: DeliveryTrackingFieldCryptoOptions | undefined,
+  context: FieldCryptoKeyContext & {
+    tableName: string;
+    store: "sql" | "object" | "memory";
+  },
+  scopes: readonly LookupScope[],
   path: "to" | "from",
-  value: string,
-): Promise<string> {
-  try {
-    return await config.provider.hash({
-      value: normalizePhoneForHash(value),
-      path,
-    });
-  } catch (error) {
-    const failMode = resolveFieldCryptoFailMode(config);
-    if (failMode === "closed") {
-      failOrOpen(config, "hash", path, error);
+  values: readonly string[],
+): Promise<string[]> {
+  let failure: { error: unknown } | undefined;
+  const onError = (error: unknown) => {
+    failure ??= { error };
+  };
+
+  const kids = await resolveLookupKids(
+    config,
+    { ...context, fieldPath: path },
+    scopes,
+    onError,
+  );
+  const results = await Promise.allSettled(
+    values.flatMap((value) =>
+      kids.map(async (kid) => hashFieldValue(config, path, value, kid)),
+    ),
+  );
+  const hashes = new Set<string>();
+  for (const result of results) {
+    if (result.status === "rejected") {
+      onError(result.reason);
+    } else if (result.value) {
+      // An empty hash would match the degraded rows stored without one.
+      hashes.add(result.value);
     }
-    return "";
   }
+
+  if (failure) {
+    const failMode = resolveFieldCryptoFailMode(config);
+    await emitMetric(
+      options,
+      {
+        name: "crypto_fail_count",
+        value: 1,
+        tags: {
+          operation: "hash",
+          failMode,
+        },
+      },
+      context.tableName,
+      context.store,
+    );
+    if (failMode === "closed") {
+      failOrOpen(config, "hash", path, failure.error);
+    }
+  }
+  return [...hashes];
 }
 
+/**
+ * Replaces `to` and `from` filter values with their lookup hashes. Resolves to
+ * `undefined` when no record can match: a secure-mode lookup whose values
+ * could not be hashed under failMode=open.
+ *
+ * @evidence docs/security/field-crypto-v1.md#key-management
+ *   Hashes each to and from filter value under the encrypt kid and the decrypt
+ *   set, resolved for every scope the filter pins and for the whole store, and
+ *   under the provider's default key, and handles a key or hash it cannot
+ *   resolve or compute as the fail mode directs.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ *   Read resolveLookupScopes, resolveLookupKids, and hashLookupValues against
+ *   the lookup and failure paragraphs: pinned scopes first, then the store,
+ *   each key source resolved on its own, no empty hash, and no records for an
+ *   undefined filter. Ran the scoped, rotation, pre-resolver, candidate, and
+ *   fail-mode lookup tests.
+ */
 export async function normalizeTrackingFilterWithHashes(
   filter: DeliveryTrackingRecordFilter,
   options: DeliveryTrackingFieldCryptoOptions | undefined,
   mode: TrackingCryptoMode,
-): Promise<DeliveryTrackingRecordFilter> {
+  context: FieldCryptoKeyContext & {
+    tableName: string;
+    store: "sql" | "object" | "memory";
+  },
+): Promise<DeliveryTrackingRecordFilter | undefined> {
   const config = resolveConfig(options);
   if (!config) return filter;
 
+  const keyContext = {
+    ...context,
+    tenantId: options?.tenantId ?? context.tenantId,
+  };
+  const scopes = resolveLookupScopes(filter);
+  // Secure mode without plain columns can match only by hash.
+  const hashOnly = mode.secureMode && !mode.compatPlainColumns;
   const next: DeliveryTrackingRecordFilter = { ...filter };
 
-  if (!next.toHash && next.to) {
-    const values = Array.isArray(next.to) ? next.to : [next.to];
-    const hashed = await Promise.all(
-      values.map((value) => hashFilterValue(config, "to", value)),
-    );
-    const normalized = hashed.filter((value) => value.length > 0);
-    if (normalized.length === 1) next.toHash = normalized[0];
-    if (normalized.length > 1) next.toHash = normalized;
-    if (mode.secureMode && !mode.compatPlainColumns) {
-      next.to = undefined;
-    }
-  }
+  const lookupFields = [
+    ["to", "toHash"],
+    ["from", "fromHash"],
+  ] as const;
+  for (const [path, hashKey] of lookupFields) {
+    const plain = next[path];
+    if (next[hashKey] || !plain) continue;
 
-  if (!next.fromHash && next.from) {
-    const values = Array.isArray(next.from) ? next.from : [next.from];
-    const hashed = await Promise.all(
-      values.map((value) => hashFilterValue(config, "from", value)),
+    const values = Array.isArray(plain) ? plain : [plain];
+    const hashes = await hashLookupValues(
+      config,
+      options,
+      keyContext,
+      scopes,
+      path,
+      values,
     );
-    const normalized = hashed.filter((value) => value.length > 0);
-    if (normalized.length === 1) next.fromHash = normalized[0];
-    if (normalized.length > 1) next.fromHash = normalized;
-    if (mode.secureMode && !mode.compatPlainColumns) {
-      next.from = undefined;
+    if (hashes.length > 0) {
+      next[hashKey] = hashes.length === 1 ? hashes[0] : hashes;
+    }
+    if (hashOnly) {
+      // Dropping the plain values without a hash would match every record.
+      if (values.length > 0 && hashes.length === 0) return undefined;
+      next[path] = undefined;
     }
   }
 

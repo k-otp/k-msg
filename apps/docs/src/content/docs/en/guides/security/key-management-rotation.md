@@ -9,7 +9,7 @@ Question this page answers: How do I rotate keys without downtime while keeping 
 - One-line definition: `KeyResolver` decouples key lifecycle decisions from application business logic.
 - Why it matters: key generation/activation/retirement can evolve without rewriting send/tracking flows.
 - Configuration example (`safe`): active `kid` for encrypt, old/new/new2 for decrypt.
-- Common mistake: removing previous decrypt `kid` too early after rollout.
+- Common mistake: removing previous decrypt `kid` too early after rollout. Records written under it then fail to decrypt, and `to`/`from` lookups stop finding them.
 
 ## Rollout recipe
 
