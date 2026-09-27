@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L31)
 
 ## Type Parameters
 
@@ -19,7 +19,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](
 
 > `optional` **keyPrefix?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L32)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
 
 Default: `kmsg/jobs`.
 
@@ -29,7 +29,7 @@ Default: `kmsg/jobs`.
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L43)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L46)
 
 How long a dequeued job may stay processing before it is due again
 (default: `Infinity`, no lease). If it is neither completed nor failed
@@ -38,7 +38,9 @@ by then, for example because the worker stopped mid-job, the next
 and makes the job due again, or fails it when no attempts are left.
 Set it above the longest time a job can take: a lease is not renewed,
 and a worker that outlives it can still complete or fail the job while
-another worker has it.
+another worker has it. `dequeue()` leaves the jobs its caller names as
+still running alone, which is how `JobProcessor` keeps a job it is
+still running from being run again or counted as lost.
 
 ***
 
@@ -46,14 +48,13 @@ another worker has it.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L52)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L54)
 
-Called by `dequeue()` for each job whose lease had expired, once
-`dequeue()` has stored its changes: with the job pending again (the same
-`dequeue()` may have taken it again) or failed if it had no attempts
-left. What it throws is logged and does not stop the dequeue. It runs
-before `dequeue()` returns, so keep it short: the job `dequeue()`
-returns is already leased.
+Called by `dequeue()` for each job whose lease had expired, once the job
+is stored pending again or, with no attempts left, failed. `dequeue()`
+waits for it before it leases the job it returns, which may be the same
+one, so it does not shorten that lease. What it throws is logged and
+does not stop the dequeue.
 
 #### Parameters
 
