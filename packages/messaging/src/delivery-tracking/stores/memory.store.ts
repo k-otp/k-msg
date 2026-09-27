@@ -145,6 +145,18 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
     return due.map(cloneRecord);
   }
 
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    const record = this.records.get(messageId);
+    // Checked and written without awaiting in between.
+    if (record?.nextCheckAt.getTime() !== leaseUntil.getTime()) return false;
+    await this.patch(messageId, patch);
+    return true;
+  }
+
   async releaseLeases(
     messageIds: readonly string[],
     leaseUntil: Date,

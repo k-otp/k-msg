@@ -567,9 +567,16 @@ export class DeliveryTrackingService {
           // of the batch is still stored.
           let stored = false;
           try {
-            await this.store.patch(update.messageId, patch);
-            stored = true;
+            const current = await this.storeResult(
+              update.messageId,
+              patch,
+              leaseUntil,
+            );
             held.delete(update.messageId);
+            // The poll ran past its lease and another poll has taken the
+            // record: its result stands, and this one is dropped.
+            if (!current) continue;
+            stored = true;
 
             if (!originalRecord || !mergedRecord) continue;
 
@@ -595,6 +602,7 @@ export class DeliveryTrackingService {
                 patch.attemptCount ??
                   (dueByMessageId.get(update.messageId)?.attemptCount ?? 0) + 1,
                 now,
+                leaseUntil,
               ))
             ) {
               held.delete(update.messageId);
@@ -621,19 +629,37 @@ export class DeliveryTrackingService {
     }
   }
 
-  // Due records, leased when the store can lease them.
+  // Due records, leased when the store can lease them. A lease is only as
+  // good as the writes that end it, so it takes patchLeased too.
   private async takeDue(
     now: Date,
   ): Promise<{ due: TrackingRecord[]; leaseUntil?: Date }> {
     const leaseMs = this.polling.leaseMs ?? 0;
-    if (leaseMs > 0 && this.store.leaseDue) {
+    if (leaseMs > 0 && this.store.leaseDue && this.store.patchLeased) {
       const leaseUntil = new Date(now.getTime() + leaseMs);
-      return {
-        due: await this.store.leaseDue(now, this.polling.batchSize, leaseUntil),
+      const due = await this.store.leaseDue(
+        now,
+        this.polling.batchSize,
         leaseUntil,
-      };
+      );
+      if (due) return { due, leaseUntil };
     }
     return { due: await this.store.listDue(now, this.polling.batchSize) };
+  }
+
+  // Stores a poll's result for a record, and resolves whether it did. Under
+  // a lease, only while the poll still holds the record: a poll that ran
+  // past its lease leaves alone what another poll has stored since.
+  private async storeResult(
+    messageId: string,
+    patch: Partial<TrackingRecord>,
+    leaseUntil: Date | undefined,
+  ): Promise<boolean> {
+    if (leaseUntil && this.store.patchLeased) {
+      return await this.store.patchLeased(messageId, leaseUntil, patch);
+    }
+    await this.store.patch(messageId, patch);
+    return true;
   }
 
   // Makes the records a poll leased but did not finish due again now,
@@ -657,22 +683,28 @@ export class DeliveryTrackingService {
   // its column. Count the check and move the record along its backoff
   // anyway, so a record the store keeps rejecting cannot take a batch slot
   // on every poll and keep the others from being polled. Reports whether
-  // that was stored.
+  // the poll is done with the record: the backoff was stored, or another
+  // poll holds it now.
   private async deferRejectedUpdate(
     messageId: string,
     attemptCount: number,
     now: Date,
+    leaseUntil: Date | undefined,
   ): Promise<boolean> {
     try {
-      await this.store.patch(messageId, {
-        attemptCount,
-        lastCheckedAt: now,
-        nextCheckAt: computeNextCheckAt(
-          now,
+      await this.storeResult(
+        messageId,
+        {
           attemptCount,
-          this.polling.backoffMs,
-        ),
-      });
+          lastCheckedAt: now,
+          nextCheckAt: computeNextCheckAt(
+            now,
+            attemptCount,
+            this.polling.backoffMs,
+          ),
+        },
+        leaseUntil,
+      );
       return true;
     } catch {
       // runOnce() reports the update's failure; the record stays due.

@@ -281,7 +281,12 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     now: Date,
     limit: number,
     leaseUntil: Date,
-  ): Promise<TrackingRecord[]> {
+  ): Promise<TrackingRecord[] | undefined> {
+    if (this.client.dialect === "mysql") {
+      // Autocommitted, the locking read would release its rows before the
+      // lease is written, and two polls could take the same ones.
+      if (typeof this.client.transaction !== "function") return undefined;
+    }
     await this.init();
 
     const safeLimit = Number.isFinite(limit)
@@ -354,8 +359,8 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     }
   }
 
-  // MySQL has no UPDATE ... RETURNING. The locking read holds the rows until
-  // the lease is written, when the client runs this in a transaction.
+  // MySQL has no UPDATE ... RETURNING. The locking read holds the rows, in
+  // the client's transaction, until the lease is written.
   private async leaseDueInTransaction(
     now: Date,
     limit: number,
@@ -496,6 +501,78 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       return;
     }
 
+    const updates = this.patchColumns(patch);
+    if (updates.length === 0) return;
+
+    await this.client.query(
+      `UPDATE ${this.tableRef()} SET ${this.setClauseSql(updates)} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${this.placeholder(updates.length + 1)}`,
+      [...updates.map((update) => update.value), messageId],
+    );
+  }
+
+  async patchLeased(
+    messageId: string,
+    leaseUntil: Date,
+    patch: Partial<TrackingRecord>,
+  ): Promise<boolean> {
+    await this.init();
+
+    if (this.patchTouchesCrypto(patch)) {
+      // Encrypted fields are rewritten from the whole record, so this is a
+      // read and a write. A poll's results never change them.
+      const current = await this.get(messageId);
+      if (current?.nextCheckAt.getTime() !== leaseUntil.getTime()) {
+        return false;
+      }
+      await this.upsert({ ...current, ...patch, messageId: current.messageId });
+      return true;
+    }
+
+    const updates = this.patchColumns(patch);
+    const table = this.tableRef();
+    const messageIdColumn = this.quoteIdentifier(this.columnName("messageId"));
+    const nextCheckAtColumn = this.quoteIdentifier(
+      this.columnName("nextCheckAt"),
+    );
+
+    if (this.client.dialect === "mysql") {
+      // No UPDATE ... RETURNING: read the lease under a lock, then write.
+      return await runCloudflareSqlTransaction(this.client, async (tx) => {
+        const { rows } = await tx.query<TrackingRow>(
+          `SELECT ${nextCheckAtColumn} FROM ${table} WHERE ${messageIdColumn} = ? FOR UPDATE`,
+          [messageId],
+        );
+        const current = toDate(rows[0]?.[this.columnName("nextCheckAt")]);
+        if (current?.getTime() !== leaseUntil.getTime()) return false;
+        if (updates.length > 0) {
+          await tx.query(
+            `UPDATE ${table} SET ${this.setClauseSql(updates)} WHERE ${messageIdColumn} = ?`,
+            [...updates.map((update) => update.value), messageId],
+          );
+        }
+        return true;
+      });
+    }
+
+    if (updates.length === 0) {
+      const current = await this.get(messageId);
+      return current?.nextCheckAt.getTime() === leaseUntil.getTime();
+    }
+    const { rows } = await this.client.query<TrackingRow>(
+      `UPDATE ${table} SET ${this.setClauseSql(updates)} WHERE ${messageIdColumn} = ${this.placeholder(updates.length + 1)} AND ${nextCheckAtColumn} = ${this.placeholder(updates.length + 2)} RETURNING ${messageIdColumn}`,
+      [
+        ...updates.map((update) => update.value),
+        messageId,
+        this.toDbTimestamp(leaseUntil),
+      ],
+    );
+    return rows.length > 0;
+  }
+
+  // The columns a patch sets, with their database values.
+  private patchColumns(
+    patch: Partial<TrackingRecord>,
+  ): Array<{ key: DeliveryTrackingColumnKey; value: unknown }> {
     const updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }> =
       [];
 
@@ -602,21 +679,19 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       });
     }
 
-    if (updates.length === 0) return;
+    return updates;
+  }
 
-    const setSql = updates
+  // `column = placeholder` for each update, numbered from 1.
+  private setClauseSql(
+    updates: Array<{ key: DeliveryTrackingColumnKey; value: unknown }>,
+  ): string {
+    return updates
       .map(
         (update, index) =>
           `${this.quoteIdentifier(this.columnName(update.key))} = ${this.valueSql(update.key, this.placeholder(index + 1))}`,
       )
       .join(", ");
-
-    const wherePlaceholder = this.placeholder(updates.length + 1);
-
-    await this.client.query(
-      `UPDATE ${this.tableRef()} SET ${setSql} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${wherePlaceholder}`,
-      [...updates.map((update) => update.value), messageId],
-    );
   }
 
   async close(): Promise<void> {

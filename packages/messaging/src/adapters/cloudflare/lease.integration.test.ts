@@ -21,7 +21,13 @@ const at = (ms: number) => new Date(base.getTime() + ms);
 
 type LeasingStore = Pick<
   HyperdriveDeliveryTrackingStore,
-  "init" | "upsert" | "get" | "listDue" | "leaseDue" | "releaseLeases"
+  | "init"
+  | "upsert"
+  | "get"
+  | "listDue"
+  | "leaseDue"
+  | "patchLeased"
+  | "releaseLeases"
 >;
 
 function dueRecord(messageId: string, nextCheckAt: Date): TrackingRecord {
@@ -42,8 +48,9 @@ function dueRecord(messageId: string, nextCheckAt: Date): TrackingRecord {
 const ids = (records: TrackingRecord[]) =>
   records.map((record) => record.messageId).sort();
 
-// Leases the oldest due records, hands a lease back only through the lease
-// that holds it, and leases again once a lease runs out.
+// Leases the oldest due records, stores a result and hands a lease back only
+// through the lease that holds the record, and leases again once a lease
+// runs out.
 async function expectLeaseCycle(store: LeasingStore): Promise<void> {
   await store.init();
   for (const [index, messageId] of ["m0", "m1", "m2"].entries()) {
@@ -52,9 +59,25 @@ async function expectLeaseCycle(store: LeasingStore): Promise<void> {
   await store.upsert({ ...dueRecord("done", at(-5000)), status: "DELIVERED" });
   const leaseUntil = at(300_000);
 
-  expect(ids(await store.leaseDue(at(0), 2, leaseUntil))).toEqual(["m0", "m1"]);
+  expect(ids((await store.leaseDue(at(0), 2, leaseUntil)) ?? [])).toEqual([
+    "m0",
+    "m1",
+  ]);
   expect((await store.get("m0"))?.nextCheckAt).toEqual(leaseUntil);
-  expect(ids(await store.leaseDue(at(0), 10, leaseUntil))).toEqual(["m2"]);
+
+  expect(
+    await store.patchLeased("m0", at(1), { providerStatusCode: "late" }),
+  ).toBe(false);
+  expect(
+    await store.patchLeased("m0", leaseUntil, {
+      providerStatusCode: "held",
+      nextCheckAt: leaseUntil,
+    }),
+  ).toBe(true);
+  expect((await store.get("m0"))?.providerStatusCode).toBe("held");
+  expect(ids((await store.leaseDue(at(0), 10, leaseUntil)) ?? [])).toEqual([
+    "m2",
+  ]);
   expect(await store.leaseDue(at(0), 10, leaseUntil)).toEqual([]);
 
   await store.releaseLeases(["m0", "m1"], at(1), at(0));
@@ -62,11 +85,9 @@ async function expectLeaseCycle(store: LeasingStore): Promise<void> {
   await store.releaseLeases(["m0"], leaseUntil, at(0));
   expect(ids(await store.listDue(at(0), 10))).toEqual(["m0"]);
 
-  expect(ids(await store.leaseDue(at(300_000), 10, at(600_000)))).toEqual([
-    "m0",
-    "m1",
-    "m2",
-  ]);
+  expect(
+    ids((await store.leaseDue(at(300_000), 10, at(600_000))) ?? []),
+  ).toEqual(["m0", "m1", "m2"]);
 }
 
 // Two connections leasing at the same time never get the same record.
@@ -85,7 +106,7 @@ async function expectDisjointLeases(
     second.leaseDue(at(0), 10, at(300_001)),
   ]);
 
-  const leased = [...ids(a), ...ids(b)];
+  const leased = [...ids(a ?? []), ...ids(b ?? [])];
   expect(new Set(leased).size).toBe(leased.length);
   expect(leased).toHaveLength(20);
 }
