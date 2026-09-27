@@ -13,7 +13,16 @@ Defined in: [packages/webhook/src/runtime/types.ts:85](https://github.com/k-otp/
 
 > `optional` **autoStart?**: `boolean`
 
-Defined in: [packages/webhook/src/runtime/types.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L93)
+Defined in: [packages/webhook/src/runtime/types.ts:103](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L103)
+
+Sends events queued by `emit()` without waiting for `flush()`: the
+first queued event starts a timer, its batch goes out after
+`batchTimeoutMs`, and the timer stops once the queue is empty. A runtime
+that never calls `emit()` starts no timer. Defaults to true.
+
+Set it to false where timers do not outlive the invocation, such as
+Cloudflare Workers, and call `flush()` before the invocation ends (or use
+`emitSync()`).
 
 ***
 
