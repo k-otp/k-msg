@@ -87,7 +87,9 @@ collecting it. The check is on by default (`enableSignatureValidation: true`):
 - The raw body is `webhook.rawBody`: the request body exactly as received, as
   a string, `Uint8Array`, or `ArrayBuffer`. A webhook without it is rejected,
   because `JSON.parse` followed by `JSON.stringify` rarely gives back the bytes
-  the sender signed.
+  the sender signed. Prefer the bytes (`await request.arrayBuffer()`, or
+  Node's raw `Buffer`): `request.text()` drops a leading byte order mark and
+  replaces invalid UTF-8, which changes what was signed.
 - The collector parses `body` from the verified raw body, which must be UTF-8
   JSON, so only signed data reaches the transformers. `body` can be left out;
   one passed alongside is replaced.
@@ -103,8 +105,8 @@ const collector = new WebhookCollector({
 });
 
 export async function receiveWebhook(request: Request) {
-  // Pass the body as received: the collector verifies it, then parses it.
-  const rawBody = await request.text();
+  // The bytes as received: the collector verifies them, then parses them.
+  const rawBody = await request.arrayBuffer();
   // Rejects with "Invalid webhook signature" when the signature does not match.
   return collector.receiveWebhook({
     id: crypto.randomUUID(),
