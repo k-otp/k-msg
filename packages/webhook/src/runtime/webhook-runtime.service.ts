@@ -35,6 +35,9 @@ import type {
   WebhookTenantMigrationResult,
 } from "./types";
 
+const DEFAULT_BATCH_SIZE = 10;
+const DEFAULT_BATCH_TIMEOUT_MS = 5_000;
+
 function toStatusFromActive(active: boolean): WebhookEndpoint["status"] {
   return active ? "active" : "inactive";
 }
@@ -45,6 +48,15 @@ function normalizeLimit(limit: number | undefined, fallback: number): number {
   }
 
   return Math.max(0, Math.floor(limit));
+}
+
+// A batch must take at least one event, or flush() would never empty the
+// queue. Infinity keeps every event queued until flush() or the timer sends
+// them all as one batch.
+function normalizeBatchSize(batchSize: number | undefined): number {
+  return typeof batchSize === "number" && batchSize >= 1
+    ? Math.floor(batchSize)
+    : DEFAULT_BATCH_SIZE;
 }
 
 function cloneEventWithValidTimestamp(event: WebhookEvent): WebhookEvent {
@@ -69,9 +81,14 @@ export class WebhookRuntimeService implements WebhookRuntime {
   >;
   private readonly persistence: WebhookPersistence;
   private readonly fieldCrypto: WebhookRuntimeConfig["fieldCrypto"];
+  private readonly batchSize: number;
+  private readonly batchTimeoutMs: number;
+  private readonly autoStart: boolean;
 
-  private readonly eventQueue: WebhookEvent[] = [];
-  private batchProcessor: ReturnType<typeof setInterval> | null = null;
+  private eventQueue: WebhookEvent[] = [];
+  // Pending only while emit() has queued events, so an idle runtime holds
+  // no timer.
+  private batchTimer: ReturnType<typeof setTimeout> | null = null;
   private initPromise: Promise<void> | null = null;
   // The batch currently dispatching, shared so flush() can wait for it.
   private activeBatch: Promise<void> | null = null;
@@ -85,6 +102,12 @@ export class WebhookRuntimeService implements WebhookRuntime {
     this.config = config.delivery;
     this.dispatcher = new WebhookDispatcher(config.delivery, config.httpClient);
     this.securityOptions = resolveEndpointValidationOptions(config.security);
+    this.batchSize = normalizeBatchSize(config.delivery.batchSize);
+    this.batchTimeoutMs = normalizeLimit(
+      config.delivery.batchTimeoutMs,
+      DEFAULT_BATCH_TIMEOUT_MS,
+    );
+    this.autoStart = config.autoStart ?? true;
 
     const persistence = this.resolvePersistence(config);
     this.persistence = persistence;
@@ -98,11 +121,6 @@ export class WebhookRuntimeService implements WebhookRuntime {
       persistence.deliveryStore,
       config.fieldCrypto,
     );
-
-    const autoStart = config.autoStart ?? true;
-    if (autoStart) {
-      this.startBatchProcessor();
-    }
   }
 
   // Checks the URL before queueing, so an invalid one fails at once instead
@@ -278,11 +296,17 @@ export class WebhookRuntimeService implements WebhookRuntime {
     await this.ensureInitialized();
     this.eventQueue.push(cloneEventWithValidTimestamp(event));
 
-    if (
-      this.eventQueue.length >= this.config.batchSize &&
-      this.activeBatch === null
-    ) {
-      await this.processBatch();
+    try {
+      // A batch in flight is not awaited: one of its delivery hooks may be
+      // this caller. A full batch queued meanwhile follows it (processBatch).
+      if (
+        this.eventQueue.length >= this.batchSize &&
+        this.activeBatch === null
+      ) {
+        await this.processBatch();
+      }
+    } finally {
+      this.scheduleBatch();
     }
   }
 
@@ -316,6 +340,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     while (this.eventQueue.length > 0 || this.activeBatch !== null) {
       await this.processBatch();
     }
+    // The queue is empty, so a scheduled batch would have nothing to send.
+    this.cancelBatchTimer();
   }
 
   async listDeliveries(
@@ -349,12 +375,10 @@ export class WebhookRuntimeService implements WebhookRuntime {
   async shutdown(): Promise<void> {
     // Endpoint writes queued before this point, such as ones behind a
     // running migration, still reach the store before it closes; later
-    // ones are refused instead of running against a closed store.
+    // ones are refused instead of running against a closed store. emit()
+    // after this point schedules no batch timer either.
     this.shuttingDown = true;
-    if (this.batchProcessor) {
-      clearInterval(this.batchProcessor);
-      this.batchProcessor = null;
-    }
+    this.cancelBatchTimer();
 
     await this.flush();
     await this.endpointWrites;
@@ -458,11 +482,39 @@ export class WebhookRuntimeService implements WebhookRuntime {
       return Promise.resolve();
     }
 
-    const batch = this.eventQueue.splice(0, this.config.batchSize);
-    this.activeBatch = this.dispatchBatch(batch).finally(() => {
+    const batch = this.eventQueue.splice(0, this.batchSize);
+    // Never dispatch (or chain after) an empty batch, so a batch size that
+    // takes nothing cannot spin.
+    if (batch.length === 0) {
+      return Promise.resolve();
+    }
+    const dispatched = this.dispatchBatch(batch);
+    this.activeBatch = dispatched.finally(() => {
       this.activeBatch = null;
     });
+    // Runs after activeBatch is cleared. Not after a failure, so a failing
+    // store is retried by the timer or the next call, not in a tight loop.
+    void dispatched.then(
+      () => this.sendQueuedFullBatch(),
+      () => undefined,
+    );
     return this.activeBatch;
+  }
+
+  // A full batch queued while another was being sent goes out right after
+  // it, since the emit() that filled it did not wait.
+  private sendQueuedFullBatch(): void {
+    if (this.eventQueue.length < this.batchSize || this.activeBatch !== null) {
+      return;
+    }
+    void this.processBatch().catch((error: unknown) => {
+      logger.error(
+        "Webhook batch processor error",
+        undefined,
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      this.scheduleBatch();
+    });
   }
 
   private async dispatchBatch(batch: WebhookEvent[]): Promise<void> {
@@ -494,8 +546,9 @@ export class WebhookRuntimeService implements WebhookRuntime {
       }
     } catch (error) {
       // Re-queue only what was not dispatched; earlier events already reached
-      // their endpoints and would otherwise be delivered twice.
-      this.eventQueue.unshift(...batch.slice(dispatched));
+      // their endpoints and would otherwise be delivered twice. Not spread
+      // into unshift(): a large batch would exceed the argument limit.
+      this.eventQueue = batch.slice(dispatched).concat(this.eventQueue);
       throw error;
     }
   }
@@ -551,18 +604,56 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return `webhook_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
-  private startBatchProcessor(): void {
-    const timeout = normalizeLimit(this.config.batchTimeoutMs, 5000);
-    this.batchProcessor = setInterval(() => {
-      if (this.activeBatch !== null) return;
-      this.processBatch().catch((error) => {
-        logger.error(
-          "Webhook batch processor error",
-          undefined,
-          error instanceof Error ? error : new Error(String(error)),
-        );
-      });
-    }, timeout);
+  // Keeps a timer pending exactly while emit() has queued events: it sends
+  // the queue batchTimeoutMs after the first one, and is cleared as soon as
+  // the queue is empty, for example after emit() sent a full batch itself.
+  private scheduleBatch(): void {
+    if (this.eventQueue.length === 0) {
+      this.cancelBatchTimer();
+      return;
+    }
+    if (!this.autoStart || this.shuttingDown || this.batchTimer !== null) {
+      return;
+    }
+
+    this.batchTimer = setTimeout(() => {
+      this.batchTimer = null;
+      void this.runScheduledBatch();
+    }, this.batchTimeoutMs);
+  }
+
+  // Whoever started a batch handles its failure; others only wait for it.
+  private async waitForActiveBatch(): Promise<void> {
+    if (this.activeBatch !== null) {
+      await this.activeBatch.catch(() => undefined);
+    }
+  }
+
+  private async runScheduledBatch(): Promise<void> {
+    try {
+      // The queue is due now. Wait out batches in flight, including any
+      // chained after them, whose failures their starters report, then send
+      // what is left rather than a whole timeout later.
+      while (this.activeBatch !== null) {
+        await this.waitForActiveBatch();
+      }
+      await this.processBatch();
+    } catch (error) {
+      logger.error(
+        "Webhook batch processor error",
+        undefined,
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    }
+    // Events queued meanwhile, or re-queued after a failure, go next.
+    this.scheduleBatch();
+  }
+
+  private cancelBatchTimer(): void {
+    if (this.batchTimer !== null) {
+      clearTimeout(this.batchTimer);
+      this.batchTimer = null;
+    }
   }
 }
 
