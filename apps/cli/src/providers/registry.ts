@@ -92,8 +92,14 @@ function wrapProviderId(
     id,
     name: provider.name,
     supportedTypes: provider.supportedTypes,
+    ...(provider.transportCapabilities
+      ? { transportCapabilities: provider.transportCapabilities }
+      : {}),
     healthCheck: () => provider.healthCheck(),
-    send: (params) => provider.send(params),
+    // Forward the request context: a provider that honors its signal or
+    // fetch must still see them under a configured id.
+    send: (params, context) =>
+      context ? provider.send(params, context) : provider.send(params),
     ...(typeof provider.getDeliveryStatus === "function"
       ? { getDeliveryStatus: provider.getDeliveryStatus.bind(provider) }
       : {}),
