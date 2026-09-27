@@ -355,6 +355,15 @@ Queue indexes:
 - `idx_kmsg_jobs_dequeue(status, priority, process_at, created_at)`
 - `idx_kmsg_jobs_id(id)`
 
+SQLite and D1 need index names to be unique per database, and Postgres per schema. A second queue table in the same one needs its own names, or its `CREATE INDEX IF NOT EXISTS` statements find the first table's indexes and skip. Pass `indexNames` to the queue (and to `buildJobQueueSchemaSql()`), or `queueIndexNames` to `buildCloudflareSqlSchemaSql()`, `initializeCloudflareSqlSchema()`, and `renderDrizzleSchemaSource()`.
+
+```ts
+const otpQueue = createD1JobQueue(env.DB, {
+  tableName: "otp_jobs",
+  indexNames: { dequeue: "idx_otp_jobs_dequeue", id: "idx_otp_jobs_id" },
+});
+```
+
 ### Schema Utility API (Cloudflare Adapter)
 
 ```ts

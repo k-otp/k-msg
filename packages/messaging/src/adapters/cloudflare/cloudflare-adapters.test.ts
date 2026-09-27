@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
 import { JobStatus } from "../../queue/job-queue.interface";
 import {
@@ -758,6 +759,84 @@ describe("Cloudflare SQL adapters", () => {
         expect.stringMatching(/^CREATE INDEX IF NOT EXISTS/),
       ]),
     );
+  });
+
+  test("SQL job queues create indexes under the configured names", async () => {
+    const indexNames = { dequeue: "otp_jobs_dequeue", id: "otp_jobs_id" };
+
+    // Index names are unique per SQLite database, so a second queue table
+    // needs its own to get any indexes.
+    const db = new Database(":memory:");
+    const sqlite = stubSqlClient("sqlite", async (sql) => {
+      db.run(sql);
+      return { rows: [] };
+    });
+    await new HyperdriveJobQueue(sqlite).init();
+    await new HyperdriveJobQueue(sqlite, {
+      tableName: "otp_jobs",
+      indexNames,
+    }).init();
+    expect(
+      db
+        .query(
+          "SELECT tbl_name, name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%' ORDER BY tbl_name, name",
+        )
+        .all(),
+    ).toEqual([
+      { tbl_name: "kmsg_jobs", name: "idx_kmsg_jobs_dequeue" },
+      { tbl_name: "kmsg_jobs", name: "idx_kmsg_jobs_id" },
+      { tbl_name: "otp_jobs", name: "otp_jobs_dequeue" },
+      { tbl_name: "otp_jobs", name: "otp_jobs_id" },
+    ]);
+    db.close();
+
+    const indexNamesIn = (statements: readonly string[]) =>
+      statements.flatMap((sql) => {
+        const match = /^\s*CREATE INDEX (?:IF NOT EXISTS )?"([^"]+)"/.exec(sql);
+        return match ? [match[1]] : [];
+      });
+
+    const d1Statements: string[] = [];
+    const d1 = {
+      prepare(sql: string) {
+        d1Statements.push(sql);
+        const statement = {
+          bind() {
+            return statement;
+          },
+          async all() {
+            return { results: [] };
+          },
+        };
+        return statement;
+      },
+    };
+    await createD1JobQueue(d1 as unknown as D1DatabaseLike, {
+      tableName: "otp_jobs",
+      indexNames,
+    }).init();
+    expect(indexNamesIn(d1Statements)).toEqual([
+      "otp_jobs_dequeue",
+      "otp_jobs_id",
+    ]);
+
+    // Statements without parameters reach Drizzle as plain strings.
+    const drizzleStatements: string[] = [];
+    await createDrizzleJobQueue({
+      dialect: "postgres",
+      db: {
+        execute(query: unknown) {
+          drizzleStatements.push(String(query));
+          return [];
+        },
+      },
+      tableName: "otp_jobs",
+      indexNames,
+    }).init();
+    expect(indexNamesIn(drizzleStatements)).toEqual([
+      "otp_jobs_dequeue",
+      "otp_jobs_id",
+    ]);
   });
 
   test("HyperdriveJobQueue stores retry delay in process_at", async () => {

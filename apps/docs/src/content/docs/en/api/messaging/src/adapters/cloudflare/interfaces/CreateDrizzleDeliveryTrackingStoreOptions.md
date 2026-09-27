@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleDeliveryTrackingStoreOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L141)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:143](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L143)
 
 ## Extends
 
@@ -69,7 +69,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 
 > `optional` **fieldCrypto?**: [`DeliveryTrackingFieldCryptoOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingfieldcryptooptions/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:144](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L144)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L146)
 
 ***
 
@@ -101,7 +101,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/delivery-tracking-schema
 
 > `optional` **initializeSchema?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L151)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:153](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L153)
 
 Whether the store creates its table and indexes on first use. Set it to
 `false` when migrations create the schema.
@@ -210,7 +210,7 @@ readonly `unknown`[]
 
 > `optional` **retention?**: [`DeliveryTrackingRetentionConfig`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingretentionconfig/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L145)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L147)
 
 ***
 
