@@ -13,14 +13,6 @@ export interface DispatchConfig {
   circuitBreakerTimeoutMs: number;
 }
 
-export interface BatchConfig {
-  maxBatchSize: number;
-  batchTimeoutMs: number;
-  maxConcurrentBatches: number;
-  enablePrioritization: boolean;
-  priorityLevels: number;
-}
-
 export interface QueueConfig {
   maxQueueSize: number;
   persistToDisk: boolean;
