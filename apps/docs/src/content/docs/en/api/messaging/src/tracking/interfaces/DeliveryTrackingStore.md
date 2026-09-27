@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:125](ht
 
 > `optional` **close**(): `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L172)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L173)
 
 #### Returns
 
@@ -25,7 +25,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:172](ht
 
 > `optional` **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L167)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L168)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > `optional` **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L166)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:167](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L167)
 
 #### Parameters
 
@@ -150,7 +150,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:129](ht
 
 > `optional` **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:165](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L165)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L166)
 
 #### Parameters
 
@@ -168,7 +168,7 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:165](ht
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L171)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L172)
 
 #### Parameters
 
@@ -190,12 +190,13 @@ Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:171](ht
 
 > `optional` **patchLeased**(`messageId`, `leaseUntil`, `patch`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:149](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L149)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:150](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L150)
 
 Applies `patch` only while the record is still leased until `leaseUntil`
-(its `nextCheckAt` equals it), and resolves whether it did. A poll
-stores its results this way, so one that ran past its lease cannot
-overwrite what another poll stored since.
+(its `nextCheckAt` equals it), and resolves whether it did. The check
+and the write are one atomic step, as in `leaseDue`. A poll stores its
+results this way, so one that ran past its lease cannot overwrite what
+another poll stored since.
 
 #### Parameters
 
@@ -221,7 +222,7 @@ overwrite what another poll stored since.
 
 > `optional` **releaseLeases**(`messageIds`, `leaseUntil`, `nextCheckAt`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L160)
+Defined in: [packages/messaging/src/delivery-tracking/store.interface.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/store.interface.ts#L161)
 
 Hands back leases a poll did not finish: moves `nextCheckAt` to the
 given time on those records whose `nextCheckAt` is still `leaseUntil`.

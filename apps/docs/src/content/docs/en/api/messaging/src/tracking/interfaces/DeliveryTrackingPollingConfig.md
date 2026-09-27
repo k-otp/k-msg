@@ -53,13 +53,15 @@ Defined in: [packages/messaging/src/delivery-tracking/types.ts:101](https://gith
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L117)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L119)
 
 How long a poll may hold the records it takes, when the store supports
 `leaseDue`. While it holds them, other services polling the same store
 skip them. A poll stores each record's next check as it goes and hands
 back the records it does not finish, so the duration matters only when a
-poll runs longer or stops without doing that. 0 turns leasing off.
+poll runs longer or stops without doing that. A lease that runs out
+before the store returns the records holds nothing: `runOnce()` rejects
+and leaves them for the next poll. 0 turns leasing off.
 
 #### Default
 

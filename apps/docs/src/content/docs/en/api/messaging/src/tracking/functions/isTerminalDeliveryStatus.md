@@ -7,7 +7,7 @@ title: "isTerminalDeliveryStatus"
 
 > **isTerminalDeliveryStatus**(`status`): `boolean`
 
-Defined in: [packages/messaging/src/delivery-tracking/types.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L135)
+Defined in: [packages/messaging/src/delivery-tracking/types.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/types.ts#L137)
 
 ## Parameters
 
