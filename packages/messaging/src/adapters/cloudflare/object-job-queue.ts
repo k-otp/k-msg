@@ -166,6 +166,9 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   async dequeue(
     options: JobDequeueOptions = {},
   ): Promise<CloudflareObjectJob<T> | undefined> {
+    // Read once: a job that finishes during the scan may still be listed as
+    // processing, and must not be taken for one whose worker was lost.
+    const running = new Set(options.running);
     // A second look only follows a first one whose job another dequeue()
     // took while onLeaseExpired ran; KV, which may read its own writes late,
     // could otherwise keep looking.
@@ -177,7 +180,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
 
       for await (const stored of this.readJobs()) {
         // Its caller will still complete or fail it, so its lease stands.
-        if (options.running?.has(stored.id)) continue;
+        if (running.has(stored.id)) continue;
         let job = stored;
         if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
           if (job.leaseExpiresAt === undefined) {

@@ -288,11 +288,13 @@ describe("JobProcessor", () => {
       metadata: {},
     };
     const running: string[][] = [];
+    const passed: Array<ReadonlySet<string> | undefined> = [];
     let handedOut = false;
     const queue: JobQueue<{ n: number }> = {
       enqueue: async () => ({ ...job }),
       dequeue: async (options) => {
         running.push([...(options?.running ?? [])]);
+        passed.push(options?.running);
         if (handedOut) return undefined;
         handedOut = true;
         return { ...job };
@@ -326,6 +328,9 @@ describe("JobProcessor", () => {
 
     expect(running[0]).toEqual([]);
     expect(running.slice(1)).toContainEqual(["job-1"]);
+    // Each dequeue() gets the jobs running when it was called, which the
+    // processor's later changes do not alter.
+    expect(passed.map((set) => [...(set ?? [])])).toEqual(running);
   });
 
   test("should keep a failed job running until its failure is stored", async () => {
