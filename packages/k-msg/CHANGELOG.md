@@ -1,5 +1,11 @@
 # k-msg
 
+## 0.32.0 — 2026-09-27
+
+### Patch changes
+
+- Updated dependencies: core@0.32.0, messaging@0.32.0
+
 ## 0.31.0 — 2026-09-26
 
 ### Minor changes
