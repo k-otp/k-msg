@@ -5,7 +5,7 @@ prev: false
 title: "KakaoChannelBindingResolver"
 ---
 
-Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L70)
+Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L84)
 
 Runtime channel APIs
 
@@ -15,7 +15,7 @@ Runtime channel APIs
 
 > **new KakaoChannelBindingResolver**(`config`): `KakaoChannelBindingResolver`
 
-Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L71)
+Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L85)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:71](
 
 > **getAlias**(`alias`): [`KakaoChannelAliasEntry`](/en/api/channel/src/interfaces/kakaochannelaliasentry/) \| `undefined`
 
-Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:282](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L282)
+Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L306)
 
 #### Parameters
 
@@ -51,7 +51,7 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:282]
 
 > **list**(`params?`): [`KakaoChannelListItem`](/en/api/channel/src/interfaces/kakaochannellistitem/)[]
 
-Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L73)
+Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L87)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:73](
 
 > **resolve**(`input?`): [`ResolvedKakaoChannelBinding`](/en/api/channel/src/interfaces/resolvedkakaochannelbinding/)
 
-Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:157](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L157)
+Defined in: [packages/channel/src/runtime/kakao-channel-binding-resolver.ts:171](https://github.com/k-otp/k-msg/blob/main/packages/channel/src/runtime/kakao-channel-binding-resolver.ts#L171)
 
 #### Parameters
 
