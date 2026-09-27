@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ErrorUtils, KMsgErrorCode } from "@k-msg/core";
+import { ErrorUtils, KMsgError, KMsgErrorCode } from "@k-msg/core";
 import { AligoSendProvider } from "./aligo/provider.send";
 import { IWINVSendProvider } from "./iwinv/provider.send";
 import { MockProvider } from "./providers/mock/mock.provider";
@@ -198,6 +198,40 @@ describe("built-in provider transport capabilities", () => {
       expect(ErrorUtils.isRetryable(result.error)).toBe(false);
       expect(result.error.message).toContain("provider deadline exceeded");
       expect(result.error.details?.requestSent).toBe(true);
+    }
+    sdk.releaseAll({ messageId: "msg_late" });
+    await settle();
+  });
+
+  test("solapi provider converts a KMsgError abort reason after the send too", async () => {
+    const sdk = createPendingSolapiClient();
+    const controller = new AbortController();
+
+    const resultPromise = createSolapiProvider(sdk.client).send(
+      { type: "SMS", to: "01012345678", text: "message" },
+      { signal: controller.signal },
+    );
+    await settle();
+    expect(sdk.calls.sendOne).toBe(1);
+
+    // A caller may abort with a KMsgError; after the send it must not stay a
+    // retryable NETWORK_TIMEOUT either.
+    controller.abort(
+      new KMsgError(
+        KMsgErrorCode.NETWORK_TIMEOUT,
+        "provider deadline exceeded",
+      ),
+    );
+    const result = await resultPromise;
+
+    expect(result.isFailure).toBe(true);
+    if (result.isFailure) {
+      expect(result.error.code).toBe(KMsgErrorCode.REQUEST_ABORTED);
+      expect(ErrorUtils.isRetryable(result.error)).toBe(false);
+      expect(result.error.details?.requestSent).toBe(true);
+      expect(result.error.details?.abortCode).toBe(
+        KMsgErrorCode.NETWORK_TIMEOUT,
+      );
     }
     sdk.releaseAll({ messageId: "msg_late" });
     await settle();
