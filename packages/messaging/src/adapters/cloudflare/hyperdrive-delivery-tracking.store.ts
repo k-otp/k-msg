@@ -38,7 +38,9 @@ import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
 import {
   jsonParameterSql,
   readJsonColumn,
+  readJsonObjectColumn,
   selectJsonAsTextSql,
+  toJsonText,
 } from "./sql-json";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
@@ -55,10 +57,6 @@ const JSON_COLUMN_KEYS: ReadonlySet<DeliveryTrackingColumnKey> = new Set([
   "metadata",
   "metadataHashes",
 ]);
-
-function isJsonObject<T extends object>(value: unknown): value is T {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function toArray<T>(value: T | T[] | undefined): T[] | undefined {
   if (value === undefined) return undefined;
@@ -470,19 +468,19 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if ("lastError" in patch) {
       updates.push({
         key: "lastError",
-        value: patch.lastError ? JSON.stringify(patch.lastError) : null,
+        value: patch.lastError ? this.jsonText(patch.lastError) : null,
       });
     }
     if (this.schema.storeRaw && "raw" in patch) {
       updates.push({
         key: "raw",
-        value: patch.raw !== undefined ? JSON.stringify(patch.raw) : null,
+        value: patch.raw !== undefined ? this.jsonText(patch.raw) : null,
       });
     }
     if ("metadata" in patch) {
       updates.push({
         key: "metadata",
-        value: patch.metadata ? JSON.stringify(patch.metadata) : null,
+        value: patch.metadata ? this.jsonText(patch.metadata) : null,
       });
     }
 
@@ -579,14 +577,21 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const lastCheckedAt = toDate(columnValue("lastCheckedAt"));
     if (lastCheckedAt) record.lastCheckedAt = lastCheckedAt;
 
-    const lastError = this.readJson(columnValue("lastError"));
-    if (isJsonObject<NonNullable<TrackingRecord["lastError"]>>(lastError)) {
-      record.lastError = lastError;
+    const lastError = readJsonObjectColumn(columnValue("lastError"));
+    if (
+      typeof lastError?.code === "string" &&
+      typeof lastError.message === "string"
+    ) {
+      record.lastError = {
+        ...lastError,
+        code: lastError.code,
+        message: lastError.message,
+      };
     }
 
     if (this.schema.storeRaw) {
       const rawValue = columnValue("raw");
-      const raw = this.readJson(rawValue);
+      const raw = readJsonColumn(rawValue);
       if (raw !== undefined) {
         record.raw = raw;
       } else if (typeof rawValue === "string" && rawValue.length > 0) {
@@ -594,17 +599,13 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       }
     }
 
-    const metadata = this.readJson(columnValue("metadata"));
-    const metadataObject = isJsonObject<Record<string, unknown>>(metadata)
-      ? metadata
-      : undefined;
+    const metadataObject = readJsonObjectColumn(columnValue("metadata"));
     if (metadataObject) record.metadata = metadataObject;
 
     if (this.schema.fieldCrypto.enabled) {
-      const hashes = this.readJson(columnValue("metadataHashes"));
-      const metadataHashes = isJsonObject<Record<string, string>>(hashes)
-        ? hashes
-        : undefined;
+      const metadataHashes = readJsonObjectColumn(
+        columnValue("metadataHashes"),
+      ) as Record<string, string> | undefined;
       const restored = await restoreTrackingCryptoOnRead(
         record,
         {
@@ -685,8 +686,11 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       : placeholder;
   }
 
-  private readJson(value: unknown): unknown {
-    return readJsonColumn(value, this.hasNativeJsonColumns());
+  private jsonText(value: unknown): string {
+    return toJsonText(
+      value,
+      this.client.dialect === "postgres" && this.hasNativeJsonColumns(),
+    );
   }
 
   private columnName(key: DeliveryTrackingColumnKey): string {
@@ -766,16 +770,16 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       case "nextCheckAt":
         return this.toDbTimestamp(record.nextCheckAt);
       case "lastError":
-        return record.lastError ? JSON.stringify(record.lastError) : null;
+        return record.lastError ? this.jsonText(record.lastError) : null;
       case "raw":
-        return record.raw !== undefined ? JSON.stringify(record.raw) : null;
+        return record.raw !== undefined ? this.jsonText(record.raw) : null;
       case "metadata":
-        return record.metadata ? JSON.stringify(record.metadata) : null;
+        return record.metadata ? this.jsonText(record.metadata) : null;
       case "metadataEnc":
         return record.metadataEnc ?? null;
       case "metadataHashes":
         return record.metadataHashes
-          ? JSON.stringify(record.metadataHashes)
+          ? this.jsonText(record.metadataHashes)
           : null;
       case "cryptoKid":
         return record.cryptoKid ?? null;

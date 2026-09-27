@@ -9,7 +9,9 @@ import { runCloudflareSqlTransaction } from "./sql-client";
 import {
   jsonParameterSql,
   readJsonColumn,
+  readJsonObjectColumn,
   selectJsonAsTextSql,
+  toJsonText,
 } from "./sql-json";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
@@ -127,7 +129,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     const values = [
       job.id,
       job.type,
-      JSON.stringify(job.data),
+      toJsonText(job.data, this.hasNativeJsonColumns()),
       job.status,
       job.priority,
       job.attempts,
@@ -138,7 +140,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       null,
       null,
       null,
-      JSON.stringify(job.metadata),
+      toJsonText(job.metadata, this.hasNativeJsonColumns()),
     ];
 
     const colSql = JOB_COLUMNS.map((column) =>
@@ -387,8 +389,8 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
 
   private rowToJob(row: JobRow): Job<T> {
     const now = new Date();
-    const data = readJsonColumn(row.data, this.hasNativeJsonColumns());
-    const metadata = readJsonColumn(row.metadata, this.hasNativeJsonColumns());
+    const data = readJsonColumn(row.data);
+    const metadata = readJsonObjectColumn(row.metadata);
     return {
       id: String(row.id ?? ""),
       type: String(row.type ?? ""),
@@ -406,12 +408,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
         typeof row.error === "string" && row.error.length > 0
           ? row.error
           : undefined,
-      metadata:
-        typeof metadata === "object" &&
-        metadata !== null &&
-        !Array.isArray(metadata)
-          ? (metadata as Job<T>["metadata"])
-          : {},
+      metadata: metadata ?? {},
     };
   }
 

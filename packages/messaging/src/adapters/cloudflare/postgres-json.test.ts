@@ -52,6 +52,27 @@ function parenthesized(sql: string, open: number): string {
 
 const unquote = (identifier: string) => identifier.trim().replace(/^"|"$/g, "");
 
+const UNPAIRED_SURROGATE =
+  /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+// JSONB, unlike JSON text, cannot hold NUL characters or unpaired surrogates.
+function assertJsonbText(value: unknown): void {
+  const strings =
+    typeof value === "string"
+      ? [value]
+      : typeof value === "object" && value !== null
+        ? Object.entries(value).flatMap(([key, item]) => {
+            assertJsonbText(item);
+            return [key];
+          })
+        : [];
+  for (const text of strings) {
+    if (text.includes("\u0000") || UNPAIRED_SURROGATE.test(text)) {
+      throw new PostgresError("unsupported Unicode escape sequence", "22P05");
+    }
+  }
+}
+
 /**
  * Postgres behind postgres.js or Bun.SQL, in memory, for the statements the
  * SQL adapters issue. Postgres infers each parameter's type from where the
@@ -160,11 +181,14 @@ class PostgresTypingFake {
   }
 
   private parseJson(text: string): unknown {
+    let document: unknown;
     try {
-      return JSON.parse(text);
+      document = JSON.parse(text);
     } catch {
       throw new PostgresError("invalid input syntax for type json", "22P02");
     }
+    assertJsonbText(document);
+    return document;
   }
 
   private insert(sql: string, params: readonly unknown[]) {
@@ -334,7 +358,7 @@ describe("SQL adapters on Postgres with postgres.js parameter typing", () => {
     expect(record?.raw).toBe("01012345678");
   });
 
-  test("HyperdriveDeliveryTrackingStore reads rows that hold JSON text as a JSON string", async () => {
+  test("HyperdriveDeliveryTrackingStore reads earlier JSON-string rows, objects as objects and raw as stored", async () => {
     const postgres = new PostgresTypingFake();
     const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
       storeRaw: true,
@@ -364,7 +388,60 @@ describe("SQL adapters on Postgres with postgres.js parameter typing", () => {
     const record = await store.get("m1");
     expect(record?.lastError).toEqual({ code: "E1", message: "first" });
     expect(record?.metadata).toEqual({ tenant: "t1" });
-    expect(record?.raw).toEqual({ result: "ok" });
+    // raw may hold any JSON, strings included, so it reads as stored.
+    expect(record?.raw).toBe('{"result":"ok"}');
+  });
+
+  test("HyperdriveDeliveryTrackingStore keeps strings that look like JSON", async () => {
+    const postgres = new PostgresTypingFake();
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      storeRaw: true,
+    });
+
+    for (const raw of ['{"result":"ok"}', "[1,2]", "12345", "true"]) {
+      await store.upsert(trackingRecord({ raw }));
+      expect((await store.get("m1"))?.raw).toBe(raw);
+    }
+  });
+
+  test("HyperdriveDeliveryTrackingStore stores NUL and unpaired surrogates as U+FFFD", async () => {
+    const postgres = new PostgresTypingFake();
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      storeRaw: true,
+    });
+
+    await store.upsert(
+      trackingRecord({
+        lastError: { code: "E1", message: "bad\uD800byte" },
+        metadata: { note: "a\u0000b", "key\u0000": "v" },
+        raw: "\uDC00",
+      }),
+    );
+
+    const record = await store.get("m1");
+    expect(record?.lastError).toEqual({ code: "E1", message: "bad\uFFFDbyte" });
+    expect(record?.metadata).toEqual({ note: "a\uFFFDb", "key\uFFFD": "v" });
+    expect(record?.raw).toBe("\uFFFD");
+  });
+
+  test("HyperdriveDeliveryTrackingStore reads objects from a JSONB table set up as json: text", async () => {
+    const postgres = new PostgresTypingFake();
+    // The table has JSONB columns, but the store is told they are TEXT.
+    await new HyperdriveDeliveryTrackingStore(postgres.client).init();
+    const store = new HyperdriveDeliveryTrackingStore(postgres.client, {
+      typeStrategy: { json: "text" },
+    });
+
+    await store.upsert(
+      trackingRecord({
+        lastError: { code: "E1", message: "first" },
+        metadata: { tenant: "t1" },
+      }),
+    );
+
+    const record = await store.get("m1");
+    expect(record?.lastError).toEqual({ code: "E1", message: "first" });
+    expect(record?.metadata).toEqual({ tenant: "t1" });
   });
 
   test("HyperdriveDeliveryTrackingStore stores provider status messages longer than 64 characters", async () => {
@@ -410,12 +487,19 @@ describe("SQL adapters on Postgres with postgres.js parameter typing", () => {
     const postgres = new PostgresTypingFake();
     const queue = new HyperdriveJobQueue<string>(postgres.client);
 
-    const job = await queue.enqueue("send", "01012345678");
-
-    expect((await queue.getJob(job.id))?.data).toBe("01012345678");
+    for (const data of [
+      "01012345678",
+      '{"to":"010"}',
+      "[1,2]",
+      "12345",
+      "true",
+    ]) {
+      const job = await queue.enqueue("send", data);
+      expect((await queue.getJob(job.id))?.data).toBe(data);
+    }
   });
 
-  test("HyperdriveJobQueue reads jobs that hold JSON text as a JSON string", async () => {
+  test("HyperdriveJobQueue reads earlier JSON-string rows, metadata as an object and data as stored", async () => {
     const postgres = new PostgresTypingFake();
     const queue = new HyperdriveJobQueue<{ to: string }>(postgres.client);
     const job = await queue.enqueue("send", { to: "01012345678" });
@@ -435,7 +519,9 @@ describe("SQL adapters on Postgres with postgres.js parameter typing", () => {
     );
 
     const stored = await queue.getJob(job.id);
-    expect(stored?.data).toEqual({ to: "01012345678" });
+    // data may hold any JSON, strings included, so it reads as stored; the
+    // README shows how to convert such rows.
+    expect(stored?.data as unknown).toBe('{"to":"01012345678"}');
     expect(stored?.metadata).toEqual({ tenant: "t1" });
   });
 });
