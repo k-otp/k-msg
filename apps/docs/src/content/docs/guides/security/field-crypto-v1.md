@@ -28,7 +28,7 @@ description: "k-msg 보안감사 대응 암호화 정책(v1) 요약"
 - 전화번호 조회는 deterministic encryption에 의존하지 않습니다.
 - `to_hash`, `from_hash` 인덱스를 사용합니다.
 - 해시는 `HMAC-SHA256(normalizedValue)` 기준입니다.
-- 레코드의 해시는 그 필드를 암호화한 `kid`의 키로 계산합니다. 조회는 active `kid`와 `resolveDecryptKeys`의 모든 `kid`로 값을 해시하므로, 테넌트 키로 쓰였거나 로테이션 이전에 쓰인 레코드도 그 `kid`가 목록에 남아 있는 동안 조회됩니다.
+- 레코드의 해시는 그 필드를 암호화한 `kid`의 키로 계산합니다. 조회는 active `kid`, `resolveDecryptKeys`의 모든 `kid`, provider 기본 키로 값을 해시하므로, 테넌트 키로 쓰였거나 로테이션 또는 `keyResolver` 설정 이전에 쓰인 레코드도 그 키가 목록에 남아 있는 동안 조회됩니다.
 
 ## AAD 및 키 로테이션
 
