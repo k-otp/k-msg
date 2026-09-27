@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-trac
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts:697](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts#L697)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts:729](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts#L729)
 
 #### Returns
 
@@ -255,9 +255,10 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-trac
 Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts:513](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-delivery-tracking.store.ts#L513)
 
 Applies `patch` only while the record is still leased until `leaseUntil`
-(its `nextCheckAt` equals it), and resolves whether it did. A poll
-stores its results this way, so one that ran past its lease cannot
-overwrite what another poll stored since.
+(its `nextCheckAt` equals it), and resolves whether it did. The check
+and the write are one atomic step, as in `leaseDue`. A poll stores its
+results this way, so one that ran past its lease cannot overwrite what
+another poll stored since.
 
 #### Parameters
 
