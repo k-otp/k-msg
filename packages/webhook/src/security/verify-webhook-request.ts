@@ -1,0 +1,217 @@
+import { fail, ok, type Result } from "@k-msg/core";
+import type { WebhookConfig } from "../types/webhook.types";
+import { SecurityManager, WEBHOOK_TIMESTAMP_HEADER } from "./security.manager";
+
+const DEFAULT_TOLERANCE_MS = 5 * 60 * 1000;
+
+/**
+ * Request headers as a Fetch `Headers` object or a plain record, such as
+ * Node's `IncomingHttpHeaders`. Record names are matched in any case.
+ */
+export type WebhookRequestHeaders =
+  | Headers
+  | Readonly<Record<string, string | readonly string[] | undefined>>;
+
+/**
+ * The raw request body, exactly as received: prefer the bytes, such as
+ * `await request.arrayBuffer()`. Bytes are checked exactly, so they must be
+ * valid UTF-8, as the sender's always are. A string is trusted as given, but
+ * `request.text()` drops a leading BOM and replaces malformed bytes before
+ * any check, and parsing and re-serializing JSON changes the body.
+ */
+export type WebhookRequestBody = string | Uint8Array | ArrayBuffer;
+
+/**
+ * Options for {@link verifyWebhookRequest}. `algorithm`, `signatureHeader`,
+ * and `signaturePrefix` must match the sender's `WebhookConfig`, so the same
+ * object can be passed to both.
+ */
+export interface VerifyWebhookRequestOptions
+  extends Pick<
+    WebhookConfig,
+    "algorithm" | "signatureHeader" | "signaturePrefix"
+  > {
+  /**
+   * How far the signed time may be from the receiver's clock, in either
+   * direction, in milliseconds: a finite number of 0 or more. Defaults to
+   * 300000 (5 minutes). Signed times have one-second resolution, so a
+   * request up to a second older than this can still pass.
+   */
+  toleranceMs?: number;
+}
+
+/**
+ * Why {@link verifyWebhookRequest} rejected a request:
+ *
+ * - `MISSING_SIGNATURE`: the signature header is missing or empty.
+ * - `MISSING_TIMESTAMP`: the `X-Webhook-Timestamp` header is missing or empty.
+ * - `INVALID_SIGNATURE`: the signature does not match the body, timestamp,
+ *   and secret, or a byte body is not valid UTF-8.
+ * - `INVALID_TIMESTAMP`: the signed timestamp is not a whole number of
+ *   seconds.
+ * - `STALE_TIMESTAMP`: the signed time is further from now than
+ *   `toleranceMs` allows, counting the second the signed time was
+ *   rounded down from.
+ */
+export type WebhookVerificationErrorCode =
+  | "MISSING_SIGNATURE"
+  | "MISSING_TIMESTAMP"
+  | "INVALID_SIGNATURE"
+  | "INVALID_TIMESTAMP"
+  | "STALE_TIMESTAMP";
+
+export class WebhookVerificationError extends Error {
+  readonly code: WebhookVerificationErrorCode;
+
+  constructor(code: WebhookVerificationErrorCode, message: string) {
+    super(message);
+    this.name = "WebhookVerificationError";
+    this.code = code;
+  }
+}
+
+/** A request that {@link verifyWebhookRequest} accepted. */
+export interface VerifiedWebhookRequest {
+  /** When the sender signed the request, from `X-Webhook-Timestamp`. */
+  timestamp: Date;
+}
+
+function readHeader(
+  headers: WebhookRequestHeaders,
+  name: string,
+): string | undefined {
+  if (typeof headers.get === "function") {
+    return (headers as Headers).get(name) ?? undefined;
+  }
+
+  const wanted = name.toLowerCase();
+  for (const [key, value] of Object.entries(
+    headers as Readonly<Record<string, string | readonly string[] | undefined>>,
+  )) {
+    if (key.toLowerCase() !== wanted) continue;
+    return typeof value === "string" ? value : value?.[0];
+  }
+  return undefined;
+}
+
+// The sender signs a UTF-8 JSON string, and decoding well-formed UTF-8 (with
+// any leading BOM kept) gives back exactly those bytes. Malformed bytes are
+// refused rather than replaced: replacement would let different bytes, such
+// as FF in place of a signed U+FFFD, pass as the signed body.
+function readBody(body: WebhookRequestBody): string | undefined {
+  if (typeof body === "string") return body;
+  try {
+    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+      body,
+    );
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Checks that a webhook request came from a k-msg sender that holds `secret`
+ * and was signed recently.
+ *
+ * It verifies the signature header, an HMAC of `<X-Webhook-Timestamp>.<body>`,
+ * in constant time, then checks that the signed time is within `toleranceMs`
+ * of now. A request that passes can still be a repeat: webhooks are delivered
+ * at least once, so skip event ids you have already processed.
+ *
+ * @param headers - The request headers.
+ * @param body - The raw request body, preferably its bytes, before any
+ *   decoding or JSON parsing.
+ * @param secret - The endpoint's signing secret (or the sender's shared
+ *   `secretKey`).
+ * @returns The signed time, or a {@link WebhookVerificationError} whose
+ *   `code` says which check failed.
+ * @throws TypeError when `secret` is empty, and RangeError when
+ *   `toleranceMs` is negative, NaN, or infinite.
+ *
+ * @example
+ * ```ts
+ * const body = await request.arrayBuffer();
+ * const verified = verifyWebhookRequest(
+ *   request.headers,
+ *   body,
+ *   env.WEBHOOK_SECRET,
+ * );
+ * if (verified.isFailure) {
+ *   return new Response(verified.error.code, { status: 401 });
+ * }
+ * const event = JSON.parse(new TextDecoder().decode(body));
+ * ```
+ */
+export function verifyWebhookRequest(
+  headers: WebhookRequestHeaders,
+  body: WebhookRequestBody,
+  secret: string,
+  options: VerifyWebhookRequestOptions = {},
+): Result<VerifiedWebhookRequest, WebhookVerificationError> {
+  if (typeof secret !== "string" || secret.length === 0) {
+    throw new TypeError("verifyWebhookRequest needs the signing secret");
+  }
+  const toleranceMs = options.toleranceMs ?? DEFAULT_TOLERANCE_MS;
+  // Infinity would silently turn the replay check off.
+  if (!Number.isFinite(toleranceMs) || toleranceMs < 0) {
+    throw new RangeError("toleranceMs must be a finite number of 0 or more");
+  }
+
+  const security = new SecurityManager(options);
+  const signatureHeader = security.getConfig().header;
+
+  const signature = readHeader(headers, signatureHeader);
+  if (!signature) {
+    return fail(
+      new WebhookVerificationError(
+        "MISSING_SIGNATURE",
+        `The ${signatureHeader} header is missing`,
+      ),
+    );
+  }
+  const timestamp = readHeader(headers, WEBHOOK_TIMESTAMP_HEADER);
+  if (!timestamp) {
+    return fail(
+      new WebhookVerificationError(
+        "MISSING_TIMESTAMP",
+        `The ${WEBHOOK_TIMESTAMP_HEADER} header is missing`,
+      ),
+    );
+  }
+
+  const text = readBody(body);
+  if (
+    text === undefined ||
+    !security.verifySignatureWithTimestamp(text, timestamp, signature, secret)
+  ) {
+    return fail(
+      new WebhookVerificationError(
+        "INVALID_SIGNATURE",
+        "The signature does not match the body and timestamp",
+      ),
+    );
+  }
+
+  const signedAt = new Date(Number(timestamp) * 1000);
+  if (!/^\d+$/.test(timestamp) || Number.isNaN(signedAt.getTime())) {
+    return fail(
+      new WebhookVerificationError(
+        "INVALID_TIMESTAMP",
+        `${WEBHOOK_TIMESTAMP_HEADER} is not a Unix time in seconds`,
+      ),
+    );
+  }
+  // Signed times are whole seconds, so a request was sent up to a second
+  // after its signed time: allow that second on the old side.
+  const ageMs = Date.now() - signedAt.getTime();
+  if (ageMs >= toleranceMs + 1000 || -ageMs > toleranceMs) {
+    return fail(
+      new WebhookVerificationError(
+        "STALE_TIMESTAMP",
+        `${WEBHOOK_TIMESTAMP_HEADER} is outside the ${toleranceMs} ms tolerance`,
+      ),
+    );
+  }
+
+  return ok({ timestamp: signedAt });
+}

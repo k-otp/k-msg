@@ -12,7 +12,13 @@ export interface WebhookConfig {
   timeoutMs: number;
 
   // 보안 설정
+  /**
+   * Signs every delivery with HMAC. While on, a delivery is never sent
+   * unsigned: endpoints need a `secret` (or `secretKey` must be set), and a
+   * stored endpoint without one gets a failed delivery and no request.
+   */
   enableSecurity: boolean;
+  /** Signs deliveries to endpoints that have no `secret` of their own. */
   secretKey?: string;
   algorithm?: "sha256" | "sha1";
   signatureHeader?: string;

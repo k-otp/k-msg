@@ -1,5 +1,8 @@
 import { RetryManager } from "../retry/retry.manager";
-import { SecurityManager } from "../security/security.manager";
+import {
+  SecurityManager,
+  WEBHOOK_TIMESTAMP_HEADER,
+} from "../security/security.manager";
 import type {
   WebhookAttempt,
   WebhookConfig,
@@ -7,6 +10,23 @@ import type {
   WebhookEndpoint,
   WebhookEvent,
 } from "../types/webhook.types";
+
+/**
+ * The secret that signs deliveries to an endpoint: its own, or else the
+ * shared `secretKey`. An empty string counts as no secret.
+ */
+export function resolveSigningSecret(
+  endpoint: Pick<WebhookEndpoint, "secret">,
+  config: Pick<WebhookConfig, "secretKey">,
+): string | undefined {
+  if (typeof endpoint.secret === "string" && endpoint.secret.length > 0) {
+    return endpoint.secret;
+  }
+  if (typeof config.secretKey === "string" && config.secretKey.length > 0) {
+    return config.secretKey;
+  }
+  return undefined;
+}
 
 export interface HttpClient {
   fetch(url: string, options: RequestInit): Promise<Response>;
@@ -67,14 +87,6 @@ export class WebhookDispatcher {
     endpoint: WebhookEndpoint,
   ): Promise<WebhookDelivery> {
     const payload = JSON.stringify(event);
-    const eventTimestamp = (() => {
-      if (event.timestamp instanceof Date) return event.timestamp;
-      const parsed = new Date(event.timestamp as unknown as string);
-      return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-    })();
-    const timestampSeconds = Math.floor(
-      eventTimestamp.getTime() / 1000,
-    ).toString();
 
     const delivery: WebhookDelivery = {
       id: this.generateDeliveryId(),
@@ -83,20 +95,41 @@ export class WebhookDispatcher {
       eventType: event.type,
       url: endpoint.url,
       httpMethod: "POST",
-      headers: this.buildHeaders(endpoint, event, payload, timestampSeconds),
+      // Each attempt replaces these with the headers it sent.
+      headers: {},
       payload,
       attempts: [],
       status: "pending",
       createdAt: new Date(),
     };
 
-    await this.executeDelivery(delivery, endpoint);
+    const secret = this.config.enableSecurity
+      ? resolveSigningSecret(endpoint, this.config)
+      : undefined;
+    if (this.config.enableSecurity && secret === undefined) {
+      // Receivers expect a signature when security is on, so never send
+      // without one.
+      const now = new Date();
+      delivery.attempts.push({
+        attemptNumber: 1,
+        timestamp: now,
+        latencyMs: 0,
+        error: `Not sent: enableSecurity is on, but endpoint ${endpoint.id} has no signing secret and delivery.secretKey is not set`,
+      });
+      delivery.status = "failed";
+      delivery.completedAt = now;
+      return delivery;
+    }
+
+    await this.executeDelivery(delivery, endpoint, event, secret);
     return delivery;
   }
 
   private async executeDelivery(
     delivery: WebhookDelivery,
     endpoint: WebhookEndpoint,
+    event: WebhookEvent,
+    secret: string | undefined,
   ): Promise<void> {
     const maxRetries =
       endpoint.retryConfig?.maxRetries ?? this.config.maxRetries;
@@ -105,6 +138,8 @@ export class WebhookDispatcher {
       const attemptResult = await this.makeHttpRequest(
         delivery,
         endpoint,
+        event,
+        secret,
         attempt,
       );
       delivery.attempts.push(attemptResult);
@@ -155,20 +190,33 @@ export class WebhookDispatcher {
 
   private async makeHttpRequest(
     delivery: WebhookDelivery,
-    _endpoint: WebhookEndpoint,
+    endpoint: WebhookEndpoint,
+    event: WebhookEvent,
+    secret: string | undefined,
     attemptNumber: number,
   ): Promise<WebhookAttempt> {
     const startTime = Date.now();
     const attempt: WebhookAttempt = {
       attemptNumber,
-      timestamp: new Date(),
+      timestamp: new Date(startTime),
       latencyMs: 0,
     };
+
+    // Signed with the time this attempt is sent, not the event's time, so a
+    // retry or a late event still passes the receiver's freshness check.
+    const headers = this.buildHeaders(
+      endpoint,
+      event,
+      delivery.payload,
+      Math.floor(startTime / 1000).toString(),
+      secret,
+    );
+    delivery.headers = headers;
 
     try {
       const response = await this.httpClient.fetch(delivery.url, {
         method: delivery.httpMethod,
-        headers: delivery.headers,
+        headers,
         body: delivery.payload,
         // A redirect could lead to a host endpoint validation would reject.
         redirect: "manual",
@@ -201,42 +249,40 @@ export class WebhookDispatcher {
     event: WebhookEvent,
     payload: string,
     timestampSeconds: string,
+    secret: string | undefined,
   ): Record<string, string> {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "X-Webhook-ID": event.id,
-      "X-Webhook-Event": event.type,
-      "X-Webhook-Timestamp": timestampSeconds,
-      "User-Agent": "K-Message-Webhook/1.0",
+    // Header names are case-insensitive, so each is keyed in lower case and a
+    // later value replaces every spelling of the same name.
+    const headers = new Map<string, [name: string, value: string]>();
+    const set = (name: string, value: string): void => {
+      headers.set(name.toLowerCase(), [name, value]);
     };
 
+    set("Content-Type", "application/json");
+    set("User-Agent", "K-Message-Webhook/1.0");
+
     // 엔드포인트별 커스텀 헤더
-    if (endpoint.headers) {
-      Object.assign(headers, endpoint.headers);
+    for (const [name, value] of Object.entries(endpoint.headers ?? {})) {
+      set(name, value);
     }
+
+    // Set last, so an endpoint's headers cannot replace what the signature
+    // covers or what receivers route on.
+    set("X-Webhook-ID", event.id);
+    set("X-Webhook-Event", event.type);
+    set(WEBHOOK_TIMESTAMP_HEADER, timestampSeconds);
 
     // Security (HMAC signature)
-    if (this.config.enableSecurity) {
-      const secret =
-        (typeof endpoint.secret === "string" && endpoint.secret.length > 0
-          ? endpoint.secret
-          : typeof this.config.secretKey === "string" &&
-              this.config.secretKey.length > 0
-            ? this.config.secretKey
-            : undefined) || undefined;
-
-      if (secret) {
-        const signature = this.securityManager.generateSignatureWithTimestamp(
-          payload,
-          timestampSeconds,
-          secret,
-        );
-        const signatureHeader = this.securityManager.getConfig().header;
-        headers[signatureHeader] = signature;
-      }
+    if (secret !== undefined) {
+      const signature = this.securityManager.generateSignatureWithTimestamp(
+        payload,
+        timestampSeconds,
+        secret,
+      );
+      set(this.securityManager.getConfig().header, signature);
     }
 
-    return headers;
+    return Object.fromEntries(headers.values());
   }
 
   private calculateRetryDelay(
