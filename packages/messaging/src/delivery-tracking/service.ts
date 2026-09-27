@@ -7,7 +7,7 @@ import type {
 import type { HookContext } from "../hooks";
 import { logFallbackFailure } from "../shared/log-fallback";
 import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "../sms-bytes";
-import { reconcileDeliveryStatuses } from "./reconciler";
+import { computeNextCheckAt, reconcileDeliveryStatuses } from "./reconciler";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
@@ -460,10 +460,12 @@ export class DeliveryTrackingService {
         patch.nextCheckAt = now;
       }
 
-      // A record the store rejects stays due for the next poll; the rest of
+      // A record the store rejects is retried by a later poll; the rest of
       // the batch is still stored.
+      let stored = false;
       try {
         await this.store.patch(update.messageId, patch);
+        stored = true;
 
         const originalRecord = dueByMessageId.get(update.messageId);
         if (!originalRecord) continue;
@@ -488,6 +490,14 @@ export class DeliveryTrackingService {
         }
       } catch (error) {
         failures.push({ messageId: update.messageId, error });
+        if (!stored) {
+          await this.deferRejectedUpdate(
+            update.messageId,
+            patch.attemptCount ??
+              (dueByMessageId.get(update.messageId)?.attemptCount ?? 0) + 1,
+            now,
+          );
+        }
       }
     }
 
@@ -501,6 +511,30 @@ export class DeliveryTrackingService {
         failures.map((failure) => failure.error),
         `Delivery tracking could not update ${failures.length} of ${updates.length} polled messages; ${first.messageId}: ${reason}`,
       );
+    }
+  }
+
+  // The store rejected a record's update, for example a value too long for
+  // its column. Count the check and move the record along its backoff
+  // anyway, so a record the store keeps rejecting cannot take a batch slot
+  // on every poll and keep the others from being polled.
+  private async deferRejectedUpdate(
+    messageId: string,
+    attemptCount: number,
+    now: Date,
+  ): Promise<void> {
+    try {
+      await this.store.patch(messageId, {
+        attemptCount,
+        lastCheckedAt: now,
+        nextCheckAt: computeNextCheckAt(
+          now,
+          attemptCount,
+          this.polling.backoffMs,
+        ),
+      });
+    } catch {
+      // runOnce() reports the update's failure; the record stays due.
     }
   }
 

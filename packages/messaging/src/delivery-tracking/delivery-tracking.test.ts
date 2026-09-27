@@ -235,6 +235,78 @@ describe("DeliveryTrackingService (InMemory)", () => {
     expect((await service.getRecord("m2"))?.status).toBe("SENT");
     expect((await service.getRecord("m3"))?.status).toBe("DELIVERED");
   });
+
+  test("runOnce moves a record whose update keeps failing along its backoff", async () => {
+    // Rejects any update that stores a provider message, as a VARCHAR(64)
+    // column does a longer one.
+    class RejectingStore extends InMemoryDeliveryTrackingStore {
+      override async patch(
+        messageId: string,
+        patch: Parameters<InMemoryDeliveryTrackingStore["patch"]>[1],
+      ): Promise<void> {
+        if (patch.providerStatusMessage !== undefined) {
+          throw new Error("value too long for type character varying(64)");
+        }
+        await super.patch(messageId, patch);
+      }
+    }
+
+    const provider: Provider = {
+      ...createMockProvider({ id: "mock", status: "DELIVERED" }),
+      getDeliveryStatus: async (query: DeliveryStatusQuery) =>
+        ok({
+          providerId: "mock",
+          providerMessageId: query.providerMessageId,
+          status: "DELIVERED",
+          ...(query.providerMessageId === "p-bad"
+            ? { statusMessage: "x".repeat(100) }
+            : {}),
+        }),
+    };
+    const store = new RejectingStore();
+    const service = new DeliveryTrackingService({
+      providers: [provider],
+      store,
+      polling: {
+        initialDelayMs: 0,
+        batchSize: 1,
+        concurrency: 1,
+        backoffMs: [60_000],
+      },
+    });
+
+    // The bad record is older, so it comes first in the due list.
+    for (const [messageId, age] of [
+      ["bad", 2_000],
+      ["good", 1_000],
+    ] as const) {
+      await service.recordSend(
+        {
+          messageId,
+          options: { type: "SMS", to: "01012345678", text: "hi" },
+          timestamp: Date.now() - age,
+        },
+        {
+          messageId,
+          providerId: "mock",
+          providerMessageId: `p-${messageId}`,
+          status: "SENT",
+          type: "SMS",
+          to: "01012345678",
+        },
+      );
+    }
+
+    await expect(service.runOnce()).rejects.toBeInstanceOf(AggregateError);
+    const bad = await service.getRecord("bad");
+    expect(bad?.status).toBe("SENT");
+    expect(bad?.attemptCount).toBe(1);
+    expect(bad?.nextCheckAt.getTime()).toBeGreaterThan(Date.now() + 50_000);
+
+    // The next poll reaches the other record instead of the same one again.
+    await service.runOnce();
+    expect((await service.getRecord("good"))?.status).toBe("DELIVERED");
+  });
 });
 
 describe("DeliveryTrackingService API failover", () => {
