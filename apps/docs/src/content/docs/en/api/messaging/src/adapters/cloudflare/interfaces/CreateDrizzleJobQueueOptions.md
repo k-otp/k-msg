@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L176)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L179)
 
 ## Extends
 
@@ -53,11 +53,19 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 
 ***
 
+### indexNames?
+
+> `optional` **indexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L182)
+
+***
+
 ### initializeSchema?
 
 > `optional` **initializeSchema?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L184)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L188)
 
 Whether the queue creates its table and indexes on first use. Set it to
 `false` when migrations create the schema.
@@ -166,4 +174,4 @@ readonly `unknown`[]
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L178)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L181)

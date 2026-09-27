@@ -5,7 +5,7 @@ prev: false
 title: "BuildCloudflareSqlSchemaSqlOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L36)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L71)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:36](https:
 
 > **dialect**: [`SqlDialect`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/sqldialect/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L37)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L72)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:37](https:
 
 > `optional` **fieldCryptoSchema?**: `DeliveryTrackingFieldCryptoSchemaOptions`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L44)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:79](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L79)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:44](https:
 
 > `optional` **includeIndexes?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L50)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L86)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:50](https:
 
 > `optional` **includeMigrationMeta?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L46)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L81)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:46](https:
 
 > `optional` **migrationChunksTableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L48)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L83)
 
 ***
 
@@ -53,7 +53,15 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:48](https:
 
 > `optional` **migrationRunsTableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L47)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:82](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L82)
+
+***
+
+### queueIndexNames?
+
+> `optional` **queueIndexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L85)
 
 ***
 
@@ -61,7 +69,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:47](https:
 
 > `optional` **queueTableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:49](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L49)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L84)
 
 ***
 
@@ -69,7 +77,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:49](https:
 
 > `optional` **target?**: [`CloudflareSqlSchemaTarget`](/en/api/k-msg/src/adapters/cloudflare/type-aliases/cloudflaresqlschematarget/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L38)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L73)
 
 ***
 
@@ -77,7 +85,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:38](https:
 
 > `optional` **trackingColumnMap?**: `Partial`\<[`DeliveryTrackingColumnMap`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingcolumnmap/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L40)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L75)
 
 ***
 
@@ -85,7 +93,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:40](https:
 
 > `optional` **trackingIndexNames?**: `Partial`\<\{ `due`: `string`; `fromHash`: `string`; `providerMessage`: `string`; `requestedAt`: `string`; `retentionBucket`: `string`; `toHash`: `string`; \}\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L45)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:80](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L80)
 
 ***
 
@@ -93,7 +101,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:45](https:
 
 > `optional` **trackingStoreRaw?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L43)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:78](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L78)
 
 ***
 
@@ -101,7 +109,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:43](https:
 
 > `optional` **trackingTableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L39)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L74)
 
 ***
 
@@ -109,7 +117,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:39](https:
 
 > `optional` **trackingTypeStrategy?**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L41)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:76](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L76)
 
 ***
 
@@ -117,4 +125,4 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:41](https:
 
 > `optional` **typeStrategy?**: `Partial`\<[`DeliveryTrackingTypeStrategy`](/en/api/k-msg/src/adapters/cloudflare/interfaces/deliverytrackingtypestrategy/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L42)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-schema.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-schema.ts#L77)
