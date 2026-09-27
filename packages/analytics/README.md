@@ -72,6 +72,60 @@ const analytics = new DeliveryTrackingAnalyticsService({ store });
 await analytics.init();
 ```
 
+## Webhook collector signatures (experimental)
+
+`WebhookCollector` checks an HMAC-SHA256 signature on each webhook before
+collecting it. The check is on by default (`enableSignatureValidation: true`):
+
+- The constructor throws without a `secretKey`. To accept unsigned webhooks,
+  pass `enableSignatureValidation: false`.
+- The signature is read from the `signatureHeader` header (default
+  `x-signature`, matched in any case), or from `webhook.signature` when that
+  header is missing. It is `sha256=` followed by the hex HMAC-SHA256 of the raw
+  body, keyed with `secretKey`. The prefix is optional, the hex can be in
+  either case, and the digests are compared in constant time.
+- The raw body is `webhook.rawBody`: the request body exactly as received, as
+  a string, `Uint8Array`, or `ArrayBuffer`. A webhook without it is rejected,
+  because `JSON.parse` followed by `JSON.stringify` rarely gives back the bytes
+  the sender signed. Prefer the bytes (`await request.arrayBuffer()`, or
+  Node's raw `Buffer`): `request.text()` drops a leading byte order mark and
+  replaces invalid UTF-8, which changes what was signed.
+- The collector parses `body` from the verified raw body, which must be UTF-8
+  JSON, so only signed data reaches the transformers. `body` can be left out;
+  one passed alongside is replaced.
+- `maxPayloadSize` (default 1 MB) applies to the raw body's size in bytes
+  before the signature is checked.
+
+```ts
+import { WebhookCollector } from "@k-msg/analytics";
+
+const collector = new WebhookCollector({
+  secretKey: process.env.WEBHOOK_SECRET,
+  signatureHeader: "x-hub-signature-256",
+});
+
+export async function receiveWebhook(request: Request) {
+  // The bytes as received: the collector verifies them, then parses them.
+  const rawBody = await request.arrayBuffer();
+  // Rejects with "Invalid webhook signature" when the signature does not match.
+  return collector.receiveWebhook({
+    id: crypto.randomUUID(),
+    source: "sms-provider",
+    timestamp: new Date(),
+    headers: Object.fromEntries(request.headers),
+    rawBody,
+  });
+}
+```
+
+The signature covers only the body, so it does not stop a captured request
+from being sent again: deduplicate on an id in the body, such as the provider's
+message id.
+
+Deliveries from `@k-msg/webhook` sign `<X-Webhook-Timestamp>.<raw body>`
+rather than the body alone, so this check rejects them. Verify those with
+`@k-msg/webhook` and collect them with `enableSignatureValidation: false`.
+
 ## Notes
 
 - `@k-msg/analytics` does not create its own database. It reads from the `kmsg_delivery_tracking` table written by `DeliveryTrackingService`.
