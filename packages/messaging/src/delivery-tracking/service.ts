@@ -7,7 +7,7 @@ import type {
 import type { HookContext } from "../hooks";
 import { logFallbackFailure } from "../shared/log-fallback";
 import { DEFAULT_AUTO_LMS_BYTES, estimateSmsBytes } from "../sms-bytes";
-import { reconcileDeliveryStatuses } from "./reconciler";
+import { computeNextCheckAt, reconcileDeliveryStatuses } from "./reconciler";
 import type {
   DeliveryTrackingCountByField,
   DeliveryTrackingCountByRow,
@@ -451,6 +451,7 @@ export class DeliveryTrackingService {
       this.polling,
     );
 
+    const failures: Array<{ messageId: string; error: unknown }> = [];
     for (const update of updates) {
       const patch = { ...update.patch, nextCheckAt: update.nextCheckAt };
 
@@ -459,29 +460,81 @@ export class DeliveryTrackingService {
         patch.nextCheckAt = now;
       }
 
-      await this.store.patch(update.messageId, patch);
+      // A record the store rejects is retried by a later poll; the rest of
+      // the batch is still stored.
+      let stored = false;
+      try {
+        await this.store.patch(update.messageId, patch);
+        stored = true;
 
-      const originalRecord = dueByMessageId.get(update.messageId);
-      if (!originalRecord) continue;
-      const mergedRecord: TrackingRecord = {
-        ...originalRecord,
-        ...patch,
-        messageId: originalRecord.messageId,
-      };
+        const originalRecord = dueByMessageId.get(update.messageId);
+        if (!originalRecord) continue;
+        const mergedRecord: TrackingRecord = {
+          ...originalRecord,
+          ...patch,
+          messageId: originalRecord.messageId,
+        };
 
-      if (
-        this.onStatusChange &&
-        mergedRecord.status !== originalRecord.status
-      ) {
-        changes.push({
-          record: mergedRecord,
-          previousStatus: originalRecord.status,
-        });
+        if (
+          this.onStatusChange &&
+          mergedRecord.status !== originalRecord.status
+        ) {
+          changes.push({
+            record: mergedRecord,
+            previousStatus: originalRecord.status,
+          });
+        }
+
+        if (this.shouldAttemptApiFailover(mergedRecord)) {
+          await this.attemptApiFailover(mergedRecord, now);
+        }
+      } catch (error) {
+        failures.push({ messageId: update.messageId, error });
+        if (!stored) {
+          await this.deferRejectedUpdate(
+            update.messageId,
+            patch.attemptCount ??
+              (dueByMessageId.get(update.messageId)?.attemptCount ?? 0) + 1,
+            now,
+          );
+        }
       }
+    }
 
-      if (this.shouldAttemptApiFailover(mergedRecord)) {
-        await this.attemptApiFailover(mergedRecord, now);
-      }
+    const [first] = failures;
+    if (first) {
+      const reason =
+        first.error instanceof Error
+          ? first.error.message
+          : String(first.error);
+      throw new AggregateError(
+        failures.map((failure) => failure.error),
+        `Delivery tracking could not update ${failures.length} of ${updates.length} polled messages; ${first.messageId}: ${reason}`,
+      );
+    }
+  }
+
+  // The store rejected a record's update, for example a value too long for
+  // its column. Count the check and move the record along its backoff
+  // anyway, so a record the store keeps rejecting cannot take a batch slot
+  // on every poll and keep the others from being polled.
+  private async deferRejectedUpdate(
+    messageId: string,
+    attemptCount: number,
+    now: Date,
+  ): Promise<void> {
+    try {
+      await this.store.patch(messageId, {
+        attemptCount,
+        lastCheckedAt: now,
+        nextCheckAt: computeNextCheckAt(
+          now,
+          attemptCount,
+          this.polling.backoffMs,
+        ),
+      });
+    } catch {
+      // runOnce() reports the update's failure; the record stays due.
     }
   }
 

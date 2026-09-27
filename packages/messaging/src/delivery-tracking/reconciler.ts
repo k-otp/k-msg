@@ -16,7 +16,7 @@ function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
 }
 
-function computeNextCheckAt(
+export function computeNextCheckAt(
   now: Date,
   attemptCountAfter: number,
   backoffMs: number[],

@@ -177,7 +177,14 @@ const kmsg = new KMsg({
   providers,
   hooks: createDeliveryTrackingHooks(tracking),
 });
+
+// 주기적으로 폴링하거나
+tracking.start();
+// cron 등에서 한 번씩 실행
+await tracking.runOnce();
 ```
+
+`runOnce()`는 저장할 수 있는 갱신을 모두 저장합니다. 스토어가 한 레코드의 갱신을 거부하면(예: 컬럼에 들어가지 않는 값) 나머지는 그대로 저장되고, 거부된 레코드는 다음 백오프 지연 뒤에 다시 확인되며, 그 뒤 `runOnce()`가 실패 목록을 담은 `AggregateError`로 reject됩니다.
 
 ### Bun(SQLite) 예시
 
@@ -214,7 +221,7 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()`와 `HyperdriveDeliveryTrackingStore`는 동일한 논리 스키마를 사용합니다.
 `DeliveryTrackingService.init()` 호출 시 테이블/인덱스가 자동 생성됩니다.
 
-스토어 인스턴스는 첫 쿼리 전에 이 `CREATE ... IF NOT EXISTS` 문을 매번 실행하므로, Worker에서는 요청마다 실행됩니다. 마이그레이션으로 스키마를 만든다면(예: `buildDeliveryTrackingSchemaSql()` 출력) `initializeSchema: false`로 건너뛰세요. SQLite, Bun.SQL 스토어도 같은 옵션을 받습니다.
+스토어 인스턴스는 첫 쿼리 전에 이 `CREATE ... IF NOT EXISTS` 문을 매번 실행하므로, Worker에서는 요청마다 실행됩니다. 마이그레이션으로 스키마를 만든다면(예: `buildDeliveryTrackingSchemaSql()` 출력) `initializeSchema: false`로 건너뛰세요. SQLite, Bun.SQL 스토어도 같은 옵션을 받습니다([마이그레이션으로 스키마 만들기](#마이그레이션으로-스키마-만들기) 참고).
 
 SQL 큐(`createD1JobQueue()`, `createDrizzleJobQueue()`, `HyperdriveJobQueue`)도 같은 방식으로 `kmsg_jobs` 테이블과 인덱스를 만들며, 같은 옵션을 받습니다. 마이그레이션에서는 `buildJobQueueSchemaSql()` 출력으로 이 스키마를 만들 수 있습니다. `HyperdriveJobQueue`의 두 번째 인자로는 테이블 이름이나 `{ tableName, initializeSchema }`를 넘깁니다.
 
@@ -242,8 +249,9 @@ Tracking 테이블/인덱스 기본값은 어댑터 스키마 스펙에서 생�
 DB별 차이:
 
 - D1(SQLite): JSON 계열 컬럼을 `TEXT`로 저장
-- Postgres: JSON 계열 컬럼을 `JSONB`로 저장
-- MySQL: 식별자 타입은 `VARCHAR`, JSON 계열 컬럼은 현재 `TEXT`로 저장
+- Postgres: JSON 계열 컬럼을 `JSONB` 문서로 저장하므로 SQL에서 읽을 수 있습니다(`last_error->>'code'`). `typeStrategy: { json: "text" }`이면 `TEXT`로 저장. `JSONB`는 NUL 문자와 짝 없는 서로게이트를 담을 수 없어 U+FFFD로 저장합니다
+- MySQL: SQL 스키마 빌더는 JSON 계열 컬럼을 `JSON`으로, `renderDrizzleSchemaSource()`는 `text`로 만들며, 스토어는 둘 다 읽습니다. MySQL은 `TEXT` 컬럼에 인덱스를 만들 수 없으므로 `typeStrategy: { messageId: "varchar", id: "varchar" }`를 지정하세요
+- `provider_status_message`는 모든 DB에서 `TEXT`입니다. 나머지 짧은 텍스트 컬럼은 `typeStrategy.shortText`를 따릅니다(Postgres/MySQL 기본값 `VARCHAR(64)`)
 
 Queue 테이블 (`HyperdriveJobQueue` / `createD1JobQueue` 사용 시): `kmsg_jobs`
 
@@ -283,6 +291,54 @@ const drizzleSource = renderDrizzleSchemaSource({
   target: "both",
 });
 ```
+
+### 마이그레이션으로 스키마 만들기
+
+SQL tracking 스토어가 처음 사용할 때 실행하는 `CREATE ... IF NOT EXISTS` 문은 테이블이 이미 있어도 `CREATE` 권한이 필요하므로, 최소 권한 역할에서는 `permission denied for schema public`이나 `must be owner of table`로 실패합니다. 운영 환경에서는 마이그레이션으로 테이블을 만들고 이 문장들을 끄세요:
+
+```ts
+import {
+  buildDeliveryTrackingSchemaSql,
+  HyperdriveDeliveryTrackingStore,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+// 출력을 마이그레이션으로 커밋하세요. 스토어와 같은 옵션으로 만들어야
+// 둘이 어긋나지 않습니다.
+const migration = buildDeliveryTrackingSchemaSql({ dialect: "postgres" });
+
+const store = new HyperdriveDeliveryTrackingStore(client, {
+  initializeSchema: false,
+});
+```
+
+`createD1DeliveryTrackingStore`, `createDrizzleDeliveryTrackingStore`, `SqliteDeliveryTrackingStore`, `BunSqlDeliveryTrackingStore`도 같은 옵션을 받습니다. 이 옵션을 쓰면 스키마의 기준은 마이그레이션입니다.
+
+#### 이전 버전이 만든 테이블 업그레이드
+
+- Postgres와 MySQL에서 `provider_status_message`가 `VARCHAR(64)`였기 때문에, 더 긴 provider 메시지는 상태 갱신을 실패시켰습니다. 컬럼을 넓히세요:
+
+  ```sql
+  -- Postgres
+  ALTER TABLE kmsg_delivery_tracking ALTER COLUMN provider_status_message TYPE TEXT;
+  -- MySQL
+  ALTER TABLE kmsg_delivery_tracking MODIFY provider_status_message TEXT;
+  ```
+
+- Postgres에서 postgres.js나 Bun.SQL로 쓴 행은 각 `JSONB` 값을 JSON 텍스트가 담긴 JSON 문자열로 저장했고, SQL JSON 연산자로는 읽을 수 없습니다.
+  - `last_error`, `metadata`, `metadata_hashes`, 큐의 `metadata`는 항상 객체이므로, 스토어와 큐가 이전 문자열을 담긴 객체로 읽습니다. 이전 행을 SQL로 조회하려면 변환하세요:
+
+    ```sql
+    UPDATE kmsg_delivery_tracking
+    SET last_error = (last_error #>> '{}')::jsonb
+    WHERE jsonb_typeof(last_error) = 'string';
+
+    UPDATE kmsg_delivery_tracking
+    SET metadata = (metadata #>> '{}')::jsonb
+    WHERE jsonb_typeof(metadata) = 'string';
+    ```
+
+    필드 암호화를 쓰면 `metadata_hashes`도 같은 방식으로 변환하세요.
+  - `raw`와 큐의 `data`에는 문자열을 포함해 어떤 JSON 값이든 들어갈 수 있어 저장된 그대로 읽으므로, 이전 행의 값은 JSON 텍스트로 돌아옵니다. 이전 버전을 실행하는 프로세스를 멈춘 뒤(변환된 행을 읽지 못합니다) 이 버전을 시작하기 전에, 같은 `UPDATE`로 `raw`와 `kmsg_jobs`의 `data`, `metadata`를 한 번 변환하세요. postgres.js나 Bun.SQL이 쓴 행에만 실행하세요. 그런 행은 모두 JSON 문자열입니다. 큐는 대신 이전 버전이 작업을 모두 끝낸 뒤 올려도 됩니다.
 
 ### Drizzle 어댑터 팩토리
 

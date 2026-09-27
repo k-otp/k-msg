@@ -452,11 +452,15 @@ export function resolveDeliveryTrackingSqlType(
     | "messageId"
     | "id"
     | "shortText"
+    | "text"
     | "timestamp"
     | "attemptCount"
     | "json",
   strategy: ResolvedDeliveryTrackingTypeStrategy = DEFAULT_TYPE_STRATEGY,
 ): string {
+  // Unbounded text, such as a provider's status message.
+  if (kind === "text") return "TEXT";
+
   if (kind === "messageId") {
     if (strategy.messageId === "uuid") {
       if (dialect === "postgres") return "UUID";

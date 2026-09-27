@@ -101,6 +101,21 @@ describe("Cloudflare SQL schema builders", () => {
     expect(timeColumnTypes("sqlite")).toEqual(new Set(["INTEGER"]));
   });
 
+  test("provider_status_message is TEXT whatever the short text strategy", () => {
+    for (const dialect of ["postgres", "mysql"] as const) {
+      for (const shortText of ["varchar", "text"] as const) {
+        const sql = buildCloudflareSqlSchemaSql({
+          dialect,
+          target: "tracking",
+          typeStrategy: { shortText },
+        });
+        const quote = dialect === "mysql" ? "`" : '"';
+
+        expect(sql).toContain(`${quote}provider_status_message${quote} TEXT,`);
+      }
+    }
+  });
+
   test("initializeCloudflareSqlSchema ignores duplicate/exists index errors", async () => {
     let indexFailures = 0;
     const client = {
@@ -170,6 +185,19 @@ describe("Drizzle schema renderer", () => {
 
     expect(withoutRaw).not.toContain("raw:");
     expect(withRaw).toContain("raw:");
+  });
+
+  test("renders providerStatusMessage as text", () => {
+    for (const dialect of ["postgres", "mysql"] as const) {
+      const source = renderDrizzleSchemaSource({
+        dialect,
+        target: "tracking",
+      });
+
+      expect(source).toContain(
+        'providerStatusMessage: text("provider_status_message"),',
+      );
+    }
   });
 
   test("renders postgres timestamp(date) fields when date strategy is requested", () => {

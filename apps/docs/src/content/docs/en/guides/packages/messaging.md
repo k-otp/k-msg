@@ -256,6 +256,8 @@ tracking.start();
 await tracking.runOnce();
 ```
 
+`runOnce()` stores every update it can. If the store rejects one record's update (for example, a value its column cannot hold), the rest of the batch is still stored, the rejected record is checked again after its next backoff delay, and `runOnce()` then rejects with an `AggregateError` listing the failures.
+
 To react when a status changes, for example to notify a webhook, pass `onStatusChange`. It receives a copy of each changed record as stored, one at a time and in order, after the poll finishes; if it throws, polling continues and the error goes to `onStatusChangeError` (or `console.error`). Delivery is best effort: a change whose callback throws is not retried, and one stored just before the process stops is not reported, so reconcile with the stored records when none may be missed. Services polling the same store can also each report a change, so make the callback idempotent, for example by message id and status. `await tracking.runOnce()` resolves once its changes have been delivered, so a cron or request handler that awaits it does not end before they run. A callback can call `runOnce()` itself; that call resolves once the poll's changes are queued, since they are delivered after the callback.
 
 ```ts
@@ -309,7 +311,7 @@ const tracking = new DeliveryTrackingService({
 `createD1DeliveryTrackingStore()` and `HyperdriveDeliveryTrackingStore` share the same logical table/index schema.
 `DeliveryTrackingService.init()` creates these automatically.
 
-Each new store runs those `CREATE ... IF NOT EXISTS` statements before its first query, which in a Worker means every request. When migrations create the schema (for example from `buildDeliveryTrackingSchemaSql()`), pass `initializeSchema: false` to skip them. The SQLite and Bun.SQL stores take the same option.
+Each new store runs those `CREATE ... IF NOT EXISTS` statements before its first query, which in a Worker means every request. When migrations create the schema (for example from `buildDeliveryTrackingSchemaSql()`), pass `initializeSchema: false` to skip them. The SQLite and Bun.SQL stores take the same option; see [Creating the schema with migrations](#creating-the-schema-with-migrations).
 
 The SQL job queues (`createD1JobQueue()`, `createDrizzleJobQueue()`, `HyperdriveJobQueue`) create their `kmsg_jobs` table and indexes the same way and take the same option. Migrations can create that schema from `buildJobQueueSchemaSql()`. `HyperdriveJobQueue` takes a table name or `{ tableName, initializeSchema }` as its second argument.
 
@@ -337,8 +339,9 @@ Tracking table/index defaults are generated from the adapter schema spec:
 Notes by dialect:
 
 - D1 (SQLite): JSON fields are stored as `TEXT`
-- Postgres: JSON fields are stored as `JSONB`
-- MySQL: identifier type differs (`VARCHAR`), JSON fields currently stored as `TEXT`
+- Postgres: JSON fields are stored as `JSONB` documents, so SQL can read them (`last_error->>'code'`); `typeStrategy: { json: "text" }` stores them as `TEXT` instead. `JSONB` cannot hold NUL characters or unpaired surrogates, so those are stored as U+FFFD
+- MySQL: the SQL schema builders make JSON fields `JSON`, while `renderDrizzleSchemaSource()` makes them `text`; the store reads either. MySQL cannot index `TEXT` columns, so set `typeStrategy: { messageId: "varchar", id: "varchar" }`
+- `provider_status_message` is `TEXT` on every dialect. The other short text columns follow `typeStrategy.shortText` (`VARCHAR(64)` on Postgres and MySQL by default)
 
 Queue table (when using `HyperdriveJobQueue` / `createD1JobQueue`): `kmsg_jobs`
 
@@ -378,6 +381,54 @@ const drizzleSource = renderDrizzleSchemaSource({
   target: "both",
 });
 ```
+
+### Creating the schema with migrations
+
+The `CREATE ... IF NOT EXISTS` statements a SQL tracking store runs on first use need the `CREATE` privilege even when the table exists, so a least-privilege role fails with `permission denied for schema public` or `must be owner of table`. In production, create the table with a migration and turn them off:
+
+```ts
+import {
+  buildDeliveryTrackingSchemaSql,
+  HyperdriveDeliveryTrackingStore,
+} from "@k-msg/messaging/adapters/cloudflare";
+
+// Commit the output as a migration. Build it from the options the store uses,
+// so the two cannot drift apart.
+const migration = buildDeliveryTrackingSchemaSql({ dialect: "postgres" });
+
+const store = new HyperdriveDeliveryTrackingStore(client, {
+  initializeSchema: false,
+});
+```
+
+`createD1DeliveryTrackingStore`, `createDrizzleDeliveryTrackingStore`, `SqliteDeliveryTrackingStore` and `BunSqlDeliveryTrackingStore` take the same option. With it, the migration is the source of truth for the schema.
+
+#### Upgrading tables created by earlier versions
+
+- `provider_status_message` was `VARCHAR(64)` on Postgres and MySQL, so a longer provider message failed its status update. Widen it:
+
+  ```sql
+  -- Postgres
+  ALTER TABLE kmsg_delivery_tracking ALTER COLUMN provider_status_message TYPE TEXT;
+  -- MySQL
+  ALTER TABLE kmsg_delivery_tracking MODIFY provider_status_message TEXT;
+  ```
+
+- On Postgres, rows written through postgres.js or Bun.SQL hold each `JSONB` value as a JSON string containing the JSON text, which SQL JSON operators cannot read.
+  - `last_error`, `metadata`, `metadata_hashes` and the queue's `metadata` always hold objects, so the store and queue read those old strings as the objects they contain. To query old rows in SQL, convert them:
+
+    ```sql
+    UPDATE kmsg_delivery_tracking
+    SET last_error = (last_error #>> '{}')::jsonb
+    WHERE jsonb_typeof(last_error) = 'string';
+
+    UPDATE kmsg_delivery_tracking
+    SET metadata = (metadata #>> '{}')::jsonb
+    WHERE jsonb_typeof(metadata) = 'string';
+    ```
+
+    With field encryption, convert `metadata_hashes` the same way.
+  - `raw` and the queue's `data` may hold any JSON value, strings included, so they read back exactly as stored: an old row's value comes back as its JSON text. Convert those rows once, with the same `UPDATE` for `raw` and for `kmsg_jobs` `data` and `metadata`, after stopping the processes that run the earlier version (they cannot read converted rows) and before starting this one. Run it only on rows that postgres.js or Bun.SQL wrote, since every one of those is a JSON string. For the queue, you can instead let the old version finish its jobs first.
 
 ### Drizzle Adapter Factories
 

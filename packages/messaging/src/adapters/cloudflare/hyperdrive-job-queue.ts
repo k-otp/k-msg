@@ -6,18 +6,35 @@ import type {
 import { JobStatus } from "../../queue/job-queue.interface";
 import type { CloudflareSqlClient } from "./sql-client";
 import { runCloudflareSqlTransaction } from "./sql-client";
+import {
+  jsonParameterSql,
+  readJsonColumn,
+  readJsonObjectColumn,
+  selectJsonAsTextSql,
+  toJsonText,
+} from "./sql-json";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type JobRow = Record<string, unknown>;
 
-function safeJsonParse<T>(value: unknown, fallback: T): T {
-  if (typeof value !== "string" || value.length === 0) return fallback;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
+const JOB_COLUMNS = [
+  "id",
+  "type",
+  "data",
+  "status",
+  "priority",
+  "attempts",
+  "max_attempts",
+  "delay",
+  "created_at",
+  "process_at",
+  "completed_at",
+  "failed_at",
+  "error",
+  "metadata",
+] as const;
+
+const JSON_JOB_COLUMNS: ReadonlySet<string> = new Set(["data", "metadata"]);
 
 function toDate(value: unknown, fallback = new Date()): Date {
   if (typeof value === "number" && Number.isFinite(value))
@@ -109,27 +126,10 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       metadata: options.metadata ?? {},
     };
 
-    const columns = [
-      "id",
-      "type",
-      "data",
-      "status",
-      "priority",
-      "attempts",
-      "max_attempts",
-      "delay",
-      "created_at",
-      "process_at",
-      "completed_at",
-      "failed_at",
-      "error",
-      "metadata",
-    ] as const;
-
     const values = [
       job.id,
       job.type,
-      JSON.stringify(job.data),
+      toJsonText(job.data, this.hasNativeJsonColumns()),
       job.status,
       job.priority,
       job.attempts,
@@ -140,13 +140,22 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       null,
       null,
       null,
-      JSON.stringify(job.metadata),
+      toJsonText(job.metadata, this.hasNativeJsonColumns()),
     ];
 
-    const colSql = columns
-      .map((column) => this.quoteIdentifier(column))
-      .join(", ");
-    const valueSql = this.placeholders(columns.length).join(", ");
+    const colSql = JOB_COLUMNS.map((column) =>
+      this.quoteIdentifier(column),
+    ).join(", ");
+    const valueSql = JOB_COLUMNS.map((column, index) => {
+      const placeholder = this.placeholder(index + 1);
+      return JSON_JOB_COLUMNS.has(column)
+        ? jsonParameterSql(
+            this.client.dialect,
+            placeholder,
+            this.hasNativeJsonColumns(),
+          )
+        : placeholder;
+    }).join(", ");
 
     await this.client.query(
       `INSERT INTO ${this.tableRef()} (${colSql}) VALUES (${valueSql})`,
@@ -175,7 +184,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
         UPDATE ${this.tableRef()}
         SET ${this.quoteIdentifier("status")} = 'processing'
         WHERE ${this.quoteIdentifier("id")} = (SELECT ${this.quoteIdentifier("id")} FROM next_job)
-        RETURNING *`,
+        RETURNING ${this.selectListSql()}`,
         [now],
       );
 
@@ -187,7 +196,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       const now = Date.now();
       const nowPlaceholder = this.placeholder(1);
       const { rows: candidates } = await tx.query<JobRow>(
-        `SELECT * FROM ${this.tableRef()}
+        `SELECT ${this.quoteIdentifier("id")} FROM ${this.tableRef()}
          WHERE ${this.quoteIdentifier("status")} = 'pending'
            AND ${this.quoteIdentifier("process_at")} <= ${nowPlaceholder}
          ORDER BY ${this.quoteIdentifier("priority")} DESC, ${this.quoteIdentifier("process_at")} ASC, ${this.quoteIdentifier("created_at")} ASC
@@ -210,7 +219,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       );
 
       const { rows } = await tx.query<JobRow>(
-        `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(1)} LIMIT 1`,
+        `SELECT ${this.selectListSql()} FROM ${this.tableRef()} WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(1)} LIMIT 1`,
         [id],
       );
       const row = rows[0];
@@ -282,7 +291,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
 
     const nowPlaceholder = this.placeholder(1);
     const { rows } = await this.client.query<JobRow>(
-      `SELECT * FROM ${this.tableRef()}
+      `SELECT ${this.selectListSql()} FROM ${this.tableRef()}
        WHERE ${this.quoteIdentifier("status")} = 'pending'
          AND ${this.quoteIdentifier("process_at")} <= ${nowPlaceholder}
        ORDER BY ${this.quoteIdentifier("priority")} DESC, ${this.quoteIdentifier("process_at")} ASC, ${this.quoteIdentifier("created_at")} ASC
@@ -312,7 +321,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     await this.init();
 
     const { rows } = await this.client.query<JobRow>(
-      `SELECT * FROM ${this.tableRef()}
+      `SELECT ${this.selectListSql()} FROM ${this.tableRef()}
        WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(1)}
        LIMIT 1`,
       [jobId],
@@ -380,10 +389,12 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
 
   private rowToJob(row: JobRow): Job<T> {
     const now = new Date();
+    const data = readJsonColumn(row.data);
+    const metadata = readJsonObjectColumn(row.metadata);
     return {
       id: String(row.id ?? ""),
       type: String(row.type ?? ""),
-      data: safeJsonParse<T>(row.data, {} as T),
+      data: (data === undefined ? {} : data) as T,
       status: String(row.status ?? JobStatus.PENDING) as JobStatus,
       priority: toNumber(row.priority, 0),
       attempts: toNumber(row.attempts, 0),
@@ -397,8 +408,23 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
         typeof row.error === "string" && row.error.length > 0
           ? row.error
           : undefined,
-      metadata: safeJsonParse<Job<T>["metadata"]>(row.metadata, {}),
+      metadata: metadata ?? {},
     };
+  }
+
+  // The queue table's JSON columns are JSONB on Postgres and TEXT elsewhere.
+  private hasNativeJsonColumns(): boolean {
+    return this.client.dialect === "postgres";
+  }
+
+  // The table's columns, with JSON columns read as JSON text.
+  private selectListSql(): string {
+    return JOB_COLUMNS.map((column) => {
+      const quoted = this.quoteIdentifier(column);
+      return JSON_JOB_COLUMNS.has(column)
+        ? selectJsonAsTextSql(this.client.dialect, quoted)
+        : quoted;
+    }).join(", ");
   }
 
   private generateId(): string {
