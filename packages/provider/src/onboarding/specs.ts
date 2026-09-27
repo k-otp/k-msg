@@ -116,7 +116,7 @@ export const providerOnboardingSpecs: Readonly<
     providerName: "SOLAPI Messaging Provider",
     channelOnboarding: "none",
     templateLifecycleApi: "unavailable",
-    plusIdPolicy: "required_if_no_inference",
+    plusIdPolicy: "optional",
     plusIdInference: "unsupported",
     liveTestSupport: "partial",
     checks: [
@@ -130,7 +130,7 @@ export const providerOnboardingSpecs: Readonly<
       },
     ],
     notes: [
-      "SOLAPI ALIMTALK requires kakao profileId/pfId, but plusId inference is not available in current integration.",
+      "SOLAPI ALIMTALK identifies the Kakao channel by pfId (kakao.profileId or config.kakaoPfId) and does not use a plusId.",
     ],
   },
   mock: {

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { KMsgError, KMsgErrorCode, type ProviderFetch } from "@k-msg/core";
 import {
   fetchWithProviderContext,
+  raceProviderAbort,
   toProviderNetworkError,
   toProviderTransportError,
 } from "./provider-transport";
@@ -125,5 +126,36 @@ describe("shared provider transport", () => {
       message: "response body cancelled",
       details: { providerId: "provider" },
     });
+  });
+
+  test("stops waiting for an operation that cannot take the signal", async () => {
+    const controller = new AbortController();
+    let rejectOperation: (reason: unknown) => void = () => {};
+    const operation = new Promise<string>((_resolve, reject) => {
+      rejectOperation = reject;
+    });
+
+    const raced = raceProviderAbort(operation, controller.signal).then(
+      () => undefined,
+      (reason: unknown) => reason,
+    );
+    const reason = new Error("deadline exceeded");
+    controller.abort(reason);
+
+    expect(await raced).toBe(reason);
+    // The operation still settles later; its rejection must not go unhandled.
+    rejectOperation(new Error("late transport failure"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  test("passes an operation's outcome through while the signal is live", async () => {
+    const controller = new AbortController();
+
+    expect(
+      await raceProviderAbort(Promise.resolve("sent"), controller.signal),
+    ).toBe("sent");
+    expect(await raceProviderAbort(Promise.resolve("sent"), undefined)).toBe(
+      "sent",
+    );
   });
 });

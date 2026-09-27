@@ -43,7 +43,7 @@ on either feature; a missing declaration is treated as unsupported.
 | --- | --- | --- | --- |
 | `iwinv` | supported | supported | `send` and `getDeliveryStatus` forward the context to every underlying request |
 | `aligo` | supported | supported | every send channel uses the shared fetch transport |
-| `solapi` | unsupported | unsupported | the upstream SOLAPI SDK does not expose per-request signal/fetch hooks |
+| `solapi` | supported | unsupported | the SOLAPI SDK takes no signal or fetch, so the provider checks the signal before each SDK call and stops waiting when it aborts; a send request the SDK already made cannot be cancelled and SOLAPI may still deliver it, so that case returns `REQUEST_ABORTED` (not retried by default) even for a timeout |
 | `mock` | supported | unsupported | simulated delays observe the signal; no HTTP transport is used |
 
 ```ts
@@ -68,7 +68,7 @@ Single source of truth: `packages/provider/src/onboarding/specs.ts`
 | --- | --- | --- | --- | --- | --- |
 | `iwinv` | manual (console) | available | optional | unsupported | supported |
 | `aligo` | api | available | required_if_no_inference | supported | supported |
-| `solapi` | none (vendor metadata) | unavailable | required_if_no_inference | unsupported | partial |
+| `solapi` | none (vendor metadata) | unavailable | optional | unsupported | partial |
 | `mock` | api (test fixture) | available | optional | supported | none |
 
 Runtime access:
@@ -88,7 +88,7 @@ Interpretation notes:
 | Provider | Native mapping | Warning |
 | --- | --- | --- |
 | `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` | none (treated as native) |
-| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` |
+| `solapi` | `kakao.disableSms`, `text`, `subject` | `FAILOVER_PARTIAL_PROVIDER` only without a sender number |
 | `aligo` | `failover`, `fmessage_1`, `fsubject_1` | `FAILOVER_PARTIAL_PROVIDER` |
 | `mock` | no native mapping | `FAILOVER_UNSUPPORTED_PROVIDER` |
 
@@ -96,7 +96,8 @@ Boundary:
 
 - Provider package maps to vendor-native fields and returns warning metadata.
 - `iwinv` sends `failover.fallbackContent` as `resendContent` (`resendType: "N"`); without it, IWINV resends the AlimTalk text. IWINV picks SMS or LMS by the text's length.
-- Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`.
+- Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`, only for sends that return one of the warnings above.
+- `solapi` sends the fallback itself (`kakao.disableSms: false`) when the AlimTalk has a sender number (`from` or `defaultFrom`), so it returns no warning then; otherwise SOLAPI cannot replace it and the send is marked for API-level fallback.
 
 ## Usage (with KMsg)
 

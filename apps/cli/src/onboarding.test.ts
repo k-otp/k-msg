@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { ProviderOnboardingSpec } from "@k-msg/core";
 import { IWINVProvider } from "@k-msg/provider";
+import { SolapiProvider } from "@k-msg/provider/solapi";
 import { runAlimTalkPreflight, runProviderDoctor } from "./onboarding";
 import type { ProviderWithCapabilities } from "./providers/registry";
 import type { Runtime } from "./runtime";
@@ -250,5 +251,70 @@ describe("onboarding guidance", () => {
       result.checks.find((check) => check.id === "template_list_probe")?.status,
     ).toBe("skip");
     expect(result.ok).toBe(true);
+  });
+
+  test("SOLAPI alimtalk preflight passes without a plusId", async () => {
+    // SOLAPI sends AlimTalk by pfId and never uses a plusId.
+    const provider = new SolapiProvider({
+      apiKey: "api-key",
+      apiSecret: "api-secret",
+      kakaoPfId: "SOLAPI_PF_ID",
+    }) as unknown as ProviderWithCapabilities;
+
+    const result = await runAlimTalkPreflight({
+      plusId: undefined,
+      provider,
+      runtime: createRuntime({
+        providers: [
+          {
+            type: "solapi",
+            id: "solapi",
+            config: { apiKey: "api-key", apiSecret: "api-secret" },
+          },
+        ],
+      }),
+      senderKey: "SOLAPI_PF_ID",
+      templateId: "TPL_001",
+    });
+
+    const plusIdPolicy = result.checks.find(
+      (check) => check.id === "plus_id_policy",
+    );
+    expect(plusIdPolicy?.status).toBe("pass");
+    expect(result.ok).toBe(true);
+  });
+
+  test("SOLAPI alimtalk preflight requires a pfId from the CLI or config", async () => {
+    // SOLAPI has no template API to probe, so without this check a config
+    // lacking a pfId would pass preflight and fail at send time.
+    const preflight = (config: Record<string, string>, senderKey?: string) =>
+      runAlimTalkPreflight({
+        plusId: undefined,
+        provider: new SolapiProvider({
+          apiKey: "api-key",
+          apiSecret: "api-secret",
+        }) as unknown as ProviderWithCapabilities,
+        runtime: createRuntime({
+          providers: [{ type: "solapi", id: "solapi", config }],
+        }),
+        senderKey,
+        templateId: "TPL_001",
+      });
+    const credentials = { apiKey: "api-key", apiSecret: "api-secret" };
+
+    const missing = await preflight(credentials);
+    const fromConfig = await preflight({
+      ...credentials,
+      kakaoPfId: "env:SOLAPI_KAKAO_PF_ID",
+    });
+    const fromCli = await preflight(credentials, "SOLAPI_PF_ID");
+
+    const senderKeyCheck = (result: typeof missing) =>
+      result.checks.find((check) => check.id === "kakao_sender_key");
+    expect(senderKeyCheck(missing)?.status).toBe("fail");
+    expect(missing.ok).toBe(false);
+    expect(senderKeyCheck(fromConfig)?.status).toBe("pass");
+    expect(fromConfig.ok).toBe(true);
+    expect(senderKeyCheck(fromCli)?.status).toBe("pass");
   });
 });

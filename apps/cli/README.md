@@ -169,7 +169,7 @@ Required values by provider/channel:
 | `iwinv` | `SMS/LMS/MMS` | `smsApiKey`, `smsAuthKey` | `to`, `text`, sender (`--from` or `iwinv.config.smsSenderNumber`/`senderNumber`) | MMS requires image binary input; `apiKey` is only needed for AlimTalk (`config provider add` fills it in by default, so remove it and the `ALIMTALK` route for SMS-only use) |
 | `iwinv` | `ALIMTALK` | `apiKey` | `to`, `template-id`, `vars` | `vars` are matched to the template's `#{name}` placeholders by name. If failover/reSend is enabled, sender callback is required (`--from` or sender number in config) |
 | `solapi` | `SMS/LMS/MMS` | `apiKey`, `apiSecret` | `to`, `text`, sender (`--from` or `solapi.config.defaultFrom`) | MMS also needs image input |
-| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/channel alias or `solapi.config.kakaoPfId`) | For preflight policy checks, set `plusId` via `--plus-id` or channel/default alias |
+| `solapi` | `ALIMTALK` | `apiKey`, `apiSecret` | `to`, `template-id`, `vars`, profileId/pfId (`--sender-key`/channel alias or `solapi.config.kakaoPfId`) | SOLAPI identifies the channel by pfId; no `plusId` is needed |
 | `mock` | all | none | minimal message fields (`to`, `text` or `template-id`/`vars`) | Local test provider |
 
 ### Provider onboarding expectations
@@ -180,7 +180,7 @@ CLI readiness checks describe the vendor prerequisite path. They do **not** crea
 | --- | --- | --- | --- |
 | `iwinv` | Manual console approval | config keys, manual evidence record, template probe, sender fallback config | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 | `aligo` | API-backed Kakao channel path | config keys, channel/template capabilities, Kakao list probe, plusId inference guidance | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
-| `solapi` | External vendor metadata + explicit binding | config keys, explicit plusId expectations, template probe result when available | `k-msg providers doctor` -> `k-msg alimtalk preflight --plus-id <plusId>` |
+| `solapi` | External vendor metadata + explicit binding | config keys, pfId/profileId binding, template probe result when available | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 | `mock` | Local fixture only | basic capability checks and seed template path | `k-msg providers doctor` -> `k-msg alimtalk preflight` |
 
 ## Commands

@@ -7,6 +7,10 @@ import {
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
+import {
+  raceProviderAbort,
+  toProviderAbortError,
+} from "../shared/provider-transport";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   extractFileId,
@@ -23,21 +27,34 @@ import type {
 } from "./solapi.internal.types";
 import type { SolapiConfig } from "./types/solapi";
 
+/**
+ * FAILOVER_* warnings make a send eligible for DeliveryTrackingService's
+ * API-level fallback. With a sender number SOLAPI replaces a failed AlimTalk
+ * with SMS/LMS itself (kakaoOptions.disableSms: false), so a warning there
+ * would get the customer a second message; only a send without one is marked.
+ */
 export function collectSolapiSendWarnings(
   options: SendOptions,
   providerId: string,
+  config: Pick<SolapiConfig, "defaultFrom">,
 ): SendResult["warnings"] {
   if (options.type !== "ALIMTALK") return undefined;
   if (options.failover?.enabled !== true) return undefined;
+
+  const hasSender =
+    (typeof options.from === "string" && options.from.length > 0) ||
+    (typeof config.defaultFrom === "string" && config.defaultFrom.length > 0);
+  if (hasSender) return undefined;
 
   return [
     {
       code: "FAILOVER_PARTIAL_PROVIDER",
       message:
-        "SOLAPI failover mapping is partial. API-level fallback may be attempted for non-Kakao-user failures.",
+        "SOLAPI replaces a failed AlimTalk with SMS/LMS only when it has a sender number (options.from or config.defaultFrom), and none was set. API-level fallback may be attempted for non-Kakao-user failures.",
       details: {
         providerId,
         mappedFields: ["kakao.disableSms", "text", "subject"],
+        missingFields: ["from"],
         unsupportedFields: ["fallbackChannel"],
       },
     },
@@ -70,8 +87,17 @@ export async function buildSolapiSendOneMessage(params: {
   providerId: string;
   config: SolapiConfig;
   client: SolapiSdkClient;
+  signal?: AbortSignal;
 }): Promise<SolapiSendOneMessage> {
-  const { options, providerId, config, client } = params;
+  const { options, providerId, config, client, signal } = params;
+  // Files upload one by one: once the signal aborts, no further upload starts
+  // and the pending one is no longer awaited.
+  const uploadFile = (
+    ...args: Parameters<SolapiSdkClient["uploadFile"]>
+  ): ReturnType<SolapiSdkClient["uploadFile"]> => {
+    throwIfAborted(signal);
+    return raceProviderAbort(client.uploadFile(...args), signal);
+  };
 
   const type = toSolapiMessageType(options);
   const senderNumber =
@@ -162,7 +188,7 @@ export async function buildSolapiSendOneMessage(params: {
         );
       }
 
-      const upload = await client.uploadFile(imageRef, "MMS");
+      const upload = await uploadFile(imageRef, "MMS");
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         base.imageId = fileId;
@@ -307,12 +333,7 @@ export async function buildSolapiSendOneMessage(params: {
         );
       }
 
-      const upload = await client.uploadFile(
-        imageRef,
-        "KAKAO",
-        undefined,
-        imageLink,
-      );
+      const upload = await uploadFile(imageRef, "KAKAO", undefined, imageLink);
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         imageId = fileId;
@@ -442,7 +463,7 @@ export async function buildSolapiSendOneMessage(params: {
 
       fileIds = [];
       for (const url of fileUrls) {
-        const upload = await client.uploadFile(url, "FAX");
+        const upload = await uploadFile(url, "FAX");
         const fileId = extractFileId(upload);
         if (typeof fileId === "string" && fileId.length > 0) {
           fileIds.push(fileId);
@@ -589,7 +610,7 @@ export async function buildSolapiSendOneMessage(params: {
       providerId,
     });
     if (imageRef) {
-      const upload = await client.uploadFile(imageRef, "RCS");
+      const upload = await uploadFile(imageRef, "RCS");
       const fileId = extractFileId(upload);
       if (typeof fileId === "string" && fileId.length > 0) {
         rcsPayload.additionalBody = buildAdditionalBody(fileId);
@@ -607,33 +628,44 @@ export async function buildSolapiSendOneMessage(params: {
   return base as unknown as SolapiSendOneMessage;
 }
 
+/**
+ * Sends one message through the SOLAPI SDK. The SDK cannot take `signal`, so
+ * it is checked before each SDK call and raced against the calls: once it
+ * aborts, nothing more is sent, but a request the SDK already made runs on
+ * and its answer is dropped.
+ */
 export async function sendWithSolapi(params: {
   providerId: string;
   client: SolapiSdkClient;
   config: SolapiConfig;
   options: SendOptions;
+  signal?: AbortSignal;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, client, config, options } = params;
+  const { providerId, client, config, options, signal } = params;
 
-  const warnings = collectSolapiSendWarnings(options, providerId);
+  const warnings = collectSolapiSendWarnings(options, providerId, config);
+  throwIfAborted(signal);
   const message = await buildSolapiSendOneMessage({
     options,
     providerId,
     config,
     client,
+    signal,
   });
   const scheduledDate = resolveSolapiScheduledDate(options);
 
-  let response: unknown;
+  // A file upload may have finished just as the signal aborted.
+  throwIfAborted(signal);
+  let request: Promise<unknown>;
   if (typeof client.sendOne === "function") {
-    response = await client.sendOne(
+    request = client.sendOne(
       scheduledDate
         ? ({ ...message, scheduledDate } as SolapiSendOneMessage)
         : message,
       config.appId,
     );
   } else if (typeof client.send === "function") {
-    response = await client.send(
+    request = client.send(
       message,
       buildSolapiSendRequestConfig(config, scheduledDate),
     );
@@ -645,6 +677,13 @@ export async function sendWithSolapi(params: {
     );
   }
 
+  let response: unknown;
+  try {
+    response = await raceProviderAbort(request, signal);
+  } catch (error) {
+    throw toSentRequestAbortError(error, signal, providerId) ?? error;
+  }
+
   return ok(
     adaptSolapiSendResult({
       options,
@@ -652,6 +691,37 @@ export async function sendWithSolapi(params: {
       providerId,
       warnings,
     }),
+  );
+}
+
+function throwIfAborted(signal: AbortSignal | undefined): void {
+  if (signal?.aborted) throw signal.reason;
+}
+
+/**
+ * An abort after the SDK sent the request cannot cancel it, and the SDK may
+ * even retry it, so SOLAPI may still send the message. Report it as
+ * REQUEST_ABORTED, which is not retried by default, even for a timeout: a
+ * retried NETWORK_TIMEOUT could reach the customer twice.
+ */
+function toSentRequestAbortError(
+  error: unknown,
+  signal: AbortSignal | undefined,
+  providerId: string,
+): KMsgError | undefined {
+  if (!signal?.aborted) return undefined;
+  // The race rejects with the signal's own reason, which may itself be a
+  // KMsgError such as NETWORK_TIMEOUT. Any other KMsgError came from the SDK
+  // call and keeps its meaning.
+  const fromSignal = error === signal.reason;
+  if (!fromSignal && error instanceof KMsgError) return undefined;
+  const aborted = toProviderAbortError(error, signal, providerId);
+  if (!aborted) return undefined;
+
+  return new KMsgError(
+    KMsgErrorCode.REQUEST_ABORTED,
+    `${aborted.message} (SOLAPI had already received the request and may still send the message)`,
+    { providerId, requestSent: true, abortCode: aborted.code },
   );
 }
 

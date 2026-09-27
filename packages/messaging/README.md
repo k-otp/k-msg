@@ -495,10 +495,13 @@ Compatibility for this line is validated in CI against the `drizzle-compat` matr
 When provider-native ALIMTALK failover is unsupported or partial, you can enable tracking-based API failover.
 
 - Triggers only for `ALIMTALK` with `failover.enabled === true`
+- Triggers only for sends whose provider returned a `FAILOVER_UNSUPPORTED_PROVIDER` or `FAILOVER_PARTIAL_PROVIDER` warning
 - Triggers only when tracking status is `FAILED` and classified as non-Kakao-user failure
 - Attempts fallback exactly once per original message
 - Sends SMS or LMS as `fallbackChannel` says; a record without one (not sent through `KMsg`) goes as LMS when its text is over 90 bytes
 - Requires providers with `getDeliveryStatus()` support
+
+The service does not resend what a provider already sent itself: IWINV, and SOLAPI when the AlimTalk has a sender number (`from` or `defaultFrom`), return no such warning; Aligo returns one but has no `getDeliveryStatus()`, so its records never reach `FAILED`. The example below leaves SOLAPI without a sender and adds it to the fallback instead.
 
 ```ts
 import {
@@ -509,10 +512,12 @@ import { KMsg } from "@k-msg/messaging";
 import { SolapiProvider } from "@k-msg/provider/solapi";
 
 const providers = [
+  // No defaultFrom: SOLAPI cannot replace the AlimTalk itself, so the
+  // tracking service sends the fallback.
   new SolapiProvider({
     apiKey: process.env.SOLAPI_API_KEY!,
     apiSecret: process.env.SOLAPI_API_SECRET!,
-    defaultFrom: "01000000000",
+    kakaoPfId: process.env.SOLAPI_KAKAO_PF_ID!,
   }),
 ];
 
@@ -521,7 +526,7 @@ const tracking = new DeliveryTrackingService({
   providers,
   apiFailover: {
     // Re-send fallback SMS/LMS through the same KMsg pipeline
-    sender: (input) => kmsg.send(input),
+    sender: (input) => kmsg.send({ ...input, from: "01000000000" }),
   },
 });
 
