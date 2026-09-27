@@ -242,13 +242,12 @@ k-msg db schema print \
 - `--target <tracking|queue|both>`: 기본값 `both`
 - `--format <drizzle|sql|both>`: 기본값 `both`
 - 스토어나 큐와 같은 옵션을 넘겨야 스키마가 그 설정과 맞습니다:
-  - `--message-id-type <text|uuid|varchar>`, `--id-type <text|varchar>`, `--short-text-type <text|varchar>`, `--timestamp-type <bigint|integer|date>`, `--json-type <auto|text>`: tracking 스토어의 `typeStrategy` (기본값 `text`, `text`, `varchar`, `bigint`, `auto`)
+  - `--message-id-type <text|uuid|varchar>`, `--id-type <text|varchar>`, `--short-text-type <text|varchar>`, `--timestamp-type <bigint|integer|date>`, `--json-type <auto|text>`: tracking 스토어의 `typeStrategy` (기본값 `text`, `text`, `varchar`, `bigint`, `auto`). MySQL은 `TEXT` 컬럼에 인덱스를 만들 수 없으므로, MySQL에서는 기본 키와 인덱스 컬럼이 이 옵션과 관계없이 `VARCHAR`입니다
   - `--tracking-table <name>`(기본값 `kmsg_delivery_tracking`), `--queue-table <name>`(기본값 `kmsg_jobs`)
   - `--store-raw`: `storeRaw: true`처럼 tracking `raw` 컬럼을 추가합니다 (기본값 `false`)
 - 옵션으로 지정할 수 없는 것:
   - `columnMap`, `indexNames`, 필드 암호화(`fieldCryptoSchema`) 스키마. 이런 설정은 `@k-msg/messaging/adapters/cloudflare`의 `buildCloudflareSqlSchemaSql()`이나 `renderDrizzleSchemaSource()`에 스토어와 같은 옵션을 넘겨 코드에서 만드세요.
   - 테이블 이름을 바꿔도 인덱스 이름은 기본값(`idx_kmsg_delivery_*`, `idx_kmsg_jobs_*`)입니다. 같은 데이터베이스(Postgres는 같은 스키마)에 두 번째 테이블을 만들면 `CREATE INDEX IF NOT EXISTS`가 건너뛰어져 인덱스가 없으므로, 코드에서 별도의 `indexNames`를 지정하세요.
-  - MySQL Drizzle 출력은 `--id-type`, `--json-type`과 관계없이 항상 `varchar(255)` ID와 `text` JSON 컬럼을 씁니다. MySQL SQL 출력은 옵션을 따릅니다.
 - `generate` 전용:
   - `--out-dir <path>` 기본 현재 디렉터리
   - `--drizzle-file <name>` 기본 `kmsg.schema.ts`
