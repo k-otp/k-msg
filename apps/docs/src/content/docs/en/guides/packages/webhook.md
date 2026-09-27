@@ -299,8 +299,9 @@ export async function receiveWebhook(
   request: Request,
   secret: string,
 ): Promise<Response> {
-  // Verify the raw body; JSON.parse and JSON.stringify can change the bytes.
-  const body = await request.text();
+  // Verify the bytes as received. request.text() would drop a leading BOM
+  // and replace malformed bytes first, and JSON can change the body.
+  const body = await request.arrayBuffer();
   const verified = verifyWebhookRequest(request.headers, body, secret, {
     toleranceMs: 5 * 60 * 1000,
   });
@@ -310,15 +311,16 @@ export async function receiveWebhook(
     return new Response(verified.error.code, { status: 401 });
   }
 
-  const event = JSON.parse(body);
+  const event = JSON.parse(new TextDecoder().decode(body));
   // Deliveries are at least once: skip event ids you have already processed.
   console.log("webhook received", event.id);
   return new Response(null, { status: 204 });
 }
 ```
 
-It also accepts Node-style header records (`req.headers`) and `Uint8Array` or
-`ArrayBuffer` bodies. If the sender changed `algorithm`, `signatureHeader`, or
+It also accepts Node-style header records (`req.headers`) and `Uint8Array`
+bodies, such as a `Buffer` from `express.raw()`. A string body is checked as
+given. If the sender changed `algorithm`, `signatureHeader`, or
 `signaturePrefix`, pass the same values in the options.
 
 ## Migration notes (breaking)

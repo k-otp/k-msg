@@ -7,7 +7,7 @@ title: "verifyWebhookRequest"
 
 > **verifyWebhookRequest**(`headers`, `body`, `secret`, `options?`): [`Result`](/en/api/core/src/type-aliases/result/)\<[`VerifiedWebhookRequest`](/en/api/webhook/src/interfaces/verifiedwebhookrequest/), [`WebhookVerificationError`](/en/api/webhook/src/classes/webhookverificationerror/)\>
 
-Defined in: [packages/webhook/src/security/verify-webhook-request.ts:140](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L140)
+Defined in: [packages/webhook/src/security/verify-webhook-request.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/security/verify-webhook-request.ts#L145)
 
 Checks that a webhook request came from a k-msg sender that holds `secret`
 and was signed recently.
@@ -29,7 +29,8 @@ The request headers.
 
 [`WebhookRequestBody`](/en/api/webhook/src/type-aliases/webhookrequestbody/)
 
-The raw request body, before any JSON parsing.
+The raw request body, preferably its bytes, before any
+  decoding or JSON parsing.
 
 ### secret
 
@@ -57,12 +58,14 @@ TypeError when `secret` is empty, and RangeError when
 ## Example
 
 ```ts
+const body = await request.arrayBuffer();
 const verified = verifyWebhookRequest(
   request.headers,
-  await request.text(),
+  body,
   env.WEBHOOK_SECRET,
 );
 if (verified.isFailure) {
   return new Response(verified.error.code, { status: 401 });
 }
+const event = JSON.parse(new TextDecoder().decode(body));
 ```
