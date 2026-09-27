@@ -5,7 +5,7 @@ prev: false
 title: "JobRetryDirective"
 ---
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L26)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L34)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://git
 
 > `optional` **delayMs?**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L28)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L36)
 
 ***
 
@@ -21,4 +21,4 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:28](https://git
 
 > **enabled**: `boolean`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L27)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L35)

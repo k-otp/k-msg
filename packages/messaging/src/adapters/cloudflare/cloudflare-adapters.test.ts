@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite";
+import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
 import { JobStatus } from "../../queue/job-queue.interface";
 import {
@@ -21,7 +21,11 @@ import {
   createR2JobQueue,
 } from "./index";
 import { createDurableObjectStorage } from "./object-storage";
-import type { CloudflareSqlClient, D1DatabaseLike } from "./sql-client";
+import type {
+  CloudflareSqlClient,
+  D1DatabaseLike,
+  D1PreparedStatementLike,
+} from "./sql-client";
 import {
   createD1SqlClient,
   createDrizzleSqlClient,
@@ -114,100 +118,32 @@ function fitsColumn(
   );
 }
 
-function createMemoryHyperdriveJobSqlClient(): {
-  client: CloudflareSqlClient;
-  rows: Map<string, Record<string, unknown>>;
-} {
-  const rows = new Map<string, Record<string, unknown>>();
-
-  const client = stubSqlClient("sqlite", async (sql, params = []) => {
-    if (/CREATE TABLE|CREATE INDEX/i.test(sql)) {
-      return { rows: [] };
-    }
-
-    if (/INSERT INTO/i.test(sql)) {
-      const [
-        id,
-        type,
-        data,
-        status,
-        priority,
-        attempts,
-        maxAttempts,
-        delay,
-        createdAt,
-        processAt,
-        completedAt,
-        failedAt,
-        error,
-        metadata,
-      ] = params;
-      rows.set(String(id), {
-        id,
-        type,
-        data,
-        status,
-        priority,
-        attempts,
-        max_attempts: maxAttempts,
-        delay,
-        created_at: createdAt,
-        process_at: processAt,
-        completed_at: completedAt,
-        failed_at: failedAt,
-        error,
-        metadata,
-      });
-      return { rows: [], rowCount: 1 };
-    }
-
-    if (/SELECT .* FROM .*WHERE .*"id" = .*LIMIT 1/is.test(sql)) {
-      const row = rows.get(String(params[0]));
-      return { rows: row ? [row] : [] };
-    }
-
-    if (/SELECT .*"id".*WHERE .*"status" IN/is.test(sql)) {
-      const statusSet = new Set(params.map((value) => String(value)));
-      const matchingRows = Array.from(rows.values())
-        .filter((row) => statusSet.has(String(row.status ?? "")))
-        .map((row) => ({ id: row.id }));
-      return { rows: matchingRows };
-    }
-
-    if (/UPDATE .*SET .*"process_at".*WHERE .*"id" =/is.test(sql)) {
-      const [status, attempts, processAt, error, jobId] = params;
-      const row = rows.get(String(jobId));
-      if (!row) {
-        return { rows: [], rowCount: 0 };
-      }
-
-      rows.set(String(jobId), {
-        ...row,
-        status,
-        attempts,
-        process_at: processAt,
-        error,
-      });
-      return { rows: [], rowCount: 1 };
-    }
-
-    if (/DELETE FROM .*WHERE .*"status" IN/is.test(sql)) {
-      const statusSet = new Set(params.map((value) => String(value)));
-      let removed = 0;
-      for (const [jobId, row] of rows) {
-        if (!statusSet.has(String(row.status ?? ""))) {
-          continue;
-        }
-        rows.delete(jobId);
-        removed++;
-      }
-      return { rows: [], rowCount: removed };
-    }
-
-    return { rows: [] };
-  });
-
-  return { client, rows };
+// A D1 binding over an in-memory bun:sqlite database: the same SQLite
+// dialect, so the queue's statements run for real.
+function createMemoryHyperdriveJobSqlClient(): CloudflareSqlClient {
+  const db = new Database(":memory:");
+  const database: D1DatabaseLike = {
+    prepare(query) {
+      let values: unknown[] = [];
+      const statement: D1PreparedStatementLike = {
+        bind(...next) {
+          values = next;
+          return statement;
+        },
+        async all<T>() {
+          const results = db
+            .query(query)
+            .all(...(values as SQLQueryBindings[])) as T[];
+          const { changes } = db.query("SELECT changes() AS changes").get() as {
+            changes: number;
+          };
+          return { results, meta: { changes } };
+        },
+      };
+      return statement;
+    },
+  };
+  return createD1SqlClient(database);
 }
 
 function createMemoryObjectStorage() {
@@ -875,8 +811,9 @@ describe("Cloudflare SQL adapters", () => {
   });
 
   test("HyperdriveJobQueue stores retry delay in process_at", async () => {
-    const { client } = createMemoryHyperdriveJobSqlClient();
-    const queue = new HyperdriveJobQueue<{ hello: string }>(client);
+    const queue = new HyperdriveJobQueue<{ hello: string }>(
+      createMemoryHyperdriveJobSqlClient(),
+    );
 
     const job = await queue.enqueue("test", { hello: "world" });
     const beforeRetry = Date.now();
@@ -895,8 +832,9 @@ describe("Cloudflare SQL adapters", () => {
   });
 
   test("HyperdriveJobQueue cleanupTerminal removes only completed and failed jobs", async () => {
-    const { client, rows } = createMemoryHyperdriveJobSqlClient();
-    const queue = new HyperdriveJobQueue<{ hello: string }>(client);
+    const queue = new HyperdriveJobQueue<{ hello: string }>(
+      createMemoryHyperdriveJobSqlClient(),
+    );
 
     const completed = await queue.enqueue("completed", { hello: "done" });
     const failed = await queue.enqueue("failed", { hello: "boom" });
@@ -906,23 +844,8 @@ describe("Cloudflare SQL adapters", () => {
       { delay: 1000 },
     );
 
-    const completedRow = rows.get(completed.id);
-    const failedRow = rows.get(failed.id);
-    if (!completedRow || !failedRow) {
-      throw new Error("Expected test rows to exist");
-    }
-
-    rows.set(completed.id, {
-      ...completedRow,
-      status: "completed",
-      completed_at: Date.now(),
-    });
-    rows.set(failed.id, {
-      ...failedRow,
-      status: "failed",
-      failed_at: Date.now(),
-      error: "boom",
-    });
+    await queue.complete(completed.id);
+    await queue.fail(failed.id, "boom");
 
     const removed = await queue.cleanupTerminal();
 

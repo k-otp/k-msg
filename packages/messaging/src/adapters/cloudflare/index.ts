@@ -26,6 +26,7 @@ import type {
   FieldCryptoMigrationStateTables,
   FieldCryptoMigrationStatus,
 } from "../../migration/field-crypto/types";
+import type { Job, JobLeaseOptions } from "../../queue/job-queue.interface";
 import {
   type DeliveryTrackingColumnMap,
   type DeliveryTrackingSchemaOptions,
@@ -37,7 +38,11 @@ import {
   renderDrizzleSchemaSource,
 } from "./drizzle-schema";
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
-import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
+import {
+  HyperdriveJobQueue,
+  type HyperdriveJobQueueConfig,
+  type HyperdriveJobQueueOptions,
+} from "./hyperdrive-job-queue";
 import { CloudflareObjectDeliveryTrackingStore } from "./object-delivery-tracking.store";
 import {
   type CloudflareObjectCleanupOptions,
@@ -114,6 +119,8 @@ export type {
   FieldCryptoMigrationRunRecord,
   FieldCryptoMigrationStateTables,
   FieldCryptoMigrationStatus,
+  HyperdriveJobQueueConfig,
+  HyperdriveJobQueueOptions,
   InitializeCloudflareSqlSchemaOptions,
   JobQueueIndexNames,
   RenderDrizzleSchemaSourceOptions,
@@ -175,7 +182,8 @@ export interface CreateD1DeliveryTrackingStoreOptions
   initializeSchema?: boolean;
 }
 
-export interface CreateD1JobQueueOptions {
+export interface CreateD1JobQueueOptions<T = unknown>
+  extends JobLeaseOptions<Job<T>> {
   tableName?: string;
   indexNames?: Partial<JobQueueIndexNames>;
   /**
@@ -186,8 +194,9 @@ export interface CreateD1JobQueueOptions {
   initializeSchema?: boolean;
 }
 
-export interface CreateDrizzleJobQueueOptions
-  extends CreateDrizzleSqlClientOptions {
+export interface CreateDrizzleJobQueueOptions<T = unknown>
+  extends CreateDrizzleSqlClientOptions,
+    JobLeaseOptions<Job<T>> {
   tableName?: string;
   indexNames?: Partial<JobQueueIndexNames>;
   /**
@@ -210,7 +219,7 @@ export function createD1DeliveryTrackingStore(
 
 export function createD1JobQueue<T>(
   database: D1DatabaseLike,
-  options: CreateD1JobQueueOptions = {},
+  options: CreateD1JobQueueOptions<T> = {},
 ): HyperdriveJobQueue<T> {
   return new HyperdriveJobQueue<T>(createD1SqlClient(database), options);
 }
@@ -223,7 +232,7 @@ export function createDrizzleDeliveryTrackingStore(
 }
 
 export function createDrizzleJobQueue<T>(
-  options: CreateDrizzleJobQueueOptions,
+  options: CreateDrizzleJobQueueOptions<T>,
 ): HyperdriveJobQueue<T> {
   const client = createDrizzleSqlClient(options);
   return new HyperdriveJobQueue<T>(client, options);

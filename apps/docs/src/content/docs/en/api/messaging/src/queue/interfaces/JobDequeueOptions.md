@@ -5,7 +5,7 @@ prev: false
 title: "JobDequeueOptions"
 ---
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L31)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L39)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://git
 
 > `optional` **running?**: `ReadonlySet`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L39)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L47)
 
 Ids of the jobs the caller is still running. A queue that leases jobs
 leaves them alone, even once their lease has run out: it does not hand

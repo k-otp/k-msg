@@ -5,7 +5,14 @@ prev: false
 title: "SQLiteJobQueue"
 ---
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L13)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:51](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L51)
+
+A job queue in a SQLite database.
+
+With `leaseMs`, a processing job's `process_at` holds its lease's end, so
+the table needs no new column. A job already processing without a lease,
+taken by an earlier version or by a queue without `leaseMs`, cannot be
+told from one whose lease has expired, so it is due at once.
 
 ## Type Parameters
 
@@ -23,13 +30,13 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:13](https://github
 
 > **new SQLiteJobQueue**\<`T`\>(`options?`): `SQLiteJobQueue`\<`T`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L16)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L56)
 
 #### Parameters
 
 ##### options?
 
-`SQLiteJobQueueOptions` = `{}`
+[`SQLiteJobQueueOptions`](/en/api/k-msg/src/adapters/bun/interfaces/sqlitejobqueueoptions/)\<`T`\> = `{}`
 
 #### Returns
 
@@ -39,15 +46,19 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:16](https://github
 
 ### cleanupTerminal()
 
-> **cleanupTerminal**(`statuses?`): `Promise`\<`number`\>
+> **cleanupTerminal**(`options?`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:293](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L293)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:435](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L435)
+
+Removes finished jobs: completed and failed ones by default, or those
+with the given statuses, and with `olderThan`, only those that finished
+before it.
 
 #### Parameters
 
-##### statuses?
+##### options?
 
-[`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)[] = `...`
+[`JobQueueCleanupOptions`](/en/api/messaging/src/queue/interfaces/jobqueuecleanupoptions/) \| [`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)[]
 
 #### Returns
 
@@ -63,7 +74,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:293](https://githu
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:289](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L289)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:426](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L426)
 
 #### Returns
 
@@ -79,7 +90,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:289](https://githu
 
 > **close**(): `void`
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:314](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L314)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:466](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L466)
 
 #### Returns
 
@@ -91,7 +102,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:314](https://githu
 
 > **complete**(`jobId`, `_result?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:172](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L172)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:277](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L277)
 
 #### Parameters
 
@@ -115,9 +126,18 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:172](https://githu
 
 ### dequeue()
 
-> **dequeue**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
+> **dequeue**(`options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L146)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:212](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L212)
+
+Takes the next due job and, with `leaseMs`, leases it. Jobs whose lease
+expired are due again first, or fail when they have no attempts left.
+
+#### Parameters
+
+##### options?
+
+[`JobDequeueOptions`](/en/api/messaging/src/queue/interfaces/jobdequeueoptions/) = `{}`
 
 #### Returns
 
@@ -133,7 +153,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:146](https://githu
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:93](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L93)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:155](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L155)
 
 #### Parameters
 
@@ -177,7 +197,11 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:93](https://github
 
 > **fail**(`jobId`, `error`, `retry?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L184)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:294](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L294)
+
+Counts a failed attempt: the job is due again after `retry.delayMs` when
+retries are enabled and attempts are left, and fails otherwise. A
+completed job stays completed, even for a worker whose lease expired.
 
 #### Parameters
 
@@ -207,7 +231,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:184](https://githu
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:258](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L258)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:396](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L396)
 
 #### Parameters
 
@@ -225,11 +249,36 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:258](https://githu
 
 ***
 
+### nextDueAt()
+
+> **nextDueAt**(): `Promise`\<`Date` \| `undefined`\>
+
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:380](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L380)
+
+When `dequeue()` next has work: the earliest due time of a pending job
+or, with `leaseMs`, lease expiry of a processing one. A time in the past
+means `dequeue()` has work now, even when it only settles an expired
+lease, so call `dequeue()` rather than checking `size()`. `undefined`
+when no job is pending or leased.
+
+#### Returns
+
+`Promise`\<`Date` \| `undefined`\>
+
+#### Implementation of
+
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`nextDueAt`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#nextdueat)
+
+***
+
 ### peek()
 
 > **peek**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:225](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L225)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:341](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L341)
+
+The job `dequeue()` would take next, including one whose lease expired,
+shown as it will be once it is due again. Changes nothing.
 
 #### Returns
 
@@ -245,7 +294,7 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:225](https://githu
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:275](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L275)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:412](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L412)
 
 #### Parameters
 
@@ -267,7 +316,9 @@ Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:275](https://githu
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:246](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L246)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:362](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L362)
+
+How many jobs are due now, including those whose lease expired.
 
 #### Returns
 
