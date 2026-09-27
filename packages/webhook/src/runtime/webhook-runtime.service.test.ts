@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import type { HttpClient } from "../services/webhook.dispatcher";
 import {
   type WebhookConfig,
@@ -274,6 +281,81 @@ describe("WebhookRuntimeService", () => {
     expect(error).toBeInstanceOf(Error);
     expect(error).not.toBeInstanceOf(WebhookEndpointConflictError);
     expect(await runtime.listEndpoints()).toHaveLength(0);
+  });
+
+  test.each([
+    ["addEndpoints", 2],
+    ["addEndpoint", 1],
+  ])(
+    "%s leaves nothing stored when an add fails after writing",
+    async (method, failOn) => {
+      const persistence = createInMemoryWebhookPersistence();
+      const add = persistence.endpointStore.add.bind(persistence.endpointStore);
+      let writes = 0;
+      // The store keeps the endpoint, then reports a failure, as D1 can when
+      // the connection drops after the INSERT commits.
+      persistence.endpointStore.add = async (endpoint) => {
+        writes += 1;
+        await add(endpoint);
+        if (writes === failOn) throw new Error("network connection lost");
+      };
+      const committed = new WebhookRuntimeService({
+        delivery: createConfig(),
+        httpClient: client,
+        persistence,
+        autoStart: false,
+      });
+      const inputs = ["https://example.com/one", "https://example.com/two"].map(
+        (url) => ({
+          url,
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        }),
+      );
+
+      const attempt =
+        method === "addEndpoints"
+          ? committed.addEndpoints(inputs)
+          : committed.addEndpoint(inputs[0] as (typeof inputs)[number]);
+      await expect(attempt).rejects.toThrow("network connection lost");
+
+      expect(await committed.listEndpoints()).toEqual([]);
+    },
+  );
+
+  test("a conflict never removes the endpoint that caused it", async () => {
+    // Two runtimes add the same id and URL in the same millisecond, so the
+    // stored endpoint looks exactly like the one that failed.
+    setSystemTime(new Date("2026-03-01T00:00:00.000Z"));
+    const persistence = createInMemoryWebhookPersistence();
+    const [first, second] = [0, 1].map(
+      () =>
+        new WebhookRuntimeService({
+          delivery: createConfig(),
+          httpClient: client,
+          persistence,
+          autoStart: false,
+        }),
+    );
+    const input = {
+      id: "hook",
+      url: "https://example.com/hook",
+      active: true,
+      events: [WebhookEventType.MESSAGE_SENT],
+    };
+
+    try {
+      await first?.addEndpoint(input);
+      await expect(second?.addEndpoint(input)).rejects.toBeInstanceOf(
+        WebhookEndpointConflictError,
+      );
+
+      expect((await persistence.endpointStore.list()).map((e) => e.id)).toEqual(
+        ["hook"],
+      );
+    } finally {
+      setSystemTime();
+    }
   });
 
   test("addEndpoints removes what it added when a later write fails", async () => {
