@@ -7,7 +7,7 @@ title: "IWINV_STATUS_CODES"
 
 > `const` **IWINV\_STATUS\_CODES**: `object`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:257](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L257)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:259](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L259)
 
 ## Type Declaration
 

@@ -23,7 +23,7 @@ bun add solapi
 ## 기본 제공 Provider
 
 - `SolapiProvider` (SOLAPI)
-- `IWINVProvider` (IWINV AlimTalk + optional SMS v2)
+- `IWINVProvider` (IWINV 알림톡 및/또는 SMS v2, `src/iwinv/README_ko.md` 참고)
 - `AligoProvider` (Aligo)
 - `MockProvider` (벤더 API를 호출하지 않는 테스트·로컬 실행용). `{ id }`를 넘기면 인스턴스마다 provider id를 따로 줄 수 있어, 예를 들어 mock 두 개로 `routing.byType`을 시험할 수 있습니다. 기본 id는 `"mock"`입니다.
 
@@ -95,6 +95,7 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 경계:
 
 - provider 패키지는 벤더 native 필드로 매핑하고 warning 메타데이터를 반환합니다.
+- `iwinv`는 `failover.fallbackContent`를 `resendContent`(`resendType: "N"`)로 보내고, 없으면 IWINV가 알림톡 내용을 대체문자로 보냅니다. SMS/LMS는 내용 길이로 IWINV가 정합니다.
 - tracking 기반 API 레벨 fallback retry(배달 폴링 + SMS/LMS 재발송)는 `@k-msg/messaging`에서 처리합니다.
 
 ## 사용 예시 (KMsg와 함께)

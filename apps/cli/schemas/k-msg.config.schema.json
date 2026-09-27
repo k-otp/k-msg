@@ -139,13 +139,12 @@
                 "minLength": 1
               },
               "config": {
-                "default": {},
                 "type": "object",
                 "properties": {
                   "apiKey": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "IWINV AlimTalk API key (AUTH header)"
+                    "description": "IWINV AlimTalk API key (AUTH header); omit for SMS/LMS/MMS-only use with smsApiKey and smsAuthKey"
                   },
                   "smsApiKey": {
                     "type": "string",
@@ -246,8 +245,15 @@
                     "description": "Enable debug logging"
                   }
                 },
-                "required": ["apiKey"],
-                "additionalProperties": {}
+                "additionalProperties": {},
+                "anyOf": [
+                  {
+                    "required": ["apiKey"]
+                  },
+                  {
+                    "required": ["smsApiKey", "smsAuthKey"]
+                  }
+                ]
               }
             },
             "required": ["type", "id", "config"],

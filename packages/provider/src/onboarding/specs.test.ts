@@ -30,6 +30,20 @@ describe("Provider onboarding specs", () => {
     if (configCheck?.kind === "config") {
       expect(configCheck.configKeys).toEqual(["apiKey"]);
     }
+    // SMS-only configs have no AlimTalk apiKey, so only the AlimTalk
+    // preflight requires it.
+    expect(configCheck?.scopes).toEqual(["preflight"]);
+    // The Kakao channel and template checks apply only to a provider that
+    // can send AlimTalk, so doctor skips them for SMS-only configs.
+    for (const id of [
+      "channel_registered_in_console",
+      "template_capability_available",
+      "template_list_probe",
+    ]) {
+      expect(
+        spec?.checks.find((check) => check.id === id)?.messageTypes,
+      ).toEqual(["ALIMTALK"]);
+    }
     expect(
       spec?.checks.some(
         (check) => check.id === "channel_registered_in_console",

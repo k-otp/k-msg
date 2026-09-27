@@ -14,12 +14,18 @@ import {
   toProviderNetworkError,
   toProviderTransportError,
 } from "../shared/provider-transport";
+import type { TemplateContentCache } from "../shared/template-content-cache";
+import {
+  findMissingTemplateVariables,
+  listTemplatePlaceholders,
+} from "../shared/template-variables";
 import { isObjectRecord } from "../shared/type-guards";
 import {
   getAlimTalkHeaders,
   getSendEndpoint,
   mapIwinvCodeToKMsgErrorCode,
   normalizeIwinvCode,
+  requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
 import {
   resolveImageFilename,
@@ -42,15 +48,88 @@ import {
   normalizePhoneNumber,
   resolveSmsBaseUrl,
 } from "./iwinv.sms.helpers";
+import { fetchIwinvTemplateContent } from "./iwinv.template-content";
 import { formatIwinvDate, formatSmsReserveDate } from "./iwinv.time";
+
+function toTemplateParamValue(value: unknown): string {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+/**
+ * Builds IWINV's `templateParam`, which IWINV applies by position. Its spec
+ * does not say how positions map to placeholders, so this sends one value per
+ * distinct `#{name}`, in the order the names first appear in the template's
+ * content and then its button links: the one value per variable that IWINV's
+ * console asks for, and what the key-order mapping used to send. The text
+ * comes from `providerOptions.templateContent` or else IWINV's template API.
+ */
+async function resolveTemplateParam(params: {
+  providerId: string;
+  config: NormalizedIwinvConfig;
+  options: Extract<SendOptions, { type: "ALIMTALK" }>;
+  context?: ProviderRequestContext;
+  templateContents: TemplateContentCache;
+}): Promise<Result<string[] | undefined, KMsgError>> {
+  const { providerId, config, options, context, templateContents } = params;
+
+  const override = options.providerOptions?.templateParam;
+  if (Array.isArray(override)) {
+    return ok(override.map(toTemplateParamValue));
+  }
+
+  const variables = options.variables ?? {};
+  const inlineContent = options.providerOptions?.templateContent;
+  const hasInlineContent =
+    typeof inlineContent === "string" && inlineContent.length > 0;
+  // Without variables there is nothing to place, so skip the lookup; a template
+  // that needs values is then refused by IWINV (code 508). Inline content costs
+  // no request, so it is still checked.
+  if (Object.keys(variables).length === 0 && !hasInlineContent) {
+    return ok(undefined);
+  }
+
+  const content = hasInlineContent
+    ? ok(inlineContent)
+    : await templateContents.get(options.templateId, context, () =>
+        fetchIwinvTemplateContent({
+          providerId,
+          config,
+          templateCode: options.templateId,
+          context,
+        }),
+      );
+  if (content.isFailure) return content;
+
+  const placeholders = [...new Set(listTemplatePlaceholders(content.value))];
+  const missing = findMissingTemplateVariables(placeholders, variables);
+  if (missing.length > 0) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        `Missing variables for IWINV template ${options.templateId}: ${missing.join(", ")}`,
+        { providerId, templateId: options.templateId, missing },
+      ),
+    );
+  }
+
+  return ok(
+    placeholders.length > 0
+      ? placeholders.map((name) => toTemplateParamValue(variables[name]))
+      : undefined,
+  );
+}
 
 export async function sendAlimTalk(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
   options: Extract<SendOptions, { type: "ALIMTALK" }>;
   context?: ProviderRequestContext;
+  templateContents: TemplateContentCache;
 }): Promise<Result<SendResult, KMsgError>> {
-  const { providerId, config, options, context } = params;
+  const { providerId, config, options, context, templateContents } = params;
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
+
   const templateId = options.templateId;
 
   if (!templateId || templateId.length === 0) {
@@ -80,14 +159,6 @@ export async function sendAlimTalk(params: {
     );
   }
 
-  const templateParamOverride = options.providerOptions?.templateParam;
-  const templateParam = Array.isArray(templateParamOverride)
-    ? templateParamOverride.map((v) =>
-        v === null || v === undefined ? "" : String(v),
-      )
-    : Object.values(options.variables || {}).map((v) =>
-        v === null || v === undefined ? "" : String(v),
-      );
   const failover = options.failover;
 
   const senderNumber =
@@ -155,13 +226,6 @@ export async function sendAlimTalk(params: {
     );
   }
 
-  const resendTypeFromFailover =
-    failover?.fallbackChannel === "lms"
-      ? "Y"
-      : failover?.fallbackChannel === "sms"
-        ? "N"
-        : undefined;
-
   const resendTitle =
     typeof options.providerOptions?.resendTitle === "string" &&
     options.providerOptions.resendTitle.trim().length > 0
@@ -180,6 +244,29 @@ export async function sendAlimTalk(params: {
         ? failover.fallbackContent.trim()
         : undefined;
 
+  // resendType picks the fallback text, not the channel: "Y" (IWINV's default)
+  // resends the AlimTalk text and "N" sends resendContent. IWINV sends SMS or
+  // LMS by the text's length, so failover.fallbackChannel has no IWINV field.
+  const effectiveResendType = resendType ?? (resendContent ? "N" : undefined);
+  if (reSend === "Y" && effectiveResendType === "N" && !resendContent) {
+    return fail(
+      new KMsgError(
+        KMsgErrorCode.INVALID_REQUEST,
+        "resendContent is required when resendType is 'N' (failover.fallbackContent or providerOptions.resendContent)",
+        { providerId },
+      ),
+    );
+  }
+
+  const templateParam = await resolveTemplateParam({
+    providerId,
+    config,
+    options,
+    context,
+    templateContents,
+  });
+  if (templateParam.isFailure) return templateParam;
+
   const payload: Record<string, unknown> = {
     templateCode: templateId,
     reserve,
@@ -187,14 +274,12 @@ export async function sendAlimTalk(params: {
     list: [
       {
         phone: to,
-        templateParam: templateParam.length > 0 ? templateParam : undefined,
+        templateParam: templateParam.value,
       },
     ],
     reSend,
     ...(resendCallback ? { resendCallback } : {}),
-    ...((resendType ?? resendTypeFromFailover)
-      ? { resendType: resendType ?? resendTypeFromFailover }
-      : {}),
+    ...(effectiveResendType ? { resendType: effectiveResendType } : {}),
     ...(resendTitle ? { resendTitle } : {}),
     ...(resendContent ? { resendContent } : {}),
   };

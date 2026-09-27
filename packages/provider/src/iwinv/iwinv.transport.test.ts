@@ -55,18 +55,23 @@ describe("IWINV transport context", () => {
     const provider = createProvider();
     const controller = new AbortController();
     const observedSignals: Array<AbortSignal | null | undefined> = [];
+    const observedUrls: string[] = [];
 
     const fetch: ProviderFetch = async (input, init) => {
       observedSignals.push(init?.signal);
-      const isAlimTalk = String(input).includes("alimtalk.bizservice.iwinv.kr");
-      return new Response(
-        JSON.stringify(
-          isAlimTalk
-            ? { code: 200, message: "ok", seqNo: 1 }
-            : { resultCode: 0, message: "ok", requestNo: "request-1" },
-        ),
-        { status: 200 },
-      );
+      observedUrls.push(String(input));
+      const url = String(input);
+      const isAlimTalk = url.includes("alimtalk.bizservice.iwinv.kr");
+      const body = url.endsWith("/api/template/")
+        ? {
+            code: 200,
+            message: "ok",
+            list: [{ templateCode: "TPL_1", templateContent: "#{code}" }],
+          }
+        : isAlimTalk
+          ? { code: 200, message: "ok", seqNo: 1 }
+          : { resultCode: 0, message: "ok", requestNo: "request-1" };
+      return new Response(JSON.stringify(body), { status: 200 });
     };
 
     for (const input of sendInputs) {
@@ -77,7 +82,11 @@ describe("IWINV transport context", () => {
       expect(result.isSuccess).toBe(true);
     }
 
-    expect(observedSignals).toHaveLength(sendInputs.length);
+    // The AlimTalk send also looks its template up through the same context.
+    expect(observedUrls).toContain(
+      "https://alimtalk.bizservice.iwinv.kr/api/template/",
+    );
+    expect(observedSignals).toHaveLength(sendInputs.length + 1);
     expect(
       observedSignals.every((signal) => signal === controller.signal),
     ).toBe(true);
