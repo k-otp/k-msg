@@ -18,6 +18,40 @@ export const DEFAULT_DELIVERY_TRACKING_TABLE =
   DEFAULT_DELIVERY_TRACKING_TABLE_NAME;
 export const DEFAULT_JOB_QUEUE_TABLE = "kmsg_jobs";
 
+/**
+ * Names of the job queue indexes. SQLite and D1 need index names to be unique
+ * per database, and Postgres per schema, so each queue table sharing one needs
+ * its own names.
+ */
+export interface JobQueueIndexNames {
+  /** @default "idx_kmsg_jobs_dequeue" */
+  dequeue: string;
+  /** @default "idx_kmsg_jobs_id" */
+  id: string;
+}
+
+const DEFAULT_JOB_QUEUE_INDEX_NAMES: JobQueueIndexNames = {
+  dequeue: "idx_kmsg_jobs_dequeue",
+  id: "idx_kmsg_jobs_id",
+};
+
+function normalizeIndexName(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function resolveJobQueueIndexNames(
+  overrides: Partial<JobQueueIndexNames> | undefined,
+): JobQueueIndexNames {
+  return {
+    dequeue:
+      normalizeIndexName(overrides?.dequeue) ??
+      DEFAULT_JOB_QUEUE_INDEX_NAMES.dequeue,
+    id: normalizeIndexName(overrides?.id) ?? DEFAULT_JOB_QUEUE_INDEX_NAMES.id,
+  };
+}
+
 export type CloudflareSqlSchemaTarget = "tracking" | "queue" | "both";
 
 export interface BuildDeliveryTrackingSchemaSqlOptions
@@ -30,6 +64,7 @@ export interface BuildDeliveryTrackingSchemaSqlOptions
 export interface BuildJobQueueSchemaSqlOptions {
   dialect: SqlDialect;
   tableName?: string;
+  indexNames?: Partial<JobQueueIndexNames>;
   includeIndexes?: boolean;
 }
 
@@ -47,6 +82,7 @@ export interface BuildCloudflareSqlSchemaSqlOptions {
   migrationRunsTableName?: string;
   migrationChunksTableName?: string;
   queueTableName?: string;
+  queueIndexNames?: Partial<JobQueueIndexNames>;
   includeIndexes?: boolean;
 }
 
@@ -63,6 +99,7 @@ export interface InitializeCloudflareSqlSchemaOptions {
   migrationRunsTableName?: string;
   migrationChunksTableName?: string;
   queueTableName?: string;
+  queueIndexNames?: Partial<JobQueueIndexNames>;
   includeIndexes?: boolean;
 }
 
@@ -286,12 +323,13 @@ CREATE TABLE IF NOT EXISTS ${tableRef} (
   ${q("metadata")} ${jsonType}
 )`;
 
+  const indexNames = resolveJobQueueIndexNames(options.indexNames);
   const indexDefs: Array<{ name: string; columns: string[] }> = [
     {
-      name: "idx_kmsg_jobs_dequeue",
+      name: indexNames.dequeue,
       columns: ["status", "priority", "process_at", "created_at"],
     },
-    { name: "idx_kmsg_jobs_id", columns: ["id"] },
+    { name: indexNames.id, columns: ["id"] },
   ];
 
   const indexStatements =
@@ -516,6 +554,7 @@ export function buildCloudflareSqlSchemaSql(
       buildJobQueueSchemaStatements({
         dialect: options.dialect,
         tableName: options.queueTableName,
+        indexNames: options.queueIndexNames,
         includeIndexes,
       }),
     );
@@ -568,6 +607,7 @@ export async function initializeCloudflareSqlSchema(
       buildJobQueueSchemaStatements({
         dialect: client.dialect,
         tableName: options.queueTableName,
+        indexNames: options.queueIndexNames,
         includeIndexes,
       }),
     );
