@@ -2109,6 +2109,36 @@ describe("DeliveryTrackingService shutdown", () => {
     expect(queries).toBe(1);
   });
 
+  test("a closed service leaves its store alone", async () => {
+    const calls: string[] = [];
+    const store: DeliveryTrackingStore = {
+      init: async () => {
+        calls.push("init");
+      },
+      upsert: async () => {},
+      get: async () => undefined,
+      listDue: async () => {
+        calls.push("listDue");
+        return [];
+      },
+      patch: async () => {},
+      close: async () => {
+        calls.push("close");
+      },
+    };
+    const service = new DeliveryTrackingService({
+      providers: [createMockProvider({ id: "mock", status: "DELIVERED" })],
+      store,
+    });
+
+    await service.close();
+    await service.runOnce();
+    service.start();
+    service.stop();
+
+    expect(calls).toEqual(["close"]);
+  });
+
   test("logs a failed poll that the timer started and keeps polling", async () => {
     let polls = 0;
     const store: DeliveryTrackingStore = {
