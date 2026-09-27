@@ -580,18 +580,29 @@ export class DeliveryTrackingService {
 
             if (!originalRecord || !mergedRecord) continue;
 
-            if (
-              this.onStatusChange &&
-              mergedRecord.status !== originalRecord.status
-            ) {
-              changes.push({
-                record: mergedRecord,
-                previousStatus: originalRecord.status,
-              });
-            }
-
-            if (failover) {
-              await this.attemptApiFailover(mergedRecord, now, signal);
+            // A record put back by a poll stopped before its fallback send
+            // has no change to report.
+            let putBack = false;
+            try {
+              if (failover) {
+                putBack = !(await this.attemptApiFailover(
+                  mergedRecord,
+                  originalRecord,
+                  now,
+                  signal,
+                ));
+              }
+            } finally {
+              if (
+                !putBack &&
+                this.onStatusChange &&
+                mergedRecord.status !== originalRecord.status
+              ) {
+                changes.push({
+                  record: mergedRecord,
+                  previousStatus: originalRecord.status,
+                });
+              }
             }
           } catch (error) {
             failures.push({ messageId: update.messageId, error });
@@ -642,6 +653,13 @@ export class DeliveryTrackingService {
         this.polling.batchSize,
         leaseUntil,
       );
+      // A lease that ran out while the store took it holds nothing: another
+      // poll may have leased the records since. They are due again.
+      if (due && due.length > 0 && Date.now() >= leaseUntil.getTime()) {
+        throw new Error(
+          `The ${leaseMs} ms delivery tracking lease ran out before the store returned the due messages, so the poll left them for the next one; raise polling.leaseMs if this repeats`,
+        );
+      }
       if (due) return { due, leaseUntil };
     }
     return { due: await this.store.listDue(now, this.polling.batchSize) };
@@ -895,13 +913,16 @@ export class DeliveryTrackingService {
     return false;
   }
 
+  // Resolves false when the poll was stopped before the send and put the
+  // record back as it found it.
   private async attemptApiFailover(
     record: TrackingRecord,
+    found: TrackingRecord,
     now: Date,
     signal: AbortSignal,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const apiFailover = this.apiFailover;
-    if (!apiFailover) return;
+    if (!apiFailover) return true;
 
     const failover = this.readFailoverMetadata(record.metadata);
     const attemptedAt = now.toISOString();
@@ -923,7 +944,7 @@ export class DeliveryTrackingService {
           warningMessage: "apiFailover.sender is not configured",
         }),
       });
-      return;
+      return true;
     }
 
     const fallbackContent = failover.request.fallbackContent?.trim() ?? "";
@@ -936,7 +957,7 @@ export class DeliveryTrackingService {
             "failover.fallbackContent is required for API-level fallback",
         }),
       });
-      return;
+      return true;
     }
 
     // KMsg records the channel it chose; size text sent some other way.
@@ -974,6 +995,14 @@ export class DeliveryTrackingService {
       signal,
     };
 
+    // The poll was stopped while it stored the failure. A failed record is
+    // not polled again, so the poll puts the record back as it found it, due
+    // now: the next poll finds the failure again and sends the fallback.
+    if (signal.aborted) {
+      await this.store.upsert({ ...found, nextCheckAt: now });
+      return false;
+    }
+
     try {
       const sendResult = await apiFailover.sender(sendInput, attemptContext);
       if (sendResult.isSuccess) {
@@ -984,7 +1013,7 @@ export class DeliveryTrackingService {
             fallbackProviderId: sendResult.value.providerId,
           }),
         });
-        return;
+        return true;
       }
 
       await this.store.patch(record.messageId, {
@@ -1003,6 +1032,7 @@ export class DeliveryTrackingService {
         }),
       });
     }
+    return true;
   }
 
   private readFailoverMetadata(

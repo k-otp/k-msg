@@ -139,7 +139,7 @@ provider가 지원하는 항목은 `provider.transportCapabilities`(`abortSignal
 
 ## ALIMTALK 대체 문자
 
-`failover.fallbackContent`와 `failover.fallbackTitle`에도 SMS 텍스트처럼 `#{변수}`를 쓸 수 있고, 메시지의 `variables`로 채워집니다. `fallbackChannel`을 생략하면 `KMsg`가 채워진 텍스트 길이로 정합니다: `defaults.sms.autoLmsBytes`보다 길면 `lms`, 아니면 `sms`. tracking 기반 API 대체 발송도 이 채널을 따르고, 채널이 없는 레코드(`KMsg`를 거치지 않은 발송)는 90바이트를 넘으면 LMS로 보냅니다. 멈춘 폴링(signal abort 또는 `close()`)은 새 대체 발송을 시작하지 않으며, 그 레코드는 그대로 남아 다음 폴링이 보냅니다. `apiFailover.sender`의 두 번째 인자에 있는 `signal`을 발송에 넘기면 `close()`가 진행 중인 발송을 기다리지 않고, 그렇게 취소된 발송은 실패한 시도로 기록됩니다.
+`failover.fallbackContent`와 `failover.fallbackTitle`에도 SMS 텍스트처럼 `#{변수}`를 쓸 수 있고, 메시지의 `variables`로 채워집니다. `fallbackChannel`을 생략하면 `KMsg`가 채워진 텍스트 길이로 정합니다: `defaults.sms.autoLmsBytes`보다 길면 `lms`, 아니면 `sms`. tracking 기반 API 대체 발송도 이 채널을 따르고, 채널이 없는 레코드(`KMsg`를 거치지 않은 발송)는 90바이트를 넘으면 LMS로 보냅니다. 멈춘 폴링(signal abort 또는 `close()`)은 새 대체 발송을 시작하지 않습니다. 레코드는 폴링이 가져간 그대로 남고, 이미 실패를 저장했다면 그 상태로 되돌려 놓으므로 다음 폴링이 보냅니다. `apiFailover.sender`의 두 번째 인자에 있는 `signal`을 발송에 넘기면 `close()`가 진행 중인 발송을 기다리지 않고, 그렇게 취소된 발송은 실패한 시도로 기록됩니다.
 
 ```ts
 await kmsg.send({
@@ -197,7 +197,7 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### 한 스토어를 여러 곳에서 폴링할 때
 
-인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. 폴링은 레코드를 아직 임대하고 있을 때만 결과를 저장하므로, 임대 시간을 넘긴 폴링이 더 새로운 결과를 덮어쓰지 않습니다. 일찍 멈춘 폴링은 끝내지 못한 레코드의 임대를 돌려줍니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. 직접 만든 스토어는 `leaseDue`, `patchLeased`와 필요하면 `releaseLeases`를 구현하면 됩니다. MySQL에서는 임대에 트랜잭션이 필요합니다: `BunSqlDeliveryTrackingStore`는 트랜잭션을 쓰고, `HyperdriveDeliveryTrackingStore`에 넘긴 client에 `transaction` 함수가 없으면 임대하지 않고 폴링합니다. 프로세스가 죽는 등으로 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
+인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. 폴링은 레코드를 아직 임대하고 있을 때만 결과를 저장하므로, 임대 시간을 넘긴 폴링이 더 새로운 결과를 덮어쓰지 않습니다. 일찍 멈춘 폴링은 끝내지 못한 레코드의 임대를 돌려줍니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. 직접 만든 스토어는 `leaseDue`, `patchLeased`와 필요하면 `releaseLeases`를 구현하면 됩니다. MySQL에서는 임대에 트랜잭션이 필요합니다: `BunSqlDeliveryTrackingStore`는 트랜잭션을 쓰고, `HyperdriveDeliveryTrackingStore`에 넘긴 client에 `transaction` 함수가 없으면 임대하지 않고 폴링하며 `patchLeased()`는 reject됩니다. 프로세스가 죽는 등으로 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다. 스토어가 레코드를 돌려주기도 전에 끝난 임대는 아무것도 잡고 있지 않으므로, 그 폴링은 레코드를 남겨 두고 `runOnce()`는 reject됩니다. 이런 일이 되풀이되면 `leaseMs`를 늘리세요.
 
 ### 종료
 

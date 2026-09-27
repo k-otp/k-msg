@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
 import postgres from "postgres";
+import type { DeliveryTrackingFieldCryptoOptions } from "../../delivery-tracking/store.interface";
 import { BunSqlDeliveryTrackingStore } from "../../delivery-tracking/stores/bun-sql.store";
 import type { TrackingRecord } from "../../delivery-tracking/types";
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
@@ -111,6 +112,50 @@ async function expectDisjointLeases(
   expect(leased).toHaveLength(20);
 }
 
+// Field crypto that marks what it encrypts, so it can be read back.
+const fieldCrypto: DeliveryTrackingFieldCryptoOptions = {
+  config: {
+    enabled: true,
+    fields: { to: "encrypt+hash", from: "encrypt+hash", metadata: "encrypt" },
+    provider: {
+      encrypt: async ({ value }) => ({ ciphertext: `enc:${value}` }),
+      decrypt: async ({ ciphertext }) => ciphertext.slice(4),
+      hash: async ({ value }) => `h:${value}`,
+    },
+  },
+};
+
+// A patch of encrypted fields rewrites the whole record, and only under the
+// lease that holds it.
+async function expectEncryptedLeasedPatch(store: LeasingStore): Promise<void> {
+  await store.init();
+  await store.upsert({
+    ...dueRecord("e1", at(-1000)),
+    from: "01000000000",
+    metadata: { note: "sent" },
+  });
+  const leaseUntil = at(300_000);
+  expect(ids((await store.leaseDue(at(0), 10, leaseUntil)) ?? [])).toEqual([
+    "e1",
+  ]);
+
+  const patch = { status: "FAILED" as const, metadata: { note: "failed" } };
+  expect(await store.patchLeased("e1", at(1), patch)).toBe(false);
+  expect(await store.get("e1")).toMatchObject({
+    status: "SENT",
+    metadata: { note: "sent" },
+  });
+
+  expect(await store.patchLeased("e1", leaseUntil, patch)).toBe(true);
+  expect(await store.get("e1")).toMatchObject({
+    status: "FAILED",
+    metadata: { note: "failed" },
+    to: "01012345678",
+    from: "01000000000",
+    nextCheckAt: leaseUntil,
+  });
+}
+
 function postgresJsClient(sql: postgres.Sql): CloudflareSqlClient {
   return createCloudflareSqlClient({
     dialect: "postgres",
@@ -162,6 +207,62 @@ describe.skipIf(!postgresUrl)("leases on a real Postgres", () => {
     });
   }
 
+  for (const timestamp of ["bigint", "date"] as const) {
+    test(`stores an encrypted leased patch under its lease with ${timestamp} timestamps`, async () => {
+      await expectEncryptedLeasedPatch(
+        new HyperdriveDeliveryTrackingStore(postgresJsClient(connect()), {
+          tableName: `encrypted_${timestamp}`,
+          typeStrategy: { timestamp },
+          fieldCrypto,
+        }),
+      );
+    });
+  }
+
+  test("an encrypted leased patch leaves a record another poll leased while it was read", async () => {
+    const inner = postgresJsClient(connect());
+    // Runs once, right after the next SELECT returns.
+    let afterRead: (() => Promise<unknown>) | undefined;
+    const client: CloudflareSqlClient = {
+      dialect: "postgres",
+      query: (async (statement: string, params?: readonly unknown[]) => {
+        const result = await inner.query(statement, params);
+        const next = afterRead;
+        if (next && statement.startsWith("SELECT ")) {
+          afterRead = undefined;
+          await next();
+        }
+        return result;
+      }) as CloudflareSqlClient["query"],
+    };
+    const store = new HyperdriveDeliveryTrackingStore(client, {
+      tableName: "encrypted_race",
+      fieldCrypto,
+    });
+    await store.init();
+    await store.upsert({
+      ...dueRecord("e1", at(-1000)),
+      metadata: { note: "sent" },
+    });
+    const leaseA = at(1000);
+    await store.leaseDue(at(0), 10, leaseA);
+
+    // A's lease runs out, and B leases the record while A reads it.
+    const leaseB = at(5000);
+    afterRead = () => store.leaseDue(at(2000), 10, leaseB);
+    expect(
+      await store.patchLeased("e1", leaseA, {
+        status: "FAILED",
+        metadata: { note: "stale" },
+      }),
+    ).toBe(false);
+    expect(await store.get("e1")).toMatchObject({
+      status: "SENT",
+      metadata: { note: "sent" },
+      nextCheckAt: leaseB,
+    });
+  });
+
   test("two connections leasing at once get different records", async () => {
     const options = { tableName: "concurrent" };
     await expectDisjointLeases(
@@ -205,6 +306,16 @@ describe.skipIf(!mysqlUrl)("leases on a real MySQL or MariaDB", () => {
         new BunSqlDeliveryTrackingStore({
           sql: await connect(isolation),
           tableName: table(`cycle_${suffix}`),
+        }),
+      );
+    });
+
+    test(`stores an encrypted leased patch under its lease at ${isolation}`, async () => {
+      await expectEncryptedLeasedPatch(
+        new BunSqlDeliveryTrackingStore({
+          sql: await connect(isolation),
+          tableName: table(`encrypted_${suffix}`),
+          fieldCrypto,
         }),
       );
     });

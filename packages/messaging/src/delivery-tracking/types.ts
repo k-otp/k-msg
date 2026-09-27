@@ -111,7 +111,9 @@ export interface DeliveryTrackingPollingConfig {
    * `leaseDue`. While it holds them, other services polling the same store
    * skip them. A poll stores each record's next check as it goes and hands
    * back the records it does not finish, so the duration matters only when a
-   * poll runs longer or stops without doing that. 0 turns leasing off.
+   * poll runs longer or stops without doing that. A lease that runs out
+   * before the store returns the records holds nothing: `runOnce()` rejects
+   * and leaves them for the next poll. 0 turns leasing off.
    * @default 300_000 (5 minutes)
    */
   leaseMs?: number;
