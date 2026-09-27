@@ -5,7 +5,7 @@ prev: false
 title: "WebhookCollector"
 ---
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:173](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L173)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:174](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L174)
 
 ## Extends
 
@@ -17,7 +17,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:173](https:/
 
 > **new WebhookCollector**(`config?`): `WebhookCollector`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L188)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L189)
 
 #### Parameters
 
@@ -219,7 +219,7 @@ Defined in: [packages/analytics/src/shared/event-emitter.ts:35](https://github.c
 
 > **receiveWebhook**(`webhook`): `Promise`\<[`EventData`](/en/api/analytics/src/interfaces/eventdata/)[]\>
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L215)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L216)
 
 웹훅 수신 처리
 

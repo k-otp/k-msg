@@ -5,7 +5,7 @@ prev: false
 title: "WebhookCollectorConfig"
 ---
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L33)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L34)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:33](https://
 
 > **allowedSources**: `string`[]
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L47)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L48)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://
 
 > **enableSignatureValidation**: `boolean`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L38)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L39)
 
 Verify each webhook's signature before collecting it. Defaults to `true`,
 which needs `secretKey`; only `false` accepts unsigned webhooks.
@@ -32,7 +32,7 @@ which needs `secretKey`; only `false` accepts unsigned webhooks.
 
 > **maxPayloadSize**: `number`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L52)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L53)
 
 The largest payload accepted, in bytes: `rawBody` is measured before its
 signature is checked, then `body` by the length of its JSON.
@@ -43,7 +43,7 @@ signature is checked, then `body` by the length of its JSON.
 
 > **rateLimitPerMinute**: `number`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:53](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L53)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L54)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/analytics/src/collectors/webhook.collector.ts:53](https://
 
 > `optional` **secretKey?**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:46](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L46)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:47](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L47)
 
 The shared signing secret. Required while signature validation is on.
 
@@ -61,7 +61,7 @@ The shared signing secret. Required while signature validation is on.
 
 > **signatureHeader**: `string`
 
-Defined in: [packages/analytics/src/collectors/webhook.collector.ts:44](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L44)
+Defined in: [packages/analytics/src/collectors/webhook.collector.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/analytics/src/collectors/webhook.collector.ts#L45)
 
 The header holding the signature, matched in any case. Its value is
 `sha256=<hex>` or bare `<hex>`: the HMAC-SHA256 of `rawBody` keyed with
