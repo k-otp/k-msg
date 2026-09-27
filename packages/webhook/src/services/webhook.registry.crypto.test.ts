@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { type FieldCryptoConfig, FieldCryptoError } from "@k-msg/core";
-import { type WebhookEndpoint, WebhookEventType } from "../types/webhook.types";
+import {
+  type WebhookEndpoint,
+  type WebhookEvent,
+  WebhookEventType,
+} from "../types/webhook.types";
+import type { HttpClient } from "./webhook.dispatcher";
+import { WebhookDispatcher } from "./webhook.dispatcher";
 import { WebhookRegistry } from "./webhook.registry";
 
 function createConfig(
@@ -376,9 +382,62 @@ describe("WebhookRegistry with a secret it cannot decrypt", () => {
 
       expect(endpoint?.url).toBe("https://example.com/hook");
       expect(endpoint).not.toHaveProperty("secret");
+      expect(endpoint?.secretUndecryptable).toBe(true);
       expect(listed).not.toHaveProperty("secret");
     },
   );
+
+  test("an endpoint read without it and sent through JSON is still not signed for", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    outage.decrypt = true;
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+    // As in a job queue persisted to disk.
+    const parsed: WebhookEndpoint = {
+      ...JSON.parse(JSON.stringify(read)),
+      createdAt: read.createdAt,
+      updatedAt: read.updatedAt,
+    };
+    const calls: RequestInit[] = [];
+    const client: HttpClient = {
+      fetch: async (_url, options) => {
+        calls.push(options);
+        return new Response(null, { status: 204 });
+      },
+    };
+    const dispatcher = new WebhookDispatcher(
+      {
+        maxRetries: 0,
+        retryDelayMs: 1,
+        timeoutMs: 500,
+        enableSecurity: true,
+        secretKey: "whsec_shared",
+        enabledEvents: [WebhookEventType.MESSAGE_SENT],
+        batchSize: 1,
+        batchTimeoutMs: 50,
+      },
+      client,
+    );
+    const event: WebhookEvent = {
+      id: "evt-1",
+      type: WebhookEventType.MESSAGE_SENT,
+      timestamp: new Date(),
+      data: {},
+      metadata: {},
+      version: "1.0",
+    };
+
+    try {
+      const delivery = await dispatcher.dispatch(event, parsed);
+
+      expect(calls).toHaveLength(0);
+      expect(delivery.attempts[0]?.error).toContain("could not be decrypted");
+    } finally {
+      await dispatcher.shutdown();
+    }
+  });
 
   test("keeps the stored secret when the endpoint read without it is updated", async () => {
     const { config, outage } = createSwitchableConfig();

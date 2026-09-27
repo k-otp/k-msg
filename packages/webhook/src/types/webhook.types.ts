@@ -184,6 +184,11 @@ export const WebhookEndpointSchema = z.object({
   events: z.array(z.nativeEnum(WebhookEventType)),
   headers: z.optional(z.record(z.string(), z.string())),
   secret: z.optional(z.string()),
+  // Set on an endpoint read while field crypto, failing open, could not
+  // decrypt its stored secret, which it is returned without. Nothing is sent
+  // to it while enableSecurity is on, and writing it back keeps the stored
+  // secret. Never stored; a `secret` of the endpoint's own overrides it.
+  secretUndecryptable: z.optional(z.literal(true)),
   retryConfig: z.optional(WebhookRetryConfigSchema),
   filters: z.optional(WebhookFiltersSchema),
   createdAt: z.date(),

@@ -247,7 +247,8 @@ export class WebhookRuntimeService implements WebhookRuntime {
     };
     this.assertSigningSecret(merged, endpointId);
 
-    await this.endpointStore.update(endpointId, merged);
+    // The flag describes this read of the endpoint and is never stored.
+    await this.endpointStore.update(endpointId, unmarkSecret(merged));
     return merged;
   }
 
