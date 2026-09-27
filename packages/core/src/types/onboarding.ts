@@ -1,3 +1,5 @@
+import type { MessageType } from "./message";
+
 export type ProviderOnboardingCheckKind =
   | "manual"
   | "config"
@@ -47,6 +49,12 @@ export interface ProviderOnboardingCheckSpec {
    * Well-known probe operation used when kind === "api_probe".
    */
   probeOperation?: ProviderOnboardingProbeOperation;
+  /**
+   * Message types the check prepares for. When set, `doctor` evaluates it only
+   * for a provider that supports one of them, so an SMS-only configuration is
+   * not held to AlimTalk prerequisites.
+   */
+  messageTypes?: MessageType[];
 }
 
 export interface ProviderOnboardingSpec {

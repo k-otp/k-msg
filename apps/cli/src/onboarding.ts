@@ -139,6 +139,18 @@ function withGuidance(input: {
 }): OnboardingCheckResult {
   const { check, providerId, providerName, scope, spec } = input;
   const providerKind = spec?.providerId ?? providerId;
+  const notApplicableTypes = check.details?.notApplicable
+    ? check.details.messageTypes
+    : undefined;
+  if (Array.isArray(notApplicableTypes)) {
+    const types = notApplicableTypes.join(", ");
+    return {
+      ...check,
+      reason: `${providerName} is not configured for ${types}, so this check does not apply.`,
+      nextAction: `No action needed unless this provider should send ${types}.`,
+    };
+  }
+
   const guidance =
     check.id === "health_check"
       ? getHealthCheckGuidance(check, providerName)
@@ -571,6 +583,26 @@ async function evaluateSpecChecks(params: {
 
   for (const check of spec.checks) {
     if (!supportsScope(check, scope)) continue;
+
+    // Doctor reviews what the provider is configured to send; the AlimTalk
+    // preflight evaluates its checks regardless.
+    if (
+      scope === "doctor" &&
+      Array.isArray(check.messageTypes) &&
+      check.messageTypes.length > 0 &&
+      !check.messageTypes.some((type) => provider.supportedTypes.includes(type))
+    ) {
+      checks.push({
+        id: check.id,
+        title: check.title,
+        kind: check.kind,
+        severity: check.severity,
+        status: "skip",
+        message: `Not applicable: the provider is not configured for ${check.messageTypes.join(", ")}`,
+        details: { notApplicable: true, messageTypes: check.messageTypes },
+      });
+      continue;
+    }
 
     if (check.kind === "manual") {
       const state = getManualCheckState(runtime.config, provider.id, check.id);

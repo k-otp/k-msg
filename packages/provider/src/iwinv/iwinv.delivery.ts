@@ -19,6 +19,7 @@ import {
   getAlimTalkHeaders,
   mapIwinvCodeToKMsgErrorCode,
   normalizeIwinvCode,
+  requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
 import type { NormalizedIwinvConfig } from "./iwinv.internal.types";
 import {
@@ -42,6 +43,9 @@ export async function getAlimTalkDeliveryStatus(params: {
   context?: ProviderRequestContext;
 }): Promise<Result<DeliveryStatusResult | null, KMsgError>> {
   const { providerId, config, query, context } = params;
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
+
   const providerMessageId = query.providerMessageId.trim();
   if (!providerMessageId) {
     return fail(

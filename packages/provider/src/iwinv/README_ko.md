@@ -4,6 +4,9 @@ K-Message IWINV 프로바이더는 하나의 `send` API로 아래 채널을 통�
 - 알림톡
 - SMS / LMS / MMS
 
+한 채널만 설정해도 됩니다. 알림톡은 `apiKey`, SMS / LMS / MMS는 `smsApiKey`와
+`smsAuthKey`가 필요합니다.
+
 영문 문서는 `README.md`를 참고하세요.
 
 ## 설치
@@ -16,8 +19,8 @@ bun add @k-msg/provider @k-msg/core
 
 ## 공식 문서(IWINV) 링크
 
-- SMS API: https://docs.iwinv.kr/api/Message_api/
-- 알림톡(Kakao) API: https://docs.iwinv.kr/api/kakao_api/
+- SMS API: https://help.iwinv.kr/manual/read.html?idx=904
+- 알림톡(Kakao) API: https://help.iwinv.kr/manual/862
 
 ## 온보딩 요구사항
 
@@ -46,6 +49,27 @@ CLI 기준:
 - 응답 예:
   - 성공: `{"code":200,...}`
   - IP 미등록: `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}`
+
+템플릿 변수:
+- IWINV의 `templateParam`은 위치 기반 배열이지만, IWINV 규격서에는 위치와 변수의 대응이 나와 있지 않습니다.
+  `IWINVProvider`는 서로 다른 `#{이름}`마다 값 하나를, 템플릿 내용과 버튼 링크에서 그 이름이 처음 나오는
+  순서대로 보냅니다(IWINV 매뉴얼 예시는 한 버튼의 두 링크에 같은 `#{idx}`를 씁니다). IWINV 콘솔이 변수마다
+  값 하나를 받는 방식이며, 이전 버전이 `variables`의 키를 템플릿 순서로 적었을 때 보내던 형태와 같습니다.
+- 값은 `variables`에서 이름으로 찾습니다. 템플릿 본문은 `providerOptions.templateContent`(변수가 있는 버튼
+  링크도 포함)에서 읽고, 없으면 템플릿 목록 API(`POST /api/template/`)로 조회해 provider 인스턴스마다
+  10분간 재사용합니다.
+- `variables`에 값이 없는 변수(키가 없거나 `undefined`)가 있으면 아무것도 보내지 않고 `INVALID_REQUEST`로
+  실패합니다. 순서가 다른 템플릿은 `providerOptions.templateParam`(배열)을 주면 그대로 보냅니다.
+- `variables`가 비어 있고 `templateContent`도 없으면 채울 값이 없으므로 조회하지 않습니다. 값이 필요한
+  템플릿은 IWINV가 거부합니다(코드 `508`).
+
+대체문자(`reSend`):
+- `failover.fallbackContent`(또는 `providerOptions.resendContent`)는 IWINV의 직접 입력 타입인
+  `resendType: "N"`과 함께 `resendContent`로 보냅니다. `failover.fallbackTitle`은 LMS 제목인
+  `resendTitle`이 됩니다.
+- 대체문자 내용이 없으면 `resendType`을 보내지 않아 IWINV 기본값 `"Y"`(알림톡 내용 재발송)가 적용됩니다.
+- IWINV는 내용 길이에 따라 SMS(90바이트 이하) 또는 LMS로 보내므로 `failover.fallbackChannel`에
+  대응하는 IWINV 필드는 없습니다.
 
 알림톡 `code` 요약:
 - `200`: 발송 성공
@@ -84,19 +108,19 @@ CLI 기준:
 
 참고:
 - `IWINVProvider`는 `getBalance(query?)`를 지원합니다.
-  - 기본 채널: `ALIMTALK` (알림톡 charge API 사용)
+  - 기본 채널: `ALIMTALK` (알림톡 charge API 사용), `apiKey`가 없으면 `SMS`
   - `SMS/LMS/MMS`: SMS v2 charge API(`secret` 인증) 사용
 - 전송내역(history) 엔드포인트는 참고용 문서로 유지됩니다.
 
 ## 환경변수
 
-필수(알림톡):
+알림톡 사용 시 필수:
 
 ```bash
 IWINV_API_KEY=your_alimtalk_api_key
 ```
 
-SMS/LMS/MMS v2 사용 시에만 필수:
+SMS/LMS/MMS v2 사용 시 필수(SMS만 쓸 때는 이 두 값만 있으면 됩니다):
 
 ```bash
 IWINV_SMS_API_KEY=your_sms_api_key
@@ -153,16 +177,23 @@ const sms = await provider.send({
 });
 if (sms.isFailure) throw sms.error;
 
-// 알림톡
+// 알림톡: variables는 템플릿의 #{이름} 변수에 이름으로 매칭됩니다.
 const alimtalk = await provider.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "YOUR_TEMPLATE_CODE",
+  templateId: "YOUR_TEMPLATE_CODE",
   variables: { name: "Jane" },
   // 선택: `from`을 주면 IWINV의 대체문자(reSend) 플로우가 활성화됩니다.
   from: "01000000000",
 });
 if (alimtalk.isFailure) throw alimtalk.error;
+
+// SMS/LMS/MMS 전용: 알림톡 apiKey 없이 사용할 수 있습니다.
+const smsOnly = new IWINVProvider({
+  smsApiKey: process.env.IWINV_SMS_API_KEY!,
+  smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
+});
 ```
 
 ## CLI 사용 예시

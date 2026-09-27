@@ -88,18 +88,29 @@ function buildProviderConfigWithDefaults(
   return config;
 }
 
+/** The message types a configured provider entry is routed for. */
+export function routingSeedTypesFor(
+  provider: ProviderEntry,
+): readonly MessageType[] {
+  const metadata = providerCliMetadata[provider.type];
+  return (
+    metadata.routingSeedTypesForConfig?.(
+      provider.config as Record<string, unknown>,
+    ) ?? metadata.routingSeedTypes
+  );
+}
+
 function supportsRoutingSeedType(
-  type: ProviderType,
+  provider: ProviderEntry,
   messageType: MessageType,
 ): boolean {
-  return providerCliMetadata[type].routingSeedTypes.includes(messageType);
+  return routingSeedTypesFor(provider).includes(messageType);
 }
 
 function collectRoutingSeedTypes(providers: ProviderEntry[]): MessageType[] {
   const types = new Set<MessageType>();
   for (const provider of providers) {
-    for (const messageType of providerCliMetadata[provider.type]
-      .routingSeedTypes) {
+    for (const messageType of routingSeedTypesFor(provider)) {
       types.add(messageType);
     }
   }
@@ -114,7 +125,7 @@ function buildFullTemplateRoutingByType(
 
   for (const messageType of allMessageTypes) {
     const ids = providers
-      .filter((provider) => supportsRoutingSeedType(provider.type, messageType))
+      .filter((provider) => supportsRoutingSeedType(provider, messageType))
       .map((provider) => provider.id);
     if (ids.length > 0) {
       byType[messageType] = ids;
@@ -139,20 +150,20 @@ function resolvePrimaryKakaoProviderId(
   const preferred = providers.find(
     (provider) =>
       provider.type !== "mock" &&
-      supportsRoutingSeedType(provider.type, "ALIMTALK") &&
+      supportsRoutingSeedType(provider, "ALIMTALK") &&
       providerCliMetadata[provider.type].defaultKakaoSenderKey !== undefined,
   );
   if (preferred) return preferred.id;
 
   const fallbackWithSenderKey = providers.find(
     (provider) =>
-      supportsRoutingSeedType(provider.type, "ALIMTALK") &&
+      supportsRoutingSeedType(provider, "ALIMTALK") &&
       providerCliMetadata[provider.type].defaultKakaoSenderKey !== undefined,
   );
   if (fallbackWithSenderKey) return fallbackWithSenderKey.id;
 
   return providers.find((provider) =>
-    supportsRoutingSeedType(provider.type, "ALIMTALK"),
+    supportsRoutingSeedType(provider, "ALIMTALK"),
   )?.id;
 }
 
@@ -269,8 +280,7 @@ function addProviderToRouting(
   provider: ProviderEntry,
 ): void {
   ensureRoutingExists(config);
-  for (const messageType of providerCliMetadata[provider.type]
-    .routingSeedTypes) {
+  for (const messageType of routingSeedTypesFor(provider)) {
     const current = routeAsList(config.routing.byType[messageType]);
     if (!current.includes(provider.id)) {
       current.push(provider.id);
@@ -284,7 +294,7 @@ function syncRoutingForAllProviders(config: KMsgCliConfig): void {
 
   for (const messageType of collectRoutingSeedTypes(config.providers)) {
     const ids = config.providers
-      .filter((provider) => supportsRoutingSeedType(provider.type, messageType))
+      .filter((provider) => supportsRoutingSeedType(provider, messageType))
       .map((provider) => provider.id);
     if (ids.length > 0) {
       setRoutingByType(config, messageType, ids);
@@ -327,7 +337,7 @@ function ensureRuntimeDefaults(config: KMsgCliConfig): void {
 
 function ensureKakaoAliasDefaults(config: KMsgCliConfig): void {
   const primaryAlimTalkProvider = config.providers.find((provider) =>
-    supportsRoutingSeedType(provider.type, "ALIMTALK"),
+    supportsRoutingSeedType(provider, "ALIMTALK"),
   );
 
   if (!primaryAlimTalkProvider) return;

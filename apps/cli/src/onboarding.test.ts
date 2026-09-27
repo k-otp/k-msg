@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { ProviderOnboardingSpec } from "@k-msg/core";
+import { IWINVProvider } from "@k-msg/provider";
 import { runAlimTalkPreflight, runProviderDoctor } from "./onboarding";
 import type { ProviderWithCapabilities } from "./providers/registry";
 import type { Runtime } from "./runtime";
@@ -219,5 +220,35 @@ describe("onboarding guidance", () => {
     expect(plusIdPolicy?.nextAction).toContain(
       "provider-scoped Kakao channel alias",
     );
+  });
+
+  test("doctor skips AlimTalk-only checks for an SMS-only IWINV provider", async () => {
+    const config = {
+      smsApiKey: "sms-api-key",
+      smsAuthKey: "sms-auth-key",
+      smsSenderNumber: "01000000000",
+    };
+    const provider = new IWINVProvider(
+      config,
+    ) as unknown as ProviderWithCapabilities;
+
+    const result = await runProviderDoctor({
+      provider,
+      runtime: createRuntime({
+        providers: [{ type: "iwinv", id: "iwinv", config }],
+      }),
+    });
+
+    const manual = result.checks.find(
+      (check) => check.id === "channel_registered_in_console",
+    );
+    expect(manual?.status).toBe("skip");
+    // Skipped checks do not carry the advice written for failed ones.
+    expect(manual?.reason).toContain("not configured for ALIMTALK");
+    expect(manual?.nextAction).not.toContain("vendor console approval");
+    expect(
+      result.checks.find((check) => check.id === "template_list_probe")?.status,
+    ).toBe("skip");
+    expect(result.ok).toBe(true);
   });
 });

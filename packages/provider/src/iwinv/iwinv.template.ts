@@ -17,6 +17,7 @@ import {
   mapIwinvCodeToKMsgErrorCode,
   mapIwinvTemplateStatus,
   normalizeIwinvCode,
+  requireAlimTalkApiKey,
   toIwinvTemplateStatus,
 } from "./iwinv.alimtalk.helpers";
 import type { NormalizedIwinvConfig } from "./iwinv.internal.types";
@@ -47,6 +48,9 @@ export async function createTemplate(params: {
   input: TemplateCreateInput;
 }): Promise<Result<Template, KMsgError>> {
   const { providerId, config, input } = params;
+
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
 
   if (!input || typeof input !== "object") {
     return fail(
@@ -147,6 +151,9 @@ export async function updateTemplate(params: {
   ctx?: TemplateContext;
 }): Promise<Result<Template, KMsgError>> {
   const { providerId, config, code, patch, ctx } = params;
+
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
   const templateCode = typeof code === "string" ? code.trim() : "";
   if (!templateCode) {
     return fail(
@@ -259,6 +266,9 @@ export async function deleteTemplate(params: {
   code: string;
 }): Promise<Result<void, KMsgError>> {
   const { providerId, config, code } = params;
+
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
   const templateCode = typeof code === "string" ? code.trim() : "";
   if (!templateCode) {
     return fail(
@@ -315,6 +325,9 @@ export async function getTemplate(params: {
   ctx?: TemplateContext;
 }): Promise<Result<Template, KMsgError>> {
   const { providerId, config, code: inputCode } = params;
+
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
   const templateCode = typeof inputCode === "string" ? inputCode.trim() : "";
 
   if (!templateCode) {
@@ -408,6 +421,9 @@ export async function listTemplates(params: {
   ctx?: TemplateContext;
 }): Promise<Result<Template[], KMsgError>> {
   const { providerId, config, query } = params;
+
+  const missingApiKey = requireAlimTalkApiKey(config, providerId);
+  if (missingApiKey) return fail(missingApiKey);
 
   const pageNum =
     typeof query?.page === "number" && query.page > 0

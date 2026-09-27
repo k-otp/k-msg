@@ -4,6 +4,9 @@ K-Message IWINV provider with unified send API for:
 - AlimTalk
 - SMS / LMS / MMS
 
+Configure either channel alone or both: AlimTalk needs `apiKey`, and
+SMS / LMS / MMS need `smsApiKey` and `smsAuthKey`.
+
 For Korean documentation, see `README_ko.md`.
 
 ## Install
@@ -16,8 +19,8 @@ bun add @k-msg/provider @k-msg/core
 
 ## Official IWINV Docs (Source)
 
-- SMS API: https://docs.iwinv.kr/api/Message_api/
-- Kakao (AlimTalk) API: https://docs.iwinv.kr/api/kakao_api/
+- SMS API: https://help.iwinv.kr/manual/read.html?idx=904
+- Kakao (AlimTalk) API: https://help.iwinv.kr/manual/862
 
 ## Onboarding Requirements
 
@@ -48,6 +51,30 @@ For CLI:
 - Typical response shape:
   - `{"code":200,...}` on success
   - `{"code":206,"message":"등록하지 않은 IP에서는 발송되지 않습니다."}` when IP is not whitelisted
+
+Template variables:
+- IWINV's `templateParam` is a positional array, and IWINV's spec does not say how positions map
+  to placeholders. `IWINVProvider` sends one value per distinct `#{name}`, in the order the names
+  first appear in the template content and then in its button links (IWINV's manual reuses one
+  `#{idx}` in two links of a button). That is the one value per variable that IWINV's console
+  asks for, and what earlier versions sent when `variables` listed its keys in template order.
+- The values come from `variables` by name. The template text comes from
+  `providerOptions.templateContent` (include any button links that have placeholders), or else
+  from the template list API (`POST /api/template/`), kept for 10 minutes per provider instance.
+- A placeholder without a value in `variables` (no key, or `undefined`) fails the send with
+  `INVALID_REQUEST` before anything is sent. `providerOptions.templateParam` (an array) is sent
+  as-is, for a template that needs a different order.
+- With empty `variables` and no `templateContent` there is nothing to place, so no lookup is
+  made; IWINV itself refuses a template that needs values (code `508`).
+
+Fallback SMS/LMS (`reSend`):
+- `failover.fallbackContent` (or `providerOptions.resendContent`) is sent as `resendContent`
+  with `resendType: "N"`, IWINV's direct-input type. `failover.fallbackTitle` becomes
+  `resendTitle`, the LMS title.
+- Without fallback content, `resendType` is left to IWINV's default `"Y"`, which resends
+  the AlimTalk text.
+- IWINV sends the fallback as SMS (up to 90 bytes) or LMS by its length, so
+  `failover.fallbackChannel` has no IWINV field.
 
 AlimTalk `code` quick reference:
 - `200`: sent
@@ -86,19 +113,19 @@ Important:
 
 Note:
 - `IWINVProvider` supports `getBalance(query?)`.
-  - default channel: `ALIMTALK` (uses AlimTalk charge API)
+  - default channel: `ALIMTALK` (uses AlimTalk charge API), or `SMS` when `apiKey` is not set
   - `SMS/LMS/MMS`: uses SMS v2 charge API (`secret` auth)
 - History endpoint remains documented here for reference.
 
 ## Environment Variables
 
-Required (AlimTalk):
+Required for AlimTalk:
 
 ```bash
 IWINV_API_KEY=your_alimtalk_api_key
 ```
 
-Required only when using SMS/LMS/MMS v2:
+Required for SMS/LMS/MMS v2 (enough on their own for SMS-only use):
 
 ```bash
 IWINV_SMS_API_KEY=your_sms_api_key
@@ -155,16 +182,23 @@ const sms = await provider.send({
 });
 if (sms.isFailure) throw sms.error;
 
-// AlimTalk
+// AlimTalk: variables are matched to the template's #{name} placeholders.
 const alimtalk = await provider.send({
   type: "ALIMTALK",
   to: "01012345678",
-  templateCode: "YOUR_TEMPLATE_CODE",
+  templateId: "YOUR_TEMPLATE_CODE",
   variables: { name: "Jane" },
   // Optional: set `from` to enable SMS fallback (IWINV's `reSend` flow).
   from: "01000000000",
 });
 if (alimtalk.isFailure) throw alimtalk.error;
+
+// SMS/LMS/MMS only: no AlimTalk apiKey needed.
+const smsOnly = new IWINVProvider({
+  smsApiKey: process.env.IWINV_SMS_API_KEY!,
+  smsAuthKey: process.env.IWINV_SMS_AUTH_KEY!,
+  smsSenderNumber: process.env.IWINV_SMS_SENDER_NUMBER,
+});
 ```
 
 ## CLI Usage

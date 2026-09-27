@@ -21,6 +21,7 @@ export {
   type ProviderConfigFieldType,
   type ProviderTypeWithConfig,
   providerConfigFieldSpecs,
+  providerConfigKeyAlternatives,
 } from "./config-fields";
 export {
   createDefaultIWINVProvider,
