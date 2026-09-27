@@ -311,10 +311,13 @@ const tracking = new DeliveryTrackingService({
 
 Each new store runs those `CREATE ... IF NOT EXISTS` statements before its first query, which in a Worker means every request. When migrations create the schema (for example from `buildDeliveryTrackingSchemaSql()`), pass `initializeSchema: false` to skip them. The SQLite and Bun.SQL stores take the same option.
 
+The SQL job queues (`createD1JobQueue()`, `createDrizzleJobQueue()`, `HyperdriveJobQueue`) create their `kmsg_jobs` table and indexes the same way and take the same option. Migrations can create that schema from `buildJobQueueSchemaSql()`. `HyperdriveJobQueue` takes a table name or `{ tableName, initializeSchema }` as its second argument.
+
 ```ts
 const store = createD1DeliveryTrackingStore(env.DB, {
   initializeSchema: false,
 });
+const queue = createD1JobQueue(env.DB, { initializeSchema: false });
 ```
 
 Tracking table/index defaults are generated from the adapter schema spec:

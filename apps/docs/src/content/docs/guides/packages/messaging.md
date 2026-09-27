@@ -216,10 +216,13 @@ const tracking = new DeliveryTrackingService({
 
 스토어 인스턴스는 첫 쿼리 전에 이 `CREATE ... IF NOT EXISTS` 문을 매번 실행하므로, Worker에서는 요청마다 실행됩니다. 마이그레이션으로 스키마를 만든다면(예: `buildDeliveryTrackingSchemaSql()` 출력) `initializeSchema: false`로 건너뛰세요. SQLite, Bun.SQL 스토어도 같은 옵션을 받습니다.
 
+SQL 큐(`createD1JobQueue()`, `createDrizzleJobQueue()`, `HyperdriveJobQueue`)도 같은 방식으로 `kmsg_jobs` 테이블과 인덱스를 만들며, 같은 옵션을 받습니다. 마이그레이션에서는 `buildJobQueueSchemaSql()` 출력으로 이 스키마를 만들 수 있습니다. `HyperdriveJobQueue`의 두 번째 인자로는 테이블 이름이나 `{ tableName, initializeSchema }`를 넘깁니다.
+
 ```ts
 const store = createD1DeliveryTrackingStore(env.DB, {
   initializeSchema: false,
 });
+const queue = createD1JobQueue(env.DB, { initializeSchema: false });
 ```
 
 Tracking 테이블/인덱스 기본값은 어댑터 스키마 스펙에서 생성됩니다:
