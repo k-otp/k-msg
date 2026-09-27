@@ -169,7 +169,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
     return this.writeEndpoints(async () => {
       await this.ensureInitialized();
       const endpoint = this.createEndpoint(input);
-      await this.endpointStore.add(endpoint);
+      await this.storeEndpoints([endpoint]);
       return endpoint;
     });
   }
@@ -203,23 +203,52 @@ export class WebhookRuntimeService implements WebhookRuntime {
       assertDistinctEndpoints(endpoints);
       await this.assertNoConflicts(endpoints);
 
-      const created: WebhookEndpoint[] = [];
+      await this.storeEndpoints(endpoints);
+      return endpoints;
+    });
+  }
+
+  // Adds endpoints to the store, all or none. When one fails, for example
+  // because a writer outside this runtime took its id or URL, the ones
+  // already added are removed. So is the failed one if the store kept it
+  // anyway, as D1 can when it fails after committing; a conflict error means
+  // it was not stored, and its id may be another endpoint's. If a removal
+  // fails too, the original error is still the one to report.
+  private async storeEndpoints(
+    endpoints: readonly WebhookEndpoint[],
+  ): Promise<void> {
+    const added: WebhookEndpoint[] = [];
+    for (const endpoint of endpoints) {
       try {
-        for (const endpoint of endpoints) {
-          await this.endpointStore.add(endpoint);
-          created.push(endpoint);
-        }
+        await this.endpointStore.add(endpoint);
       } catch (error) {
-        // A later write failed, or a writer outside this runtime took an id
-        // or URL: remove what this call added. If that fails too, the
-        // original error is still the one to report.
-        for (const endpoint of created) {
-          await this.endpointStore.remove(endpoint.id).catch(() => undefined);
+        if (
+          !(error instanceof WebhookEndpointConflictError) &&
+          (await this.holdsEndpoint(endpoint))
+        ) {
+          added.push(endpoint);
+        }
+        for (const stored of added) {
+          await this.endpointStore.remove(stored.id).catch(() => undefined);
         }
         throw error;
       }
-      return created;
-    });
+      added.push(endpoint);
+    }
+  }
+
+  // Whether the store holds this endpoint itself: the row with its id has
+  // its URL and creation time. Read without field crypto, which these
+  // fields do not use.
+  private async holdsEndpoint(endpoint: WebhookEndpoint): Promise<boolean> {
+    const stored = await this.persistence.endpointStore
+      .get(endpoint.id)
+      .catch(() => null);
+    return (
+      stored !== null &&
+      stored.url === endpoint.url &&
+      stored.createdAt.getTime() === endpoint.createdAt.getTime()
+    );
   }
 
   updateEndpoint(
