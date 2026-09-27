@@ -35,6 +35,13 @@ import {
   getDeliveryTrackingSchemaSpec,
 } from "./delivery-tracking-schema";
 import type { CloudflareSqlClient, SqlDialect } from "./sql-client";
+import {
+  jsonParameterSql,
+  readJsonColumn,
+  readJsonObjectColumn,
+  selectJsonAsTextSql,
+  toJsonText,
+} from "./sql-json";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type TrackingRow = Record<string, unknown>;
@@ -44,14 +51,12 @@ type WhereSql = {
   params: unknown[];
 };
 
-function safeJsonParse<T>(value: unknown): T | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return undefined;
-  }
-}
+const JSON_COLUMN_KEYS: ReadonlySet<DeliveryTrackingColumnKey> = new Set([
+  "lastError",
+  "raw",
+  "metadata",
+  "metadataHashes",
+]);
 
 function toArray<T>(value: T | T[] | undefined): T[] | undefined {
   if (value === undefined) return undefined;
@@ -194,7 +199,9 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const colSql = keys
       .map((key) => this.quoteIdentifier(this.columnName(key)))
       .join(", ");
-    const valueSql = this.placeholders(keys.length).join(", ");
+    const valueSql = keys
+      .map((key, index) => this.valueSql(key, this.placeholder(index + 1)))
+      .join(", ");
 
     if (this.client.dialect === "mysql") {
       const updates = keys
@@ -231,7 +238,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
     const messageIdPlaceholder = this.placeholder(1);
     const { rows } = await this.client.query<TrackingRow>(
-      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${messageIdPlaceholder} LIMIT 1`,
+      `SELECT ${this.selectListSql()} FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("messageId"))} = ${messageIdPlaceholder} LIMIT 1`,
       [messageId],
     );
     const row = rows[0];
@@ -256,7 +263,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     );
 
     const { rows } = await this.client.query<TrackingRow>(
-      `SELECT * FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
+      `SELECT ${this.selectListSql()} FROM ${this.tableRef()} WHERE ${this.quoteIdentifier(this.columnName("status"))} NOT IN (${statusPlaceholders.join(", ")}) AND ${this.quoteIdentifier(this.columnName("nextCheckAt"))} <= ${nowPlaceholder} ORDER BY ${this.quoteIdentifier(this.columnName("nextCheckAt"))} ASC LIMIT ${limitPlaceholder}`,
       [...KMSG_TERMINAL_STATUSES, this.toDbTimestamp(now), safeLimit],
     );
 
@@ -289,7 +296,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const offsetPlaceholder = this.placeholder(where.params.length + 2);
 
     const { rows } = await this.client.query<TrackingRow>(
-      `SELECT * FROM ${this.tableRef()} ${where.sql} ORDER BY ${this.quoteIdentifier(orderBy)} ${direction} LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}`,
+      `SELECT ${this.selectListSql()} FROM ${this.tableRef()} ${where.sql} ORDER BY ${this.quoteIdentifier(orderBy)} ${direction} LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}`,
       params,
     );
 
@@ -461,19 +468,19 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     if ("lastError" in patch) {
       updates.push({
         key: "lastError",
-        value: patch.lastError ? JSON.stringify(patch.lastError) : null,
+        value: patch.lastError ? this.jsonText(patch.lastError) : null,
       });
     }
     if (this.schema.storeRaw && "raw" in patch) {
       updates.push({
         key: "raw",
-        value: patch.raw !== undefined ? JSON.stringify(patch.raw) : null,
+        value: patch.raw !== undefined ? this.jsonText(patch.raw) : null,
       });
     }
     if ("metadata" in patch) {
       updates.push({
         key: "metadata",
-        value: patch.metadata ? JSON.stringify(patch.metadata) : null,
+        value: patch.metadata ? this.jsonText(patch.metadata) : null,
       });
     }
 
@@ -482,7 +489,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const setSql = updates
       .map(
         (update, index) =>
-          `${this.quoteIdentifier(this.columnName(update.key))} = ${this.placeholder(index + 1)}`,
+          `${this.quoteIdentifier(this.columnName(update.key))} = ${this.valueSql(update.key, this.placeholder(index + 1))}`,
       )
       .join(", ");
 
@@ -570,27 +577,35 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     const lastCheckedAt = toDate(columnValue("lastCheckedAt"));
     if (lastCheckedAt) record.lastCheckedAt = lastCheckedAt;
 
-    const lastError = safeJsonParse<TrackingRecord["lastError"]>(
-      columnValue("lastError"),
-    );
-    if (lastError) record.lastError = lastError;
+    const lastError = readJsonObjectColumn(columnValue("lastError"));
+    if (
+      typeof lastError?.code === "string" &&
+      typeof lastError.message === "string"
+    ) {
+      record.lastError = {
+        ...lastError,
+        code: lastError.code,
+        message: lastError.message,
+      };
+    }
 
     if (this.schema.storeRaw) {
       const rawValue = columnValue("raw");
-      if (rawValue !== null && rawValue !== undefined) {
-        record.raw = safeJsonParse(rawValue) ?? rawValue;
+      const raw = readJsonColumn(rawValue);
+      if (raw !== undefined) {
+        record.raw = raw;
+      } else if (typeof rawValue === "string" && rawValue.length > 0) {
+        record.raw = rawValue;
       }
     }
 
-    const metadata = safeJsonParse<Record<string, unknown>>(
-      columnValue("metadata"),
-    );
-    if (metadata) record.metadata = metadata;
+    const metadataObject = readJsonObjectColumn(columnValue("metadata"));
+    if (metadataObject) record.metadata = metadataObject;
 
     if (this.schema.fieldCrypto.enabled) {
-      const metadataHashes = safeJsonParse<Record<string, string>>(
+      const metadataHashes = readJsonObjectColumn(
         columnValue("metadataHashes"),
-      );
+      ) as Record<string, string> | undefined;
       const restored = await restoreTrackingCryptoOnRead(
         record,
         {
@@ -602,7 +617,7 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
           fromMasked: toStringValue(columnValue("fromMasked")) || undefined,
           metadataEnc: toStringValue(columnValue("metadataEnc")) || undefined,
           metadataHashes,
-          metadata,
+          metadata: metadataObject,
           cryptoKid: toStringValue(columnValue("cryptoKid")) || undefined,
           cryptoVersion:
             toNumberValue(columnValue("cryptoVersion"), 0) > 0
@@ -639,6 +654,43 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
 
   private tableRef(): string {
     return this.quoteIdentifier(this.schema.tableName);
+  }
+
+  // JSONB on Postgres and JSON on MySQL unless typeStrategy.json is "text".
+  private hasNativeJsonColumns(): boolean {
+    return (
+      this.schema.typeStrategy.json === "auto" &&
+      this.client.dialect !== "sqlite"
+    );
+  }
+
+  // The stored columns, with JSON columns read as JSON text.
+  private selectListSql(): string {
+    return getDeliveryTrackingColumnKeys(this.schema)
+      .map((key) => {
+        const column = this.quoteIdentifier(this.columnName(key));
+        return JSON_COLUMN_KEYS.has(key)
+          ? selectJsonAsTextSql(this.client.dialect, column)
+          : column;
+      })
+      .join(", ");
+  }
+
+  private valueSql(key: DeliveryTrackingColumnKey, placeholder: string) {
+    return JSON_COLUMN_KEYS.has(key)
+      ? jsonParameterSql(
+          this.client.dialect,
+          placeholder,
+          this.hasNativeJsonColumns(),
+        )
+      : placeholder;
+  }
+
+  private jsonText(value: unknown): string {
+    return toJsonText(
+      value,
+      this.client.dialect === "postgres" && this.hasNativeJsonColumns(),
+    );
   }
 
   private columnName(key: DeliveryTrackingColumnKey): string {
@@ -718,16 +770,16 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
       case "nextCheckAt":
         return this.toDbTimestamp(record.nextCheckAt);
       case "lastError":
-        return record.lastError ? JSON.stringify(record.lastError) : null;
+        return record.lastError ? this.jsonText(record.lastError) : null;
       case "raw":
-        return record.raw !== undefined ? JSON.stringify(record.raw) : null;
+        return record.raw !== undefined ? this.jsonText(record.raw) : null;
       case "metadata":
-        return record.metadata ? JSON.stringify(record.metadata) : null;
+        return record.metadata ? this.jsonText(record.metadata) : null;
       case "metadataEnc":
         return record.metadataEnc ?? null;
       case "metadataHashes":
         return record.metadataHashes
-          ? JSON.stringify(record.metadataHashes)
+          ? this.jsonText(record.metadataHashes)
           : null;
       case "cryptoKid":
         return record.cryptoKid ?? null;

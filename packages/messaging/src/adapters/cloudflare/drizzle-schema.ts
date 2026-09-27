@@ -119,7 +119,7 @@ function renderPostgresTrackingSchema(
     ${secureAddressFields.trimStart()}
     status: ${shortTextField(c.status, true)},
     providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
-    providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
+    providerStatusMessage: text(${q(c.providerStatusMessage)}),
     sentAt: ${timestampField(c.sentAt)},
     deliveredAt: ${timestampField(c.deliveredAt)},
     failedAt: ${timestampField(c.failedAt)},
@@ -244,7 +244,7 @@ function renderMySqlTrackingSchema(
     ${secureAddressFields.trimStart()}
     status: ${shortTextField(c.status, true)},
     providerStatusCode: ${shortTextField(c.providerStatusCode, false)},
-    providerStatusMessage: ${shortTextField(c.providerStatusMessage, false)},
+    providerStatusMessage: text(${q(c.providerStatusMessage)}),
     sentAt: ${timestampField(c.sentAt)},
     deliveredAt: ${timestampField(c.deliveredAt)},
     failedAt: ${timestampField(c.failedAt)},
