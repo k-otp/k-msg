@@ -7,7 +7,7 @@ title: "createR2JobQueue"
 
 > **createR2JobQueue**\<`T`\>(`bucket`, `options?`): [`CloudflareObjectJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:274](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L274)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:283](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L283)
 
 ## Type Parameters
 

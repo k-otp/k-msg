@@ -2,32 +2,32 @@
 editUrl: false
 next: false
 prev: false
-title: "CloudflareObjectJobQueueOptions"
+title: "SQLiteJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L19)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
 ## Extends
 
-- [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/)\<[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)\<`T`\>\>
+- [`JobLeaseOptions`](/en/api/messaging/src/queue/interfaces/jobleaseoptions/)\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
 ## Type Parameters
 
 ### T
 
-`T`
+`T` = `unknown`
 
 ## Properties
 
-### keyPrefix?
+### dbPath?
 
-> `optional` **keyPrefix?**: `string`
+> `optional` **dbPath?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L22)
 
-Default: `kmsg/jobs`.
+Default: `:memory:`.
 
 ***
 
@@ -70,7 +70,7 @@ does not stop the dequeue.
 
 ##### job
 
-[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)
+[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)
 
 #### Returns
 

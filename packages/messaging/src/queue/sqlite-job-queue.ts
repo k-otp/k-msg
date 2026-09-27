@@ -1,19 +1,61 @@
 import Database from "bun:sqlite";
 import {
+  notifyLeaseExpired,
+  releaseExpiredLease,
+  resolveCleanupOptions,
+  resolveLeaseMs,
+} from "./job-lease";
+import {
+  JOB_LEASE_EXPIRED,
   type Job,
+  type JobDequeueOptions,
+  type JobLeaseOptions,
   type JobQueue,
+  type JobQueueCleanupOptions,
   type JobRetryDirective,
   JobStatus,
 } from "./job-queue.interface";
 
-interface SQLiteJobQueueOptions {
+export interface SQLiteJobQueueOptions<T = unknown>
+  extends JobLeaseOptions<Job<T>> {
+  /** Default: `:memory:`. */
   dbPath?: string;
 }
 
+const JOB_COLUMNS = `id, type, data, status, priority, attempts, max_attempts,
+  delay, created_at, process_at, completed_at, failed_at, error, metadata`;
+
+// The order dequeue() takes due jobs in: priority, then due time, then age.
+const DUE_ORDER = "priority DESC, process_at ASC, created_at ASC";
+
+// Leaves out the jobs the caller is still running, whose ids go in one JSON
+// parameter.
+function notRunningSql(running: readonly string[]): string {
+  return running.length > 0
+    ? " AND id NOT IN (SELECT value FROM json_each(?))"
+    : "";
+}
+
+function notRunningParams(running: readonly string[]): string[] {
+  return running.length > 0 ? [JSON.stringify(running)] : [];
+}
+
+/**
+ * A job queue in a SQLite database.
+ *
+ * With `leaseMs`, a processing job's `process_at` holds its lease's end, so
+ * the table needs no new column. A job already processing without a lease,
+ * taken by an earlier version or by a queue without `leaseMs`, cannot be
+ * told from one whose lease has expired, so it is due at once.
+ */
 export class SQLiteJobQueue<T> implements JobQueue<T> {
   private db: Database;
+  private readonly leaseMs: number;
+  private readonly onLeaseExpired?: SQLiteJobQueueOptions<T>["onLeaseExpired"];
 
-  constructor(options: SQLiteJobQueueOptions = {}) {
+  constructor(options: SQLiteJobQueueOptions<T> = {}) {
+    this.leaseMs = resolveLeaseMs(options.leaseMs);
+    this.onLeaseExpired = options.onLeaseExpired;
     this.db = new Database(options.dbPath ?? ":memory:");
     this.initializeSchema();
   }
@@ -66,28 +108,48 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
   }
 
   private rowToJob(row: Record<string, unknown>): Job<T> {
+    const status = row.status as JobStatus;
+    const processAt = new Date(row.process_at as number);
     return {
       id: row.id as string,
       type: row.type as string,
       data: JSON.parse(row.data as string) as T,
-      status: row.status as JobStatus,
+      status,
       priority: row.priority as number,
       attempts: row.attempts as number,
       maxAttempts: row.max_attempts as number,
       delay: row.delay as number,
       createdAt: new Date(row.created_at as number),
-      processAt: new Date(row.process_at as number),
+      processAt,
       completedAt: row.completed_at
         ? new Date(row.completed_at as number)
         : undefined,
       failedAt: row.failed_at ? new Date(row.failed_at as number) : undefined,
       error: (row.error as string | null) ?? undefined,
       metadata: JSON.parse(row.metadata as string) as Record<string, any>,
+      // A processing job's process_at is when its lease ends.
+      leaseExpiresAt:
+        status === JobStatus.PROCESSING && this.leasesEnabled()
+          ? processAt
+          : undefined,
     };
   }
 
   private generateId(): string {
     return `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  }
+
+  private leasesEnabled(): boolean {
+    return Number.isFinite(this.leaseMs);
+  }
+
+  // The jobs dequeue() can take now: pending ones that are due and, with
+  // leases, processing ones whose lease expired with attempts left.
+  private dueSql(): string {
+    return this.leasesEnabled()
+      ? `process_at <= ? AND (status = 'pending'
+          OR (status = 'processing' AND attempts + 1 < max_attempts))`
+      : "status = 'pending' AND process_at <= ?";
   }
 
   async enqueue(
@@ -143,30 +205,73 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     return job;
   }
 
-  async dequeue(): Promise<Job<T> | undefined> {
-    const now = Date.now();
+  /**
+   * Takes the next due job and, with `leaseMs`, leases it. Jobs whose lease
+   * expired are due again first, or fail when they have no attempts left.
+   */
+  async dequeue(options: JobDequeueOptions = {}): Promise<Job<T> | undefined> {
+    // Their caller will still complete or fail them, so their leases stand.
+    const running = [...(options.running ?? [])];
+    if (this.leasesEnabled()) {
+      // The callbacks run once the settled leases are stored and before the
+      // job this returns is leased, so they cannot shorten its lease.
+      for (const job of this.settleExpiredLeases(running)) {
+        await notifyLeaseExpired(this.onLeaseExpired, job);
+      }
+    }
+    return this.takeNext(running);
+  }
 
+  // Makes every job whose lease expired due again, or failed when it has no
+  // attempts left.
+  private settleExpiredLeases(running: readonly string[]): Job<T>[] {
+    const now = Date.now();
     const stmt = this.db.prepare(`
       UPDATE jobs
-      SET status = 'processing'
-      WHERE id = (
-        SELECT id FROM jobs
-        WHERE status = 'pending' 
-          AND process_at <= ?
-        ORDER BY priority DESC, process_at ASC, created_at ASC
-        LIMIT 1
-      )
-      RETURNING id, type, data, status, priority, attempts, max_attempts,
-                delay, created_at, process_at, completed_at, failed_at, error, metadata
+      SET error = ?,
+          failed_at = CASE WHEN attempts + 1 < max_attempts
+            THEN failed_at ELSE ? END,
+          status = CASE WHEN attempts + 1 < max_attempts
+            THEN 'pending' ELSE 'failed' END,
+          attempts = attempts + 1
+      WHERE status = 'processing' AND process_at <= ?${notRunningSql(running)}
+      RETURNING ${JOB_COLUMNS}
     `);
 
-    const result = stmt.get(now) as Record<string, unknown> | undefined;
+    const rows = stmt.all(
+      JOB_LEASE_EXPIRED,
+      now,
+      now,
+      ...notRunningParams(running),
+    ) as Record<string, unknown>[];
+    return rows.map((row) => this.rowToJob(row));
+  }
 
-    if (!result) {
-      return undefined;
-    }
+  // Marks the next due pending job processing and, with leases, leases it
+  // from now.
+  private takeNext(running: readonly string[]): Job<T> | undefined {
+    const now = Date.now();
+    const lease = this.leasesEnabled() ? "process_at = ?," : "";
+    const stmt = this.db.prepare(`
+      UPDATE jobs
+      SET ${lease} status = 'processing'
+      WHERE id = (
+        SELECT id FROM jobs
+        WHERE status = 'pending'
+          AND process_at <= ?${notRunningSql(running)}
+        ORDER BY ${DUE_ORDER}
+        LIMIT 1
+      )
+      RETURNING ${JOB_COLUMNS}
+    `);
 
-    return this.rowToJob(result);
+    const result = (
+      this.leasesEnabled()
+        ? stmt.get(now + this.leaseMs, now, ...notRunningParams(running))
+        : stmt.get(now, ...notRunningParams(running))
+    ) as Record<string, unknown> | null;
+
+    return result ? this.rowToJob(result) : undefined;
   }
 
   async complete(jobId: string, _result?: any): Promise<void> {
@@ -181,6 +286,11 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     stmt.run(now, jobId);
   }
 
+  /**
+   * Counts a failed attempt: the job is due again after `retry.delayMs` when
+   * retries are enabled and attempts are left, and fails otherwise. A
+   * completed job stays completed, even for a worker whose lease expired.
+   */
   async fail(
     jobId: string,
     error: string | Error,
@@ -193,44 +303,48 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     if (!job) {
       throw new Error(`Job ${jobId} not found`);
     }
+    if (job.status === JobStatus.COMPLETED) return;
 
-    const newAttempts = job.attempts + 1;
-
-    if (retry.enabled && newAttempts < job.maxAttempts) {
-      const processAt = now + (retry.delayMs ?? 0);
+    if (retry.enabled) {
       const stmt = this.db.prepare(`
         UPDATE jobs
-        SET status = 'pending',
-            attempts = ?,
-            process_at = ?,
-            error = ?
-        WHERE id = ?
+        SET error = ?,
+            process_at = CASE WHEN attempts + 1 < max_attempts
+              THEN ? ELSE process_at END,
+            failed_at = CASE WHEN attempts + 1 < max_attempts
+              THEN failed_at ELSE ? END,
+            status = CASE WHEN attempts + 1 < max_attempts
+              THEN 'pending' ELSE 'failed' END,
+            attempts = attempts + 1
+        WHERE id = ? AND status <> 'completed'
       `);
 
-      stmt.run(newAttempts, processAt, errorMessage, jobId);
+      stmt.run(errorMessage, now + Math.ceil(retry.delayMs ?? 0), now, jobId);
     } else {
       const stmt = this.db.prepare(`
         UPDATE jobs
-        SET status = 'failed',
-            attempts = ?,
+        SET error = ?,
             failed_at = ?,
-            error = ?
-        WHERE id = ?
+            status = 'failed',
+            attempts = attempts + 1
+        WHERE id = ? AND status <> 'completed'
       `);
 
-      stmt.run(newAttempts, now, errorMessage, jobId);
+      stmt.run(errorMessage, now, jobId);
     }
   }
 
+  /**
+   * The job `dequeue()` would take next, including one whose lease expired,
+   * shown as it will be once it is due again. Changes nothing.
+   */
   async peek(): Promise<Job<T> | undefined> {
     const now = Date.now();
     const stmt = this.db.prepare(`
-      SELECT id, type, data, status, priority, attempts, max_attempts,
-             delay, created_at, process_at, completed_at, failed_at, error, metadata
+      SELECT ${JOB_COLUMNS}
       FROM jobs
-      WHERE status = 'pending' 
-        AND process_at <= ?
-      ORDER BY priority DESC, process_at ASC, created_at ASC
+      WHERE ${this.dueSql()}
+      ORDER BY ${DUE_ORDER}
       LIMIT 1
     `);
 
@@ -240,25 +354,48 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
       return undefined;
     }
 
-    return this.rowToJob(result);
+    const job = this.rowToJob(result);
+    return releaseExpiredLease(job, now) ?? job;
   }
 
+  /** How many jobs are due now, including those whose lease expired. */
   async size(): Promise<number> {
     const stmt = this.db.prepare(`
       SELECT COUNT(*) as count
       FROM jobs
-      WHERE status = 'pending' 
-        AND process_at <= ?
+      WHERE ${this.dueSql()}
     `);
 
     const result = stmt.get(Date.now()) as { count: number };
     return result.count;
   }
 
+  /**
+   * When `dequeue()` next has work: the earliest due time of a pending job
+   * or, with `leaseMs`, lease expiry of a processing one. A time in the past
+   * means `dequeue()` has work now, even when it only settles an expired
+   * lease, so call `dequeue()` rather than checking `size()`. `undefined`
+   * when no job is pending or leased.
+   */
+  async nextDueAt(): Promise<Date | undefined> {
+    const statuses = this.leasesEnabled()
+      ? "'pending', 'processing'"
+      : "'pending'";
+    const stmt = this.db.prepare(`
+      SELECT MIN(process_at) AS next_due_at
+      FROM jobs
+      WHERE status IN (${statuses})
+    `);
+
+    const result = stmt.get() as { next_due_at: number | null };
+    return result.next_due_at === null
+      ? undefined
+      : new Date(result.next_due_at);
+  }
+
   async getJob(jobId: string): Promise<Job<T> | undefined> {
     const stmt = this.db.prepare(`
-      SELECT id, type, data, status, priority, attempts, max_attempts,
-             delay, created_at, process_at, completed_at, failed_at, error, metadata
+      SELECT ${JOB_COLUMNS}
       FROM jobs
       WHERE id = ?
     `);
@@ -290,20 +427,35 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     this.db.exec("DELETE FROM jobs");
   }
 
+  /**
+   * Removes finished jobs: completed and failed ones by default, or those
+   * with the given statuses, and with `olderThan`, only those that finished
+   * before it.
+   */
   async cleanupTerminal(
-    statuses: JobStatus[] = [JobStatus.COMPLETED, JobStatus.FAILED],
+    options: JobStatus[] | JobQueueCleanupOptions = {},
   ): Promise<number> {
+    const { statuses, olderThan } = resolveCleanupOptions(options);
     if (statuses.length === 0) {
       return 0;
     }
 
     const placeholders = statuses.map(() => "?").join(", ");
+    const finished =
+      olderThan === undefined
+        ? ""
+        : "AND COALESCE(completed_at, failed_at, created_at) < ?";
     const stmt = this.db.prepare(`
       DELETE FROM jobs
       WHERE status IN (${placeholders})
+      ${finished}
     `);
 
-    stmt.run(...statuses);
+    if (olderThan === undefined) {
+      stmt.run(...statuses);
+    } else {
+      stmt.run(...statuses, olderThan.getTime());
+    }
 
     const changes = this.db.query("SELECT changes() as changes").get() as {
       changes: number;

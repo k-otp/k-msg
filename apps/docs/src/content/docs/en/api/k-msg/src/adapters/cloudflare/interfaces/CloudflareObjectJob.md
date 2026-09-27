@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJob"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L21)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L25)
 
 A job in a KV, R2 or Durable Object queue.
 
@@ -25,7 +25,7 @@ A job in a KV, R2 or Durable Object queue.
 
 > **attempts**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L15)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L18)
 
 #### Inherited from
 
@@ -37,7 +37,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://git
 
 > `optional` **completedAt?**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L20)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L23)
 
 #### Inherited from
 
@@ -49,7 +49,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://git
 
 > **createdAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L18)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L21)
 
 #### Inherited from
 
@@ -61,7 +61,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://git
 
 > **data**: `T`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L12)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L15)
 
 #### Inherited from
 
@@ -73,7 +73,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:12](https://git
 
 > **delay**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L17)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L20)
 
 #### Inherited from
 
@@ -85,7 +85,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://git
 
 > `optional` **error?**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L22)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L25)
 
 #### Inherited from
 
@@ -97,7 +97,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://git
 
 > `optional` **failedAt?**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L21)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L24)
 
 #### Inherited from
 
@@ -109,7 +109,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://git
 
 > **id**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L10)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L13)
 
 #### Inherited from
 
@@ -121,10 +121,14 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:10](https://git
 
 > `optional` **leaseExpiresAt?**: `Date`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L26)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L31)
 
-While the job is processing: when it becomes due again unless it is
-completed or failed first.
+While the job is processing in a queue with `leaseMs`: when it becomes
+due again unless it is completed or failed first.
+
+#### Inherited from
+
+[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/).[`leaseExpiresAt`](/en/api/k-msg/src/adapters/node/interfaces/job/#leaseexpiresat)
 
 ***
 
@@ -132,7 +136,7 @@ completed or failed first.
 
 > **maxAttempts**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L16)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L19)
 
 #### Inherited from
 
@@ -144,7 +148,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://git
 
 > **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L23)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L26)
 
 #### Inherited from
 
@@ -156,7 +160,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://git
 
 > **priority**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L14)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L17)
 
 #### Inherited from
 
@@ -168,7 +172,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:14](https://git
 
 > **processAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L19)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L22)
 
 #### Inherited from
 
@@ -180,7 +184,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://git
 
 > `optional` **result?**: `unknown`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L28)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L27)
 
 What `complete()` was given.
 
@@ -190,7 +194,7 @@ What `complete()` was given.
 
 > **status**: [`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L13)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L16)
 
 #### Inherited from
 
@@ -202,7 +206,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://git
 
 > **type**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L11)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L14)
 
 #### Inherited from
 
