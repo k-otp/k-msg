@@ -2,6 +2,7 @@ import type { SQL } from "bun";
 import type { DeliveryTrackingSchemaOptions } from "../../adapters/cloudflare/delivery-tracking-schema";
 import { HyperdriveDeliveryTrackingStore } from "../../adapters/cloudflare/hyperdrive-delivery-tracking.store";
 import {
+  type CloudflareSqlClient,
   createCloudflareSqlClient,
   type SqlDialect,
 } from "../../adapters/cloudflare/sql-client";
@@ -47,18 +48,31 @@ export class BunSqlDeliveryTrackingStore implements DeliveryTrackingStore {
       this.ownsClient = true;
     }
 
-    const client = createCloudflareSqlClient({
-      dialect: this.inferDialect(),
-      query: async <T = Record<string, unknown>>(
+    const dialect = this.inferDialect();
+    const query =
+      (runner: SQL): CloudflareSqlClient["query"] =>
+      async <T = Record<string, unknown>>(
         statement: string,
         params: readonly unknown[] = [],
       ) => {
-        const result = await this.sql.unsafe(statement, [...params]);
+        const result = await runner.unsafe(statement, [...params]);
         if (Array.isArray(result)) {
           return { rows: result as T[], rowCount: result.length };
         }
         return { rows: [] as T[] };
-      },
+      };
+
+    const client = createCloudflareSqlClient({
+      dialect,
+      query: query(this.sql),
+      // A MySQL lease reads and updates its rows in one transaction, which
+      // holds their locks until the lease is written.
+      transaction: <T>(
+        fn: (tx: CloudflareSqlClient) => Promise<T>,
+      ): Promise<T> =>
+        this.sql.begin((tx) =>
+          fn(createCloudflareSqlClient({ dialect, query: query(tx) })),
+        ) as Promise<T>,
       close: async () => {
         if (this.closed || !this.ownsClient) return;
         this.closed = true;

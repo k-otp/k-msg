@@ -11,6 +11,7 @@ import {
   type ProviderRequestContext,
   type SendInput,
 } from "@k-msg/core";
+import type { SQL } from "bun";
 import { KMsg } from "../k-msg";
 import { InMemoryMessageRepository } from "../test-utils/in-memory-message-repository";
 import { createDeliveryTrackingHooks } from "./hooks";
@@ -979,6 +980,37 @@ describe("DeliveryTrackingStore (SQLite)", () => {
 });
 
 describe("DeliveryTrackingStore (Bun.SQL sqlite)", () => {
+  test("leases MySQL rows inside a transaction", async () => {
+    const statements: string[] = [];
+    let transactions = 0;
+    const runner = (where: string) => ({
+      unsafe: async (statement: string) => {
+        statements.push(`${where}: ${statement}`);
+        return [];
+      },
+    });
+    const sql = {
+      options: { adapter: "mysql" },
+      ...runner("pool"),
+      begin: async (fn: (tx: unknown) => Promise<unknown>) => {
+        transactions += 1;
+        return await fn(runner("transaction"));
+      },
+    } as unknown as SQL;
+    const store = new BunSqlDeliveryTrackingStore({
+      sql,
+      initializeSchema: false,
+    });
+
+    await store.leaseDue(new Date(), 10, new Date(Date.now() + 60_000));
+
+    // The locking read holds its rows only inside a transaction.
+    expect(transactions).toBe(1);
+    expect(statements).toEqual([
+      expect.stringMatching(/^transaction: SELECT .* FOR UPDATE$/),
+    ]);
+  });
+
   test("upsert/get/listDue/patch works with adapter=sqlite", async () => {
     const store = new BunSqlDeliveryTrackingStore({
       options: { adapter: "sqlite", filename: ":memory:" },
