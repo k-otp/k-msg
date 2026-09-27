@@ -7,7 +7,7 @@ title: "listFailedFieldCryptoMigrationChunks"
 
 > **listFailedFieldCryptoMigrationChunks**(`client`, `planId`, `options?`): `Promise`\<[`FieldCryptoMigrationChunkRecord`](/en/api/k-msg/src/adapters/cloudflare/interfaces/fieldcryptomigrationchunkrecord/)[]\>
 
-Defined in: [packages/messaging/src/migration/field-crypto/state.ts:356](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L356)
+Defined in: [packages/messaging/src/migration/field-crypto/state.ts:385](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/migration/field-crypto/state.ts#L385)
 
 ## Parameters
 
