@@ -47,7 +47,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:111]
 
 > **cleanupTerminal**(`options?`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L383)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:380](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L380)
 
 Removes finished jobs: completed and failed ones by default, or those
 with the given statuses, and with `olderThan`, only those that finished
@@ -73,7 +73,7 @@ before it.
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:371](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L371)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:368](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L368)
 
 #### Returns
 
@@ -89,7 +89,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:371]
 
 > **complete**(`jobId`, `result?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:247](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L247)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:244](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L244)
 
 Marks the job completed and keeps `result` with it when it can be
 stored as JSON. A result that cannot be stored is logged and dropped,
@@ -190,7 +190,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:132]
 
 > **fail**(`jobId`, `error`, `retry?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:274](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L274)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:271](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L271)
 
 A completed job stays completed, even for a worker whose lease expired.
 
@@ -222,7 +222,7 @@ A completed job stays completed, even for a worker whose lease expired.
 
 > **getJob**(`jobId`): `Promise`\<[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:358](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L358)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:355](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L355)
 
 #### Parameters
 
@@ -244,7 +244,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:358]
 
 > **nextDueAt**(): `Promise`\<`Date` \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:342](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L342)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:339](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L339)
 
 When `dequeue()` next has work: the earliest due time of a pending job
 or lease expiry of a processing one, and now for a processing job that
@@ -263,7 +263,7 @@ Use it to set a Durable Object alarm instead of polling.
 
 > **peek**(): `Promise`\<[`CloudflareObjectJob`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjob/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:312](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L312)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:309](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L309)
 
 The job `dequeue()` would take next, including one whose lease expired,
 shown as it will be once it is due again. Changes nothing.
@@ -282,7 +282,7 @@ shown as it will be once it is due again. Changes nothing.
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:364](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L364)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L361)
 
 #### Parameters
 
@@ -304,7 +304,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:364]
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:324](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L324)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:321](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L321)
 
 How many jobs are due now, including those whose lease expired.
 
