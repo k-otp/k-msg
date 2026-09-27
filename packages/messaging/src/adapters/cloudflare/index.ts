@@ -73,6 +73,7 @@ import {
   type CloudflareSqlSchemaTarget,
   type InitializeCloudflareSqlSchemaOptions,
   initializeCloudflareSqlSchema,
+  type JobQueueIndexNames,
 } from "./sql-schema";
 
 export type {
@@ -105,6 +106,7 @@ export type {
   FieldCryptoMigrationStateTables,
   FieldCryptoMigrationStatus,
   InitializeCloudflareSqlSchemaOptions,
+  JobQueueIndexNames,
   RenderDrizzleSchemaSourceOptions,
   SqlDialect,
 };
@@ -165,6 +167,7 @@ export interface CreateD1DeliveryTrackingStoreOptions
 
 export interface CreateD1JobQueueOptions {
   tableName?: string;
+  indexNames?: Partial<JobQueueIndexNames>;
   /**
    * Whether the queue creates its table and indexes on first use. Set it to
    * `false` when migrations create the schema.
@@ -176,6 +179,7 @@ export interface CreateD1JobQueueOptions {
 export interface CreateDrizzleJobQueueOptions
   extends CreateDrizzleSqlClientOptions {
   tableName?: string;
+  indexNames?: Partial<JobQueueIndexNames>;
   /**
    * Whether the queue creates its table and indexes on first use. Set it to
    * `false` when migrations create the schema.

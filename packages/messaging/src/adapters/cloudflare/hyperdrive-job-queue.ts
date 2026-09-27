@@ -13,6 +13,7 @@ import {
   selectJsonAsTextSql,
   toJsonText,
 } from "./sql-json";
+import type { JobQueueIndexNames } from "./sql-schema";
 import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type JobRow = Record<string, unknown>;
@@ -60,6 +61,7 @@ function toNumber(value: unknown, fallback = 0): number {
 export interface HyperdriveJobQueueConfig {
   /** @default "kmsg_jobs" */
   tableName?: string;
+  indexNames?: Partial<JobQueueIndexNames>;
   /**
    * Whether `init()` creates the table and indexes (`IF NOT EXISTS`). Each
    * new queue runs those statements before its first query, which in a
@@ -75,6 +77,7 @@ export type HyperdriveJobQueueOptions = string | HyperdriveJobQueueConfig;
 export class HyperdriveJobQueue<T> implements JobQueue<T> {
   private initPromise: Promise<void> | undefined;
   private readonly tableName: string;
+  private readonly indexNames: Partial<JobQueueIndexNames> | undefined;
   private readonly initializeSchema: boolean;
 
   constructor(
@@ -84,6 +87,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     const resolved =
       typeof options === "string" ? { tableName: options } : options;
     this.tableName = resolved.tableName ?? "kmsg_jobs";
+    this.indexNames = resolved.indexNames;
     this.initializeSchema = resolved.initializeSchema !== false;
   }
 
@@ -96,6 +100,7 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     this.initPromise = initializeCloudflareSqlSchema(this.client, {
       target: "queue",
       queueTableName: this.tableName,
+      queueIndexNames: this.indexNames,
     }).catch((error) => {
       this.initPromise = undefined;
       throw error;
