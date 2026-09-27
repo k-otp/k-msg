@@ -7,6 +7,11 @@ import type {
   SqlDialect,
 } from "../../adapters/cloudflare/sql-client";
 import {
+  jsonParameterSql,
+  readJsonObjectColumn,
+  toJsonText,
+} from "../../adapters/cloudflare/sql-json";
+import {
   applyTrackingCryptoOnWrite,
   type TrackingCryptoWriteInput,
 } from "../../delivery-tracking/field-crypto";
@@ -155,32 +160,25 @@ async function selectNextRows(
   params.push(limit);
 
   const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+  // Lowercase aliases: Postgres folds unquoted ones to lowercase.
   const { rows } = await client.query<Record<string, unknown>>(
-    `SELECT ${messageIdColumn} as messageId, ${requestedAtColumn} as requestedAt FROM ${tableRef} ${whereSql} ORDER BY ${requestedAtColumn} ASC, ${messageIdColumn} ASC LIMIT ${limitPlaceholder}`,
+    `SELECT ${messageIdColumn} AS message_id, ${requestedAtColumn} AS requested_at FROM ${tableRef} ${whereSql} ORDER BY ${requestedAtColumn} ASC, ${messageIdColumn} ASC LIMIT ${limitPlaceholder}`,
     params,
   );
 
   return rows
     .map((row) => ({
-      messageId: String(row.messageId ?? ""),
-      requestedAt: toNumber(row.requestedAt),
+      messageId: String(row.message_id ?? ""),
+      requestedAt: toNumber(row.requested_at),
     }))
     .filter((row) => row.messageId.length > 0);
 }
 
+// Reads metadata as the tracking store does, including rows that postgres.js
+// or Bun.SQL stored in a JSONB column as a JSON string.
 function parseMetadata(value: unknown): Record<string, unknown> | undefined {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : undefined;
-  } catch {
-    return undefined;
-  }
+  if (value === "") return undefined;
+  return readJsonObjectColumn(value);
 }
 
 function requireFieldCrypto(
@@ -215,6 +213,9 @@ async function backfillChunkByMessageIds(
   // encryption, or rows read here could be skipped by the write below.
   const stillMigratable = `(${q(columns.cryptoState)} IS NULL OR ${q(columns.cryptoState)} IN ('plain', 'degraded'))`;
   const metadataText = asText(client.dialect, q(columns.metadata));
+  // JSONB on Postgres and JSON on MySQL, unless the schema keeps JSON in TEXT.
+  const nativeJson =
+    spec.typeStrategy.json === "auto" && client.dialect !== "sqlite";
   const selectColumns = `${q(columns.messageId)} AS message_id, ${q(columns.providerId)} AS provider_id, ${q(columns.to)} AS to_plain, ${q(columns.from)} AS from_plain, ${metadataText} AS metadata_plain, ${q(columns.cryptoState)} AS crypto_state`;
   const { rows } = await client.query<Record<string, unknown>>(
     `SELECT ${selectColumns} FROM ${tableRef} WHERE ${q(columns.messageId)} IN (${idPlaceholders}) AND ${stillMigratable}`,
@@ -285,7 +286,12 @@ async function backfillChunkByMessageIds(
       [columns.metadataEnc, secured.metadataEnc ?? null],
       [
         columns.metadataHashes,
-        secured.metadataHashes ? JSON.stringify(secured.metadataHashes) : null,
+        secured.metadataHashes
+          ? toJsonText(
+              secured.metadataHashes,
+              client.dialect === "postgres" && nativeJson,
+            )
+          : null,
       ],
       [columns.cryptoKid, secured.cryptoKid ?? null],
       [columns.cryptoVersion, secured.cryptoVersion ?? 1],
@@ -293,10 +299,16 @@ async function backfillChunkByMessageIds(
     ];
     const at = (offset: number) =>
       placeholder(client.dialect, values.length + offset);
-    const assignments = values.map(
-      ([column], index) =>
-        `${q(column)} = ${placeholder(client.dialect, index + 1)}`,
-    );
+    const assignments = values.map(([column], index) => {
+      const value = placeholder(client.dialect, index + 1);
+      // JSON text is bound as text and cast, as the store binds it, or
+      // postgres.js and Bun.SQL would store it as a JSON string.
+      return `${q(column)} = ${
+        column === columns.metadataHashes
+          ? jsonParameterSql(client.dialect, value, nativeJson)
+          : value
+      }`;
+    });
     // Write only if the row still holds every value this ciphertext was
     // derived from: its state, recipient, sender, provider (part of the
     // default AAD), and metadata. A live writer may have changed any of them
