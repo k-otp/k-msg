@@ -4,6 +4,7 @@ import {
   ok,
   type Provider,
   type ProviderHealthStatus,
+  type ProviderRequestContext,
   type SendOptions,
 } from "@k-msg/core";
 import type { KMsgCliConfig } from "../config/schema";
@@ -13,15 +14,22 @@ const SOLAPI_DEPENDENCY_ERROR_PREFIX =
   "SOLAPI provider is configured, but the `solapi` dependency could not be loaded.";
 
 class FakeSolapiProvider implements Provider {
+  static lastContext: ProviderRequestContext | undefined;
+
   readonly id = "solapi";
   readonly name = "Fake Solapi Provider";
   readonly supportedTypes = ["SMS"] as const;
+  readonly transportCapabilities = {
+    abortSignal: "supported",
+    injectableFetch: "unsupported",
+  } as const;
 
   async healthCheck(): Promise<ProviderHealthStatus> {
     return { healthy: true, issues: [] };
   }
 
-  async send(_params: SendOptions) {
+  async send(_params: SendOptions, context?: ProviderRequestContext) {
+    FakeSolapiProvider.lastContext = context;
     return ok({
       messageId: "msg-1",
       providerId: this.id,
@@ -183,5 +191,32 @@ describe("provider registry", () => {
     expect(typeof provider?.createTemplate).toBe("function");
     expect(typeof provider?.requestTemplateInspection).toBe("function");
     expect(typeof provider?.listKakaoChannels).toBe("function");
+  });
+
+  test("keeps the request context and transport capabilities under a custom id", async () => {
+    const [provider] = await createProvidersWithLoaders(
+      createConfig([
+        {
+          type: "solapi",
+          id: "solapi-main",
+          config: { apiKey: "test-api-key", apiSecret: "test-api-secret" },
+        },
+      ]),
+      { loadSolapiProvider: async () => FakeSolapiProvider },
+    );
+    const controller = new AbortController();
+
+    await provider?.send(
+      { type: "SMS", to: "01012345678", text: "hello" },
+      { signal: controller.signal },
+    );
+
+    // The id wrapper must not drop the signal a provider says it honors.
+    expect(provider?.id).toBe("solapi-main");
+    expect(FakeSolapiProvider.lastContext?.signal).toBe(controller.signal);
+    expect(provider?.transportCapabilities).toEqual({
+      abortSignal: "supported",
+      injectableFetch: "unsupported",
+    });
   });
 });
