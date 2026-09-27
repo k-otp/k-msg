@@ -7,7 +7,7 @@ title: "createInMemoryWebhookPersistence"
 
 > **createInMemoryWebhookPersistence**(): [`WebhookPersistence`](/en/api/webhook/src/interfaces/webhookpersistence/)
 
-Defined in: [packages/webhook/src/runtime/persistence.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/persistence.ts#L116)
+Defined in: [packages/webhook/src/runtime/persistence.ts:142](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/persistence.ts#L142)
 
 ## Returns
 

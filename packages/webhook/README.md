@@ -195,7 +195,8 @@ Endpoint ids and URLs are unique, and registering never replaces an endpoint.
 that another endpoint uses in the same way. Change an endpoint's secret,
 events or URL with `updateEndpoint()`. `addEndpoints()` stores all of its
 endpoints or none: it checks them against stored endpoints first, and removes
-the ones it added if a later write fails. An id or URL given twice in one
+the ones it added if a later write fails, including one the store kept before
+reporting the error. An id or URL given twice in one
 call is bad input and throws a plain `Error`, not a conflict.
 
 To register the same endpoints on every deploy, update the one that is

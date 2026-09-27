@@ -7,7 +7,7 @@ title: "WebhookEndpointInput"
 
 > **WebhookEndpointInput** = `Omit`\<[`WebhookEndpoint`](/en/api/webhook/src/type-aliases/webhookendpoint/), `"id"` \| `"createdAt"` \| `"updatedAt"` \| `"status"`\> & `object`
 
-Defined in: [packages/webhook/src/runtime/types.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L77)
+Defined in: [packages/webhook/src/runtime/types.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/runtime/types.ts#L91)
 
 ## Type Declaration
 
