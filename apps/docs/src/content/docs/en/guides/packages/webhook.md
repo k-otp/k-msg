@@ -261,8 +261,10 @@ without one. A delivery is never sent unsigned while `enableSecurity` is on:
   `error`.
 - With `fieldCrypto.endpoint` failing open (`failMode: "open"`), an endpoint
   whose stored secret cannot be decrypted is returned without `secret`, not
-  with a masked, empty, or encrypted value, and its deliveries fail the same
-  way even when `secretKey` is set, since its receiver checks its own secret.
+  with a masked, empty, or encrypted value, and with
+  `secretUndecryptable: true`, which survives JSON. Its deliveries fail the
+  same way even when `secretKey` is set, since its receiver checks its own
+  secret.
   That includes `openFallback: "plaintext"`: a value that does not decrypt
   cannot be told apart from ciphertext, so a secret that fallback stored in
   plaintext is not used until it is set again. An update that does not set
