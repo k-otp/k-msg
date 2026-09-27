@@ -264,9 +264,12 @@ const runtime = new WebhookRuntimeService({
 - `fieldCrypto.endpoint`가 fail-open(`failMode: "open"`)일 때 저장된 secret을
   복호화하지 못한 엔드포인트는 마스킹 값, 빈 값, 암호문 대신 `secret` 없이
   반환되고, `secretKey`가 있어도 같은 방식으로 전송이 실패합니다. 그 수신
-  측은 자기 secret으로 검증하기 때문입니다. 새 `secret`을 지정하지 않은
-  업데이트는 저장된 secret을 그대로 둡니다. `openFallback: "plaintext"`에서는
-  암호화에 실패해 평문으로 저장된 secret을 계속 씁니다.
+  측은 자기 secret으로 검증하기 때문입니다. `openFallback: "plaintext"`도
+  마찬가지입니다. 복호화되지 않는 값은 암호문과 구별할 수 없으므로, 이
+  fallback이 평문으로 저장한 secret도 다시 지정하기 전까지 쓰지 않습니다.
+  `secret`을 지정하지 않은 업데이트는 저장된 secret을 그대로 두고, 지정한
+  `secret`을 암호화하지도 저장된 값과 비교하지도 못하면 추측하지 않고
+  실패합니다.
 
 secret은 field crypto 사용 여부와 관계없이 앞뒤 공백까지 주어진 그대로
 씁니다.
