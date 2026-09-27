@@ -3,6 +3,30 @@ export interface CloudflareObjectStorage {
   put(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
   list(prefix: string): Promise<string[]>;
+  /**
+   * The keys under `prefix` with their values, a listing page at a time, for
+   * storage whose listing returns values (Durable Objects), so reading
+   * everything under a prefix takes no get() per key.
+   */
+  entries?(prefix: string): AsyncIterable<[key: string, value: string]>;
+}
+
+/**
+ * Every key under `prefix` with its value, from the listing when the storage
+ * returns values, and without holding more than a page of them at a time.
+ */
+export async function* readObjectEntries(
+  storage: CloudflareObjectStorage,
+  prefix: string,
+): AsyncGenerator<[key: string, value: string]> {
+  if (storage.entries) {
+    yield* storage.entries(prefix);
+    return;
+  }
+  for (const key of await storage.list(prefix)) {
+    const value = await storage.get(key);
+    if (value !== null) yield [key, value];
+  }
 }
 
 export interface CloudflareKvNamespaceLike {
@@ -54,6 +78,30 @@ export interface CloudflareDurableObjectStorageLike {
 
 // Durable Object storage returns at most `limit` keys per list call.
 const DURABLE_OBJECT_LIST_PAGE_SIZE = 1000;
+
+// Pages through a prefix with startAfter: one call stops at the limit, which
+// left queues and stores blind to everything past the first page.
+async function* durableObjectPages(
+  storage: CloudflareDurableObjectStorageLike,
+  prefix: string,
+): AsyncGenerator<Map<string, unknown>> {
+  let startAfter: string | undefined;
+  for (;;) {
+    const page = await storage.list<unknown>({
+      prefix,
+      limit: DURABLE_OBJECT_LIST_PAGE_SIZE,
+      ...(startAfter === undefined ? {} : { startAfter }),
+    });
+    let lastKey: string | undefined;
+    for (const key of page.keys()) lastKey = key;
+    // Only an empty page ends the listing: storage may also cut a page
+    // short at a size cap. A page ending where the previous one did means
+    // the storage ignored startAfter, so stop rather than loop forever.
+    if (lastKey === undefined || lastKey === startAfter) return;
+    yield page;
+    startAfter = lastKey;
+  }
+}
 
 export function createKvObjectStorage(
   namespace: CloudflareKvNamespaceLike,
@@ -134,24 +182,18 @@ export function createDurableObjectStorage(
       await storage.delete(key);
     },
     async list(prefix: string): Promise<string[]> {
-      // Page through with startAfter: one call stops at the limit, which
-      // left queues and stores blind to everything past the first page.
       const keys: string[] = [];
-      let startAfter: string | undefined;
-      for (;;) {
-        const page = await storage.list({
-          prefix,
-          limit: DURABLE_OBJECT_LIST_PAGE_SIZE,
-          ...(startAfter === undefined ? {} : { startAfter }),
-        });
-        const pageKeys = Array.from(page.keys());
-        const lastKey = pageKeys.at(-1);
-        // Only an empty page ends the listing: storage may also cut a page
-        // short at a size cap. A page ending where the previous one did means
-        // the storage ignored startAfter, so stop rather than loop forever.
-        if (lastKey === undefined || lastKey === startAfter) return keys;
-        keys.push(...pageKeys);
-        startAfter = lastKey;
+      for await (const page of durableObjectPages(storage, prefix)) {
+        keys.push(...page.keys());
+      }
+      return keys;
+    },
+    async *entries(prefix: string): AsyncGenerator<[string, string]> {
+      // The listing already holds the values, so no get() per key.
+      for await (const page of durableObjectPages(storage, prefix)) {
+        for (const [key, value] of page) {
+          if (typeof value === "string") yield [key, value];
+        }
       }
     },
   };

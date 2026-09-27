@@ -39,7 +39,13 @@ import {
 import { HyperdriveDeliveryTrackingStore } from "./hyperdrive-delivery-tracking.store";
 import { HyperdriveJobQueue } from "./hyperdrive-job-queue";
 import { CloudflareObjectDeliveryTrackingStore } from "./object-delivery-tracking.store";
-import { CloudflareObjectJobQueue } from "./object-job-queue";
+import {
+  type CloudflareObjectCleanupOptions,
+  type CloudflareObjectJob,
+  CloudflareObjectJobQueue,
+  type CloudflareObjectJobQueueOptions,
+  JOB_LEASE_EXPIRED,
+} from "./object-job-queue";
 import {
   type CloudflareDurableObjectStorageLike,
   type CloudflareKvNamespaceLike,
@@ -82,6 +88,9 @@ export type {
   BuildJobQueueSchemaSqlOptions,
   CloudflareDurableObjectStorageLike,
   CloudflareKvNamespaceLike,
+  CloudflareObjectCleanupOptions,
+  CloudflareObjectJob,
+  CloudflareObjectJobQueueOptions,
   CloudflareObjectStorage,
   CloudflareR2BucketLike,
   CloudflareSqlClient,
@@ -132,6 +141,7 @@ export {
   HyperdriveDeliveryTrackingStore,
   HyperdriveJobQueue,
   initializeCloudflareSqlSchema,
+  JOB_LEASE_EXPIRED,
   listFailedFieldCryptoMigrationChunks,
   planFieldCryptoMigration,
   renderDrizzleSchemaSource,
@@ -237,11 +247,11 @@ export function createKvDeliveryTrackingStore(
 
 export function createKvJobQueue<T>(
   namespace: CloudflareKvNamespaceLike,
-  options: { keyPrefix?: string } = {},
+  options: CloudflareObjectJobQueueOptions<T> = {},
 ): CloudflareObjectJobQueue<T> {
   return new CloudflareObjectJobQueue<T>(
     createKvObjectStorage(namespace),
-    options.keyPrefix,
+    options,
   );
 }
 
@@ -263,11 +273,11 @@ export function createR2DeliveryTrackingStore(
 
 export function createR2JobQueue<T>(
   bucket: CloudflareR2BucketLike,
-  options: { keyPrefix?: string } = {},
+  options: CloudflareObjectJobQueueOptions<T> = {},
 ): CloudflareObjectJobQueue<T> {
   return new CloudflareObjectJobQueue<T>(
     createR2ObjectStorage(bucket),
-    options.keyPrefix,
+    options,
   );
 }
 
@@ -289,10 +299,10 @@ export function createDurableObjectDeliveryTrackingStore(
 
 export function createDurableObjectJobQueue<T>(
   storage: CloudflareDurableObjectStorageLike,
-  options: { keyPrefix?: string } = {},
+  options: CloudflareObjectJobQueueOptions<T> = {},
 ): CloudflareObjectJobQueue<T> {
   return new CloudflareObjectJobQueue<T>(
     createDurableObjectStorage(storage),
-    options.keyPrefix,
+    options,
   );
 }

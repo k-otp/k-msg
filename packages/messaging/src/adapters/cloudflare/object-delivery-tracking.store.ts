@@ -22,7 +22,10 @@ import {
   isTerminalDeliveryStatus,
   type TrackingRecord,
 } from "../../delivery-tracking/types";
-import type { CloudflareObjectStorage } from "./object-storage";
+import {
+  type CloudflareObjectStorage,
+  readObjectEntries,
+} from "./object-storage";
 
 interface StoredTrackingRecord {
   messageId: string;
@@ -224,11 +227,10 @@ export class CloudflareObjectDeliveryTrackingStore
       : 0;
     if (safeLimit === 0) return [];
 
-    const keys = await this.storage.list(this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const due: TrackingRecord[] = [];
 
-    for (const key of keys) {
-      const raw = await this.storage.get(key);
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -257,11 +259,10 @@ export class CloudflareObjectDeliveryTrackingStore
     const orderDirection = options.orderDirection ?? "desc";
     const normalizedFilter = await this.normalizeFilter(options);
 
-    const keys = await this.storage.list(this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const records: TrackingRecord[] = [];
 
-    for (const key of keys) {
-      const raw = await this.storage.get(key);
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -284,11 +285,10 @@ export class CloudflareObjectDeliveryTrackingStore
 
   async countRecords(filter: DeliveryTrackingRecordFilter): Promise<number> {
     const normalizedFilter = await this.normalizeFilter(filter);
-    const keys = await this.storage.list(this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     let count = 0;
 
-    for (const key of keys) {
-      const raw = await this.storage.get(key);
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;
@@ -306,14 +306,13 @@ export class CloudflareObjectDeliveryTrackingStore
     if (fields.length === 0) return [];
 
     const normalizedFilter = await this.normalizeFilter(filter);
-    const keys = await this.storage.list(this.recordPrefix());
+    const entries = readObjectEntries(this.storage, this.recordPrefix());
     const buckets = new Map<
       string,
       { key: Record<string, string>; count: number }
     >();
 
-    for (const key of keys) {
-      const raw = await this.storage.get(key);
+    for await (const [, raw] of entries) {
       if (!raw) continue;
       const record = await this.deserializeRecord(raw);
       if (!record) continue;

@@ -240,13 +240,23 @@ export class JobProcessor extends EventEmitter {
     }
 
     for (let i = 0; i < availableSlots; i++) {
-      const job = await this.queue.dequeue();
+      // A queue that leases jobs keeps the ones still running here, even
+      // once their lease has run out, rather than counting them as lost. A
+      // copy, so a job that finishes during the call stays in it.
+      const job = await this.queue.dequeue({
+        running: new Set(this.processing),
+      });
       if (!job) {
         break;
       }
+      // A queue that ignores `running` hands such a job out again; running
+      // it twice would repeat the work.
+      if (this.processing.has(job.id)) {
+        continue;
+      }
       this.processing.add(job.id);
-      // Jobs run concurrently. processJob frees the slot before any step that
-      // can reject, so a failure here only needs to be reported.
+      // Jobs run concurrently. processJob frees the slot even when a step
+      // rejects, so a failure here only needs to be reported.
       this.processJob(job).catch((error: unknown) => {
         logBackgroundFailure("Job processing failed", error, {
           jobId: job.id,
@@ -259,12 +269,15 @@ export class JobProcessor extends EventEmitter {
   private async processJob(job: Job<any>): Promise<void> {
     const handler = this.handlers.get(job.type);
     if (!handler) {
-      this.processing.delete(job.id);
-      await this.failJob(
-        job.id,
-        `No handler registered for job type: ${job.type}`,
-        { enabled: false },
-      );
+      try {
+        await this.failJob(
+          job.id,
+          `No handler registered for job type: ${job.type}`,
+          { enabled: false },
+        );
+      } finally {
+        this.processing.delete(job.id);
+      }
       this.metrics.lastProcessedAt = new Date();
       await this.refreshQueueMetrics();
       return;
@@ -295,27 +308,32 @@ export class JobProcessor extends EventEmitter {
 
       this.emit("job:completed", { job, result, processingTime });
     } catch (error) {
-      this.processing.delete(job.id);
       this.metrics.activeJobs--;
 
       const shouldRetry = job.attempts + 1 < job.maxAttempts;
 
-      if (shouldRetry) {
-        const retryDelay = this.getRetryDelay(job.attempts);
-        await this.failJob(
-          job.id,
-          error instanceof Error ? error.message : String(error),
-          { enabled: true, delayMs: retryDelay },
-        );
+      // The job stays in `processing` until its failure is stored, so a
+      // dequeue() in between still leaves it to this processor.
+      try {
+        if (shouldRetry) {
+          const retryDelay = this.getRetryDelay(job.attempts);
+          await this.failJob(
+            job.id,
+            error instanceof Error ? error.message : String(error),
+            { enabled: true, delayMs: retryDelay },
+          );
 
-        this.metrics.retried++;
-        this.emit("job:retry", { job, error, retryDelay });
-      } else {
-        await this.failJob(
-          job.id,
-          error instanceof Error ? error.message : String(error),
-          { enabled: false },
-        );
+          this.metrics.retried++;
+          this.emit("job:retry", { job, error, retryDelay });
+        } else {
+          await this.failJob(
+            job.id,
+            error instanceof Error ? error.message : String(error),
+            { enabled: false },
+          );
+        }
+      } finally {
+        this.processing.delete(job.id);
       }
     }
 

@@ -273,6 +273,184 @@ describe("JobProcessor", () => {
     await processor.stop();
   });
 
+  test("should tell the queue which jobs it is still running", async () => {
+    const job: Job<{ n: number }> = {
+      id: "job-1",
+      type: "send",
+      data: { n: 1 },
+      status: JobStatus.PROCESSING,
+      priority: 0,
+      attempts: 0,
+      maxAttempts: 3,
+      delay: 0,
+      createdAt: new Date(),
+      processAt: new Date(),
+      metadata: {},
+    };
+    const running: string[][] = [];
+    const passed: Array<ReadonlySet<string> | undefined> = [];
+    let handedOut = false;
+    const queue: JobQueue<{ n: number }> = {
+      enqueue: async () => ({ ...job }),
+      dequeue: async (options) => {
+        running.push([...(options?.running ?? [])]);
+        passed.push(options?.running);
+        if (handedOut) return undefined;
+        handedOut = true;
+        return { ...job };
+      },
+      complete: async () => {},
+      fail: async () => {},
+      peek: async () => undefined,
+      size: async () => 0,
+      getJob: async () => ({ ...job }),
+      remove: async () => true,
+      clear: async () => {},
+    };
+    const processor = new JobProcessor(
+      {
+        concurrency: 2,
+        retryDelays: [0],
+        maxRetries: 3,
+        pollInterval: 5,
+        enableMetrics: false,
+      },
+      queue,
+    );
+    processor.handle("send", async () => {
+      await wait(50);
+      return "ok";
+    });
+
+    processor.start();
+    await wait(30);
+    await processor.stop();
+
+    expect(running[0]).toEqual([]);
+    expect(running.slice(1)).toContainEqual(["job-1"]);
+    // Each dequeue() gets the jobs running when it was called, which the
+    // processor's later changes do not alter.
+    expect(passed.map((set) => [...(set ?? [])])).toEqual(running);
+  });
+
+  test("should keep a failed job running until its failure is stored", async () => {
+    const job: Job<{ n: number }> = {
+      id: "job-1",
+      type: "send",
+      data: { n: 1 },
+      status: JobStatus.PROCESSING,
+      priority: 0,
+      attempts: 0,
+      maxAttempts: 3,
+      delay: 0,
+      createdAt: new Date(),
+      processAt: new Date(),
+      metadata: {},
+    };
+    let storeFailure = () => {};
+    const failureStored = new Promise<void>((resolve) => {
+      storeFailure = resolve;
+    });
+    let storingFailure = false;
+    const runningWhileStoring: boolean[] = [];
+    let handedOut = false;
+    const queue: JobQueue<{ n: number }> = {
+      enqueue: async () => ({ ...job }),
+      dequeue: async (options) => {
+        if (storingFailure) {
+          runningWhileStoring.push(options?.running?.has(job.id) ?? false);
+        }
+        if (handedOut) return undefined;
+        handedOut = true;
+        return { ...job };
+      },
+      complete: async () => {},
+      fail: async () => {
+        storingFailure = true;
+        await failureStored;
+        storingFailure = false;
+      },
+      peek: async () => undefined,
+      size: async () => 0,
+      getJob: async () => ({ ...job }),
+      remove: async () => true,
+      clear: async () => {},
+    };
+    const processor = new JobProcessor(
+      {
+        concurrency: 2,
+        retryDelays: [0],
+        maxRetries: 3,
+        pollInterval: 5,
+        enableMetrics: false,
+      },
+      queue,
+    );
+    processor.handle("send", async () => {
+      throw new Error("provider down");
+    });
+
+    processor.start();
+    await wait(40);
+    storeFailure();
+    await processor.stop();
+
+    expect(runningWhileStoring.length).toBeGreaterThan(0);
+    expect(runningWhileStoring.every(Boolean)).toBe(true);
+  });
+
+  test("should not run a job again while it is still running", async () => {
+    // Ignores `running` and hands the same job out on every dequeue, as a
+    // queue without that option does once its lease on a job runs out while
+    // the handler is still busy with it.
+    const job: Job<{ n: number }> = {
+      id: "job-1",
+      type: "send",
+      data: { n: 1 },
+      status: JobStatus.PROCESSING,
+      priority: 0,
+      attempts: 0,
+      maxAttempts: 3,
+      delay: 0,
+      createdAt: new Date(),
+      processAt: new Date(),
+      metadata: {},
+    };
+    const queue: JobQueue<{ n: number }> = {
+      enqueue: async () => ({ ...job }),
+      dequeue: async () => ({ ...job }),
+      complete: async () => {},
+      fail: async () => {},
+      peek: async () => undefined,
+      size: async () => 1,
+      getJob: async () => ({ ...job }),
+      remove: async () => true,
+      clear: async () => {},
+    };
+    const processor = new JobProcessor(
+      {
+        concurrency: 2,
+        retryDelays: [0],
+        maxRetries: 3,
+        pollInterval: 5,
+        enableMetrics: false,
+      },
+      queue,
+    );
+    let runs = 0;
+    processor.handle("send", async () => {
+      runs += 1;
+      await wait(100);
+      return "ok";
+    });
+
+    processor.start();
+    await wait(60);
+
+    expect(runs).toBe(1);
+    await processor.stop();
+  });
+
   test("should fail missing handlers without leaving processing slots stuck", async () => {
     const processor = new JobProcessor(
       {

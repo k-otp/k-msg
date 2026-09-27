@@ -5,7 +5,7 @@ prev: false
 title: "CreateDrizzleJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L179)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:189](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L189)
 
 ## Extends
 
@@ -57,7 +57,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:38](https:
 
 > `optional` **indexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:182](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L182)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:192](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L192)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:182](https://gi
 
 > `optional` **initializeSchema?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:188](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L188)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:198](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L198)
 
 Whether the queue creates its table and indexes on first use. Set it to
 `false` when migrations create the schema.
@@ -174,4 +174,4 @@ readonly `unknown`[]
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:181](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L181)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L191)

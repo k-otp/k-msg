@@ -486,6 +486,59 @@ const queue = createDrizzleJobQueue({
 });
 ```
 
+### KV, R2 and Durable Object Job Queues
+
+`createDurableObjectJobQueue`, `createKvJobQueue` and `createR2JobQueue` store each job as JSON under `keyPrefix` (default `kmsg/jobs`).
+
+- With `leaseMs`, `dequeue()` leases the job it returns for that long. Without it, a job whose worker stopped mid-job, for example in a deploy, stays `processing` forever. If a leased job is neither completed nor failed in time, the next `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`, exported as `JOB_LEASE_EXPIRED`) and makes the job due again, or fails it when no attempts are left, then calls `onLeaseExpired(job)`. It calls it before it leases the job it returns, so a slow callback does not shorten that lease.
+  - A job that is already `processing` without a lease, such as one taken by an earlier version, gets a lease when `dequeue()` first sees it.
+  - Leases are not renewed and not fenced: set `leaseMs` above the longest time a job can take, because a worker that outlives its lease can still complete or fail the job while another worker has it.
+  - `dequeue({ running })` leaves the jobs its caller is still running alone: it neither hands them out again nor counts their lease as lost. `JobProcessor` passes the jobs it is running, so a handler that outlives its lease is not run twice by the same processor.
+- `nextDueAt()` returns when `dequeue()` next has work: a pending job's due time or a lease's end. Set an alarm for it instead of polling. A time in the past means `dequeue()` has work now, even if only to fail a job whose lease ran out, so call `dequeue()` rather than checking `size()`.
+- `complete(jobId, result)` keeps `result` on the job, for example the provider's message id. A result that JSON cannot hold, or that is too large for the storage, is logged and dropped rather than failing the completion. `fail()` never reopens a completed job.
+- `cleanupTerminal({ olderThan })` removes only jobs that finished before `olderThan`, so a finished job stays readable for a while.
+- On Durable Objects, reads take the values from the storage listing, a page at a time, instead of one `get()` per job. `dequeue()` still reads every stored job, so clean up finished jobs regularly.
+
+For example, a Durable Object that sends from its alarm:
+
+```ts
+import { DurableObject } from "cloudflare:workers";
+import { createDurableObjectJobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export class SendQueue extends DurableObject<Env> {
+  private readonly queue = createDurableObjectJobQueue<SendInput>(
+    this.ctx.storage,
+    // Sends time out after 10 seconds, so a minute is plenty.
+    { leaseMs: 60_000 },
+  );
+
+  async alarm(): Promise<void> {
+    for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (result.isSuccess) {
+        await this.queue.complete(job.id, {
+          providerMessageId: result.value.providerMessageId,
+        });
+      } else {
+        await this.queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // Keep finished jobs readable for a day.
+    await this.queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+    const next = await this.queue.nextDueAt();
+    if (next) await this.ctx.storage.setAlarm(next);
+  }
+}
+```
+
 ### Tracking Schema Customization
 
 `storeRaw` defaults to `false`. Enable it only when you explicitly need provider raw payload storage.

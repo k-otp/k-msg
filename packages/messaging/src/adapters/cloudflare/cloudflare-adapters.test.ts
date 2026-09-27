@@ -1255,6 +1255,76 @@ describe("Cloudflare backend helpers", () => {
     expect(keys).toHaveLength(1000);
   });
 
+  test("DurableObject reads take values from the listing, not one get() each", async () => {
+    const data = new Map<string, string>();
+    const calls = { get: 0, list: 0 };
+    // Behaves like Durable Object storage: sorted keys, `limit` per call.
+    const doStorage = {
+      async get<T>(key: string) {
+        calls.get += 1;
+        return data.get(key) as T | undefined;
+      },
+      async put<T>(key: string, value: T) {
+        data.set(key, String(value));
+      },
+      async delete(key: string) {
+        return data.delete(key);
+      },
+      async list<T>(options?: {
+        prefix?: string;
+        startAfter?: string;
+        limit?: number;
+      }) {
+        calls.list += 1;
+        const prefix = options?.prefix ?? "";
+        const entries = Array.from(data.entries())
+          .filter(([key]) => key.startsWith(prefix))
+          .filter(([key]) => !options?.startAfter || key > options.startAfter)
+          .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          .slice(0, options?.limit ?? Number.POSITIVE_INFINITY);
+        return new Map(entries) as Map<string, T>;
+      },
+    };
+
+    const queue = createDurableObjectJobQueue<{ n: number }>(doStorage);
+    for (let index = 0; index < 2500; index += 1) {
+      await queue.enqueue("send", { n: index });
+    }
+    const urgent = await queue.enqueue("send", { n: -1 }, { priority: 10 });
+
+    const store = createDurableObjectDeliveryTrackingStore(doStorage);
+    const now = new Date();
+    for (const messageId of ["m1", "m2", "m3"]) {
+      await store.upsert({
+        messageId,
+        providerId: "mock",
+        providerMessageId: `p-${messageId}`,
+        type: "SMS",
+        to: "01012345678",
+        requestedAt: now,
+        status: "SENT",
+        statusUpdatedAt: now,
+        attemptCount: 0,
+        nextCheckAt: now,
+      });
+    }
+    calls.get = 0;
+    calls.list = 0;
+
+    expect((await queue.dequeue())?.id).toBe(urgent.id);
+    // 2,501 jobs in pages of 1,000, then the empty page that ends the listing.
+    expect(calls).toEqual({ get: 0, list: 4 });
+
+    const due = await store.listDue(new Date(now.getTime() + 1), 10);
+    expect(due.map((record) => record.messageId).sort()).toEqual([
+      "m1",
+      "m2",
+      "m3",
+    ]);
+    expect(await store.countRecords({})).toBe(3);
+    expect(calls.get).toBe(0);
+  });
+
   test("creates DurableObject-backed store/queue", async () => {
     const data = new Map<string, string>();
     const doStorage = {
