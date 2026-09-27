@@ -35,7 +35,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:41]
 
 > **close**(): `void`
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:137](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L137)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L145)
 
 #### Returns
 
@@ -51,7 +51,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:137
 
 > **countBy**(`filter`, `groupBy`): `Promise`\<[`DeliveryTrackingCountByRow`](/en/api/messaging/src/tracking/interfaces/deliverytrackingcountbyrow/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L123)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:131](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L131)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ readonly [`DeliveryTrackingCountByField`](/en/api/messaging/src/tracking/type-al
 
 > **countRecords**(`filter`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:119](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L119)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L127)
 
 #### Parameters
 
@@ -135,14 +135,16 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:81]
 
 ### leaseDue()
 
-> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+> **leaseDue**(`now`, `limit`, `leaseUntil`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[] \| `undefined`\>
 
 Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L97)
 
 Like `listDue`, but also leases the records it returns: in the same
 atomic step their `nextCheckAt` moves to `leaseUntil`, so other pollers
 of the store skip them until the poll stores their next check or the
-lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
+lease runs out. It resolves `undefined` when this store cannot lease
+atomically. `DeliveryTrackingService` leases only with a store that has
+both this and `patchLeased`, and otherwise uses `listDue`.
 
 #### Parameters
 
@@ -160,7 +162,7 @@ lease runs out. Without it, `DeliveryTrackingService` uses `listDue`.
 
 #### Returns
 
-`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
+`Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[] \| `undefined`\>
 
 #### Implementation of
 
@@ -198,7 +200,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:93]
 
 > **listRecords**(`options`): `Promise`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)[]\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L113)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:121](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L121)
 
 #### Parameters
 
@@ -220,7 +222,7 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:113
 
 > **patch**(`messageId`, `patch`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L130)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:138](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L138)
 
 #### Parameters
 
@@ -242,11 +244,46 @@ Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:130
 
 ***
 
+### patchLeased()
+
+> **patchLeased**(`messageId`, `leaseUntil`, `patch`): `Promise`\<`boolean`\>
+
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L105)
+
+Applies `patch` only while the record is still leased until `leaseUntil`
+(its `nextCheckAt` equals it), and resolves whether it did. A poll
+stores its results this way, so one that ran past its lease cannot
+overwrite what another poll stored since.
+
+#### Parameters
+
+##### messageId
+
+`string`
+
+##### leaseUntil
+
+`Date`
+
+##### patch
+
+`Partial`\<[`TrackingRecord`](/en/api/messaging/src/tracking/interfaces/trackingrecord/)\>
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+#### Implementation of
+
+[`DeliveryTrackingStore`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/).[`patchLeased`](/en/api/messaging/src/tracking/interfaces/deliverytrackingstore/#patchleased)
+
+***
+
 ### releaseLeases()
 
 > **releaseLeases**(`messageIds`, `leaseUntil`, `nextCheckAt`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:105](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L105)
+Defined in: [packages/messaging/src/delivery-tracking/stores/sqlite.store.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/delivery-tracking/stores/sqlite.store.ts#L113)
 
 Hands back leases a poll did not finish: moves `nextCheckAt` to the
 given time on those records whose `nextCheckAt` is still `leaseUntil`.
