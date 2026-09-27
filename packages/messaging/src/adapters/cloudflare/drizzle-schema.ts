@@ -79,13 +79,12 @@ function renderPostgresTrackingSchema(
     return required ? `${base}.notNull()` : base;
   };
 
+  // Epoch milliseconds overflow integer(), so "integer" gets bigint() too.
   const timestampField = (columnName: string, required = false): string => {
     const base =
-      s.timestamp === "integer"
-        ? `integer(${q(columnName)})`
-        : s.timestamp === "date"
-          ? `timestamp(${q(columnName)}, { withTimezone: true, mode: "date" })`
-          : `bigint(${q(columnName)}, { mode: "number" })`;
+      s.timestamp === "date"
+        ? `timestamp(${q(columnName)}, { withTimezone: true, mode: "date" })`
+        : `bigint(${q(columnName)}, { mode: "number" })`;
     return required ? `${base}.notNull()` : base;
   };
 
@@ -211,11 +210,9 @@ function renderMySqlTrackingSchema(
     return required ? `${base}.notNull()` : base;
   };
 
+  // Epoch milliseconds overflow int(), whatever the timestamp strategy.
   const timestampField = (columnName: string, required = false): string => {
-    const base =
-      s.timestamp === "integer"
-        ? `int(${q(columnName)})`
-        : `bigint(${q(columnName)}, { mode: "number" })`;
+    const base = `bigint(${q(columnName)}, { mode: "number" })`;
     return required ? `${base}.notNull()` : base;
   };
 

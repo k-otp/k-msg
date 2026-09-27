@@ -493,6 +493,71 @@ describe("Cloudflare SQL adapters", () => {
     expect(dueParams.some((value) => value instanceof Date)).toBe(true);
   });
 
+  test("HyperdriveDeliveryTrackingStore binds times that fit the columns it creates", async () => {
+    // INTEGER is 32-bit on Postgres and MySQL, 64-bit on SQLite.
+    const fits = (dialect: string, type: string, value: unknown): boolean => {
+      if (type === "TIMESTAMPTZ") return value instanceof Date;
+      if (typeof value !== "number" || !Number.isSafeInteger(value)) {
+        return false;
+      }
+      return (
+        type === "BIGINT" ||
+        (type === "INTEGER" &&
+          (dialect === "sqlite" || Math.abs(value) < 2 ** 31))
+      );
+    };
+
+    const now = new Date();
+    const mismatches: string[] = [];
+    for (const dialect of ["postgres", "mysql", "sqlite"] as const) {
+      for (const timestamp of ["bigint", "integer", "date"] as const) {
+        const { client, queries } = createCapturingSqlClient(dialect);
+        const store = new HyperdriveDeliveryTrackingStore(client, {
+          typeStrategy: { timestamp },
+        });
+        await store.upsert({
+          messageId: "m-time",
+          providerId: "iwinv",
+          providerMessageId: "p-time",
+          type: "SMS",
+          to: "01012345678",
+          status: "DELIVERED",
+          requestedAt: now,
+          scheduledAt: now,
+          sentAt: now,
+          deliveredAt: now,
+          failedAt: now,
+          lastCheckedAt: now,
+          statusUpdatedAt: now,
+          attemptCount: 1,
+          nextCheckAt: now,
+        });
+
+        const ddl =
+          queries.find((query) => query.sql.includes("CREATE TABLE"))?.sql ??
+          "";
+        const insert = queries.find((query) =>
+          query.sql.includes("INSERT INTO"),
+        );
+        const columns = (
+          /\(([^)]*)\) VALUES/.exec(insert?.sql ?? "")?.[1] ?? ""
+        )
+          .split(", ")
+          .map((column) => column.slice(1, -1));
+        for (const column of columns.filter((name) => name.endsWith("_at"))) {
+          const type =
+            new RegExp(`[\`"]${column}[\`"] (\\w+)`).exec(ddl)?.[1] ?? "";
+          const value = insert?.params[columns.indexOf(column)];
+          if (!fits(dialect, type, value)) {
+            mismatches.push(`${dialect}/${timestamp}: ${column} ${type}`);
+          }
+        }
+      }
+    }
+
+    expect(mismatches).toEqual([]);
+  });
+
   test("HyperdriveDeliveryTrackingStore toggles raw column by storeRaw option", async () => {
     const withoutRaw = createCapturingSqlClient("sqlite");
     const withRaw = createCapturingSqlClient("sqlite");

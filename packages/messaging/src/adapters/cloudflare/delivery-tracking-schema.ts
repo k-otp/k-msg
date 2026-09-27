@@ -85,6 +85,14 @@ export interface DeliveryTrackingTypeStrategy {
   messageId?: DeliveryTrackingMessageIdType;
   id?: DeliveryTrackingIdType;
   shortText?: DeliveryTrackingShortTextType;
+  /**
+   * Type of the time columns. `bigint` stores epoch milliseconds in `BIGINT`
+   * (`INTEGER` on SQLite, which is 64-bit). `integer` is an alias of
+   * `bigint`, kept for compatibility: epoch milliseconds do not fit the
+   * 32-bit `INTEGER` of Postgres and MySQL. `date` is `TIMESTAMPTZ` on
+   * Postgres and the same as `bigint` on MySQL and SQLite.
+   * @default "bigint"
+   */
   timestamp?: DeliveryTrackingTimestampType;
   json?: DeliveryTrackingJsonType;
 }
@@ -475,15 +483,13 @@ export function resolveDeliveryTrackingSqlType(
   }
 
   if (kind === "timestamp") {
-    if (strategy.timestamp === "date") {
-      if (dialect === "postgres") return "TIMESTAMPTZ";
-      if (dialect === "mysql") return "BIGINT";
-      return "INTEGER";
+    if (strategy.timestamp === "date" && dialect === "postgres") {
+      return "TIMESTAMPTZ";
     }
-    if (strategy.timestamp === "integer") return "INTEGER";
-    if (dialect === "mysql") return "BIGINT";
-    if (dialect === "sqlite") return "INTEGER";
-    return "BIGINT";
+    // The stores write epoch milliseconds, which need 64 bits. SQLite's
+    // INTEGER has them; on Postgres and MySQL INTEGER is 32-bit, so
+    // "integer" gets BIGINT there, like "bigint".
+    return dialect === "sqlite" ? "INTEGER" : "BIGINT";
   }
 
   if (kind === "attemptCount") {
