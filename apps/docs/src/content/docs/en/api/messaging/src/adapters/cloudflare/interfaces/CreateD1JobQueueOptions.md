@@ -5,7 +5,7 @@ prev: false
 title: "CreateD1JobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:168](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L168)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:178](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L178)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:168](https://gi
 
 > `optional` **indexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L170)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:180](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L180)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:170](https://gi
 
 > `optional` **initializeSchema?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:176](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L176)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:186](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L186)
 
 Whether the queue creates its table and indexes on first use. Set it to
 `false` when migrations create the schema.
@@ -38,4 +38,4 @@ true
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:169](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L169)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L179)

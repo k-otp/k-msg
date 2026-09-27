@@ -7,7 +7,7 @@ title: "createKvJobQueue"
 
 > **createKvJobQueue**\<`T`\>(`namespace`, `options?`): [`CloudflareObjectJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:238](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L238)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L248)
 
 ## Type Parameters
 
@@ -23,9 +23,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:238](https://gi
 
 ### options?
 
-#### keyPrefix?
-
-`string`
+[`CloudflareObjectJobQueueOptions`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflareobjectjobqueueoptions/)\<`T`\> = `{}`
 
 ## Returns
 
