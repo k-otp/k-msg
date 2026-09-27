@@ -283,7 +283,7 @@ describe("applyFieldCryptoMigration", () => {
     // The read that checks for more rows after the only chunk allowed fails.
     const flaky = failNthQuery(
       client,
-      (sql) => sql.includes("as messageId"),
+      (sql) => sql.includes("AS requested_at"),
       2,
     );
     expect(
