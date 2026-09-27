@@ -19,7 +19,7 @@ Before this runbook, read `./field-crypto-basics.md` for plain-language context.
 
 ## Alarm: `to`/`from` lookups miss records
 
-1. Compare the missing records' `crypto_kid` with the kids `resolveDecryptKeys` returns for the store's `tenantId`: lookups search only under those kids and the active one, and pass no `messageId` or `providerId`.
+1. Compare the missing records' `crypto_kid` with the kids `resolveDecryptKeys` returns for the store's `tenantId`: lookups search only under those kids, the active one, and the provider's default key, and pass no `messageId` or `providerId`.
 2. Confirm the provider has a hash key for each of those kids.
 3. Check `crypto_fail_count` with `operation=hash`: under `failMode=open`, a lookup skips a key it cannot hash.
 
