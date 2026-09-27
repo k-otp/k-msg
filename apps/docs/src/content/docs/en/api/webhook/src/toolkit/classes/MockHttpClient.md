@@ -5,7 +5,7 @@ prev: false
 title: "MockHttpClient"
 ---
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L21)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L41)
 
 ## Implements
 
@@ -27,7 +27,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:21](https://git
 
 > **fetch**(`url`, `_options`): `Promise`\<`Response`\>
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L40)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L60)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:40](https://git
 
 > **setDefaultResponse**(`response`): `void`
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L36)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:56](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L56)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:36](https://git
 
 > **setMockResponse**(`url`, `response`): `void`
 
-Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L32)
+Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/services/webhook.dispatcher.ts#L52)
 
 #### Parameters
 

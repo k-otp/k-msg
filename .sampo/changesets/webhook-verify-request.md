@@ -1,0 +1,5 @@
+---
+npm/@k-msg/webhook: minor
+---
+
+Add `verifyWebhookRequest(headers, body, secret, { toleranceMs })` for receivers. It checks the signature over `<X-Webhook-Timestamp>.<body>` in constant time, then rejects a signed time more than `toleranceMs` (default five minutes) from now, allowing for the one-second resolution of the signed time, and returns a `Result` whose `WebhookVerificationError` has a `code` for each failed check. It reads `Headers` or Node-style header records and string, `Uint8Array` or `ArrayBuffer` bodies (bytes are checked exactly and must be valid UTF-8; the README verifies `await request.arrayBuffer()`, since `request.text()` drops a leading BOM and replaces malformed bytes before any check), and takes the sender's `algorithm`, `signatureHeader` and `signaturePrefix`. It throws for an empty secret or a `toleranceMs` that is negative, NaN or infinite.

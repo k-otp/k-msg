@@ -34,6 +34,15 @@ export {
 } from "./runtime/webhook-runtime.service";
 export { SecurityManager } from "./security/security.manager";
 export {
+  type VerifiedWebhookRequest,
+  type VerifyWebhookRequestOptions,
+  verifyWebhookRequest,
+  type WebhookRequestBody,
+  type WebhookRequestHeaders,
+  WebhookVerificationError,
+  type WebhookVerificationErrorCode,
+} from "./security/verify-webhook-request";
+export {
   DefaultHttpClient,
   WebhookDispatcher,
 } from "./services/webhook.dispatcher";

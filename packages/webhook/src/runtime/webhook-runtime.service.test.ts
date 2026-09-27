@@ -226,6 +226,198 @@ describe("WebhookRuntimeService", () => {
   });
 });
 
+describe("WebhookRuntimeService with enableSecurity", () => {
+  function createSecureRuntime(
+    overrides: Partial<WebhookConfig> = {},
+  ): WebhookRuntimeService {
+    return new WebhookRuntimeService({
+      delivery: { ...createConfig(), enableSecurity: true, ...overrides },
+      httpClient: new RecordingHttpClient(),
+      autoStart: false,
+    });
+  }
+
+  test("addEndpoint rejects an endpoint without a secret", async () => {
+    const runtime = createSecureRuntime();
+
+    try {
+      await expect(
+        runtime.addEndpoint({
+          url: "https://example.com/unsigned",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        }),
+      ).rejects.toThrow("needs a secret");
+      expect(await runtime.listEndpoints()).toHaveLength(0);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("addEndpoints adds none of a batch when an active endpoint lacks a secret", async () => {
+    const runtime = createSecureRuntime();
+
+    try {
+      await expect(
+        runtime.addEndpoints([
+          {
+            url: "https://example.com/signed",
+            active: true,
+            events: [WebhookEventType.MESSAGE_SENT],
+            secret: "whsec_signed",
+          },
+          {
+            url: "https://example.com/unsigned",
+            active: true,
+            events: [WebhookEventType.MESSAGE_SENT],
+          },
+        ]),
+      ).rejects.toThrow("Webhook endpoint 1 in the batch: An active webhook");
+      expect(await runtime.listEndpoints()).toEqual([]);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("the secret error does not repeat the URL, which may hold a token", async () => {
+    const runtime = createSecureRuntime();
+
+    try {
+      const error = await runtime
+        .addEndpoint({
+          url: "https://hooks.example.com/services/T0/B0/token-abc123",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        })
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain("needs a secret");
+      expect((error as Error).message).not.toContain("token-abc123");
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("an endpoint that receives nothing needs no secret", async () => {
+    const persistence = createInMemoryWebhookPersistence();
+    const now = new Date();
+    // Stored before security was turned on.
+    await persistence.endpointStore.add({
+      id: "legacy",
+      url: "https://example.com/legacy",
+      active: true,
+      status: "active",
+      events: [WebhookEventType.MESSAGE_SENT],
+      createdAt: now,
+      updatedAt: now,
+    });
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), enableSecurity: true },
+      httpClient: new RecordingHttpClient(),
+      persistence,
+      autoStart: false,
+    });
+
+    try {
+      // Pausing stops the refused deliveries without deleting the endpoint.
+      await runtime.updateEndpoint("legacy", { active: false });
+      await runtime.updateEndpoint("legacy", { status: "suspended" });
+      await runtime.addEndpoint({
+        url: "https://example.com/paused",
+        active: false,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+
+      await expect(
+        runtime.updateEndpoint("legacy", { active: true, status: "active" }),
+      ).rejects.toThrow("needs a secret");
+      expect((await runtime.getEndpoint("legacy"))?.status).toBe("suspended");
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("addEndpoint accepts an endpoint secret or a shared delivery.secretKey", async () => {
+    const own = createSecureRuntime();
+    const shared = createSecureRuntime({ secretKey: "whsec_shared" });
+
+    try {
+      await own.addEndpoint({
+        url: "https://example.com/own",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "whsec_own",
+      });
+      await shared.addEndpoint({
+        url: "https://example.com/shared",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+
+      expect(await own.listEndpoints()).toHaveLength(1);
+      expect(await shared.listEndpoints()).toHaveLength(1);
+    } finally {
+      await own.shutdown();
+      await shared.shutdown();
+    }
+  });
+
+  test("updateEndpoint rejects removing the only secret", async () => {
+    const runtime = createSecureRuntime();
+
+    try {
+      const endpoint = await runtime.addEndpoint({
+        url: "https://example.com/rotating",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+        secret: "whsec_own",
+      });
+
+      await expect(
+        runtime.updateEndpoint(endpoint.id, { secret: "" }),
+      ).rejects.toThrow("needs a secret");
+      expect((await runtime.getEndpoint(endpoint.id))?.secret).toBe(
+        "whsec_own",
+      );
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("probeEndpoint reports why an unsigned probe was not sent", async () => {
+    const client = new RecordingHttpClient();
+    const persistence = createInMemoryWebhookPersistence();
+    const now = new Date();
+    // Stored before security was turned on, so it never passed addEndpoint's check.
+    await persistence.endpointStore.add({
+      id: "legacy",
+      url: "https://example.com/legacy",
+      active: true,
+      status: "active",
+      events: [WebhookEventType.SYSTEM_MAINTENANCE],
+      createdAt: now,
+      updatedAt: now,
+    });
+    const runtime = new WebhookRuntimeService({
+      delivery: { ...createConfig(), enableSecurity: true },
+      httpClient: client,
+      persistence,
+      autoStart: false,
+    });
+
+    try {
+      const result = await runtime.probeEndpoint("legacy");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("no signing secret");
+      expect(client.calls.length).toBe(0);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+});
+
 // Tracks timers scheduled through the globals that are still pending: a
 // timeout that has neither fired nor been cleared, or an uncleared interval.
 function trackTimers(): { pending(): number; restore(): void } {
@@ -745,6 +937,45 @@ describe("WebhookRuntimeService message status events", () => {
       await runtime.shutdown();
     }
   });
+});
+
+describe("WebhookRuntimeService probeEndpoint", () => {
+  test.each([
+    [503, 404, { success: false, httpStatus: 404, error: "HTTP 404" }],
+    [503, 200, { success: true, httpStatus: 200, error: undefined }],
+  ])(
+    "probeEndpoint reports the last attempt after a %p then a %p",
+    async (first, last, expected) => {
+      const statuses = [first, last];
+      const runtime = new WebhookRuntimeService({
+        delivery: { ...createConfig(), maxRetries: 1, retryDelayMs: 1 },
+        httpClient: {
+          fetch: async () => new Response("", { status: statuses.shift() }),
+        },
+        autoStart: false,
+      });
+
+      try {
+        const endpoint = await runtime.addEndpoint({
+          url: "https://example.com/flaky",
+          active: true,
+          events: [WebhookEventType.SYSTEM_MAINTENANCE],
+        });
+
+        const result = await runtime.probeEndpoint(endpoint.id);
+
+        expect(result.success).toBe(expected.success);
+        expect(result.httpStatus).toBe(expected.httpStatus);
+        if (expected.error === undefined) {
+          expect(result.error).toBeUndefined();
+        } else {
+          expect(result.error).toStartWith(expected.error);
+        }
+      } finally {
+        await runtime.shutdown();
+      }
+    },
+  );
 });
 
 class SlowHttpClient implements HttpClient {

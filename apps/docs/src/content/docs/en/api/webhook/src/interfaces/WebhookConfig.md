@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:3](https://github.com/k
 
 > `optional` **algorithm?**: `"sha256"` \| `"sha1"`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L17)
+Defined in: [packages/webhook/src/types/webhook.types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L23)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:8](https://github.com/k
 
 > `optional` **batchSize?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L33)
+Defined in: [packages/webhook/src/types/webhook.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L39)
 
 How many events queued by `emit()` go out in one batch. The `emit()` call
 that fills a batch sends it, retries included, before it resolves, unless
@@ -44,7 +44,7 @@ which also replaces a value below 1. `emitSync()` does not use it.
 
 > `optional` **batchTimeoutMs?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L39)
+Defined in: [packages/webhook/src/types/webhook.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L45)
 
 With `autoStart`, how long in milliseconds the first event queued by
 `emit()` waits before its batch is sent. Defaults to 5000. `emitSync()`
@@ -56,7 +56,7 @@ does not use it.
 
 > **enabledEvents**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L22)
+Defined in: [packages/webhook/src/types/webhook.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L28)
 
 ***
 
@@ -64,7 +64,11 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:22](https://github.com/
 
 > **enableSecurity**: `boolean`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L15)
+Defined in: [packages/webhook/src/types/webhook.types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L20)
+
+Signs every delivery with HMAC. While on, a delivery is never sent
+unsigned: endpoints need a `secret` (or `secretKey` must be set), and a
+stored endpoint without one gets a failed delivery and no request.
 
 ***
 
@@ -104,7 +108,9 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:6](https://github.com/k
 
 > `optional` **secretKey?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L16)
+Defined in: [packages/webhook/src/types/webhook.types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L22)
+
+Signs deliveries to endpoints that have no `secret` of their own.
 
 ***
 
@@ -112,7 +118,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:16](https://github.com/
 
 > `optional` **signatureHeader?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L18)
+Defined in: [packages/webhook/src/types/webhook.types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L24)
 
 ***
 
@@ -120,7 +126,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:18](https://github.com/
 
 > `optional` **signaturePrefix?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L19)
+Defined in: [packages/webhook/src/types/webhook.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L25)
 
 ***
 
