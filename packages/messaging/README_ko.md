@@ -253,7 +253,7 @@ DB별 차이:
 - MySQL: JSON 계열 컬럼을 `JSON`으로 저장(`typeStrategy: { json: "text" }`이면 `TEXT`). MySQL은 `TEXT` 컬럼에 인덱스를 만들 수 없으므로, 기본 키와 인덱스 컬럼은 `typeStrategy`와 관계없이 `VARCHAR`입니다:
   - `message_id`, `provider_id`, `provider_message_id`, 필드 암호화 시 `to_hash`와 `from_hash`: `VARCHAR(255)` (`messageId: "uuid"`이면 `message_id`는 `VARCHAR(36)`)
   - `status`, 필드 암호화 시 `retention_class`: `VARCHAR(64)`
-- `provider_status_message`는 모든 DB에서 `TEXT`입니다. 나머지 짧은 텍스트 컬럼은 `typeStrategy.shortText`를 따릅니다(Postgres/MySQL 기본값 `VARCHAR(64)`). 단, MySQL의 인덱스 컬럼은 예외입니다
+- `provider_status_message`와 `metadata_enc`(암호화된 메타데이터)는 모든 DB에서 `TEXT`입니다. 나머지 짧은 텍스트 컬럼은 `typeStrategy.shortText`를 따릅니다(Postgres/MySQL 기본값 `VARCHAR(64)`). 단, MySQL의 인덱스 컬럼은 예외입니다
 
 Queue 테이블 (`HyperdriveJobQueue` / `createD1JobQueue` 사용 시): `kmsg_jobs`
 
@@ -366,11 +366,14 @@ const store = new HyperdriveDeliveryTrackingStore(client, {
   - `raw`와 큐의 `data`에는 문자열을 포함해 어떤 JSON 값이든 들어갈 수 있어 저장된 그대로 읽으므로, 이전 행의 값은 JSON 텍스트로 돌아옵니다. 이전 버전을 실행하는 프로세스를 멈춘 뒤(변환된 행을 읽지 못합니다) 이 버전을 시작하기 전에, 같은 `UPDATE`로 `raw`와 `kmsg_jobs`의 `data`, `metadata`를 한 번 변환하세요. postgres.js나 Bun.SQL이 쓴 행에만 실행하세요. 그런 행은 모두 JSON 문자열입니다. 큐는 대신 이전 버전이 작업을 모두 끝낸 뒤 올려도 됩니다.
 
 - MySQL에서는 기본 `typeStrategy`로 SQL 스키마를 만들 수 없었으므로(오류 1170), 기존 테이블은 `typeStrategy: { messageId: "varchar", id: "varchar" }`로 만들었거나 Drizzle 스키마로 만들었습니다. 둘 다 그대로 동작합니다:
-  - 그 `typeStrategy`의 SQL 스키마는 바뀌지 않았습니다. 계속 넘겨도 되고 빼도 됩니다. 빼면 필드 암호화를 쓰는 새 테이블에서 인덱스가 없는 컬럼이 `VARCHAR(255)` 대신 `TEXT`가 되고, 기존 테이블은 어느 쪽이든 동작합니다.
-  - 이전 버전의 Drizzle 스키마는 모든 id 컬럼을 `varchar(255)`로, JSON 컬럼을 `text`로 선언했습니다. 이제 `typeStrategy`를 따르므로 drizzle-kit이 마이그레이션을 만듭니다: JSON 컬럼은 `json`이 되고, 필드 암호화 시 인덱스가 없는 컬럼(`to_enc`, `to_masked`, `from_enc`, `from_masked`, `metadata_enc`, `crypto_kid`)은 `text`가 됩니다. 저장된 값은 그대로 변환됩니다. 테이블을 그대로 두려면 `renderDrizzleSchemaSource()`와 스토어에 `typeStrategy: { id: "varchar", json: "text" }`를 넘기세요.
-- 메타데이터 암호화(`fields.metadata: "encrypt"`)를 쓰면, 위 두 종류의 MySQL 테이블에 있는 `VARCHAR(255)` `metadata_enc`는 255자보다 긴 암호화 메타데이터를 거부합니다(오류 1406). 메타데이터 JSON이 110자 정도면 넘습니다. 컬럼을 넓히세요:
+  - 그 `typeStrategy`의 SQL 스키마는 `metadata_enc`(아래)를 빼면 바뀌지 않았습니다. 계속 넘겨도 되고 빼도 됩니다. 빼면 필드 암호화를 쓰는 새 테이블에서 인덱스가 없는 컬럼이 `VARCHAR(255)` 대신 `TEXT`가 되고, 기존 테이블은 어느 쪽이든 동작합니다.
+  - 이전 버전의 Drizzle 스키마는 모든 id 컬럼을 `varchar(255)`로, JSON 컬럼을 `text`로 선언했습니다. 이제 `typeStrategy`를 따르므로 drizzle-kit이 마이그레이션을 만듭니다: JSON 컬럼은 `json`이 되고, 필드 암호화 시 인덱스가 없는 컬럼(`to_enc`, `to_masked`, `from_enc`, `from_masked`, `metadata_enc`, `crypto_kid`)은 `text`가 됩니다. 저장된 값은 그대로 변환됩니다. 나머지 테이블을 그대로 두려면 `renderDrizzleSchemaSource()`와 스토어에 `typeStrategy: { id: "varchar", json: "text" }`를 넘기세요.
+- `metadata_enc`는 `typeStrategy.id`를 따랐기 때문에, Postgres와 MySQL에서 `id: "varchar"`이면 `VARCHAR(255)`였고 위 두 종류의 MySQL 테이블에서도 그렇습니다. 메타데이터 암호화(`fields.metadata: "encrypt"`)를 쓰면 255자보다 긴 암호화 메타데이터가 거부됩니다(MySQL 오류 1406, Postgres `value too long`). 메타데이터 JSON이 110자 정도면 넘습니다. 이제 이 컬럼은 `typeStrategy`와 관계없이 `TEXT`입니다. 기존 테이블은 넓히세요:
 
   ```sql
+  -- Postgres
+  ALTER TABLE kmsg_delivery_tracking ALTER COLUMN metadata_enc TYPE TEXT;
+  -- MySQL
   ALTER TABLE kmsg_delivery_tracking MODIFY metadata_enc TEXT;
   ```
 
