@@ -46,12 +46,14 @@ another worker has it.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:50](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L50)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:52](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L52)
 
 Called by `dequeue()` for each job whose lease had expired, once
 `dequeue()` has stored its changes: with the job pending again (the same
 `dequeue()` may have taken it again) or failed if it had no attempts
-left. What it throws is logged and does not stop the dequeue.
+left. What it throws is logged and does not stop the dequeue. It runs
+before `dequeue()` returns, so keep it short: the job `dequeue()`
+returns is already leased.
 
 #### Parameters
 
