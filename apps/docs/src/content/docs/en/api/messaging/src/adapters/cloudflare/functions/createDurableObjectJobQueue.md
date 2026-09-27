@@ -7,7 +7,7 @@ title: "createDurableObjectJobQueue"
 
 > **createDurableObjectJobQueue**\<`T`\>(`storage`, `options?`): [`CloudflareObjectJobQueue`](/en/api/k-msg/src/adapters/cloudflare/classes/cloudflareobjectjobqueue/)\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:273](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L273)
+Defined in: [packages/messaging/src/adapters/cloudflare/index.ts:286](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/index.ts#L286)
 
 ## Type Parameters
 
