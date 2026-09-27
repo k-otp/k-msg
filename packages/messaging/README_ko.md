@@ -139,7 +139,7 @@ provider가 지원하는 항목은 `provider.transportCapabilities`(`abortSignal
 
 ## ALIMTALK 대체 문자
 
-`failover.fallbackContent`와 `failover.fallbackTitle`에도 SMS 텍스트처럼 `#{변수}`를 쓸 수 있고, 메시지의 `variables`로 채워집니다. `fallbackChannel`을 생략하면 `KMsg`가 채워진 텍스트 길이로 정합니다: `defaults.sms.autoLmsBytes`보다 길면 `lms`, 아니면 `sms`. tracking 기반 API 대체 발송도 이 채널을 따르고, 채널이 없는 레코드(`KMsg`를 거치지 않은 발송)는 90바이트를 넘으면 LMS로 보냅니다.
+`failover.fallbackContent`와 `failover.fallbackTitle`에도 SMS 텍스트처럼 `#{변수}`를 쓸 수 있고, 메시지의 `variables`로 채워집니다. `fallbackChannel`을 생략하면 `KMsg`가 채워진 텍스트 길이로 정합니다: `defaults.sms.autoLmsBytes`보다 길면 `lms`, 아니면 `sms`. tracking 기반 API 대체 발송도 이 채널을 따르고, 채널이 없는 레코드(`KMsg`를 거치지 않은 발송)는 90바이트를 넘으면 LMS로 보냅니다. 멈춘 폴링(signal abort 또는 `close()`)은 새 대체 발송을 시작하지 않으며, 그 레코드는 그대로 남아 다음 폴링이 보냅니다. `apiFailover.sender`의 두 번째 인자에 있는 `signal`을 발송에 넘기면 `close()`가 진행 중인 발송을 기다리지 않고, 그렇게 취소된 발송은 실패한 시도로 기록됩니다.
 
 ```ts
 await kmsg.send({
@@ -197,11 +197,11 @@ await tracking.runOnce({ signal: AbortSignal.timeout(25_000) });
 
 ### 한 스토어를 여러 곳에서 폴링할 때
 
-인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. MySQL에서는 SQL client가 트랜잭션을 지원할 때만 임대가 원자적입니다. 폴링이 중단되어 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
+인스턴스가 여럿이거나 크론 실행이 겹쳐 여러 서비스가 한 스토어를 쓰면, 폴링은 가져간 레코드를 임대(lease)합니다. 다음 확인 시각을 저장할 때까지 다른 폴링은 그 레코드를 건너뛰므로, 같은 메시지를 동시에 두 번 조회하거나 대체 발송하지 않습니다. 일찍 멈춘 폴링은 끝내지 못한 레코드의 임대를 돌려주되, 그 사이 다른 폴링이 임대한 레코드는 건드리지 않습니다. SQL 스토어와 `InMemoryDeliveryTrackingStore`는 임대를 지원하고, KV·R2·Durable Object 스토어는 지원하지 않습니다. 직접 만든 스토어는 `leaseDue`와 `releaseLeases`를 구현하면 됩니다. MySQL에서는 SQL client가 트랜잭션을 지원할 때만 임대가 원자적입니다. 프로세스가 죽는 등으로 돌려주지 못한 임대는 `polling.leaseMs`(5분) 뒤에 풀리고, `leaseMs: 0`이면 임대하지 않습니다.
 
 ### 종료
 
-`close()`는 타이머를 멈추고, 진행 중인 폴링을 signal이 abort된 것처럼 멈춘 뒤 그 폴링이 받은 상태를 저장하기를 기다렸다가 스토어를 닫습니다. `start()`로 돌린 폴링이 실패하면 `@k-msg/core` logger로 기록하고 다음 주기에 다시 폴링합니다.
+`close()`는 타이머를 멈추고, 진행 중인 폴링을 signal이 abort된 것처럼 멈춘 뒤 그 폴링이 받은 상태를 저장하기를 기다렸다가 스토어를 닫습니다. `onStatusChange`로 전달 중인 상태 변경은 기다리지 않고, 진행 중인 대체 발송은 sender가 받은 signal을 발송에 넘기지 않는 한 기다립니다. `start()`로 돌린 폴링이 실패하면 `@k-msg/core` logger로 기록하고 다음 주기에 다시 폴링합니다.
 
 ```ts
 process.once("SIGTERM", () => {

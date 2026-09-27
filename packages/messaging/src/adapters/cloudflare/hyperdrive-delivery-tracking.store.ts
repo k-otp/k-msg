@@ -50,6 +50,9 @@ import { initializeCloudflareSqlSchema } from "./sql-schema";
 
 type TrackingRow = Record<string, unknown>;
 
+// D1 binds at most 100 parameters per statement.
+const RELEASE_BATCH_SIZE = 50;
+
 type WhereSql = {
   sql: string;
   params: unknown[];
@@ -319,6 +322,36 @@ export class HyperdriveDeliveryTrackingStore implements DeliveryTrackingStore {
     );
 
     return await Promise.all(rows.map((row) => this.rowToRecord(row)));
+  }
+
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    await this.init();
+
+    const table = this.tableRef();
+    const messageId = this.quoteIdentifier(this.columnName("messageId"));
+    const nextCheckAtColumn = this.quoteIdentifier(
+      this.columnName("nextCheckAt"),
+    );
+    for (
+      let start = 0;
+      start < messageIds.length;
+      start += RELEASE_BATCH_SIZE
+    ) {
+      const batch = messageIds.slice(start, start + RELEASE_BATCH_SIZE);
+      // Only rows still under this lease: another poll may hold one now.
+      await this.client.query(
+        `UPDATE ${table} SET ${nextCheckAtColumn} = ${this.placeholder(1)} WHERE ${nextCheckAtColumn} = ${this.placeholder(2)} AND ${messageId} IN (${this.placeholders(batch.length, 3).join(", ")})`,
+        [
+          this.toDbTimestamp(nextCheckAt),
+          this.toDbTimestamp(leaseUntil),
+          ...batch,
+        ],
+      );
+    }
   }
 
   // MySQL has no UPDATE ... RETURNING. The locking read holds the rows until

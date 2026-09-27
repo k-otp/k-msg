@@ -145,6 +145,20 @@ export class InMemoryDeliveryTrackingStore implements DeliveryTrackingStore {
     return due.map(cloneRecord);
   }
 
+  async releaseLeases(
+    messageIds: readonly string[],
+    leaseUntil: Date,
+    nextCheckAt: Date,
+  ): Promise<void> {
+    for (const messageId of messageIds) {
+      const record = this.records.get(messageId);
+      // Still this lease: another poll may have leased the record since.
+      if (record?.nextCheckAt.getTime() === leaseUntil.getTime()) {
+        record.nextCheckAt = new Date(nextCheckAt);
+      }
+    }
+  }
+
   // The stored records themselves, not copies.
   private selectDue(now: Date, limit: number): TrackingRecord[] {
     const due: TrackingRecord[] = [];
