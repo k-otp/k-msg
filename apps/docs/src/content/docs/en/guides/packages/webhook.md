@@ -52,8 +52,6 @@ const config: WebhookConfig = {
     WebhookEventType.MESSAGE_FAILED,
     WebhookEventType.SYSTEM_MAINTENANCE,
   ],
-  batchSize: 10,
-  batchTimeoutMs: 5_000,
 };
 
 const runtime = new WebhookRuntimeService({
@@ -79,6 +77,75 @@ await runtime.emitSync({
 await runtime.shutdown();
 ```
 
+## Sending events
+
+- `emitSync(event)` sends the event to every matching endpoint and resolves
+  with the deliveries once they finish.
+- `emit(event)` queues the event. Up to `batchSize` queued events (default
+  10) go out together when that many are queued, when you call `flush()` or
+  `shutdown()`, or, with `autoStart` (the default), `batchTimeoutMs`
+  (default 5000 ms) after the first event is queued. Most calls resolve as
+  soon as the event is queued. The call that fills a batch sends it, retries
+  included, before it resolves, unless another batch is still being sent:
+  then it resolves at once, and the full batch goes out as soon as the other
+  one finishes (if that one fails, the timer, the next call or `flush()`
+  sends it). The timer runs only while events are queued: a runtime that
+  never calls `emit()` starts none, and one with an empty queue holds none.
+
+`batchSize` and `batchTimeoutMs` only affect `emit()`, so a config used with
+`emitSync()` can leave them out. A `batchSize` of `Infinity` keeps every event
+queued until `flush()` or the timer sends them as one batch.
+
+### Cloudflare Workers and other serverless runtimes
+
+Work that is neither awaited nor passed to `ctx.waitUntil()` can be cancelled
+when a Worker invocation ends, and that includes the `emit()` timer. In a
+Worker:
+
+- create the runtime for each request or cron run from its bindings, with
+  `autoStart: false` (see `createRuntime` in the D1 quickstart below);
+- await `emitSync()`, or call `emit()` and then
+  `ctx.waitUntil(runtime.flush())`;
+- keep `timeoutMs` and the retries within what the invocation allows:
+  `waitUntil()` work gets 30 seconds after an HTTP response.
+
+```ts
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const runtime = createRuntime(env);
+    await runtime.emit({
+      id: crypto.randomUUID(),
+      type: WebhookEventType.MESSAGE_SENT,
+      timestamp: new Date(),
+      data: await request.json(),
+      metadata: {},
+      version: "1.0",
+    });
+    // Send the queue before the invocation ends.
+    ctx.waitUntil(runtime.flush());
+    return new Response(null, { status: 202 });
+  },
+};
+```
+
+## Message events
+
+The message events match the delivery statuses of `@k-msg/messaging`
+delivery tracking. No package sends them by itself: map each status change,
+for example from `DeliveryTrackingService`'s `onStatusChange`, to its event
+and emit it. `PENDING`, the status before a provider accepts a message, has
+none.
+
+| Delivery status | Event |
+| --- | --- |
+| `SENT` | `message.sent` |
+| `DELIVERED` | `message.delivered` |
+| `FAILED` | `message.failed` |
+| `CANCELLED` | `message.cancelled` |
+| `UNKNOWN` | `message.unknown`: tracking ended without a final result, for example because the provider has no status lookup |
+
+`message.clicked` and `message.read` are also available.
+
 ## D1 quickstart (same runtime API)
 
 ```ts
@@ -94,13 +161,12 @@ type Env = {
 };
 
 const config: WebhookConfig = {
-  maxRetries: 3,
+  // Small enough to finish inside the invocation (see above).
+  maxRetries: 2,
   retryDelayMs: 1_000,
-  timeoutMs: 30_000,
+  timeoutMs: 5_000,
   enableSecurity: false,
   enabledEvents: [WebhookEventType.MESSAGE_SENT, WebhookEventType.MESSAGE_FAILED],
-  batchSize: 10,
-  batchTimeoutMs: 5_000,
 };
 
 function createRuntime(env: Env): WebhookRuntimeService {
@@ -110,6 +176,9 @@ function createRuntime(env: Env): WebhookRuntimeService {
     security: {
       allowPrivateHosts: true,
     },
+    // No timers in a Worker; see "Cloudflare Workers and other serverless
+    // runtimes".
+    autoStart: false,
   });
 }
 ```

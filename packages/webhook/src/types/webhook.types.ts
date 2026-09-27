@@ -22,8 +22,21 @@ export interface WebhookConfig {
   enabledEvents: WebhookEventType[];
 
   // 배치 처리 설정
-  batchSize: number;
-  batchTimeoutMs: number;
+  /**
+   * How many events queued by `emit()` go out in one batch. The `emit()` call
+   * that fills a batch sends it, retries included, before it resolves, unless
+   * another batch is still being sent: then the full batch follows that one,
+   * or, if that one fails, goes with the timer, the next call, or `flush()`.
+   * `Infinity` leaves every event for `flush()` or the timer. Defaults to 10,
+   * which also replaces a value below 1. `emitSync()` does not use it.
+   */
+  batchSize?: number;
+  /**
+   * With `autoStart`, how long in milliseconds the first event queued by
+   * `emit()` waits before its batch is sent. Defaults to 5000. `emitSync()`
+   * does not use it.
+   */
+  batchTimeoutMs?: number;
 }
 
 export enum WebhookEventType {
@@ -33,6 +46,13 @@ export enum WebhookEventType {
   MESSAGE_FAILED = "message.failed",
   MESSAGE_CLICKED = "message.clicked",
   MESSAGE_READ = "message.read",
+  /** The message was cancelled (delivery status `CANCELLED`). */
+  MESSAGE_CANCELLED = "message.cancelled",
+  /**
+   * Tracking ended without a final result (delivery status `UNKNOWN`), for
+   * example when the provider has no status lookup.
+   */
+  MESSAGE_UNKNOWN = "message.unknown",
 
   // 템플릿 이벤트
   TEMPLATE_CREATED = "template.created",

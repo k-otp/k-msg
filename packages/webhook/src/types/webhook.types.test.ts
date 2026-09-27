@@ -33,6 +33,21 @@ describe("webhook.types schema", () => {
     expect(invalid.success).toBe(false);
   });
 
+  test("accepts message.cancelled and message.unknown events", () => {
+    for (const type of ["message.cancelled", "message.unknown"]) {
+      const parsed = WebhookEventSchema.safeParse({
+        id: "evt-1",
+        type,
+        timestamp: new Date(),
+        data: {},
+        metadata: {},
+        version: "1",
+      });
+
+      expect(parsed.success).toBe(true);
+    }
+  });
+
   test("enforces retry/url/status boundaries", () => {
     const invalidEndpoint = WebhookEndpointSchema.safeParse({
       id: "ep-1",

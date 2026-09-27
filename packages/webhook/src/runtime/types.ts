@@ -90,6 +90,16 @@ export interface WebhookRuntimeConfig {
   fieldCrypto?: WebhookRuntimeFieldCryptoOptions;
   httpClient?: HttpClient;
   security?: WebhookRuntimeSecurityOptions;
+  /**
+   * Sends events queued by `emit()` without waiting for `flush()`: the
+   * first queued event starts a timer, its batch goes out after
+   * `batchTimeoutMs`, and the timer stops once the queue is empty. A runtime
+   * that never calls `emit()` starts no timer. Defaults to true.
+   *
+   * Set it to false where timers do not outlive the invocation, such as
+   * Cloudflare Workers, and call `flush()` before the invocation ends (or use
+   * `emitSync()`).
+   */
   autoStart?: boolean;
 }
 
