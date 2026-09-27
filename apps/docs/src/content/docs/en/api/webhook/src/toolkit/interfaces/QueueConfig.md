@@ -5,7 +5,7 @@ prev: false
 title: "QueueConfig"
 ---
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L24)
+Defined in: [packages/webhook/src/dispatcher/types.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L16)
 
 ## Properties
 
@@ -13,7 +13,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:24](https://github.com/k-o
 
 > **compressionEnabled**: `boolean`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L29)
+Defined in: [packages/webhook/src/dispatcher/types.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L21)
 
 ***
 
@@ -21,7 +21,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:29](https://github.com/k-o
 
 > `optional` **diskPath?**: `string`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L27)
+Defined in: [packages/webhook/src/dispatcher/types.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L19)
 
 ***
 
@@ -29,7 +29,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:27](https://github.com/k-o
 
 > `optional` **fileAdapter?**: [`FileStorageAdapter`](/en/api/webhook/src/toolkit/interfaces/filestorageadapter/)
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L28)
+Defined in: [packages/webhook/src/dispatcher/types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L20)
 
 ***
 
@@ -37,7 +37,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:28](https://github.com/k-o
 
 > **maxQueueSize**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L25)
+Defined in: [packages/webhook/src/dispatcher/types.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L17)
 
 ***
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:25](https://github.com/k-o
 
 > **persistToDisk**: `boolean`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L26)
+Defined in: [packages/webhook/src/dispatcher/types.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L18)
 
 ***
 
@@ -53,4 +53,4 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:26](https://github.com/k-o
 
 > **ttlMs**: `number`
 
-Defined in: [packages/webhook/src/dispatcher/types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L30)
+Defined in: [packages/webhook/src/dispatcher/types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/dispatcher/types.ts#L22)

@@ -19,13 +19,21 @@ describe("webhook export boundaries", () => {
   test("toolkit subpath exports advanced symbols", async () => {
     const toolkit = await import("./toolkit/index");
 
-    expect(typeof toolkit.BatchDispatcher).toBe("function");
     expect(typeof toolkit.LoadBalancer).toBe("function");
     expect(typeof toolkit.QueueManager).toBe("function");
     expect(typeof toolkit.EndpointManager).toBe("function");
     expect(typeof toolkit.DeliveryStore).toBe("function");
     expect(typeof toolkit.EventStore).toBe("function");
     expect(typeof toolkit.MockHttpClient).toBe("function");
+  });
+
+  // BatchDispatcher never sent a request: it reported simulated deliveries.
+  // WebhookRuntimeService.emit() and WebhookDispatcher deliver for real.
+  test("toolkit leaves out the simulated BatchDispatcher", async () => {
+    const toolkit = await import("./toolkit/index");
+
+    expect("BatchDispatcher" in toolkit).toBe(false);
+    expect(typeof toolkit.WebhookDispatcher).toBe("function");
   });
 
   test("cloudflare adapter subpath exports persistence factory", async () => {

@@ -185,12 +185,23 @@ const runtime = new WebhookRuntimeService({
 | Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
 | `fieldCrypto.endpoint` / `fieldCrypto.delivery` without `fields.secret` / `fields.payload`, or with `plain`/`mask` | set `fields.secret` (endpoint) and `fields.payload` (delivery) to `encrypt` or `encrypt+hash`; other values now fail at startup |
 | ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before are rejected unless `fieldCrypto.acceptLegacyAad` is set. Deploy with the flag set, run `runtime.migrateFieldCryptoToTenant()` once every instance runs the new version (an older one still writes tenant-less values; running it again picks them up), pausing endpoint changes from other instances while it runs, then remove the flag. A custom delivery store must implement `replace()` and page `list()` with the `before` cursor |
+| `BatchDispatcher` / `BatchConfig` from `@k-msg/webhook/toolkit` | removed; it never sent a request. Use `runtime.emit()` / `flush()`, or `WebhookDispatcher.dispatch()` for a single delivery (see [Toolkit subpath](#toolkit-subpath)) |
 
 ## Toolkit subpath
 
 ```ts
 import { LoadBalancer, QueueManager } from "@k-msg/webhook/toolkit";
 ```
+
+`BatchDispatcher` is no longer exported. It never sent an HTTP request: each job got a simulated result (a random 200 or 500 and an invented latency), so it reported deliveries that never happened. For batched delivery, queue events on the runtime: `emit()` queues an event, and the runtime sends queued events through `WebhookDispatcher`, `batchSize` at a time, every `batchTimeoutMs` or as soon as a batch fills, and records each result:
+
+```ts
+await runtime.emit(event);
+await runtime.flush(); // sends whatever is still queued; shutdown() does too
+const deliveries = await runtime.listDeliveries({ endpointId });
+```
+
+For an endpoint you manage outside the runtime, `new WebhookDispatcher(config, httpClient).dispatch(event, endpoint)` sends one delivery and returns it with its status. It does not check the URL, so run `validateEndpointUrl()` on endpoint URLs first.
 
 ## License
 

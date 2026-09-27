@@ -11,10 +11,12 @@ import { WebhookRuntimeService } from "./webhook-runtime.service";
 class RecordingHttpClient implements HttpClient {
   readonly calls: Array<{ url: string; options: RequestInit }> = [];
 
+  constructor(private readonly status = 200) {}
+
   async fetch(url: string, options: RequestInit): Promise<Response> {
     this.calls.push({ url, options });
     return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
+      status: this.status,
       headers: { "content-type": "application/json" },
     });
   }
@@ -235,6 +237,82 @@ class SlowHttpClient implements HttpClient {
 }
 
 describe("WebhookRuntimeService batching", () => {
+  test("flush sends one request per queued event and endpoint", async () => {
+    const client = new RecordingHttpClient();
+    const runtime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      autoStart: false,
+    });
+
+    try {
+      await runtime.addEndpoints([
+        {
+          url: "https://example.com/a",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        },
+        {
+          url: "https://example.com/b",
+          active: true,
+          events: [WebhookEventType.MESSAGE_SENT],
+        },
+      ]);
+      const events = [createEvent(), createEvent()];
+      for (const event of events) {
+        await runtime.emit(event);
+      }
+
+      await runtime.flush();
+
+      const sent = client.calls.map(
+        (call) => `${call.url} ${JSON.parse(String(call.options.body)).id}`,
+      );
+      expect(sent.sort()).toEqual(
+        events
+          .flatMap((event) => [
+            `https://example.com/a ${event.id}`,
+            `https://example.com/b ${event.id}`,
+          ])
+          .sort(),
+      );
+      const deliveries = await runtime.listDeliveries();
+      expect(deliveries).toHaveLength(4);
+      expect(
+        deliveries.every((delivery) => delivery.status === "success"),
+      ).toBe(true);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("flush records a 500 response as a failed delivery", async () => {
+    const client = new RecordingHttpClient(500);
+    const runtime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: client,
+      autoStart: false,
+    });
+
+    try {
+      await runtime.addEndpoint({
+        url: "https://example.com/failing",
+        active: true,
+        events: [WebhookEventType.MESSAGE_SENT],
+      });
+      await runtime.emit(createEvent());
+
+      await runtime.flush();
+
+      expect(client.calls).toHaveLength(1);
+      const [delivery] = await runtime.listDeliveries();
+      expect(delivery?.status).toBe("failed");
+      expect(delivery?.attempts[0]?.httpStatus).toBe(500);
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
   test("flush waits for a batch the interval already started", async () => {
     const client = new SlowHttpClient();
     const runtime = new WebhookRuntimeService({
