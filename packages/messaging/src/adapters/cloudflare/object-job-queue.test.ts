@@ -32,6 +32,10 @@ class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
   maxValueLength = Number.POSITIVE_INFINITY;
   /** Keys whose writes are not read back, as KV may read its own writes late. */
   readonly unseenWrites = new Set<string>();
+  /** When each key was last written. */
+  readonly writtenAt = new Map<string, number>();
+  /** Called after every put(), for example to let time pass during a write. */
+  onPut?: () => void;
 
   async get<T>(key: string): Promise<T | undefined> {
     this.gets += 1;
@@ -43,8 +47,9 @@ class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
       throw new RangeError("Values cannot be larger than the storage limit");
     }
     this.puts.set(key, (this.puts.get(key) ?? 0) + 1);
-    if (this.unseenWrites.has(key)) return;
-    this.data.set(key, value);
+    this.writtenAt.set(key, Date.now());
+    if (!this.unseenWrites.has(key)) this.data.set(key, value);
+    this.onPut?.();
   }
 
   async delete(key: string): Promise<boolean> {
@@ -350,6 +355,47 @@ describe("CloudflareObjectJobQueue leases", () => {
     expect(job?.leaseExpiresAt?.getTime()).toBeGreaterThanOrEqual(
       at(elapsed + 60_000).getTime(),
     );
+  });
+
+  test("each lease dequeue() stores starts when it is written, after the writes before it", async () => {
+    setSystemTime(at(0));
+    const { storage, queue } = queueWith<{ to: string }>({ leaseMs: 1_000 });
+    const released = await queue.enqueue("send", { to: "01000000001" });
+    await queue.dequeue();
+    // Left processing without a lease, as by an earlier version.
+    const legacy = await queue.enqueue("send", { to: "01000000002" });
+    const legacyKey = `kmsg/jobs/jobs/${legacy.id}`;
+    storage.data.set(
+      legacyKey,
+      JSON.stringify({
+        ...JSON.parse(String(storage.data.get(legacyKey))),
+        status: JobStatus.PROCESSING,
+      }),
+    );
+    const selected = await queue.enqueue(
+      "send",
+      { to: "01000000003" },
+      { priority: 1 },
+    );
+
+    setSystemTime(at(1_000));
+    // Slow writes: each takes 600 ms.
+    let elapsed = 1_000;
+    storage.onPut = () => {
+      elapsed += 600;
+      setSystemTime(at(elapsed));
+    };
+
+    const taken = await queue.dequeue();
+
+    expect(taken?.id).toBe(selected.id);
+    expect((await queue.getJob(released.id))?.status).toBe(JobStatus.PENDING);
+    for (const job of [selected, legacy]) {
+      const writtenAt = storage.writtenAt.get(`kmsg/jobs/jobs/${job.id}`);
+      expect((await queue.getJob(job.id))?.leaseExpiresAt?.getTime()).toBe(
+        (writtenAt ?? Number.NaN) + 1_000,
+      );
+    }
   });
 
   test("with leases off, size() and peek() leave a stored lease alone, as dequeue() does", async () => {
