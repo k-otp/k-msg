@@ -397,7 +397,7 @@ describe("WebhookRegistry with a secret it cannot decrypt", () => {
     });
   });
 
-  test("keeps the stored secret when an endpoint read before the outage is updated", async () => {
+  test("refuses a secret it can neither encrypt nor compare with the stored one", async () => {
     const { config, outage } = createSwitchableConfig();
     const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
     await registry.addEndpoint(createEndpoint("my-secret"));
@@ -406,9 +406,32 @@ describe("WebhookRegistry with a secret it cannot decrypt", () => {
     outage.encrypt = true;
     outage.decrypt = true;
 
-    await registry.updateEndpoint("ep-1", { ...read, name: "renamed" });
+    await expect(
+      registry.updateEndpoint("ep-1", { ...read, secret: "rotated" }),
+    ).rejects.toMatchObject({ kind: "encrypt", fieldPath: "secret" });
 
     outage.encrypt = false;
+    outage.decrypt = false;
+    expect((await registry.getEndpoint("ep-1"))?.secret).toBe("my-secret");
+  });
+
+  test("keeps the stored secret of an endpoint read without it and sent through JSON", async () => {
+    const { config, outage } = createSwitchableConfig();
+    const registry = new WebhookRegistry({ fieldCrypto: { endpoint: config } });
+    await registry.addEndpoint(createEndpoint("my-secret"));
+    outage.decrypt = true;
+    const read = await registry.getEndpoint("ep-1");
+    if (!read) throw new Error("endpoint missing");
+    // The mark does not survive serialization, as in an admin API round trip.
+    const parsed = JSON.parse(JSON.stringify(read));
+
+    await registry.updateEndpoint("ep-1", {
+      ...parsed,
+      createdAt: read.createdAt,
+      updatedAt: new Date(),
+      name: "renamed",
+    });
+
     outage.decrypt = false;
     expect(await registry.getEndpoint("ep-1")).toMatchObject({
       name: "renamed",

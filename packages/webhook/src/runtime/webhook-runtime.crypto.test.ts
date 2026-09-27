@@ -255,7 +255,7 @@ describe("WebhookRuntimeService with an endpoint secret it cannot decrypt", () =
     }
   });
 
-  test("with the plaintext fallback, signs with a secret stored in plaintext but never with ciphertext", async () => {
+  test("with the plaintext fallback, signs with no stored value that fails to decrypt", async () => {
     const outage = { encrypt: false, decrypt: false };
     const aes = createAesGcmFieldCryptoProvider({
       keys: { k1: "0123456789abcdef0123456789abcdef" },
@@ -288,23 +288,43 @@ describe("WebhookRuntimeService with an endpoint secret it cannot decrypt", () =
       outage.encrypt = false;
       outage.decrypt = true;
 
+      // A value stored in plaintext looks like any ciphertext the provider
+      // could not decrypt, so neither is used as the secret.
       expect(await runtime.getEndpoint(encrypted.id)).not.toHaveProperty(
         "secret",
       );
-      expect((await runtime.getEndpoint(plaintext.id))?.secret).toBe(
-        "whsec_plaintext",
+      expect(await runtime.getEndpoint(plaintext.id)).not.toHaveProperty(
+        "secret",
       );
       const deliveries = await runtime.emitSync(createEvent());
 
-      const byEndpoint = new Map(
-        deliveries.map((delivery) => [delivery.endpointId, delivery]),
+      expect(client.calls).toHaveLength(0);
+      for (const delivery of deliveries) {
+        expect(delivery.attempts[0]?.error).toContain("could not be decrypted");
+      }
+    } finally {
+      await runtime.shutdown();
+    }
+  });
+
+  test("with the plaintext fallback, does not sign with string ciphertext", async () => {
+    const { config, outage } = createSwitchableCrypto({
+      openFallback: "plaintext",
+      unsafeAllowPlaintextStorage: true,
+    });
+    const { runtime, client } = createSecureRuntime(config);
+
+    try {
+      const endpoint = await addSignedEndpoint(runtime, "whsec_endpoint");
+      outage.decrypt = true;
+
+      expect(await runtime.getEndpoint(endpoint.id)).not.toHaveProperty(
+        "secret",
       );
-      expect(byEndpoint.get(encrypted.id)?.attempts[0]?.error).toContain(
-        "could not be decrypted",
-      );
-      expect(byEndpoint.get(plaintext.id)?.status).toBe("success");
-      expect(client.calls).toHaveLength(1);
-      expect(isSignedWith(client.calls[0], "whsec_plaintext")).toBe(true);
+      const [delivery] = await runtime.emitSync(createEvent());
+
+      expect(client.calls).toHaveLength(0);
+      expect(delivery?.attempts[0]?.error).toContain("could not be decrypted");
     } finally {
       await runtime.shutdown();
     }
@@ -386,30 +406,41 @@ describe("WebhookRuntimeService with an endpoint secret it cannot decrypt", () =
     }
   });
 
-  test("an update that passes back a secret read before the outage keeps the stored one", async () => {
-    const { config, outage } = createSwitchableCrypto();
-    const { runtime, endpointStore } = createSecureRuntime(config);
+  test.each([
+    ["passes back the secret read before the outage", "whsec_endpoint"],
+    ["rotates the secret", "whsec_rotated"],
+  ])(
+    "an update that %s while nothing can be encrypted or decrypted fails and keeps the stored secret",
+    async (_case, secret) => {
+      const { config, outage } = createSwitchableCrypto();
+      const { runtime, endpointStore } = createSecureRuntime(config);
 
-    try {
-      const endpoint = await addSignedEndpoint(runtime, "whsec_endpoint");
-      const stored = endpointStore.rows.get(endpoint.id)?.secret;
-      const read = await runtime.getEndpoint(endpoint.id);
-      outage.encrypt = true;
-      outage.decrypt = true;
+      try {
+        const endpoint = await addSignedEndpoint(runtime, "whsec_endpoint");
+        const stored = endpointStore.rows.get(endpoint.id);
+        const read = await runtime.getEndpoint(endpoint.id);
+        outage.encrypt = true;
+        outage.decrypt = true;
 
-      await runtime.updateEndpoint(endpoint.id, { ...read, name: "renamed" });
+        await expect(
+          runtime.updateEndpoint(endpoint.id, {
+            ...read,
+            name: "renamed",
+            secret,
+          }),
+        ).rejects.toMatchObject({ kind: "encrypt", fieldPath: "secret" });
 
-      expect(endpointStore.rows.get(endpoint.id)?.secret).toBe(stored);
-      outage.encrypt = false;
-      outage.decrypt = false;
-      expect(await runtime.getEndpoint(endpoint.id)).toMatchObject({
-        name: "renamed",
-        secret: "whsec_endpoint",
-      });
-    } finally {
-      await runtime.shutdown();
-    }
-  });
+        expect(endpointStore.rows.get(endpoint.id)).toEqual(stored);
+        outage.encrypt = false;
+        outage.decrypt = false;
+        expect((await runtime.getEndpoint(endpoint.id))?.secret).toBe(
+          "whsec_endpoint",
+        );
+      } finally {
+        await runtime.shutdown();
+      }
+    },
+  );
 
   test("an update can still replace or remove the secret", async () => {
     const { config, outage } = createSwitchableCrypto();
