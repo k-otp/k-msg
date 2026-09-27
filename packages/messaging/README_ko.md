@@ -396,6 +396,59 @@ const queue = createDrizzleJobQueue({
 });
 ```
 
+### KV/R2/Durable Object 작업 큐
+
+`createDurableObjectJobQueue`, `createKvJobQueue`, `createR2JobQueue`는 각 작업(job)을 `keyPrefix`(기본값 `kmsg/jobs`) 아래에 JSON으로 저장합니다.
+
+- `leaseMs`를 지정하면 `dequeue()`는 반환하는 작업을 그 시간 동안 점유(lease)합니다. 지정하지 않으면 처리 도중 워커가 멈춘 작업(예: 배포)은 영원히 `processing`으로 남습니다. 점유한 작업이 제시간에 완료도 실패도 되지 않으면, 다음 `dequeue()`가 잃어버린 시도를 실패로 계산하고(`error: "LEASE_EXPIRED"`, `JOB_LEASE_EXPIRED`로 export) 작업을 다시 처리 대상으로 만들거나, 남은 시도가 없으면 실패시킨 뒤 `onLeaseExpired(job)`를 호출합니다. 이 콜백은 반환할 작업을 점유하기 전에 호출되므로, 콜백이 오래 걸려도 그 작업의 lease가 줄어들지 않습니다.
+  - lease 없이 이미 `processing`인 작업(예: 이전 버전이 가져간 작업)은 `dequeue()`가 처음 볼 때 lease를 받습니다.
+  - lease는 연장되지 않고, 다른 워커의 처리를 막지도(fencing) 않습니다. `leaseMs`는 작업 하나가 걸릴 수 있는 가장 긴 시간보다 길게 잡으세요. lease가 끝난 뒤에도 원래 워커가 작업을 완료하거나 실패시킬 수 있고, 그 사이 다른 워커가 같은 작업을 가져갈 수 있습니다.
+  - `dequeue({ running })`은 호출한 쪽이 아직 실행 중인 작업을 건드리지 않습니다. 다시 내주지도 않고, lease를 잃어버린 시도로 계산하지도 않습니다. `JobProcessor`는 실행 중인 작업을 이 옵션으로 넘기므로, lease보다 오래 걸리는 핸들러를 같은 프로세서가 두 번 실행하지 않습니다.
+- `nextDueAt()`은 `dequeue()`가 다음에 할 일이 생기는 시각(대기 작업의 예정 시각이나 lease 종료 시각)을 반환하므로, 폴링 대신 그 시각에 알람을 걸 수 있습니다. 과거 시각이면 lease가 끝난 작업을 실패 처리하는 일이라도 `dequeue()`에 할 일이 있다는 뜻이니, `size()`를 확인하지 말고 `dequeue()`를 호출하세요.
+- `complete(jobId, result)`는 `result`(예: provider 메시지 ID)를 작업에 남깁니다. JSON으로 담을 수 없거나 storage에 비해 너무 큰 결과는 로그를 남기고 버리며, 완료 처리 자체는 실패하지 않습니다. `fail()`은 완료된 작업을 다시 열지 않습니다.
+- `cleanupTerminal({ olderThan })`은 `olderThan` 이전에 끝난 작업만 지우므로, 끝난 작업을 한동안 조회할 수 있습니다.
+- Durable Object에서는 작업마다 `get()`을 하지 않고 storage 목록 조회가 돌려준 값을 한 페이지씩 읽습니다. 그래도 `dequeue()`는 저장된 작업을 모두 읽으므로 끝난 작업은 주기적으로 정리하세요.
+
+예를 들어 알람에서 발송하는 Durable Object:
+
+```ts
+import { DurableObject } from "cloudflare:workers";
+import { createDurableObjectJobQueue } from "@k-msg/messaging/adapters/cloudflare";
+
+export class SendQueue extends DurableObject<Env> {
+  private readonly queue = createDurableObjectJobQueue<SendInput>(
+    this.ctx.storage,
+    // 발송은 10초 후 타임아웃되므로 1분이면 충분합니다.
+    { leaseMs: 60_000 },
+  );
+
+  async alarm(): Promise<void> {
+    for (let job = await this.queue.dequeue(); job; job = await this.queue.dequeue()) {
+      const result = await kmsg.send(job.data, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (result.isSuccess) {
+        await this.queue.complete(job.id, {
+          providerMessageId: result.value.providerMessageId,
+        });
+      } else {
+        await this.queue.fail(job.id, result.error.code, {
+          enabled: ErrorUtils.isRetryable(result.error),
+          delayMs: 5_000,
+        });
+      }
+    }
+
+    // 끝난 작업은 하루 동안 조회할 수 있게 둡니다.
+    await this.queue.cleanupTerminal({
+      olderThan: new Date(Date.now() - 24 * 60 * 60_000),
+    });
+    const next = await this.queue.nextDueAt();
+    if (next) await this.ctx.storage.setAlarm(next);
+  }
+}
+```
+
 ### Tracking 스키마 커스터마이즈
 
 `storeRaw` 기본값은 `false`입니다. provider 원본 payload 저장이 꼭 필요할 때만 `true`로 켜세요.

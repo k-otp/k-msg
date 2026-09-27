@@ -27,6 +27,28 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:4](htt
 
 ***
 
+### entries()?
+
+> `optional` **entries**(`prefix`): `AsyncIterable`\<\[`string`, `string`\]\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L11)
+
+The keys under `prefix` with their values, a listing page at a time, for
+storage whose listing returns values (Durable Objects), so reading
+everything under a prefix takes no get() per key.
+
+#### Parameters
+
+##### prefix
+
+`string`
+
+#### Returns
+
+`AsyncIterable`\<\[`string`, `string`\]\>
+
+***
+
 ### get()
 
 > **get**(`key`): `Promise`\<`string` \| `null`\>
