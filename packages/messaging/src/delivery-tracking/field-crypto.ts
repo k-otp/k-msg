@@ -274,24 +274,37 @@ function normalizeKidList(kids: unknown): string[] {
 }
 
 // A record's hashes use the kid that encrypted it, which a lookup cannot know,
-// so it tries every kid a record may carry: the one a write resolves now and
-// the decrypt set. `undefined` stands for the provider's default hash key,
-// which writes use when no resolver hands out a kid.
+// so it tries every key a record's hash may use: the kid a write resolves now,
+// the decrypt set, and the provider's default hash key (`undefined`), which
+// writes use without a resolved kid. Each source resolves on its own, so a
+// failing one, reported through onError, drops only its own candidates.
 async function resolveLookupKids(
   config: FieldCryptoConfig,
   context: FieldCryptoKeyContext,
+  onError: (error: unknown) => void,
 ): Promise<Array<string | undefined>> {
-  if (!config.keyResolver) return [undefined];
+  const kids: Array<string | undefined> = [];
+  const add = (kid: string | undefined) => {
+    if (!kids.includes(kid)) kids.push(kid);
+  };
 
-  const kids: Array<string | undefined> = [
-    await resolveEncryptKid(config, context),
-  ];
-  if (config.keyResolver.resolveDecryptKeys) {
-    const decryptKids = await config.keyResolver.resolveDecryptKeys(context);
-    for (const kid of normalizeKidList(decryptKids)) {
-      if (!kids.includes(kid)) kids.push(kid);
+  const resolver = config.keyResolver;
+  if (resolver) {
+    try {
+      add(await resolveEncryptKid(config, context));
+    } catch (error) {
+      onError(error);
+    }
+    if (resolver.resolveDecryptKeys) {
+      try {
+        const decryptKids = await resolver.resolveDecryptKeys(context);
+        for (const kid of normalizeKidList(decryptKids)) add(kid);
+      } catch (error) {
+        onError(error);
+      }
     }
   }
+  add(undefined);
   return kids;
 }
 
@@ -549,9 +562,9 @@ async function buildMetadataHashes(
 }
 
 // A degraded row keeps the lookup hash a normal write would store, under the
-// same kid, so lookups still find it. The fallback must not throw, so a hash
-// it cannot compute, because the kid did not resolve or the provider failed,
-// is left out.
+// same kid, so lookups still find it. When the kid does not resolve or cannot
+// hash, the provider's default key, which lookups also search, stands in. The
+// fallback must not throw, so a hash it cannot compute at all is left out.
 async function hashDegradedField(
   config: FieldCryptoConfig,
   path: "to" | "from",
@@ -559,11 +572,15 @@ async function hashDegradedField(
   resolveKid: FieldKidResolver,
 ): Promise<string | undefined> {
   if (!shouldEncrypt(resolveScalarMode(config, path))) return undefined;
-  try {
-    return await hashFieldValue(config, path, value, await resolveKid(path));
-  } catch {
-    return undefined;
+  const kid = await resolveKid(path).catch(() => undefined);
+  for (const candidate of kid ? [kid, undefined] : [undefined]) {
+    try {
+      return await hashFieldValue(config, path, value, candidate);
+    } catch {
+      // Try the next key.
+    }
   }
+  return undefined;
 }
 
 function toFallbackValue(
@@ -587,10 +604,11 @@ function toFallbackValue(
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Encrypts and hashes each field under the kid resolveEncryptKey returns for
  *   it, and has a degraded write hash to and from under the same kids.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #c79fc15
- *   Read protectScalar, buildMetadataHashes, and hashDegradedField: each hash
- *   takes the kid resolved for to, from, or metadata, and the fallback reuses
- *   it or stores no hash. Ran the tenant-key, metadata, and degraded tests.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #85ceff4
+ *   Read protectScalar, buildMetadataHashes, and hashDegradedField: hashes use
+ *   the kid resolved for to, from, or metadata, else the default key, and the
+ *   fallback retries with the default key before storing an empty to hash.
+ *   Ran the tenant-key, metadata, and degraded-write tests on both stores.
  */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
@@ -843,7 +861,11 @@ export async function applyTrackingCryptoOnWrite(
 
     return {
       toEnc,
-      toHash: await hashDegradedField(config, "to", record.to, resolveKid),
+      // The secure SQL schema requires a recipient hash as it does a
+      // ciphertext. Like the "null" fallback's empty ciphertext, an empty hash
+      // keeps the row storable, and no lookup matches it.
+      toHash:
+        (await hashDegradedField(config, "to", record.to, resolveKid)) ?? "",
       toMasked,
       fromEnc,
       fromHash:
@@ -1094,8 +1116,8 @@ export async function restoreTrackingCryptoOnRead(
 }
 
 // Hashes each lookup value under every candidate kid. Under failMode=open a
-// hash that cannot be computed is skipped, so the lookup may find fewer
-// records; under failMode=closed it fails the lookup.
+// candidate or hash that cannot be computed is skipped, so the lookup may find
+// fewer records; under failMode=closed it fails the lookup.
 async function hashLookupValues(
   config: FieldCryptoConfig,
   options: DeliveryTrackingFieldCryptoOptions | undefined,
@@ -1106,27 +1128,29 @@ async function hashLookupValues(
   path: "to" | "from",
   values: readonly string[],
 ): Promise<string[]> {
-  const hashes = new Set<string>();
   let failure: { error: unknown } | undefined;
-  try {
-    const kids = await resolveLookupKids(config, {
-      ...context,
-      fieldPath: path,
-    });
-    const results = await Promise.allSettled(
-      values.flatMap((value) =>
-        kids.map(async (kid) => hashFieldValue(config, path, value, kid)),
-      ),
-    );
-    for (const result of results) {
-      if (result.status === "fulfilled") {
-        hashes.add(result.value);
-      } else {
-        failure ??= { error: result.reason };
-      }
+  const onError = (error: unknown) => {
+    failure ??= { error };
+  };
+
+  const kids = await resolveLookupKids(
+    config,
+    { ...context, fieldPath: path },
+    onError,
+  );
+  const results = await Promise.allSettled(
+    values.flatMap((value) =>
+      kids.map(async (kid) => hashFieldValue(config, path, value, kid)),
+    ),
+  );
+  const hashes = new Set<string>();
+  for (const result of results) {
+    if (result.status === "rejected") {
+      onError(result.reason);
+    } else if (result.value) {
+      // An empty hash would match the degraded rows stored without one.
+      hashes.add(result.value);
     }
-  } catch (error) {
-    failure = { error };
   }
 
   if (failure) {
@@ -1157,13 +1181,14 @@ async function hashLookupValues(
  * could not be hashed under failMode=open.
  *
  * @evidence docs/security/field-crypto-v1.md#key-management
- *   Hashes each to and from filter value under the encrypt kid and the decrypt
- *   set that the resolver returns for the store, and handles a hash it cannot
- *   compute as the fail mode directs.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #c79fc15
+ *   Hashes each to and from filter value under the encrypt kid, the decrypt
+ *   set, and the provider's default key, and handles a key or hash it cannot
+ *   resolve or compute as the fail mode directs.
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #85ceff4
  *   Read resolveLookupKids and hashLookupValues against the lookup and failure
- *   paragraphs, checked both stores return no records for an undefined
- *   filter, and ran the rotation, candidate, and fail-mode lookup tests.
+ *   paragraphs: three key sources resolved independently, no empty hash, and
+ *   no records from either store for an undefined filter. Ran the rotation,
+ *   pre-resolver, candidate, and fail-mode lookup tests.
  */
 export async function normalizeTrackingFilterWithHashes(
   filter: DeliveryTrackingRecordFilter,
