@@ -99,6 +99,10 @@ Defined in: [packages/webhook/src/dispatcher/types.ts:35](https://github.com/k-o
 
 > `optional` **secret?**: `string`
 
+#### secretUndecryptable?
+
+> `optional` **secretUndecryptable?**: `true`
+
 #### status
 
 > **status**: `"error"` \| `"active"` \| `"inactive"` \| `"suspended"`

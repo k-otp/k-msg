@@ -113,6 +113,10 @@ Defined in: [packages/webhook/src/services/webhook.dispatcher.ts:86](https://git
 
 `string` = `...`
 
+###### secretUndecryptable?
+
+`true` = `...`
+
 ###### status
 
 `"error"` \| `"active"` \| `"inactive"` \| `"suspended"` = `...`
