@@ -1,10 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
 import {
-  type CloudflareDurableObjectStorageLike,
+  type CloudflareObjectJob,
   type CloudflareObjectJobQueue,
   createDurableObjectJobQueue,
 } from "@k-msg/messaging/adapters/cloudflare";
-import { type Job, JobStatus } from "@k-msg/messaging/queue";
+import { JobStatus } from "@k-msg/messaging/queue";
 import { ErrorUtils, KMsg, type KMsgError } from "k-msg";
 import { type Config, type Env, readConfig } from "./env";
 import { log } from "./log";
@@ -31,8 +31,20 @@ export interface JobView {
   nextAttemptAt: string | null;
   completedAt: string | null;
   failedAt: string | null;
-  /** Code of the last failed attempt: a KMsgErrorCode, or INTERRUPTED. */
+  /**
+   * Code of the last failed attempt: a KMsgErrorCode, or LEASE_EXPIRED when
+   * the object stopped mid-send.
+   */
   lastError: string | null;
+  /** The provider that accepted the message, once it has. */
+  providerId: string | null;
+  providerMessageId: string | null;
+}
+
+/** What a sent job keeps, through complete(). */
+interface SentResult {
+  providerId: string;
+  providerMessageId: string | null;
 }
 
 export interface DrainResult {
@@ -89,7 +101,6 @@ type AlarmStorage = Pick<DurableObjectStorage, "getAlarm" | "setAlarm">;
 
 const QUEUE_KEY_PREFIX = "send-queue";
 const IDEMPOTENCY_PREFIX = "idempotency/";
-const IN_FLIGHT_KEY = "in-flight";
 const STATS_KEY = "stats";
 
 /**
@@ -97,17 +108,21 @@ const STATS_KEY = "stats";
  * code. The SOLAPI SDK ignores the signal, so SOLAPI calls are not bounded.
  */
 const SEND_TIMEOUT_MS = 10_000;
-/** Jobs per pass. A full pass sets the alarm to fire again at once. */
-const BATCH_SIZE = 25;
-/** While jobs wait for a retry, the queue is checked at least this often. */
-const POLL_INTERVAL_MS = 10_000;
 /**
- * Finished jobs and expired idempotency keys are deleted this often, starting
- * one interval after the first job. cleanupTerminal() removes every finished
- * job however recent, so a job's status stays readable for at most this long
- * after it finishes.
+ * A dequeued job is leased for this long. If the object stops mid-send, for
+ * example during a deploy, the job is due again once its lease runs out,
+ * with the lost attempt counted as failed. Far longer than a send takes.
+ */
+const LEASE_MS = 5 * 60_000;
+/** Jobs per pass. A full pass leaves jobs due, so the alarm fires again at once. */
+const BATCH_SIZE = 25;
+/**
+ * Finished jobs older than FINISHED_JOB_TTL_MS and expired idempotency keys
+ * are deleted this often, starting one interval after the first job.
  */
 const CLEANUP_INTERVAL_MS = 10 * 60_000;
+/** How long a finished job's status stays readable. */
+const FINISHED_JOB_TTL_MS = 60 * 60_000;
 /** For this long, a repeated Idempotency-Key returns the original job. */
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60_000;
 const BASE_BACKOFF_MS = 2_000;
@@ -190,17 +205,17 @@ export class SendQueue extends DurableObject<Env> {
   /** Sends the due jobs now instead of waiting for the alarm. */
   async drain(): Promise<DrainResult> {
     const result = await this.runPass();
-    await this.scheduleNextAlarm(result);
+    await this.scheduleNextAlarm();
     return result;
   }
 
   async alarm(): Promise<void> {
-    const result = await this.runPass();
+    await this.runPass();
     const { nextCleanupAt } = await readStats(this.ctx.storage);
     if (nextCleanupAt !== undefined && Date.now() >= nextCleanupAt) {
       await this.cleanup();
     }
-    await this.scheduleNextAlarm(result);
+    await this.scheduleNextAlarm();
   }
 
   private getSender(): Promise<Sender> {
@@ -224,7 +239,6 @@ export class SendQueue extends DurableObject<Env> {
   private async processDueJobs(): Promise<DrainResult> {
     // A configuration error stops the pass before it touches a job.
     await this.getSender();
-    await this.recoverInterruptedJob();
 
     const result: DrainResult = {
       processed: 0,
@@ -242,16 +256,27 @@ export class SendQueue extends DurableObject<Env> {
     return result;
   }
 
-  /** Takes the next due job and marks it in flight, in one transaction. */
-  private claimNextJob(): Promise<Job<SendJob> | undefined> {
-    return this.transaction(async (queue, txn) => {
-      const job = await queue.dequeue();
-      if (job !== undefined) await txn.put(IN_FLIGHT_KEY, job.id);
-      return job;
+  /**
+   * Takes the next due job and leases it. In the same transaction, jobs whose
+   * lease ran out mid-send are due again or failed (see jobQueue()). They
+   * are logged once the transaction commits: storage may run the transaction
+   * again, and only the attempt that commits happened.
+   */
+  private async claimNextJob(): Promise<
+    CloudflareObjectJob<SendJob> | undefined
+  > {
+    let interrupted: InterruptedJob[] = [];
+    const job = await this.ctx.storage.transaction((txn) => {
+      interrupted = [];
+      return jobQueue(txn, interrupted).dequeue();
     });
+    for (const fields of interrupted) {
+      log("warn", "job was interrupted mid-send", fields);
+    }
+    return job;
   }
 
-  private async send(job: Job<SendJob>): Promise<Outcome> {
+  private async send(job: CloudflareObjectJob<SendJob>): Promise<Outcome> {
     const { config, kmsg } = await this.getSender();
     const attempt = job.attempts + 1;
     const fields = { jobId: job.id, attempt, to: maskPhoneNumber(job.data.to) };
@@ -268,12 +293,12 @@ export class SendQueue extends DurableObject<Env> {
     );
 
     if (result.isSuccess) {
-      await this.settle("sent", (queue) => queue.complete(job.id));
-      log("info", "message sent", {
-        ...fields,
+      const sent: SentResult = {
         providerId: result.value.providerId,
         providerMessageId: result.value.providerMessageId ?? null,
-      });
+      };
+      await this.settle("sent", (queue) => queue.complete(job.id, sent));
+      log("info", "message sent", { ...fields, ...sent });
       return "sent";
     }
 
@@ -289,10 +314,9 @@ export class SendQueue extends DurableObject<Env> {
 
     if (ErrorUtils.isRetryable(error) && attempt < job.maxAttempts) {
       const delayMs = retryDelayMs(error, attempt);
-      await this.settle("retried", async (queue, txn) => {
-        await queue.fail(job.id, error.code, { enabled: true, delayMs });
-        await wakeAt(txn, Date.now() + delayMs);
-      });
+      await this.settle("retried", (queue) =>
+        queue.fail(job.id, error.code, { enabled: true, delayMs }),
+      );
       log("warn", "send failed; retry scheduled", { ...failure, delayMs });
       return "retried";
     }
@@ -305,56 +329,29 @@ export class SendQueue extends DurableObject<Env> {
     return "failed";
   }
 
-  /** Records how an attempt ended and clears the in-flight mark with it. */
+  /** Records how an attempt ended, in the transaction that stores it. */
   private settle(
     outcome: Outcome,
-    update: (
-      queue: SendJobQueue,
-      txn: DurableObjectTransaction,
-    ) => Promise<void>,
+    update: (queue: SendJobQueue) => Promise<void>,
   ): Promise<void> {
     return this.transaction(async (queue, txn) => {
-      await update(queue, txn);
-      await txn.delete(IN_FLIGHT_KEY);
+      await update(queue);
       await count(txn, outcome);
     });
   }
 
   /**
-   * A job still marked in flight when a pass starts was being sent when the
-   * object stopped, for example during a deploy. Whether the provider got it
-   * is unknown, so it counts as a failed attempt and is retried: a recipient
-   * may get the message twice, but it is never dropped silently.
+   * Deletes jobs that finished over FINISHED_JOB_TTL_MS ago and expired
+   * idempotency records.
    */
-  private async recoverInterruptedJob(): Promise<void> {
-    const recovered = await this.transaction(async (queue, txn) => {
-      const jobId = await txn.get<string>(IN_FLIGHT_KEY);
-      if (jobId === undefined) return undefined;
-      await txn.delete(IN_FLIGHT_KEY);
-
-      const job = await queue.getJob(jobId);
-      if (job?.status !== JobStatus.PROCESSING) return undefined;
-      const retry = job.attempts + 1 < job.maxAttempts;
-      await queue.fail(jobId, "INTERRUPTED", { enabled: retry });
-      if (retry) {
-        await count(txn, "interrupted");
-      } else {
-        await count(txn, "interrupted", "failed");
-      }
-      return { jobId, retry };
-    });
-    if (recovered !== undefined) {
-      log("warn", "job was interrupted mid-send", recovered);
-    }
-  }
-
-  /** Deletes finished jobs and expired idempotency records. */
   private async cleanup(): Promise<void> {
     const now = Date.now();
-    const removedJobs = await this.queue.cleanupTerminal();
+    const removedJobs = await this.queue.cleanupTerminal({
+      olderThan: new Date(now - FINISHED_JOB_TTL_MS),
+    });
     const expiredKeys = await this.expireIdempotencyRecords(now);
-    // Idempotency records outlive their jobs, so while any remain, jobs may
-    // still finish and need another cleanup.
+    // Idempotency records outlive their jobs by far, so while any remain,
+    // jobs may still finish and need another cleanup.
     const remaining = await this.ctx.storage.list({
       prefix: IDEMPOTENCY_PREFIX,
       limit: 1,
@@ -410,19 +407,18 @@ export class SendQueue extends DurableObject<Env> {
   }
 
   /**
-   * Sets the alarm for whatever comes first. The queue cannot tell when its
-   * next delayed job is due, so while jobs are open it is polled every
-   * POLL_INTERVAL_MS; each retry also sets the alarm for its own due time.
+   * Sets the alarm for whatever comes first: the next job due (a retry, or a
+   * lease running out, and now when jobs are left after a full pass) or the
+   * next cleanup.
    */
-  private async scheduleNextAlarm(pass: DrainResult): Promise<void> {
-    const now = Date.now();
+  private async scheduleNextAlarm(): Promise<void> {
     const stats = await readStats(this.ctx.storage);
     const candidates: number[] = [];
 
     const current = await this.ctx.storage.getAlarm();
     if (current !== null) candidates.push(current);
-    if (pass.processed === BATCH_SIZE) candidates.push(now);
-    if (openJobs(stats) > 0) candidates.push(now + POLL_INTERVAL_MS);
+    const nextDue = await this.queue.nextDueAt();
+    if (nextDue !== undefined) candidates.push(nextDue.getTime());
     if (stats.nextCleanupAt !== undefined) {
       candidates.push(stats.nextCleanupAt);
     }
@@ -449,9 +445,38 @@ async function createSender(env: Env): Promise<Sender> {
   return { config, kmsg: new KMsg({ providers: [provider] }) };
 }
 
-function jobQueue(storage: CloudflareDurableObjectStorageLike): SendJobQueue {
+/** A job whose send was interrupted, as logged once its claim commits. */
+type InterruptedJob = {
+  jobId: string;
+  /** Whether the job is due again, rather than failed. */
+  retry: boolean;
+};
+
+/**
+ * The queue over this object's storage, or over a transaction so that its
+ * changes commit with the bookkeeping around them. Jobs whose lease ran out
+ * are counted in the same storage and added to `interrupted`.
+ */
+function jobQueue(
+  storage: DurableObjectStorage | DurableObjectTransaction,
+  interrupted: InterruptedJob[] = [],
+): SendJobQueue {
   return createDurableObjectJobQueue<SendJob>(storage, {
     keyPrefix: QUEUE_KEY_PREFIX,
+    leaseMs: LEASE_MS,
+    // A job whose send never finished, because the object stopped mid-send.
+    // Whether the provider got it is unknown, so it is retried as a failed
+    // attempt: a recipient may get the message twice, but it is never
+    // dropped silently.
+    onLeaseExpired: async (job) => {
+      const retry = job.status === JobStatus.PENDING;
+      if (retry) {
+        await count(storage, "interrupted");
+      } else {
+        await count(storage, "interrupted", "failed");
+      }
+      interrupted.push({ jobId: job.id, retry });
+    },
   });
 }
 
@@ -516,7 +541,8 @@ async function wakeAt(storage: AlarmStorage, time: number): Promise<void> {
   if (current === null || time < current) await storage.setAlarm(time);
 }
 
-function toJobView(job: Job<SendJob>): JobView {
+function toJobView(job: CloudflareObjectJob<SendJob>): JobView {
+  const sent = readSentResult(job.result);
   return {
     jobId: job.id,
     status: job.status,
@@ -528,6 +554,19 @@ function toJobView(job: Job<SendJob>): JobView {
     completedAt: job.completedAt?.toISOString() ?? null,
     failedAt: job.failedAt?.toISOString() ?? null,
     lastError: job.error ?? null,
+    providerId: sent?.providerId ?? null,
+    providerMessageId: sent?.providerMessageId ?? null,
+  };
+}
+
+function readSentResult(result: unknown): SentResult | undefined {
+  if (typeof result !== "object" || result === null) return undefined;
+  const { providerId, providerMessageId } = result as Record<string, unknown>;
+  if (typeof providerId !== "string") return undefined;
+  return {
+    providerId,
+    providerMessageId:
+      typeof providerMessageId === "string" ? providerMessageId : null,
   };
 }
 
