@@ -709,7 +709,12 @@ function toSentRequestAbortError(
   signal: AbortSignal | undefined,
   providerId: string,
 ): KMsgError | undefined {
-  if (error instanceof KMsgError) return undefined;
+  if (!signal?.aborted) return undefined;
+  // The race rejects with the signal's own reason, which may itself be a
+  // KMsgError such as NETWORK_TIMEOUT. Any other KMsgError came from the SDK
+  // call and keeps its meaning.
+  const fromSignal = error === signal.reason;
+  if (!fromSignal && error instanceof KMsgError) return undefined;
   const aborted = toProviderAbortError(error, signal, providerId);
   if (!aborted) return undefined;
 
