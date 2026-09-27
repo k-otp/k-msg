@@ -45,7 +45,9 @@ export interface CloudflareObjectJobQueueOptions<T> {
    * Called by `dequeue()` for each job whose lease had expired, once
    * `dequeue()` has stored its changes: with the job pending again (the same
    * `dequeue()` may have taken it again) or failed if it had no attempts
-   * left. What it throws is logged and does not stop the dequeue.
+   * left. What it throws is logged and does not stop the dequeue. It runs
+   * before `dequeue()` returns, so keep it short: the job `dequeue()`
+   * returns is already leased.
    */
   onLeaseExpired?: (job: CloudflareObjectJob<T>) => void | Promise<void>;
 }
@@ -161,6 +163,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
   async dequeue(): Promise<CloudflareObjectJob<T> | undefined> {
     const now = Date.now();
     const changed = new Map<string, CloudflareObjectJob<T>>();
+    const unleased: CloudflareObjectJob<T>[] = [];
     const released: CloudflareObjectJob<T>[] = [];
     let next: CloudflareObjectJob<T> | undefined;
 
@@ -169,11 +172,8 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
       if (job.status === JobStatus.PROCESSING && this.leasesEnabled()) {
         if (job.leaseExpiresAt === undefined) {
           // Left processing by an earlier version or a queue without leases,
-          // and maybe still being worked on: its lease starts now.
-          changed.set(job.id, {
-            ...job,
-            leaseExpiresAt: new Date(now + this.leaseMs),
-          });
+          // and maybe still being worked on: it gets a lease below.
+          unleased.push(job);
           continue;
         }
         const recovered = this.releaseExpiredLease(job, now);
@@ -187,12 +187,21 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
       if (!next || compareJobs(job, next) < 0) next = job;
     }
 
+    // Leases start when they are stored, not when the scan began, so a long
+    // scan does not shorten them.
+    const leasedAt = Date.now();
+    for (const job of unleased) {
+      changed.set(job.id, {
+        ...job,
+        leaseExpiresAt: this.leaseExpiry(leasedAt),
+      });
+    }
     let leased: CloudflareObjectJob<T> | undefined;
     if (next) {
       leased = {
         ...next,
         status: JobStatus.PROCESSING,
-        leaseExpiresAt: this.leaseExpiry(now),
+        leaseExpiresAt: this.leaseExpiry(leasedAt),
       };
       // One write per job, even for a released job taken again at once.
       changed.set(leased.id, leased);
@@ -279,7 +288,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     const now = Date.now();
     let next: CloudflareObjectJob<T> | undefined;
     for await (const stored of this.readJobs()) {
-      const job = this.releaseExpiredLease(stored, now) ?? stored;
+      const job = this.releaseIfLeased(stored, now);
       if (!isDue(job, now)) continue;
       if (!next || compareJobs(job, next) < 0) next = job;
     }
@@ -291,7 +300,7 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     const now = Date.now();
     let due = 0;
     for await (const stored of this.readJobs()) {
-      const job = this.releaseExpiredLease(stored, now) ?? stored;
+      const job = this.releaseIfLeased(stored, now);
       if (isDue(job, now)) due += 1;
     }
     return due;
@@ -383,6 +392,16 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
 
   private leaseExpiry(now: number): Date | undefined {
     return this.leasesEnabled() ? new Date(now + this.leaseMs) : undefined;
+  }
+
+  // What dequeue() would make of the job: with leases off it leaves a lease
+  // stored by an earlier configuration alone, so peek() and size() must too.
+  private releaseIfLeased(
+    job: CloudflareObjectJob<T>,
+    now: number,
+  ): CloudflareObjectJob<T> {
+    if (!this.leasesEnabled()) return job;
+    return this.releaseExpiredLease(job, now) ?? job;
   }
 
   // The job as it is once its expired lease ends: due again from the lease's

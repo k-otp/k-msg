@@ -21,6 +21,8 @@ class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
   readonly puts = new Map<string, number>();
   gets = 0;
   lists = 0;
+  /** Called on every list(), for example to let time pass during a scan. */
+  onList?: () => void;
   /** Values longer than this are rejected, as storage rejects oversized values. */
   maxValueLength = Number.POSITIVE_INFINITY;
 
@@ -45,6 +47,7 @@ class DurableObjectStorageFake implements CloudflareDurableObjectStorageLike {
     options: { prefix?: string; startAfter?: string; limit?: number } = {},
   ): Promise<Map<string, T>> {
     this.lists += 1;
+    this.onList?.();
     const prefix = options.prefix ?? "";
     const entries = Array.from(this.data.entries())
       .filter(([key]) => key.startsWith(prefix))
@@ -210,6 +213,39 @@ describe("CloudflareObjectJobQueue leases", () => {
     // write rather than one for the recovery and one for the new lease.
     expect(seen).toEqual([JobStatus.PROCESSING]);
     expect(storage.puts.get(`kmsg/jobs/jobs/${job.id}`)).toBe(1);
+  });
+
+  test("the lease dequeue() returns starts when it stores it, not when the scan began", async () => {
+    setSystemTime(at(0));
+    const { storage, queue } = queueWith<{ to: string }>({ leaseMs: 60_000 });
+    await queue.enqueue("send", { to: "01012345678" });
+    // A slow scan: time passes while the jobs are listed.
+    let elapsed = 0;
+    storage.onList = () => {
+      elapsed += 30_000;
+      setSystemTime(at(elapsed));
+    };
+
+    const job = await queue.dequeue();
+
+    expect(job?.leaseExpiresAt?.getTime()).toBeGreaterThanOrEqual(
+      at(elapsed + 60_000).getTime(),
+    );
+  });
+
+  test("with leases off, size() and peek() leave a stored lease alone, as dequeue() does", async () => {
+    setSystemTime(at(0));
+    const { storage, queue } = queueWith<{ to: string }>({ leaseMs: 1_000 });
+    const job = await queue.enqueue("send", { to: "01012345678" });
+    await queue.dequeue();
+    // The same storage, reopened without leases.
+    const unleased = createDurableObjectJobQueue<{ to: string }>(storage);
+
+    setSystemTime(at(5_000));
+    expect(await unleased.size()).toBe(0);
+    expect(await unleased.peek()).toBeUndefined();
+    expect(await unleased.dequeue()).toBeUndefined();
+    expect((await unleased.getJob(job.id))?.status).toBe(JobStatus.PROCESSING);
   });
 
   test("size() and peek() count a job whose lease expired, without changing it", async () => {
