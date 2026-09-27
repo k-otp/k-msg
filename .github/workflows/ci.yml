@@ -121,8 +121,9 @@ jobs:
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
-    # A real Postgres for the SQL adapter integration tests in
-    # packages/messaging; they are skipped when KMSG_TEST_POSTGRES_URL is unset.
+    # A real Postgres and MariaDB for the SQL adapter integration tests in
+    # packages/messaging; they are skipped when KMSG_TEST_POSTGRES_URL or
+    # KMSG_TEST_MYSQL_URL is unset.
     services:
       postgres:
         image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
@@ -137,8 +138,21 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      mariadb:
+        image: mariadb:11.4@sha256:2f45480c9cac0545cd723ad0006d6ac28e173eeb6120b83ab31efc1a043dd325
+        env:
+          MARIADB_ROOT_PASSWORD: kmsg
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     env:
       KMSG_TEST_POSTGRES_URL: postgres://kmsg:kmsg@localhost:5432/kmsg_test
+      # Root, since the tests create and drop their own database.
+      KMSG_TEST_MYSQL_URL: mysql://root:kmsg@localhost:3306/mysql
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
