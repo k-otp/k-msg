@@ -61,20 +61,18 @@ export async function openTrackingRuntime(
     },
   });
 
-  const trackingHooks = createDeliveryTrackingHooks(tracking, {
-    // The provider accepted the message, so the send still succeeds, but it
-    // has no tracking record and the cron will never poll it.
-    onError: (error) => {
-      log("error", "could not record a sent message", errorFields(error));
-    },
-  });
-
   const kmsg = new KMsg({
     providers: [provider],
-    // createDeliveryTrackingHooks also hands every failed send to the onError
-    // above. The route reports send failures itself, so drop that hook and
-    // keep onError for tracking write failures.
-    hooks: { ...trackingHooks, onError: undefined },
+    hooks: createDeliveryTrackingHooks(tracking, {
+      // The provider accepted the message, so the send still succeeds, but
+      // it has no tracking record and the cron will never poll it.
+      onRecordError: (error, { result }) => {
+        log("error", "could not record a sent message", {
+          messageId: result.messageId,
+          ...errorFields(error),
+        });
+      },
+    }),
   });
 
   return { kmsg, tracking, close: () => sql.end() };
