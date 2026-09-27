@@ -212,6 +212,7 @@ describe("AligoProvider (send)", () => {
       to: "01012345678",
       templateId: "TPL_1",
       variables: { name: "Jane" },
+      providerOptions: { templateContent: "#{name}" },
       failover: {
         enabled: true,
         fallbackChannel: "lms",
@@ -260,6 +261,7 @@ describe("AligoProvider (send responses)", () => {
       to: "01012345678",
       templateId: "TPL_1",
       variables: { name: "Jane" },
+      providerOptions: { templateContent: "#{name}" },
     });
 
     expect(result.isFailure).toBe(true);
@@ -283,6 +285,7 @@ describe("AligoProvider (send responses)", () => {
       to: "01012345678",
       templateId: "TPL_1",
       variables: { name: "Jane" },
+      providerOptions: { templateContent: "#{name}" },
     });
 
     expect(result.isFailure).toBe(true);
@@ -356,6 +359,7 @@ describe("AligoProvider (send responses)", () => {
       to: "01012345678",
       templateId: "TPL_1",
       variables: { name: "Jane" },
+      providerOptions: { templateContent: "#{name}" },
     });
 
     expect(result.isFailure).toBe(true);

@@ -8,17 +8,6 @@ import {
 import { parseKstDateTime, toKst } from "../shared/kst";
 import type { AligoConfig } from "./types/aligo";
 
-function interpolateTemplate(
-  text: string,
-  vars: Record<string, unknown>,
-): string {
-  if (!text) return "";
-  return text.replace(/#\{([^}]+)\}/g, (match, key) => {
-    const value = vars[key];
-    return value === undefined || value === null ? match : String(value);
-  });
-}
-
 export function resolveImageRef(options: {
   imageUrl?: string;
   media?: { image?: MessageBinaryInput };
@@ -131,16 +120,4 @@ export function mapAligoTemplateStatus(
 // Aligo's timestamps are Korea Standard Time.
 export function parseAligoDateTime(value: unknown): Date | undefined {
   return parseKstDateTime(value);
-}
-
-export function resolveAligoTemplateMessage(
-  variables: Record<string, unknown> | undefined,
-  templateContent?: string,
-): string {
-  if (!variables) return "";
-  const fullText = variables._full_text;
-  if (fullText !== undefined && fullText !== null) return String(fullText);
-  if (!templateContent) return Object.values(variables).map(String).join("\n");
-
-  return interpolateTemplate(templateContent, variables);
 }

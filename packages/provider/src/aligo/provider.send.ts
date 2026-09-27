@@ -12,8 +12,10 @@ import {
   readRuntimeEnv,
   type SendOptions,
   type SendResult,
+  type TemplateContext,
 } from "@k-msg/core";
 import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { TemplateContentCache } from "../shared/template-content-cache";
 import type { AligoRuntimeContext } from "./aligo.internal.types";
 import {
   addKakaoChannel,
@@ -22,6 +24,7 @@ import {
   requestKakaoChannelAuth,
 } from "./aligo.kakao";
 import { sendWithAligo } from "./aligo.send";
+import { aligoTemplateContentKey } from "./aligo.template-content";
 import type { AligoConfig } from "./types/aligo";
 
 export function resolveDefaultAligoConfig(): AligoConfig {
@@ -54,6 +57,8 @@ export class AligoSendProvider implements Provider, KakaoChannelProvider {
   protected readonly config: AligoConfig;
   protected readonly smsHost: string;
   protected readonly alimtalkHost: string;
+  /** Template bodies used to render AlimTalk messages. */
+  protected readonly templateContents = new TemplateContentCache();
 
   getOnboardingSpec() {
     const spec = getProviderOnboardingSpec(this.id);
@@ -88,7 +93,18 @@ export class AligoSendProvider implements Provider, KakaoChannelProvider {
       smsHost: this.smsHost,
       alimtalkHost: this.alimtalkHost,
       requestContext,
+      templateContents: this.templateContents,
     };
+  }
+
+  /** Drops a kept template body, e.g. after the template changed. */
+  protected forgetTemplateContent(code: string, ctx?: TemplateContext): void {
+    const senderKey =
+      (typeof ctx?.kakaoChannelSenderKey === "string" &&
+      ctx.kakaoChannelSenderKey.trim().length > 0
+        ? ctx.kakaoChannelSenderKey.trim()
+        : this.config.senderKey) || "";
+    this.templateContents.delete(aligoTemplateContentKey(senderKey, code));
   }
 
   async healthCheck(): Promise<ProviderHealthStatus> {

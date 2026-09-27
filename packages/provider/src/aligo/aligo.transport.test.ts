@@ -38,6 +38,13 @@ const sendInputs: SendOptions[] = [
     providerOptions: { templateContent: "code: #{code}" },
   },
   {
+    // Looks the template body up first, through the same context.
+    type: "ALIMTALK",
+    to: "01012345678",
+    templateId: "TPL_2",
+    variables: { code: "123456" },
+  },
+  {
     type: "FRIENDTALK",
     to: "01012345678",
     text: "friend message",
@@ -52,15 +59,17 @@ describe("Aligo transport context", () => {
 
     const fetch: ProviderFetch = async (input, init) => {
       observedSignals.push(init?.signal);
-      const isSms = String(input).includes("apis.aligo.in");
-      return new Response(
-        JSON.stringify(
-          isSms
-            ? { result_code: 1, message: "", msg_id: 1 }
-            : { code: 0, message: "ok", info: { mid: 1 } },
-        ),
-        { status: 200 },
-      );
+      const url = String(input);
+      const body = url.endsWith("/akv10/template/list/")
+        ? {
+            code: 0,
+            message: "ok",
+            list: [{ templtCode: "TPL_2", templtContent: "code: #{code}" }],
+          }
+        : url.includes("apis.aligo.in")
+          ? { result_code: 1, message: "", msg_id: 1 }
+          : { code: 0, message: "ok", info: { mid: 1 } };
+      return new Response(JSON.stringify(body), { status: 200 });
     };
 
     for (const input of sendInputs) {
@@ -71,7 +80,8 @@ describe("Aligo transport context", () => {
       expect(result.isSuccess).toBe(true);
     }
 
-    expect(observedSignals).toHaveLength(sendInputs.length);
+    // One more request: the template lookup for TPL_2.
+    expect(observedSignals).toHaveLength(sendInputs.length + 1);
     expect(
       observedSignals.every((signal) => signal === controller.signal),
     ).toBe(true);

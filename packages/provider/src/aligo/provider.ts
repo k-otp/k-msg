@@ -35,14 +35,23 @@ export class AligoProvider
     patch: TemplateUpdateInput,
     ctx?: TemplateContext,
   ): Promise<Result<Template, KMsgError>> {
-    return updateTemplate(this.getRuntimeContext(), code, patch, ctx);
+    const result = await updateTemplate(
+      this.getRuntimeContext(),
+      code,
+      patch,
+      ctx,
+    );
+    this.forgetTemplateContent(code, ctx);
+    return result;
   }
 
   async deleteTemplate(
     code: string,
     ctx?: TemplateContext,
   ): Promise<Result<void, KMsgError>> {
-    return deleteTemplate(this.getRuntimeContext(), code, ctx);
+    const result = await deleteTemplate(this.getRuntimeContext(), code, ctx);
+    this.forgetTemplateContent(code, ctx);
+    return result;
   }
 
   async getTemplate(
