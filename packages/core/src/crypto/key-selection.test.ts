@@ -37,6 +37,20 @@ describe("field crypto key selection", () => {
     expect(
       extractEnvelopeKid(JSON.stringify({ kid: "meta", payload: "x" })),
     ).toBeUndefined();
+    const shaped = {
+      v: 1,
+      alg: "A256GCM",
+      kid: "k",
+      iv: "i",
+      tag: "t",
+      ct: "c",
+    };
+    expect(
+      extractEnvelopeKid(JSON.stringify({ ...shaped, v: 2 })),
+    ).toBeUndefined();
+    expect(
+      extractEnvelopeKid(JSON.stringify({ ...shaped, alg: "CUSTOM" })),
+    ).toBeUndefined();
     expect(extractEnvelopeKid("plain")).toBeUndefined();
     expect(extractEnvelopeKid("{not json")).toBeUndefined();
     expect(extractEnvelopeKid(undefined)).toBeUndefined();

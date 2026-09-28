@@ -23,7 +23,15 @@ export function extractEnvelopeKid(ciphertext: unknown): string | undefined {
 
   try {
     const parsed: unknown = JSON.parse(ciphertext);
-    if (!isCryptoEnvelope(parsed)) return undefined;
+    // The same v1 contract assertCryptoEnvelopeV1 enforces: any other JSON is
+    // the provider's own format, and its fields are not ours to read.
+    if (
+      !isCryptoEnvelope(parsed) ||
+      parsed.v !== 1 ||
+      parsed.alg !== "A256GCM"
+    ) {
+      return undefined;
+    }
     return parsed.kid.length > 0 ? parsed.kid : undefined;
   } catch {
     return undefined;
