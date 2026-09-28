@@ -37,14 +37,14 @@ const entryBoundaries: readonly EntryBoundary[] = [
 ];
 
 // Bun's scanner finds every runtime import, whatever comments sit inside it,
-// but drops type-only ones. The pattern adds those, and `typeof import()`,
-// from the source with its comments removed.
+// but drops type-only ones. The pattern adds those, `typeof import()`, and
+// `import type X = require()`, from the source with its comments removed.
 const transpilers = {
   ts: new Bun.Transpiler({ loader: "ts" }),
   tsx: new Bun.Transpiler({ loader: "tsx" }),
 };
 const typeImportSpecifier =
-  /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+  /(?:\bfrom\s*|\b(?:import|require)\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
 
 // Blanks out comments and leaves strings and template literals intact, so a
 // comment between `import(` and its specifier cannot hide it.
