@@ -72,13 +72,17 @@ describe("k-msg package exports", () => {
     const facade = await import("./index");
     const coreFacade = await import("./core/index");
 
-    const aliases = Object.entries(await import("./deprecated-crypto"));
+    const aliases: [string, unknown][] = Object.entries(
+      await import("./deprecated-crypto"),
+    );
+    const root: Record<string, unknown> = facade;
+    const core: Record<string, unknown> = coreFacade;
 
     expect(aliases.length).toBe(17);
     for (const [name, value] of aliases) {
-      expect(value).toBe(coreFacade[name as keyof typeof coreFacade]);
+      expect(value).toBe(core[name]);
       // A root export with the same name would shadow the alias silently.
-      expect(facade[name as keyof typeof facade]).toBe(value);
+      expect(root[name]).toBe(value);
     }
 
     const error: FieldCryptoError = new facade.FieldCryptoError("config", "x");
