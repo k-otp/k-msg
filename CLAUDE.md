@@ -113,7 +113,8 @@ bun run dev
 # Canonical check: TypeScript 7 via ttsc + @ttsc/lint + @ttsc/evidence
 bun run typecheck
 
-# Architecture gate: dependency direction, provider contracts, citation map
+# Architecture gate: dependency direction, messaging entry boundaries,
+# provider contracts, citation map
 bun run graph:ttsc:check
 bun run graph:ttsc:snapshot   # after an intended dependency or citation change
 ```
