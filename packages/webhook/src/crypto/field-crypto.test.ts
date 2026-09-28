@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { FieldCryptoConfig } from "@k-msg/core";
+import {
+  createAesGcmFieldCryptoProvider,
+  type FieldCryptoConfig,
+} from "@k-msg/core";
 import { createInMemoryWebhookPersistence } from "../runtime/persistence";
 import type { WebhookRuntimeFieldCryptoOptions } from "../runtime/types";
 import { WebhookRuntimeService } from "../runtime/webhook-runtime.service";
@@ -635,5 +638,40 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
     } finally {
       await runtime.shutdown();
     }
+  });
+});
+
+describe("webhook field crypto key selection", () => {
+  const key = (byte: number) =>
+    Buffer.from(new Uint8Array(32).fill(byte)).toString("base64url");
+  const provider = createAesGcmFieldCryptoProvider({
+    activeKid: "old",
+    keys: { old: key(1), new: key(2) },
+    keyEncoding: "base64url",
+  });
+
+  test("decrypts with the envelope kid when the resolver no longer lists it", async () => {
+    const written: FieldCryptoConfig = {
+      enabled: true,
+      fields: { secret: "encrypt" },
+      provider,
+      keyResolver: { resolveEncryptKey: () => ({ kid: "old" }) },
+    };
+    const stored = await protectFieldValue(written, {
+      value: "my-secret",
+      path: "secret",
+      aad,
+    });
+
+    const rotated: FieldCryptoConfig = {
+      ...written,
+      keyResolver: {
+        resolveEncryptKey: () => ({ kid: "new" }),
+        resolveDecryptKeys: () => ["new"],
+      },
+    };
+    expect(
+      await revealFieldValue(rotated, { value: stored, path: "secret", aad }),
+    ).toBe("my-secret");
   });
 });
