@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { validateEntryBoundaries } from "./entry-boundaries";
 import { repoRoot, runGraph } from "./ttsc-graph-command";
 
 type GraphNode = {
@@ -801,6 +802,7 @@ ${citationRows}
 
 async function main(): Promise<void> {
   const write = process.argv.includes("--write");
+  await validateEntryBoundaries();
   const [graph, criticalTestGraph] = await Promise.all([
     loadGraph(productionGraphConfig),
     loadGraph(criticalTestGraphConfig),
