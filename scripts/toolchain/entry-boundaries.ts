@@ -1,11 +1,11 @@
-import { readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { repoRoot } from "./ttsc-graph-command";
 
 type EntryBoundary = {
   entry: string;
   // Source folders, relative to the entry's package `src`, that the entry
-  // must not reach, through runtime or type-only dependencies.
+  // must not reach, through runtime or type-level dependencies.
   forbidden: readonly string[];
   reason: string;
 };
@@ -43,13 +43,27 @@ const entryBoundaries: readonly EntryBoundary[] = [
   })),
 ];
 
-const transpilers = {
-  ts: new Bun.Transpiler({ loader: "ts" }),
-  tsx: new Bun.Transpiler({ loader: "tsx" }),
-};
+const loaders = {
+  ".cjs": "js",
+  ".js": "js",
+  ".jsx": "jsx",
+  ".mjs": "js",
+  ".ts": "ts",
+  ".tsx": "tsx",
+} as const;
+const transpilers = new Map(
+  [...new Set(Object.values(loaders))].map((loader) => [
+    loader,
+    new Bun.Transpiler({ loader }),
+  ]),
+);
 
 function toPosix(file: string): string {
   return file.replaceAll("\\", "/");
+}
+
+function toRepoPath(file: string): string {
+  return toPosix(path.relative(repoRoot, file));
 }
 
 async function isFile(file: string): Promise<boolean> {
@@ -74,14 +88,44 @@ async function resolveModule(base: string): Promise<string | null> {
   return null;
 }
 
-type PackageInfo = { name: string; sourceRoot: string };
+type Workspace = {
+  // Package name to its absolute `src` directory.
+  sources: Map<string, string>;
+  typeDependencies: Map<string, Set<string>>;
+};
 
-// A package can import itself by name through its `exports` subpaths, which
-// map `name` to `src/index.ts` and `name/sub` to `src/sub/index.ts` here.
-function selfReferenceBase(specifier: string, pkg: PackageInfo): string | null {
-  if (specifier === pkg.name) return pkg.sourceRoot;
-  if (!specifier.startsWith(`${pkg.name}/`)) return null;
-  return path.join(pkg.sourceRoot, specifier.slice(pkg.name.length + 1));
+async function readWorkspaceSources(): Promise<Map<string, string>> {
+  const packagesRoot = path.join(repoRoot, "packages");
+  const sources = new Map<string, string>();
+  for (const entry of await readdir(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const packageRoot = path.join(packagesRoot, entry.name);
+    const manifestPath = path.join(packageRoot, "package.json");
+    if (!(await isFile(manifestPath))) continue;
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      name?: unknown;
+    };
+    if (typeof manifest.name === "string") {
+      sources.set(manifest.name, path.join(packageRoot, "src"));
+    }
+  }
+  return sources;
+}
+
+// Workspace packages import each other by name through their `exports`
+// subpaths, which map `name` to `src/index.ts` and `name/sub` to
+// `src/sub/index.ts` here.
+function workspaceBase(
+  specifier: string,
+  sources: Map<string, string>,
+): string | null {
+  for (const [name, sourceRoot] of sources) {
+    if (specifier === name) return sourceRoot;
+    if (specifier.startsWith(`${name}/`)) {
+      return path.join(sourceRoot, specifier.slice(name.length + 1));
+    }
+  }
+  return null;
 }
 
 // Type-level dependencies, including type-only imports and re-exports, as
@@ -104,84 +148,66 @@ function graphFileDependencies(
 }
 
 // Runtime imports, as Bun's parser reads them: static, side-effect, dynamic
-// with a literal specifier, and `require`. Specifiers arrive decoded, and
-// comments cannot hide them.
+// with a literal specifier, and `require`, in TypeScript and JavaScript
+// alike. Specifiers arrive decoded, and comments cannot hide them.
 async function runtimeImports(
   file: string,
-  pkg: PackageInfo,
+  workspace: Workspace,
 ): Promise<string[]> {
-  if (!/\.tsx?$/.test(file)) return [];
-  const transpiler = file.endsWith(".tsx") ? transpilers.tsx : transpilers.ts;
-  const source = await readFile(path.join(repoRoot, file), "utf8");
+  const loader = loaders[path.extname(file) as keyof typeof loaders];
+  const transpiler = loader ? transpilers.get(loader) : undefined;
+  if (!transpiler) return [];
+  const absolute = path.join(repoRoot, file);
+  const source = await readFile(absolute, "utf8");
   const resolved: string[] = [];
   for (const { path: specifier } of transpiler.scanImports(source)) {
     const base = specifier.startsWith(".")
-      ? path.resolve(path.dirname(path.join(repoRoot, file)), specifier)
-      : selfReferenceBase(specifier, pkg);
+      ? path.resolve(path.dirname(absolute), specifier)
+      : workspaceBase(specifier, workspace.sources);
     if (!base) continue;
     const target = await resolveModule(base);
     if (!target) {
       throw new Error(`Cannot resolve ${specifier} from ${file}.`);
     }
-    resolved.push(toPosix(path.relative(repoRoot, target)));
+    resolved.push(toRepoPath(target));
   }
   return resolved;
 }
 
-// Walks only the entry's own package: the graph gate already rejects package
-// cycles, so a path through another package cannot lead back into this one.
+// Walks every workspace package the entry reaches, so a path that leaves the
+// package and comes back by name (`@k-msg/messaging/tracking`) is followed.
 async function collectEntryClosure(
   entry: string,
-  pkg: PackageInfo,
-  typeDependencies: Map<string, Set<string>>,
+  workspace: Workspace,
 ): Promise<string[]> {
-  const sourceRoot = `${toPosix(path.relative(repoRoot, pkg.sourceRoot))}/`;
   const seen = new Set<string>();
   const pending = [entry];
   while (pending.length > 0) {
     const file = pending.pop();
-    if (!file || seen.has(file) || !file.startsWith(sourceRoot)) continue;
+    if (!file || seen.has(file) || !file.startsWith("packages/")) continue;
     seen.add(file);
     pending.push(
-      ...(typeDependencies.get(file) ?? []),
-      ...(await runtimeImports(file, pkg)),
+      ...(workspace.typeDependencies.get(file) ?? []),
+      ...(await runtimeImports(file, workspace)),
     );
   }
   return [...seen].sort();
 }
 
-async function readPackageInfo(entry: string): Promise<PackageInfo> {
-  const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(entry);
-  if (!match?.[1]) {
-    throw new Error(
-      `Entry boundary ${entry} must be a packages/<name>/src/**/*.ts file.`,
-    );
-  }
-  const packageRoot = path.join(repoRoot, match[1]);
-  if (!(await isFile(path.join(repoRoot, entry)))) {
-    throw new Error(`Entry boundary ${entry} does not exist.`);
-  }
-  const manifest = JSON.parse(
-    await readFile(path.join(packageRoot, "package.json"), "utf8"),
-  ) as { name?: unknown };
-  if (typeof manifest.name !== "string") {
-    throw new Error(`${match[1]}/package.json has no name.`);
-  }
-  return { name: manifest.name, sourceRoot: path.join(packageRoot, "src") };
-}
-
 async function checkBoundary(
   boundary: EntryBoundary,
-  typeDependencies: Map<string, Set<string>>,
+  workspace: Workspace,
 ): Promise<string[]> {
-  const pkg = await readPackageInfo(boundary.entry);
-  const sourceRoot = `${toPosix(path.relative(repoRoot, pkg.sourceRoot))}/`;
-  const closure = await collectEntryClosure(
-    boundary.entry,
-    pkg,
-    typeDependencies,
-  );
+  const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(boundary.entry);
+  if (!match?.[1] || !(await isFile(path.join(repoRoot, boundary.entry)))) {
+    throw new Error(
+      `Entry boundary ${boundary.entry} must be an existing packages/<name>/src/**/*.ts file.`,
+    );
+  }
+  const sourceRoot = `${match[1]}/src/`;
+  const closure = await collectEntryClosure(boundary.entry, workspace);
   return closure.flatMap((file) => {
+    if (!file.startsWith(sourceRoot)) return [];
     const folder = file.slice(sourceRoot.length).split("/")[0];
     return folder && boundary.forbidden.includes(folder)
       ? [`${boundary.entry} reaches ${file}: ${boundary.reason}.`]
@@ -191,18 +217,21 @@ async function checkBoundary(
 
 /**
  * Fails when an entry reaches a forbidden folder through the compiler graph
- * (types, calls, re-exports) or a runtime import. An import whose specifier
- * is computed at run time is invisible to both, as it is to bundlers.
+ * (types, calls, re-exports) or a runtime import, across workspace packages.
+ * Not followed: a specifier computed at run time, which bundlers cannot see
+ * either, and a module reference that names no symbol, such as
+ * `export type {} from "./x"`.
  */
 export async function validateEntryBoundaries(
   graph: EntryBoundaryGraph,
 ): Promise<void> {
-  const typeDependencies = graphFileDependencies(graph);
+  const workspace: Workspace = {
+    sources: await readWorkspaceSources(),
+    typeDependencies: graphFileDependencies(graph),
+  };
   const violations = (
     await Promise.all(
-      entryBoundaries.map((boundary) =>
-        checkBoundary(boundary, typeDependencies),
-      ),
+      entryBoundaries.map((boundary) => checkBoundary(boundary, workspace)),
     )
   ).flat();
   if (violations.length > 0) {
