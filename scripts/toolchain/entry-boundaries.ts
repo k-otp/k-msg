@@ -1,4 +1,11 @@
-import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { repoRoot, resolveWorkspaceTsgoBinary } from "./ttsc-graph-command";
@@ -50,14 +57,13 @@ async function isFile(file: string): Promise<boolean> {
 }
 
 /**
- * Every file the compiler loads for a program rooted at `entry`, under the
+ * Every file the compiler loads for a program rooted at `roots`, under the
  * root tsconfig: its `paths` resolve workspace packages (the entry's own
  * included) to source, and `allowJs` follows JavaScript and its JSDoc types.
- * That covers runtime, side-effect, dynamic, type-only, and triple-slash
- * references alike. A specifier computed at run time stays invisible, as it
- * does to bundlers.
+ * That covers static, side-effect, dynamic, type-only, and triple-slash
+ * references.
  */
-async function collectEntryClosure(entry: string): Promise<string[]> {
+async function listProgramFiles(roots: readonly string[]): Promise<string[]> {
   const directory = await mkdtemp(path.join(tmpdir(), "k-msg-entry-"));
   try {
     const project = path.join(directory, "tsconfig.json");
@@ -66,7 +72,7 @@ async function collectEntryClosure(entry: string): Promise<string[]> {
       JSON.stringify({
         extends: path.join(repoRoot, "tsconfig.json"),
         compilerOptions: { noEmit: true, plugins: [] },
-        files: [path.join(repoRoot, entry)],
+        files: roots.map((root) => path.join(repoRoot, root)),
         include: [],
       }),
     );
@@ -81,21 +87,165 @@ async function collectEntryClosure(entry: string): Promise<string[]> {
     ]);
     if (exitCode !== 0) {
       throw new Error(
-        `tsc --listFilesOnly failed for ${entry}:\n${stdout}${stderr}`,
+        `tsc --listFilesOnly failed for ${roots.join(", ")}:\n${stdout}${stderr}`,
       );
     }
     return stdout
       .split(/\r?\n/)
       .filter((line) => line.length > 0)
       .map((line) => toRepoPath(path.resolve(repoRoot, line)))
-      .filter((file) => !file.startsWith("..") && !file.includes(":"))
-      .sort();
+      .filter((file) => !file.startsWith("..") && !file.includes(":"));
   } finally {
     await rm(directory, { force: true, recursive: true });
   }
 }
 
-async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
+const loaders = {
+  ".cjs": "js",
+  ".cts": "ts",
+  ".js": "js",
+  ".jsx": "jsx",
+  ".mjs": "js",
+  ".mts": "ts",
+  ".ts": "ts",
+  ".tsx": "tsx",
+} as const;
+const transpilers = new Map(
+  [...new Set(Object.values(loaders))].map((loader) => [
+    loader,
+    new Bun.Transpiler({ loader }),
+  ]),
+);
+const runtimeExtensions = [
+  ".ts",
+  ".tsx",
+  ".mts",
+  ".cts",
+  ".js",
+  ".mjs",
+  ".cjs",
+];
+
+async function readWorkspaceSources(): Promise<Map<string, string>> {
+  const sources = new Map<string, string>();
+  for (const area of ["packages", "apps"]) {
+    const areaRoot = path.join(repoRoot, area);
+    for (const entry of await readdir(areaRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const manifestPath = path.join(areaRoot, entry.name, "package.json");
+      if (!(await isFile(manifestPath))) continue;
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+        name?: unknown;
+      };
+      if (typeof manifest.name === "string") {
+        sources.set(manifest.name, path.join(areaRoot, entry.name, "src"));
+      }
+    }
+  }
+  return sources;
+}
+
+// The file a bundler or Bun loads for a specifier: the exact file when it
+// exists (`./loader.js` next to `loader.d.ts` is the JavaScript), else the
+// first source extension, else an index file. Workspace package names map
+// to their `src`, as their `exports` subpaths do.
+async function resolveRuntimeTarget(
+  from: string,
+  specifier: string,
+  sources: Map<string, string>,
+): Promise<string | null> {
+  let base: string | null = null;
+  if (specifier.startsWith(".")) {
+    base = path.resolve(path.dirname(path.join(repoRoot, from)), specifier);
+  } else {
+    for (const [name, sourceRoot] of sources) {
+      if (specifier === name) base = sourceRoot;
+      else if (specifier.startsWith(`${name}/`)) {
+        base = path.join(sourceRoot, specifier.slice(name.length + 1));
+      }
+      if (base) break;
+    }
+  }
+  if (!base) return null;
+  const stem = base.replace(/\.(?:[cm]?js|jsx)$/, "");
+  const candidates = [
+    base,
+    ...runtimeExtensions.map((extension) => `${stem}${extension}`),
+    ...runtimeExtensions.map((extension) =>
+      path.join(base, `index${extension}`),
+    ),
+  ];
+  for (const candidate of candidates) {
+    if (await isFile(candidate)) return toRepoPath(candidate);
+  }
+  if (specifier.startsWith(".")) {
+    throw new Error(`Cannot resolve ${specifier} from ${from}.`);
+  }
+  return null;
+}
+
+// What runs but the compiler may not load: a literal `require()`, and the
+// JavaScript behind a declaration file.
+async function runtimeDependencies(
+  file: string,
+  sources: Map<string, string>,
+): Promise<string[]> {
+  if (file.endsWith(".d.ts")) {
+    const stem = file.slice(0, -".d.ts".length);
+    const found: string[] = [];
+    for (const extension of [".js", ".mjs", ".cjs"]) {
+      if (await isFile(path.join(repoRoot, `${stem}${extension}`))) {
+        found.push(`${stem}${extension}`);
+      }
+    }
+    return found;
+  }
+  const loader = loaders[path.extname(file) as keyof typeof loaders];
+  const transpiler = loader ? transpilers.get(loader) : undefined;
+  if (!transpiler) return [];
+  const source = await readFile(path.join(repoRoot, file), "utf8");
+  const targets: string[] = [];
+  for (const { path: specifier } of transpiler.scanImports(source)) {
+    const target = await resolveRuntimeTarget(file, specifier, sources);
+    if (target) targets.push(target);
+  }
+  return targets;
+}
+
+/**
+ * The files an entry reaches: the compiler's program, plus what Bun's
+ * parser finds at run time in those files, repeated until nothing new
+ * appears. A specifier computed at run time stays invisible, as it does to
+ * bundlers.
+ */
+async function collectEntryClosure(
+  entry: string,
+  sources: Map<string, string>,
+): Promise<string[]> {
+  const roots = new Set([entry]);
+  const scanned = new Set<string>();
+  const closure = new Set<string>();
+  for (;;) {
+    for (const file of await listProgramFiles([...roots])) closure.add(file);
+    let grew = false;
+    for (const file of [...closure]) {
+      if (scanned.has(file) || !/^(?:apps|packages)\//.test(file)) continue;
+      scanned.add(file);
+      for (const target of await runtimeDependencies(file, sources)) {
+        if (closure.has(target)) continue;
+        closure.add(target);
+        roots.add(target);
+        grew = true;
+      }
+    }
+    if (!grew) return [...closure].sort();
+  }
+}
+
+async function checkBoundary(
+  boundary: EntryBoundary,
+  sources: Map<string, string>,
+): Promise<string[]> {
   const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(boundary.entry);
   if (!match?.[1] || !(await isFile(path.join(repoRoot, boundary.entry)))) {
     throw new Error(
@@ -103,7 +253,7 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
     );
   }
   const sourceRoot = `${match[1]}/src/`;
-  const closure = await collectEntryClosure(boundary.entry);
+  const closure = await collectEntryClosure(boundary.entry, sources);
   if (!closure.includes(boundary.entry)) {
     throw new Error(`The compiler did not load ${boundary.entry}.`);
   }
@@ -118,8 +268,11 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
 
 /** Fails when an entry reaches a folder its boundary forbids. */
 export async function validateEntryBoundaries(): Promise<void> {
+  const sources = await readWorkspaceSources();
   const violations = (
-    await Promise.all(entryBoundaries.map(checkBoundary))
+    await Promise.all(
+      entryBoundaries.map((boundary) => checkBoundary(boundary, sources)),
+    )
   ).flat();
   if (violations.length > 0) {
     throw new Error(

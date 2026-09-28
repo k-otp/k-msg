@@ -15,7 +15,7 @@ Key entrypoints:
 - [./typecheck-targets.ts](./typecheck-targets.ts): records the validation scope and dependency-first order.
 - [./run-ttsc-graph.ts](./run-ttsc-graph.ts): exposes the compiler graph CLI and MCP server.
 - [./check-ttsc-graph.ts](./check-ttsc-graph.ts): enforces architecture invariants, compiler diagnostics, the specification citation map, and snapshot drift.
-- [./entry-boundaries.ts](./entry-boundaries.ts): keeps `@k-msg/messaging` entries from importing the folders behind other subpaths (the root never reaches tracking, queues, or storage adapters), using the files `tsc --listFilesOnly` loads for each entry under the root tsconfig. `check-ttsc-graph.ts` runs it beside the graph dumps.
+- [./entry-boundaries.ts](./entry-boundaries.ts): keeps `@k-msg/messaging` entries from importing the folders behind other subpaths (the root never reaches tracking, queues, or storage adapters), using the files `tsc --listFilesOnly` loads for each entry under the root tsconfig, plus the runtime imports Bun's parser finds in them (literal `require()`, JavaScript behind a `.d.ts`), repeated until nothing new appears. `check-ttsc-graph.ts` runs it beside the graph dumps.
 - [./benchmark-ttsc.ts](./benchmark-ttsc.ts): refreshes the checked-in timing report.
 
 Configuration at the repository root:
