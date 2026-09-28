@@ -1,5 +1,20 @@
 # k-msg
 
+## 0.33.0 — 2026-09-28
+
+### Minor changes
+
+- [ab19046c](https://github.com/k-otp/k-msg/commit/ab19046c28cca5ff335208eba3abb4f4b656ac43) Deprecate the field-crypto re-exports on the `k-msg` root. Import them from `k-msg/core` (or `@k-msg/core`) instead; the root aliases keep working and will be removed in a future minor release.
+  
+  - deprecated: `createAesGcmFieldCryptoProvider`, `createNoopFieldCryptoProvider`, `createDefaultMasker`, `normalizePhoneForHash`, `toCiphertextEnvelopeString`
+  - deprecated: `validateFieldCryptoConfig`, `assertFieldCryptoConfig`, `resolveFieldMode`, `FieldCryptoError`
+  - deprecated: the static, refreshable, rolling, ENV, AWS KMS, and Vault Transit key resolvers, the rollout helpers, and the related field-crypto types
+  - the root keeps `KMsg`, its config types, `estimateSmsBytes`, `Result`, errors, delivery-status helpers, and the retry-policy helpers — Thanks @imjlk!
+
+### Patch changes
+
+- Updated dependencies: core@0.33.0, messaging@0.33.0
+
 ## 0.32.0 — 2026-09-27
 
 ### Patch changes
