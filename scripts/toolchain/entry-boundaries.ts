@@ -103,103 +103,89 @@ async function listProgramFiles(roots: readonly string[]): Promise<string[]> {
   }
 }
 
-const loaders = {
-  ".cjs": "js",
-  ".cts": "ts",
-  ".js": "js",
-  ".jsx": "jsx",
-  ".mjs": "js",
-  ".mts": "ts",
-  ".ts": "ts",
-  ".tsx": "tsx",
-} as const;
-const transpilers = new Map(
-  [...new Set(Object.values(loaders))].map((loader) => [
-    loader,
-    new Bun.Transpiler({ loader }),
-  ]),
-);
-// Bun's own resolver, which honors the root tsconfig `paths` (workspace
-// packages resolve to source) and picks among extensions as Bun does.
-function resolveRuntimeTarget(from: string, specifier: string): string | null {
-  let resolved: string;
-  try {
-    resolved = Bun.resolveSync(
-      specifier,
-      path.dirname(path.join(repoRoot, from)),
+const codeExtension = /\.(?:[cm]?[jt]sx?)$/;
+
+/**
+ * Every file Bun parses while bundling `entry`, recorded as it loads them and
+ * so before tree shaking can drop a side-effect import: Bun's own resolution
+ * (the root tsconfig `paths`, `foo.tsx` before `foo.ts`, the JavaScript
+ * behind a `.d.ts`), literal `require()`, and dynamic `import()` with a
+ * literal specifier, while a call to a shadowed `require` stays local.
+ */
+async function bundleInputs(entry: string): Promise<string[]> {
+  const loaded = new Set<string>();
+  const result = await Bun.build({
+    entrypoints: [path.join(repoRoot, entry)],
+    plugins: [
+      {
+        name: "record-loaded-files",
+        setup(build) {
+          build.onLoad({ filter: /.*/ }, (args) => {
+            loaded.add(toRepoPath(args.path));
+            return undefined;
+          });
+        },
+      },
+    ],
+    target: "bun",
+    throw: false,
+  });
+  if (!result.success) {
+    throw new Error(
+      `Bun could not bundle ${entry}:\n${result.logs.map(String).join("\n")}`,
     );
-  } catch (error) {
-    if (specifier.startsWith(".")) {
-      throw new Error(`Cannot resolve ${specifier} from ${from}: ${error}`);
-    }
-    return null;
   }
-  if (!path.isAbsolute(resolved)) return null;
-  const file = toRepoPath(resolved);
-  return isRepoSource(file) ? file : null;
+  return [...loaded].filter(isRepoSource);
 }
 
-// Declaration overlays and the JavaScript they stand in for at run time.
-const declarationOverlays = [
-  [".d.ts", [".js", ".mjs", ".cjs"]],
-  [".d.mts", [".mjs"]],
-  [".d.cts", [".cjs"]],
-] as const;
+const transpilers = {
+  js: new Bun.Transpiler({ loader: "js" }),
+  jsx: new Bun.Transpiler({ loader: "jsx" }),
+  ts: new Bun.Transpiler({ loader: "ts" }),
+  tsx: new Bun.Transpiler({ loader: "tsx" }),
+};
 
-// What runs but the compiler may not load: a literal `require()`, and the
-// JavaScript behind a declaration file.
-async function runtimeDependencies(file: string): Promise<string[]> {
-  for (const [suffix, runtime] of declarationOverlays) {
-    if (!file.endsWith(suffix)) continue;
-    const stem = file.slice(0, -suffix.length);
-    const found: string[] = [];
-    for (const extension of runtime) {
-      if (await isFile(path.join(repoRoot, `${stem}${extension}`))) {
-        found.push(`${stem}${extension}`);
-      }
+function transpilerFor(file: string): Bun.Transpiler | undefined {
+  if (file.endsWith(".d.ts") || /\.d\.[cm]ts$/.test(file)) return undefined;
+  if (/\.[cm]?ts$/.test(file)) return transpilers.ts;
+  if (file.endsWith(".tsx")) return transpilers.tsx;
+  if (/\.[cm]?js$/.test(file)) return transpilers.js;
+  if (file.endsWith(".jsx")) return transpilers.jsx;
+  return undefined;
+}
+
+// `import.meta.require()` loads a module at run time that neither Bun's
+// bundler nor the compiler follows, so the gate cannot see what it reaches.
+// Reachable files must use `import` instead. Checked on transpiled output,
+// so comments do not count.
+async function findUntrackedLoads(files: readonly string[]): Promise<string[]> {
+  const offenders: string[] = [];
+  for (const file of files) {
+    const transpiler = transpilerFor(file);
+    if (!transpiler) continue;
+    const source = await readFile(path.join(repoRoot, file), "utf8");
+    if (/\bimport\.meta\.require\b/.test(transpiler.transformSync(source))) {
+      offenders.push(file);
     }
-    return found;
   }
-  const loader = loaders[path.extname(file) as keyof typeof loaders];
-  const transpiler = loader ? transpilers.get(loader) : undefined;
-  if (!transpiler) return [];
-  const source = await readFile(path.join(repoRoot, file), "utf8");
-  const targets: string[] = [];
-  for (const { path: specifier } of transpiler.scanImports(source)) {
-    const target = resolveRuntimeTarget(file, specifier);
-    if (target) targets.push(target);
-  }
-  return targets;
+  return offenders;
 }
 
 /**
- * The files an entry reaches: the compiler's program, plus what Bun's
- * parser finds at run time in those files, repeated until nothing new
- * appears. Not followed: a specifier computed at run time, as bundlers cannot
- * follow it either, and URL-based loads such as `new URL("./x", import.meta.url)`.
+ * The files an entry reaches: what Bun bundles for it, and every file the
+ * compiler loads from the entry and those bundled files, which adds
+ * type-only and side-effect references that bundling erases or shakes out.
+ * Not followed: a specifier computed at run time, and URL-based loads such as
+ * `new URL("./x", import.meta.url)`; `import.meta.require()` is rejected.
  */
 async function collectEntryClosure(entry: string): Promise<string[]> {
-  const roots = new Set([entry]);
-  const scanned = new Set<string>();
-  const closure = new Set<string>();
-  for (;;) {
-    for (const file of await listProgramFiles([...roots])) closure.add(file);
-    let grew = false;
-    for (const file of [...closure]) {
-      if (scanned.has(file) || !isRepoSource(file)) continue;
-      scanned.add(file);
-      for (const target of await runtimeDependencies(file)) {
-        if (closure.has(target)) continue;
-        closure.add(target);
-        // Assets such as CSS stay leaves: tsc rejects them as roots.
-        if (path.extname(target) in loaders) {
-          roots.add(target);
-          grew = true;
-        }
-      }
-    }
-    if (!grew) return [...closure].sort();
-  }
+  const bundled = await bundleInputs(entry);
+  const roots = [
+    entry,
+    ...bundled.filter((file) => file !== entry && codeExtension.test(file)),
+  ];
+  const listed = await listProgramFiles(roots);
+  return [...new Set([...bundled, ...listed])].sort();
 }
 
 async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
@@ -214,13 +200,19 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   if (!closure.includes(boundary.entry)) {
     throw new Error(`The compiler did not load ${boundary.entry}.`);
   }
-  return closure.flatMap((file) => {
-    if (!file.startsWith(sourceRoot)) return [];
-    const folder = file.slice(sourceRoot.length).split("/")[0];
-    return folder && boundary.forbidden.includes(folder)
-      ? [`${boundary.entry} reaches ${file}: ${boundary.reason}.`]
-      : [];
-  });
+  const untracked = (await findUntrackedLoads(closure)).map(
+    (file) =>
+      `${boundary.entry} reaches ${file}, which calls import.meta.require(); use import so the boundary can be checked.`,
+  );
+  return untracked.concat(
+    closure.flatMap((file) => {
+      if (!file.startsWith(sourceRoot)) return [];
+      const folder = file.slice(sourceRoot.length).split("/")[0];
+      return folder && boundary.forbidden.includes(folder)
+        ? [`${boundary.entry} reaches ${file}: ${boundary.reason}.`]
+        : [];
+    }),
+  );
 }
 
 /** Fails when an entry reaches a folder its boundary forbids. */
