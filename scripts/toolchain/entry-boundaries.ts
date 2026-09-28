@@ -47,23 +47,38 @@ async function isFile(file: string): Promise<boolean> {
   }
 }
 
-async function resolveRelative(
-  from: string,
-  specifier: string,
-): Promise<string | null> {
-  const base = path.resolve(path.dirname(from), specifier);
+function toPosix(file: string): string {
+  return file.replaceAll("\\", "/");
+}
+
+async function resolveModule(base: string): Promise<string | null> {
+  const stem = base.replace(/\.(?:m?js|jsx)$/, "");
   for (const candidate of [
     base,
-    `${base}.ts`,
-    `${base}.tsx`,
+    `${stem}.ts`,
+    `${stem}.tsx`,
     path.join(base, "index.ts"),
+    path.join(base, "index.tsx"),
   ]) {
     if (await isFile(candidate)) return candidate;
   }
   return null;
 }
 
-async function collectEntryClosure(entry: string): Promise<string[]> {
+type PackageInfo = { name: string; sourceRoot: string };
+
+// A package can import itself by name through its `exports` subpaths, which
+// map `name/sub` to `src/sub/index.ts` in this repository.
+function selfReferenceBase(specifier: string, pkg: PackageInfo): string | null {
+  if (specifier === pkg.name) return path.join(pkg.sourceRoot, "index.ts");
+  if (!specifier.startsWith(`${pkg.name}/`)) return null;
+  return path.join(pkg.sourceRoot, specifier.slice(pkg.name.length + 1));
+}
+
+async function collectEntryClosure(
+  entry: string,
+  pkg: PackageInfo,
+): Promise<string[]> {
   const seen = new Set<string>();
   const pending = [path.join(repoRoot, entry)];
   while (pending.length > 0) {
@@ -73,36 +88,60 @@ async function collectEntryClosure(entry: string): Promise<string[]> {
     const source = await readFile(file, "utf8");
     for (const match of source.matchAll(importSpecifier)) {
       const specifier = match[1];
-      if (!specifier?.startsWith(".")) continue;
-      const resolved = await resolveRelative(file, specifier);
+      if (!specifier) continue;
+      const base = specifier.startsWith(".")
+        ? path.resolve(path.dirname(file), specifier)
+        : selfReferenceBase(specifier, pkg);
+      if (!base) continue;
+      const resolved = await resolveModule(base);
       if (!resolved) {
         throw new Error(
-          `Cannot resolve ${specifier} from ${path.relative(repoRoot, file)}.`,
+          `Cannot resolve ${specifier} from ${toPosix(path.relative(repoRoot, file))}.`,
         );
       }
       pending.push(resolved);
     }
   }
-  return [...seen].map((file) => path.relative(repoRoot, file)).sort();
+  return [...seen].map((file) => toPosix(path.relative(repoRoot, file))).sort();
+}
+
+async function readPackageInfo(entry: string): Promise<PackageInfo> {
+  const match = /^(packages\/[^/]+)\/src\/.+\.ts$/.exec(entry);
+  if (!match?.[1]) {
+    throw new Error(
+      `Entry boundary ${entry} must be a packages/<name>/src/**/*.ts file.`,
+    );
+  }
+  const packageRoot = path.join(repoRoot, match[1]);
+  if (!(await isFile(path.join(repoRoot, entry)))) {
+    throw new Error(`Entry boundary ${entry} does not exist.`);
+  }
+  const manifest = JSON.parse(
+    await readFile(path.join(packageRoot, "package.json"), "utf8"),
+  ) as { name?: unknown };
+  if (typeof manifest.name !== "string") {
+    throw new Error(`${match[1]}/package.json has no name.`);
+  }
+  return { name: manifest.name, sourceRoot: path.join(packageRoot, "src") };
+}
+
+async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
+  const pkg = await readPackageInfo(boundary.entry);
+  const sourceRoot = `${toPosix(path.relative(repoRoot, pkg.sourceRoot))}/`;
+  const closure = await collectEntryClosure(boundary.entry, pkg);
+  return closure.flatMap((file) => {
+    if (!file.startsWith(sourceRoot)) return [];
+    const folder = file.slice(sourceRoot.length).split("/")[0];
+    return folder && boundary.forbidden.includes(folder)
+      ? [`${boundary.entry} reaches ${file}: ${boundary.reason}.`]
+      : [];
+  });
 }
 
 export async function validateEntryBoundaries(): Promise<void> {
-  const violations: string[] = [];
-  for (const boundary of entryBoundaries) {
-    const sourceRoot = boundary.entry.slice(
-      0,
-      boundary.entry.indexOf("/src/") + "/src/".length,
-    );
-    const closure = await collectEntryClosure(boundary.entry);
-    for (const file of closure) {
-      const folder = file.slice(sourceRoot.length).split("/")[0];
-      if (folder && boundary.forbidden.includes(folder)) {
-        violations.push(
-          `${boundary.entry} reaches ${file}: ${boundary.reason}.`,
-        );
-      }
-    }
-  }
+  const violations = (
+    await Promise.all(entryBoundaries.map(checkBoundary))
+  ).flat();
   if (violations.length > 0) {
     throw new Error(
       `Package entry boundaries violated:\n${violations.join("\n")}`,
