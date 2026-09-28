@@ -57,7 +57,7 @@ The messaging tracking stores look records up by `to` and `from`, so they also s
 ## Key management
 
 - Encrypt uses active `kid` from `resolveEncryptKey`
-- Decrypt supports multi-kid from `resolveDecryptKeys`
+- Decrypt supports multi-kid from `resolveDecryptKeys`, tried after the envelope's own `kid`. Without `resolveDecryptKeys`, no candidates are passed and the provider picks the key from its ciphertext. The messaging tracking stores and the webhook stores select these the same way (`resolveFieldDecryptKids` in `@k-msg/core`). Dropping a `kid` from `resolveDecryptKeys` therefore does not stop decryption of values that name it; retire a key by removing it from the provider
 - Rotation: write with new `kid`, read with old+new `kid`
 - Lookup: hash with the field's encrypt `kid`, search under every `kid` a record may carry
 

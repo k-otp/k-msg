@@ -3,6 +3,7 @@ export * from "./crypto/key-adapters/aws-kms";
 export * from "./crypto/key-adapters/env";
 export * from "./crypto/key-adapters/vault-transit";
 export * from "./crypto/key-resolver";
+export * from "./crypto/key-selection";
 export * from "./crypto/policy";
 export * from "./crypto/rollout-policy";
 export * from "./crypto/types";
