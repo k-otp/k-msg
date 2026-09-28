@@ -1,4 +1,4 @@
-import { createDefaultMasker } from "k-msg";
+import { createDefaultMasker } from "k-msg/core";
 
 // 010 numbers have 8 digits after the prefix; legacy 011/016-019 have 7 or 8.
 const KOREAN_MOBILE = /^01(?:0\d{8}|[16789]\d{7,8})$/;
