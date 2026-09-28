@@ -37,16 +37,51 @@ const entryBoundaries: readonly EntryBoundary[] = [
 ];
 
 // Bun's scanner finds every runtime import, whatever comments sit inside it,
-// but drops type-only ones; the pattern adds those (and `typeof import()`).
-const transpiler = new Bun.Transpiler({ loader: "tsx" });
+// but drops type-only ones. The pattern adds those, and `typeof import()`,
+// from the source with its comments removed.
+const transpilers = {
+  ts: new Bun.Transpiler({ loader: "ts" }),
+  tsx: new Bun.Transpiler({ loader: "tsx" }),
+};
 const typeImportSpecifier =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
 
-function importSpecifiers(source: string): Set<string> {
+// Blanks out comments and leaves strings and template literals intact, so a
+// comment between `import(` and its specifier cannot hide it.
+export function stripComments(source: string): string {
+  let out = "";
+  let i = 0;
+  while (i < source.length) {
+    const char = source[i];
+    const next = source[i + 1];
+    if (char === "/" && next === "/") {
+      while (i < source.length && source[i] !== "\n") i++;
+      out += " ";
+    } else if (char === "/" && next === "*") {
+      const close = source.indexOf("*/", i + 2);
+      i = close === -1 ? source.length : close + 2;
+      out += " ";
+    } else if (char === '"' || char === "'" || char === "`") {
+      let j = i + 1;
+      while (j < source.length && source[j] !== char) {
+        j += source[j] === "\\" ? 2 : 1;
+      }
+      out += source.slice(i, j + 1);
+      i = j + 1;
+    } else {
+      out += char;
+      i++;
+    }
+  }
+  return out;
+}
+
+function importSpecifiers(file: string, source: string): Set<string> {
+  const transpiler = file.endsWith(".tsx") ? transpilers.tsx : transpilers.ts;
   const specifiers = new Set(
     transpiler.scanImports(source).map((entry) => entry.path),
   );
-  for (const match of source.matchAll(typeImportSpecifier)) {
+  for (const match of stripComments(source).matchAll(typeImportSpecifier)) {
     if (match[1]) specifiers.add(match[1]);
   }
   return specifiers;
@@ -99,7 +134,7 @@ async function collectEntryClosure(
     if (!file || seen.has(file)) continue;
     seen.add(file);
     const source = await readFile(file, "utf8");
-    for (const specifier of importSpecifiers(source)) {
+    for (const specifier of importSpecifiers(file, source)) {
       const base = specifier.startsWith(".")
         ? path.resolve(path.dirname(file), specifier)
         : selfReferenceBase(specifier, pkg);
