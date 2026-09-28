@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { validateEntryBoundaries } from "./entry-boundaries";
 import { repoRoot, runGraph } from "./ttsc-graph-command";
 
 type GraphNode = {
@@ -804,6 +805,8 @@ async function main(): Promise<void> {
   const [graph, criticalTestGraph] = await Promise.all([
     loadGraph(productionGraphConfig),
     loadGraph(criticalTestGraphConfig),
+    // Runs beside the graph dumps; it only throws on a violation.
+    validateEntryBoundaries(),
   ]);
   const dependencies = await collectDependencies(graph);
   validateGraph(graph, dependencies);
