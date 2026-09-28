@@ -1,5 +1,11 @@
 # @k-msg/channel
 
+## 0.33.0 — 2026-09-28
+
+### Patch changes
+
+- Updated dependencies: core@0.33.0
+
 ## 0.32.0 — 2026-09-27
 
 ### Patch changes
