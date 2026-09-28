@@ -1,11 +1,4 @@
-import {
-  mkdtemp,
-  readdir,
-  readFile,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { repoRoot, resolveWorkspaceTsgoBinary } from "./ttsc-graph-command";
@@ -43,6 +36,16 @@ const entryBoundaries: readonly EntryBoundary[] = [
     reason: "runtime storage adapters build on this subpath, not the reverse",
   })),
 ];
+
+// Repository source, wherever it lives: a path that leaves the package
+// through an app, example, or script and comes back is still followed.
+function isRepoSource(file: string): boolean {
+  return (
+    !file.startsWith("..") &&
+    !file.includes(":") &&
+    !file.split("/").includes("node_modules")
+  );
+}
 
 function toRepoPath(file: string): string {
   return path.relative(repoRoot, file).replaceAll("\\", "/");
@@ -94,7 +97,7 @@ async function listProgramFiles(roots: readonly string[]): Promise<string[]> {
       .split(/\r?\n/)
       .filter((line) => line.length > 0)
       .map((line) => toRepoPath(path.resolve(repoRoot, line)))
-      .filter((file) => !file.startsWith("..") && !file.includes(":"));
+      .filter(isRepoSource);
   } finally {
     await rm(directory, { force: true, recursive: true });
   }
@@ -116,84 +119,41 @@ const transpilers = new Map(
     new Bun.Transpiler({ loader }),
   ]),
 );
-const runtimeExtensions = [
-  ".ts",
-  ".tsx",
-  ".mts",
-  ".cts",
-  ".js",
-  ".mjs",
-  ".cjs",
-];
-
-async function readWorkspaceSources(): Promise<Map<string, string>> {
-  const sources = new Map<string, string>();
-  for (const area of ["packages", "apps"]) {
-    const areaRoot = path.join(repoRoot, area);
-    for (const entry of await readdir(areaRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const manifestPath = path.join(areaRoot, entry.name, "package.json");
-      if (!(await isFile(manifestPath))) continue;
-      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-        name?: unknown;
-      };
-      if (typeof manifest.name === "string") {
-        sources.set(manifest.name, path.join(areaRoot, entry.name, "src"));
-      }
+// Bun's own resolver, which honors the root tsconfig `paths` (workspace
+// packages resolve to source) and picks among extensions as Bun does.
+function resolveRuntimeTarget(from: string, specifier: string): string | null {
+  let resolved: string;
+  try {
+    resolved = Bun.resolveSync(
+      specifier,
+      path.dirname(path.join(repoRoot, from)),
+    );
+  } catch (error) {
+    if (specifier.startsWith(".")) {
+      throw new Error(`Cannot resolve ${specifier} from ${from}: ${error}`);
     }
+    return null;
   }
-  return sources;
+  if (!path.isAbsolute(resolved)) return null;
+  const file = toRepoPath(resolved);
+  return isRepoSource(file) ? file : null;
 }
 
-// The file a bundler or Bun loads for a specifier: the exact file when it
-// exists (`./loader.js` next to `loader.d.ts` is the JavaScript), else the
-// first source extension, else an index file. Workspace package names map
-// to their `src`, as their `exports` subpaths do.
-async function resolveRuntimeTarget(
-  from: string,
-  specifier: string,
-  sources: Map<string, string>,
-): Promise<string | null> {
-  let base: string | null = null;
-  if (specifier.startsWith(".")) {
-    base = path.resolve(path.dirname(path.join(repoRoot, from)), specifier);
-  } else {
-    for (const [name, sourceRoot] of sources) {
-      if (specifier === name) base = sourceRoot;
-      else if (specifier.startsWith(`${name}/`)) {
-        base = path.join(sourceRoot, specifier.slice(name.length + 1));
-      }
-      if (base) break;
-    }
-  }
-  if (!base) return null;
-  const stem = base.replace(/\.(?:[cm]?js|jsx)$/, "");
-  const candidates = [
-    base,
-    ...runtimeExtensions.map((extension) => `${stem}${extension}`),
-    ...runtimeExtensions.map((extension) =>
-      path.join(base, `index${extension}`),
-    ),
-  ];
-  for (const candidate of candidates) {
-    if (await isFile(candidate)) return toRepoPath(candidate);
-  }
-  if (specifier.startsWith(".")) {
-    throw new Error(`Cannot resolve ${specifier} from ${from}.`);
-  }
-  return null;
-}
+// Declaration overlays and the JavaScript they stand in for at run time.
+const declarationOverlays = [
+  [".d.ts", [".js", ".mjs", ".cjs"]],
+  [".d.mts", [".mjs"]],
+  [".d.cts", [".cjs"]],
+] as const;
 
 // What runs but the compiler may not load: a literal `require()`, and the
 // JavaScript behind a declaration file.
-async function runtimeDependencies(
-  file: string,
-  sources: Map<string, string>,
-): Promise<string[]> {
-  if (file.endsWith(".d.ts")) {
-    const stem = file.slice(0, -".d.ts".length);
+async function runtimeDependencies(file: string): Promise<string[]> {
+  for (const [suffix, runtime] of declarationOverlays) {
+    if (!file.endsWith(suffix)) continue;
+    const stem = file.slice(0, -suffix.length);
     const found: string[] = [];
-    for (const extension of [".js", ".mjs", ".cjs"]) {
+    for (const extension of runtime) {
       if (await isFile(path.join(repoRoot, `${stem}${extension}`))) {
         found.push(`${stem}${extension}`);
       }
@@ -206,7 +166,7 @@ async function runtimeDependencies(
   const source = await readFile(path.join(repoRoot, file), "utf8");
   const targets: string[] = [];
   for (const { path: specifier } of transpiler.scanImports(source)) {
-    const target = await resolveRuntimeTarget(file, specifier, sources);
+    const target = resolveRuntimeTarget(file, specifier);
     if (target) targets.push(target);
   }
   return targets;
@@ -215,13 +175,10 @@ async function runtimeDependencies(
 /**
  * The files an entry reaches: the compiler's program, plus what Bun's
  * parser finds at run time in those files, repeated until nothing new
- * appears. A specifier computed at run time stays invisible, as it does to
- * bundlers.
+ * appears. Not followed: a specifier computed at run time, as bundlers cannot
+ * follow it either, and URL-based loads such as `new URL("./x", import.meta.url)`.
  */
-async function collectEntryClosure(
-  entry: string,
-  sources: Map<string, string>,
-): Promise<string[]> {
+async function collectEntryClosure(entry: string): Promise<string[]> {
   const roots = new Set([entry]);
   const scanned = new Set<string>();
   const closure = new Set<string>();
@@ -229,23 +186,23 @@ async function collectEntryClosure(
     for (const file of await listProgramFiles([...roots])) closure.add(file);
     let grew = false;
     for (const file of [...closure]) {
-      if (scanned.has(file) || !/^(?:apps|packages)\//.test(file)) continue;
+      if (scanned.has(file) || !isRepoSource(file)) continue;
       scanned.add(file);
-      for (const target of await runtimeDependencies(file, sources)) {
+      for (const target of await runtimeDependencies(file)) {
         if (closure.has(target)) continue;
         closure.add(target);
-        roots.add(target);
-        grew = true;
+        // Assets such as CSS stay leaves: tsc rejects them as roots.
+        if (path.extname(target) in loaders) {
+          roots.add(target);
+          grew = true;
+        }
       }
     }
     if (!grew) return [...closure].sort();
   }
 }
 
-async function checkBoundary(
-  boundary: EntryBoundary,
-  sources: Map<string, string>,
-): Promise<string[]> {
+async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(boundary.entry);
   if (!match?.[1] || !(await isFile(path.join(repoRoot, boundary.entry)))) {
     throw new Error(
@@ -253,7 +210,7 @@ async function checkBoundary(
     );
   }
   const sourceRoot = `${match[1]}/src/`;
-  const closure = await collectEntryClosure(boundary.entry, sources);
+  const closure = await collectEntryClosure(boundary.entry);
   if (!closure.includes(boundary.entry)) {
     throw new Error(`The compiler did not load ${boundary.entry}.`);
   }
@@ -268,11 +225,8 @@ async function checkBoundary(
 
 /** Fails when an entry reaches a folder its boundary forbids. */
 export async function validateEntryBoundaries(): Promise<void> {
-  const sources = await readWorkspaceSources();
   const violations = (
-    await Promise.all(
-      entryBoundaries.map((boundary) => checkBoundary(boundary, sources)),
-    )
+    await Promise.all(entryBoundaries.map(checkBoundary))
   ).flat();
   if (violations.length > 0) {
     throw new Error(
