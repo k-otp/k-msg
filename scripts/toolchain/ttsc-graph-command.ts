@@ -4,6 +4,21 @@ import path from "node:path";
 
 export const repoRoot = path.resolve(import.meta.dir, "../..");
 
+// The native TypeScript 7 compiler the workspace pins.
+export function resolveWorkspaceTsgoBinary(): string {
+  const rootRequire = createRequire(path.join(repoRoot, "package.json"));
+  const typescriptManifest = rootRequire.resolve("typescript/package.json");
+  const typescriptRequire = createRequire(typescriptManifest);
+  const platformManifest = typescriptRequire.resolve(
+    `@typescript/typescript-${process.platform}-${process.arch}/package.json`,
+  );
+  return path.join(
+    path.dirname(platformManifest),
+    "lib",
+    process.platform === "win32" ? "tsc.exe" : "tsc",
+  );
+}
+
 function resolveGraphBinary(): string {
   const requireFromRoot = createRequire(path.join(repoRoot, "package.json"));
   const manifestPath = requireFromRoot.resolve("@ttsc/graph/package.json");
