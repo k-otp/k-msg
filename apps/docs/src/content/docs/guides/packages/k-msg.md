@@ -15,6 +15,8 @@ description: "Generated from `packages/k-msg/README_ko.md`"
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
 
+필드 암호화 헬퍼(`createAesGcmFieldCryptoProvider`, 키 리졸버, `FieldCryptoConfig`, `createDefaultMasker`와 관련 타입)는 `k-msg/core`에서 import 합니다. `k-msg` 루트의 같은 이름 export는 deprecated이며 이후 minor 릴리즈에서 제거됩니다.
+
 번들 크기에 민감한 환경에서 core 유틸만 필요하면 `k-msg` 루트 대신 `k-msg/core`(또는 `@k-msg/core`) 경로를 권장합니다.
 
 ```ts
