@@ -7,7 +7,7 @@ title: "isCryptoEnvelope"
 
 > **isCryptoEnvelope**(`value`): `value is CryptoEnvelope`
 
-Defined in: [packages/core/src/crypto/types.ts:251](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L251)
+Defined in: [packages/core/src/crypto/types.ts:254](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L254)
 
 ## Parameters
 

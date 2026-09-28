@@ -8,9 +8,12 @@ import {
   type FieldCryptoMetricEvent,
   type FieldCryptoOpenFallback,
   type FieldMode,
+  normalizeKidList,
   normalizePhoneForHash,
   resolveFieldCryptoFailMode,
   resolveFieldCryptoOpenFallback,
+  resolveFieldDecryptKids,
+  resolveFieldEncryptKid,
   resolveFieldMode,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
@@ -221,18 +224,6 @@ function buildAad(
   return aad;
 }
 
-async function resolveEncryptKid(
-  config: FieldCryptoConfig,
-  context: FieldCryptoKeyContext,
-): Promise<string | undefined> {
-  if (!config.keyResolver) return undefined;
-  const resolved = await config.keyResolver.resolveEncryptKey(context);
-  if (!resolved || typeof resolved.kid !== "string" || !resolved.kid.trim()) {
-    return undefined;
-  }
-  return resolved.kid.trim();
-}
-
 /** Resolves a field's encrypt kid for one write, at most once per field. */
 type FieldKidResolver = (fieldPath: string) => Promise<string | undefined>;
 
@@ -244,7 +235,7 @@ function createFieldKidResolver(
   return (fieldPath) => {
     let kid = kids.get(fieldPath);
     if (!kid) {
-      kid = resolveEncryptKid(config, { ...context, fieldPath });
+      kid = resolveFieldEncryptKid(config, { ...context, fieldPath });
       kids.set(fieldPath, kid);
     }
     return kid;
@@ -264,13 +255,6 @@ function hashFieldValue(
     path,
     ...(kid ? { kid } : {}),
   });
-}
-
-function normalizeKidList(kids: unknown): string[] {
-  return (Array.isArray(kids) ? kids : [])
-    .filter((kid): kid is string => typeof kid === "string")
-    .map((kid) => kid.trim())
-    .filter((kid) => kid.length > 0);
 }
 
 type LookupScope = Pick<FieldCryptoKeyContext, "providerId" | "messageId">;
@@ -334,7 +318,7 @@ async function resolveLookupKids(
     for (const scope of scopes) {
       const scoped = { ...context, ...scope };
       try {
-        add(await resolveEncryptKid(config, scoped));
+        add(await resolveFieldEncryptKid(config, scoped));
       } catch (error) {
         onError(error);
       }
@@ -350,41 +334,6 @@ async function resolveLookupKids(
   }
   add(undefined);
   return kids;
-}
-
-function extractEnvelopeKid(ciphertext: unknown): string | undefined {
-  if (typeof ciphertext !== "string" || ciphertext.length === 0) {
-    return undefined;
-  }
-  if (ciphertext[0] !== "{") return undefined;
-
-  try {
-    const parsed = JSON.parse(ciphertext) as { kid?: unknown };
-    if (typeof parsed.kid !== "string") return undefined;
-    const normalized = parsed.kid.trim();
-    return normalized.length > 0 ? normalized : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-async function resolveDecryptKids(
-  config: FieldCryptoConfig,
-  context: FieldCryptoKeyContext & { ciphertext?: string },
-): Promise<readonly string[] | undefined> {
-  const envelopeKid = extractEnvelopeKid(context.ciphertext);
-  if (!config.keyResolver?.resolveDecryptKeys) {
-    return envelopeKid ? [envelopeKid] : undefined;
-  }
-
-  const resolved = await config.keyResolver.resolveDecryptKeys(context);
-  const normalized = normalizeKidList(resolved);
-
-  if (envelopeKid && !normalized.includes(envelopeKid)) {
-    normalized.unshift(envelopeKid);
-  }
-
-  return normalized.length > 0 ? normalized : undefined;
 }
 
 async function emitMetric(
@@ -519,7 +468,7 @@ async function revealScalar(
   encrypted: string,
 ): Promise<string> {
   const aad = buildAad(config, context, path);
-  const candidateKids = await resolveDecryptKids(config, {
+  const candidateKids = await resolveFieldDecryptKids(config, {
     ...context,
     fieldPath: path,
     ciphertext: encrypted,
@@ -648,12 +597,14 @@ function toFallbackValue(
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Encrypts and hashes each field under the kid resolveEncryptKey returns for
  *   it, and has a degraded write hash to and from under the same kids.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Read protectScalar, buildMetadataHashes, and hashDegradedField: hashes use
  *   the kid resolved, with the record's providerId and messageId, for to, from,
  *   or metadata, else the default key, and the fallback retries with the
  *   default key before storing an empty to hash. Ran the tenant-key, metadata,
- *   and degraded-write tests on both stores.
+ *   and degraded-write tests on both stores. Re-read after the decrypt rule
+ *   was added: writes resolve kids through core's resolveFieldEncryptKid, the
+ *   same body as the local helper it replaced.
  */
 export async function applyTrackingCryptoOnWrite(
   record: TrackingCryptoWriteInput,
@@ -1232,12 +1183,13 @@ async function hashLookupValues(
  *   set, resolved for every scope the filter pins and for the whole store, and
  *   under the provider's default key, and handles a key or hash it cannot
  *   resolve or compute as the fail mode directs.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Read resolveLookupScopes, resolveLookupKids, and hashLookupValues against
  *   the lookup and failure paragraphs: pinned scopes first, then the store,
  *   each key source resolved on its own, no empty hash, and no records for an
  *   undefined filter. Ran the scoped, rotation, pre-resolver, candidate, and
- *   fail-mode lookup tests.
+ *   fail-mode lookup tests. Re-read after the decrypt rule was added: lookups
+ *   use core's resolveFieldEncryptKid and normalizeKidList, unchanged bodies.
  */
 export async function normalizeTrackingFilterWithHashes(
   filter: DeliveryTrackingRecordFilter,

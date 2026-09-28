@@ -7,7 +7,7 @@ title: "toCiphertextEnvelopeString"
 
 > **toCiphertextEnvelopeString**(`ciphertext`): `string`
 
-Defined in: [packages/core/src/crypto/types.ts:532](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L532)
+Defined in: [packages/core/src/crypto/types.ts:535](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L535)
 
 Serializes provider ciphertext for storage. An envelope object must be a v1
 envelope; a string is the provider's own serialized form and is kept as is.
