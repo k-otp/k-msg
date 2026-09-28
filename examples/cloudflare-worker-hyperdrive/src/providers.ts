@@ -1,5 +1,6 @@
 import { AligoProvider, IWINVProvider, MockProvider } from "@k-msg/provider";
-import { createDefaultMasker, type Provider } from "k-msg";
+import type { Provider } from "k-msg";
+import { createDefaultMasker } from "k-msg/core";
 import type { ProviderConfig } from "./env";
 
 // MockProvider remembers the messages it sent and reports them as DELIVERED
