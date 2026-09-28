@@ -30,8 +30,13 @@ describe("field crypto key selection", () => {
     expect(normalizeKidList(undefined)).toEqual([]);
   });
 
-  test("extractEnvelopeKid reads only JSON envelopes", () => {
-    expect(extractEnvelopeKid(envelope(" k1 "))).toBe("k1");
+  test("extractEnvelopeKid reads only v1 envelopes, verbatim", () => {
+    expect(extractEnvelopeKid(envelope("k1"))).toBe("k1");
+    expect(extractEnvelopeKid(envelope(" k1 "))).toBe(" k1 ");
+    expect(extractEnvelopeKid(envelope(""))).toBeUndefined();
+    expect(
+      extractEnvelopeKid(JSON.stringify({ kid: "meta", payload: "x" })),
+    ).toBeUndefined();
     expect(extractEnvelopeKid("plain")).toBeUndefined();
     expect(extractEnvelopeKid("{not json")).toBeUndefined();
     expect(extractEnvelopeKid(undefined)).toBeUndefined();
@@ -43,6 +48,19 @@ describe("field crypto key selection", () => {
     expect(await resolveFieldEncryptKid(trimmed, context)).toBe("k2");
     const blank = configWith({ resolveEncryptKey: () => ({ kid: "  " }) });
     expect(await resolveFieldEncryptKid(blank, context)).toBeUndefined();
+  });
+
+  test("resolveFieldDecryptKids moves a listed envelope kid first", async () => {
+    const resolver: KeyResolver = {
+      resolveEncryptKey: () => ({ kid: "new" }),
+      resolveDecryptKeys: () => ["new", "old"],
+    };
+    expect(
+      await resolveFieldDecryptKids(configWith(resolver), {
+        ...context,
+        ciphertext: envelope("old"),
+      }),
+    ).toEqual(["old", "new"]);
   });
 
   test("resolveFieldDecryptKids puts the envelope kid first", async () => {

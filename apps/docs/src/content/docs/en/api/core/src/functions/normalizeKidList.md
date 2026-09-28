@@ -7,7 +7,7 @@ title: "normalizeKidList"
 
 > **normalizeKidList**(`kids`): `string`[]
 
-Defined in: [packages/core/src/crypto/key-selection.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-selection.ts#L4)
+Defined in: [packages/core/src/crypto/key-selection.ts:8](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-selection.ts#L8)
 
 Keeps the non-empty string kids of a resolver answer, trimmed.
 

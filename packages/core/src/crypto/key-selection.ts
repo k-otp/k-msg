@@ -1,4 +1,8 @@
-import type { FieldCryptoConfig, FieldCryptoKeyContext } from "./types";
+import {
+  type FieldCryptoConfig,
+  type FieldCryptoKeyContext,
+  isCryptoEnvelope,
+} from "./types";
 
 /** Keeps the non-empty string kids of a resolver answer, trimmed. */
 export function normalizeKidList(kids: unknown): string[] {
@@ -8,18 +12,19 @@ export function normalizeKidList(kids: unknown): string[] {
     .filter((kid) => kid.length > 0);
 }
 
-/** Reads the `kid` of a JSON ciphertext envelope, if it names one. */
+/**
+ * Reads the `kid` of a v1 ciphertext envelope, exactly as written. Returns
+ * `undefined` for any other value, including a provider's own JSON format.
+ */
 export function extractEnvelopeKid(ciphertext: unknown): string | undefined {
-  if (typeof ciphertext !== "string" || ciphertext.length === 0) {
+  if (typeof ciphertext !== "string" || ciphertext[0] !== "{") {
     return undefined;
   }
-  if (ciphertext[0] !== "{") return undefined;
 
   try {
-    const parsed = JSON.parse(ciphertext) as { kid?: unknown };
-    if (typeof parsed.kid !== "string") return undefined;
-    const normalized = parsed.kid.trim();
-    return normalized.length > 0 ? normalized : undefined;
+    const parsed: unknown = JSON.parse(ciphertext);
+    if (!isCryptoEnvelope(parsed)) return undefined;
+    return parsed.kid.length > 0 ? parsed.kid : undefined;
   } catch {
     return undefined;
   }
@@ -64,11 +69,8 @@ export async function resolveFieldDecryptKids(
   }
 
   const resolved = await config.keyResolver.resolveDecryptKeys(context);
-  const normalized = normalizeKidList(resolved);
+  const kids = normalizeKidList(resolved).filter((kid) => kid !== envelopeKid);
+  if (envelopeKid) kids.unshift(envelopeKid);
 
-  if (envelopeKid && !normalized.includes(envelopeKid)) {
-    normalized.unshift(envelopeKid);
-  }
-
-  return normalized.length > 0 ? normalized : undefined;
+  return kids.length > 0 ? kids : undefined;
 }
