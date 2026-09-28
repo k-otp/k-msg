@@ -36,8 +36,21 @@ const entryBoundaries: readonly EntryBoundary[] = [
   })),
 ];
 
-const importSpecifier =
+// Bun's scanner finds every runtime import, whatever comments sit inside it,
+// but drops type-only ones; the pattern adds those (and `typeof import()`).
+const transpiler = new Bun.Transpiler({ loader: "tsx" });
+const typeImportSpecifier =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+
+function importSpecifiers(source: string): Set<string> {
+  const specifiers = new Set(
+    transpiler.scanImports(source).map((entry) => entry.path),
+  );
+  for (const match of source.matchAll(typeImportSpecifier)) {
+    if (match[1]) specifiers.add(match[1]);
+  }
+  return specifiers;
+}
 
 async function isFile(file: string): Promise<boolean> {
   try {
@@ -86,9 +99,7 @@ async function collectEntryClosure(
     if (!file || seen.has(file)) continue;
     seen.add(file);
     const source = await readFile(file, "utf8");
-    for (const match of source.matchAll(importSpecifier)) {
-      const specifier = match[1];
-      if (!specifier) continue;
+    for (const specifier of importSpecifiers(source)) {
       const base = specifier.startsWith(".")
         ? path.resolve(path.dirname(file), specifier)
         : selfReferenceBase(specifier, pkg);
