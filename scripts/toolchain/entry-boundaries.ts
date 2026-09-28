@@ -45,9 +45,11 @@ const entryBoundaries: readonly EntryBoundary[] = [
 
 const loaders = {
   ".cjs": "js",
+  ".cts": "ts",
   ".js": "js",
   ".jsx": "jsx",
   ".mjs": "js",
+  ".mts": "ts",
   ".ts": "ts",
   ".tsx": "tsx",
 } as const;
@@ -174,8 +176,9 @@ async function runtimeImports(
   return resolved;
 }
 
-// Walks every workspace package the entry reaches, so a path that leaves the
-// package and comes back by name (`@k-msg/messaging/tracking`) is followed.
+// Walks every workspace package and app the entry reaches, so a path that
+// leaves the package and comes back by name (`@k-msg/messaging/tracking`) is
+// followed.
 async function collectEntryClosure(
   entry: string,
   workspace: Workspace,
@@ -184,7 +187,9 @@ async function collectEntryClosure(
   const pending = [entry];
   while (pending.length > 0) {
     const file = pending.pop();
-    if (!file || seen.has(file) || !file.startsWith("packages/")) continue;
+    if (!file || seen.has(file) || !/^(?:apps|packages)\//.test(file)) {
+      continue;
+    }
     seen.add(file);
     pending.push(
       ...(workspace.typeDependencies.get(file) ?? []),
@@ -220,7 +225,7 @@ async function checkBoundary(
  * (types, calls, re-exports) or a runtime import, across workspace packages.
  * Not followed: a specifier computed at run time, which bundlers cannot see
  * either, and a module reference that names no symbol, such as
- * `export type {} from "./x"`.
+ * `export type {} from "./x"`, or a JSDoc type in a JavaScript file.
  */
 export async function validateEntryBoundaries(
   graph: EntryBoundaryGraph,
