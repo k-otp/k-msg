@@ -138,15 +138,25 @@ async function bundleInputs(entry: string): Promise<string[]> {
   return [...loaded].filter(isRepoSource);
 }
 
+// Every real `import.meta` becomes this identifier, which no string or
+// comment can contain, so only actual uses are inspected.
+const metaSentinel = `__entry_boundary_meta_${crypto.randomUUID().replaceAll("-", "")}`;
+const transpilerOptions = { define: { "import.meta": metaSentinel } };
 const transpilers = {
-  js: new Bun.Transpiler({ loader: "js" }),
-  jsx: new Bun.Transpiler({ loader: "jsx" }),
-  ts: new Bun.Transpiler({ loader: "ts" }),
-  tsx: new Bun.Transpiler({ loader: "tsx" }),
+  js: new Bun.Transpiler({ ...transpilerOptions, loader: "js" }),
+  jsx: new Bun.Transpiler({ ...transpilerOptions, loader: "jsx" }),
+  ts: new Bun.Transpiler({ ...transpilerOptions, loader: "ts" }),
+  tsx: new Bun.Transpiler({ ...transpilerOptions, loader: "tsx" }),
 };
+// `import.meta` properties that describe the module or read the environment
+// without loading one.
+const safeMetaUse = new RegExp(
+  `${metaSentinel}\\.(?:dir|dirname|env|file|filename|main|path|resolve|url)\\b`,
+  "g",
+);
 
 function transpilerFor(file: string): Bun.Transpiler | undefined {
-  if (file.endsWith(".d.ts") || /\.d\.[cm]ts$/.test(file)) return undefined;
+  if (/\.d\.[cm]?ts$/.test(file)) return undefined;
   if (/\.[cm]?ts$/.test(file)) return transpilers.ts;
   if (file.endsWith(".tsx")) return transpilers.tsx;
   if (/\.[cm]?js$/.test(file)) return transpilers.js;
@@ -154,19 +164,18 @@ function transpilerFor(file: string): Bun.Transpiler | undefined {
   return undefined;
 }
 
-// `import.meta.require()` loads a module at run time that neither Bun's
-// bundler nor the compiler follows, so the gate cannot see what it reaches.
-// Reachable files must use `import` instead. Checked on transpiled output,
-// so comments do not count.
+// Any other `import.meta` use, such as `import.meta.require()` in any
+// spelling, can load a module that neither Bun's bundler nor the compiler
+// follows, so the gate cannot see what it reaches. Reachable files must use
+// `import` instead.
 async function findUntrackedLoads(files: readonly string[]): Promise<string[]> {
   const offenders: string[] = [];
   for (const file of files) {
     const transpiler = transpilerFor(file);
     if (!transpiler) continue;
     const source = await readFile(path.join(repoRoot, file), "utf8");
-    if (/\bimport\.meta\.require\b/.test(transpiler.transformSync(source))) {
-      offenders.push(file);
-    }
+    const output = transpiler.transformSync(source).replace(safeMetaUse, "");
+    if (output.includes(metaSentinel)) offenders.push(file);
   }
   return offenders;
 }
@@ -176,7 +185,8 @@ async function findUntrackedLoads(files: readonly string[]): Promise<string[]> {
  * compiler loads from the entry and those bundled files, which adds
  * type-only and side-effect references that bundling erases or shakes out.
  * Not followed: a specifier computed at run time, and URL-based loads such as
- * `new URL("./x", import.meta.url)`; `import.meta.require()` is rejected.
+ * `new URL("./x", import.meta.url)`; any other `import.meta` use, such as
+ * `import.meta.require()`, is rejected.
  */
 async function collectEntryClosure(entry: string): Promise<string[]> {
   const bundled = await bundleInputs(entry);
@@ -202,7 +212,7 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   }
   const untracked = (await findUntrackedLoads(closure)).map(
     (file) =>
-      `${boundary.entry} reaches ${file}, which calls import.meta.require(); use import so the boundary can be checked.`,
+      `${boundary.entry} reaches ${file}, which uses import.meta beyond url, dir, env, and similar (for example import.meta.require); use import so the boundary can be checked.`,
   );
   return untracked.concat(
     closure.flatMap((file) => {
