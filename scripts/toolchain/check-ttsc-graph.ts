@@ -802,10 +802,10 @@ ${citationRows}
 
 async function main(): Promise<void> {
   const write = process.argv.includes("--write");
-  await validateEntryBoundaries();
   const [graph, criticalTestGraph] = await Promise.all([
     loadGraph(productionGraphConfig),
     loadGraph(criticalTestGraphConfig),
+    validateEntryBoundaries(),
   ]);
   const dependencies = await collectDependencies(graph);
   validateGraph(graph, dependencies);
