@@ -7,7 +7,7 @@ title: "migrateWebhookFieldCryptoToTenant"
 
 > **migrateWebhookFieldCryptoToTenant**(`persistence`, `options`): `Promise`\<[`WebhookTenantMigrationResult`](/en/api/webhook/src/interfaces/webhooktenantmigrationresult/)\>
 
-Defined in: [packages/webhook/src/crypto/field-crypto.ts:652](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/crypto/field-crypto.ts#L652)
+Defined in: [packages/webhook/src/crypto/field-crypto.ts:640](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/crypto/field-crypto.ts#L640)
 
 Re-encrypts endpoint secrets and delivery payloads written before
 ciphertext was bound to `options.tenantId`, so they read without

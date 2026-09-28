@@ -7,7 +7,7 @@ title: "normalizePhoneForHash"
 
 > **normalizePhoneForHash**(`value`): `string`
 
-Defined in: [packages/core/src/crypto/types.ts:264](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L264)
+Defined in: [packages/core/src/crypto/types.ts:266](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L266)
 
 ## Parameters
 

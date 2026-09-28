@@ -6,6 +6,8 @@ import {
   type FieldMode,
   resolveFieldCryptoFailMode,
   resolveFieldCryptoOpenFallback,
+  resolveFieldDecryptKids,
+  resolveFieldEncryptKid,
   toCiphertextEnvelopeString,
 } from "@k-msg/core";
 import { isBeforeDeliveryCursor } from "../runtime/persistence";
@@ -23,12 +25,6 @@ import {
   markSecretUndecryptable,
   unmarkSecret,
 } from "./undecryptable-secret";
-
-function normalizeString(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
 
 // Values are encrypted and returned exactly as given, not trimmed: a secret
 // with surrounding whitespace still signs as it is without field crypto.
@@ -119,7 +115,6 @@ export async function protectFieldValue(
   if (!config || config.enabled === false) return value;
 
   const failMode = resolveFieldCryptoFailMode(config);
-  const keyResolver = config.keyResolver;
 
   try {
     const keyContext = {
@@ -129,10 +124,7 @@ export async function protectFieldValue(
       messageId: input.aad.messageId,
       providerId: input.aad.providerId,
     };
-    const key = keyResolver
-      ? await keyResolver.resolveEncryptKey(keyContext)
-      : undefined;
-    const kid = normalizeString(key?.kid);
+    const kid = await resolveFieldEncryptKid(config, keyContext);
     const encrypted = await config.provider.encrypt({
       value,
       path: input.path,
@@ -184,21 +176,17 @@ export async function revealFieldValue(
       messageId: input.aad.messageId,
       providerId: input.aad.providerId,
     };
-    const candidateKids = config.keyResolver?.resolveDecryptKeys
-      ? await config.keyResolver.resolveDecryptKeys({
-          ...keyContext,
-          ciphertext: value,
-        })
-      : undefined;
+    const candidateKids = await resolveFieldDecryptKids(config, {
+      ...keyContext,
+      ciphertext: value,
+    });
 
     const decrypt = (aad: Record<string, string>) =>
       config.provider.decrypt({
         ciphertext: value,
         path: input.path,
         aad,
-        ...(Array.isArray(candidateKids) && candidateKids.length > 0
-          ? { candidateKids }
-          : {}),
+        ...(candidateKids ? { candidateKids } : {}),
       });
     if (!input.tenantId) return await decrypt(input.aad);
     if (!input.acceptLegacyAad) {
