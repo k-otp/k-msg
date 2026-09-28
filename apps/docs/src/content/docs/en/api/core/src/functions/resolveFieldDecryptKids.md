@@ -7,7 +7,7 @@ title: "resolveFieldDecryptKids"
 
 > **resolveFieldDecryptKids**(`config`, `context`): `Promise`\<readonly `string`[] \| `undefined`\>
 
-Defined in: [packages/core/src/crypto/key-selection.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-selection.ts#L62)
+Defined in: [packages/core/src/crypto/key-selection.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/key-selection.ts#L70)
 
 The `candidateKids` to decrypt a field with: the envelope's own `kid` first,
 then every `kid` from `resolveDecryptKeys`. `undefined` lets the provider
