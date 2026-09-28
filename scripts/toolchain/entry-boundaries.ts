@@ -165,9 +165,11 @@ function transpilerFor(file: string): Bun.Transpiler | undefined {
 }
 
 // Any other `import.meta` use, such as `import.meta.require()` in any
-// spelling, can load a module that neither Bun's bundler nor the compiler
-// follows, so the gate cannot see what it reaches. Reachable files must use
-// `import` instead.
+// spelling, and the `module` builtin (`createRequire`) build loaders that
+// neither Bun's bundler nor the compiler follows, so the gate cannot see what
+// they reach. Reachable files must use `import` instead. Code evaluation
+// (`eval`, `new Function`, a loader reached through an aliased
+// `process.getBuiltinModule`) is out of scope: no static check can follow it.
 async function findUntrackedLoads(files: readonly string[]): Promise<string[]> {
   const offenders: string[] = [];
   for (const file of files) {
@@ -175,7 +177,12 @@ async function findUntrackedLoads(files: readonly string[]): Promise<string[]> {
     if (!transpiler) continue;
     const source = await readFile(path.join(repoRoot, file), "utf8");
     const output = transpiler.transformSync(source).replace(safeMetaUse, "");
-    if (output.includes(metaSentinel)) offenders.push(file);
+    const importsModuleApi = transpiler
+      .scan(source)
+      .imports.some(({ path: specifier }) =>
+        /^(?:node:)?module$/.test(specifier),
+      );
+    if (output.includes(metaSentinel) || importsModuleApi) offenders.push(file);
   }
   return offenders;
 }
@@ -212,7 +219,7 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   }
   const untracked = (await findUntrackedLoads(closure)).map(
     (file) =>
-      `${boundary.entry} reaches ${file}, which uses import.meta beyond url, dir, env, and similar (for example import.meta.require); use import so the boundary can be checked.`,
+      `${boundary.entry} reaches ${file}, which builds its own module loader (import.meta.require or the module builtin's createRequire); use import so the boundary can be checked.`,
   );
   return untracked.concat(
     closure.flatMap((file) => {
