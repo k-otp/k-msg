@@ -43,9 +43,12 @@ export interface KeySetState {
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Separates the active encrypt kid from the multi-kid decrypt set that
  *   key rotation and hash lookups rely on.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #ab9f50f
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Re-checked for scoped lookups: the context carries providerId and messageId;
  *   the AES-GCM hash defaults to activeKid, and decrypt tries every kid.
+ *   Re-read for the envelope-kid rule: the interface leaves the order to
+ *   resolveFieldDecryptKids, and AES-GCM decrypt tries candidateKids in order,
+ *   or the envelope kid when it gets none.
  */
 export interface KeyResolver {
   resolveEncryptKey(
