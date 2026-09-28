@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   type DeliveryStatus,
+  type FieldCryptoError,
   KMsg,
   type KMsgConfig,
   type KMsgDefaultsConfig,
@@ -56,5 +57,35 @@ describe("k-msg package exports", () => {
     expect(typeof coreFacade.parseErrorRetryPolicyFromJson).toBe("function");
     expect(typeof coreFacade.normalizeProviderError).toBe("function");
     expect("KMsg" in coreFacade).toBe(false);
+  });
+
+  test("core subpath exposes the field-crypto helpers", async () => {
+    const coreFacade = await import("./core/index");
+
+    expect(typeof coreFacade.createAesGcmFieldCryptoProvider).toBe("function");
+    expect(typeof coreFacade.createAwsKmsKeyResolver).toBe("function");
+    expect(typeof coreFacade.createDefaultMasker).toBe("function");
+    expect(typeof coreFacade.FieldCryptoError).toBe("function");
+  });
+
+  test("root keeps deprecated field-crypto aliases that match k-msg/core", async () => {
+    const facade = await import("./index");
+    const coreFacade = await import("./core/index");
+
+    const aliases: [string, unknown][] = Object.entries(
+      await import("./deprecated-crypto"),
+    );
+    const root: Record<string, unknown> = facade;
+    const core: Record<string, unknown> = coreFacade;
+
+    expect(aliases.length).toBe(17);
+    for (const [name, value] of aliases) {
+      expect(value).toBe(core[name]);
+      // A root export with the same name would shadow the alias silently.
+      expect(root[name]).toBe(value);
+    }
+
+    const error: FieldCryptoError = new facade.FieldCryptoError("config", "x");
+    expect(error).toBeInstanceOf(coreFacade.FieldCryptoError);
   });
 });

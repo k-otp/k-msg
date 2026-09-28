@@ -15,6 +15,8 @@ Provider implementations and advanced/runtime-specific APIs should be imported d
 - `@k-msg/messaging/{sender,queue}`
 - `@k-msg/messaging/adapters/*`
 
+Field-crypto helpers (`createAesGcmFieldCryptoProvider`, key resolvers, `FieldCryptoConfig`, `createDefaultMasker`, and related types) live on `k-msg/core`. Their `k-msg` root aliases are deprecated and will be removed in a future minor release.
+
 For core-only utilities in bundle-sensitive apps, prefer `k-msg/core` (or `@k-msg/core`) instead of importing them from `k-msg` root.
 
 ```ts
