@@ -57,25 +57,26 @@ export async function resolveFieldEncryptKid(
 
 /**
  * The `candidateKids` to decrypt a field with: the envelope's own `kid` first,
- * then every `kid` from `resolveDecryptKeys`. `undefined` lets the provider
- * pick the key from the envelope.
+ * then every `kid` from `resolveDecryptKeys`. Without `resolveDecryptKeys`
+ * it returns `undefined`, and the provider picks the key from its ciphertext.
  *
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   The one decrypt key selection shared by the tracking and webhook stores.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #b219abe
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Read the decrypt rule: the envelope kid leads, resolveDecryptKeys follows
- *   without duplicates, and both stores call this. Ran key-selection.test.ts
- *   and the webhook test that decrypts after the resolver drops the kid.
+ *   without duplicates, no candidates without resolveDecryptKeys, and both
+ *   stores call this. Ran key-selection.test.ts and the webhook test that
+ *   decrypts after the resolver drops the kid.
  */
 export async function resolveFieldDecryptKids(
   config: FieldCryptoConfig,
   context: FieldCryptoKeyContext & { ciphertext?: string },
 ): Promise<readonly string[] | undefined> {
-  const envelopeKid = extractEnvelopeKid(context.ciphertext);
-  if (!config.keyResolver?.resolveDecryptKeys) {
-    return envelopeKid ? [envelopeKid] : undefined;
-  }
+  // Without a resolver the provider reads its own ciphertext, which a
+  // string-returning provider may serialize however it likes.
+  if (!config.keyResolver?.resolveDecryptKeys) return undefined;
 
+  const envelopeKid = extractEnvelopeKid(context.ciphertext);
   const resolved = await config.keyResolver.resolveDecryptKeys(context);
   const kids = normalizeKidList(resolved).filter((kid) => kid !== envelopeKid);
   if (envelopeKid) kids.unshift(envelopeKid);

@@ -597,7 +597,7 @@ function toFallbackValue(
  * @evidence docs/security/field-crypto-v1.md#key-management
  *   Encrypts and hashes each field under the kid resolveEncryptKey returns for
  *   it, and has a degraded write hash to and from under the same kids.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #b219abe
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Read protectScalar, buildMetadataHashes, and hashDegradedField: hashes use
  *   the kid resolved, with the record's providerId and messageId, for to, from,
  *   or metadata, else the default key, and the fallback retries with the
@@ -1183,7 +1183,7 @@ async function hashLookupValues(
  *   set, resolved for every scope the filter pins and for the whole store, and
  *   under the provider's default key, and handles a key or hash it cannot
  *   resolve or compute as the fail mode directs.
- * @evidenceReview docs/security/field-crypto-v1.md#key-management #b219abe
+ * @evidenceReview docs/security/field-crypto-v1.md#key-management #0eceeec
  *   Read resolveLookupScopes, resolveLookupKids, and hashLookupValues against
  *   the lookup and failure paragraphs: pinned scopes first, then the store,
  *   each key source resolved on its own, no empty hash, and no records for an
