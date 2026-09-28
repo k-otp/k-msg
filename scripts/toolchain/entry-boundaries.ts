@@ -5,9 +5,16 @@ import { repoRoot } from "./ttsc-graph-command";
 type EntryBoundary = {
   entry: string;
   // Source folders, relative to the entry's package `src`, that the entry
-  // must not reach through relative imports, type-only imports included.
+  // must not reach, through runtime or type-only dependencies.
   forbidden: readonly string[];
   reason: string;
+};
+
+// The part of the compiler graph this check reads: which file declares each
+// symbol, and which symbols use, reference, or re-export which.
+export type EntryBoundaryGraph = {
+  edges: readonly { from: string; to: string }[];
+  nodes: readonly { file: string; id: string }[];
 };
 
 // `@k-msg/messaging` keeps tracking, queues, and runtime storage behind
@@ -36,55 +43,13 @@ const entryBoundaries: readonly EntryBoundary[] = [
   })),
 ];
 
-// Bun's scanner finds every runtime import, whatever comments sit inside it,
-// but drops type-only ones. The pattern adds those, `typeof import()`, and
-// `import type X = require()`, from the source with its comments removed.
 const transpilers = {
   ts: new Bun.Transpiler({ loader: "ts" }),
   tsx: new Bun.Transpiler({ loader: "tsx" }),
 };
-const typeImportSpecifier =
-  /(?:\bfrom\s*|\b(?:import|require)\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
 
-// Blanks out comments and leaves strings and template literals intact, so a
-// comment between `import(` and its specifier cannot hide it.
-export function stripComments(source: string): string {
-  let out = "";
-  let i = 0;
-  while (i < source.length) {
-    const char = source[i];
-    const next = source[i + 1];
-    if (char === "/" && next === "/") {
-      while (i < source.length && source[i] !== "\n") i++;
-      out += " ";
-    } else if (char === "/" && next === "*") {
-      const close = source.indexOf("*/", i + 2);
-      i = close === -1 ? source.length : close + 2;
-      out += " ";
-    } else if (char === '"' || char === "'" || char === "`") {
-      let j = i + 1;
-      while (j < source.length && source[j] !== char) {
-        j += source[j] === "\\" ? 2 : 1;
-      }
-      out += source.slice(i, j + 1);
-      i = j + 1;
-    } else {
-      out += char;
-      i++;
-    }
-  }
-  return out;
-}
-
-function importSpecifiers(file: string, source: string): Set<string> {
-  const transpiler = file.endsWith(".tsx") ? transpilers.tsx : transpilers.ts;
-  const specifiers = new Set(
-    transpiler.scanImports(source).map((entry) => entry.path),
-  );
-  for (const match of stripComments(source).matchAll(typeImportSpecifier)) {
-    if (match[1]) specifiers.add(match[1]);
-  }
-  return specifiers;
+function toPosix(file: string): string {
+  return file.replaceAll("\\", "/");
 }
 
 async function isFile(file: string): Promise<boolean> {
@@ -93,10 +58,6 @@ async function isFile(file: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-function toPosix(file: string): string {
-  return file.replaceAll("\\", "/");
 }
 
 async function resolveModule(base: string): Promise<string | null> {
@@ -123,36 +84,74 @@ function selfReferenceBase(specifier: string, pkg: PackageInfo): string | null {
   return path.join(pkg.sourceRoot, specifier.slice(pkg.name.length + 1));
 }
 
+// Type-level dependencies, including type-only imports and re-exports, as
+// the compiler resolved them: file A depends on file B when a symbol in A
+// uses, references, or re-exports one declared in B.
+function graphFileDependencies(
+  graph: EntryBoundaryGraph,
+): Map<string, Set<string>> {
+  const fileById = new Map(graph.nodes.map((node) => [node.id, node.file]));
+  const dependencies = new Map<string, Set<string>>();
+  for (const edge of graph.edges) {
+    const from = fileById.get(edge.from);
+    const to = fileById.get(edge.to);
+    if (!from || !to || from === to) continue;
+    const targets = dependencies.get(from) ?? new Set<string>();
+    targets.add(to);
+    dependencies.set(from, targets);
+  }
+  return dependencies;
+}
+
+// Runtime imports, as Bun's parser reads them: static, side-effect, dynamic
+// with a literal specifier, and `require`. Specifiers arrive decoded, and
+// comments cannot hide them.
+async function runtimeImports(
+  file: string,
+  pkg: PackageInfo,
+): Promise<string[]> {
+  if (!/\.tsx?$/.test(file)) return [];
+  const transpiler = file.endsWith(".tsx") ? transpilers.tsx : transpilers.ts;
+  const source = await readFile(path.join(repoRoot, file), "utf8");
+  const resolved: string[] = [];
+  for (const { path: specifier } of transpiler.scanImports(source)) {
+    const base = specifier.startsWith(".")
+      ? path.resolve(path.dirname(path.join(repoRoot, file)), specifier)
+      : selfReferenceBase(specifier, pkg);
+    if (!base) continue;
+    const target = await resolveModule(base);
+    if (!target) {
+      throw new Error(`Cannot resolve ${specifier} from ${file}.`);
+    }
+    resolved.push(toPosix(path.relative(repoRoot, target)));
+  }
+  return resolved;
+}
+
+// Walks only the entry's own package: the graph gate already rejects package
+// cycles, so a path through another package cannot lead back into this one.
 async function collectEntryClosure(
   entry: string,
   pkg: PackageInfo,
+  typeDependencies: Map<string, Set<string>>,
 ): Promise<string[]> {
+  const sourceRoot = `${toPosix(path.relative(repoRoot, pkg.sourceRoot))}/`;
   const seen = new Set<string>();
-  const pending = [path.join(repoRoot, entry)];
+  const pending = [entry];
   while (pending.length > 0) {
     const file = pending.pop();
-    if (!file || seen.has(file)) continue;
+    if (!file || seen.has(file) || !file.startsWith(sourceRoot)) continue;
     seen.add(file);
-    const source = await readFile(file, "utf8");
-    for (const specifier of importSpecifiers(file, source)) {
-      const base = specifier.startsWith(".")
-        ? path.resolve(path.dirname(file), specifier)
-        : selfReferenceBase(specifier, pkg);
-      if (!base) continue;
-      const resolved = await resolveModule(base);
-      if (!resolved) {
-        throw new Error(
-          `Cannot resolve ${specifier} from ${toPosix(path.relative(repoRoot, file))}.`,
-        );
-      }
-      pending.push(resolved);
-    }
+    pending.push(
+      ...(typeDependencies.get(file) ?? []),
+      ...(await runtimeImports(file, pkg)),
+    );
   }
-  return [...seen].map((file) => toPosix(path.relative(repoRoot, file))).sort();
+  return [...seen].sort();
 }
 
 async function readPackageInfo(entry: string): Promise<PackageInfo> {
-  const match = /^(packages\/[^/]+)\/src\/.+\.ts$/.exec(entry);
+  const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(entry);
   if (!match?.[1]) {
     throw new Error(
       `Entry boundary ${entry} must be a packages/<name>/src/**/*.ts file.`,
@@ -171,12 +170,18 @@ async function readPackageInfo(entry: string): Promise<PackageInfo> {
   return { name: manifest.name, sourceRoot: path.join(packageRoot, "src") };
 }
 
-async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
+async function checkBoundary(
+  boundary: EntryBoundary,
+  typeDependencies: Map<string, Set<string>>,
+): Promise<string[]> {
   const pkg = await readPackageInfo(boundary.entry);
   const sourceRoot = `${toPosix(path.relative(repoRoot, pkg.sourceRoot))}/`;
-  const closure = await collectEntryClosure(boundary.entry, pkg);
+  const closure = await collectEntryClosure(
+    boundary.entry,
+    pkg,
+    typeDependencies,
+  );
   return closure.flatMap((file) => {
-    if (!file.startsWith(sourceRoot)) return [];
     const folder = file.slice(sourceRoot.length).split("/")[0];
     return folder && boundary.forbidden.includes(folder)
       ? [`${boundary.entry} reaches ${file}: ${boundary.reason}.`]
@@ -184,9 +189,21 @@ async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   });
 }
 
-export async function validateEntryBoundaries(): Promise<void> {
+/**
+ * Fails when an entry reaches a forbidden folder through the compiler graph
+ * (types, calls, re-exports) or a runtime import. An import whose specifier
+ * is computed at run time is invisible to both, as it is to bundlers.
+ */
+export async function validateEntryBoundaries(
+  graph: EntryBoundaryGraph,
+): Promise<void> {
+  const typeDependencies = graphFileDependencies(graph);
   const violations = (
-    await Promise.all(entryBoundaries.map(checkBoundary))
+    await Promise.all(
+      entryBoundaries.map((boundary) =>
+        checkBoundary(boundary, typeDependencies),
+      ),
+    )
   ).flat();
   if (violations.length > 0) {
     throw new Error(
