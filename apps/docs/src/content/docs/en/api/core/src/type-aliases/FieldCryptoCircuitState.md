@@ -7,4 +7,4 @@ title: "FieldCryptoCircuitState"
 
 > **FieldCryptoCircuitState** = `"closed"` \| `"open"` \| `"half-open"`
 
-Defined in: [packages/core/src/crypto/types.ts:134](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L134)
+Defined in: [packages/core/src/crypto/types.ts:135](https://github.com/k-otp/k-msg/blob/main/packages/core/src/crypto/types.ts#L135)

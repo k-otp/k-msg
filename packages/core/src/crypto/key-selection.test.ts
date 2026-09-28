@@ -96,13 +96,13 @@ describe("field crypto key selection", () => {
     ).toEqual(["new"]);
   });
 
-  test("resolveFieldDecryptKids falls back to the envelope or nothing", async () => {
+  test("resolveFieldDecryptKids leaves the key to the provider without a resolver", async () => {
     expect(
       await resolveFieldDecryptKids(configWith(), {
         ...context,
         ciphertext: envelope("k1"),
       }),
-    ).toEqual(["k1"]);
+    ).toBeUndefined();
     expect(
       await resolveFieldDecryptKids(configWith(), {
         ...context,
