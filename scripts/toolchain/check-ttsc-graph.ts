@@ -805,10 +805,11 @@ async function main(): Promise<void> {
   const [graph, criticalTestGraph] = await Promise.all([
     loadGraph(productionGraphConfig),
     loadGraph(criticalTestGraphConfig),
+    // Runs beside the graph dumps; it only throws on a violation.
+    validateEntryBoundaries(),
   ]);
   const dependencies = await collectDependencies(graph);
   validateGraph(graph, dependencies);
-  await validateEntryBoundaries(graph);
   validateCompilerDiagnostics(graph, "production graph");
   validateProviderContracts(graph);
   validateRetryPolicyContracts(graph);

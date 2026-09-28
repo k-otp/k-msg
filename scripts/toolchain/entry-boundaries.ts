@@ -1,20 +1,14 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
-import { repoRoot } from "./ttsc-graph-command";
+import { repoRoot, resolveWorkspaceTsgoBinary } from "./ttsc-graph-command";
 
 type EntryBoundary = {
   entry: string;
   // Source folders, relative to the entry's package `src`, that the entry
-  // must not reach, through runtime or type-level dependencies.
+  // must not reach.
   forbidden: readonly string[];
   reason: string;
-};
-
-// The part of the compiler graph this check reads: which file declares each
-// symbol, and which symbols use, reference, or re-export which.
-export type EntryBoundaryGraph = {
-  edges: readonly { from: string; to: string }[];
-  nodes: readonly { file: string; id: string }[];
 };
 
 // `@k-msg/messaging` keeps tracking, queues, and runtime storage behind
@@ -43,29 +37,8 @@ const entryBoundaries: readonly EntryBoundary[] = [
   })),
 ];
 
-const loaders = {
-  ".cjs": "js",
-  ".cts": "ts",
-  ".js": "js",
-  ".jsx": "jsx",
-  ".mjs": "js",
-  ".mts": "ts",
-  ".ts": "ts",
-  ".tsx": "tsx",
-} as const;
-const transpilers = new Map(
-  [...new Set(Object.values(loaders))].map((loader) => [
-    loader,
-    new Bun.Transpiler({ loader }),
-  ]),
-);
-
-function toPosix(file: string): string {
-  return file.replaceAll("\\", "/");
-}
-
 function toRepoPath(file: string): string {
-  return toPosix(path.relative(repoRoot, file));
+  return path.relative(repoRoot, file).replaceAll("\\", "/");
 }
 
 async function isFile(file: string): Promise<boolean> {
@@ -76,133 +49,53 @@ async function isFile(file: string): Promise<boolean> {
   }
 }
 
-async function resolveModule(base: string): Promise<string | null> {
-  const stem = base.replace(/\.jsx?$/, "");
-  for (const candidate of [
-    base,
-    `${stem}.ts`,
-    `${stem}.tsx`,
-    path.join(base, "index.ts"),
-    path.join(base, "index.tsx"),
-  ]) {
-    if (await isFile(candidate)) return candidate;
-  }
-  return null;
-}
-
-type Workspace = {
-  // Package name to its absolute `src` directory.
-  sources: Map<string, string>;
-  typeDependencies: Map<string, Set<string>>;
-};
-
-async function readWorkspaceSources(): Promise<Map<string, string>> {
-  const packagesRoot = path.join(repoRoot, "packages");
-  const sources = new Map<string, string>();
-  for (const entry of await readdir(packagesRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const packageRoot = path.join(packagesRoot, entry.name);
-    const manifestPath = path.join(packageRoot, "package.json");
-    if (!(await isFile(manifestPath))) continue;
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-      name?: unknown;
-    };
-    if (typeof manifest.name === "string") {
-      sources.set(manifest.name, path.join(packageRoot, "src"));
-    }
-  }
-  return sources;
-}
-
-// Workspace packages import each other by name through their `exports`
-// subpaths, which map `name` to `src/index.ts` and `name/sub` to
-// `src/sub/index.ts` here.
-function workspaceBase(
-  specifier: string,
-  sources: Map<string, string>,
-): string | null {
-  for (const [name, sourceRoot] of sources) {
-    if (specifier === name) return sourceRoot;
-    if (specifier.startsWith(`${name}/`)) {
-      return path.join(sourceRoot, specifier.slice(name.length + 1));
-    }
-  }
-  return null;
-}
-
-// Type-level dependencies, including type-only imports and re-exports, as
-// the compiler resolved them: file A depends on file B when a symbol in A
-// uses, references, or re-exports one declared in B.
-function graphFileDependencies(
-  graph: EntryBoundaryGraph,
-): Map<string, Set<string>> {
-  const fileById = new Map(graph.nodes.map((node) => [node.id, node.file]));
-  const dependencies = new Map<string, Set<string>>();
-  for (const edge of graph.edges) {
-    const from = fileById.get(edge.from);
-    const to = fileById.get(edge.to);
-    if (!from || !to || from === to) continue;
-    const targets = dependencies.get(from) ?? new Set<string>();
-    targets.add(to);
-    dependencies.set(from, targets);
-  }
-  return dependencies;
-}
-
-// Runtime imports, as Bun's parser reads them: static, side-effect, dynamic
-// with a literal specifier, and `require`, in TypeScript and JavaScript
-// alike. Specifiers arrive decoded, and comments cannot hide them.
-async function runtimeImports(
-  file: string,
-  workspace: Workspace,
-): Promise<string[]> {
-  const loader = loaders[path.extname(file) as keyof typeof loaders];
-  const transpiler = loader ? transpilers.get(loader) : undefined;
-  if (!transpiler) return [];
-  const absolute = path.join(repoRoot, file);
-  const source = await readFile(absolute, "utf8");
-  const resolved: string[] = [];
-  for (const { path: specifier } of transpiler.scanImports(source)) {
-    const base = specifier.startsWith(".")
-      ? path.resolve(path.dirname(absolute), specifier)
-      : workspaceBase(specifier, workspace.sources);
-    if (!base) continue;
-    const target = await resolveModule(base);
-    if (!target) {
-      throw new Error(`Cannot resolve ${specifier} from ${file}.`);
-    }
-    resolved.push(toRepoPath(target));
-  }
-  return resolved;
-}
-
-// Walks every workspace package and app the entry reaches, so a path that
-// leaves the package and comes back by name (`@k-msg/messaging/tracking`) is
-// followed.
-async function collectEntryClosure(
-  entry: string,
-  workspace: Workspace,
-): Promise<string[]> {
-  const seen = new Set<string>();
-  const pending = [entry];
-  while (pending.length > 0) {
-    const file = pending.pop();
-    if (!file || seen.has(file) || !/^(?:apps|packages)\//.test(file)) {
-      continue;
-    }
-    seen.add(file);
-    pending.push(
-      ...(workspace.typeDependencies.get(file) ?? []),
-      ...(await runtimeImports(file, workspace)),
+/**
+ * Every file the compiler loads for a program rooted at `entry`, under the
+ * root tsconfig: its `paths` resolve workspace packages (the entry's own
+ * included) to source, and `allowJs` follows JavaScript and its JSDoc types.
+ * That covers runtime, side-effect, dynamic, type-only, and triple-slash
+ * references alike. A specifier computed at run time stays invisible, as it
+ * does to bundlers.
+ */
+async function collectEntryClosure(entry: string): Promise<string[]> {
+  const directory = await mkdtemp(path.join(tmpdir(), "k-msg-entry-"));
+  try {
+    const project = path.join(directory, "tsconfig.json");
+    await writeFile(
+      project,
+      JSON.stringify({
+        extends: path.join(repoRoot, "tsconfig.json"),
+        compilerOptions: { noEmit: true, plugins: [] },
+        files: [path.join(repoRoot, entry)],
+        include: [],
+      }),
     );
+    const child = Bun.spawn(
+      [resolveWorkspaceTsgoBinary(), "--listFilesOnly", "-p", project],
+      { cwd: repoRoot, stderr: "pipe", stdout: "pipe" },
+    );
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(child.stdout).text(),
+      new Response(child.stderr).text(),
+      child.exited,
+    ]);
+    if (exitCode !== 0) {
+      throw new Error(
+        `tsc --listFilesOnly failed for ${entry}:\n${stdout}${stderr}`,
+      );
+    }
+    return stdout
+      .split(/\r?\n/)
+      .filter((line) => line.length > 0)
+      .map((line) => toRepoPath(path.resolve(repoRoot, line)))
+      .filter((file) => !file.startsWith("..") && !file.includes(":"))
+      .sort();
+  } finally {
+    await rm(directory, { force: true, recursive: true });
   }
-  return [...seen].sort();
 }
 
-async function checkBoundary(
-  boundary: EntryBoundary,
-  workspace: Workspace,
-): Promise<string[]> {
+async function checkBoundary(boundary: EntryBoundary): Promise<string[]> {
   const match = /^(packages\/[^/]+)\/src\/.+\.tsx?$/.exec(boundary.entry);
   if (!match?.[1] || !(await isFile(path.join(repoRoot, boundary.entry)))) {
     throw new Error(
@@ -210,7 +103,10 @@ async function checkBoundary(
     );
   }
   const sourceRoot = `${match[1]}/src/`;
-  const closure = await collectEntryClosure(boundary.entry, workspace);
+  const closure = await collectEntryClosure(boundary.entry);
+  if (!closure.includes(boundary.entry)) {
+    throw new Error(`The compiler did not load ${boundary.entry}.`);
+  }
   return closure.flatMap((file) => {
     if (!file.startsWith(sourceRoot)) return [];
     const folder = file.slice(sourceRoot.length).split("/")[0];
@@ -220,24 +116,10 @@ async function checkBoundary(
   });
 }
 
-/**
- * Fails when an entry reaches a forbidden folder through the compiler graph
- * (types, calls, re-exports) or a runtime import, across workspace packages.
- * Not followed: a specifier computed at run time, which bundlers cannot see
- * either, and a module reference that names no symbol, such as
- * `export type {} from "./x"`, or a JSDoc type in a JavaScript file.
- */
-export async function validateEntryBoundaries(
-  graph: EntryBoundaryGraph,
-): Promise<void> {
-  const workspace: Workspace = {
-    sources: await readWorkspaceSources(),
-    typeDependencies: graphFileDependencies(graph),
-  };
+/** Fails when an entry reaches a folder its boundary forbids. */
+export async function validateEntryBoundaries(): Promise<void> {
   const violations = (
-    await Promise.all(
-      entryBoundaries.map((boundary) => checkBoundary(boundary, workspace)),
-    )
+    await Promise.all(entryBoundaries.map(checkBoundary))
   ).flat();
   if (violations.length > 0) {
     throw new Error(

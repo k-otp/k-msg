@@ -1,7 +1,7 @@
-import { createRequire } from "node:module";
 import { availableParallelism } from "node:os";
 import path from "node:path";
 import type { Subprocess } from "bun";
+import { resolveWorkspaceTsgoBinary } from "./ttsc-graph-command";
 import {
   docsTypecheckBoundary,
   type TypecheckTarget,
@@ -18,20 +18,6 @@ type TargetResult = {
 };
 
 const repoRoot = path.resolve(import.meta.dir, "../..");
-
-function resolveWorkspaceTsgoBinary(): string {
-  const rootRequire = createRequire(path.join(repoRoot, "package.json"));
-  const typescriptManifest = rootRequire.resolve("typescript/package.json");
-  const typescriptRequire = createRequire(typescriptManifest);
-  const platformManifest = typescriptRequire.resolve(
-    `@typescript/typescript-${process.platform}-${process.arch}/package.json`,
-  );
-  return path.join(
-    path.dirname(platformManifest),
-    "lib",
-    process.platform === "win32" ? "tsc.exe" : "tsc",
-  );
-}
 
 function readConcurrency(): number {
   const flagIndex = process.argv.indexOf("--concurrency");
