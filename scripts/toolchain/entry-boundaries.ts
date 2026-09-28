@@ -52,7 +52,7 @@ function toPosix(file: string): string {
 }
 
 async function resolveModule(base: string): Promise<string | null> {
-  const stem = base.replace(/\.(?:m?js|jsx)$/, "");
+  const stem = base.replace(/\.jsx?$/, "");
   for (const candidate of [
     base,
     `${stem}.ts`,
@@ -68,9 +68,9 @@ async function resolveModule(base: string): Promise<string | null> {
 type PackageInfo = { name: string; sourceRoot: string };
 
 // A package can import itself by name through its `exports` subpaths, which
-// map `name/sub` to `src/sub/index.ts` in this repository.
+// map `name` to `src/index.ts` and `name/sub` to `src/sub/index.ts` here.
 function selfReferenceBase(specifier: string, pkg: PackageInfo): string | null {
-  if (specifier === pkg.name) return path.join(pkg.sourceRoot, "index.ts");
+  if (specifier === pkg.name) return pkg.sourceRoot;
   if (!specifier.startsWith(`${pkg.name}/`)) return null;
   return path.join(pkg.sourceRoot, specifier.slice(pkg.name.length + 1));
 }
