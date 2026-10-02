@@ -9,6 +9,7 @@ import {
   type TemplateUpdateInput,
 } from "@k-msg/core";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
+import { resolveDefaultIWINVConfig } from "./iwinv.default-config";
 import type { NormalizedIwinvConfig } from "./iwinv.internal.types";
 import {
   createTemplate,
@@ -17,7 +18,6 @@ import {
   listTemplates,
   updateTemplate,
 } from "./iwinv.template";
-import { resolveDefaultIWINVConfig } from "./provider.send";
 import type { IWINVConfig } from "./types/iwinv";
 
 function normalizeTemplateConfig(config: IWINVConfig): NormalizedIwinvConfig {
