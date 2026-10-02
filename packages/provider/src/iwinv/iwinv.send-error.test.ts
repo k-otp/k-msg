@@ -11,7 +11,10 @@ import {
   IWINV_PROVIDER_TEXT_MAX_LENGTH,
 } from "./iwinv.send-error";
 import { IWINVSendProvider } from "./provider.send";
-import { IWINV_SEND_ERROR_REASONS } from "./types/iwinv";
+import {
+  IWINV_SEND_ERROR_REASONS,
+  type IWINVSendErrorReason,
+} from "./types/iwinv";
 
 const SENDER_MISMATCH_TEXT = "조직(업체) 발신번호가 일치하지 않습니다.";
 
@@ -166,6 +169,7 @@ describe("IWINV send errors carry IWINV's code and text", () => {
       respondWith("<html>Service Unavailable</html>", 503),
     );
 
+    expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
     expect(error.providerErrorCode).toBeUndefined();
     expect(error.providerErrorText).toBeUndefined();
     expect(error.httpStatus).toBe(503);
@@ -385,6 +389,78 @@ describe("IWINV send errors name the refusal in details.reason", () => {
 
     expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
     expect(getIWINVSendErrorReason(error)).toBe("SENDER_NUMBER_NOT_REGISTERED");
+  });
+
+  test("HTTP 429 is a rate limit whatever listed code the body holds", async () => {
+    const mms = {
+      ...sms,
+      type: "MMS",
+      media: {
+        image: {
+          bytes: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]),
+          filename: "a.jpg",
+          contentType: "image/jpeg",
+        },
+      },
+    } as SendOptions;
+    const lms = { ...sms, type: "LMS", subject: "제목" } as SendOptions;
+    const cases: Array<[SendOptions, string, IWINVSendErrorReason]> = [
+      [sms, JSON.stringify({ resultCode: 13 }), "SENDER_NUMBER_NOT_REGISTERED"],
+      [lms, JSON.stringify({ resultCode: "15" }), "IP_NOT_ALLOWED"],
+      [mms, JSON.stringify({ resultCode: 50 }), "AUTO_CHARGE_LIMIT_EXCEEDED"],
+      [sms, "13", "SENDER_NUMBER_NOT_REGISTERED"],
+      [alimTalk, JSON.stringify({ code: 505 }), "SENDER_NUMBER_NOT_REGISTERED"],
+      [alimTalk, JSON.stringify({ code: 206 }), "IP_NOT_ALLOWED"],
+    ];
+    for (const [options, body, reason] of cases) {
+      const error = await sendFailure(options, respondWith(body, 429));
+
+      expect(error.code).toBe(KMsgErrorCode.RATE_LIMIT_EXCEEDED);
+      expect(error.httpStatus).toBe(429);
+      expect(normalizeProviderError(error).classification).toBe("retryable");
+      expect(getIWINVSendErrorReason(error)).toBe(reason);
+    }
+  });
+
+  test("HTTP 5xx is retryable whatever listed code the body holds", async () => {
+    const smsError = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({ resultCode: 13, message: SENDER_MISMATCH_TEXT }),
+        503,
+      ),
+    );
+    expect(smsError.code).toBe(KMsgErrorCode.NETWORK_ERROR);
+    expect(smsError.providerErrorCode).toBe("13");
+    expect(normalizeProviderError(smsError).classification).toBe("retryable");
+    expect(getIWINVSendErrorReason(smsError)).toBe(
+      "SENDER_NUMBER_NOT_REGISTERED",
+    );
+
+    const alimTalkError = await sendFailure(
+      alimTalk,
+      respondWith(JSON.stringify({ code: 505, message: "x" }), 502),
+    );
+    expect(alimTalkError.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(alimTalkError.providerErrorCode).toBe("505");
+    expect(normalizeProviderError(alimTalkError).classification).toBe(
+      "retryable",
+    );
+    expect(getIWINVSendErrorReason(alimTalkError)).toBe(
+      "SENDER_NUMBER_NOT_REGISTERED",
+    );
+  });
+
+  test("an AlimTalk 5xx without a body code stays retryable", async () => {
+    for (const status of [501, 502, 505, 517]) {
+      const error = await sendFailure(
+        alimTalk,
+        respondWith(JSON.stringify({ message: "maintenance" }), status),
+      );
+      expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+      expect(error.providerErrorCode).toBeUndefined();
+      expect(normalizeProviderError(error).classification).toBe("retryable");
+    }
   });
 
   test("other refusals set no reason and keep their code", async () => {

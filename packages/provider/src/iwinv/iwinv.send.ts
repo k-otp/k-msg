@@ -23,7 +23,7 @@ import { isObjectRecord } from "../shared/type-guards";
 import {
   getAlimTalkHeaders,
   getSendEndpoint,
-  mapIwinvCodeToKMsgErrorCode,
+  mapAlimTalkSendErrorCode,
   normalizeIwinvCode,
   requireAlimTalkApiKey,
 } from "./iwinv.alimtalk.helpers";
@@ -319,9 +319,9 @@ export async function sendAlimTalk(params: {
         toIwinvSendError({
           providerId,
           channel: "alimtalk",
-          // Without a code in the body, the HTTP status classifies the failure.
-          code: mapIwinvCodeToKMsgErrorCode(
-            normalizeIwinvCode(data.code) ?? response.status,
+          code: mapAlimTalkSendErrorCode(
+            normalizeIwinvCode(data.code),
+            response.status,
           ),
           message:
             toIwinvProviderText(isRecord ? data.message : responseText) ??
