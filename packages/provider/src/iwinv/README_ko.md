@@ -226,6 +226,21 @@ bun src/cli.ts send \
 - `41`: 수신번호 누락
 - `50`: 자동충전 한도 초과
 
+## 발송 오류
+
+IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에는 정규화된
+`code`와 함께 IWINV의 응답이 그대로 담깁니다.
+
+- `providerErrorCode` (`string`): IWINV의 `resultCode`(SMS v2) 또는
+  `code`(알림톡). 예: `"13"`, `"505"`. 본문에 코드가 없으면(HTML 오류 페이지 등)
+  설정되지 않습니다.
+- `providerErrorText` (`string`): IWINV의 `message`. SMS 응답이 코드만 보낸
+  경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
+- `httpStatus` (`number`): IWINV 응답의 HTTP 상태.
+- `details.originalCode`: IWINV가 보낸 원래 코드(기존과 동일).
+
+`normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
+
 ## 트러블슈팅
 
 - `resultCode=14` (SMS): `SMS_API_KEY` + `SMS_AUTH_KEY` 조합과 `secret` 인코딩 형식을 확인하세요.

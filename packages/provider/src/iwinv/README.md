@@ -231,6 +231,21 @@ bun src/cli.ts send \
 - `41`: missing recipient
 - `50`: auto-recharge limit exceeded
 
+## Send Errors
+
+When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
+`KMsgError` carries IWINV's own answer next to the normalized `code`:
+
+- `providerErrorCode` (`string`): IWINV's `resultCode` (SMS v2) or `code`
+  (AlimTalk), e.g. `"13"` or `"505"`. Unset when the body held no code (an
+  HTML error page, say).
+- `providerErrorText` (`string`): IWINV's `message`. For a bare-code SMS
+  response it is the text IWINV documents for that code. Unset otherwise.
+- `httpStatus` (`number`): the HTTP status of IWINV's response.
+- `details.originalCode`: the raw code as IWINV sent it (unchanged).
+
+`normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
+
 ## Troubleshooting
 
 - `resultCode=14` (SMS): verify exact `SMS_API_KEY` + `SMS_AUTH_KEY` pair and `secret` header encoding format.
