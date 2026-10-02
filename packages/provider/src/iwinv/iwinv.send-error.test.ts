@@ -6,7 +6,10 @@ import {
   type ProviderFetch,
   type SendOptions,
 } from "@k-msg/core";
-import { getIWINVSendErrorReason } from "./iwinv.send-error";
+import {
+  getIWINVSendErrorReason,
+  IWINV_PROVIDER_TEXT_MAX_LENGTH,
+} from "./iwinv.send-error";
 import { IWINVSendProvider } from "./provider.send";
 import { IWINV_SEND_ERROR_REASONS } from "./types/iwinv";
 
@@ -166,6 +169,63 @@ describe("IWINV send errors carry IWINV's code and text", () => {
     expect(error.providerErrorCode).toBeUndefined();
     expect(error.providerErrorText).toBeUndefined();
     expect(error.httpStatus).toBe(503);
+  });
+
+  test("SMS v2: a plain-text body sets no code", async () => {
+    const error = await sendFailure(sms, respondWith("Forbidden", 403));
+
+    expect(error.providerErrorCode).toBeUndefined();
+    expect(error.providerErrorText).toBeUndefined();
+    expect(error.details?.originalCode).toBeUndefined();
+    expect(error.httpStatus).toBe(403);
+    expect(error.message).toBe("SMS send failed");
+  });
+
+  test("a long message with control characters is bounded", async () => {
+    const message = `\u0000앞\r\n\t뒤${"가".repeat(2_000)}\u0007`;
+    for (const [options, body] of [
+      [sms, JSON.stringify({ resultCode: 1, message })],
+      [alimTalk, JSON.stringify({ code: 518, message })],
+    ] as const) {
+      const error = await sendFailure(options, respondWith(body));
+      const text = error.providerErrorText as string;
+
+      expect(Array.from(text)).toHaveLength(IWINV_PROVIDER_TEXT_MAX_LENGTH);
+      expect(text.startsWith("앞 뒤가")).toBe(true);
+      expect(text.endsWith("…")).toBe(true);
+      expect(/\p{Cc}/u.test(text)).toBe(false);
+      expect(error.message).toBe(text);
+    }
+  });
+
+  test("an AlimTalk non-JSON body is bounded in the message", async () => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(`<html>${"x".repeat(5_000)}</html>`, 503),
+    );
+
+    expect(Array.from(error.message).length).toBeLessThanOrEqual(
+      IWINV_PROVIDER_TEXT_MAX_LENGTH,
+    );
+    expect(error.providerErrorText).toBeUndefined();
+  });
+
+  test("phone-like runs in IWINV's text are masked", async () => {
+    const error = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({
+          resultCode: 1,
+          message:
+            "수신 010-1234-5678, 01012345678, +821012345678 차단 (2000 Bytes, 2015-09-02)",
+        }),
+      ),
+    );
+
+    expect(error.providerErrorText).toBe(
+      "수신 ***, ***, *** 차단 (2000 Bytes, 2015-09-02)",
+    );
+    expect(error.message).toBe(error.providerErrorText as string);
   });
 
   test("normalizeProviderError keeps the provider code and text", async () => {

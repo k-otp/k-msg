@@ -231,13 +231,19 @@ bun src/cli.ts send \
 IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에는 정규화된
 `code`와 함께 IWINV의 응답이 그대로 담깁니다.
 
-- `providerErrorCode` (`string`): IWINV의 `resultCode`(SMS v2) 또는
-  `code`(알림톡). 예: `"13"`, `"505"`. 본문에 코드가 없으면(HTML 오류 페이지 등)
-  설정되지 않습니다.
+- `providerErrorCode` (`string`): IWINV의 정수 `resultCode`(SMS v2) 또는
+  `code`(알림톡)를 문자열로 담습니다. 예: `"13"`, `"505"`. 본문에 그런 코드가
+  없으면(`Forbidden` 같은 일반 텍스트, HTML 오류 페이지 등) 설정되지 않습니다.
 - `providerErrorText` (`string`): IWINV의 `message`. SMS 응답이 코드만 보낸
   경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
-- `httpStatus` (`number`): IWINV 응답의 HTTP 상태.
-- `details.originalCode`: IWINV가 보낸 원래 코드(기존과 동일).
+  제어 문자는 공백으로, 9자리 이상의 전화번호 같은 숫자열은 `***`로 바뀌고
+  500자로 잘립니다. 오류의 `message`도 같은 문구입니다.
+- `httpStatus` (`number`): IWINV 응답의 HTTP 상태. 재시도 분류에 쓰입니다.
+  `ErrorRetryPolicy.retryableStatuses`/`nonRetryableStatuses`가 코드 목록보다
+  먼저 이 값과 비교되고, 정책의 `retryableCodes`/`nonRetryableCodes`에 오류의
+  `code`가 없으면 이 값으로 분류합니다.
+- `details.originalCode`: IWINV가 보낸 원래 코드. SMS 일반 텍스트 본문은 더 이상
+  여기에 담기지 않습니다.
 - `details.reason` (`IWINVSendErrorReason`, `IWINV_SEND_ERROR_REASONS` 중 하나):
   IWINV의 코드나 문구로 거절 사유를 알 수 있을 때 설정됩니다.
   `getIWINVSendErrorReason(error)`로 읽으세요.
@@ -255,6 +261,11 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
   사유는 추가될 수 있으니 모르는 값은 사유 없음으로 다루세요.
 
 `normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
+
+`providerErrorText`와 메시지는 k-msg가 아니라 IWINV가 쓴 문구입니다. 발송한
+내용을 되풀이할 수 있으므로(알림톡 `540`은 메시지의 금칙어를 보여 줍니다) 민감한
+값으로 다루고, 메시지 내용이 들어가면 안 되는 곳에 기록·저장하기 전에 가리거나
+빼세요.
 
 ## 트러블슈팅
 

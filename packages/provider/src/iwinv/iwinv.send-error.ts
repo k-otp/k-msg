@@ -5,16 +5,28 @@ import {
   type IWINVSendErrorReason,
 } from "./types/iwinv";
 
-const PROVIDER_CODE_PATTERN = /^[A-Za-z0-9_-]{1,32}$/;
+// IWINV's result codes are integers. Anything else in the code's place (a
+// plain-text "Forbidden", an HTML page) is not reported as one.
+const PROVIDER_CODE_PATTERN = /^-?\d{1,6}$/;
+
+/** The longest `providerErrorText` (and message) an IWINV send error keeps. */
+export const IWINV_PROVIDER_TEXT_MAX_LENGTH = 500;
+
+const CONTROL_CHARACTERS = /\p{Cc}+/gu;
+const WHITESPACE_RUNS = /\s+/g;
+// Nine or more digits, optionally `+`-prefixed and split by `-` or `.`: a
+// phone number, which IWINV's text has no other reason to hold.
+const PHONE_LIKE_RUNS = /\+?\d(?:[-.]?\d){8,}/g;
 
 /**
  * Returns IWINV's result code as a string, or `undefined` when the response
- * carried none. A body that is not a code (an HTML error page, say) is not
- * reported as one.
+ * carried none. Only an integer code counts.
  */
 export function toIwinvProviderCode(value: unknown): string | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return String(value);
+  if (typeof value === "number") {
+    return Number.isInteger(value) && PROVIDER_CODE_PATTERN.test(String(value))
+      ? String(value)
+      : undefined;
   }
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -23,11 +35,23 @@ export function toIwinvProviderCode(value: unknown): string | undefined {
   return undefined;
 }
 
-/** Returns IWINV's result message, or `undefined` when it sent none. */
+/**
+ * Returns IWINV's result message, or `undefined` when it sent none. The text is
+ * IWINV's, so it is cleaned before it goes on an error: control characters
+ * become spaces, whitespace runs collapse, phone-like digit runs become `***`,
+ * and it is cut to {@link IWINV_PROVIDER_TEXT_MAX_LENGTH} characters.
+ */
 export function toIwinvProviderText(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
+  const cleaned = value
+    .replace(CONTROL_CHARACTERS, " ")
+    .replace(WHITESPACE_RUNS, " ")
+    .trim()
+    .replace(PHONE_LIKE_RUNS, "***");
+  if (cleaned.length === 0) return undefined;
+  const characters = Array.from(cleaned);
+  if (characters.length <= IWINV_PROVIDER_TEXT_MAX_LENGTH) return cleaned;
+  return `${characters.slice(0, IWINV_PROVIDER_TEXT_MAX_LENGTH - 1).join("")}…`;
 }
 
 export type IwinvSendChannel = "sms" | "alimtalk";
