@@ -1,5 +1,27 @@
 # @k-msg/provider
 
+## 0.34.0 — 2026-10-02
+
+### Minor changes
+
+- [b3af7ee0](https://github.com/k-otp/k-msg/commit/b3af7ee0c1e9cb93bb2f034096eada207a4d971d) IWINV send errors name the refusal in `details.reason`.
+  
+  - A failed IWINV send sets `details.reason` when IWINV's code or text identifies the refusal: `SENDER_NUMBER_NOT_REGISTERED` (SMS `13`, AlimTalk `505`, or a text such as "조직(업체) 발신번호가 일치하지 않습니다."), `IP_NOT_ALLOWED` (SMS `15`/`206`, AlimTalk `206`), `RECIPIENT_NUMBER_INVALID` (SMS `41`), and `AUTO_CHARGE_LIMIT_EXCEEDED` (SMS `50`). New exports: `IWINV_SEND_ERROR_REASONS`, the `IWINVSendErrorReason` type, and `getIWINVSendErrorReason(error)`, which reads the reason without a cast. No `KMsgErrorCode` is added.
+  - A sender-number or IP refusal that only IWINV's text identifies is now `INVALID_REQUEST` or `AUTHENTICATION_FAILED` where it used to be the generic, retried `PROVIDER_ERROR` or `NETWORK_ERROR` of an unlisted code. A rate limit, an HTTP 5xx or a 5xx code keeps its code.
+  - The HTTP status now decides first: an SMS or AlimTalk send answered with HTTP `429` is `RATE_LIMIT_EXCEEDED`, and one answered with HTTP 5xx is `NETWORK_ERROR` (SMS) or `PROVIDER_ERROR` (AlimTalk), whatever code the body holds. Before, an SMS `429` was `NETWORK_ERROR`, a listed code in the body won over either status, and an AlimTalk HTTP 5xx without a body code could be the non-retryable `INVALID_REQUEST` or `TEMPLATE_NOT_FOUND`.
+  - An AlimTalk response whose body has no code is otherwise classified by its HTTP status, and a string `code` is read as a number (a string `"505"` was `PROVIDER_ERROR` and is now `INVALID_REQUEST`). — Thanks @imjlk!
+
+### Patch changes
+
+- [1da5059f](https://github.com/k-otp/k-msg/commit/1da5059ff2e424f2a675b92338280d328f8d6bc9) IWINV send errors now carry IWINV's own code and text.
+  
+  - A failed AlimTalk or SMS/LMS/MMS send sets `providerErrorCode` to IWINV's integer `code` (AlimTalk) or `resultCode` (SMS v2) as a string, `providerErrorText` to IWINV's `message`, and `httpStatus` to the response status. Before, the code was only in `details.originalCode`, which `normalizeProviderError` does not read, so callers saw an empty `providerErrorCode` (for example on IWINV's "조직(업체) 발신번호가 일치하지 않습니다." refusal, code `13`).
+  - `httpStatus` is new on these errors and takes part in retry classification: a policy's `retryableStatuses`/`nonRetryableStatuses` now match IWINV send errors whose `code` no configured `retryableCodes`/`nonRetryableCodes` entry lists (a configured code entry still wins), and a custom code list that leaves the error's `code` out now falls back to the HTTP status. Custom retry policies keyed on HTTP status or on custom code lists may classify IWINV send errors differently.
+  - `providerErrorText` and the error message are IWINV's text, cleaned: control characters become spaces, phone-like runs of nine or more digits become `***`, and the text is cut to 500 characters (an AlimTalk non-JSON body in the message too). The text is IWINV's and can echo message content (AlimTalk `540` names the blocked word), so treat it as sensitive.
+  - For a bare-code SMS response, `providerErrorText` is the text IWINV documents for that code. A body that is not an integer code, such as plain-text `Forbidden` or an HTML error page, sets neither field, and a plain-text SMS body no longer becomes `details.originalCode`.
+  - The normalized `code` is unchanged. — Thanks @imjlk!
+- Updated dependencies: core@0.34.0, template@0.34.0
+
 ## 0.33.0 — 2026-09-28
 
 ### Patch changes
