@@ -73,37 +73,12 @@ for entry in "${CHECKS[@]}"; do
   printf "%-58s %10d %10d %10d %10d %8s\n" "$artifact" "$raw_size" "$raw_limit" "$gzip_size" "$gzip_limit" "$result"
 done
 
-declare -a FORBIDDEN_IMPORT_CHECKS=(
-  "packages/messaging/dist/sender/index.mjs|zod"
-  "packages/messaging/dist/sender/index.mjs|zod/mini"
-  "packages/messaging/dist/sender/index.mjs|drizzle-orm"
-  "packages/provider/dist/aligo/send.mjs|zod"
-  "packages/provider/dist/aligo/send.mjs|zod/mini"
-  "packages/provider/dist/aligo/send.mjs|drizzle-orm"
-  "packages/provider/dist/aligo/send.mjs|@k-msg/template"
-  "packages/provider/dist/iwinv/send.mjs|zod"
-  "packages/provider/dist/iwinv/send.mjs|zod/mini"
-  "packages/provider/dist/iwinv/send.mjs|drizzle-orm"
-  "packages/provider/dist/iwinv/send.mjs|@k-msg/template"
-)
-
+# Runs in Bun, not through an external search tool: a missing tool must fail
+# the guard, never skip it. Checks and semantics: scripts/ci/forbidden-imports.ts.
 echo
-echo "Forbidden import guard (send-only artifacts)"
-for entry in "${FORBIDDEN_IMPORT_CHECKS[@]}"; do
-  IFS="|" read -r artifact token <<<"$entry"
-  if [[ ! -f "$artifact" ]]; then
-    echo "::error file=$artifact::bundle artifact is missing for forbidden import check"
-    FAILED=1
-    continue
-  fi
-
-  if rg -q "$token" "$artifact"; then
-    echo "::error file=$artifact::found forbidden import token '$token'"
-    FAILED=1
-  else
-    echo "OK  $artifact does not contain '$token'"
-  fi
-done
+if ! bun ./scripts/ci/forbidden-imports.ts; then
+  FAILED=1
+fi
 
 if (( FAILED != 0 )); then
   echo
