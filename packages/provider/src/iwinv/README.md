@@ -244,9 +244,11 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   Control characters become spaces, phone-like runs of 9+ digits become `***`,
   and it is cut to 500 characters. The error's `message` is the same text.
 - `httpStatus` (`number`): the HTTP status of IWINV's response. It takes part
-  in retry classification: `ErrorRetryPolicy.retryableStatuses` /
-  `nonRetryableStatuses` match it before the code lists, and it decides when a
-  policy's `retryableCodes`/`nonRetryableCodes` leave the error's `code` out.
+  in retry classification (`ErrorUtils.classifyForRetry`) after the policy's
+  code lists: a `retryableCodes`/`nonRetryableCodes` entry for the error's
+  `code` wins first, then `retryableStatuses`/`nonRetryableStatuses` match the
+  status, and when no code list (the policy's or the default) holds the `code`,
+  the status decides.
 - `details.originalCode`: the raw code as IWINV sent it. A plain-text SMS body
   is no longer put here.
 - `details.reason` (`IWINVSendErrorReason`, one of `IWINV_SEND_ERROR_REASONS`):
@@ -258,13 +260,15 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
   - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
 
-  IWINV's listed codes already map to a non-retryable code. A sender-number or
-  IP refusal read only from the text becomes `INVALID_REQUEST` or
+  The HTTP status decides the normalized `code` first: HTTP `429` is
+  `RATE_LIMIT_EXCEEDED` and HTTP 5xx is `NETWORK_ERROR` (SMS) or
+  `PROVIDER_ERROR` (AlimTalk), both retryable, whatever code the body holds.
+  Otherwise the codes above map to a non-retryable code. A sender-number or IP
+  refusal read only from the text becomes `INVALID_REQUEST` or
   `AUTHENTICATION_FAILED` when the code would otherwise be the generic
-  `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted code. A rate limit (HTTP
-  `429`, AlimTalk code `429`), an HTTP 5xx or a 5xx code keeps its own,
-  retryable code, with the reason still set. More reasons may be added; treat
-  unknown values as no reason.
+  `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted code; AlimTalk code `429` and
+  an unlisted 5xx code keep their own, retryable code. The reason is set in
+  every case. More reasons may be added; treat unknown values as no reason.
 
 `normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
 
