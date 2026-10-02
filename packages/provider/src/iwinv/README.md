@@ -231,6 +231,52 @@ bun src/cli.ts send \
 - `41`: missing recipient
 - `50`: auto-recharge limit exceeded
 
+## Send Errors
+
+When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
+`KMsgError` carries IWINV's own answer next to the normalized `code`:
+
+- `providerErrorCode` (`string`): IWINV's integer `resultCode` (SMS v2) or
+  `code` (AlimTalk) as a string, e.g. `"13"` or `"505"`. Unset when the body
+  held no such code (plain text such as `Forbidden`, or an HTML error page).
+- `providerErrorText` (`string`): IWINV's `message`. For a bare-code SMS
+  response it is the text IWINV documents for that code. Unset otherwise.
+  Control characters become spaces, phone-like runs of 9+ digits become `***`,
+  and it is cut to 500 characters. The error's `message` is the same text.
+- `httpStatus` (`number`): the HTTP status of IWINV's response. It takes part
+  in retry classification (`ErrorUtils.classifyForRetry`) after the policy's
+  code lists: a `retryableCodes`/`nonRetryableCodes` entry for the error's
+  `code` wins first, then `retryableStatuses`/`nonRetryableStatuses` match the
+  status, and when no code list (the policy's or the default) holds the `code`,
+  the status decides.
+- `details.originalCode`: the raw code as IWINV sent it. A plain-text SMS body
+  is no longer put here.
+- `details.reason` (`IWINVSendErrorReason`, one of `IWINV_SEND_ERROR_REASONS`):
+  set when IWINV's code or text names the refusal. Read it with
+  `getIWINVSendErrorReason(error)`.
+  - `SENDER_NUMBER_NOT_REGISTERED`: SMS `13`, AlimTalk `505`, or a text such as
+    "조직(업체) 발신번호가 일치하지 않습니다."
+  - `IP_NOT_ALLOWED`: SMS `15`/`206`, AlimTalk `206`, or a text saying so.
+  - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
+  - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
+
+  The HTTP status decides the normalized `code` first: HTTP `429` is
+  `RATE_LIMIT_EXCEEDED` and HTTP 5xx is `NETWORK_ERROR` (SMS) or
+  `PROVIDER_ERROR` (AlimTalk), both retryable, whatever code the body holds.
+  Otherwise the codes above map to a non-retryable code. A sender-number or IP
+  refusal read only from the text becomes `INVALID_REQUEST` or
+  `AUTHENTICATION_FAILED` when the code would otherwise be the generic
+  `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted code; AlimTalk code `429` and
+  an unlisted 5xx code keep their own, retryable code. The reason is set in
+  every case. More reasons may be added; treat unknown values as no reason.
+
+`normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
+
+`providerErrorText` and the message are written by IWINV, not k-msg. They can
+echo what was sent (AlimTalk `540` names the blocked word from the message), so
+treat them as sensitive: mask or drop them before logging or storing them where
+message content may not go.
+
 ## Troubleshooting
 
 - `resultCode=14` (SMS): verify exact `SMS_API_KEY` + `SMS_AUTH_KEY` pair and `secret` header encoding format.
