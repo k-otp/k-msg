@@ -14,9 +14,11 @@ export const IWINV_PROVIDER_TEXT_MAX_LENGTH = 500;
 
 const CONTROL_CHARACTERS = /\p{Cc}+/gu;
 const WHITESPACE_RUNS = /\s+/g;
-// Nine or more digits, optionally `+`-prefixed and split by `-` or `.`: a
-// phone number, which IWINV's text has no other reason to hold.
-const PHONE_LIKE_RUNS = /\+?\d(?:[-.]?\d){8,}/g;
+// Nine or more digits, optionally `+`- or `(`-prefixed, with up to two of
+// `-`, `.`, a space or a parenthesis between digits ("010 1234 5678",
+// "(010) 1234-5678", "+82 10-1234-5678"): a phone number, which IWINV's text
+// has no other reason to hold.
+const PHONE_LIKE_RUNS = /[+(]?\d(?:[-. ()]{0,2}\d){8,}/g;
 
 /**
  * Returns IWINV's result code as a string, or `undefined` when the response
