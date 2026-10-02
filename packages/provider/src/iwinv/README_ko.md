@@ -238,6 +238,14 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
   경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
 - `httpStatus` (`number`): IWINV 응답의 HTTP 상태.
 - `details.originalCode`: IWINV가 보낸 원래 코드(기존과 동일).
+- `details.reason` (`IWINVSendErrorReason`): IWINV의 코드나 문구로 거절 사유를
+  알 수 있을 때 설정됩니다. `SENDER_NUMBER_NOT_REGISTERED`(SMS `13`, 알림톡
+  `505`, 또는 "조직(업체) 발신번호가 일치하지 않습니다." 같은 문구),
+  `IP_NOT_ALLOWED`(SMS `15`/`206`), `RECIPIENT_NUMBER_INVALID`(SMS `41`, 알림톡
+  `512`/`513`), `AUTO_CHARGE_LIMIT_EXCEEDED`(SMS `50`). 발신번호 거절은 항상
+  `INVALID_REQUEST`, IP 거절은 `AUTHENTICATION_FAILED`이므로 IWINV가 문서에 없는
+  코드로 보내도 재시도되지 않습니다. 사유는 추가될 수 있으니 모르는 값은 사유
+  없음으로 다루세요.
 
 `normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
 

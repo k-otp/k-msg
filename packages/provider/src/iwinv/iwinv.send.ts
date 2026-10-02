@@ -318,6 +318,7 @@ export async function sendAlimTalk(params: {
       return fail(
         toIwinvSendError({
           providerId,
+          channel: "alimtalk",
           code: mapIwinvCodeToKMsgErrorCode(data.code),
           message: data.message || "IWINV send failed",
           httpStatus: response.status,
@@ -369,6 +370,7 @@ function toSmsV2SendFailure(
 
   return toIwinvSendError({
     providerId,
+    channel: "sms",
     code: mapSmsErrorCode(code, response.ok),
     message: providerText ?? fallbackMessage,
     httpStatus: response.status,
