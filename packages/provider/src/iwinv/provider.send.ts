@@ -14,11 +14,10 @@ import {
   type ProviderRequestContext,
   type ProviderTransportCapabilities,
   type Result,
-  readRuntimeEnv,
   type SendOptions,
   type SendResult,
 } from "@k-msg/core";
-import { getProviderOnboardingSpec } from "../onboarding/specs";
+import { iwinvOnboardingSpec } from "../onboarding/iwinv";
 import { safeParseJson, toRecordOrFallback } from "../shared/http-json";
 import { TemplateContentCache } from "../shared/template-content-cache";
 import {
@@ -28,6 +27,7 @@ import {
 } from "./iwinv.alimtalk.helpers";
 import { resolveIwinvMessageTypes } from "./iwinv.capabilities";
 import { IWINV_ALIMTALK_BASE_URL } from "./iwinv.constants";
+import { resolveDefaultIWINVConfig } from "./iwinv.default-config";
 import {
   getAlimTalkDeliveryStatus,
   getSmsV2DeliveryStatus,
@@ -52,22 +52,6 @@ function normalizeIwinvConfig(config: IWINVConfig): NormalizedIwinvConfig {
   };
 }
 
-export function resolveDefaultIWINVConfig(): IWINVConfig {
-  return {
-    apiKey: readRuntimeEnv("IWINV_API_KEY") || "",
-    smsApiKey: readRuntimeEnv("IWINV_SMS_API_KEY"),
-    smsAuthKey: readRuntimeEnv("IWINV_SMS_AUTH_KEY"),
-    smsCompanyId: readRuntimeEnv("IWINV_SMS_COMPANY_ID"),
-    senderNumber:
-      readRuntimeEnv("IWINV_SENDER_NUMBER") ||
-      readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
-    smsSenderNumber: readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
-    sendEndpoint: readRuntimeEnv("IWINV_SEND_ENDPOINT") || "/api/v2/send/",
-    xForwardedFor: readRuntimeEnv("IWINV_X_FORWARDED_FOR"),
-    debug: readRuntimeEnv("NODE_ENV") === "development",
-  };
-}
-
 export class IWINVSendProvider implements Provider, BalanceProvider {
   readonly id = "iwinv";
   readonly name = "IWINV Messaging Provider";
@@ -82,15 +66,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
   protected readonly templateContents = new TemplateContentCache();
 
   getOnboardingSpec() {
-    const spec = getProviderOnboardingSpec(this.id);
-    if (!spec) {
-      throw new KMsgError(
-        KMsgErrorCode.INVALID_REQUEST,
-        `Onboarding spec missing for provider: ${this.id}`,
-        { providerId: this.id },
-      );
-    }
-    return spec;
+    return iwinvOnboardingSpec;
   }
 
   constructor(config: IWINVConfig) {

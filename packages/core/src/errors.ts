@@ -362,6 +362,10 @@ export class KMsgError extends Error {
   public readonly code: KMsgErrorCode;
   public readonly details?: Record<string, unknown>;
   public readonly providerErrorCode?: string;
+  /**
+   * The provider's own error text. The provider writes it, so it can echo
+   * what was sent (a blocked word, a recipient); treat it as sensitive.
+   */
   public readonly providerErrorText?: string;
   public readonly httpStatus?: number;
   public readonly requestId?: string;

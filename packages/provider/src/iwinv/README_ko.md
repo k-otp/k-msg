@@ -226,6 +226,50 @@ bun src/cli.ts send \
 - `41`: 수신번호 누락
 - `50`: 자동충전 한도 초과
 
+## 발송 오류
+
+IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에는 정규화된
+`code`와 함께 IWINV의 응답이 그대로 담깁니다.
+
+- `providerErrorCode` (`string`): IWINV의 정수 `resultCode`(SMS v2) 또는
+  `code`(알림톡)를 문자열로 담습니다. 예: `"13"`, `"505"`. 본문에 그런 코드가
+  없으면(`Forbidden` 같은 일반 텍스트, HTML 오류 페이지 등) 설정되지 않습니다.
+- `providerErrorText` (`string`): IWINV의 `message`. SMS 응답이 코드만 보낸
+  경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
+  제어 문자는 공백으로, 9자리 이상의 전화번호 같은 숫자열은 `***`로 바뀌고
+  500자로 잘립니다. 오류의 `message`도 같은 문구입니다.
+- `httpStatus` (`number`): IWINV 응답의 HTTP 상태. 재시도 분류
+  (`ErrorUtils.classifyForRetry`)에서 정책의 코드 목록 다음에 쓰입니다. 오류의
+  `code`가 `retryableCodes`/`nonRetryableCodes`에 있으면 그것이 먼저 적용되고,
+  그다음 `retryableStatuses`/`nonRetryableStatuses`가 이 상태와 비교되며, 어느
+  코드 목록(정책 또는 기본값)에도 `code`가 없으면 이 상태로 분류합니다.
+- `details.originalCode`: IWINV가 보낸 원래 코드. SMS 일반 텍스트 본문은 더 이상
+  여기에 담기지 않습니다.
+- `details.reason` (`IWINVSendErrorReason`, `IWINV_SEND_ERROR_REASONS` 중 하나):
+  IWINV의 코드나 문구로 거절 사유를 알 수 있을 때 설정됩니다.
+  `getIWINVSendErrorReason(error)`로 읽으세요.
+  - `SENDER_NUMBER_NOT_REGISTERED`: SMS `13`, 알림톡 `505`, 또는 "조직(업체)
+    발신번호가 일치하지 않습니다." 같은 문구.
+  - `IP_NOT_ALLOWED`: SMS `15`/`206`, 알림톡 `206`, 또는 그런 문구.
+  - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
+  - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
+
+  정규화된 `code`는 HTTP 상태가 먼저 정합니다. 본문의 코드와 관계없이 HTTP
+  `429`는 `RATE_LIMIT_EXCEEDED`, HTTP 5xx는 `NETWORK_ERROR`(SMS) 또는
+  `PROVIDER_ERROR`(알림톡)이며 둘 다 재시도 가능합니다. 그 밖에는 위 코드들이
+  재시도하지 않는 코드로 매핑됩니다. 문구로만 알 수 있는 발신번호/IP 거절은
+  코드가 문서에 없는 코드의 일반 분류(`PROVIDER_ERROR`/`NETWORK_ERROR`)일 때만
+  `INVALID_REQUEST`/`AUTHENTICATION_FAILED`가 되고, 알림톡 코드 `429`와 문서에
+  없는 5xx 코드는 재시도 가능한 원래 코드를 유지합니다. 사유는 어느 경우에나
+  설정됩니다. 사유는 추가될 수 있으니 모르는 값은 사유 없음으로 다루세요.
+
+`normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
+
+`providerErrorText`와 메시지는 k-msg가 아니라 IWINV가 쓴 문구입니다. 발송한
+내용을 되풀이할 수 있으므로(알림톡 `540`은 메시지의 금칙어를 보여 줍니다) 민감한
+값으로 다루고, 메시지 내용이 들어가면 안 되는 곳에 기록·저장하기 전에 가리거나
+빼세요.
+
 ## 트러블슈팅
 
 - `resultCode=14` (SMS): `SMS_API_KEY` + `SMS_AUTH_KEY` 조합과 `secret` 인코딩 형식을 확인하세요.

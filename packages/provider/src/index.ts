@@ -23,6 +23,7 @@ export {
   providerConfigFieldSpecs,
   providerConfigKeyAlternatives,
 } from "./config-fields";
+export { getIWINVSendErrorReason } from "./iwinv/iwinv.send-error";
 export {
   createDefaultIWINVProvider,
   createIWINVProvider,
@@ -30,7 +31,11 @@ export {
   IWINVProviderFactory,
   initializeIWINV,
 } from "./iwinv/provider";
-export type { IWINVConfig } from "./iwinv/types/iwinv";
+export {
+  IWINV_SEND_ERROR_REASONS,
+  type IWINVConfig,
+  type IWINVSendErrorReason,
+} from "./iwinv/types/iwinv";
 export {
   getProviderOnboardingSpec,
   listProviderOnboardingSpecs,
