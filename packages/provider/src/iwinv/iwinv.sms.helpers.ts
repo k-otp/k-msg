@@ -64,34 +64,45 @@ export function mapSmsResponseMessage(code: string, fallback: string): string {
   return knownMessages[code] || fallback;
 }
 
+// SMS v2 result codes that are refusals of the request itself.
+const SMS_INVALID_REQUEST_CODES = [
+  "13",
+  "21",
+  "22",
+  "23",
+  "31",
+  "32",
+  "33",
+  "41",
+  "42",
+  "43",
+  "44",
+];
+
+/**
+ * Maps an SMS v2 send failure to a normalized code. The HTTP status decides
+ * first: a rate limit (`429`) or a server failure (5xx) stays retryable
+ * whatever `resultCode` the body holds.
+ */
 export function mapSmsErrorCode(
   code: string,
   responseOk: boolean,
   httpStatus?: number,
 ): KMsgErrorCode {
+  if (httpStatus === 429) {
+    return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
+  }
+  if (httpStatus !== undefined && httpStatus >= 500) {
+    return KMsgErrorCode.NETWORK_ERROR;
+  }
   if (code === "14" || code === "15" || code === "202" || code === "206") {
     return KMsgErrorCode.AUTHENTICATION_FAILED;
   }
   if (code === "50") {
     return KMsgErrorCode.INSUFFICIENT_BALANCE;
   }
-  if (
-    code === "13" ||
-    code === "21" ||
-    code === "22" ||
-    code === "23" ||
-    code === "31" ||
-    code === "32" ||
-    code === "33" ||
-    code === "41" ||
-    code === "42" ||
-    code === "43" ||
-    code === "44"
-  ) {
+  if (SMS_INVALID_REQUEST_CODES.includes(code)) {
     return KMsgErrorCode.INVALID_REQUEST;
-  }
-  if (httpStatus === 429) {
-    return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
   }
   if (!responseOk) {
     return KMsgErrorCode.NETWORK_ERROR;
