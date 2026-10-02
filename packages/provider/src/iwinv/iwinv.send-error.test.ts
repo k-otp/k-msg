@@ -232,6 +232,23 @@ describe("IWINV send errors carry IWINV's code and text", () => {
     expect(error.message).toBe(error.providerErrorText as string);
   });
 
+  test("spaced and parenthesized phone numbers are masked", async () => {
+    const error = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({
+          resultCode: 1,
+          message:
+            "수신 010 1234 5678, (010) 1234-5678, +82 10-1234-5678, (02)1234-5678 차단 (2000 Bytes, 2015-09-02, 1000 2000)",
+        }),
+      ),
+    );
+
+    expect(error.providerErrorText).toBe(
+      "수신 ***, ***, ***, *** 차단 (2000 Bytes, 2015-09-02, 1000 2000)",
+    );
+  });
+
   test("normalizeProviderError keeps the provider code and text", async () => {
     const error = await sendFailure(
       sms,
