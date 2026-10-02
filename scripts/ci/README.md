@@ -8,11 +8,15 @@ Guards published ESM artifact size regressions with fixed byte thresholds.
 - CI job: `bundle-size` in `.github/workflows/ci.yml`
 - Scope: `@k-msg/core`, `@k-msg/template` (subpaths), `@k-msg/messaging`, `@k-msg/provider`, `k-msg`
 - Enforces both `raw` and `gzip` thresholds per artifact.
-- Includes send-only forbidden import checks:
-  - `zod` (sender/send-only bundles)
-  - `zod/mini` (sender/send-only bundles)
-  - `drizzle-orm` (sender/send-only bundles)
+- Runs the send-only forbidden import guard, `scripts/ci/forbidden-imports.ts`:
+  - `zod` and `drizzle-orm`, including their subpaths such as `zod/mini`
+    (messaging sender and provider send-only bundles)
   - `@k-msg/template` (provider send-only bundles)
+- The guard reads import specifiers with Bun's parser and inlined modules from
+  each artifact's linked sourcemap, so a string that mentions a package is not
+  a match. It needs no external tool, and an artifact it cannot read (missing
+  file or sourcemap) fails the guard. `bun test ./scripts/ci/forbidden-imports.test.ts`
+  builds fixture bundles to prove each kind of violation is detected.
 
 ### Threshold Update Policy
 
