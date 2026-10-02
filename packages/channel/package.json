@@ -1,6 +1,6 @@
 {
   "name": "@k-msg/channel",
-  "version": "0.33.0",
+  "version": "0.34.0",
   "packageManager": "bun@1.4.2",
   "description": "AlimTalk channel and sender number management",
   "type": "module",

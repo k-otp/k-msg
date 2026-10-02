@@ -1,5 +1,15 @@
 # @k-msg/template
 
+## 0.34.0 — 2026-10-02
+
+### Minor changes
+
+- Bumped due to fixed dependency group policy
+
+### Patch changes
+
+- Updated dependencies: core@0.34.0
+
 ## 0.33.0 — 2026-09-28
 
 ### Patch changes
