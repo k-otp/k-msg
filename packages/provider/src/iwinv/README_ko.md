@@ -238,10 +238,11 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
   경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
   제어 문자는 공백으로, 9자리 이상의 전화번호 같은 숫자열은 `***`로 바뀌고
   500자로 잘립니다. 오류의 `message`도 같은 문구입니다.
-- `httpStatus` (`number`): IWINV 응답의 HTTP 상태. 재시도 분류에 쓰입니다.
-  `ErrorRetryPolicy.retryableStatuses`/`nonRetryableStatuses`가 코드 목록보다
-  먼저 이 값과 비교되고, 정책의 `retryableCodes`/`nonRetryableCodes`에 오류의
-  `code`가 없으면 이 값으로 분류합니다.
+- `httpStatus` (`number`): IWINV 응답의 HTTP 상태. 재시도 분류
+  (`ErrorUtils.classifyForRetry`)에서 정책의 코드 목록 다음에 쓰입니다. 오류의
+  `code`가 `retryableCodes`/`nonRetryableCodes`에 있으면 그것이 먼저 적용되고,
+  그다음 `retryableStatuses`/`nonRetryableStatuses`가 이 상태와 비교되며, 어느
+  코드 목록(정책 또는 기본값)에도 `code`가 없으면 이 상태로 분류합니다.
 - `details.originalCode`: IWINV가 보낸 원래 코드. SMS 일반 텍스트 본문은 더 이상
   여기에 담기지 않습니다.
 - `details.reason` (`IWINVSendErrorReason`, `IWINV_SEND_ERROR_REASONS` 중 하나):
@@ -253,12 +254,14 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
   - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
   - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
 
-  IWINV 문서에 있는 코드는 이미 재시도하지 않는 코드로 매핑됩니다. 문구로만 알 수
-  있는 발신번호/IP 거절은 코드가 문서에 없는 코드의 일반 분류
-  (`PROVIDER_ERROR`/`NETWORK_ERROR`)일 때만 `INVALID_REQUEST`/
-  `AUTHENTICATION_FAILED`가 됩니다. 요청 한도(HTTP `429`, 알림톡 코드 `429`),
-  HTTP 5xx, 5xx 코드는 사유가 설정되더라도 재시도 가능한 원래 코드를 유지합니다.
-  사유는 추가될 수 있으니 모르는 값은 사유 없음으로 다루세요.
+  정규화된 `code`는 HTTP 상태가 먼저 정합니다. 본문의 코드와 관계없이 HTTP
+  `429`는 `RATE_LIMIT_EXCEEDED`, HTTP 5xx는 `NETWORK_ERROR`(SMS) 또는
+  `PROVIDER_ERROR`(알림톡)이며 둘 다 재시도 가능합니다. 그 밖에는 위 코드들이
+  재시도하지 않는 코드로 매핑됩니다. 문구로만 알 수 있는 발신번호/IP 거절은
+  코드가 문서에 없는 코드의 일반 분류(`PROVIDER_ERROR`/`NETWORK_ERROR`)일 때만
+  `INVALID_REQUEST`/`AUTHENTICATION_FAILED`가 되고, 알림톡 코드 `429`와 문서에
+  없는 5xx 코드는 재시도 가능한 원래 코드를 유지합니다. 사유는 어느 경우에나
+  설정됩니다. 사유는 추가될 수 있으니 모르는 값은 사유 없음으로 다루세요.
 
 `normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
 
