@@ -243,14 +243,22 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   response it is the text IWINV documents for that code. Unset otherwise.
 - `httpStatus` (`number`): the HTTP status of IWINV's response.
 - `details.originalCode`: the raw code as IWINV sent it (unchanged).
-- `details.reason` (`IWINVSendErrorReason`): set when IWINV's code or text
-  names the refusal: `SENDER_NUMBER_NOT_REGISTERED` (SMS `13`, AlimTalk `505`,
-  or a text such as "조직(업체) 발신번호가 일치하지 않습니다."), `IP_NOT_ALLOWED`
-  (SMS `15`/`206`), `RECIPIENT_NUMBER_INVALID` (SMS `41`, AlimTalk
-  `512`/`513`), `AUTO_CHARGE_LIMIT_EXCEEDED` (SMS `50`). A sender-number
-  refusal is always `INVALID_REQUEST` and an IP refusal `AUTHENTICATION_FAILED`,
-  even under a code IWINV does not document, so neither is retried. More
-  reasons may be added; treat unknown values as no reason.
+- `details.reason` (`IWINVSendErrorReason`, one of `IWINV_SEND_ERROR_REASONS`):
+  set when IWINV's code or text names the refusal. Read it with
+  `getIWINVSendErrorReason(error)`.
+  - `SENDER_NUMBER_NOT_REGISTERED`: SMS `13`, AlimTalk `505`, or a text such as
+    "조직(업체) 발신번호가 일치하지 않습니다."
+  - `IP_NOT_ALLOWED`: SMS `15`/`206`, AlimTalk `206`, or a text saying so.
+  - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
+  - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
+
+  IWINV's listed codes already map to a non-retryable code. A sender-number or
+  IP refusal read only from the text becomes `INVALID_REQUEST` or
+  `AUTHENTICATION_FAILED` when the code would otherwise be the generic
+  `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted code. A rate limit (HTTP
+  `429`, AlimTalk code `429`), an HTTP 5xx or a 5xx code keeps its own,
+  retryable code, with the reason still set. More reasons may be added; treat
+  unknown values as no reason.
 
 `normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
 

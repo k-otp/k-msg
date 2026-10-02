@@ -6,7 +6,9 @@ import {
   type ProviderFetch,
   type SendOptions,
 } from "@k-msg/core";
+import { getIWINVSendErrorReason } from "./iwinv.send-error";
 import { IWINVSendProvider } from "./provider.send";
+import { IWINV_SEND_ERROR_REASONS } from "./types/iwinv";
 
 const SENDER_MISMATCH_TEXT = "조직(업체) 발신번호가 일치하지 않습니다.";
 
@@ -229,32 +231,100 @@ describe("IWINV send errors name the refusal in details.reason", () => {
     },
   );
 
-  test.each([
-    ["512", "RECIPIENT_NUMBER_INVALID"],
-    ["513", "RECIPIENT_NUMBER_INVALID"],
-  ])("AlimTalk code %s has reason %s", async (code, reason) => {
+  test("AlimTalk code 206 alone is an IP refusal", async () => {
     const error = await sendFailure(
       alimTalk,
-      respondWith(JSON.stringify({ code: Number(code), message: "x" })),
+      respondWith(JSON.stringify({ code: 206 })),
     );
 
-    expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
-    expect(error.details?.reason).toBe(reason);
+    expect(error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
+    expect(getIWINVSendErrorReason(error)).toBe("IP_NOT_ALLOWED");
   });
 
-  test("an IP text under an unlisted code is an authentication refusal", async () => {
+  test("AlimTalk codes without a verified reason set none", async () => {
+    for (const code of [512, 513]) {
+      const error = await sendFailure(
+        alimTalk,
+        respondWith(JSON.stringify({ code, message: "x" })),
+      );
+
+      expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(getIWINVSendErrorReason(error)).toBeUndefined();
+    }
+  });
+
+  test("an IP text under an unlisted SMS code is an authentication refusal", async () => {
     const error = await sendFailure(
-      alimTalk,
+      sms,
       respondWith(
         JSON.stringify({
-          code: 599,
+          resultCode: 99,
           message: "등록하지 않은 IP에서는 발송되지 않습니다.",
         }),
       ),
     );
 
     expect(error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
-    expect(error.details?.reason).toBe("IP_NOT_ALLOWED");
+    expect(getIWINVSendErrorReason(error)).toBe("IP_NOT_ALLOWED");
+  });
+
+  test("a sender-number text keeps a rate limit retryable", async () => {
+    const cases: Array<[SendOptions, string, number]> = [
+      [
+        alimTalk,
+        JSON.stringify({ code: 429, message: SENDER_MISMATCH_TEXT }),
+        200,
+      ],
+      [alimTalk, JSON.stringify({ message: SENDER_MISMATCH_TEXT }), 429],
+      [sms, JSON.stringify({ message: SENDER_MISMATCH_TEXT }), 429],
+      [
+        sms,
+        JSON.stringify({ resultCode: 429, message: SENDER_MISMATCH_TEXT }),
+        200,
+      ],
+    ];
+    for (const [options, body, status] of cases) {
+      const error = await sendFailure(options, respondWith(body, status));
+
+      expect(error.code).not.toBe(KMsgErrorCode.INVALID_REQUEST);
+      expect(normalizeProviderError(error).classification).toBe("retryable");
+      expect(getIWINVSendErrorReason(error)).toBe(
+        "SENDER_NUMBER_NOT_REGISTERED",
+      );
+    }
+    // A 429 status or AlimTalk code is a rate limit.
+    for (const [options, body, status] of cases.slice(0, 3)) {
+      const error = await sendFailure(options, respondWith(body, status));
+      expect(error.code).toBe(KMsgErrorCode.RATE_LIMIT_EXCEEDED);
+    }
+  });
+
+  test("a sender-number text keeps an SMS 5xx failure's code", async () => {
+    const httpFailure = await sendFailure(
+      sms,
+      respondWith(JSON.stringify({ message: SENDER_MISMATCH_TEXT }), 502),
+    );
+    expect(httpFailure.code).toBe(KMsgErrorCode.NETWORK_ERROR);
+    expect(httpFailure.httpStatus).toBe(502);
+
+    const codeFailure = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({ resultCode: 502, message: SENDER_MISMATCH_TEXT }),
+      ),
+    );
+    expect(codeFailure.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(codeFailure.providerErrorCode).toBe("502");
+  });
+
+  test("a sender-number text keeps an AlimTalk 5xx code's classification", async () => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(JSON.stringify({ code: 599, message: SENDER_MISMATCH_TEXT })),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(getIWINVSendErrorReason(error)).toBe("SENDER_NUMBER_NOT_REGISTERED");
   });
 
   test("other refusals set no reason and keep their code", async () => {
@@ -270,5 +340,44 @@ describe("IWINV send errors name the refusal in details.reason", () => {
 
     expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
     expect(error.details).not.toHaveProperty("reason");
+  });
+});
+
+describe("getIWINVSendErrorReason", () => {
+  test("reads a known reason from details", () => {
+    for (const reason of IWINV_SEND_ERROR_REASONS) {
+      const error = new KMsgError(KMsgErrorCode.INVALID_REQUEST, "x", {
+        reason,
+      });
+      expect(getIWINVSendErrorReason(error)).toBe(reason);
+    }
+  });
+
+  test("returns undefined for no reason, an unknown one, or a non-error", () => {
+    expect(
+      getIWINVSendErrorReason(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "x", { reason: "OTHER" }),
+      ),
+    ).toBeUndefined();
+    expect(
+      getIWINVSendErrorReason(
+        new KMsgError(KMsgErrorCode.INVALID_REQUEST, "x"),
+      ),
+    ).toBeUndefined();
+    expect(getIWINVSendErrorReason(undefined)).toBeUndefined();
+    expect(
+      getIWINVSendErrorReason("SENDER_NUMBER_NOT_REGISTERED"),
+    ).toBeUndefined();
+  });
+
+  test("is exported from the root and both IWINV entry points", async () => {
+    const root = await import("../index");
+    const iwinv = await import("./index");
+    const send = await import("./send");
+
+    for (const entry of [root, iwinv, send]) {
+      expect(entry.getIWINVSendErrorReason).toBe(getIWINVSendErrorReason);
+      expect(entry.IWINV_SEND_ERROR_REASONS).toBe(IWINV_SEND_ERROR_REASONS);
+    }
   });
 });

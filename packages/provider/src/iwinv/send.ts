@@ -2,6 +2,7 @@
  * IWINV send/status/balance focused entrypoint.
  */
 
+export { getIWINVSendErrorReason } from "./iwinv.send-error";
 export {
   createDefaultIWINVSendProvider,
   createIWINVSendProvider,
