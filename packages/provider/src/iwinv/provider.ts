@@ -7,6 +7,7 @@ import type {
   TemplateProvider,
   TemplateUpdateInput,
 } from "@k-msg/core";
+import { resolveDefaultIWINVConfig } from "./iwinv.default-config";
 import {
   createTemplate,
   deleteTemplate,
@@ -14,7 +15,7 @@ import {
   listTemplates,
   updateTemplate,
 } from "./iwinv.template";
-import { IWINVSendProvider, resolveDefaultIWINVConfig } from "./provider.send";
+import { IWINVSendProvider } from "./provider.send";
 import type { IWINVConfig } from "./types/iwinv";
 
 export class IWINVProvider
