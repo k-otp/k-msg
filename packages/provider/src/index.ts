@@ -30,7 +30,10 @@ export {
   IWINVProviderFactory,
   initializeIWINV,
 } from "./iwinv/provider";
-export type { IWINVConfig } from "./iwinv/types/iwinv";
+export type {
+  IWINVConfig,
+  IWINVSendErrorReason,
+} from "./iwinv/types/iwinv";
 export {
   getProviderOnboardingSpec,
   listProviderOnboardingSpecs,

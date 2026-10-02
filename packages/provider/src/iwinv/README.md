@@ -243,6 +243,14 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   response it is the text IWINV documents for that code. Unset otherwise.
 - `httpStatus` (`number`): the HTTP status of IWINV's response.
 - `details.originalCode`: the raw code as IWINV sent it (unchanged).
+- `details.reason` (`IWINVSendErrorReason`): set when IWINV's code or text
+  names the refusal: `SENDER_NUMBER_NOT_REGISTERED` (SMS `13`, AlimTalk `505`,
+  or a text such as "조직(업체) 발신번호가 일치하지 않습니다."), `IP_NOT_ALLOWED`
+  (SMS `15`/`206`), `RECIPIENT_NUMBER_INVALID` (SMS `41`, AlimTalk
+  `512`/`513`), `AUTO_CHARGE_LIMIT_EXCEEDED` (SMS `50`). A sender-number
+  refusal is always `INVALID_REQUEST` and an IP refusal `AUTHENTICATION_FAILED`,
+  even under a code IWINV does not document, so neither is retried. More
+  reasons may be added; treat unknown values as no reason.
 
 `normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
 

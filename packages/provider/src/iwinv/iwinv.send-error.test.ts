@@ -65,6 +65,7 @@ describe("IWINV send errors carry IWINV's code and text", () => {
     expect(error.details).toMatchObject({
       providerId: "iwinv",
       originalCode: 13,
+      reason: "SENDER_NUMBER_NOT_REGISTERED",
     });
   });
 
@@ -140,7 +141,10 @@ describe("IWINV send errors carry IWINV's code and text", () => {
     expect(error.providerErrorCode).toBe("505");
     expect(error.providerErrorText).toBe(text);
     expect(error.httpStatus).toBe(200);
-    expect(error.details).toMatchObject({ originalCode: 505 });
+    expect(error.details).toMatchObject({
+      originalCode: 505,
+      reason: "SENDER_NUMBER_NOT_REGISTERED",
+    });
   });
 
   test("AlimTalk: a bare-code body is IWINV's code, without text", async () => {
@@ -178,5 +182,93 @@ describe("IWINV send errors carry IWINV's code and text", () => {
       expect(normalized.providerErrorText).toBe(SENDER_MISMATCH_TEXT);
       expect(normalized.httpStatus).toBe(200);
     }
+  });
+});
+
+describe("IWINV send errors name the refusal in details.reason", () => {
+  test("a sender-number text under an unlisted code is a non-retryable refusal", async () => {
+    const error = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({ resultCode: 99, message: SENDER_MISMATCH_TEXT }),
+      ),
+    );
+
+    // Without the text, an unlisted code on an OK response is PROVIDER_ERROR,
+    // which the default retry policy retries.
+    expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+    expect(error.details?.reason).toBe("SENDER_NUMBER_NOT_REGISTERED");
+    expect(error.providerErrorCode).toBe("99");
+    expect(normalizeProviderError(error).classification).toBe("non_retryable");
+  });
+
+  test("a sender-number text on a non-OK response is not a network error", async () => {
+    const error = await sendFailure(
+      sms,
+      respondWith(JSON.stringify({ message: SENDER_MISMATCH_TEXT }), 400),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+    expect(error.details?.reason).toBe("SENDER_NUMBER_NOT_REGISTERED");
+    expect(error.providerErrorCode).toBeUndefined();
+    expect(error.httpStatus).toBe(400);
+  });
+
+  test.each([
+    ["15", KMsgErrorCode.AUTHENTICATION_FAILED, "IP_NOT_ALLOWED"],
+    ["206", KMsgErrorCode.AUTHENTICATION_FAILED, "IP_NOT_ALLOWED"],
+    ["41", KMsgErrorCode.INVALID_REQUEST, "RECIPIENT_NUMBER_INVALID"],
+    ["50", KMsgErrorCode.INSUFFICIENT_BALANCE, "AUTO_CHARGE_LIMIT_EXCEEDED"],
+  ])(
+    "SMS resultCode %s is %s with reason %s",
+    async (resultCode, code, reason) => {
+      const error = await sendFailure(sms, respondWith(resultCode));
+
+      expect(error.code).toBe(code);
+      expect(error.details?.reason).toBe(reason);
+    },
+  );
+
+  test.each([
+    ["512", "RECIPIENT_NUMBER_INVALID"],
+    ["513", "RECIPIENT_NUMBER_INVALID"],
+  ])("AlimTalk code %s has reason %s", async (code, reason) => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(JSON.stringify({ code: Number(code), message: "x" })),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+    expect(error.details?.reason).toBe(reason);
+  });
+
+  test("an IP text under an unlisted code is an authentication refusal", async () => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(
+        JSON.stringify({
+          code: 599,
+          message: "등록하지 않은 IP에서는 발송되지 않습니다.",
+        }),
+      ),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
+    expect(error.details?.reason).toBe("IP_NOT_ALLOWED");
+  });
+
+  test("other refusals set no reason and keep their code", async () => {
+    const error = await sendFailure(
+      sms,
+      respondWith(
+        JSON.stringify({
+          resultCode: 1,
+          message: "메시지가 전송되지 않았습니다.",
+        }),
+      ),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(error.details).not.toHaveProperty("reason");
   });
 });
