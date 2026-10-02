@@ -236,13 +236,19 @@ bun src/cli.ts send \
 When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
 `KMsgError` carries IWINV's own answer next to the normalized `code`:
 
-- `providerErrorCode` (`string`): IWINV's `resultCode` (SMS v2) or `code`
-  (AlimTalk), e.g. `"13"` or `"505"`. Unset when the body held no code (an
-  HTML error page, say).
+- `providerErrorCode` (`string`): IWINV's integer `resultCode` (SMS v2) or
+  `code` (AlimTalk) as a string, e.g. `"13"` or `"505"`. Unset when the body
+  held no such code (plain text such as `Forbidden`, or an HTML error page).
 - `providerErrorText` (`string`): IWINV's `message`. For a bare-code SMS
   response it is the text IWINV documents for that code. Unset otherwise.
-- `httpStatus` (`number`): the HTTP status of IWINV's response.
-- `details.originalCode`: the raw code as IWINV sent it (unchanged).
+  Control characters become spaces, phone-like runs of 9+ digits become `***`,
+  and it is cut to 500 characters. The error's `message` is the same text.
+- `httpStatus` (`number`): the HTTP status of IWINV's response. It takes part
+  in retry classification: `ErrorRetryPolicy.retryableStatuses` /
+  `nonRetryableStatuses` match it before the code lists, and it decides when a
+  policy's `retryableCodes`/`nonRetryableCodes` leave the error's `code` out.
+- `details.originalCode`: the raw code as IWINV sent it. A plain-text SMS body
+  is no longer put here.
 - `details.reason` (`IWINVSendErrorReason`, one of `IWINV_SEND_ERROR_REASONS`):
   set when IWINV's code or text names the refusal. Read it with
   `getIWINVSendErrorReason(error)`.
@@ -261,6 +267,11 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   unknown values as no reason.
 
 `normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
+
+`providerErrorText` and the message are written by IWINV, not k-msg. They can
+echo what was sent (AlimTalk `540` names the blocked word from the message), so
+treat them as sensitive: mask or drop them before logging or storing them where
+message content may not go.
 
 ## Troubleshooting
 

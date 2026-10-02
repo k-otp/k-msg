@@ -323,7 +323,9 @@ export async function sendAlimTalk(params: {
           code: mapIwinvCodeToKMsgErrorCode(
             normalizeIwinvCode(data.code) ?? response.status,
           ),
-          message: data.message || "IWINV send failed",
+          message:
+            toIwinvProviderText(isRecord ? data.message : responseText) ??
+            "IWINV send failed",
           httpStatus: response.status,
           originalCode: data.code,
           // A bare-code body is IWINV's code; any other body (an HTML error
@@ -510,7 +512,11 @@ async function sendSmsV2Mms(params: {
 
     const data: SmsV2SendResponse = isObjectRecord(parsed)
       ? (parsed as SmsV2SendResponse)
-      : ({ resultCode: parsed } as SmsV2SendResponse);
+      : // A bare-code body is IWINV's code; other text is not.
+        ({
+          resultCode:
+            toIwinvProviderCode(parsed) !== undefined ? parsed : undefined,
+        } as SmsV2SendResponse);
 
     const failure = toSmsV2SendFailure(
       providerId,
@@ -673,7 +679,11 @@ export async function sendSmsV2(params: {
 
     const data: SmsV2SendResponse = isObjectRecord(parsed)
       ? (parsed as SmsV2SendResponse)
-      : ({ resultCode: parsed } as SmsV2SendResponse);
+      : // A bare-code body is IWINV's code; other text is not.
+        ({
+          resultCode:
+            toIwinvProviderCode(parsed) !== undefined ? parsed : undefined,
+        } as SmsV2SendResponse);
 
     const failure = toSmsV2SendFailure(
       providerId,
