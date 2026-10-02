@@ -344,7 +344,7 @@ function nearestPackageName(file) {
 // Counts an artifact's modules by the package that owns them, from the
 // sources of its linked sourcemap: an installed package by the path after the
 // last node_modules segment, a workspace file by its nearest package.json.
-function countModulesByPackage(artifactFile, packageDir) {
+export function countModulesByPackage(artifactFile, packageDir) {
   const url = readFileSync(artifactFile, "utf8").match(SOURCE_MAPPING_URL)?.[1];
   if (!url) return { problem: "it links no sourcemap" };
   const mapFile = path.resolve(path.dirname(artifactFile), url);
