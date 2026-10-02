@@ -253,26 +253,36 @@ export interface IWINVIPRestrictionAlert {
 }
 
 /**
+ * Every value `details.reason` takes on an IWINV send error. See
+ * {@link IWINVSendErrorReason}.
+ */
+export const IWINV_SEND_ERROR_REASONS = [
+  "SENDER_NUMBER_NOT_REGISTERED",
+  "IP_NOT_ALLOWED",
+  "RECIPIENT_NUMBER_INVALID",
+  "AUTO_CHARGE_LIMIT_EXCEEDED",
+] as const;
+
+/**
  * Why IWINV refused a send, set as `details.reason` on the send's `KMsgError`
- * when IWINV's code or text says more than the normalized `code` does.
+ * when IWINV's code or text says more than the normalized `code` does. Read it
+ * with `getIWINVSendErrorReason`.
  *
  * - `SENDER_NUMBER_NOT_REGISTERED`: the sender number is not registered (or
  *   not approved) for the IWINV account. SMS `13`, AlimTalk `505`, or a
  *   message saying so (e.g. "조직(업체) 발신번호가 일치하지 않습니다.").
  * - `IP_NOT_ALLOWED`: the request came from an IP the account does not allow.
- *   SMS `15`/`206`, or a message saying so.
- * - `RECIPIENT_NUMBER_INVALID`: the recipient number is missing or malformed.
- *   SMS `41`, AlimTalk `512`/`513`.
+ *   SMS `15`/`206`, AlimTalk `206`, or a message saying so.
+ * - `RECIPIENT_NUMBER_INVALID`: the recipient number is missing. SMS `41`.
  * - `AUTO_CHARGE_LIMIT_EXCEEDED`: the daily SMS auto-charge limit is used up.
  *   SMS `50`.
  *
- * More reasons may be added; treat unknown values as no reason.
+ * A reason read from IWINV's text sets the normalized code only when that code
+ * was otherwise the generic `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted
+ * code; a rate limit, an HTTP 5xx or a 5xx code keeps its own code. More
+ * reasons may be added; treat unknown values as no reason.
  */
-export type IWINVSendErrorReason =
-  | "SENDER_NUMBER_NOT_REGISTERED"
-  | "IP_NOT_ALLOWED"
-  | "RECIPIENT_NUMBER_INVALID"
-  | "AUTO_CHARGE_LIMIT_EXCEEDED";
+export type IWINVSendErrorReason = (typeof IWINV_SEND_ERROR_REASONS)[number];
 
 // =============================================================================
 // 상수

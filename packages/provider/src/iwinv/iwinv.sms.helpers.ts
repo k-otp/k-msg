@@ -67,6 +67,7 @@ export function mapSmsResponseMessage(code: string, fallback: string): string {
 export function mapSmsErrorCode(
   code: string,
   responseOk: boolean,
+  httpStatus?: number,
 ): KMsgErrorCode {
   if (code === "14" || code === "15" || code === "202" || code === "206") {
     return KMsgErrorCode.AUTHENTICATION_FAILED;
@@ -88,6 +89,9 @@ export function mapSmsErrorCode(
     code === "44"
   ) {
     return KMsgErrorCode.INVALID_REQUEST;
+  }
+  if (httpStatus === 429) {
+    return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
   }
   if (!responseOk) {
     return KMsgErrorCode.NETWORK_ERROR;

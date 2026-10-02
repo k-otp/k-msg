@@ -1,5 +1,9 @@
 import { KMsgError, KMsgErrorCode } from "@k-msg/core";
-import type { IWINVSendErrorReason } from "./types/iwinv";
+import { isObjectRecord } from "../shared/type-guards";
+import {
+  IWINV_SEND_ERROR_REASONS,
+  type IWINVSendErrorReason,
+} from "./types/iwinv";
 
 const PROVIDER_CODE_PATTERN = /^[A-Za-z0-9_-]{1,32}$/;
 
@@ -28,7 +32,8 @@ export function toIwinvProviderText(value: unknown): string | undefined {
 
 export type IwinvSendChannel = "sms" | "alimtalk";
 
-// Codes from IWINV's SMS v2 and AlimTalk send result-code tables.
+// SMS codes are from IWINV's SMS v2 send result-code table; AlimTalk 505 from
+// its AlimTalk table and 206 from the IP note in this provider's README.
 const REASON_BY_CODE: Record<
   IwinvSendChannel,
   Readonly<Record<string, IWINVSendErrorReason>>
@@ -42,8 +47,7 @@ const REASON_BY_CODE: Record<
   },
   alimtalk: {
     "505": "SENDER_NUMBER_NOT_REGISTERED",
-    "512": "RECIPIENT_NUMBER_INVALID",
-    "513": "RECIPIENT_NUMBER_INVALID",
+    "206": "IP_NOT_ALLOWED",
   },
 };
 
@@ -54,12 +58,50 @@ const NOT_REGISTERED_TEXT =
   /일치하지\s*않|등록되지\s*않|미\s*등록|사전에\s*등록/;
 const IP_NOT_ALLOWED_TEXT = /(등록하지|허용되지)\s*않은\s*IP/i;
 
-// The normalized code a reason implies, where every IWINV code for it agrees.
-// Both are refusals that a retry repeats.
-const CODE_BY_REASON: Partial<Record<IWINVSendErrorReason, KMsgErrorCode>> = {
+// The normalized code a reason read from IWINV's text implies. Both are
+// refusals that a retry repeats.
+const CODE_BY_TEXT_REASON: Partial<
+  Record<IWINVSendErrorReason, KMsgErrorCode>
+> = {
   SENDER_NUMBER_NOT_REGISTERED: KMsgErrorCode.INVALID_REQUEST,
   IP_NOT_ALLOWED: KMsgErrorCode.AUTHENTICATION_FAILED,
 };
+
+function isRateLimitOrServerFailure(value: number | undefined): boolean {
+  return value !== undefined && (value === 429 || value >= 500);
+}
+
+/**
+ * Returns the normalized code for a refusal whose reason came from IWINV's
+ * text. The text replaces only the generic code an unlisted code falls back
+ * to, so a rate limit, an HTTP 5xx or a 5xx code keeps its own code.
+ */
+function resolveTextReasonCode(
+  reason: IWINVSendErrorReason,
+  code: KMsgErrorCode,
+  httpStatus: number,
+  providerCode: string | undefined,
+): KMsgErrorCode {
+  const implied = CODE_BY_TEXT_REASON[reason];
+  if (!implied) return code;
+  if (
+    code !== KMsgErrorCode.PROVIDER_ERROR &&
+    code !== KMsgErrorCode.NETWORK_ERROR
+  ) {
+    return code;
+  }
+  const numericCode =
+    providerCode !== undefined ? Number(providerCode) : undefined;
+  if (
+    isRateLimitOrServerFailure(httpStatus) ||
+    isRateLimitOrServerFailure(
+      Number.isFinite(numericCode) ? numericCode : undefined,
+    )
+  ) {
+    return code;
+  }
+  return implied;
+}
 
 /**
  * Names why IWINV refused a send, from its code or else its text, or returns
@@ -69,21 +111,23 @@ export function classifyIwinvSendFailure(
   channel: IwinvSendChannel,
   providerCode: string | undefined,
   providerText: string | undefined,
-): IWINVSendErrorReason | undefined {
+): { reason: IWINVSendErrorReason; source: "code" | "text" } | undefined {
   const byCode =
     providerCode !== undefined
       ? REASON_BY_CODE[channel][providerCode]
       : undefined;
-  if (byCode) return byCode;
+  if (byCode) return { reason: byCode, source: "code" };
   if (!providerText) return undefined;
 
   if (
     SENDER_NUMBER_TEXT.test(providerText) &&
     NOT_REGISTERED_TEXT.test(providerText)
   ) {
-    return "SENDER_NUMBER_NOT_REGISTERED";
+    return { reason: "SENDER_NUMBER_NOT_REGISTERED", source: "text" };
   }
-  if (IP_NOT_ALLOWED_TEXT.test(providerText)) return "IP_NOT_ALLOWED";
+  if (IP_NOT_ALLOWED_TEXT.test(providerText)) {
+    return { reason: "IP_NOT_ALLOWED", source: "text" };
+  }
   return undefined;
 }
 
@@ -92,8 +136,9 @@ export function classifyIwinvSendFailure(
  * and text go on `providerErrorCode`/`providerErrorText` and the HTTP status
  * on `httpStatus`; `details.originalCode` keeps the raw code as before, and
  * `details.reason` names the refusal when IWINV's code or text identifies it.
- * A sender-number or IP refusal takes the normalized code it implies, so one
- * IWINV reports with an unlisted code is not retried as a provider error.
+ * A sender-number or IP refusal read from the text takes the normalized code it
+ * implies in place of the generic one an unlisted code falls back to, so it is
+ * not retried as a provider error.
  */
 export function toIwinvSendError(params: {
   providerId: string;
@@ -115,10 +160,19 @@ export function toIwinvSendError(params: {
     providerCode,
     providerText,
   } = params;
-  const reason = classifyIwinvSendFailure(channel, providerCode, providerText);
+  const classified = classifyIwinvSendFailure(
+    channel,
+    providerCode,
+    providerText,
+  );
+  const reason = classified?.reason;
+  const resolvedCode =
+    classified?.source === "text"
+      ? resolveTextReasonCode(classified.reason, code, httpStatus, providerCode)
+      : code;
 
   return new KMsgError(
-    (reason && CODE_BY_REASON[reason]) ?? code,
+    resolvedCode,
     message,
     { providerId, originalCode, ...(reason ? { reason } : {}) },
     {
@@ -131,4 +185,20 @@ export function toIwinvSendError(params: {
       httpStatus,
     },
   );
+}
+
+/**
+ * Returns `details.reason` of an IWINV send error, or `undefined` when the
+ * error has none (or a value this version does not know).
+ */
+export function getIWINVSendErrorReason(
+  error: unknown,
+): IWINVSendErrorReason | undefined {
+  if (!isObjectRecord(error) || !isObjectRecord(error.details)) {
+    return undefined;
+  }
+  const reason = error.details.reason;
+  return (IWINV_SEND_ERROR_REASONS as readonly unknown[]).includes(reason)
+    ? (reason as IWINVSendErrorReason)
+    : undefined;
 }
