@@ -22,7 +22,7 @@
     },
     "apps/cli": {
       "name": "@k-msg/cli",
-      "version": "0.11.2",
+      "version": "0.11.3",
       "bin": {
         "k-msg": "./bin/k-msg.js",
         "kmsg": "./bin/k-msg.js",
@@ -63,7 +63,7 @@
     },
     "packages/analytics": {
       "name": "@k-msg/analytics",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@k-msg/messaging": "workspace:*",
@@ -77,7 +77,7 @@
     },
     "packages/channel": {
       "name": "@k-msg/channel",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "zod": "catalog:",
@@ -90,7 +90,7 @@
     },
     "packages/core": {
       "name": "@k-msg/core",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -102,7 +102,7 @@
     },
     "packages/k-msg": {
       "name": "k-msg",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@k-msg/messaging": "workspace:*",
@@ -122,7 +122,7 @@
     },
     "packages/messaging": {
       "name": "@k-msg/messaging",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@k-msg/template": "workspace:*",
@@ -143,7 +143,7 @@
     },
     "packages/provider": {
       "name": "@k-msg/provider",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@k-msg/template": "workspace:*",
@@ -163,7 +163,7 @@
     },
     "packages/template": {
       "name": "@k-msg/template",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "zod": "catalog:",
@@ -176,7 +176,7 @@
     },
     "packages/webhook": {
       "name": "@k-msg/webhook",
-      "version": "0.34.0",
+      "version": "0.34.1",
       "dependencies": {
         "@k-msg/core": "workspace:*",
         "@noble/hashes": "^1.8.0",

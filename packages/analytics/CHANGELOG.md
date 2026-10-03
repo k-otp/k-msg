@@ -1,5 +1,12 @@
 # @k-msg/analytics
 
+## 0.34.1 — 2026-10-03
+
+### Patch changes
+
+- Bumped due to fixed dependency group policy
+- Updated dependencies: core@0.34.1, messaging@0.34.1
+
 ## 0.34.0 — 2026-10-02
 
 ### Minor changes
