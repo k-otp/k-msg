@@ -270,6 +270,12 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   an unlisted 5xx code keep their own, retryable code. The reason is set in
   every case. More reasons may be added; treat unknown values as no reason.
 
+An AlimTalk send is accepted when IWINV answers 2xx with code `200`, as an
+integer or the string `"200"`; its `seqNo` (number or digit string, up to
+`Number.MAX_SAFE_INTEGER`) becomes `providerMessageId`. A string code is read as an integer, so `{"code":"505"}`
+is a refusal like `505`, and a code that is not an integer (`"200.0"`, `"2e2"`)
+counts as no code.
+
 A 2xx answer without a numeric code (`{}`, `{"code":"x"}`, an empty body, or
 plain text such as `OK`) is `PROVIDER_ERROR` on both channels, with no
 `providerErrorCode`: IWINV may have accepted the send, so it is not reported as

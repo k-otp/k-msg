@@ -1,11 +1,11 @@
 import type { IWINVConfig } from "./types/iwinv";
 
 export type IWINVSendResponse = {
-  code?: number;
+  code?: number | string;
   message: string;
   success?: number;
   fail?: number;
-  seqNo?: number;
+  seqNo?: number | string;
 };
 
 export type SmsV2SendResponse = Record<string, unknown> & {

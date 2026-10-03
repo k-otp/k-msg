@@ -600,6 +600,101 @@ describe("IWINV sends answered 2xx without a numeric code", () => {
   });
 });
 
+describe("IWINV success codes sent as strings", () => {
+  const respondOk =
+    (body: unknown): ProviderFetch =>
+    async () =>
+      new Response(JSON.stringify(body), { status: 200 });
+
+  test('AlimTalk: a string "200" code is an accepted send', async () => {
+    const result = await createProvider().send(alimTalk, {
+      fetch: respondOk({
+        code: "200",
+        message: "메시지가 발송되었습니다",
+        seqNo: 17,
+      }),
+    });
+
+    if (result.isFailure) throw result.error;
+    expect(result.value.status).toBe("SENT");
+    expect(result.value.providerMessageId).toBe("17");
+  });
+
+  test("AlimTalk: a numeric 200 code is still an accepted send", async () => {
+    for (const seqNo of [17, "17"]) {
+      const result = await createProvider().send(alimTalk, {
+        fetch: respondOk({ code: 200, message: "ok", seqNo }),
+      });
+
+      if (result.isFailure) throw result.error;
+      expect(result.value.providerMessageId).toBe("17");
+    }
+  });
+
+  test("AlimTalk: a seqNo that does not round-trip as a number is dropped", async () => {
+    for (const [seqNo, expected] of [
+      ["9007199254740993", undefined],
+      [Number.MAX_SAFE_INTEGER + 2, undefined],
+      ["017", "17"],
+      ["17a", undefined],
+    ] as const) {
+      const result = await createProvider().send(alimTalk, {
+        fetch: respondOk({ code: "200", seqNo }),
+      });
+
+      if (result.isFailure) throw result.error;
+      expect(result.value.providerMessageId).toBe(expected);
+    }
+  });
+
+  test("AlimTalk: a string refusal code is still a refusal", async () => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(JSON.stringify({ code: "505", message: "발신번호 미등록" })),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.INVALID_REQUEST);
+    expect(error.providerErrorCode).toBe("505");
+    expect(error.details?.reason).toBe("SENDER_NUMBER_NOT_REGISTERED");
+  });
+
+  test("AlimTalk: a code that is not an integer is an unknown outcome", async () => {
+    for (const code of ["200.0", "2e2", "200 OK", 200.5]) {
+      const error = await sendFailure(
+        alimTalk,
+        respondWith(JSON.stringify({ code })),
+      );
+      expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+      expect(error.providerErrorCode).toBeUndefined();
+    }
+  });
+
+  test('AlimTalk: "200" on a non-2xx answer is not a success', async () => {
+    const error = await sendFailure(
+      alimTalk,
+      respondWith(JSON.stringify({ code: "200" }), 503),
+    );
+
+    expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+  });
+
+  test('SMS v2: a string "0" resultCode is an accepted send', async () => {
+    for (const resultCode of [0, "0"]) {
+      const result = await createProvider().send(sms, {
+        fetch: respondOk({
+          resultCode,
+          message: "전송 성공",
+          requestNo: "123",
+        }),
+      });
+
+      if (result.isFailure) throw result.error;
+      expect(result.value.status).toBe("SENT");
+      expect(result.value.providerMessageId).toBe("123");
+    }
+  });
+});
+
 describe("getIWINVSendErrorReason", () => {
   test("reads a known reason from details", () => {
     for (const reason of IWINV_SEND_ERROR_REASONS) {
