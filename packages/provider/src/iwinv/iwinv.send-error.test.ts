@@ -631,6 +631,22 @@ describe("IWINV success codes sent as strings", () => {
     }
   });
 
+  test("AlimTalk: a seqNo that does not round-trip as a number is dropped", async () => {
+    for (const [seqNo, expected] of [
+      ["9007199254740993", undefined],
+      [Number.MAX_SAFE_INTEGER + 2, undefined],
+      ["017", "17"],
+      ["17a", undefined],
+    ] as const) {
+      const result = await createProvider().send(alimTalk, {
+        fetch: respondOk({ code: "200", seqNo }),
+      });
+
+      if (result.isFailure) throw result.error;
+      expect(result.value.providerMessageId).toBe(expected);
+    }
+  });
+
   test("AlimTalk: a string refusal code is still a refusal", async () => {
     const error = await sendFailure(
       alimTalk,
