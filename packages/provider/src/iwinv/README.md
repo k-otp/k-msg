@@ -270,6 +270,15 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
   an unlisted 5xx code keep their own, retryable code. The reason is set in
   every case. More reasons may be added; treat unknown values as no reason.
 
+A 2xx answer without a numeric code (`{}`, `{"code":"x"}`, an empty body, or
+plain text such as `OK`) is `PROVIDER_ERROR` on both channels, with no
+`providerErrorCode`: IWINV may have accepted the send, so it is not reported as
+a refusal (`INVALID_REQUEST`) and not as a success. `PROVIDER_ERROR` is
+retryable by default, so a retry can send the message twice; a consumer that
+cannot tolerate that should treat this as an unknown outcome and check delivery
+status before retrying. A numeric refusal code on HTTP 200 (AlimTalk `501`, SMS
+`13`, ...) keeps the mapping above.
+
 `normalizeProviderError` keeps these fields in both `safe` and `compat` mode.
 
 `providerErrorText` and the message are written by IWINV, not k-msg. They can

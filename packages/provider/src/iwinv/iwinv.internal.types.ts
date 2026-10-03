@@ -1,7 +1,7 @@
 import type { IWINVConfig } from "./types/iwinv";
 
 export type IWINVSendResponse = {
-  code: number;
+  code?: number;
   message: string;
   success?: number;
   fail?: number;

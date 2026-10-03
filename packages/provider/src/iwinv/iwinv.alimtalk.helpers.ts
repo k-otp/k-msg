@@ -92,7 +92,9 @@ export function mapIwinvCodeToKMsgErrorCode(code: number): KMsgErrorCode {
  * Maps an AlimTalk send failure to a normalized code. The HTTP status decides
  * first: a rate limit (`429`) or a server failure (5xx) stays retryable
  * whatever `code` the body holds. Otherwise IWINV's code classifies it, or the
- * HTTP status when the body carried no code.
+ * HTTP status when the body carried no code. A 2xx answer without a numeric
+ * code is `PROVIDER_ERROR`: IWINV may have accepted the send, so it is not
+ * reported as a refusal.
  */
 export function mapAlimTalkSendErrorCode(
   code: number | undefined,
@@ -100,7 +102,12 @@ export function mapAlimTalkSendErrorCode(
 ): KMsgErrorCode {
   if (httpStatus === 429) return KMsgErrorCode.RATE_LIMIT_EXCEEDED;
   if (httpStatus >= 500) return KMsgErrorCode.PROVIDER_ERROR;
-  return mapIwinvCodeToKMsgErrorCode(code ?? httpStatus);
+  if (code === undefined) {
+    return httpStatus >= 200 && httpStatus < 300
+      ? KMsgErrorCode.PROVIDER_ERROR
+      : mapIwinvCodeToKMsgErrorCode(httpStatus);
+  }
+  return mapIwinvCodeToKMsgErrorCode(code);
 }
 
 export function normalizeIwinvCode(value: unknown): number | undefined {

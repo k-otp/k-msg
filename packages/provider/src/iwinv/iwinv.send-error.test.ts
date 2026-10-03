@@ -496,6 +496,70 @@ describe("IWINV send errors name the refusal in details.reason", () => {
   });
 });
 
+describe("IWINV sends answered 2xx without a numeric code", () => {
+  const unknownOutcomeBodies = [
+    ["an empty object", "{}"],
+    ["a non-numeric code", JSON.stringify({ code: "x" })],
+    ["a non-numeric resultCode", JSON.stringify({ resultCode: "x" })],
+    ["an empty body", ""],
+    ["plain text", "OK"],
+  ] as const;
+
+  for (const [label, body] of unknownOutcomeBodies) {
+    test(`AlimTalk: ${label} is a PROVIDER_ERROR, not a refusal or a success`, async () => {
+      const error = await sendFailure(alimTalk, respondWith(body));
+
+      expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+      expect(error.providerErrorCode).toBeUndefined();
+      expect(error.httpStatus).toBe(200);
+      expect(error.details?.reason).toBeUndefined();
+    });
+
+    test(`SMS v2: ${label} is a PROVIDER_ERROR`, async () => {
+      const error = await sendFailure(sms, respondWith(body));
+
+      expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+      expect(error.providerErrorCode).toBeUndefined();
+      expect(error.httpStatus).toBe(200);
+      expect(error.details?.reason).toBeUndefined();
+    });
+  }
+
+  test("AlimTalk: a numeric refusal code on HTTP 200 keeps its classification", async () => {
+    for (const [body, code] of [
+      [
+        JSON.stringify({ code: 501, message: "템플릿 없음" }),
+        "TEMPLATE_NOT_FOUND",
+      ],
+      [JSON.stringify({ code: "508" }), "INVALID_REQUEST"],
+      ["501", "TEMPLATE_NOT_FOUND"],
+      [JSON.stringify({ code: 519 }), "INSUFFICIENT_BALANCE"],
+    ] as const) {
+      const error = await sendFailure(alimTalk, respondWith(body));
+      expect(error.code).toBe(KMsgErrorCode[code]);
+    }
+  });
+
+  test("SMS v2: a numeric refusal code on HTTP 200 keeps its classification", async () => {
+    for (const [body, code] of [
+      [JSON.stringify({ resultCode: 13 }), "INVALID_REQUEST"],
+      [JSON.stringify({ resultCode: "41" }), "INVALID_REQUEST"],
+      ["202", "AUTHENTICATION_FAILED"],
+      [JSON.stringify({ resultCode: 50 }), "INSUFFICIENT_BALANCE"],
+    ] as const) {
+      const error = await sendFailure(sms, respondWith(body));
+      expect(error.code).toBe(KMsgErrorCode[code]);
+    }
+  });
+
+  test("AlimTalk: a non-2xx answer without a code still maps by HTTP status", async () => {
+    const error = await sendFailure(alimTalk, respondWith("Forbidden", 403));
+
+    expect(error.code).toBe(KMsgErrorCode.AUTHENTICATION_FAILED);
+    expect(error.details?.originalCode).toBe(403);
+  });
+});
+
 describe("getIWINVSendErrorReason", () => {
   test("reads a known reason from details", () => {
     for (const reason of IWINV_SEND_ERROR_REASONS) {
