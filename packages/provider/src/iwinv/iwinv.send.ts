@@ -307,10 +307,12 @@ export async function sendAlimTalk(params: {
     const parsed = safeParseJson(responseText);
 
     const isRecord = isObjectRecord(parsed);
+    // A body that is not a record carries IWINV's code only when it is a bare
+    // code; any other text (even on HTTP 200) leaves the outcome unknown.
     const data: IWINVSendResponse = isRecord
       ? (parsed as IWINVSendResponse)
       : ({
-          code: normalizeIwinvCode(parsed) ?? response.status,
+          code: normalizeIwinvCode(parsed),
           message: responseText || String(parsed || ""),
         } as IWINVSendResponse);
 
@@ -327,7 +329,7 @@ export async function sendAlimTalk(params: {
             toIwinvProviderText(isRecord ? data.message : responseText) ??
             "IWINV send failed",
           httpStatus: response.status,
-          originalCode: data.code,
+          originalCode: isRecord ? data.code : (data.code ?? response.status),
           // A bare-code body is IWINV's code; any other body (an HTML error
           // page) is neither its code nor its text.
           providerCode: toIwinvProviderCode(isRecord ? data.code : parsed),

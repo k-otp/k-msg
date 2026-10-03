@@ -263,6 +263,17 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
   없는 5xx 코드는 재시도 가능한 원래 코드를 유지합니다. 사유는 어느 경우에나
   설정됩니다. 사유는 추가될 수 있으니 모르는 값은 사유 없음으로 다루세요.
 
+숫자 코드가 없는 2xx 응답(`{}`, `{"code":"x"}`, 빈 본문, `OK` 같은 일반
+텍스트)은 두 채널 모두 `PROVIDER_ERROR`이며 `providerErrorCode`는 설정되지
+않습니다. IWINV가 발송을 접수했을 수도 있으므로 거절(`INVALID_REQUEST`)로도,
+성공으로도 보고하지 않습니다. 단, `message`가 거절을 알리면(위
+`details.reason`, 예: "조직(업체) 발신번호가 일치하지 않습니다.") IWINV가 발송을
+거절한 것이므로, 문서에 없는 코드일 때와 마찬가지로 그 거절에 맞는 코드
+(`INVALID_REQUEST` 또는 `AUTHENTICATION_FAILED`)를 유지합니다. `PROVIDER_ERROR`는 기본적으로 재시도 대상이라
+재시도하면 메시지가 두 번 갈 수 있습니다. 중복 발송을 허용할 수 없다면 결과를
+알 수 없는 발송으로 보고 재시도 전에 발송 상태를 확인하세요. HTTP 200에 숫자
+거절 코드(알림톡 `501`, SMS `13` 등)가 오면 위 매핑을 그대로 따릅니다.
+
 `normalizeProviderError`는 `safe`, `compat` 모드 모두에서 이 필드를 유지합니다.
 
 `providerErrorText`와 메시지는 k-msg가 아니라 IWINV가 쓴 문구입니다. 발송한
