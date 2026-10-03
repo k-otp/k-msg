@@ -124,15 +124,22 @@ async function resolveTemplateParam(params: {
   );
 }
 
-/** Returns IWINV's `seqNo` as a message id, whether sent as number or string. */
+/**
+ * Returns IWINV's `seqNo` as a message id, whether sent as a number or a digit
+ * string. The delivery-status lookup sends the id back as a number, so only a
+ * safe integer is kept, written the way that number prints.
+ */
 function toAlimTalkMessageId(value: unknown): string | undefined {
-  if (typeof value === "number") {
-    return Number.isSafeInteger(value) ? String(value) : undefined;
-  }
-  if (typeof value === "string" && /^\d+$/.test(value.trim())) {
-    return value.trim();
-  }
-  return undefined;
+  const text = typeof value === "string" ? value.trim() : undefined;
+  const seqNo =
+    typeof value === "number"
+      ? value
+      : text !== undefined && /^\d+$/.test(text)
+        ? Number(text)
+        : undefined;
+  return seqNo !== undefined && Number.isSafeInteger(seqNo)
+    ? String(seqNo)
+    : undefined;
 }
 
 export async function sendAlimTalk(params: {
