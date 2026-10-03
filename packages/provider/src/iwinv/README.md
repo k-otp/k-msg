@@ -273,7 +273,11 @@ When IWINV answers a send (AlimTalk or SMS/LMS/MMS) with a failure, the
 A 2xx answer without a numeric code (`{}`, `{"code":"x"}`, an empty body, or
 plain text such as `OK`) is `PROVIDER_ERROR` on both channels, with no
 `providerErrorCode`: IWINV may have accepted the send, so it is not reported as
-a refusal (`INVALID_REQUEST`) and not as a success. `PROVIDER_ERROR` is
+a refusal (`INVALID_REQUEST`) and not as a success. The exception is a
+`message` that names a refusal (`details.reason` above, e.g. "조직(업체)
+발신번호가 일치하지 않습니다."): IWINV said it refused the send, so it keeps
+the code that refusal implies (`INVALID_REQUEST` or `AUTHENTICATION_FAILED`),
+as it does under an unlisted code. `PROVIDER_ERROR` is
 retryable by default, so a retry can send the message twice; a consumer that
 cannot tolerate that should treat this as an unknown outcome and check delivery
 status before retrying. A numeric refusal code on HTTP 200 (AlimTalk `501`, SMS

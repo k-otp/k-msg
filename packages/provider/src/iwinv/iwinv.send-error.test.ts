@@ -552,6 +552,46 @@ describe("IWINV sends answered 2xx without a numeric code", () => {
     }
   });
 
+  test("a refusal named only by IWINV's text keeps the code it implies", async () => {
+    for (const options of [alimTalk, sms]) {
+      for (const [message, code, reason] of [
+        [
+          SENDER_MISMATCH_TEXT,
+          KMsgErrorCode.INVALID_REQUEST,
+          "SENDER_NUMBER_NOT_REGISTERED",
+        ],
+        [
+          "등록하지 않은 IP에서는 발송되지 않습니다.",
+          KMsgErrorCode.AUTHENTICATION_FAILED,
+          "IP_NOT_ALLOWED",
+        ],
+      ] as const) {
+        const error = await sendFailure(
+          options,
+          respondWith(JSON.stringify({ message })),
+        );
+
+        // IWINV said it refused the send, so the outcome is not unknown.
+        expect(error.code).toBe(code);
+        expect(error.details?.reason).toBe(reason);
+        expect(error.providerErrorCode).toBeUndefined();
+        expect(error.httpStatus).toBe(200);
+      }
+    }
+  });
+
+  test("a text that names no refusal leaves the outcome unknown", async () => {
+    for (const options of [alimTalk, sms]) {
+      const error = await sendFailure(
+        options,
+        respondWith(JSON.stringify({ message: "처리 중 오류" })),
+      );
+
+      expect(error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+      expect(error.details?.reason).toBeUndefined();
+    }
+  });
+
   test("AlimTalk: a non-2xx answer without a code still maps by HTTP status", async () => {
     const error = await sendFailure(alimTalk, respondWith("Forbidden", 403));
 
