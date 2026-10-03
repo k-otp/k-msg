@@ -124,6 +124,24 @@ async function resolveTemplateParam(params: {
   );
 }
 
+/**
+ * Returns IWINV's `seqNo` as a message id, whether sent as a number or a digit
+ * string. The delivery-status lookup sends the id back as a number, so only a
+ * safe integer is kept, written the way that number prints.
+ */
+function toAlimTalkMessageId(value: unknown): string | undefined {
+  const text = typeof value === "string" ? value.trim() : undefined;
+  const seqNo =
+    typeof value === "number"
+      ? value
+      : text !== undefined && /^\d+$/.test(text)
+        ? Number(text)
+        : undefined;
+  return seqNo !== undefined && Number.isSafeInteger(seqNo)
+    ? String(seqNo)
+    : undefined;
+}
+
 export async function sendAlimTalk(params: {
   providerId: string;
   config: NormalizedIwinvConfig;
@@ -316,23 +334,24 @@ export async function sendAlimTalk(params: {
           message: responseText || String(parsed || ""),
         } as IWINVSendResponse);
 
-    if (!response.ok || data.code !== 200) {
+    // A bare-code body is IWINV's code; any other body (an HTML error page) is
+    // neither its code nor its text. IWINV documents an integer `code`, but a
+    // send it accepted can carry "200" as a string, so the code is read as an
+    // integer either way; reading "200" as a refusal would invite a resend.
+    const providerCode = toIwinvProviderCode(isRecord ? data.code : parsed);
+    const code = providerCode !== undefined ? Number(providerCode) : undefined;
+    if (!response.ok || code !== 200) {
       return fail(
         toIwinvSendError({
           providerId,
           channel: "alimtalk",
-          code: mapAlimTalkSendErrorCode(
-            normalizeIwinvCode(data.code),
-            response.status,
-          ),
+          code: mapAlimTalkSendErrorCode(code, response.status),
           message:
             toIwinvProviderText(isRecord ? data.message : responseText) ??
             "IWINV send failed",
           httpStatus: response.status,
           originalCode: isRecord ? data.code : (data.code ?? response.status),
-          // A bare-code body is IWINV's code; any other body (an HTML error
-          // page) is neither its code nor its text.
-          providerCode: toIwinvProviderCode(isRecord ? data.code : parsed),
+          providerCode,
           providerText: isRecord
             ? toIwinvProviderText(data.message)
             : undefined,
@@ -343,8 +362,7 @@ export async function sendAlimTalk(params: {
     return ok({
       messageId: options.messageId || crypto.randomUUID(),
       providerId,
-      providerMessageId:
-        typeof data.seqNo === "number" ? String(data.seqNo) : undefined,
+      providerMessageId: toAlimTalkMessageId(data.seqNo),
       status: scheduledAtValid ? "PENDING" : "SENT",
       type: options.type,
       to: options.to,
