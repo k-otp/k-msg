@@ -178,7 +178,8 @@ Message key and delivery status:
   template and a window from a minute before `requestedAt` to five minutes
   after it (or after `scheduledAt`), reads every page (1,000 rows each, up to
   ten), and takes the API-sent row whose `req_date` is closest to
-  `requestedAt` (or `scheduledAt`). Two sends of one template to one number within moments of
+  `requestedAt` (or `scheduledAt`). A lookup with more than ten pages of rows
+  fails with `PROVIDER_ERROR` instead of choosing among some of them. Two sends of one template to one number within moments of
   each other cannot be told apart. The row (with IWINV's `msgkey`) is `raw`.
   A `providerMessageId` that is not a correlation id is looked up as IWINV's
   `msgkey`.

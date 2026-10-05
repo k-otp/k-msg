@@ -579,6 +579,31 @@ describe("IWINV RCS delivery status", () => {
     expect(result.value?.raw).toMatchObject({ msgkey: "RCS-ours" });
   });
 
+  test("a lookup past the page cap fails rather than guessing", async () => {
+    const full = JSON.stringify({
+      code: 200,
+      totalCount: 20000,
+      list: Array.from({ length: 1000 }, (_, index) =>
+        row({ msgkey: `RCS-${index}`, req_date: "2026-10-05 10:00:01" }),
+      ),
+    });
+    const { fetch, calls } = recordingFetch([{ body: full }]);
+    const result = await createProvider().getDeliveryStatus(
+      {
+        providerMessageId: CORRELATION_ID,
+        type: "RCS_TPL",
+        to: "01012345678",
+        requestedAt,
+      },
+      { fetch },
+    );
+
+    expect(calls).toHaveLength(10);
+    if (result.isSuccess) throw new Error("expected the lookup to fail");
+    expect(result.error.code).toBe(KMsgErrorCode.PROVIDER_ERROR);
+    expect(result.error.message).toContain("cannot be matched");
+  });
+
   test("a msgkey lookup stops at the page that has it", async () => {
     const others = Array.from({ length: 1000 }, (_, index) =>
       row({ msgkey: `RCS-other-${index}` }),

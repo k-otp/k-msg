@@ -655,6 +655,7 @@ export async function getRcsDeliveryStatus(params: {
   try {
     const rows: Record<string, unknown>[] = [];
     let row: Record<string, unknown> | undefined;
+    let complete = false;
     for (let pageNum = 1; pageNum <= RCS_HISTORY_MAX_PAGES; pageNum += 1) {
       const page = await fetchRcsHistoryPage({
         providerId,
@@ -676,8 +677,20 @@ export async function getRcsDeliveryStatus(params: {
         page.value.rows.length < RCS_HISTORY_PAGE_SIZE ||
         (totalCount !== undefined && rows.length >= totalCount)
       ) {
+        complete = true;
         break;
       }
+    }
+    // Choosing among some of the rows could pick another send, so a lookup
+    // whose rows run past the page cap reports that rather than guessing.
+    if (!row && !complete) {
+      return fail(
+        new KMsgError(
+          KMsgErrorCode.PROVIDER_ERROR,
+          `IWINV RCS history holds more than ${RCS_HISTORY_PAGE_SIZE * RCS_HISTORY_MAX_PAGES} rows for this lookup; the send cannot be matched`,
+          { providerId, rowsRead: rows.length },
+        ),
+      );
     }
     if (correlation) row = pickCorrelatedRow(rows, correlation, query);
     if (!row) return ok(null);
