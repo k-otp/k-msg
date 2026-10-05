@@ -1308,4 +1308,39 @@ describe("KMsg RCS template fallback content", () => {
       },
     ]);
   });
+
+  test("fills the fallback from rcs.variables like the RCS message", async () => {
+    const sent: SendOptions[] = [];
+    const provider: Provider = {
+      id: "rcs",
+      name: "RCS",
+      supportedTypes: ["RCS_TPL"] as const,
+      healthCheck: async () => ({ healthy: true, issues: [] }),
+      send: async (options) => {
+        sent.push(options);
+        return ok({
+          messageId: options.messageId ?? "id",
+          status: "SENT" as const,
+          providerId: "rcs",
+          type: options.type,
+          to: options.to,
+        });
+      },
+    };
+    const kmsg = new KMsg({ providers: [provider] });
+
+    await kmsg.send({
+      type: "RCS_TPL",
+      to: "01012345678",
+      templateId: "OTP",
+      variables: { brand: "K-OTP", code: "000000" },
+      rcs: { variables: { code: "123456" } },
+      failover: { enabled: true, fallbackContent: "[#{brand}] code #{code}" },
+    });
+
+    const options = sent[0];
+    expect(
+      options?.type === "RCS_TPL" && options.failover?.fallbackContent,
+    ).toBe("[K-OTP] code 123456");
+  });
 });
