@@ -1245,7 +1245,15 @@ export class KMsg {
     if (!options.failover) return options;
 
     const failover = options.failover;
-    const variables = this.coerceVariables(options.variables);
+    // RCS providers merge `rcs.variables` over `variables` for the message, so
+    // the fallback text is filled from the same values.
+    const variables =
+      options.type === "ALIMTALK"
+        ? this.coerceVariables(options.variables)
+        : this.coerceVariables({
+            ...(this.coerceVariables(options.variables) ?? {}),
+            ...(this.coerceVariables(options.rcs?.variables) ?? {}),
+          });
     const fallbackContent =
       typeof failover.fallbackContent === "string"
         ? this.interpolateText(failover.fallbackContent, variables)
