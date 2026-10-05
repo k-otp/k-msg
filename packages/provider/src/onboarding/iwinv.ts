@@ -31,7 +31,9 @@ export const iwinvOnboardingSpec: ProviderOnboardingSpec = {
         "IWINV RCS onboarding is manual: register the RCS account (RCS ID and brand key) in the IWINV console after delegating the brand to IWINV's agency in RCS Biz Center, then get the template approved. RCS_TPL sends need `rcsApiKey`, a brand id and an approved template.",
       kind: "manual",
       severity: "blocker",
-      scopes: ["doctor", "preflight"],
+      // `preflight` is the AlimTalk preflight, which does not filter checks by
+      // message type, so RCS checks run in doctor only.
+      scopes: ["doctor"],
       messageTypes: ["RCS_TPL"],
     },
     {
@@ -41,7 +43,9 @@ export const iwinvOnboardingSpec: ProviderOnboardingSpec = {
         "IWINV refuses RCS sends from IPs not listed under the RCS account's sending IPs (code 206).",
       kind: "manual",
       severity: "blocker",
-      scopes: ["doctor", "preflight"],
+      // `preflight` is the AlimTalk preflight, which does not filter checks by
+      // message type, so RCS checks run in doctor only.
+      scopes: ["doctor"],
       messageTypes: ["RCS_TPL"],
     },
     {

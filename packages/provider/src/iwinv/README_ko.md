@@ -170,8 +170,11 @@ IWINV는 현재 RCS 템플릿형만 제공합니다(SMS/LMS/이미지형 RCS는 
   `https://rcs.bizservice.iwinv.kr/api/v1/history/`에 수신번호, 브랜드, 템플릿과
   `requestedAt` 1분 전부터 그 5분 뒤(또는 `scheduledAt` 5분 뒤)까지의 기간을
   보내고, 모든 페이지(페이지당 1,000행, 최대 10페이지)를 읽은 뒤 API로 보낸 행
-  중 `req_date`가 `requestedAt`(또는 `scheduledAt`)에 가장 가까운 행을 고릅니다.
-  10페이지를 넘는 조회는 일부 행에서 고르지 않고 `PROVIDER_ERROR`로 실패합니다. 같은 템플릿을
+  중 `req_date`가 `requestedAt`에 가장 가까운 행을 고릅니다. 예약 발송은
+  `scheduledAt` 전에는 조회하지 않고, 이후에는 `scheduledAt` 근처 행을 우선하며
+  그곳에 행이 없을 때만 `requestedAt`에 가장 가까운 행을 고릅니다(예약 발송의
+  `req_date`가 어느 시각인지 IWINV가 밝히지 않음). 10페이지를 넘는 조회는 일부
+  행에서 고르지 않고 `PROVIDER_ERROR`로 실패합니다. 같은 템플릿을
   같은 번호로 거의 동시에 두 번 보내면 구분할 수 없습니다. 고른 행(IWINV
   `msgkey` 포함)은 `raw`에 담깁니다. 상관 ID가 아닌 `providerMessageId`는 IWINV
   `msgkey`로 조회합니다.
