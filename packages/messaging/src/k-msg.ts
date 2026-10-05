@@ -1230,10 +1230,19 @@ export class KMsg {
     };
   }
 
-  // Providers send the ALIMTALK fallback text as given, so it is filled in
-  // here like SMS text, and sized for SMS or LMS unless the caller chose.
+  // Providers send the ALIMTALK and RCS template fallback text as given, so it
+  // is filled in here like SMS text, and sized for SMS or LMS unless the
+  // caller chose.
   private prepareFailoverContent(options: SendOptions): SendOptions {
-    if (options.type !== "ALIMTALK" || !options.failover) return options;
+    if (
+      options.type !== "ALIMTALK" &&
+      options.type !== "RCS_TPL" &&
+      options.type !== "RCS_ITPL" &&
+      options.type !== "RCS_LTPL"
+    ) {
+      return options;
+    }
+    if (!options.failover) return options;
 
     const failover = options.failover;
     const variables = this.coerceVariables(options.variables);
