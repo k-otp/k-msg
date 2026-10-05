@@ -56,10 +56,11 @@ export function toIwinvProviderText(value: unknown): string | undefined {
   return `${characters.slice(0, IWINV_PROVIDER_TEXT_MAX_LENGTH - 1).join("")}…`;
 }
 
-export type IwinvSendChannel = "sms" | "alimtalk";
+export type IwinvSendChannel = "sms" | "alimtalk" | "rcs";
 
 // SMS codes are from IWINV's SMS v2 send result-code table; AlimTalk 505 from
-// its AlimTalk table and 206 from the IP note in this provider's README.
+// its AlimTalk table and 206 from the IP note in this provider's README; RCS
+// codes from its RCS send result-code table.
 const REASON_BY_CODE: Record<
   IwinvSendChannel,
   Readonly<Record<string, IWINVSendErrorReason>>
@@ -74,6 +75,15 @@ const REASON_BY_CODE: Record<
   alimtalk: {
     "505": "SENDER_NUMBER_NOT_REGISTERED",
     "206": "IP_NOT_ALLOWED",
+  },
+  rcs: {
+    "206": "IP_NOT_ALLOWED",
+    "214": "RECIPIENT_NUMBER_INVALID",
+    "215": "RECIPIENT_NUMBER_INVALID",
+    "217": "SENDER_NUMBER_NOT_REGISTERED",
+    "218": "SENDER_NUMBER_NOT_REGISTERED",
+    "221": "RECIPIENT_NUMBER_INVALID",
+    "222": "AUTO_CHARGE_LIMIT_EXCEEDED",
   },
 };
 
