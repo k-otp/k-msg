@@ -5,7 +5,7 @@ prev: false
 title: "SendResult"
 ---
 
-Defined in: [packages/core/src/types/message.ts:367](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L367)
+Defined in: [packages/core/src/types/message.ts:378](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L378)
 
 Result of a message send operation.
 Returned by Provider.send() and KMsg.send().
@@ -16,7 +16,7 @@ Returned by Provider.send() and KMsg.send().
 
 > **messageId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:371](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L371)
+Defined in: [packages/core/src/types/message.ts:382](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L382)
 
 Correlation id (equals the request `messageId`).
 
@@ -26,7 +26,7 @@ Correlation id (equals the request `messageId`).
 
 > **providerId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:375](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L375)
+Defined in: [packages/core/src/types/message.ts:386](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L386)
 
 Identifier of the provider that handled this message.
 
@@ -36,7 +36,7 @@ Identifier of the provider that handled this message.
 
 > `optional` **providerMessageId?**: `string`
 
-Defined in: [packages/core/src/types/message.ts:379](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L379)
+Defined in: [packages/core/src/types/message.ts:390](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L390)
 
 Provider-specific message identifier for tracking.
 
@@ -46,7 +46,7 @@ Provider-specific message identifier for tracking.
 
 > `optional` **raw?**: `unknown`
 
-Defined in: [packages/core/src/types/message.ts:399](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L399)
+Defined in: [packages/core/src/types/message.ts:410](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L410)
 
 Raw provider response for debugging (provider-specific shape).
 
@@ -56,7 +56,7 @@ Raw provider response for debugging (provider-specific shape).
 
 > **status**: [`MessageStatus`](/en/api/core/src/type-aliases/messagestatus/)
 
-Defined in: [packages/core/src/types/message.ts:383](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L383)
+Defined in: [packages/core/src/types/message.ts:394](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L394)
 
 Current delivery status of the message.
 
@@ -66,7 +66,7 @@ Current delivery status of the message.
 
 > **to**: `string`
 
-Defined in: [packages/core/src/types/message.ts:391](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L391)
+Defined in: [packages/core/src/types/message.ts:402](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L402)
 
 Recipient phone number.
 
@@ -76,7 +76,7 @@ Recipient phone number.
 
 > **type**: [`MessageType`](/en/api/core/src/type-aliases/messagetype/)
 
-Defined in: [packages/core/src/types/message.ts:387](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L387)
+Defined in: [packages/core/src/types/message.ts:398](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L398)
 
 The message type that was sent.
 
@@ -86,6 +86,6 @@ The message type that was sent.
 
 > `optional` **warnings?**: [`SendWarning`](/en/api/core/src/interfaces/sendwarning/)[]
 
-Defined in: [packages/core/src/types/message.ts:395](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L395)
+Defined in: [packages/core/src/types/message.ts:406](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L406)
 
 Non-fatal warnings (e.g., failover partially applied).

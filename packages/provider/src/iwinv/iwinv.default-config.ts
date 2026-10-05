@@ -16,6 +16,9 @@ export function resolveDefaultIWINVConfig(): IWINVConfig {
       readRuntimeEnv("IWINV_SENDER_NUMBER") ||
       readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
     smsSenderNumber: readRuntimeEnv("IWINV_SMS_SENDER_NUMBER"),
+    rcsApiKey: readRuntimeEnv("IWINV_RCS_API_KEY"),
+    rcsBrandId: readRuntimeEnv("IWINV_RCS_BRAND_ID"),
+    rcsSenderNumber: readRuntimeEnv("IWINV_RCS_SENDER_NUMBER"),
     sendEndpoint: readRuntimeEnv("IWINV_SEND_ENDPOINT") || "/api/v2/send/",
     xForwardedFor: readRuntimeEnv("IWINV_X_FORWARDED_FOR"),
     debug: readRuntimeEnv("NODE_ENV") === "development",

@@ -38,6 +38,26 @@ export function collectSolapiSendWarnings(
   providerId: string,
   config: Pick<SolapiConfig, "defaultFrom">,
 ): SendResult["warnings"] {
+  if (
+    (options.type === "RCS_TPL" ||
+      options.type === "RCS_ITPL" ||
+      options.type === "RCS_LTPL") &&
+    options.failover
+  ) {
+    // DeliveryTrackingService falls back through the API for AlimTalk only, so
+    // this warning just tells the caller the field went unused.
+    return [
+      {
+        code: "FAILOVER_UNSUPPORTED_PROVIDER",
+        message:
+          "SOLAPI does not map `failover` for RCS sends; its own SMS fallback is controlled by rcs.disableSms.",
+        details: {
+          providerId,
+          unsupportedFields: ["failover"],
+        },
+      },
+    ];
+  }
   if (options.type !== "ALIMTALK") return undefined;
   if (options.failover?.enabled !== true) return undefined;
 

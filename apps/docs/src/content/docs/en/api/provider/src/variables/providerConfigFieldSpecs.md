@@ -227,6 +227,42 @@ Defined in: [packages/provider/src/config-fields.ts:16](https://github.com/k-otp
 
 > `readonly` **type**: `"number"` = `"number"`
 
+#### iwinv.rcsApiKey
+
+> `readonly` **rcsApiKey**: `object`
+
+#### iwinv.rcsApiKey.description
+
+> `readonly` **description**: `"IWINV RCS send API key (AUTH header); enables RCS_TPL, e.g. env:IWINV_RCS_API_KEY"` = `"IWINV RCS send API key (AUTH header); enables RCS_TPL, e.g. env:IWINV_RCS_API_KEY"`
+
+#### iwinv.rcsApiKey.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### iwinv.rcsBrandId
+
+> `readonly` **rcsBrandId**: `object`
+
+#### iwinv.rcsBrandId.description
+
+> `readonly` **description**: `"Default IWINV RCS brand id (BR....)"` = `"Default IWINV RCS brand id (BR....)"`
+
+#### iwinv.rcsBrandId.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### iwinv.rcsSenderNumber
+
+> `readonly` **rcsSenderNumber**: `object`
+
+#### iwinv.rcsSenderNumber.description
+
+> `readonly` **description**: `"RCS sender number (callback) override"` = `"RCS sender number (callback) override"`
+
+#### iwinv.rcsSenderNumber.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
 #### iwinv.sendEndpoint
 
 > `readonly` **sendEndpoint**: `object`
