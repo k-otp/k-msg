@@ -499,53 +499,56 @@ function readString(value: unknown): string | undefined {
     : undefined;
 }
 
+function isEligibleRow(
+  row: Record<string, unknown>,
+  templateCode: string,
+): boolean {
+  const rowTemplate = readString(row.template_code);
+  if (rowTemplate !== undefined && rowTemplate !== templateCode) return false;
+  const sendMethod = readString(row.send_method);
+  return sendMethod === undefined || sendMethod.toUpperCase() === "API";
+}
+
 /**
  * Picks the history row of a send whose `providerMessageId` was a correlation
- * id: a row of the brand and template (sent through the API when IWINV says),
- * requested from {@link RCS_HISTORY_SKEW_MS} before the send to
- * {@link RCS_HISTORY_MATCH_WINDOW_MS} after it (or after its scheduled time),
- * whose request time is closest to the send's (or to its scheduled time). Two sends
- * of one template to one recipient within moments of each other cannot be
- * told apart this way.
+ * id: a row of the brand and template (sent through the API when IWINV says)
+ * stamped from {@link RCS_HISTORY_SKEW_MS} before a reference time to
+ * {@link RCS_HISTORY_MATCH_WINDOW_MS} after it, closest to that time. A
+ * scheduled send looks near its scheduled time first and near its request
+ * time only when nothing is stamped there, so an unrelated immediate send
+ * made around the reservation does not compete with the scheduled one. Two
+ * sends of one template to one recipient within moments of each other cannot
+ * be told apart this way.
  */
 function pickCorrelatedRow(
   rows: readonly Record<string, unknown>[],
   correlation: { brandId: string; templateCode: string },
   query: DeliveryStatusQuery,
+  scheduledMs: number | undefined,
 ): Record<string, unknown> | undefined {
-  const references = [query.requestedAt.getTime()];
-  if (
-    query.scheduledAt instanceof Date &&
-    !Number.isNaN(query.scheduledAt.getTime())
-  ) {
-    references.push(query.scheduledAt.getTime());
-  }
-  const earliest = query.requestedAt.getTime() - RCS_HISTORY_SKEW_MS;
-  const latest = Math.max(...references) + RCS_HISTORY_MATCH_WINDOW_MS;
+  const references =
+    scheduledMs !== undefined
+      ? [scheduledMs, query.requestedAt.getTime()]
+      : [query.requestedAt.getTime()];
 
-  let best: { row: Record<string, unknown>; distance: number } | undefined;
-  for (const row of rows) {
-    const templateCode = readString(row.template_code);
-    if (
-      templateCode !== undefined &&
-      templateCode !== correlation.templateCode
-    ) {
-      continue;
+  for (const reference of references) {
+    let best: { row: Record<string, unknown>; distance: number } | undefined;
+    for (const row of rows) {
+      if (!isEligibleRow(row, correlation.templateCode)) continue;
+      const stamped = parseIwinvDateTime(row.req_date)?.getTime();
+      if (
+        stamped === undefined ||
+        stamped < reference - RCS_HISTORY_SKEW_MS ||
+        stamped > reference + RCS_HISTORY_MATCH_WINDOW_MS
+      ) {
+        continue;
+      }
+      const distance = Math.abs(stamped - reference);
+      if (!best || distance < best.distance) best = { row, distance };
     }
-    const sendMethod = readString(row.send_method);
-    if (sendMethod !== undefined && sendMethod.toUpperCase() !== "API") {
-      continue;
-    }
-    const requested = parseIwinvDateTime(row.req_date)?.getTime();
-    if (requested === undefined || requested < earliest || requested > latest) {
-      continue;
-    }
-    const distance = Math.min(
-      ...references.map((reference) => Math.abs(requested - reference)),
-    );
-    if (!best || distance < best.distance) best = { row, distance };
+    if (best) return best.row;
   }
-  return best?.row;
+  return undefined;
 }
 
 /**
@@ -630,14 +633,19 @@ export async function getRcsDeliveryStatus(params: {
     query.scheduledAt instanceof Date &&
     !Number.isNaN(query.scheduledAt.getTime())
       ? query.scheduledAt.getTime()
-      : 0;
+      : undefined;
+  // Until its time comes a scheduled send has nothing to report, and a row
+  // near its request time could be another send.
+  if (correlation && scheduledMs !== undefined && Date.now() < scheduledMs) {
+    return ok(null);
+  }
   // A correlated lookup needs only the rows its send can have; a msgkey is
   // exact, so that lookup searches up to now.
   const end = new Date(
     correlation
-      ? Math.max(query.requestedAt.getTime(), scheduledMs) +
+      ? Math.max(query.requestedAt.getTime(), scheduledMs ?? 0) +
           RCS_HISTORY_MATCH_WINDOW_MS
-      : Math.max(Date.now(), scheduledMs) + RCS_HISTORY_SKEW_MS,
+      : Math.max(Date.now(), scheduledMs ?? 0) + RCS_HISTORY_SKEW_MS,
   );
 
   const filter: Record<string, unknown> = {
@@ -692,7 +700,9 @@ export async function getRcsDeliveryStatus(params: {
         ),
       );
     }
-    if (correlation) row = pickCorrelatedRow(rows, correlation, query);
+    if (correlation) {
+      row = pickCorrelatedRow(rows, correlation, query, scheduledMs);
+    }
     if (!row) return ok(null);
 
     const state = readString(row.state);

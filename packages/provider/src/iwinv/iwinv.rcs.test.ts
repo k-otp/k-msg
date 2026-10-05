@@ -5,6 +5,7 @@ import {
   type RcsTemplateSendOptions,
   type SendOptions,
 } from "@k-msg/core";
+import { iwinvOnboardingSpec } from "../onboarding/iwinv";
 import { resolveIwinvMessageTypes } from "./iwinv.capabilities";
 import { mapIwinvRcsHistoryStatus } from "./iwinv.rcs";
 import { getIWINVSendErrorReason } from "./iwinv.send-error";
@@ -102,6 +103,18 @@ describe("IWINV RCS capability", () => {
       }),
     ).toEqual(["ALIMTALK", "SMS", "LMS", "MMS", "RCS_TPL"]);
     expect(resolveIwinvMessageTypes({ apiKey: "a" })).not.toContain("RCS_TPL");
+  });
+
+  test("RCS onboarding checks run in doctor, not the AlimTalk preflight", () => {
+    const rcsChecks = iwinvOnboardingSpec.checks.filter((check) =>
+      check.messageTypes?.includes("RCS_TPL"),
+    );
+
+    expect(rcsChecks.map((check) => check.id)).toEqual([
+      "rcs_brand_template_approved",
+      "rcs_send_ip_registered",
+    ]);
+    for (const check of rcsChecks) expect(check.scopes).toEqual(["doctor"]);
   });
 
   test("other RCS types are not supported", async () => {
@@ -512,6 +525,62 @@ describe("IWINV RCS delivery status", () => {
       sentAt: new Date("2026-10-05T01:00:02.000Z"),
     });
     expect(result.value?.raw).toMatchObject({ msgkey: "RCS-ours" });
+  });
+
+  describe("a scheduled send", () => {
+    const lookupScheduled = async (scheduledAt: Date, body: string) => {
+      const { fetch, calls } = recordingFetch([{ body }]);
+      const result = await createProvider().getDeliveryStatus(
+        {
+          providerMessageId: CORRELATION_ID,
+          type: "RCS_TPL",
+          to: "01012345678",
+          requestedAt,
+          scheduledAt,
+        },
+        { fetch },
+      );
+      return { result, calls };
+    };
+    const noon = new Date("2026-10-05T03:00:00.000Z"); // 12:00:00 KST
+
+    test("matches near its scheduled time before its request time", async () => {
+      const { result, calls } = await lookupScheduled(
+        noon,
+        history([
+          // An immediate send of the template made right after the
+          // reservation: closer to the request time than ours is to noon.
+          row({ msgkey: "RCS-immediate", req_date: "2026-10-05 10:00:00" }),
+          row({ msgkey: "RCS-scheduled", req_date: "2026-10-05 12:00:30" }),
+        ]),
+      );
+
+      expect(calls[0]?.body.endDate).toBe("2026-10-05 12:05:00");
+      if (result.isFailure) throw result.error;
+      expect(result.value?.raw).toMatchObject({ msgkey: "RCS-scheduled" });
+    });
+
+    test("falls back to its request time when nothing is stamped near the schedule", async () => {
+      const { result } = await lookupScheduled(
+        noon,
+        history([
+          row({ msgkey: "RCS-reserved", req_date: "2026-10-05 10:00:02" }),
+        ]),
+      );
+
+      if (result.isFailure) throw result.error;
+      expect(result.value?.raw).toMatchObject({ msgkey: "RCS-reserved" });
+    });
+
+    test("is not looked up before its time", async () => {
+      const { result, calls } = await lookupScheduled(
+        new Date(Date.now() + 60 * 60_000),
+        history([row({})]),
+      );
+
+      expect(calls).toHaveLength(0);
+      expect(result.isSuccess && result.value).toBeNull();
+    });
   });
 
   test("an IWINV msgkey is looked up as is", async () => {
