@@ -293,6 +293,11 @@ describe("IWINV RCS fallback", () => {
     for (const options of [
       rcs({ failover: { enabled: false, fallbackContent: "x" } }),
       rcs({ failover: { fallbackContent: "x" }, rcs: { disableSms: true } }),
+      // An explicit opt-out wins over the generic failover flag.
+      rcs({
+        failover: { enabled: true, fallbackContent: "x" },
+        rcs: { disableSms: true },
+      }),
     ]) {
       const { call } = await sendOk(options);
       expect(call.body.reSend).toBe("N");
@@ -533,10 +538,74 @@ describe("IWINV RCS delivery status", () => {
   });
 
   test("no matching row is not found yet", async () => {
-    const { result } = await lookup(
-      history([row({ req_date: "2026-10-05 09:30:00" })]),
+    const { result, call } = await lookup(
+      history([
+        row({ req_date: "2026-10-05 09:30:00" }),
+        // Past the window after the send: another send of the template.
+        row({ req_date: "2026-10-05 10:05:01" }),
+      ]),
     );
+    expect(call.body.endDate).toBe("2026-10-05 10:05:00");
     expect(result.isSuccess && result.value).toBeNull();
+  });
+
+  test("reads further history pages before choosing a row", async () => {
+    const others = Array.from({ length: 1000 }, (_, index) =>
+      row({ msgkey: `RCS-other-${index}`, req_date: "2026-10-05 10:04:00" }),
+    );
+    const { fetch, calls } = recordingFetch([
+      { body: JSON.stringify({ code: 200, totalCount: 1001, list: others }) },
+      {
+        body: JSON.stringify({
+          code: 200,
+          totalCount: 1001,
+          list: [row({ msgkey: "RCS-ours", req_date: "2026-10-05 10:00:01" })],
+        }),
+      },
+    ]);
+    const result = await createProvider().getDeliveryStatus(
+      {
+        providerMessageId: CORRELATION_ID,
+        type: "RCS_TPL",
+        to: "01012345678",
+        requestedAt,
+      },
+      { fetch },
+    );
+
+    expect(calls.map((call) => call.body.pageNum)).toEqual([1, 2]);
+    expect(calls[0]?.body.pageSize).toBe(1000);
+    if (result.isFailure) throw result.error;
+    expect(result.value?.raw).toMatchObject({ msgkey: "RCS-ours" });
+  });
+
+  test("a msgkey lookup stops at the page that has it", async () => {
+    const others = Array.from({ length: 1000 }, (_, index) =>
+      row({ msgkey: `RCS-other-${index}` }),
+    );
+    const { fetch, calls } = recordingFetch([
+      { body: JSON.stringify({ code: 200, totalCount: 2001, list: others }) },
+      {
+        body: JSON.stringify({
+          code: 200,
+          totalCount: 2001,
+          list: [row({ msgkey: "RCS-1" }), ...others.slice(1)],
+        }),
+      },
+    ]);
+    const result = await createProvider().getDeliveryStatus(
+      {
+        providerMessageId: "RCS-1",
+        type: "RCS_TPL",
+        to: "01012345678",
+        requestedAt,
+      },
+      { fetch },
+    );
+
+    expect(calls).toHaveLength(2);
+    if (result.isFailure) throw result.error;
+    expect(result.value?.raw).toMatchObject({ msgkey: "RCS-1" });
   });
 
   test("a history refusal is an error with IWINV's code", async () => {
@@ -558,10 +627,14 @@ describe("IWINV RCS delivery status", () => {
     ["대기", "", "", "PENDING"],
     ["발송완료", "10000", "성공", "DELIVERED"],
     ["발송완료", "54001", "실패", "FAILED"],
+    // A failure code wins over a message that merely contains "성공".
+    ["발송완료", "54001", "성공하지 못했습니다", "FAILED"],
+    ["발송완료", "", "성공", "DELIVERED"],
+    ["발송완료", "", "성공하지 못했습니다", "SENT"],
     ["발송완료", "", "", "SENT"],
     ["", "", "", "PENDING"],
   ] as const)(
-    "state %p with done_code %p maps to %s",
+    "state %p, done_code %p, done_message %p maps to %s",
     (state, doneCode, doneMessage, expected) => {
       expect(
         mapIwinvRcsHistoryStatus(

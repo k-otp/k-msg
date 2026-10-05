@@ -143,9 +143,11 @@ IWINV는 현재 RCS 템플릿형만 제공합니다(SMS/LMS/이미지형 RCS는 
 대체 문자(`reSend`): `RCS_TPL`의 `failover`(`@k-msg/core`의
 `RcsFailoverOptions`, 알림톡과 같은 모양)를 IWINV 필드로 옮깁니다.
 
-- `failover.enabled`가 true이거나, 지정하지 않고 `failover.fallbackContent`를 주면
-  대체 문자를 요청합니다(`reSend: "Y"`). `failover.enabled: false`나
-  `rcs.disableSms: true`이면 요청하지 않으며, 이것이 IWINV 기본값이기도 합니다.
+- `rcs.disableSms: true`나 `failover.enabled: false`이면 대체 문자를 요청하지
+  않으며, 이것이 IWINV 기본값이기도 합니다. `rcs.disableSms`는
+  `failover.enabled: true`보다 우선합니다. 그 밖에는 `failover.enabled`가
+  true이거나 `failover.fallbackContent`를 주면 대체 문자를 요청합니다
+  (`reSend: "Y"`).
 - `fallbackContent`는 `resendContent`, `fallbackTitle`은 `resendTitle`(LMS만),
   `fallbackChannel`은 `resendType` `SMS`/`LMS`가 됩니다. 채널이 없으면 내용
   크기로 정합니다(`KMsg` 방식으로 센 90바이트 초과면 LMS). `KMsg`는 발송 전에
@@ -166,14 +168,16 @@ IWINV는 현재 RCS 템플릿형만 제공합니다(SMS/LMS/이미지형 RCS는 
   `iwinv-rcs:<brandId>:<templateCode>`(URI 인코딩)입니다.
 - `getDeliveryStatus({ type: "RCS_TPL", ... })`는
   `https://rcs.bizservice.iwinv.kr/api/v1/history/`에 수신번호, 브랜드, 템플릿과
-  `requestedAt` 1분 전부터의 기간을 보내고, API로 보낸 행 중 `req_date`가
-  `requestedAt`(또는 `scheduledAt`)에 가장 가까운 행을 고릅니다. 같은 템플릿을
+  `requestedAt` 1분 전부터 그 5분 뒤(또는 `scheduledAt` 5분 뒤)까지의 기간을
+  보내고, 모든 페이지(페이지당 1,000행, 최대 10페이지)를 읽은 뒤 API로 보낸 행
+  중 `req_date`가 `requestedAt`(또는 `scheduledAt`)에 가장 가까운 행을 고릅니다. 같은 템플릿을
   같은 번호로 거의 동시에 두 번 보내면 구분할 수 없습니다. 고른 행(IWINV
   `msgkey` 포함)은 `raw`에 담깁니다. 상관 ID가 아닌 `providerMessageId`는 IWINV
   `msgkey`로 조회합니다.
 - 상태: `state`가 수신완료면 `DELIVERED`, 수신실패면 `FAILED`, 대기면
-  `PENDING`입니다. 그 밖에는 `done_code` `10000`(또는 "성공" `done_message`)이면
-  `DELIVERED`, 다른 `done_code`면 `FAILED`, 둘 다 없으면 `SENT`입니다. IWINV가
+  `PENDING`입니다. 그 밖에는 `done_code` `10000`이면 `DELIVERED`, 다른
+  `done_code`면 `FAILED`입니다. 코드가 없는 행만 `done_message`로 판단하고
+  ("성공"이면 `DELIVERED`), 둘 다 없으면 `SENT`입니다. IWINV가
   `done_code` 표를 공개하지 않아 `statusCode`에는 IWINV 코드를 그대로 담습니다.
   상태는 RCS 메시지의 것이며 대체 SMS/LMS 결과는 보고하지 않습니다.
 - 전송내역 API의 HTTP 메서드는 IWINV 가이드에 없어, 발송과 같이 JSON POST로

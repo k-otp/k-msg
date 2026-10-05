@@ -52,6 +52,17 @@ const RCS_FALLBACK_MAX_BYTES = { SMS: 90, LMS: 2000 } as const;
 const RCS_HISTORY_SKEW_MS = 60_000;
 
 /**
+ * How far after a send's request (or scheduled) time its history row may be
+ * stamped. The correlated lookup searches only this window, so rows of other
+ * sends of the template stay out of it.
+ */
+const RCS_HISTORY_MATCH_WINDOW_MS = 5 * 60_000;
+
+/** IWINV's largest history page, and the most pages one lookup reads. */
+const RCS_HISTORY_PAGE_SIZE = 1000;
+const RCS_HISTORY_MAX_PAGES = 10;
+
+/**
  * Returns an error for an RCS operation on a provider configured without
  * `rcsApiKey`, before any request is made.
  */
@@ -182,9 +193,9 @@ function readYesNo(
 /**
  * Builds IWINV's fallback fields (`reSend`, `resendType`, `resendTitle`,
  * `resendContent`) from `failover`, with `providerOptions` fields of the same
- * names taking precedence. A fallback is sent when `failover.enabled` is
- * true, or when it is unset and fallback text is given, unless
- * `rcs.disableSms` is true; otherwise IWINV's default (none) applies.
+ * names taking precedence. `rcs.disableSms: true` or `failover.enabled:
+ * false` sends none; otherwise a fallback is sent when `failover.enabled` is
+ * true or fallback text is given, and else IWINV's default (none) applies.
  */
 function resolveRcsFallback(
   options: IwinvRcsSendOptions,
@@ -208,13 +219,11 @@ function resolveRcsFallback(
   if (reSendOverride.isFailure) return reSendOverride;
   const reSend =
     reSendOverride.value ??
-    (failover?.enabled === true
-      ? "Y"
-      : failover?.enabled === false || options.rcs?.disableSms === true
-        ? "N"
-        : content
-          ? "Y"
-          : "N");
+    (options.rcs?.disableSms === true || failover?.enabled === false
+      ? "N"
+      : failover?.enabled === true || content
+        ? "Y"
+        : "N");
   if (reSend === "N") return ok({ reSend });
 
   let resendType: "SMS" | "LMS" | undefined;
@@ -465,8 +474,9 @@ export async function sendRcs(params: {
  * Maps an RCS history row to a delivery status. IWINV documents `state` as
  * 수신완료 (received), 수신실패 (failed) or 대기 (waiting), and its example
  * shows 발송완료 (sent) with `done_code` "10000" and `done_message` "성공"; it
- * publishes no `done_code` table, so any other `done_code` counts as failed,
- * and a row with neither is still pending.
+ * publishes no `done_code` table, so any other `done_code` counts as failed.
+ * Only a row without a code is read by its message ("성공" exactly), and a
+ * row with neither is sent or still pending.
  */
 export function mapIwinvRcsHistoryStatus(
   state: string | undefined,
@@ -476,10 +486,8 @@ export function mapIwinvRcsHistoryStatus(
   if (state?.includes("수신완료")) return "DELIVERED";
   if (state?.includes("실패")) return "FAILED";
   if (state?.includes("대기")) return "PENDING";
-  if (doneCode === "10000" || doneMessage?.includes("성공")) {
-    return "DELIVERED";
-  }
-  if (doneCode) return "FAILED";
+  if (doneCode) return doneCode === "10000" ? "DELIVERED" : "FAILED";
+  if (doneMessage === "성공") return "DELIVERED";
   if (state) return "SENT";
   return "PENDING";
 }
@@ -494,8 +502,9 @@ function readString(value: unknown): string | undefined {
 /**
  * Picks the history row of a send whose `providerMessageId` was a correlation
  * id: a row of the brand and template (sent through the API when IWINV says),
- * requested no earlier than the send less {@link RCS_HISTORY_SKEW_MS}, whose
- * request time is closest to the send's (or to its scheduled time). Two sends
+ * requested from {@link RCS_HISTORY_SKEW_MS} before the send to
+ * {@link RCS_HISTORY_MATCH_WINDOW_MS} after it (or after its scheduled time),
+ * whose request time is closest to the send's (or to its scheduled time). Two sends
  * of one template to one recipient within moments of each other cannot be
  * told apart this way.
  */
@@ -512,6 +521,7 @@ function pickCorrelatedRow(
     references.push(query.scheduledAt.getTime());
   }
   const earliest = query.requestedAt.getTime() - RCS_HISTORY_SKEW_MS;
+  const latest = Math.max(...references) + RCS_HISTORY_MATCH_WINDOW_MS;
 
   let best: { row: Record<string, unknown>; distance: number } | undefined;
   for (const row of rows) {
@@ -527,13 +537,73 @@ function pickCorrelatedRow(
       continue;
     }
     const requested = parseIwinvDateTime(row.req_date)?.getTime();
-    if (requested === undefined || requested < earliest) continue;
+    if (requested === undefined || requested < earliest || requested > latest) {
+      continue;
+    }
     const distance = Math.min(
       ...references.map((reference) => Math.abs(requested - reference)),
     );
     if (!best || distance < best.distance) best = { row, distance };
   }
   return best?.row;
+}
+
+/**
+ * Reads one page of IWINV's RCS history. Throws only what the transport
+ * throws; a refusal is a failed result with IWINV's code.
+ */
+async function fetchRcsHistoryPage(params: {
+  providerId: string;
+  config: NormalizedIwinvConfig;
+  context?: ProviderRequestContext;
+  payload: Record<string, unknown>;
+}): Promise<
+  Result<
+    { rows: Record<string, unknown>[]; totalCount: number | undefined },
+    KMsgError
+  >
+> {
+  const { providerId, config, context, payload } = params;
+  const response = await fetchWithProviderContext(
+    context,
+    `${IWINV_RCS_BASE_URL}${RCS_HISTORY_PATH}`,
+    {
+      method: "POST",
+      headers: getRcsHeaders(config),
+      body: JSON.stringify(payload),
+    },
+    providerId,
+  );
+
+  const responseText = await response.text();
+  const parsed = safeParseJson(responseText);
+  const data = toRecordOrFallback(parsed, {});
+  const { providerCode, code } = readRcsCode(parsed, isObjectRecord(parsed));
+
+  if (!response.ok || code !== 200) {
+    const providerText = toIwinvProviderText(data.message);
+    return fail(
+      new KMsgError(
+        mapRcsErrorCode(code, response.status),
+        providerText ?? "IWINV RCS history query failed",
+        { providerId, originalCode: data.code ?? response.status },
+        {
+          ...(providerCode !== undefined
+            ? { providerErrorCode: providerCode }
+            : {}),
+          ...(providerText !== undefined
+            ? { providerErrorText: providerText }
+            : {}),
+          httpStatus: response.status,
+        },
+      ),
+    );
+  }
+
+  return ok({
+    rows: (Array.isArray(data.list) ? data.list : []).filter(isObjectRecord),
+    totalCount: toCount(data.totalCount),
+  });
 }
 
 export async function getRcsDeliveryStatus(params: {
@@ -556,16 +626,21 @@ export async function getRcsDeliveryStatus(params: {
   // A correlation id from `sendRcs`, or else IWINV's own `msgkey`.
   const correlation = parseRcsCorrelationId(providerMessageId);
   const start = new Date(query.requestedAt.getTime() - RCS_HISTORY_SKEW_MS);
+  const scheduledMs =
+    query.scheduledAt instanceof Date &&
+    !Number.isNaN(query.scheduledAt.getTime())
+      ? query.scheduledAt.getTime()
+      : 0;
+  // A correlated lookup needs only the rows its send can have; a msgkey is
+  // exact, so that lookup searches up to now.
   const end = new Date(
-    Math.max(
-      Date.now(),
-      query.scheduledAt instanceof Date ? query.scheduledAt.getTime() : 0,
-    ) + RCS_HISTORY_SKEW_MS,
+    correlation
+      ? Math.max(query.requestedAt.getTime(), scheduledMs) +
+          RCS_HISTORY_MATCH_WINDOW_MS
+      : Math.max(Date.now(), scheduledMs) + RCS_HISTORY_SKEW_MS,
   );
 
-  const payload: Record<string, unknown> = {
-    pageNum: 1,
-    pageSize: 100,
+  const filter: Record<string, unknown> = {
     startDate: formatIwinvDate(start),
     endDate: formatIwinvDate(end),
     phone: to,
@@ -578,48 +653,33 @@ export async function getRcsDeliveryStatus(params: {
   };
 
   try {
-    const response = await fetchWithProviderContext(
-      context,
-      `${IWINV_RCS_BASE_URL}${RCS_HISTORY_PATH}`,
-      {
-        method: "POST",
-        headers: getRcsHeaders(config),
-        body: JSON.stringify(payload),
-      },
-      providerId,
-    );
+    const rows: Record<string, unknown>[] = [];
+    let row: Record<string, unknown> | undefined;
+    for (let pageNum = 1; pageNum <= RCS_HISTORY_MAX_PAGES; pageNum += 1) {
+      const page = await fetchRcsHistoryPage({
+        providerId,
+        config,
+        context,
+        payload: { ...filter, pageNum, pageSize: RCS_HISTORY_PAGE_SIZE },
+      });
+      if (page.isFailure) return page;
 
-    const responseText = await response.text();
-    const parsed = safeParseJson(responseText);
-    const data = toRecordOrFallback(parsed, {});
-    const { providerCode, code } = readRcsCode(parsed, isObjectRecord(parsed));
-
-    if (!response.ok || code !== 200) {
-      const providerText = toIwinvProviderText(data.message);
-      return fail(
-        new KMsgError(
-          mapRcsErrorCode(code, response.status),
-          providerText ?? "IWINV RCS history query failed",
-          { providerId, originalCode: data.code ?? response.status },
-          {
-            ...(providerCode !== undefined
-              ? { providerErrorCode: providerCode }
-              : {}),
-            ...(providerText !== undefined
-              ? { providerErrorText: providerText }
-              : {}),
-            httpStatus: response.status,
-          },
-        ),
-      );
+      rows.push(...page.value.rows);
+      if (!correlation) {
+        row = rows.find(
+          (item) => readString(item.msgkey) === providerMessageId,
+        );
+        if (row) break;
+      }
+      const { totalCount } = page.value;
+      if (
+        page.value.rows.length < RCS_HISTORY_PAGE_SIZE ||
+        (totalCount !== undefined && rows.length >= totalCount)
+      ) {
+        break;
+      }
     }
-
-    const rows = (Array.isArray(data.list) ? data.list : []).filter(
-      isObjectRecord,
-    );
-    const row = correlation
-      ? pickCorrelatedRow(rows, correlation, query)
-      : rows.find((item) => readString(item.msgkey) === providerMessageId);
+    if (correlation) row = pickCorrelatedRow(rows, correlation, query);
     if (!row) return ok(null);
 
     const state = readString(row.state);

@@ -150,9 +150,10 @@ types.
 Fallback SMS/LMS (`reSend`): `failover` on `RCS_TPL` (`RcsFailoverOptions` in
 `@k-msg/core`, the same shape as AlimTalk's) maps to IWINV's fields:
 
-- A fallback is requested (`reSend: "Y"`) when `failover.enabled` is true, or
-  when it is unset and `failover.fallbackContent` is given. `failover.enabled:
-  false` or `rcs.disableSms: true` sends none, which is also IWINV's default.
+- `rcs.disableSms: true` or `failover.enabled: false` sends no fallback, which
+  is also IWINV's default; `rcs.disableSms` wins over `failover.enabled: true`.
+  Otherwise a fallback is requested (`reSend: "Y"`) when `failover.enabled` is
+  true or `failover.fallbackContent` is given.
 - `fallbackContent` is `resendContent`, `fallbackTitle` is `resendTitle` (LMS
   only), and `fallbackChannel` picks `resendType` `SMS` or `LMS`; without a
   channel the text's size decides (over 90 bytes, counted as `KMsg` counts
@@ -174,15 +175,17 @@ Message key and delivery status:
   (URI-encoded), a correlation id rather than IWINV's key.
 - `getDeliveryStatus({ type: "RCS_TPL", ... })` posts to
   `https://rcs.bizservice.iwinv.kr/api/v1/history/` with the recipient, brand,
-  template and a window from a minute before `requestedAt`, and takes the
-  API-sent row whose `req_date` is closest to `requestedAt` (or
-  `scheduledAt`). Two sends of one template to one number within moments of
+  template and a window from a minute before `requestedAt` to five minutes
+  after it (or after `scheduledAt`), reads every page (1,000 rows each, up to
+  ten), and takes the API-sent row whose `req_date` is closest to
+  `requestedAt` (or `scheduledAt`). Two sends of one template to one number within moments of
   each other cannot be told apart. The row (with IWINV's `msgkey`) is `raw`.
   A `providerMessageId` that is not a correlation id is looked up as IWINV's
   `msgkey`.
 - Status: `state` 수신완료 is `DELIVERED`, 수신실패 `FAILED`, 대기 `PENDING`;
-  otherwise `done_code` `10000` (or a "성공" `done_message`) is `DELIVERED`,
-  any other `done_code` `FAILED`, and a row with neither is `SENT`. IWINV
+  otherwise `done_code` `10000` is `DELIVERED` and any other `done_code`
+  `FAILED`. Only a row without a code is read by its `done_message` ("성공"
+  is `DELIVERED`), and a row with neither is `SENT`. IWINV
   publishes no `done_code` table, so `statusCode` is IWINV's code as is. The
   status is the RCS message's; a fallback SMS/LMS is not reported.
 - The history API's HTTP method is not stated in IWINV's guide; this provider
