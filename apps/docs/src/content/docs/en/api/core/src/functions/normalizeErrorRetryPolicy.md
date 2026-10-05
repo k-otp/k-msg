@@ -7,7 +7,7 @@ title: "normalizeErrorRetryPolicy"
 
 > **normalizeErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`
 
-Defined in: [packages/core/src/errors.ts:865](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L865)
+Defined in: [packages/core/src/errors.ts:869](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L869)
 
 ## Parameters
 

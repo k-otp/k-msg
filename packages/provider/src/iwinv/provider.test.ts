@@ -213,13 +213,13 @@ describe("IWINVProvider", () => {
     }
   });
 
-  test("requires the AlimTalk apiKey or both SMS keys", () => {
+  test("requires the AlimTalk apiKey, both SMS keys or the RCS key", () => {
     expect(() => new IWINVProvider({})).toThrow(
-      "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
+      "IWINVProvider requires `apiKey` (AlimTalk), `smsApiKey` and `smsAuthKey` (SMS), or `rcsApiKey` (RCS)",
     );
     // A single legacy SMS key authenticates together with the AlimTalk apiKey.
     expect(() => new IWINVProvider({ smsAuthKey: "legacy-auth-key" })).toThrow(
-      "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
+      "IWINVProvider requires `apiKey` (AlimTalk), `smsApiKey` and `smsAuthKey` (SMS), or `rcsApiKey` (RCS)",
     );
   });
 

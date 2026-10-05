@@ -7,7 +7,7 @@ title: "SendInput"
 
 > **SendInput** = [`SendOptions`](/en/api/core/src/type-aliases/sendoptions/) \| [`SmsDefaultSendInput`](/en/api/core/src/type-aliases/smsdefaultsendinput/)
 
-Defined in: [packages/core/src/types/message.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L361)
+Defined in: [packages/core/src/types/message.ts:372](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L372)
 
 Developer-facing input type.
 - SMS defaults allow omitting `type` and using `content`.

@@ -219,6 +219,19 @@ export interface IWINVConfig {
   smsCompanyId?: string;
   senderNumber?: string;
   smsSenderNumber?: string;
+  /**
+   * IWINV RCS send API key ("RCS 발송 API Key" of the RCS account in the IWINV
+   * console), sent as `AUTH: base64(rcsApiKey)`. It is separate from the
+   * AlimTalk and SMS keys, and enables `RCS_TPL`.
+   */
+  rcsApiKey?: string;
+  /** Default RCS brand id (`BR....`); `options.rcs.brandId` overrides it. */
+  rcsBrandId?: string;
+  /**
+   * Sender number (`callback`) for RCS; falls back to `senderNumber`.
+   * `options.from` overrides it.
+   */
+  rcsSenderNumber?: string;
   sendEndpoint?: string;
   /**
    * Optional proxy/IP override header for IP-restricted IWINV endpoints.
@@ -269,13 +282,15 @@ export const IWINV_SEND_ERROR_REASONS = [
  * with `getIWINVSendErrorReason`.
  *
  * - `SENDER_NUMBER_NOT_REGISTERED`: the sender number is not registered (or
- *   not approved) for the IWINV account. SMS `13`, AlimTalk `505`, or a
- *   message saying so (e.g. "조직(업체) 발신번호가 일치하지 않습니다.").
+ *   not approved) for the IWINV account. SMS `13`, AlimTalk `505`, a message
+ *   saying so (e.g. "조직(업체) 발신번호가 일치하지 않습니다."), or
+ *   RCS `218` (`217` when the account has no sender number at all).
  * - `IP_NOT_ALLOWED`: the request came from an IP the account does not allow.
- *   SMS `15`/`206`, AlimTalk `206`, or a message saying so.
- * - `RECIPIENT_NUMBER_INVALID`: the recipient number is missing. SMS `41`.
- * - `AUTO_CHARGE_LIMIT_EXCEEDED`: the daily SMS auto-charge limit is used up.
- *   SMS `50`.
+ *   SMS `15`/`206`, AlimTalk `206`, RCS `206`, or a message saying so.
+ * - `RECIPIENT_NUMBER_INVALID`: the recipient number is missing or malformed.
+ *   SMS `41`, RCS `214`/`215`/`221`.
+ * - `AUTO_CHARGE_LIMIT_EXCEEDED`: the daily auto-charge limit is used up.
+ *   SMS `50`, RCS `222`.
  *
  * A reason read from IWINV's text sets the normalized code only when that code
  * was otherwise the generic `PROVIDER_ERROR`/`NETWORK_ERROR` of an unlisted

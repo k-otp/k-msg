@@ -90,6 +90,19 @@ export const providerConfigFieldSpecs = {
       type: "string",
       description: "SMS/LMS sender number override",
     },
+    rcsApiKey: {
+      type: "string",
+      description:
+        "IWINV RCS send API key (AUTH header); enables RCS_TPL, e.g. env:IWINV_RCS_API_KEY",
+    },
+    rcsBrandId: {
+      type: "string",
+      description: "Default IWINV RCS brand id (BR....)",
+    },
+    rcsSenderNumber: {
+      type: "string",
+      description: "RCS sender number (callback) override",
+    },
     sendEndpoint: {
       type: "string",
       description: "Override IWINV send endpoint path",
@@ -173,11 +186,11 @@ export type ProviderTypeWithConfig = keyof typeof providerConfigFieldSpecs;
 
 /**
  * Key sets a provider config must contain one of in full, beyond the fields
- * marked `required`: an IWINV config needs the AlimTalk `apiKey`, or both SMS
- * keys.
+ * marked `required`: an IWINV config needs the AlimTalk `apiKey`, both SMS
+ * keys, or the RCS `rcsApiKey`.
  */
 export const providerConfigKeyAlternatives: Partial<
   Record<ProviderTypeWithConfig, readonly (readonly string[])[]>
 > = {
-  iwinv: [["apiKey"], ["smsApiKey", "smsAuthKey"]],
+  iwinv: [["apiKey"], ["smsApiKey", "smsAuthKey"], ["rcsApiKey"]],
 };

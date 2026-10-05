@@ -316,11 +316,22 @@ export interface RcsTextSendOptions extends CommonSendOptions {
   rcs?: RcsSendOptions;
 }
 
+/**
+ * SMS/LMS fallback for an RCS template message that the recipient's device or
+ * carrier does not deliver. Same shape as {@link AlimTalkFailoverOptions}:
+ * `fallbackContent` and `fallbackTitle` are the fallback text, and
+ * `fallbackChannel` picks SMS or LMS (`KMsg` sizes it from the content when
+ * unset). Providers that cannot send a fallback ignore it; see each provider's
+ * README for what it maps.
+ */
+export type RcsFailoverOptions = AlimTalkFailoverOptions;
+
 export interface RcsTemplateSendOptions extends CommonSendOptions {
   type: "RCS_TPL" | "RCS_ITPL" | "RCS_LTPL";
   templateId: string;
   variables: MessageVariables;
   rcs?: RcsSendOptions;
+  failover?: RcsFailoverOptions;
 }
 
 /**

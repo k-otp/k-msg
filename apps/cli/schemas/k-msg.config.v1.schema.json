@@ -171,6 +171,21 @@
                     "minLength": 1,
                     "description": "SMS/LMS sender number override"
                   },
+                  "rcsApiKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "IWINV RCS send API key (AUTH header); enables RCS_TPL, e.g. env:IWINV_RCS_API_KEY"
+                  },
+                  "rcsBrandId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Default IWINV RCS brand id (BR....)"
+                  },
+                  "rcsSenderNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "RCS sender number (callback) override"
+                  },
                   "sendEndpoint": {
                     "type": "string",
                     "minLength": 1,
@@ -252,6 +267,9 @@
                   },
                   {
                     "required": ["smsApiKey", "smsAuthKey"]
+                  },
+                  {
+                    "required": ["rcsApiKey"]
                   }
                 ]
               }
