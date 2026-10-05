@@ -3,9 +3,10 @@
 K-Message IWINV 프로바이더는 하나의 `send` API로 아래 채널을 통합 처리합니다.
 - 알림톡
 - SMS / LMS / MMS
+- RCS 템플릿(`RCS_TPL`)
 
-한 채널만 설정해도 됩니다. 알림톡은 `apiKey`, SMS / LMS / MMS는 `smsApiKey`와
-`smsAuthKey`가 필요합니다.
+한 채널만 설정해도, 여러 채널을 함께 설정해도 됩니다. 알림톡은 `apiKey`,
+SMS / LMS / MMS는 `smsApiKey`와 `smsAuthKey`, RCS는 `rcsApiKey`가 필요합니다.
 
 영문 문서는 `README.md`를 참고하세요.
 
@@ -21,6 +22,10 @@ bun add @k-msg/provider @k-msg/core
 
 - SMS API: https://help.iwinv.kr/manual/read.html?idx=904
 - 알림톡(Kakao) API: https://help.iwinv.kr/manual/862
+- RCS: 출시 공지 https://docs.iwinv.kr/blog/2026/06/15/release-rcs, 설정 가이드
+  https://docs.iwinv.kr/service/message/rcs/rcs-guide (계정, 발송 IP, 템플릿, 발송).
+  RCS REST API 가이드는 IWINV 콘솔(메시지 > RCS > RCS API)에 있고 로그인이
+  필요합니다. 아래 RCS 절은 2026-10-05에 확인한 그 가이드를 따릅니다.
 
 ## 온보딩 요구사항
 
@@ -112,6 +117,82 @@ CLI 기준:
   - `SMS/LMS/MMS`: SMS v2 charge API(`secret` 인증) 사용
 - 전송내역(history) 엔드포인트는 참고용 문서로 유지됩니다.
 
+### 4) RCS (템플릿 메시지)
+
+IWINV는 현재 RCS 템플릿형만 제공합니다(SMS/LMS/이미지형 RCS는 준비 중). 그래서
+`IWINVProvider`는 `RCS_TPL`만 보내고 다른 `RCS_*` 타입은 거절합니다.
+
+- URL: `POST https://rcs.bizservice.iwinv.kr/api/v1/send/`
+- 헤더:
+  - `Content-Type: application/json;charset=UTF-8`
+  - `AUTH: base64(RCS_API_KEY)`: RCS 계정의 "RCS 발송 API Key"로, 알림톡·SMS 키와
+    별개입니다.
+- BODY (`SendOptions`에서 만듦):
+  - `brandId`: `options.rcs.brandId`, 없으면 `config.rcsBrandId`.
+  - `templateCode`: `options.rcs.templateId`, 없으면 `templateId`.
+  - `callback`(발신번호): `from`, 없으면 `config.rcsSenderNumber`, 없으면
+    `config.senderNumber`.
+  - `list[0]`: `phone`과 `templateParam`. `templateParam`은 `variables`와
+    `options.rcs.variables`를 이름별로 담은 객체입니다(값은 문자열로 바꾸며
+    `null`은 `""`, `undefined`는 뺍니다).
+  - `reserve`/`sendDate`: `options.scheduledAt`(KST로 보냄). IWINV는 15분 뒤부터
+    2일 뒤까지 받습니다.
+- 템플릿은 변수 값을 포함해 최대 90자이며, 더 긴 메시지는 IWINV가 거절합니다
+  (`211`/`212`).
+
+대체 문자(`reSend`): `RCS_TPL`의 `failover`(`@k-msg/core`의
+`RcsFailoverOptions`, 알림톡과 같은 모양)를 IWINV 필드로 옮깁니다.
+
+- `failover.enabled`가 true이거나, 지정하지 않고 `failover.fallbackContent`를 주면
+  대체 문자를 요청합니다(`reSend: "Y"`). `failover.enabled: false`나
+  `rcs.disableSms: true`이면 요청하지 않으며, 이것이 IWINV 기본값이기도 합니다.
+- `fallbackContent`는 `resendContent`, `fallbackTitle`은 `resendTitle`(LMS만),
+  `fallbackChannel`은 `resendType` `SMS`/`LMS`가 됩니다. 채널이 없으면 내용
+  크기로 정합니다(`KMsg` 방식으로 센 90바이트 초과면 LMS). `KMsg`는 발송 전에
+  대체 문자의 `#{name}`을 `variables`로 채웁니다.
+- SMS로 90바이트, LMS로 2,000바이트를 넘는 내용은 보내기 전에
+  `INVALID_REQUEST`로 실패합니다.
+- `providerOptions.reSend`, `resendType`, `resendTitle`, `resendContent`가
+  `failover`보다 우선합니다.
+- 내용 없이 `failover.enabled`만 주면 `resendContent` 없이 `reSend: "Y"`를
+  보냅니다. 이때 IWINV가 무엇을 보내는지는 가이드에 없으므로, OTP처럼 대체 문자가
+  중요하면 내용을 주세요.
+
+메시지 키와 발송 상태:
+
+- IWINV 발송 응답은 `{"code":200,"message":...,"success":n,"fail":n}`이고 메시지
+  키가 없습니다(`msgkey`는 전송내역 API에만 나옵니다). 그래서 발송 결과의
+  `providerMessageId`는 IWINV 키가 아닌 상관 ID
+  `iwinv-rcs:<brandId>:<templateCode>`(URI 인코딩)입니다.
+- `getDeliveryStatus({ type: "RCS_TPL", ... })`는
+  `https://rcs.bizservice.iwinv.kr/api/v1/history/`에 수신번호, 브랜드, 템플릿과
+  `requestedAt` 1분 전부터의 기간을 보내고, API로 보낸 행 중 `req_date`가
+  `requestedAt`(또는 `scheduledAt`)에 가장 가까운 행을 고릅니다. 같은 템플릿을
+  같은 번호로 거의 동시에 두 번 보내면 구분할 수 없습니다. 고른 행(IWINV
+  `msgkey` 포함)은 `raw`에 담깁니다. 상관 ID가 아닌 `providerMessageId`는 IWINV
+  `msgkey`로 조회합니다.
+- 상태: `state`가 수신완료면 `DELIVERED`, 수신실패면 `FAILED`, 대기면
+  `PENDING`입니다. 그 밖에는 `done_code` `10000`(또는 "성공" `done_message`)이면
+  `DELIVERED`, 다른 `done_code`면 `FAILED`, 둘 다 없으면 `SENT`입니다. IWINV가
+  `done_code` 표를 공개하지 않아 `statusCode`에는 IWINV 코드를 그대로 담습니다.
+  상태는 RCS 메시지의 것이며 대체 SMS/LMS 결과는 보고하지 않습니다.
+- 전송내역 API의 HTTP 메서드는 IWINV 가이드에 없어, 발송과 같이 JSON POST로
+  보냅니다. SMS와 달리 RCS 전송내역에는 `companyid`가 필요 없습니다.
+- IWINV의 예약 발송 취소 API(`/api/v1/cancel/`)는 감싸지 않았고, `getBalance`에는
+  RCS 채널이 없습니다.
+
+RCS `code` 요약: `200` 발송; `202` API 키 인증 실패; `203` 미승인 브랜드;
+`206` 미등록 IP; `207` 브랜드에 없는 템플릿; `208` 미승인 템플릿; `209`–`212`
+변수·길이 오류; `213` 금칙어; `214`/`215`/`221` 수신번호 누락·형식 오류;
+`217`/`218` 미등록 발신번호; `222` 일일 자동충전 한도; `223` 자동충전 중; `224`
+잔액 부족; `225` 자동충전 실패. 매핑은 "발송 오류"를 보세요.
+
+온보딩: IWINV RCS 설정은 수동입니다. RCS Biz Center에서 브랜드를 등록하고
+IWINV 대행사에 위임한 뒤, IWINV 콘솔에 RCS 계정(RCS ID, 브랜드 키)을 추가하고
+발송 IP와 발신번호를 등록하고 템플릿 승인을 받으세요. `k-msg providers doctor`는
+이를 수동 점검 `rcs_brand_template_approved`, `rcs_send_ip_registered`로
+보여 줍니다.
+
 ## 환경변수
 
 알림톡 사용 시 필수:
@@ -125,6 +206,14 @@ SMS/LMS/MMS v2 사용 시 필수(SMS만 쓸 때는 이 두 값만 있으면 됩�
 ```bash
 IWINV_SMS_API_KEY=your_sms_api_key
 IWINV_SMS_AUTH_KEY=your_sms_auth_key
+```
+
+RCS 사용 시 필수(RCS만 쓸 때는 이 값만 있으면 됩니다):
+
+```bash
+IWINV_RCS_API_KEY=your_rcs_send_api_key
+IWINV_RCS_BRAND_ID=BR.your_brand_id         # 선택: 기본 브랜드
+IWINV_RCS_SENDER_NUMBER=15880000            # 선택: 없으면 IWINV_SENDER_NUMBER
 ```
 
 발신번호 기본값(선택):
@@ -188,6 +277,21 @@ const alimtalk = await provider.send({
 });
 if (alimtalk.isFailure) throw alimtalk.error;
 
+// RCS 템플릿, 같은 코드를 담은 SMS 대체 문자와 함께.
+const rcsProvider = new IWINVProvider({
+  rcsApiKey: process.env.IWINV_RCS_API_KEY!,
+  rcsBrandId: process.env.IWINV_RCS_BRAND_ID,
+  senderNumber: process.env.IWINV_SENDER_NUMBER,
+});
+const rcs = await rcsProvider.send({
+  type: "RCS_TPL",
+  to: "01012345678",
+  templateId: "YOUR_RCS_TEMPLATE_CODE",
+  variables: { code: "123456" },
+  failover: { enabled: true, fallbackContent: "[서비스] 인증번호 123456" },
+});
+if (rcs.isFailure) throw rcs.error;
+
 // SMS/LMS/MMS 전용: 알림톡 apiKey 없이 사용할 수 있습니다.
 const smsOnly = new IWINVProvider({
   smsApiKey: process.env.IWINV_SMS_API_KEY!,
@@ -228,11 +332,11 @@ bun src/cli.ts send \
 
 ## 발송 오류
 
-IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에는 정규화된
+IWINV가 발송(알림톡, SMS/LMS/MMS, RCS)을 실패로 응답하면 `KMsgError`에는 정규화된
 `code`와 함께 IWINV의 응답이 그대로 담깁니다.
 
 - `providerErrorCode` (`string`): IWINV의 정수 `resultCode`(SMS v2) 또는
-  `code`(알림톡)를 문자열로 담습니다. 예: `"13"`, `"505"`. 본문에 그런 코드가
+  `code`(알림톡, RCS)를 문자열로 담습니다. 예: `"13"`, `"505"`. 본문에 그런 코드가
   없으면(`Forbidden` 같은 일반 텍스트, HTML 오류 페이지 등) 설정되지 않습니다.
 - `providerErrorText` (`string`): IWINV의 `message`. SMS 응답이 코드만 보낸
   경우 IWINV 문서가 그 코드에 적은 문구입니다. 그 밖에는 설정되지 않습니다.
@@ -248,15 +352,15 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
 - `details.reason` (`IWINVSendErrorReason`, `IWINV_SEND_ERROR_REASONS` 중 하나):
   IWINV의 코드나 문구로 거절 사유를 알 수 있을 때 설정됩니다.
   `getIWINVSendErrorReason(error)`로 읽으세요.
-  - `SENDER_NUMBER_NOT_REGISTERED`: SMS `13`, 알림톡 `505`, 또는 "조직(업체)
-    발신번호가 일치하지 않습니다." 같은 문구.
-  - `IP_NOT_ALLOWED`: SMS `15`/`206`, 알림톡 `206`, 또는 그런 문구.
-  - `RECIPIENT_NUMBER_INVALID`: SMS `41`.
-  - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`.
+  - `SENDER_NUMBER_NOT_REGISTERED`: SMS `13`, 알림톡 `505`, RCS `217`/`218`,
+    또는 "조직(업체) 발신번호가 일치하지 않습니다." 같은 문구.
+  - `IP_NOT_ALLOWED`: SMS `15`/`206`, 알림톡 `206`, RCS `206`, 또는 그런 문구.
+  - `RECIPIENT_NUMBER_INVALID`: SMS `41`, RCS `214`/`215`/`221`.
+  - `AUTO_CHARGE_LIMIT_EXCEEDED`: SMS `50`, RCS `222`.
 
   정규화된 `code`는 HTTP 상태가 먼저 정합니다. 본문의 코드와 관계없이 HTTP
   `429`는 `RATE_LIMIT_EXCEEDED`, HTTP 5xx는 `NETWORK_ERROR`(SMS) 또는
-  `PROVIDER_ERROR`(알림톡)이며 둘 다 재시도 가능합니다. 그 밖에는 위 코드들이
+  `PROVIDER_ERROR`(알림톡, RCS)이며 둘 다 재시도 가능합니다. 그 밖에는 위 코드들이
   재시도하지 않는 코드로 매핑됩니다. 문구로만 알 수 있는 발신번호/IP 거절은
   코드가 문서에 없는 코드의 일반 분류(`PROVIDER_ERROR`/`NETWORK_ERROR`)일 때만
   `INVALID_REQUEST`/`AUTHENTICATION_FAILED`가 되고, 알림톡 코드 `429`와 문서에
@@ -266,10 +370,17 @@ IWINV가 발송(알림톡, SMS/LMS/MMS)을 실패로 응답하면 `KMsgError`에
 알림톡 발송은 IWINV가 2xx와 코드 `200`(정수 또는 문자열 `"200"`)으로 응답하면
 접수된 것으로 봅니다. `seqNo`(숫자 또는 숫자 문자열, `Number.MAX_SAFE_INTEGER`
 이하)는 `providerMessageId`가 됩니다. 문자열 코드는 정수로 읽으므로 `{"code":"505"}`는 `505`와 같은 거절이고,
-정수가 아닌 코드(`"200.0"`, `"2e2"`)는 코드가 없는 것으로 봅니다.
+정수가 아닌 코드(`"200.0"`, `"2e2"`)는 코드가 없는 것으로 봅니다. RCS 발송도
+`code`를 같은 방식으로 읽습니다.
+
+RCS 코드 매핑: `202`, `204`, `205`, `206`은 `AUTHENTICATION_FAILED`, `207`은
+`TEMPLATE_NOT_FOUND`, `203`과 `208`–`221`은 `INVALID_REQUEST`, `222`, `224`,
+`225`는 `INSUFFICIENT_BALANCE`, `223`(자동충전 중)과 문서에 없는 코드는
+`PROVIDER_ERROR`입니다. `success`가 `0`인(받은 수신자가 없는) 200 응답도
+`PROVIDER_ERROR`입니다.
 
 숫자 코드가 없는 2xx 응답(`{}`, `{"code":"x"}`, 빈 본문, `OK` 같은 일반
-텍스트)은 두 채널 모두 `PROVIDER_ERROR`이며 `providerErrorCode`는 설정되지
+텍스트)은 모든 채널에서 `PROVIDER_ERROR`이며 `providerErrorCode`는 설정되지
 않습니다. IWINV가 발송을 접수했을 수도 있으므로 거절(`INVALID_REQUEST`)로도,
 성공으로도 보고하지 않습니다. 단, `message`가 거절을 알리면(위
 `details.reason`, 예: "조직(업체) 발신번호가 일치하지 않습니다.") IWINV가 발송을

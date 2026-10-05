@@ -346,6 +346,37 @@ describe("SolapiProvider (SendOptions-based)", () => {
     );
   });
 
+  test("warns that RCS failover is not mapped", async () => {
+    const { client, calls } = createStubClient();
+    const provider = new SolapiProvider(
+      {
+        apiKey: "key",
+        apiSecret: "secret",
+        baseUrl: "https://api.solapi.com",
+        rcsBrandId: "brand_1",
+        defaultFrom: "01000000000",
+        debug: false,
+      } satisfies SolapiConfig,
+      client,
+    );
+
+    const result = await provider.send({
+      type: "RCS_TPL",
+      to: "01012345678",
+      templateId: "RCS_TPL_1",
+      variables: {},
+      failover: { enabled: true, fallbackContent: "fallback text" },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(calls.sendOne[0]?.message?.text).toBeUndefined();
+    if (result.isSuccess) {
+      expect(result.value.warnings?.map((warning) => warning.code)).toEqual([
+        "FAILOVER_UNSUPPORTED_PROVIDER",
+      ]);
+    }
+  });
+
   test("marks ALIMTALK failover for API-level fallback when SOLAPI has no sender to replace with", async () => {
     const { client, calls } = createStubClient();
     const provider = new SolapiProvider(

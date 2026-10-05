@@ -46,9 +46,9 @@ export const providerCliMetadata: Record<
   },
   iwinv: {
     label: "IWINV",
-    routingSeedTypes: ["ALIMTALK", "SMS", "LMS", "MMS"],
-    // AlimTalk needs apiKey and SMS needs the SMS keys, so an entry routes
-    // only the types its credentials can send.
+    routingSeedTypes: ["ALIMTALK", "SMS", "LMS", "MMS", "RCS_TPL"],
+    // AlimTalk needs apiKey, SMS the SMS keys and RCS rcsApiKey, so an entry
+    // routes only the types its credentials can send.
     routingSeedTypesForConfig: resolveIwinvMessageTypes,
   },
   solapi: {

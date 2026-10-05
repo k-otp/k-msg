@@ -36,6 +36,11 @@ import type {
   NormalizedIwinvConfig,
   SmsV2MessageType,
 } from "./iwinv.internal.types";
+import {
+  getRcsDeliveryStatus,
+  type IwinvRcsSendOptions,
+  sendRcs,
+} from "./iwinv.rcs";
 import { sendAlimTalk, sendSmsV2 } from "./iwinv.send";
 import {
   buildSmsSecretHeader,
@@ -83,7 +88,7 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
     if (types.length === 0) {
       throw new KMsgError(
         KMsgErrorCode.INVALID_REQUEST,
-        "IWINVProvider requires `apiKey` (AlimTalk) or `smsApiKey` and `smsAuthKey` (SMS)",
+        "IWINVProvider requires `apiKey` (AlimTalk), `smsApiKey` and `smsAuthKey` (SMS), or `rcsApiKey` (RCS)",
         { providerId: this.id },
       );
     }
@@ -153,6 +158,13 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
           >,
           context,
         });
+      case "RCS_TPL":
+        return sendRcs({
+          providerId: this.id,
+          config: this.config,
+          options: normalized as IwinvRcsSendOptions,
+          context,
+        });
       default:
         return fail(
           new KMsgError(
@@ -180,6 +192,13 @@ export class IWINVSendProvider implements Provider, BalanceProvider {
       case "LMS":
       case "MMS":
         return getSmsV2DeliveryStatus({
+          providerId: this.id,
+          config: this.config,
+          query,
+          context,
+        });
+      case "RCS_TPL":
+        return getRcsDeliveryStatus({
           providerId: this.id,
           config: this.config,
           query,
@@ -408,10 +427,14 @@ export const createIWINVSendProvider = (config: IWINVConfig) =>
 export const createDefaultIWINVSendProvider = () => {
   const config = resolveDefaultIWINVConfig();
 
-  if (!config.apiKey && !(config.smsApiKey && config.smsAuthKey)) {
+  if (
+    !config.apiKey &&
+    !(config.smsApiKey && config.smsAuthKey) &&
+    !config.rcsApiKey
+  ) {
     throw new KMsgError(
       KMsgErrorCode.INVALID_REQUEST,
-      "IWINV_API_KEY (AlimTalk), or IWINV_SMS_API_KEY and IWINV_SMS_AUTH_KEY (SMS), environment variables are required",
+      "IWINV_API_KEY (AlimTalk), IWINV_SMS_API_KEY and IWINV_SMS_AUTH_KEY (SMS), or IWINV_RCS_API_KEY (RCS) environment variables are required",
       { providerId: "iwinv" },
     );
   }
