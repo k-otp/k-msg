@@ -23,7 +23,7 @@ bun add solapi
 ## 기본 제공 Provider
 
 - `SolapiProvider` (SOLAPI)
-- `IWINVProvider` (IWINV 알림톡 및/또는 SMS v2, `src/iwinv/README_ko.md` 참고)
+- `IWINVProvider` (IWINV 알림톡, SMS v2, RCS 템플릿 중 원하는 조합, `src/iwinv/README_ko.md` 참고)
 - `AligoProvider` (Aligo)
 - `MockProvider` (벤더 API를 호출하지 않는 테스트·로컬 실행용). `{ id }`를 넘기면 인스턴스마다 provider id를 따로 줄 수 있어, 예를 들어 mock 두 개로 `routing.byType`을 시험할 수 있습니다. 기본 id는 `"mock"`입니다.
 
@@ -99,7 +99,7 @@ IWINV와 Aligo는 이를 위해 템플릿 본문이 필요합니다. `providerOp
 
 | Provider | `getDeliveryStatus` |
 | --- | --- |
-| `iwinv` | 알림톡 전송내역, SMS/LMS/MMS 전송내역은 `smsCompanyId` 필요 |
+| `iwinv` | 알림톡 전송내역, SMS/LMS/MMS 전송내역은 `smsCompanyId` 필요, RCS 전송내역은 브랜드·템플릿·수신번호·요청 시각으로 매칭(IWINV 발송 응답에 메시지 키가 없음) |
 | `solapi` | SOLAPI 메시지 목록 |
 | `aligo` | 미구현 |
 
@@ -122,6 +122,15 @@ ALIMTALK의 `failover`는 `@k-msg/core`에서 표준화되어 있지만 provider
 - `iwinv`는 `failover.fallbackContent`를 `resendContent`(`resendType: "N"`)로 보내고, 없으면 IWINV가 알림톡 내용을 대체문자로 보냅니다. SMS/LMS는 내용 길이로 IWINV가 정합니다.
 - tracking 기반 API 레벨 fallback retry(배달 폴링 + SMS/LMS 재발송)는 `@k-msg/messaging`에서 처리하며, 위 warning을 반환한 발송에만 적용됩니다.
 - `solapi`는 알림톡에 발신번호(`from` 또는 `defaultFrom`)가 있으면 대체문자를 직접 보내므로(`kakao.disableSms: false`) warning을 반환하지 않습니다. 발신번호가 없으면 SOLAPI가 대체발송할 수 없어 API 레벨 fallback 대상으로 표시됩니다.
+
+## RCS failover
+
+`RCS_TPL`/`RCS_ITPL`/`RCS_LTPL`의 `failover`(`@k-msg/core`의 `RcsFailoverOptions`, ALIMTALK과 같은 모양)는 RCS 메시지가 전달되지 않을 때 SMS/LMS 대체 문자를 요청합니다. `KMsg`는 ALIMTALK과 같이 변수를 채우고 SMS/LMS 크기를 정합니다. tracking 기반 API 레벨 fallback은 RCS에 적용되지 않습니다.
+
+| Provider | Native mapping | Warning |
+| --- | --- | --- |
+| `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` (`RCS_TPL`만) | none (native로 처리) |
+| `solapi` | 매핑하지 않음, SOLAPI 자체 대체발송은 `rcs.disableSms`를 따름 | `FAILOVER_UNSUPPORTED_PROVIDER` |
 
 ## 사용 예시 (KMsg와 함께)
 

@@ -23,7 +23,7 @@ bun add solapi
 ## Built-in Providers
 
 - `SolapiProvider` (SOLAPI)
-- `IWINVProvider` (IWINV AlimTalk and/or SMS v2; see `src/iwinv/README.md`)
+- `IWINVProvider` (IWINV AlimTalk, SMS v2 and/or RCS templates; see `src/iwinv/README.md`)
 - `AligoProvider` (Aligo)
 - `MockProvider` (no vendor calls, for tests and local runs). Pass `{ id }` to give each instance its own provider id, for example to try `routing.byType` with two mocks; the id defaults to `"mock"`.
 
@@ -99,7 +99,7 @@ IWINV and Aligo need the template text for this. They take it from `providerOpti
 
 | Provider | `getDeliveryStatus` |
 | --- | --- |
-| `iwinv` | AlimTalk history; SMS/LMS/MMS history needs `smsCompanyId` |
+| `iwinv` | AlimTalk history; SMS/LMS/MMS history needs `smsCompanyId`; RCS history, matched by brand, template, recipient and request time (IWINV's send answer has no message key) |
 | `solapi` | SOLAPI message list |
 | `aligo` | not implemented |
 
@@ -122,6 +122,15 @@ Boundary:
 - `iwinv` sends `failover.fallbackContent` as `resendContent` (`resendType: "N"`); without it, IWINV resends the AlimTalk text. IWINV picks SMS or LMS by the text's length.
 - Tracking-based API-level fallback retry (delivery polling + SMS/LMS re-send) is handled by `@k-msg/messaging`, only for sends that return one of the warnings above.
 - `solapi` sends the fallback itself (`kakao.disableSms: false`) when the AlimTalk has a sender number (`from` or `defaultFrom`), so it returns no warning then; otherwise SOLAPI cannot replace it and the send is marked for API-level fallback.
+
+## RCS failover
+
+`failover` on `RCS_TPL`/`RCS_ITPL`/`RCS_LTPL` (`RcsFailoverOptions` in `@k-msg/core`, the same shape as ALIMTALK's) asks for an SMS/LMS fallback when the RCS message is not delivered. `KMsg` fills its placeholders and sizes it for SMS or LMS as for ALIMTALK. Tracking-based API-level fallback does not apply to RCS.
+
+| Provider | Native mapping | Warning |
+| --- | --- | --- |
+| `iwinv` | `reSend`, `resendType`, `resendContent`, `resendTitle` (`RCS_TPL` only) | none (treated as native) |
+| `solapi` | not mapped; SOLAPI's own fallback follows `rcs.disableSms` | `FAILOVER_UNSUPPORTED_PROVIDER` |
 
 ## Usage (with KMsg)
 
