@@ -7,7 +7,7 @@ title: "normalizeProviderError"
 
 > **normalizeProviderError**(`error`, `options?`): [`NormalizedProviderError`](/en/api/core/src/interfaces/normalizedprovidererror/)
 
-Defined in: [packages/core/src/errors.ts:1020](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L1020)
+Defined in: [packages/core/src/errors.ts:1024](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L1024)
 
 ## Parameters
 

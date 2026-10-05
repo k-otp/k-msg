@@ -7,7 +7,7 @@ title: "parseErrorRetryPolicyFromJson"
 
 > **parseErrorRetryPolicyFromJson**(`raw`, `options?`): [`ErrorRetryPolicy`](/en/api/core/src/interfaces/errorretrypolicy/) \| `null`
 
-Defined in: [packages/core/src/errors.ts:872](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L872)
+Defined in: [packages/core/src/errors.ts:876](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L876)
 
 ## Parameters
 

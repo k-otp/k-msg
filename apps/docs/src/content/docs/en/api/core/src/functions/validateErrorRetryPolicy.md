@@ -7,7 +7,7 @@ title: "validateErrorRetryPolicy"
 
 > **validateErrorRetryPolicy**(`input`, `options?`): [`ErrorRetryPolicyValidationResult`](/en/api/core/src/interfaces/errorretrypolicyvalidationresult/)
 
-Defined in: [packages/core/src/errors.ts:744](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L744)
+Defined in: [packages/core/src/errors.ts:748](https://github.com/k-otp/k-msg/blob/main/packages/core/src/errors.ts#L748)
 
 ## Parameters
 

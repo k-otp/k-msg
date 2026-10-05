@@ -5,9 +5,25 @@ prev: false
 title: "IWINVSendProvider"
 ---
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L71)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L60)
 
-IWINV send/status/balance focused entrypoint.
+Core provider interface for sending messages.
+
+All providers must implement this interface. Optional capabilities
+(balance, templates, delivery status) are exposed via separate interfaces.
+
+## Example
+
+```ts
+class MyProvider implements Provider {
+  readonly id = "my-provider";
+  readonly name = "My Provider";
+  readonly supportedTypes = ["SMS", "LMS"] as const;
+
+  async healthCheck() { return { healthy: true, issues: [] }; }
+  async send(params) { ... }
+}
+```
 
 ## Extended by
 
@@ -24,7 +40,7 @@ IWINV send/status/balance focused entrypoint.
 
 > **new IWINVSendProvider**(`config`): `IWINVSendProvider`
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L96)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:77](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L77)
 
 #### Parameters
 
@@ -42,7 +58,7 @@ Defined in: [packages/provider/src/iwinv/provider.send.ts:96](https://github.com
 
 > `readonly` **id**: `"iwinv"` = `"iwinv"`
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L72)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:61](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L61)
 
 Unique identifier for this provider instance.
 Used for routing and logging.
@@ -63,7 +79,7 @@ Used for routing and logging.
 
 > `readonly` **name**: `"IWINV Messaging Provider"` = `"IWINV Messaging Provider"`
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L73)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:62](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L62)
 
 Human-readable name for display purposes.
 
@@ -83,7 +99,7 @@ Human-readable name for display purposes.
 
 > `readonly` **supportedTypes**: readonly [`MessageType`](/en/api/core/src/type-aliases/messagetype/)[]
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:74](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L74)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:63](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L63)
 
 Message types this provider supports.
 Messages of unsupported types will be rejected.
@@ -98,7 +114,7 @@ Messages of unsupported types will be rejected.
 
 > `readonly` **transportCapabilities**: `object`
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:75](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L75)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L64)
 
 Per-operation transport features supported by this provider.
 Missing declarations must be treated as unsupported.
@@ -121,7 +137,7 @@ Missing declarations must be treated as unsupported.
 
 > **getBalance**(`query?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`BalanceResult`](/en/api/core/src/interfaces/balanceresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L223)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:218](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L218)
 
 Query the remaining balance/points for the provider account.
 
@@ -145,7 +161,7 @@ Query the remaining balance/points for the provider account.
 
 > **getDeliveryStatus**(`query`, `context?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`DeliveryStatusResult`](/en/api/core/src/interfaces/deliverystatusresult/) \| `null`, [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:191](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L191)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:179](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L179)
 
 Query delivery status for a previously sent message.
 Optional capability - not all providers support this.
@@ -174,7 +190,7 @@ Optional capability - not all providers support this.
 
 > **getOnboardingSpec**(): [`ProviderOnboardingSpec`](/en/api/core/src/interfaces/provideronboardingspec/)
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L84)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:73](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L73)
 
 Get the onboarding specification for this provider.
 Used by tooling to guide provider configuration.
@@ -193,7 +209,7 @@ Used by tooling to guide provider configuration.
 
 > **healthCheck**(): `Promise`\<[`ProviderHealthStatus`](/en/api/core/src/interfaces/providerhealthstatus/)\>
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:117](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L117)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:98](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L98)
 
 Check if the provider is operational.
 Used for health monitoring and circuit breaker decisions.
@@ -212,7 +228,7 @@ Used for health monitoring and circuit breaker decisions.
 
 > **send**(`options`, `context?`): `Promise`\<[`Result`](/en/api/core/src/type-aliases/result/)\<[`SendResult`](/en/api/core/src/interfaces/sendresult/), [`KMsgError`](/en/api/core/src/classes/kmsgerror/)\>\>
 
-Defined in: [packages/provider/src/iwinv/provider.send.ts:152](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L152)
+Defined in: [packages/provider/src/iwinv/provider.send.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/provider.send.ts#L133)
 
 Send a message through this provider.
 

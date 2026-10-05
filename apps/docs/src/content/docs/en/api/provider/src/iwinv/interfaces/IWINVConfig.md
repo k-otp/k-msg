@@ -25,7 +25,7 @@ it and set `smsApiKey` and `smsAuthKey` instead.
 
 > `optional` **debug?**: `boolean`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:239](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L239)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:252](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L252)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:239](https://github.com/
 
 > `optional` **extraHeaders?**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:232](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L232)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L245)
 
 Extra HTTP headers merged into outgoing requests.
 Use with care: overriding AUTH/secret can break requests.
@@ -44,7 +44,7 @@ Use with care: overriding AUTH/secret can break requests.
 
 > `optional` **ipAlertWebhookUrl?**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L235)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:248](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L248)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:235](https://github.com/
 
 > `optional` **ipRetryCount?**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L233)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:246](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L246)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:233](https://github.com/
 
 > `optional` **ipRetryDelayMs?**: `number`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L234)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:247](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L247)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/
 
 > `optional` **onIpRestrictionAlert?**: (`payload`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:236](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L236)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:249](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L249)
 
 #### Parameters
 
@@ -82,11 +82,44 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:236](https://github.com/
 
 ***
 
+### rcsApiKey?
+
+> `optional` **rcsApiKey?**: `string`
+
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:227](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L227)
+
+IWINV RCS send API key ("RCS 발송 API Key" of the RCS account in the IWINV
+console), sent as `AUTH: base64(rcsApiKey)`. It is separate from the
+AlimTalk and SMS keys, and enables `RCS_TPL`.
+
+***
+
+### rcsBrandId?
+
+> `optional` **rcsBrandId?**: `string`
+
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:229](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L229)
+
+Default RCS brand id (`BR....`); `options.rcs.brandId` overrides it.
+
+***
+
+### rcsSenderNumber?
+
+> `optional` **rcsSenderNumber?**: `string`
+
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:234](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L234)
+
+Sender number (`callback`) for RCS; falls back to `senderNumber`.
+`options.from` overrides it.
+
+***
+
 ### sendEndpoint?
 
 > `optional` **sendEndpoint?**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:222](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L222)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:235](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L235)
 
 ***
 
@@ -137,7 +170,7 @@ Defined in: [packages/provider/src/iwinv/types/iwinv.ts:221](https://github.com/
 
 > `optional` **xForwardedFor?**: `string`
 
-Defined in: [packages/provider/src/iwinv/types/iwinv.ts:227](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L227)
+Defined in: [packages/provider/src/iwinv/types/iwinv.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/provider/src/iwinv/types/iwinv.ts#L240)
 
 Optional proxy/IP override header for IP-restricted IWINV endpoints.
 Intended for testing or controlled environments; production should whitelist real egress IPs.

@@ -5,13 +5,21 @@ prev: false
 title: "RcsTemplateSendOptions"
 ---
 
-Defined in: [packages/core/src/types/message.ts:319](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L319)
+Defined in: [packages/core/src/types/message.ts:329](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L329)
 
 ## Extends
 
 - [`CommonSendOptions`](/en/api/core/src/interfaces/commonsendoptions/)
 
 ## Properties
+
+### failover?
+
+> `optional` **failover?**: [`AlimTalkFailoverOptions`](/en/api/core/src/interfaces/alimtalkfailoveroptions/)
+
+Defined in: [packages/core/src/types/message.ts:334](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L334)
+
+***
 
 ### from?
 
@@ -103,7 +111,7 @@ Provider-specific escape hatch (use sparingly).
 
 > `optional` **rcs?**: [`RcsSendOptions`](/en/api/core/src/interfaces/rcssendoptions/)
 
-Defined in: [packages/core/src/types/message.ts:323](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L323)
+Defined in: [packages/core/src/types/message.ts:333](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L333)
 
 ***
 
@@ -111,7 +119,7 @@ Defined in: [packages/core/src/types/message.ts:323](https://github.com/k-otp/k-
 
 > **templateId**: `string`
 
-Defined in: [packages/core/src/types/message.ts:321](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L321)
+Defined in: [packages/core/src/types/message.ts:331](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L331)
 
 ***
 
@@ -139,7 +147,7 @@ Recipient phone number in Korean format without hyphens.
 
 > **type**: `"RCS_TPL"` \| `"RCS_ITPL"` \| `"RCS_LTPL"`
 
-Defined in: [packages/core/src/types/message.ts:320](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L320)
+Defined in: [packages/core/src/types/message.ts:330](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L330)
 
 ***
 
@@ -147,4 +155,4 @@ Defined in: [packages/core/src/types/message.ts:320](https://github.com/k-otp/k-
 
 > **variables**: [`MessageVariables`](/en/api/core/src/type-aliases/messagevariables/)
 
-Defined in: [packages/core/src/types/message.ts:322](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L322)
+Defined in: [packages/core/src/types/message.ts:332](https://github.com/k-otp/k-msg/blob/main/packages/core/src/types/message.ts#L332)
