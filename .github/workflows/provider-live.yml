@@ -18,6 +18,12 @@ on:
 permissions:
   contents: read
 
+# Live runs send real messages with shared provider credentials: queue them
+# instead of overlapping, and never cancel one mid-send.
+concurrency:
+  group: provider-live
+  cancel-in-progress: false
+
 env:
   BUN_VERSION: "1.4.2"
 
