@@ -53,6 +53,10 @@ To try the API without provider credentials, use `MockProvider` from `@k-msg/pro
 - TypeScript projects requiring type-safe messaging APIs
 - When automatic failover is needed for high availability
 
+### Used in Production
+
+[K-OTP](https://k-otp.dev), a phone-verification OTP API for apps serving Korean users, sends its codes with k-msg: AlimTalk first through the IWINV provider, with an SMS failover, k-msg's error details to tell refused sends from unknown outcomes, and encrypted delivery tracking. See the [K-OTP case study](https://k-msg.and.guide/en/guides/use-cases/k-otp/) for the pattern.
+
 ## Installation
 
 ```bash

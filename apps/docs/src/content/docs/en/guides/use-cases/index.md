@@ -31,6 +31,16 @@ Use this when:
 - you are choosing between FriendTalk and SMS
 - segmentation and send timing matter as much as delivery
 
+## In production
+
+### [Case Study: K-OTP](/en/guides/use-cases/k-otp/)
+
+Read this when you want to see the OTP pattern as it runs in a production service:
+
+- AlimTalk first, with an SMS failover that never duplicates a message
+- telling refused sends apart from unknown outcomes before retrying
+- encrypted delivery tracking, status polling, and WebOTP-friendly SMS text
+
 ## Why this section exists
 
 Different messaging problems need different channel choices:

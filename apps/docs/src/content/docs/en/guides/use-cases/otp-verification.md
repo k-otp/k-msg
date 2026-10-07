@@ -71,5 +71,6 @@ Use Kakao only if:
 
 ## Next steps
 
+- [Case Study: K-OTP](/en/guides/use-cases/k-otp/) for an AlimTalk-first OTP service with SMS failover in production
 - [Message Type Guide](/en/guides/message-types/) for channel tradeoffs
 - [Troubleshooting](/en/guides/troubleshooting/) if OTP sends fail in production

@@ -344,6 +344,7 @@ export default defineConfig({
                 "guides/use-cases/otp-verification",
                 "guides/use-cases/order-notification",
                 "guides/use-cases/marketing-message",
+                "guides/use-cases/k-otp",
               ],
             },
             {

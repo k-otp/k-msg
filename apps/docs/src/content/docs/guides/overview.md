@@ -52,6 +52,10 @@ if (result.isFailure) console.error(result.error.code, result.error.message);
 - 타입 안전한 메시징 API를 원하는 TypeScript 프로젝트
 - 고가용성을 위해 프로바이더 장애 시 자동 페일오버가 필요할 때
 
+### 실서비스 사례
+
+한국 사용자를 위한 휴대폰 인증 OTP API인 [K-OTP](https://k-otp.dev)는 k-msg로 인증 코드를 보냅니다. IWINV 프로바이더로 알림톡을 먼저 보내고 SMS로 대체 발송하며, k-msg의 오류 정보로 거절된 발송과 결과를 알 수 없는 발송을 구분하고, 전송 기록은 암호화해 추적합니다. 자세한 패턴은 [K-OTP 사례](https://k-msg.and.guide/guides/use-cases/k-otp/)를 참고하세요.
+
 ## 설치
 
 ```bash
