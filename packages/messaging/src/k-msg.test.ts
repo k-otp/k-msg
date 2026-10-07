@@ -1287,7 +1287,7 @@ describe("KMsg RCS template fallback content", () => {
         type: "RCS_TPL",
         to: "01012345678",
         templateId: "OTP",
-        variables: { brand: "K-OTP", code: "123456" },
+        variables: { brand: "MyShop", code: "123456" },
         failover: { enabled: true, fallbackContent },
       });
     }
@@ -1299,7 +1299,7 @@ describe("KMsg RCS template fallback content", () => {
       {
         enabled: true,
         fallbackChannel: "sms",
-        fallbackContent: "[K-OTP] code 123456",
+        fallbackContent: "[MyShop] code 123456",
       },
       {
         enabled: true,
@@ -1333,7 +1333,7 @@ describe("KMsg RCS template fallback content", () => {
       type: "RCS_TPL",
       to: "01012345678",
       templateId: "OTP",
-      variables: { brand: "K-OTP", code: "000000" },
+      variables: { brand: "MyShop", code: "000000" },
       rcs: { variables: { code: "123456" } },
       failover: { enabled: true, fallbackContent: "[#{brand}] code #{code}" },
     });
@@ -1341,6 +1341,6 @@ describe("KMsg RCS template fallback content", () => {
     const options = sent[0];
     expect(
       options?.type === "RCS_TPL" && options.failover?.fallbackContent,
-    ).toBe("[K-OTP] code 123456");
+    ).toBe("[MyShop] code 123456");
   });
 });

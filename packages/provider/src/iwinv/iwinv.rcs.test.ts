@@ -141,7 +141,7 @@ describe("IWINV RCS send", () => {
           skipped: undefined,
           at: new Date("2026-10-05T00:00:00.000Z"),
         },
-        rcs: { variables: { brand: "K-OTP" } },
+        rcs: { variables: { brand: "MyShop" } },
       }),
     );
 
@@ -160,7 +160,7 @@ describe("IWINV RCS send", () => {
             code: "123456",
             name: "",
             at: "2026-10-05T00:00:00.000Z",
-            brand: "K-OTP",
+            brand: "MyShop",
           },
         },
       ],
@@ -248,7 +248,7 @@ describe("IWINV RCS fallback", () => {
       rcs({
         failover: {
           enabled: true,
-          fallbackContent: " [K-OTP] 인증번호 123456 ",
+          fallbackContent: " [MyShop] 인증번호 123456 ",
           fallbackTitle: "ignored for SMS",
         },
       }),
@@ -257,7 +257,7 @@ describe("IWINV RCS fallback", () => {
     expect(call.body).toMatchObject({
       reSend: "Y",
       resendType: "SMS",
-      resendContent: "[K-OTP] 인증번호 123456",
+      resendContent: "[MyShop] 인증번호 123456",
     });
     expect(call.body).not.toHaveProperty("resendTitle");
   });
@@ -445,7 +445,7 @@ describe("IWINV RCS delivery status", () => {
   const requestedAt = new Date("2026-10-05T01:00:00.000Z"); // 10:00:00 KST
 
   const row = (overrides: Record<string, string>) => ({
-    brand_name: "K-OTP",
+    brand_name: "MyShop",
     template_code: "UBR.otp01",
     send_method: "API",
     callback: "15880000",

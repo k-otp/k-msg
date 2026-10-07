@@ -702,8 +702,8 @@ describe("Integration Tests", () => {
 
     // Build template using fluent API
     const template = TemplateBuilders.authentication("OTP 인증", "iwinv")
-      .code("KOTP_001")
-      .content("[K-OTP] 인증번호는 #{code}입니다. 3분 내에 입력해주세요.")
+      .code("OTP_001")
+      .content("[MyShop] 인증번호는 #{code}입니다. 3분 내에 입력해주세요.")
       .variable("code", "string", true, {
         maxLength: 6,
         format: "^[0-9]{6}$",
@@ -745,7 +745,7 @@ describe("Integration Tests", () => {
 
     const preview = builder.preview();
     expect(preview).toBe(
-      "[K-OTP] 인증번호는 123456입니다. 3분 내에 입력해주세요.",
+      "[MyShop] 인증번호는 123456입니다. 3분 내에 입력해주세요.",
     );
 
     // Validate variables
@@ -760,7 +760,7 @@ describe("Integration Tests", () => {
       code: "654321",
     });
     expect(replaced).toBe(
-      "[K-OTP] 인증번호는 654321입니다. 3분 내에 입력해주세요.",
+      "[MyShop] 인증번호는 654321입니다. 3분 내에 입력해주세요.",
     );
   });
 });
