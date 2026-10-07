@@ -551,7 +551,7 @@ import {
 } from "@k-msg/messaging/adapters/cloudflare";
 
 const trackingOptions = {
-  tableName: "otp_delivery_tracking",
+  tableName: "message_delivery_tracking",
   columnMap: {
     messageId: "id",
     nextCheckAt: "next_check_at_ms",

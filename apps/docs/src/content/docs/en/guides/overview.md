@@ -183,7 +183,7 @@ const fieldCrypto: FieldCryptoConfig = {
 };
 
 const trackingStore = createD1DeliveryTrackingStore(env.DB, {
-  tableName: "otp_delivery_tracking",
+  tableName: "message_delivery_tracking",
   fieldCryptoSchema: {
     enabled: true,
     mode: "secure",
