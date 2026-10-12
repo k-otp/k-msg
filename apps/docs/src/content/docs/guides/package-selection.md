@@ -265,8 +265,13 @@ import {
 
 const webhook = new WebhookRuntimeService({
   delivery: {
+    // 기본 HTTP client는 여기에 적은 호스트로만 전송합니다. 목록에 없는
+    // 호스트의 엔드포인트는 addEndpoint()가 거부합니다.
+    allowedHosts: ["my-app.com"],
     maxRetries: 3,
+    retryDelayMs: 1000,
     timeoutMs: 30000,
+    enableSecurity: false,
     enabledEvents: [WebhookEventType.MESSAGE_SENT],
   },
 });

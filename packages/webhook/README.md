@@ -163,6 +163,8 @@ type Env = {
 };
 
 const config: WebhookConfig = {
+  // Hosts you trust to receive deliveries; see "Security defaults".
+  allowedHosts: ["hooks.example.com"],
   // Small enough to finish inside the invocation (see above).
   maxRetries: 2,
   retryDelayMs: 1_000,
@@ -175,9 +177,8 @@ function createRuntime(env: Env): WebhookRuntimeService {
   return new WebhookRuntimeService({
     delivery: config,
     persistence: createD1WebhookPersistence(env.DB),
-    security: {
-      allowPrivateHosts: true,
-    },
+    // For local development only, `security: { allowPrivateHosts: true }`
+    // needs an explicit `httpClient` too (the constructor throws without it).
     // No timers in a Worker; see "Cloudflare Workers and other serverless
     // runtimes".
     autoStart: false,
@@ -297,6 +298,49 @@ const runtime = new WebhookRuntimeService({
 
 - Private hosts are blocked by default
 - `http://localhost` style URLs require explicit allowance (runtime security options)
+- The default HTTP client delivers only to hosts in `delivery.allowedHosts`
+- Response diagnostics are capped at 4096 bytes
+
+### Outbound host policy
+
+The default HTTP client rejects every destination unless its exact hostname or
+public IP literal is in `delivery.allowedHosts` (`WebhookConfig.allowedHosts`).
+Populate the list from administrator configuration, never from an incoming
+endpoint URL.
+
+- **Registration checks it.** `addEndpoint()`, `addEndpoints()` and
+  `updateEndpoint()` (when the URL changes) throw `WebhookHostNotAllowedError`
+  for a host outside the list, so an endpoint is never stored and then fails
+  every delivery. The error names the host, not the rest of the URL, which may
+  carry a token. Endpoints stored before you changed the list are not
+  rechecked; their deliveries fail as untrusted. With an injected `httpClient`
+  the runtime checks nothing: that client decides.
+- **Entry format.** Exact hostnames, lowercase, without scheme, path, port,
+  credentials or wildcard. A trailing dot is ignored. Write an IPv6 address in
+  brackets (`[2001:db8::1]`) and an internationalized name as punycode
+  (`xn--mnchen-3ya.de`, not `münchen.de`); the constructor throws otherwise.
+  Requests are compared by their canonical hostname, so
+  `https://HOOKS.example.com./x` matches `hooks.example.com`.
+- **Ports.** Only the host is compared. An entry trusts every port on that
+  host (`https://hooks.example.com:6379/`), so list hosts whose every port you
+  control.
+- **DNS.** The client checks names, not resolved addresses, and does not pin
+  DNS. An entry trusts that host's DNS operator: a name that resolves to a
+  private address, or a compromised record, is still fetched. For arbitrary
+  customer-owned URLs inject an `HttpClient` that validates resolved addresses
+  and pins the connection, or send through an egress proxy or firewall that
+  blocks private and metadata networks.
+- Private literal addresses, URL credentials and redirects (not followed) are
+  rejected.
+- `security.allowPrivateHosts` without an injected `httpClient` throws when the
+  runtime is constructed.
+
+`maxResponseBodyBytes` limits the retained response diagnostics to 4096 bytes by
+default (`0` omits them, maximum 1 MiB). Reaching the cap cancels the rest of
+the body and sets `responseBodyTruncated`; a body exactly as long as the cap is
+reported as truncated too. Bytes are decoded as UTF-8, so a multibyte character
+cut by the cap becomes U+FFFD. Avoid secrets in responses even with the bound.
+Injected HTTP clients must honor request cancellation and manual redirects.
 
 ## Signing and verifying deliveries
 
@@ -400,7 +444,27 @@ given. If the sender changed `algorithm`, `signatureHeader`, or
 | Cloudflare persistence from custom wiring | use `@k-msg/webhook/adapters/cloudflare` |
 | `fieldCrypto.endpoint` / `fieldCrypto.delivery` without `fields.secret` / `fields.payload`, or with `plain`/`mask` | set `fields.secret` (endpoint) and `fields.payload` (delivery) to `encrypt` or `encrypt+hash`; other values now fail at startup |
 | ciphertext written with `fieldCrypto.tenantId` set | now also bound to the tenant; values written before are rejected unless `fieldCrypto.acceptLegacyAad` is set. Deploy with the flag set, run `runtime.migrateFieldCryptoToTenant()` once every instance runs the new version (an older one still writes tenant-less values; running it again picks them up), pausing endpoint changes from other instances while it runs, then remove the flag. A custom delivery store must implement `replace()` and page `list()` with the `before` cursor |
+| The default HTTP client delivered to any public HTTPS host | it delivers only to `delivery.allowedHosts`, and `addEndpoint()` / `updateEndpoint()` throw `WebhookHostNotAllowedError` for other hosts. Add your receivers to `allowedHosts`, or inject a DNS-pinned or egress-filtered `httpClient` for arbitrary URLs (see [Outbound host policy](#outbound-host-policy)) |
+| `new WebhookRuntimeService({ security: { allowPrivateHosts: true } })` without `httpClient` | throws "Private webhook destinations require an explicitly configured HTTP client" at construction. Pass an `httpClient` for local development, or drop `allowPrivateHosts` and list the host in `allowedHosts` |
+| Receiver responses stored in full in delivery attempts | the stored `responseBody` is the first 4096 bytes (`maxResponseBodyBytes`, `0` omits it), and `responseBodyTruncated` marks a cut |
 | `BatchDispatcher` / `BatchConfig` from `@k-msg/webhook/toolkit` | removed; it never sent a request. Use `runtime.emit()` / `flush()`, or `WebhookDispatcher.dispatch()` for a single delivery (see [Toolkit subpath](#toolkit-subpath)) |
+
+Before and after, for a Worker that delivers to `hooks.example.com`:
+
+```ts
+// Before: any public HTTPS host was reachable, and this was accepted.
+new WebhookRuntimeService({
+  delivery: config,
+  persistence,
+  security: { allowPrivateHosts: true },
+});
+
+// After: name the hosts you trust. (`allowPrivateHosts` now needs `httpClient`.)
+new WebhookRuntimeService({
+  delivery: { ...config, allowedHosts: ["hooks.example.com"] },
+  persistence,
+});
+```
 
 ## Toolkit subpath
 
@@ -421,23 +485,3 @@ For an endpoint you manage outside the runtime, `new WebhookDispatcher(config, h
 ## License
 
 MIT
-
-## Outbound host policy and response retention
-
-The default HTTP client rejects destinations unless their exact hostname or public IP literal is
-in `WebhookConfig.allowedHosts` (no URL, port, path or wildcard). Populate this
-list from administrator configuration, never from the incoming endpoint URL.
-An allowlist entry trusts that host's DNS operator: the client does **not** resolve
-and pin DNS addresses, so this is not sufficient for arbitrary customer-owned
-hosts or a compromised trusted DNS record. Those deployments must inject an
-`HttpClient` that validates resolved addresses and pins the connection, or use an
-egress proxy/firewall that blocks private and metadata networks. Private literal
-addresses, URL credentials and redirects are rejected by the default client.
-
-`maxResponseBodyBytes` limits retained response diagnostics to 4096 bytes by
-default (0 omits them, maximum 1 MiB). Reaching the cap cancels the remaining body
-and marks `responseBodyTruncated`; this is conservative when the exact body size
-equals the cap. Avoid response secrets even with this bound. Injected HTTP clients
-must honor request cancellation and manual redirect policy.
-
-`security.allowPrivateHosts` without an injected HTTP client now fails during runtime construction, so a private endpoint cannot register successfully and only fail later at delivery.
