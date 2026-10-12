@@ -1,6 +1,7 @@
 import { hasUndecryptableSecret } from "../crypto/undecryptable-secret";
 import { RetryManager } from "../retry/retry.manager";
 import { validateEndpointUrl } from "../runtime/endpoint-validation";
+import { WebhookHostNotAllowedError } from "../runtime/errors";
 import {
   SecurityManager,
   WEBHOOK_TIMESTAMP_HEADER,
@@ -72,42 +73,76 @@ async function readResponsePrefix(response: Response, limit: number) {
   return { text: new TextDecoder().decode(bytes), truncated };
 }
 
+const ALLOWED_HOST_HELP =
+  "allowedHosts must contain exact DNS hostnames, without URLs, ports or wildcards (write IPv6 addresses in brackets and internationalized names as punycode)";
+
+function normalizeAllowedHost(host: string): string {
+  const normalized = host.toLowerCase().replace(/\.$/, "");
+  let parsed: URL;
+  try {
+    parsed = new URL(`https://${normalized}`);
+  } catch {
+    throw new TypeError(ALLOWED_HOST_HELP);
+  }
+  if (
+    // A second trailing dot would be stored but never match a request.
+    normalized.endsWith(".") ||
+    parsed.hostname !== normalized ||
+    parsed.port ||
+    parsed.username ||
+    parsed.password ||
+    parsed.pathname !== "/" ||
+    parsed.search ||
+    parsed.hash
+  ) {
+    throw new TypeError(ALLOWED_HOST_HELP);
+  }
+  if (normalized.includes("*"))
+    throw new TypeError("Wildcard hosts are not allowed");
+  return normalized;
+}
+
+/**
+ * Delivers only to the hosts it is given, over HTTPS, and never follows a
+ * redirect.
+ *
+ * `allowedHosts` entries are exact hostnames, compared in lowercase without a
+ * trailing dot: DNS names, public IPv4 addresses, and IPv6 addresses in
+ * brackets (`[2001:db8::1]`). Write an internationalized name as punycode
+ * (`xn--...`). A URL, a port, credentials, a path and a wildcard throw
+ * `TypeError`.
+ *
+ * Port: only the host is compared, so an entry trusts every port of that host
+ * (`https://hooks.example.com:6379/`). Trust only hosts whose every port you
+ * control.
+ *
+ * DNS: it checks names, not addresses. A trusted name that resolves to a
+ * private address is still fetched, so it is not a defense against DNS
+ * rebinding. For arbitrary customer URLs, inject an `HttpClient` that pins
+ * DNS or filters egress.
+ */
 export class DefaultHttpClient implements HttpClient {
   private readonly hosts: ReadonlySet<string>;
   constructor(allowedHosts: readonly string[] = []) {
-    this.hosts = new Set(
-      allowedHosts.map((host) => {
-        const normalized = host.toLowerCase().replace(/\.$/, "");
-        const parsed = new URL(`https://${normalized}`);
-        if (
-          parsed.hostname !== normalized ||
-          parsed.port ||
-          parsed.username ||
-          parsed.password ||
-          parsed.pathname !== "/" ||
-          parsed.search ||
-          parsed.hash
-        ) {
-          throw new TypeError(
-            "allowedHosts must contain exact DNS hostnames, without URLs, ports or wildcards",
-          );
-        }
-        if (normalized.includes("*"))
-          throw new TypeError("Wildcard hosts are not allowed");
-        return normalized;
-      }),
-    );
+    this.hosts = new Set(allowedHosts.map(normalizeAllowedHost));
   }
-  async fetch(url: string, _options: RequestInit): Promise<Response> {
+
+  /**
+   * Parses the URL and throws unless fetch() would deliver to it: HTTPS, a
+   * public host, no credentials, and a host in `allowedHosts`
+   * (`WebhookHostNotAllowedError`).
+   */
+  assertAllowed(url: string): URL {
     const parsed = validateEndpointUrl(url);
     if (parsed.username || parsed.password)
       throw new Error("Webhook URL credentials are not allowed");
     const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
-    if (!this.hosts.has(host)) {
-      throw new Error(
-        "Webhook host is not explicitly trusted; configure allowedHosts or a DNS-pinned HTTP client",
-      );
-    }
+    if (!this.hosts.has(host)) throw new WebhookHostNotAllowedError(host);
+    return parsed;
+  }
+
+  async fetch(url: string, _options: RequestInit): Promise<Response> {
+    const parsed = this.assertAllowed(url);
     return fetch(parsed, { ..._options, redirect: "manual" });
   }
 }
@@ -147,12 +182,19 @@ export class WebhookDispatcher {
   private config: WebhookConfig;
   private readonly maxResponseBodyBytes: number;
   private httpClient: HttpClient;
+  // Set only when no client was injected: an injected client vets its own destinations.
+  private readonly defaultClient?: DefaultHttpClient;
   private securityManager: SecurityManager;
   private retryManager: RetryManager;
 
   constructor(config: WebhookConfig, httpClient?: HttpClient) {
     this.config = config;
-    this.httpClient = httpClient || new DefaultHttpClient(config.allowedHosts);
+    if (httpClient) {
+      this.httpClient = httpClient;
+    } else {
+      this.defaultClient = new DefaultHttpClient(config.allowedHosts);
+      this.httpClient = this.defaultClient;
+    }
     const limit = config.maxResponseBodyBytes ?? 4096;
     if (!Number.isSafeInteger(limit) || limit < 0 || limit > 1_048_576) {
       throw new RangeError(
@@ -162,6 +204,15 @@ export class WebhookDispatcher {
     this.maxResponseBodyBytes = limit;
     this.securityManager = new SecurityManager(config);
     this.retryManager = new RetryManager(config);
+  }
+
+  /**
+   * Throws `WebhookHostNotAllowedError` (or the error for an unusable URL)
+   * when deliveries to `url` would be refused by the default client. Does
+   * nothing when an HTTP client was injected.
+   */
+  assertDestinationAllowed(url: string): void {
+    this.defaultClient?.assertAllowed(url);
   }
 
   async dispatch(

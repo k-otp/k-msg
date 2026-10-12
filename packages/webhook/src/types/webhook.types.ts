@@ -12,8 +12,18 @@ export interface WebhookConfig {
   timeoutMs: number;
   /** Diagnostic response prefix, in bytes (default 4096, maximum 1 MiB; 0 omits it). */
   maxResponseBodyBytes?: number;
-  /** Exact administrator-trusted hosts (including public IP literals) for the default HTTP client.
-   * Arbitrary customer domains need an injected DNS-pinned/egress-filtered HttpClient. */
+  /**
+   * Exact administrator-trusted hosts for the default HTTP client: lowercase
+   * DNS names, public IPv4 addresses, and IPv6 addresses in brackets
+   * (`[2001:db8::1]`), with internationalized names as punycode. No scheme,
+   * port, path or wildcard. An entry trusts every port of that host and that
+   * host's DNS operator: names are checked, addresses are not resolved or
+   * pinned. Arbitrary customer domains need an injected DNS-pinned or
+   * egress-filtered HttpClient.
+   *
+   * `addEndpoint()` and `updateEndpoint()` refuse other hosts with
+   * `WebhookHostNotAllowedError` unless an `httpClient` is injected.
+   */
   allowedHosts?: readonly string[];
 
   // 보안 설정

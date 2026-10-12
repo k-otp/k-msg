@@ -166,7 +166,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   // Checks the URL and the signing secret before queueing, so an invalid
   // endpoint fails at once instead of waiting behind other endpoint writes.
   async addEndpoint(input: WebhookEndpointInput): Promise<WebhookEndpoint> {
-    validateEndpointUrl(input.url, this.securityOptions);
+    this.assertDestination(input.url);
     this.assertSigningSecret({
       ...unmarkSecret(input),
       ...resolveActivity(input),
@@ -189,7 +189,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
   ): Promise<WebhookEndpoint[]> {
     for (const [index, input] of inputs.entries()) {
       try {
-        validateEndpointUrl(input.url, this.securityOptions);
+        this.assertDestination(input.url);
         this.assertSigningSecret({
           ...unmarkSecret(input),
           ...resolveActivity(input),
@@ -283,7 +283,7 @@ export class WebhookRuntimeService implements WebhookRuntime {
     }
 
     if (updates.url && updates.url !== current.url) {
-      validateEndpointUrl(updates.url, this.securityOptions);
+      this.assertDestination(updates.url);
     }
 
     const now = new Date();
@@ -715,11 +715,19 @@ export class WebhookRuntimeService implements WebhookRuntime {
     };
   }
 
+  // An endpoint's URL must be one the runtime may use and, with the default
+  // HTTP client, one deliveries can reach: a host outside delivery.allowedHosts
+  // is refused here instead of being stored and then failing every delivery.
+  private assertDestination(url: string): void {
+    validateEndpointUrl(url, this.securityOptions);
+    this.dispatcher.assertDestinationAllowed(url);
+  }
+
   // Builds a new endpoint for a caller that holds the endpoint write queue.
   // The URL and secret are checked again here, the check that guards the
   // store: callers check them before queueing only to fail fast.
   private createEndpoint(input: WebhookEndpointInput): WebhookEndpoint {
-    validateEndpointUrl(input.url, this.securityOptions);
+    this.assertDestination(input.url);
     const now = new Date();
 
     const endpoint: WebhookEndpoint = {

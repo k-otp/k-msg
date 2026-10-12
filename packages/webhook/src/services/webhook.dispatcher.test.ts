@@ -7,6 +7,7 @@ import {
   test,
 } from "bun:test";
 import { createHmac } from "node:crypto";
+import { WebhookHostNotAllowedError } from "../runtime/errors";
 import {
   type WebhookConfig,
   type WebhookEndpoint,
@@ -381,4 +382,55 @@ test("mutating the caller config cannot remove the validated response cap", asyn
   config.maxResponseBodyBytes = Number.POSITIVE_INFINITY;
   const delivery = await d.dispatch(createEvent(), createEndpoint());
   expect(delivery.attempts[0]?.responseBody).toBe("1234");
+});
+
+describe("allowedHosts entries", () => {
+  test("accept lowercase DNS names, punycode, public IPv4 and bracketed IPv6", () => {
+    const client = new DefaultHttpClient([
+      "Hooks.Example.com.",
+      "xn--mnchen-3ya.de",
+      "203.0.113.5",
+      "[2001:db8::1]",
+    ]);
+    for (const url of [
+      "https://hooks.example.com/a",
+      "https://hooks.example.com./a",
+      "https://HOOKS.example.com/a",
+      "https://münchen.de/a",
+      "https://203.0.113.5/a",
+      "https://[2001:db8::1]/a",
+    ]) {
+      expect(client.assertAllowed(url).href).toBeTruthy();
+    }
+    expect(() => client.assertAllowed("https://other.example.com/a")).toThrow(
+      WebhookHostNotAllowedError,
+    );
+  });
+
+  test("refuse entries that could never match, with a message that says how to write them", () => {
+    for (const entry of [
+      "2001:db8::1", // IPv6 needs brackets
+      "münchen.de", // IDN needs punycode
+      "hooks.example.com:443",
+      "hooks.example.com:8443",
+      "hooks.example.com..", // two trailing dots never match
+      "*.example.com",
+      "https://hooks.example.com",
+      "hooks.example.com/path",
+      "user@hooks.example.com",
+      "",
+    ]) {
+      expect(() => new DefaultHttpClient([entry])).toThrow(TypeError);
+    }
+    expect(() => new DefaultHttpClient(["2001:db8::1"])).toThrow(
+      "brackets and internationalized names as punycode",
+    );
+  });
+
+  test("trust a host on every port, not one destination", () => {
+    const client = new DefaultHttpClient(["hooks.example.com"]);
+    expect(client.assertAllowed("https://hooks.example.com:6379/x").port).toBe(
+      "6379",
+    );
+  });
 });

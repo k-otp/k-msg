@@ -401,6 +401,7 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
         enabledEvents: [WebhookEventType.MESSAGE_SENT],
         batchSize: 10,
         batchTimeoutMs: 50,
+        allowedHosts: ["example.com"],
       },
       persistence: {
         ...persistence,
@@ -463,6 +464,7 @@ describe("migrateWebhookFieldCryptoToTenant", () => {
         enabledEvents: [WebhookEventType.MESSAGE_SENT],
         batchSize: 10,
         batchTimeoutMs: 50,
+        allowedHosts: ["example.com"],
       },
       persistence: {
         ...persistence,

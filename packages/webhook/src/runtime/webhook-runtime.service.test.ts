@@ -12,7 +12,10 @@ import {
   type WebhookEvent,
   WebhookEventType,
 } from "../types/webhook.types";
-import { WebhookEndpointConflictError } from "./errors";
+import {
+  WebhookEndpointConflictError,
+  WebhookHostNotAllowedError,
+} from "./errors";
 import { createInMemoryWebhookPersistence } from "./persistence";
 import { WebhookRuntimeService } from "./webhook-runtime.service";
 
@@ -1461,4 +1464,99 @@ test("private destination opt-in requires an explicit transport at construction"
         autoStart: false,
       }),
   ).toThrow("explicitly configured HTTP client");
+});
+
+describe("endpoint hosts against delivery.allowedHosts", () => {
+  const runtimeWith = (allowedHosts: string[]) =>
+    new WebhookRuntimeService({
+      delivery: { ...createConfig(), allowedHosts },
+      persistence: createInMemoryWebhookPersistence(),
+      autoStart: false,
+    });
+
+  test("addEndpoint refuses a public host outside the list instead of storing it", async () => {
+    const runtime = runtimeWith(["hooks.example.com"]);
+    await expect(
+      runtime.addEndpoint({
+        id: "bad",
+        url: "https://not-listed.example/hook?token=secret",
+        events: [WebhookEventType.MESSAGE_SENT],
+        active: true,
+      }),
+    ).rejects.toThrow(WebhookHostNotAllowedError);
+    // The message names the host, never the rest of the URL.
+    await expect(
+      runtime.addEndpoint({
+        id: "bad",
+        url: "https://not-listed.example/hook?token=secret",
+        events: [WebhookEventType.MESSAGE_SENT],
+        active: true,
+      }),
+    ).rejects.toThrow(/not-listed\.example(?!.*secret)/);
+    expect(await runtime.listEndpoints()).toEqual([]);
+
+    const listed = await runtime.addEndpoint({
+      id: "ok",
+      url: "https://hooks.example.com/hook",
+      events: [WebhookEventType.MESSAGE_SENT],
+      active: true,
+    });
+    expect(listed.id).toBe("ok");
+  });
+
+  test("addEndpoints adds none when one host is not listed, and names its position", async () => {
+    const runtime = runtimeWith(["hooks.example.com"]);
+    await expect(
+      runtime.addEndpoints([
+        {
+          id: "a",
+          url: "https://hooks.example.com/a",
+          events: [WebhookEventType.MESSAGE_SENT],
+          active: true,
+        },
+        {
+          id: "b",
+          url: "https://not-listed.example/b",
+          events: [WebhookEventType.MESSAGE_SENT],
+          active: true,
+        },
+      ]),
+    ).rejects.toThrow("Webhook endpoint 1 in the batch");
+    expect(await runtime.listEndpoints()).toEqual([]);
+  });
+
+  test("updateEndpoint refuses a new URL on a host outside the list and keeps the old one", async () => {
+    const runtime = runtimeWith(["hooks.example.com"]);
+    await runtime.addEndpoint({
+      id: "ep",
+      url: "https://hooks.example.com/a",
+      events: [WebhookEventType.MESSAGE_SENT],
+      active: true,
+    });
+    await expect(
+      runtime.updateEndpoint("ep", { url: "https://not-listed.example/b" }),
+    ).rejects.toThrow(WebhookHostNotAllowedError);
+    expect((await runtime.getEndpoint("ep"))?.url).toBe(
+      "https://hooks.example.com/a",
+    );
+    await runtime.updateEndpoint("ep", { url: "https://hooks.example.com/b" });
+    // A change that leaves the URL alone is not rechecked.
+    await runtime.updateEndpoint("ep", { active: false });
+  });
+
+  test("an injected HTTP client decides for itself, so nothing is checked here", async () => {
+    const runtime = new WebhookRuntimeService({
+      delivery: createConfig(),
+      httpClient: new RecordingHttpClient(),
+      persistence: createInMemoryWebhookPersistence(),
+      autoStart: false,
+    });
+    await runtime.addEndpoint({
+      id: "any",
+      url: "https://any-public-host.example/hook",
+      events: [WebhookEventType.MESSAGE_SENT],
+      active: true,
+    });
+    expect(await runtime.listEndpoints()).toHaveLength(1);
+  });
 });

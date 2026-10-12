@@ -54,3 +54,25 @@ export class WebhookEndpointConflictError extends Error {
     Object.defineProperty(this, CONFLICT_ERROR_BRAND, { value: true });
   }
 }
+
+/**
+ * Thrown when an endpoint URL names a host that the default HTTP client would
+ * refuse to deliver to, because `delivery.allowedHosts` does not list it. The
+ * runtime checks this when an endpoint is added or its URL changes, so the
+ * endpoint is not stored and then fails every delivery.
+ *
+ * It is not thrown when an `httpClient` is injected: that client decides which
+ * destinations it trusts.
+ */
+export class WebhookHostNotAllowedError extends Error {
+  /** The URL's hostname, which is not a secret (the rest of the URL may be). */
+  readonly host: string;
+
+  constructor(host: string) {
+    super(
+      `Webhook host ${host} is not explicitly trusted; add it to delivery.allowedHosts, or inject a DNS-pinned HTTP client`,
+    );
+    this.name = "WebhookHostNotAllowedError";
+    this.host = host;
+  }
+}
