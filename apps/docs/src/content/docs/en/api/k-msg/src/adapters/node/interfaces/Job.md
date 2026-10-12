@@ -5,7 +5,7 @@ prev: false
 title: "Job"
 ---
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L12)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L29)
 
 ## Extended by
 
@@ -23,7 +23,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:12](https://git
 
 > **attempts**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L18)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L35)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:18](https://git
 
 > `optional` **completedAt?**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L23)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L40)
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:23](https://git
 
 > **createdAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L21)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L38)
 
 ***
 
@@ -47,7 +47,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:21](https://git
 
 > **data**: `T`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L15)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:32](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L32)
 
 ***
 
@@ -55,7 +55,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:15](https://git
 
 > **delay**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L20)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L37)
 
 ***
 
@@ -63,7 +63,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:20](https://git
 
 > `optional` **error?**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L25)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:42](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L42)
 
 ***
 
@@ -71,7 +71,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:25](https://git
 
 > `optional` **failedAt?**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L24)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:41](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L41)
 
 ***
 
@@ -79,7 +79,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:24](https://git
 
 > **id**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L13)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L30)
 
 ***
 
@@ -87,7 +87,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:13](https://git
 
 > `optional` **leaseExpiresAt?**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L31)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:48](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L48)
 
 While the job is processing in a queue with `leaseMs`: when it becomes
 due again unless it is completed or failed first.
@@ -98,7 +98,7 @@ due again unless it is completed or failed first.
 
 > **maxAttempts**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L19)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L36)
 
 ***
 
@@ -106,7 +106,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:19](https://git
 
 > **metadata**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L26)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L43)
 
 ***
 
@@ -114,7 +114,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:26](https://git
 
 > **priority**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L17)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:34](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L34)
 
 ***
 
@@ -122,7 +122,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:17](https://git
 
 > **processAt**: `Date`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L22)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L39)
 
 ***
 
@@ -130,7 +130,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:22](https://git
 
 > **status**: [`JobStatus`](/en/api/messaging/src/queue/enumerations/jobstatus/)
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L16)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L33)
 
 ***
 
@@ -138,4 +138,4 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:16](https://git
 
 > **type**: `string`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L14)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L31)

@@ -44,6 +44,7 @@ import {
 } from "@k-msg/webhook";
 
 const config: WebhookConfig = {
+  allowedHosts: ["example.com"], // administrator-trusted destination
   maxRetries: 3,
   retryDelayMs: 1_000,
   timeoutMs: 30_000,
@@ -420,4 +421,24 @@ For an endpoint you manage outside the runtime, `new WebhookDispatcher(config, h
 ## License
 
 MIT
+
+## Outbound host policy and response retention
+
+The default HTTP client rejects destinations unless their exact hostname or public IP literal is
+in `WebhookConfig.allowedHosts` (no URL, port, path or wildcard). Populate this
+list from administrator configuration, never from the incoming endpoint URL.
+An allowlist entry trusts that host's DNS operator: the client does **not** resolve
+and pin DNS addresses, so this is not sufficient for arbitrary customer-owned
+hosts or a compromised trusted DNS record. Those deployments must inject an
+`HttpClient` that validates resolved addresses and pins the connection, or use an
+egress proxy/firewall that blocks private and metadata networks. Private literal
+addresses, URL credentials and redirects are rejected by the default client.
+
+`maxResponseBodyBytes` limits retained response diagnostics to 4096 bytes by
+default (0 omits them, maximum 1 MiB). Reaching the cap cancels the remaining body
+and marks `responseBodyTruncated`; this is conservative when the exact body size
+equals the cap. Avoid response secrets even with this bound. Injected HTTP clients
+must honor request cancellation and manual redirect policy.
+
+`security.allowPrivateHosts` without an injected HTTP client now fails during runtime construction, so a private endpoint cannot register successfully and only fail later at delivery.
 

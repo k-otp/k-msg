@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareDurableObjectStorageLike"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:66](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L66)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L68)
 
 ## Methods
 
@@ -13,7 +13,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:66](ht
 
 > **delete**(`key`): `Promise`\<`boolean` \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L69)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:71](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L71)
 
 #### Parameters
 
@@ -31,7 +31,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:69](ht
 
 > **get**\<`T`\>(`key`): `Promise`\<`T` \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:67](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L67)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:69](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L69)
 
 #### Type Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:67](ht
 
 > **list**\<`T`\>(`options?`): `Promise`\<`Map`\<`string`, `T`\>\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L70)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L72)
 
 #### Type Parameters
 
@@ -95,7 +95,7 @@ Lists keys after this one, as Durable Object storage pages.
 
 > **put**\<`T`\>(`key`, `value`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:68](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L68)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:70](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L70)
 
 #### Type Parameters
 

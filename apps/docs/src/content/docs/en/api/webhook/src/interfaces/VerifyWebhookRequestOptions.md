@@ -21,7 +21,7 @@ object can be passed to both.
 
 > `optional` **algorithm?**: `"sha256"` \| `"sha1"`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L23)
+Defined in: [packages/webhook/src/types/webhook.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L28)
 
 #### Inherited from
 
@@ -33,7 +33,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:23](https://github.com/
 
 > `optional` **signatureHeader?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L24)
+Defined in: [packages/webhook/src/types/webhook.types.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L29)
 
 #### Inherited from
 
@@ -45,7 +45,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:24](https://github.com/
 
 > `optional` **signaturePrefix?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L25)
+Defined in: [packages/webhook/src/types/webhook.types.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L30)
 
 #### Inherited from
 

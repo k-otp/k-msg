@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
@@ -25,7 +25,7 @@ Options of the queues that lease the jobs `dequeue()` returns.
 
 > `optional` **keyPrefix?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:33](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L33)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:36](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L36)
 
 Default: `kmsg/jobs`.
 
@@ -35,7 +35,7 @@ Default: `kmsg/jobs`.
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L64)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L81)
 
 How long a dequeued job may stay processing before it is due again
 (default: `Infinity`, no lease). If it is neither completed nor failed
@@ -58,7 +58,7 @@ still running from being run again or counted as lost.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L72)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L89)
 
 Called by `dequeue()` for each job whose lease had expired, once the job
 is stored pending again or, with no attempts left, failed. `dequeue()`

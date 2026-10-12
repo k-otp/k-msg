@@ -5,7 +5,7 @@ prev: false
 title: "HyperdriveJobQueueConfig"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:84](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L84)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L88)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
@@ -25,7 +25,7 @@ Options of the queues that lease the jobs `dequeue()` returns.
 
 > `optional` **indexNames?**: `Partial`\<[`JobQueueIndexNames`](/en/api/k-msg/src/adapters/cloudflare/interfaces/jobqueueindexnames/)\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:88](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L88)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:92](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L92)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > `optional` **initializeSchema?**: `boolean`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:96](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L96)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:100](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L100)
 
 Whether `init()` creates the table and indexes (`IF NOT EXISTS`). Each
 new queue runs those statements before its first query, which in a
@@ -52,7 +52,7 @@ true
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L64)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L81)
 
 How long a dequeued job may stay processing before it is due again
 (default: `Infinity`, no lease). If it is neither completed nor failed
@@ -75,7 +75,7 @@ still running from being run again or counted as lost.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L72)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L89)
 
 Called by `dequeue()` for each job whose lease had expired, once the job
 is stored pending again or, with no attempts left, failed. `dequeue()`
@@ -103,7 +103,7 @@ does not stop the dequeue.
 
 > `optional` **tableName?**: `string`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:87](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L87)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L91)
 
 #### Default
 

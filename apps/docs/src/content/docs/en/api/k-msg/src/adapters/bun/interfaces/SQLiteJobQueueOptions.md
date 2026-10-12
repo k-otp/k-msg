@@ -5,7 +5,7 @@ prev: false
 title: "SQLiteJobQueueOptions"
 ---
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:19](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L19)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L20)
 
 Options of the queues that lease the jobs `dequeue()` returns.
 
@@ -25,7 +25,7 @@ Options of the queues that lease the jobs `dequeue()` returns.
 
 > `optional` **dbPath?**: `string`
 
-Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L22)
+Defined in: [packages/messaging/src/queue/sqlite-job-queue.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/sqlite-job-queue.ts#L23)
 
 Default: `:memory:`.
 
@@ -35,7 +35,7 @@ Default: `:memory:`.
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L64)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:81](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L81)
 
 How long a dequeued job may stay processing before it is due again
 (default: `Infinity`, no lease). If it is neither completed nor failed
@@ -58,7 +58,7 @@ still running from being run again or counted as lost.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L72)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:89](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L89)
 
 Called by `dequeue()` for each job whose lease had expired, once the job
 is stored pending again or, with no attempts left, failed. `dequeue()`
