@@ -236,8 +236,15 @@ function withoutReceipts(data: unknown): unknown {
   >;
   return publicData;
 }
+// The jobs MessageJobProcessor sends. Only these carry receipts, are bounded
+// in size and settle under an attempt fence.
+const MESSAGE_JOB_TYPES: ReadonlySet<string> = new Set([
+  "send_message",
+  "send_bulk_messages",
+  "send_scheduled_message",
+]);
 function isMessageJobType(jobType: string): boolean {
-  return jobType.startsWith("send_");
+  return MESSAGE_JOB_TYPES.has(jobType);
 }
 function publicJob(job: Job<unknown>): Job<unknown> {
   return isMessageJobType(job.type)
