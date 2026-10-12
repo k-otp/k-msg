@@ -5,8 +5,13 @@ export {
   type JobProcessorMetrics,
   type JobProcessorOptions,
   MessageJobProcessor,
+  MessageJobTooLargeError,
 } from "../../queue/job.processor";
-export type { Job, JobQueue } from "../../queue/job-queue.interface";
+export type {
+  Job,
+  JobQueue,
+  JobSettleOptions,
+} from "../../queue/job-queue.interface";
 export { JobCheckpointLostError } from "../../queue/job-queue.interface";
 export {
   MessageRetryHandler,

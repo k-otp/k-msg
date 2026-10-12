@@ -1646,6 +1646,26 @@ test("Drizzle MySQL normalizes affectedRows and result tuples", async () => {
   ]);
 });
 
+test("Drizzle postgres-js reports changed rows from the array's count", async () => {
+  // postgres.js returns UPDATE and DELETE results as an empty array with `count`.
+  const client = createDrizzleSqlClient({
+    dialect: "postgres",
+    db: { execute: async () => Object.assign([], { count: 1 }) },
+  });
+  const queue = new HyperdriveJobQueue(client, { initializeSchema: false });
+  expect((await client.query("DELETE FROM jobs")).rowCount).toBe(1);
+  expect(await queue.remove("job")).toBe(true);
+  const none = createDrizzleSqlClient({
+    dialect: "postgres",
+    db: { execute: async () => Object.assign([], { count: 0 }) },
+  });
+  expect(
+    await new HyperdriveJobQueue(none, { initializeSchema: false }).remove(
+      "job",
+    ),
+  ).toBe(false);
+});
+
 test("KV queues refuse durable message checkpoints", () => {
   const queue = createKvJobQueue({
     get: async () => null,

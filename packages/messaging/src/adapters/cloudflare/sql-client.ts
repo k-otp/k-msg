@@ -119,9 +119,14 @@ function defaultDrizzleResultNormalizer<T = Record<string, unknown>>(input: {
     ) {
       return { rows: first as T[], rowCount: first.length };
     }
+    // postgres.js (and Drizzle's postgres-js driver) return the rows as an
+    // array that carries the number of rows an UPDATE or DELETE changed in
+    // `count`, while the array itself is empty.
     return {
       rows: input.result as T[],
-      rowCount: input.result.length,
+      rowCount:
+        toNumber((input.result as unknown as { count?: unknown }).count) ??
+        input.result.length,
     };
   }
 

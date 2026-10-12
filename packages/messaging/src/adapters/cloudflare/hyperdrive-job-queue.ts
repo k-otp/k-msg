@@ -11,6 +11,7 @@ import type {
   JobQueue,
   JobQueueCleanupOptions,
   JobRetryDirective,
+  JobSettleOptions,
 } from "../../queue/job-queue.interface";
 import {
   JOB_LEASE_EXPIRED,
@@ -246,18 +247,24 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     return this.takeNext(running);
   }
 
+  /**
+   * Saves a message job's progress under the attempt fence and, with
+   * `leaseMs`, renews the lease. Needs a cache-disabled Hyperdrive: when the
+   * driver reports no affected-row count, ownership is verified with a plain
+   * read, which a query cache could answer with a stale row.
+   */
   async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
     await this.init();
     const q = (name: string) => this.quoteIdentifier(name);
+    const p = this.parameters();
+    const dataSql = `${q("data")} = ${jsonParameterSql(this.client.dialect, p.add(toJsonText(data, this.hasNativeJsonColumns())), this.hasNativeJsonColumns())}`;
+    const leaseSql = this.leasesEnabled()
+      ? `, ${q("process_at")} = ${p.add(Date.now() + this.leaseMs)}`
+      : "";
     const result = await this.client.query(
-      `UPDATE ${this.tableRef()} SET ${q("data")} = ${jsonParameterSql(this.client.dialect, this.placeholder(1), this.hasNativeJsonColumns())}
-       WHERE ${q("id")} = ${this.placeholder(2)} AND ${q("status")} = ${this.placeholder(3)} AND ${q("attempts")} = ${this.placeholder(4)}`,
-      [
-        toJsonText(data, this.hasNativeJsonColumns()),
-        jobId,
-        JobStatus.PROCESSING,
-        attempt,
-      ],
+      `UPDATE ${this.tableRef()} SET ${dataSql}${leaseSql}
+       WHERE ${q("id")} = ${p.add(jobId)} AND ${q("status")} = ${p.add(JobStatus.PROCESSING)} AND ${q("attempts")} = ${p.add(attempt)}`,
+      p.values,
     );
     if (result.rowCount === 1) return;
     // Drivers may omit counts, or report zero for an unchanged MySQL value.
@@ -276,26 +283,42 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
   async complete(
     jobId: string,
     _result?: Parameters<JobQueue<T>["complete"]>[1],
+    options: JobSettleOptions = {},
   ): Promise<void> {
     await this.init();
-    await this.client.query(
+    const q = (column: string) => this.quoteIdentifier(column);
+    const p = this.parameters();
+    const fence = options.attempt;
+    const result = await this.client.query(
       `UPDATE ${this.tableRef()}
-       SET ${this.quoteIdentifier("status")} = ${this.placeholder(1)},
-           ${this.quoteIdentifier("completed_at")} = ${this.placeholder(2)}
-       WHERE ${this.quoteIdentifier("id")} = ${this.placeholder(3)}`,
-      [JobStatus.COMPLETED, Date.now(), jobId],
+       SET ${q("status")} = ${p.add(JobStatus.COMPLETED)},
+           ${q("completed_at")} = ${p.add(Date.now())}
+       WHERE ${q("id")} = ${p.add(jobId)}${
+         fence === undefined
+           ? ""
+           : ` AND ${q("status")} = 'processing' AND ${q("attempts")} = ${p.add(fence)}`
+       }`,
+      p.values,
     );
+    if (fence === undefined || result.rowCount === 1) return;
+    if (result.rowCount === undefined) {
+      const current = await this.getJob(jobId);
+      if (current?.status === JobStatus.COMPLETED) return;
+    }
+    throw new JobCheckpointLostError();
   }
 
   /**
    * Counts a failed attempt: the job is due again after `retry.delayMs` when
    * retries are enabled and attempts are left, and fails otherwise. A
-   * completed job stays completed, even for a worker whose lease expired.
+   * completed job stays completed, even for a worker whose lease expired,
+   * unless `options.attempt` fences the call to the attempt that owns it.
    */
   async fail(
     jobId: string,
     error: string | Error,
     retry: JobRetryDirective = { enabled: false },
+    options: JobSettleOptions = {},
   ): Promise<void> {
     await this.init();
 
@@ -304,6 +327,13 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
       throw new Error(`Job ${jobId} not found`);
     }
     if (job.status === JobStatus.COMPLETED) return;
+    const fence = options.attempt;
+    if (
+      fence !== undefined &&
+      (job.status !== JobStatus.PROCESSING || job.attempts !== fence)
+    ) {
+      throw new JobCheckpointLostError();
+    }
 
     const q = (column: string) => this.quoteIdentifier(column);
     const message = error instanceof Error ? error.message : error;
@@ -320,14 +350,29 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
          ${q("status")} = CASE WHEN ${canRetry} THEN 'pending' ELSE 'failed' END`
       : `${q("failed_at")} = ${p.add(now)},
          ${q("status")} = 'failed'`;
-    await this.client.query(
+    const result = await this.client.query(
       `UPDATE ${this.tableRef()}
        SET ${errorSql},
            ${outcomeSql},
            ${q("attempts")} = ${q("attempts")} + 1
-       WHERE ${q("id")} = ${p.add(jobId)} AND ${q("status")} <> 'completed'`,
+       WHERE ${q("id")} = ${p.add(jobId)} AND ${
+         fence === undefined
+           ? `${q("status")} <> 'completed'`
+           : `${q("status")} = 'processing' AND ${q("attempts")} = ${p.add(fence)}`
+       }`,
       p.values,
     );
+    if (fence === undefined || result.rowCount === 1) return;
+    if (result.rowCount === undefined) {
+      // No count: the fence held if the job moved on from this attempt.
+      const current = await this.getJob(jobId);
+      if (
+        current &&
+        !(current.status === JobStatus.PROCESSING && current.attempts === fence)
+      )
+        return;
+    }
+    throw new JobCheckpointLostError();
   }
 
   /**

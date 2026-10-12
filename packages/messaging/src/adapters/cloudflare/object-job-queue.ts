@@ -11,6 +11,7 @@ import type {
   JobQueue,
   JobQueueCleanupOptions,
   JobRetryDirective,
+  JobSettleOptions,
 } from "../../queue/job-queue.interface";
 import {
   JobCheckpointLostError,
@@ -204,14 +205,21 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     return undefined;
   }
 
+  /**
+   * Only Durable Object storage can fence a checkpoint: the check and the
+   * write are two storage calls, and a Durable Object runs them without
+   * another worker in between. R2 and custom storage have no such guarantee
+   * (two isolates can both pass the check), and KV may read old values, so
+   * a message processor refuses those queues.
+   */
   get supportsCheckpoints(): boolean {
-    return this.storage.consistency !== "eventual";
+    return this.storage.consistency === "serialized";
   }
 
   async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
     if (!this.supportsCheckpoints)
       throw new Error(
-        "Message checkpoints require strongly consistent storage; KV is unsupported",
+        "Message checkpoints require Durable Object storage; KV and R2 queues are unsupported",
       );
     const job = await this.getJob(jobId);
     if (
@@ -221,8 +229,14 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     ) {
       throw new JobCheckpointLostError();
     }
-    // Requires a single coordinated writer AND read-your-writes consistency.
-    await this.write({ ...job, data });
+    // Renews the lease: a job that checkpoints between sends must not outlive it.
+    await this.write({
+      ...job,
+      data,
+      leaseExpiresAt: this.leasesEnabled()
+        ? this.leaseExpiry(Date.now())
+        : job.leaseExpiresAt,
+    });
   }
 
   /**
@@ -231,9 +245,19 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
    * never failing the completion, since callers such as `JobProcessor`
    * would treat that as a failed job and run it again.
    */
-  async complete(jobId: string, result?: unknown): Promise<void> {
+  async complete(
+    jobId: string,
+    result?: unknown,
+    options: JobSettleOptions = {},
+  ): Promise<void> {
     const job = await this.getJob(jobId);
     if (!job) return;
+    if (
+      options.attempt !== undefined &&
+      (job.status !== JobStatus.PROCESSING || job.attempts !== options.attempt)
+    ) {
+      throw new JobCheckpointLostError();
+    }
 
     const completed: CloudflareObjectJob<T> = {
       ...job,
@@ -257,15 +281,25 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
     }
   }
 
-  /** A completed job stays completed, even for a worker whose lease expired. */
+  /**
+   * A completed job stays completed, even for a worker whose lease expired,
+   * unless `options.attempt` fences the call to the attempt that owns it.
+   */
   async fail(
     jobId: string,
     error: string | Error,
     retry: JobRetryDirective = { enabled: false },
+    options: JobSettleOptions = {},
   ): Promise<void> {
     const job = await this.getJob(jobId);
     if (!job) throw new Error(`Job ${jobId} not found`);
     if (job.status === JobStatus.COMPLETED) return;
+    if (
+      options.attempt !== undefined &&
+      (job.status !== JobStatus.PROCESSING || job.attempts !== options.attempt)
+    ) {
+      throw new JobCheckpointLostError();
+    }
 
     const attempts = job.attempts + 1;
     const message = error instanceof Error ? error.message : error;

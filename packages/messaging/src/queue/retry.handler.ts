@@ -367,25 +367,44 @@ export class MessageRetryHandler extends EventEmitter {
       item.updatedAt = new Date();
       this.updateMetrics();
 
-      await this.options.onRetryFailed?.(item, retryError);
-
-      this.emit("retry:failed", {
-        type: MessageEventType.MESSAGE_FAILED,
-        timestamp: new Date(),
-        data: { item, error: retryError, willRetry: shouldRetryAgain },
-        metadata: item.originalDeliveryReport.metadata,
-      } as MessageEvent);
-
-      if (!shouldRetryAgain) {
-        await this.options.onRetryExhausted?.(item);
-
-        this.emit("retry:exhausted", {
+      // Observers must not skip each other: the item is already settled.
+      await this.notifyObserver("Retry failure callback failed", item, () =>
+        this.options.onRetryFailed?.(item, retryError),
+      );
+      await this.notifyObserver("Failed retry observer failed", item, () =>
+        this.emit("retry:failed", {
           type: MessageEventType.MESSAGE_FAILED,
           timestamp: new Date(),
-          data: { item, finalError: retryError },
+          data: { item, error: retryError, willRetry: shouldRetryAgain },
           metadata: item.originalDeliveryReport.metadata,
-        } as MessageEvent);
+        } as MessageEvent),
+      );
+
+      if (!shouldRetryAgain) {
+        await this.notifyObserver("Retry exhausted callback failed", item, () =>
+          this.options.onRetryExhausted?.(item),
+        );
+        await this.notifyObserver("Exhausted retry observer failed", item, () =>
+          this.emit("retry:exhausted", {
+            type: MessageEventType.MESSAGE_FAILED,
+            timestamp: new Date(),
+            data: { item, finalError: retryError },
+            metadata: item.originalDeliveryReport.metadata,
+          } as MessageEvent),
+        );
       }
+    }
+  }
+
+  private async notifyObserver(
+    label: string,
+    item: RetryQueueItem,
+    notify: () => unknown,
+  ): Promise<void> {
+    try {
+      await notify();
+    } catch (error) {
+      logBackgroundFailure(label, error, { retryItemId: item.id });
     }
   }
 

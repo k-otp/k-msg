@@ -72,9 +72,11 @@ export interface JobLeaseOptions<J> {
    * by then, for example because the worker stopped mid-job, the next
    * `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`)
    * and makes the job due again, or fails it when no attempts are left.
-   * Set it above the longest time a job can take: a lease is not renewed,
-   * and a worker that outlives it can still complete or fail the job while
-   * another worker has it. `dequeue()` leaves the jobs its caller names as
+   * Set it above the longest time a job can take. Only `checkpoint()` renews
+   * a lease, which message jobs do before every recipient, so for them it
+   * only has to outlast one send. A worker that outlives its lease can still
+   * complete or fail the job while another worker has it, unless the caller
+   * fences the call with `JobSettleOptions.attempt` (message jobs do). `dequeue()` leaves the jobs its caller names as
    * still running alone, which is how `JobProcessor` keeps a job it is
    * still running from being run again or counted as lost.
    */
@@ -99,6 +101,17 @@ export interface JobQueueCleanupOptions {
   olderThan?: Date;
 }
 
+/** Optional fence for `complete()` and `fail()`. */
+export interface JobSettleOptions {
+  /**
+   * The attempt (`job.attempts`) that owns the job. A queue that supports the
+   * fence rejects with `JobCheckpointLostError` when the job is no longer
+   * processing that attempt, so a stale worker cannot settle the job of the
+   * worker that took it over. Without it, completing or failing is unfenced.
+   */
+  attempt?: number;
+}
+
 export interface JobQueue<T> {
   enqueue(
     type: string,
@@ -113,18 +126,29 @@ export interface JobQueue<T> {
 
   dequeue(options?: JobDequeueOptions): Promise<Job<T> | undefined>;
 
-  complete(jobId: string, result?: any): Promise<void>;
+  complete(
+    jobId: string,
+    result?: any,
+    options?: JobSettleOptions,
+  ): Promise<void>;
 
   /** False for stores that cannot persist reliable message progress (such as KV). */
   readonly supportsCheckpoints?: boolean;
-  /** Persist message progress before/after a send. Required by MessageJobProcessor.
-   * Must reject with JobCheckpointLostError if the processing attempt no longer owns the job. */
+  /**
+   * Persist message progress before a send. Required by MessageJobProcessor.
+   * Replaces the job's `data` atomically with the attempt check, so a stale
+   * attempt cannot overwrite the progress of the one that took the job over:
+   * it must reject with `JobCheckpointLostError` if the processing attempt no
+   * longer owns the job. With `leaseMs`, it also renews the lease from now, so
+   * a job that checkpoints after every recipient does not outlive its lease.
+   */
   checkpoint?(jobId: string, data: T, attempt: number): Promise<void>;
 
   fail(
     jobId: string,
     error: string | Error,
     retry?: JobRetryDirective,
+    options?: JobSettleOptions,
   ): Promise<void>;
 
   peek(): Promise<Job<T> | undefined>;

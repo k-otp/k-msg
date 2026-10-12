@@ -5,6 +5,7 @@ export type {
   JobQueue,
   JobQueueCleanupOptions,
   JobRetryDirective,
+  JobSettleOptions,
 } from "./job-queue.interface";
 export {
   JOB_LEASE_EXPIRED,
