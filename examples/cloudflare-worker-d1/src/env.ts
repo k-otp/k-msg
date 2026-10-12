@@ -1,5 +1,3 @@
-import { DefaultHttpClient } from "@k-msg/webhook/toolkit";
-
 /**
  * Bindings, vars and secrets as they arrive on `env`. wrangler.jsonc `vars`,
  * `.dev.vars` and `wrangler secret put` values are not typed at runtime, so
@@ -154,12 +152,10 @@ export function readConfig(env: Env): Config {
       .map((host) => host.trim())
       .filter(Boolean) ?? [];
   // The webhook transport throws a TypeError for an entry it cannot match,
-  // which would fail every request. Check them here with its own rules, and
-  // name the entry's position, never its value.
+  // which would fail every request. Check them here with its rules, and name
+  // the entry's position, never its value.
   for (const [index, host] of webhookAllowedHosts.entries()) {
-    try {
-      new DefaultHttpClient([host]);
-    } catch {
+    if (!isExactHostname(host)) {
       issues.push(
         `WEBHOOK_ALLOWED_HOSTS entry ${index + 1} must be an exact hostname: no scheme, port, path or wildcard, IPv6 in brackets, internationalized names as punycode`,
       );
@@ -195,6 +191,31 @@ export function readConfig(env: Env): Config {
     throw new ConfigError(issues);
   }
   return { db, ...config };
+}
+
+/**
+ * Whether the webhook transport accepts the entry in `allowedHosts`: a
+ * lowercase DNS name, public IPv4 address or bracketed IPv6 address, with at
+ * most one trailing dot and no scheme, credentials, port, path or wildcard.
+ */
+function isExactHostname(entry: string): boolean {
+  const host = entry.toLowerCase().replace(/\.$/, "");
+  try {
+    const url = new URL(`https://${host}`);
+    return (
+      url.hostname === host &&
+      !host.endsWith(".") &&
+      !host.includes("*") &&
+      url.port === "" &&
+      url.username === "" &&
+      url.password === "" &&
+      url.pathname === "/" &&
+      url.search === "" &&
+      url.hash === ""
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isProviderName(value: string): value is ProviderName {
