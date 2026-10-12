@@ -10,6 +10,21 @@ export interface WebhookConfig {
 
   // 네트워크 설정
   timeoutMs: number;
+  /** Diagnostic response prefix, in bytes (default 4096, maximum 1 MiB; 0 omits it). */
+  maxResponseBodyBytes?: number;
+  /**
+   * Exact administrator-trusted hosts for the default HTTP client: lowercase
+   * DNS names, public IPv4 addresses, and IPv6 addresses in brackets
+   * (`[2001:db8::1]`), with internationalized names as punycode. No scheme,
+   * port, path or wildcard. An entry trusts every port of that host and that
+   * host's DNS operator: names are checked, addresses are not resolved or
+   * pinned. Arbitrary customer domains need an injected DNS-pinned or
+   * egress-filtered HttpClient.
+   *
+   * `addEndpoint()` and `updateEndpoint()` refuse other hosts with
+   * `WebhookHostNotAllowedError` unless an `httpClient` is injected.
+   */
+  allowedHosts?: readonly string[];
 
   // 보안 설정
   /**
@@ -152,6 +167,7 @@ export const WebhookAttemptSchema = z.object({
   timestamp: z.date(),
   httpStatus: z.optional(z.number()),
   responseBody: z.optional(z.string()),
+  responseBodyTruncated: z.optional(z.boolean()),
   responseHeaders: z.optional(z.record(z.string(), z.string())),
   error: z.optional(z.string()),
   latencyMs: z.number(),

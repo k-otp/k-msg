@@ -26,8 +26,13 @@ export interface Config {
   adminToken: string | undefined;
   /** Secret of the endpoint registered for POST /webhooks/receiver. */
   webhookReceiverSecret: string | undefined;
-  /** Development only: accept http://localhost and private-network URLs. */
+  /**
+   * Development only (`ENVIRONMENT=development`): accept http://localhost and
+   * private-network URLs, and skip WEBHOOK_ALLOWED_HOSTS.
+   */
   allowPrivateWebhookUrls: boolean;
+  /** Comma-separated administrator-trusted DNS destinations; never derived from endpoint input. */
+  webhookAllowedHosts: string[];
 }
 
 export class ConfigError extends Error {
@@ -141,18 +146,76 @@ export function readConfig(env: Env): Config {
     );
   }
 
+  const webhookAllowedHosts =
+    text("WEBHOOK_ALLOWED_HOSTS")
+      ?.split(",")
+      .map((host) => host.trim())
+      .filter(Boolean) ?? [];
+  // The webhook transport throws a TypeError for an entry it cannot match,
+  // which would fail every request. Check them here with its rules, and name
+  // the entry's position, never its value.
+  for (const [index, host] of webhookAllowedHosts.entries()) {
+    if (!isExactHostname(host)) {
+      issues.push(
+        `WEBHOOK_ALLOWED_HOSTS entry ${index + 1} must be an exact hostname: no scheme, port, path or wildcard, IPv6 in brackets, internationalized names as punycode`,
+      );
+    }
+  }
+
+  const allowPrivateWebhookUrls = flag("DEV_ALLOW_PRIVATE_WEBHOOK_URLS");
+  if (allowPrivateWebhookUrls) {
+    // The development transport accepts every host, private ones included,
+    // and ignores WEBHOOK_ALLOWED_HOSTS. A deployed Worker must never run it.
+    if (text("ENVIRONMENT") !== "development") {
+      issues.push(
+        "DEV_ALLOW_PRIVATE_WEBHOOK_URLS is only accepted with ENVIRONMENT=development, as set in a local .dev.vars; remove it from deployed environments",
+      );
+    }
+    if (webhookAllowedHosts.length > 0) {
+      issues.push(
+        "DEV_ALLOW_PRIVATE_WEBHOOK_URLS bypasses WEBHOOK_ALLOWED_HOSTS; set only one of them",
+      );
+    }
+  }
+
   const config = {
     provider,
     senderNumber,
     adminToken,
     webhookReceiverSecret: text("WEBHOOK_RECEIVER_SECRET"),
-    allowPrivateWebhookUrls: flag("DEV_ALLOW_PRIVATE_WEBHOOK_URLS"),
+    allowPrivateWebhookUrls,
+    webhookAllowedHosts,
   };
 
   if (db === undefined || issues.length > 0) {
     throw new ConfigError(issues);
   }
   return { db, ...config };
+}
+
+/**
+ * Whether the webhook transport accepts the entry in `allowedHosts`: a
+ * lowercase DNS name, public IPv4 address or bracketed IPv6 address, with at
+ * most one trailing dot and no scheme, credentials, port, path or wildcard.
+ */
+function isExactHostname(entry: string): boolean {
+  const host = entry.toLowerCase().replace(/\.$/, "");
+  try {
+    const url = new URL(`https://${host}`);
+    return (
+      url.hostname === host &&
+      !host.endsWith(".") &&
+      !host.includes("*") &&
+      url.port === "" &&
+      url.username === "" &&
+      url.password === "" &&
+      url.pathname === "/" &&
+      url.search === "" &&
+      url.hash === ""
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isProviderName(value: string): value is ProviderName {

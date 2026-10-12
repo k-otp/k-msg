@@ -22,6 +22,7 @@ import {
   createCloudflareSqlClient,
   createD1JobQueue,
   createD1SqlClient,
+  createDrizzleSqlClient,
   type D1DatabaseLike,
   type D1PreparedStatementLike,
   HyperdriveJobQueue,
@@ -30,6 +31,7 @@ import { JobProcessor } from "./job.processor";
 import {
   JOB_LEASE_EXPIRED,
   type Job,
+  JobCheckpointLostError,
   type JobQueue,
   type JobQueueCleanupOptions,
   JobStatus,
@@ -84,6 +86,8 @@ interface Backend {
 function memoryObjectStorage(): CloudflareObjectStorage {
   const values = new Map<string, string>();
   return {
+    // One process runs these calls one at a time, as a Durable Object does.
+    consistency: "serialized",
     async get(key) {
       return values.get(key) ?? null;
     },
@@ -416,6 +420,92 @@ function describeLeases(backend: Backend, enabled = true): void {
       expect(stored?.leaseExpiresAt).toBeUndefined();
       expect(expired.map((item) => item.status)).toEqual([JobStatus.FAILED]);
       expect(await queue.nextDueAt()).toBeUndefined();
+    });
+
+    test("a checkpoint saves the data and renews the lease", async () => {
+      setSystemTime(at(0));
+      const queue = await store.queue<Payload>({ leaseMs: 1_000 });
+      const job = await queue.enqueue("send", payload);
+      const claimed = (await queue.dequeue())!;
+      expect(claimed.leaseExpiresAt).toEqual(at(1_000));
+
+      setSystemTime(at(800));
+      await queue.checkpoint?.(job.id, { to: "saved" }, claimed.attempts);
+      const renewed = await queue.getJob(job.id);
+      expect(renewed?.data).toEqual({ to: "saved" });
+      expect(renewed?.status).toBe(JobStatus.PROCESSING);
+      expect(renewed?.leaseExpiresAt).toEqual(at(1_800));
+
+      // The first lease would have ended by now; the renewed one has not.
+      setSystemTime(at(1_500));
+      expect(await queue.dequeue()).toBeUndefined();
+      expect((await queue.getJob(job.id))?.attempts).toBe(0);
+
+      setSystemTime(at(1_800));
+      const again = await queue.dequeue();
+      expect(again?.id).toBe(job.id);
+      expect(again?.attempts).toBe(1);
+      // The old attempt cannot save over the new one.
+      await expect(
+        queue.checkpoint?.(job.id, { to: "stale" }, claimed.attempts),
+      ).rejects.toBeInstanceOf(JobCheckpointLostError);
+      expect((await queue.getJob(job.id))?.data).toEqual({ to: "saved" });
+    });
+
+    test("a checkpoint leaves the lease unset when leases are off", async () => {
+      setSystemTime(at(0));
+      const queue = await store.queue<Payload>();
+      const job = await queue.enqueue("send", payload);
+      const claimed = (await queue.dequeue())!;
+      await queue.checkpoint?.(job.id, { to: "saved" }, claimed.attempts);
+      const stored = await queue.getJob(job.id);
+      expect(stored?.data).toEqual({ to: "saved" });
+      expect(stored?.leaseExpiresAt).toBeUndefined();
+    });
+
+    test("a fenced complete or fail only settles the attempt that owns the job", async () => {
+      setSystemTime(at(0));
+      const queue = await store.queue<Payload>({ leaseMs: 1_000 });
+      const job = await queue.enqueue("send", payload);
+      await queue.dequeue();
+      // The lease ends and another worker takes the job as attempt 1.
+      setSystemTime(at(1_000));
+      expect((await queue.dequeue())?.attempts).toBe(1);
+
+      await expect(
+        queue.complete(job.id, undefined, { attempt: 0 }),
+      ).rejects.toBeInstanceOf(JobCheckpointLostError);
+      await expect(
+        queue.fail(job.id, "late", { enabled: false }, { attempt: 0 }),
+      ).rejects.toBeInstanceOf(JobCheckpointLostError);
+      await expect(
+        queue.fail(
+          job.id,
+          "late",
+          { enabled: true, delayMs: 0 },
+          { attempt: 0 },
+        ),
+      ).rejects.toBeInstanceOf(JobCheckpointLostError);
+      const untouched = await queue.getJob(job.id);
+      expect(untouched?.status).toBe(JobStatus.PROCESSING);
+      expect(untouched?.attempts).toBe(1);
+
+      await queue.fail(
+        job.id,
+        "mine",
+        { enabled: true, delayMs: 0 },
+        { attempt: 1 },
+      );
+      const retried = await queue.getJob(job.id);
+      expect(retried?.status).toBe(JobStatus.PENDING);
+      expect(retried?.attempts).toBe(2);
+
+      const next = (await queue.dequeue())!;
+      expect(next.attempts).toBe(2);
+      await queue.complete(job.id, undefined, { attempt: 2 });
+      expect((await queue.getJob(job.id))?.status).toBe(JobStatus.COMPLETED);
+      // Unfenced calls behave as before.
+      await queue.complete(job.id);
     });
 
     test("leases are off unless leaseMs is set", async () => {
@@ -1073,6 +1163,68 @@ describe.skipIf(!postgresUrl)(
       } finally {
         await connection.client.query(`DROP TABLE ${tableName}`);
         await connection.end();
+      }
+    });
+  },
+);
+
+describe.skipIf(!postgresUrl)(
+  "HyperdriveJobQueue on Drizzle with postgres.js",
+  () => {
+    test("remove() and the fences read the changed-row count of the driver", async () => {
+      setSystemTime(at(0));
+      const connection = connectPostgresJs();
+      // What drizzle-orm/postgres-js does with execute(): run the statement
+      // and return postgres.js' own result, an array that carries `count`.
+      const sql = postgres(postgresUrl ?? "", {
+        max: 1,
+        onnotice: () => {},
+        connection: { search_path: postgresSchema },
+      });
+      const client = createDrizzleSqlClient({
+        dialect: "postgres",
+        db: {
+          execute: (query: unknown) => {
+            const rendered =
+              typeof query === "string"
+                ? { sql: query, params: [] as unknown[] }
+                : (
+                    query as {
+                      getSQL(): {
+                        toQuery(): { sql: string; params: unknown[] };
+                      };
+                    }
+                  )
+                    .getSQL()
+                    .toQuery();
+            return sql.unsafe(
+              rendered.sql,
+              rendered.params as postgres.ParameterOrJSON<never>[],
+            );
+          },
+        },
+      });
+      const tableName = nextTableName();
+      try {
+        const queue = new HyperdriveJobQueue<Payload>(client, {
+          tableName,
+          leaseMs: 1_000,
+        });
+        const job = await queue.enqueue("send", payload);
+        const claimed = (await queue.dequeue())!;
+        await queue.checkpoint(job.id, { to: "saved" }, claimed.attempts);
+        await expect(
+          queue.checkpoint(job.id, { to: "stale" }, claimed.attempts + 1),
+        ).rejects.toBeInstanceOf(JobCheckpointLostError);
+        await expect(
+          queue.complete(job.id, undefined, { attempt: claimed.attempts + 1 }),
+        ).rejects.toBeInstanceOf(JobCheckpointLostError);
+        expect(await queue.remove(job.id)).toBe(true);
+        expect(await queue.remove(job.id)).toBe(false);
+      } finally {
+        await connection.client.query(`DROP TABLE ${tableName}`);
+        await connection.end();
+        await sql.end();
       }
     });
   },

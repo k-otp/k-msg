@@ -44,6 +44,25 @@ bun add @k-msg/messaging @k-msg/core
 
 `JobProcessor` and `MessageJobProcessor` now require explicit `jobQueue` injection.
 
+### Message queue delivery safety (breaking)
+
+`MessageJobProcessor` saves each recipient's progress before it sends, so a retry, a restart or a stale worker never sends to a recipient that already has a result. It does not promise exactly-once delivery.
+
+Before you upgrade:
+
+- **Drain the queue first.** Jobs that an earlier version created carry no receipts. If one is still pending or processing when the new processor takes it, every recipient of that job is sent again. Stop producers, let the old workers finish (or fail) the pending and processing jobs, then deploy.
+- Use a queue that can checkpoint. `SQLiteJobQueue`, `HyperdriveJobQueue` (D1, Postgres, MySQL; a Postgres Hyperdrive must have its query cache disabled) and the Durable Object queue can. A custom `JobQueue` still compiles, because `checkpoint` is optional, but `MessageJobProcessor` throws at construction without `checkpoint(jobId, data, attempt)`. It must replace the job's `data` atomically with the check that the job is still processing that attempt, reject with `JobCheckpointLostError` (from `@k-msg/messaging/queue`) otherwise, and with `leaseMs`, renew the lease. A queue that also honors `JobSettleOptions.attempt` in `complete()` and `fail()` keeps a stale worker from settling the job of the one that took it over. KV queues and R2 queues are not supported: two isolates can both pass an R2 read-then-write check, and KV may read old values.
+
+What changes:
+
+- **Recipients are sent one at a time.** `concurrency` limits jobs, not recipients. Split large lists over several jobs and workers.
+- **Only `RATE_LIMIT_EXCEEDED` retries**, and only for the recipients that were rate limited. Every other failure, such as `INVALID_REQUEST`, authentication, insufficient balance or a provider 5xx, is final for that recipient and is not retried, because a retry could send twice. A transport error or an unfinished receipt is an unknown outcome (`OUTCOME_UNKNOWN`) that you reconcile with the provider. Never delete receipts to force a retry.
+- **`job.error` and `job:failed` are a summary**: the number of failed recipients and the position and error code of the first one, for example `1 recipient(s) failed or have an unknown outcome (first: recipient 3, INVALID_REQUEST); ...`. They never hold a phone number or provider text. The receipts in `getJob(id).data` hold the per-recipient detail.
+- **A job is limited in size.** Every checkpoint rewrites the job row, so the work grows with the square of the recipient count, and the row must fit the database (D1: 2 MB). `maxRecipientsPerJob` (default 1000) and `maxJobBytes` (default 1,000,000, with room for the receipts) make `queueMessage()`, `queueBulkMessages()` and `scheduleMessage()` throw `MessageJobTooLargeError` for a larger job. A job of 1,000 recipients writes about 95 MB in total and its row stays near 130 KB. Raise the limits only for a database that takes larger rows.
+- **`__kmsgDelivery` is reserved.** The receipts live under that key of the queued request. A request that carries it is refused, and receipts that another job wrote are ignored, so untrusted input cannot mark a recipient as sent. Keep the field across restarts and retries.
+- **Leases are renewed by every checkpoint**, so with `leaseMs` a job only has to outlast one send, not the whole list.
+- A `providerOptions.requestId` or `correlationId` you set is passed to the provider as it is and wins over the job id. The handle that tells one recipient's send from another is the `messageId` the provider receives, which stays the same across retries of that recipient.
+
 `MessageRetryHandler` is an application-level retry orchestrator for provider gaps. You must supply an `execute(attempt, item)` callback that performs the real resend logic, and the handler will only manage retry timing, policy, and queue state.
 
 ```ts
@@ -527,11 +546,11 @@ const queue = createDrizzleJobQueue({
 
 ### KV, R2 and Durable Object Job Queues
 
-`createDurableObjectJobQueue`, `createKvJobQueue` and `createR2JobQueue` store each job as JSON under `keyPrefix` (default `kmsg/jobs`).
+`createDurableObjectJobQueue`, `createKvJobQueue` and `createR2JobQueue` store each job as JSON under `keyPrefix` (default `kmsg/jobs`). Only the Durable Object queue can run message jobs with `MessageJobProcessor`: its checkpoints are serialized by the object. KV and R2 queues report `supportsCheckpoints: false`.
 
 - With `leaseMs`, `dequeue()` leases the job it returns for that long. Without it, a job whose worker stopped mid-job, for example in a deploy, stays `processing` forever. If a leased job is neither completed nor failed in time, the next `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`, exported as `JOB_LEASE_EXPIRED`) and makes the job due again, or fails it when no attempts are left, then calls `onLeaseExpired(job)`. It calls it before it leases the job it returns, so a slow callback does not shorten that lease.
   - A job that is already `processing` without a lease, such as one taken by an earlier version, gets a lease when `dequeue()` first sees it.
-  - Leases are not renewed and not fenced: set `leaseMs` above the longest time a job can take, because a worker that outlives its lease can still complete or fail the job while another worker has it.
+  - Leases are only renewed by `checkpoint()`, which message jobs call before every recipient: set `leaseMs` above the longest time a job can take between checkpoints (for a message job, one send). A worker that outlives its lease can still complete or fail the job while another worker has it, unless the caller passes `{ attempt }` to `complete()` or `fail()`, as `MessageJobProcessor` does.
   - `dequeue({ running })` leaves the jobs its caller is still running alone: it neither hands them out again nor counts their lease as lost. `JobProcessor` passes the jobs it is running, so a handler that outlives its lease is not run twice by the same processor.
 - `nextDueAt()` returns when `dequeue()` next has work: a pending job's due time or a lease's end. Set an alarm for it instead of polling. A time in the past means `dequeue()` has work now, even if only to fail a job whose lease ran out, so call `dequeue()` rather than checking `size()`.
 - `complete(jobId, result)` keeps `result` on the job, for example the provider's message id. A result that JSON cannot hold, or that is too large for the storage, is logged and dropped rather than failing the completion. `fail()` never reopens a completed job.

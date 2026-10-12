@@ -44,6 +44,25 @@ bun add @k-msg/messaging @k-msg/core
   - 템플릿 개인화 관련: `@k-msg/template` (`TemplatePersonalizer`, `TemplateVariableUtils`, `defaultTemplatePersonalizer`)
 - `JobProcessor`/`MessageJobProcessor`는 이제 `jobQueue`를 반드시 주입해야 합니다.
 
+### 메시지 큐 전달 안전성 (Breaking)
+
+`MessageJobProcessor`는 발송하기 전에 수신자별 진행 상황을 저장하므로, 재시도, 재시작, 오래된 워커 때문에 이미 결과가 있는 수신자에게 다시 보내지 않습니다. 정확히 한 번(exactly-once) 전달을 보장하지는 않습니다.
+
+업그레이드 전에:
+
+- **먼저 큐를 비우세요.** 이전 버전이 만든 작업에는 receipt가 없습니다. 이런 작업이 대기(pending) 또는 처리(processing) 중일 때 새 프로세서가 가져가면 그 작업의 모든 수신자에게 다시 발송합니다. 작업 생성을 멈추고, 이전 워커가 대기·처리 중인 작업을 끝내게(또는 실패시키게) 한 뒤 배포하세요.
+- checkpoint를 지원하는 큐를 사용하세요. `SQLiteJobQueue`, `HyperdriveJobQueue`(D1, Postgres, MySQL; Postgres용 Hyperdrive는 쿼리 캐시를 꺼야 합니다), Durable Object 큐가 지원합니다. 직접 만든 `JobQueue`는 `checkpoint`가 선택 메서드라 컴파일은 되지만, `checkpoint(jobId, data, attempt)`가 없으면 `MessageJobProcessor`가 생성 시점에 예외를 던집니다. 이 메서드는 작업이 여전히 그 attempt로 처리 중인지 확인하는 것과 함께 작업의 `data`를 원자적으로 교체해야 하고, 그렇지 않으면 `JobCheckpointLostError`(`@k-msg/messaging/queue`)로 reject해야 하며, `leaseMs`가 있으면 lease를 연장해야 합니다. `complete()`와 `fail()`도 `JobSettleOptions.attempt`를 지키면 오래된 워커가 작업을 넘겨받은 워커의 작업을 정리하지 못합니다. KV 큐와 R2 큐는 지원하지 않습니다. R2의 읽기-쓰기 확인은 두 isolate가 모두 통과할 수 있고, KV는 오래된 값을 읽을 수 있습니다.
+
+달라지는 점:
+
+- **수신자는 한 명씩 순서대로 발송합니다.** `concurrency`는 수신자가 아니라 작업 수를 제한합니다. 큰 목록은 여러 작업과 워커로 나누세요.
+- **`RATE_LIMIT_EXCEEDED`만 자동으로 재시도**하며, rate limit에 걸린 수신자에 대해서만 재시도합니다. `INVALID_REQUEST`, 인증, 잔액 부족, provider 5xx 등 나머지 실패는 해당 수신자에게는 최종 실패이고 재시도하지 않습니다. 재시도가 중복 발송이 될 수 있기 때문입니다. 전송 오류나 끝나지 않은 receipt는 결과를 알 수 없는 상태(`OUTCOME_UNKNOWN`)이므로 provider와 대조해서 확인하세요. 재시도를 강제하려고 receipt를 지우지 마세요.
+- **`job.error`와 `job:failed`는 요약입니다.** 실패한 수신자 수와, 첫 번째 실패의 위치 및 에러 코드만 담습니다(예: `1 recipient(s) failed or have an unknown outcome (first: recipient 3, INVALID_REQUEST); ...`). 전화번호나 provider 메시지는 들어가지 않습니다. 수신자별 상세는 `getJob(id).data`의 receipt에 있습니다.
+- **작업 크기에 제한이 있습니다.** checkpoint마다 작업 행 전체를 다시 쓰므로 수신자 수의 제곱에 비례해 쓰기량이 늘고, 행은 데이터베이스 한도(D1: 2 MB)에 맞아야 합니다. `maxRecipientsPerJob`(기본 1000)와 `maxJobBytes`(기본 1,000,000, receipt 몫 포함)를 넘으면 `queueMessage()`, `queueBulkMessages()`, `scheduleMessage()`가 `MessageJobTooLargeError`를 던집니다. 수신자 1,000명짜리 작업은 총 약 95 MB를 쓰고 행 크기는 약 130 KB에 머뭅니다. 더 큰 행을 받는 데이터베이스에서만 한도를 올리세요.
+- **`__kmsgDelivery`는 예약된 키입니다.** receipt는 큐에 들어간 요청의 이 키 아래에 저장됩니다. 이 키가 있는 요청은 거부하고, 다른 작업이 쓴 receipt는 무시하므로 신뢰할 수 없는 입력으로 수신자를 발송 완료로 표시할 수 없습니다. 재시작과 재시도 사이에도 이 필드를 보존하세요.
+- **checkpoint마다 lease가 연장됩니다.** 그래서 `leaseMs`는 목록 전체가 아니라 한 번의 발송 시간보다만 길면 됩니다.
+- 호출자가 지정한 `providerOptions.requestId`와 `correlationId`는 그대로 provider에 전달되며 작업 ID보다 우선합니다. 수신자별 발송을 구분하는 값은 provider가 받는 `messageId`이고, 같은 수신자를 재시도해도 이 값은 그대로입니다.
+
 - `MessageRetryHandler`는 provider 기능 공백을 메우는 애플리케이션 레벨 retry orchestrator입니다. 실제 재전송은 호출자가 `execute(attempt, item)` 콜백으로 주입해야 하며, 핸들러는 retry 타이밍과 정책, 큐 상태만 관리합니다.
 
 ```ts
@@ -437,11 +456,11 @@ const queue = createDrizzleJobQueue({
 
 ### KV/R2/Durable Object 작업 큐
 
-`createDurableObjectJobQueue`, `createKvJobQueue`, `createR2JobQueue`는 각 작업(job)을 `keyPrefix`(기본값 `kmsg/jobs`) 아래에 JSON으로 저장합니다.
+`createDurableObjectJobQueue`, `createKvJobQueue`, `createR2JobQueue`는 각 작업(job)을 `keyPrefix`(기본값 `kmsg/jobs`) 아래에 JSON으로 저장합니다. `MessageJobProcessor`로 메시지 작업을 처리할 수 있는 것은 Durable Object 큐뿐이며, checkpoint가 객체 안에서 직렬화되기 때문입니다. KV 큐와 R2 큐는 `supportsCheckpoints: false`를 보고합니다.
 
 - `leaseMs`를 지정하면 `dequeue()`는 반환하는 작업을 그 시간 동안 점유(lease)합니다. 지정하지 않으면 처리 도중 워커가 멈춘 작업(예: 배포)은 영원히 `processing`으로 남습니다. 점유한 작업이 제시간에 완료도 실패도 되지 않으면, 다음 `dequeue()`가 잃어버린 시도를 실패로 계산하고(`error: "LEASE_EXPIRED"`, `JOB_LEASE_EXPIRED`로 export) 작업을 다시 처리 대상으로 만들거나, 남은 시도가 없으면 실패시킨 뒤 `onLeaseExpired(job)`를 호출합니다. 이 콜백은 반환할 작업을 점유하기 전에 호출되므로, 콜백이 오래 걸려도 그 작업의 lease가 줄어들지 않습니다.
   - lease 없이 이미 `processing`인 작업(예: 이전 버전이 가져간 작업)은 `dequeue()`가 처음 볼 때 lease를 받습니다.
-  - lease는 연장되지 않고, 다른 워커의 처리를 막지도(fencing) 않습니다. `leaseMs`는 작업 하나가 걸릴 수 있는 가장 긴 시간보다 길게 잡으세요. lease가 끝난 뒤에도 원래 워커가 작업을 완료하거나 실패시킬 수 있고, 그 사이 다른 워커가 같은 작업을 가져갈 수 있습니다.
+  - lease는 `checkpoint()`만 연장하며, 메시지 작업은 수신자마다 발송 전에 이를 호출합니다. `leaseMs`는 checkpoint 사이에 걸릴 수 있는 가장 긴 시간(메시지 작업은 한 번의 발송)보다 길게 잡으세요. 호출자가 `complete()`나 `fail()`에 `{ attempt }`를 넘기지 않으면(`MessageJobProcessor`는 넘깁니다), lease가 끝난 뒤에도 원래 워커가 작업을 완료하거나 실패시킬 수 있고, 그 사이 다른 워커가 같은 작업을 가져갈 수 있습니다.
   - `dequeue({ running })`은 호출한 쪽이 아직 실행 중인 작업을 건드리지 않습니다. 다시 내주지도 않고, lease를 잃어버린 시도로 계산하지도 않습니다. `JobProcessor`는 실행 중인 작업을 이 옵션으로 넘기므로, lease보다 오래 걸리는 핸들러를 같은 프로세서가 두 번 실행하지 않습니다.
 - `nextDueAt()`은 `dequeue()`가 다음에 할 일이 생기는 시각(대기 작업의 예정 시각이나 lease 종료 시각)을 반환하므로, 폴링 대신 그 시각에 알람을 걸 수 있습니다. 과거 시각이면 lease가 끝난 작업을 실패 처리하는 일이라도 `dequeue()`에 할 일이 있다는 뜻이니, `size()`를 확인하지 말고 `dequeue()`를 호출하세요.
 - `complete(jobId, result)`는 `result`(예: provider 메시지 ID)를 작업에 남깁니다. JSON으로 담을 수 없거나 storage에 비해 너무 큰 결과는 로그를 남기고 버리며, 완료 처리 자체는 실패하지 않습니다. `fail()`은 완료된 작업을 다시 열지 않습니다.

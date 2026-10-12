@@ -9,6 +9,7 @@ import {
 } from "@k-msg/webhook";
 import { createD1WebhookPersistence } from "@k-msg/webhook/adapters/cloudflare";
 import type { Config } from "./env";
+import { log } from "./log";
 
 /** The events this Worker sends; endpoints subscribe to all of them by default. */
 export const MESSAGE_EVENT_TYPES: readonly WebhookEventType[] = [
@@ -51,8 +52,34 @@ function endpointSecurity(config: Config): WebhookRuntimeSecurityOptions {
 
 /** A webhook runtime for one request or cron run. */
 export function createWebhookRuntime(config: Config): WebhookRuntimeService {
+  if (config.allowPrivateWebhookUrls) {
+    log(
+      "warn",
+      "development webhook transport active; allowedHosts is ignored",
+    );
+  }
+  const delivery = {
+    ...deliveryConfig,
+    allowedHosts: config.webhookAllowedHosts,
+  };
   return new WebhookRuntimeService({
-    delivery: deliveryConfig,
+    delivery,
+    // Local-only opt-in (readConfig refuses it outside ENVIRONMENT=development)
+    // keeps the sample receiver usable. Deployments use the default
+    // trusted-host transport.
+    httpClient: config.allowPrivateWebhookUrls
+      ? {
+          fetch: async (url, options) => {
+            const parsed = validateEndpointUrl(
+              url,
+              resolveEndpointValidationOptions(endpointSecurity(config)),
+            );
+            if (parsed.username || parsed.password)
+              throw new Error("Webhook URL credentials are not allowed");
+            return fetch(parsed, { ...options, redirect: "manual" });
+          },
+        }
+      : undefined,
     // migrations/ owns the tables, so skip the CREATE TABLE statements the
     // persistence would otherwise run on first use.
     persistence: createD1WebhookPersistence(config.db, {

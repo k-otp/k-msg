@@ -13,7 +13,26 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:3](https://github.com/k
 
 > `optional` **algorithm?**: `"sha256"` \| `"sha1"`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:23](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L23)
+Defined in: [packages/webhook/src/types/webhook.types.ts:38](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L38)
+
+***
+
+### allowedHosts?
+
+> `optional` **allowedHosts?**: readonly `string`[]
+
+Defined in: [packages/webhook/src/types/webhook.types.ts:27](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L27)
+
+Exact administrator-trusted hosts for the default HTTP client: lowercase
+DNS names, public IPv4 addresses, and IPv6 addresses in brackets
+(`[2001:db8::1]`), with internationalized names as punycode. No scheme,
+port, path or wildcard. An entry trusts every port of that host and that
+host's DNS operator: names are checked, addresses are not resolved or
+pinned. Arbitrary customer domains need an injected DNS-pinned or
+egress-filtered HttpClient.
+
+`addEndpoint()` and `updateEndpoint()` refuse other hosts with
+`WebhookHostNotAllowedError` unless an `httpClient` is injected.
 
 ***
 
@@ -29,7 +48,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:8](https://github.com/k
 
 > `optional` **batchSize?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L39)
+Defined in: [packages/webhook/src/types/webhook.types.ts:54](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L54)
 
 How many events queued by `emit()` go out in one batch. The `emit()` call
 that fills a batch sends it, retries included, before it resolves, unless
@@ -44,7 +63,7 @@ which also replaces a value below 1. `emitSync()` does not use it.
 
 > `optional` **batchTimeoutMs?**: `number`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:45](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L45)
+Defined in: [packages/webhook/src/types/webhook.types.ts:60](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L60)
 
 With `autoStart`, how long in milliseconds the first event queued by
 `emit()` waits before its batch is sent. Defaults to 5000. `emitSync()`
@@ -56,7 +75,7 @@ does not use it.
 
 > **enabledEvents**: [`WebhookEventType`](/en/api/webhook/src/enumerations/webhookeventtype/)[]
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L28)
+Defined in: [packages/webhook/src/types/webhook.types.ts:43](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L43)
 
 ***
 
@@ -64,7 +83,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:28](https://github.com/
 
 > **enableSecurity**: `boolean`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L20)
+Defined in: [packages/webhook/src/types/webhook.types.ts:35](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L35)
 
 Signs every delivery with HMAC. While on, a delivery is never sent
 unsigned: endpoints need a `secret` (or `secretKey` must be set), and a
@@ -88,6 +107,16 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:7](https://github.com/k
 
 ***
 
+### maxResponseBodyBytes?
+
+> `optional` **maxResponseBodyBytes?**: `number`
+
+Defined in: [packages/webhook/src/types/webhook.types.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L14)
+
+Diagnostic response prefix, in bytes (default 4096, maximum 1 MiB; 0 omits it).
+
+***
+
 ### maxRetries
 
 > **maxRetries**: `number`
@@ -108,7 +137,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:6](https://github.com/k
 
 > `optional` **secretKey?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:22](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L22)
+Defined in: [packages/webhook/src/types/webhook.types.ts:37](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L37)
 
 Signs deliveries to endpoints that have no `secret` of their own.
 
@@ -118,7 +147,7 @@ Signs deliveries to endpoints that have no `secret` of their own.
 
 > `optional` **signatureHeader?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:24](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L24)
+Defined in: [packages/webhook/src/types/webhook.types.ts:39](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L39)
 
 ***
 
@@ -126,7 +155,7 @@ Defined in: [packages/webhook/src/types/webhook.types.ts:24](https://github.com/
 
 > `optional` **signaturePrefix?**: `string`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:25](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L25)
+Defined in: [packages/webhook/src/types/webhook.types.ts:40](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L40)
 
 ***
 

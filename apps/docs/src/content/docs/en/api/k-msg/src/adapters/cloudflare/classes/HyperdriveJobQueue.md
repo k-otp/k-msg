@@ -5,7 +5,7 @@ prev: false
 title: "HyperdriveJobQueue"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:120](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L120)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:125](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L125)
 
 A job queue in a SQL table on D1 or another SQLite, Postgres (Hyperdrive)
 or MySQL.
@@ -39,7 +39,7 @@ expired, so it is due at once.
 
 > **new HyperdriveJobQueue**\<`T`\>(`client`, `options?`): `HyperdriveJobQueue`\<`T`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:128](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L128)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:133](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L133)
 
 #### Parameters
 
@@ -57,11 +57,46 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 ## Methods
 
+### checkpoint()
+
+> **checkpoint**(`jobId`, `data`, `attempt`): `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:256](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L256)
+
+Saves a message job's progress under the attempt fence and, with
+`leaseMs`, renews the lease. Needs a cache-disabled Hyperdrive: when the
+driver reports no affected-row count, ownership is verified with a plain
+read, which a query cache could answer with a stale row.
+
+#### Parameters
+
+##### jobId
+
+`string`
+
+##### data
+
+`T`
+
+##### attempt
+
+`number`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`JobQueue`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/).[`checkpoint`](/en/api/k-msg/src/adapters/node/interfaces/jobqueue/#checkpoint)
+
+***
+
 ### cleanupTerminal()
 
 > **cleanupTerminal**(`options?`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:401](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L401)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:477](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L477)
 
 Removes finished jobs: completed and failed ones by default, or those
 with the given statuses, and with `olderThan`, only those that finished
@@ -87,7 +122,7 @@ before it.
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:391](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L391)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:467](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L467)
 
 #### Returns
 
@@ -103,7 +138,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:442](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L442)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:518](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L518)
 
 #### Returns
 
@@ -113,9 +148,9 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 ### complete()
 
-> **complete**(`jobId`, `_result?`): `Promise`\<`void`\>
+> **complete**(`jobId`, `_result?`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:245](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L245)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:283](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L283)
 
 #### Parameters
 
@@ -126,6 +161,10 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 ##### \_result?
 
 `any`
+
+##### options?
+
+[`JobSettleOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobsettleoptions/) = `{}`
 
 #### Returns
 
@@ -141,7 +180,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **dequeue**(`options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:225](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L225)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L230)
 
 Takes the next due job and, with `leaseMs`, leases it. Jobs whose lease
 expired are due again first, or fail when they have no attempts left.
@@ -167,7 +206,7 @@ Jobs in `options.running` are left as they are.
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:159](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L159)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:164](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L164)
 
 #### Parameters
 
@@ -195,13 +234,14 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 ### fail()
 
-> **fail**(`jobId`, `error`, `retry?`): `Promise`\<`void`\>
+> **fail**(`jobId`, `error`, `retry?`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:264](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L264)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:317](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L317)
 
 Counts a failed attempt: the job is due again after `retry.delayMs` when
 retries are enabled and attempts are left, and fails otherwise. A
-completed job stays completed, even for a worker whose lease expired.
+completed job stays completed, even for a worker whose lease expired,
+unless `options.attempt` fences the call to the attempt that owns it.
 
 #### Parameters
 
@@ -217,6 +257,10 @@ completed job stays completed, even for a worker whose lease expired.
 
 [`JobRetryDirective`](/en/api/messaging/src/queue/interfaces/jobretrydirective/) = `...`
 
+##### options?
+
+[`JobSettleOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobsettleoptions/) = `{}`
+
 #### Returns
 
 `Promise`\<`void`\>
@@ -231,7 +275,7 @@ completed job stays completed, even for a worker whose lease expired.
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:361](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L361)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:437](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L437)
 
 #### Parameters
 
@@ -253,7 +297,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:141](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L141)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:146](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L146)
 
 #### Returns
 
@@ -265,7 +309,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **nextDueAt**(): `Promise`\<`Date` \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:347](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L347)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:423](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L423)
 
 When `dequeue()` next has work: the earliest due time of a pending job
 or, with `leaseMs`, lease expiry of a processing one. A time in the past
@@ -287,7 +331,7 @@ when no job is pending or leased.
 
 > **peek**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:306](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L306)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:382](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L382)
 
 The job `dequeue()` would take next, including one whose lease expired,
 shown as it will be once it is due again. Changes nothing.
@@ -306,7 +350,7 @@ shown as it will be once it is due again. Changes nothing.
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:375](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L375)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:451](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L451)
 
 #### Parameters
 
@@ -328,7 +372,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:326](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L326)
+Defined in: [packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts:402](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/hyperdrive-job-queue.ts#L402)
 
 How many jobs are due now, including those whose lease expired.
 

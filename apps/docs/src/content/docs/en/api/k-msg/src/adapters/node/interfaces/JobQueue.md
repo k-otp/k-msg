@@ -5,7 +5,7 @@ prev: false
 title: "JobQueue"
 ---
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:85](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L85)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L115)
 
 ## Type Parameters
 
@@ -13,13 +13,56 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:85](https://git
 
 `T`
 
+## Properties
+
+### supportsCheckpoints?
+
+> `readonly` `optional` **supportsCheckpoints?**: `boolean`
+
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:136](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L136)
+
+False for stores that cannot persist reliable message progress (such as KV).
+
 ## Methods
+
+### checkpoint()?
+
+> `optional` **checkpoint**(`jobId`, `data`, `attempt`): `Promise`\<`void`\>
+
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:145](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L145)
+
+Persist message progress before a send. Required by MessageJobProcessor.
+Replaces the job's `data` atomically with the attempt check, so a stale
+attempt cannot overwrite the progress of the one that took the job over:
+it must reject with `JobCheckpointLostError` if the processing attempt no
+longer owns the job. With `leaseMs`, it also renews the lease from now, so
+a job that checkpoints after every recipient does not outlive its lease.
+
+#### Parameters
+
+##### jobId
+
+`string`
+
+##### data
+
+`T`
+
+##### attempt
+
+`number`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
 
 ### cleanupTerminal()?
 
 > `optional` **cleanupTerminal**(`options?`): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:130](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L130)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:177](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L177)
 
 Removes finished jobs: completed and failed ones by default, or those
 with the given statuses, and with `olderThan`, only those that finished
@@ -41,7 +84,7 @@ before it.
 
 > **clear**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:115](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L115)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:162](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L162)
 
 #### Returns
 
@@ -51,9 +94,9 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:115](https://gi
 
 ### complete()
 
-> **complete**(`jobId`, `result?`): `Promise`\<`void`\>
+> **complete**(`jobId`, `result?`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:99](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L99)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:129](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L129)
 
 #### Parameters
 
@@ -65,6 +108,10 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:99](https://git
 
 `any`
 
+##### options?
+
+[`JobSettleOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobsettleoptions/)
+
 #### Returns
 
 `Promise`\<`void`\>
@@ -75,7 +122,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:99](https://git
 
 > **dequeue**(`options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:97](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L97)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:127](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L127)
 
 #### Parameters
 
@@ -93,7 +140,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:97](https://git
 
 > **enqueue**(`type`, `data`, `options?`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\>\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:86](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L86)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L116)
 
 #### Parameters
 
@@ -131,9 +178,9 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:86](https://git
 
 ### fail()
 
-> **fail**(`jobId`, `error`, `retry?`): `Promise`\<`void`\>
+> **fail**(`jobId`, `error`, `retry?`, `options?`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:101](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L101)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:147](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L147)
 
 #### Parameters
 
@@ -149,6 +196,10 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:101](https://gi
 
 [`JobRetryDirective`](/en/api/messaging/src/queue/interfaces/jobretrydirective/)
 
+##### options?
+
+[`JobSettleOptions`](/en/api/k-msg/src/adapters/node/interfaces/jobsettleoptions/)
+
 #### Returns
 
 `Promise`\<`void`\>
@@ -159,7 +210,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:101](https://gi
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:111](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L111)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L158)
 
 #### Parameters
 
@@ -177,7 +228,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:111](https://gi
 
 > `optional` **nextDueAt**(): `Promise`\<`Date` \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:123](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L123)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:170](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L170)
 
 When `dequeue()` next has work: the earliest due time of a pending job
 or, with leases, lease expiry of a processing one. A time in the past
@@ -194,7 +245,7 @@ lease. `undefined` when no job is pending or leased.
 
 > **peek**(): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`T`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:107](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L107)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:154](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L154)
 
 #### Returns
 
@@ -206,7 +257,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:107](https://gi
 
 > **remove**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:113](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L113)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:160](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L160)
 
 #### Parameters
 
@@ -224,7 +275,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:113](https://gi
 
 > **size**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:109](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L109)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:156](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L156)
 
 #### Returns
 

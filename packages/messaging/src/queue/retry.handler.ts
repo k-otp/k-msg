@@ -318,14 +318,25 @@ export class MessageRetryHandler extends EventEmitter {
       this.metrics.totalRetries++;
       this.updateMetrics();
 
-      await this.options.onRetrySuccess?.(item, result);
-
-      this.emit("retry:success", {
-        type: MessageEventType.MESSAGE_SENT,
-        timestamp: new Date(),
-        data: { item, attempt, result },
-        metadata: item.originalDeliveryReport.metadata,
-      } as MessageEvent);
+      try {
+        await this.options.onRetrySuccess?.(item, result);
+      } catch (error) {
+        logBackgroundFailure("Retry success callback failed", error, {
+          retryItemId: item.id,
+        });
+      }
+      try {
+        this.emit("retry:success", {
+          type: MessageEventType.MESSAGE_SENT,
+          timestamp: new Date(),
+          data: { item, attempt, result },
+          metadata: item.originalDeliveryReport.metadata,
+        } as MessageEvent);
+      } catch (error) {
+        logBackgroundFailure("Successful retry observer failed", error, {
+          retryItemId: item.id,
+        });
+      }
     } catch (error) {
       const retryError =
         error instanceof Error ? error : new Error(String(error));
@@ -356,25 +367,44 @@ export class MessageRetryHandler extends EventEmitter {
       item.updatedAt = new Date();
       this.updateMetrics();
 
-      await this.options.onRetryFailed?.(item, retryError);
-
-      this.emit("retry:failed", {
-        type: MessageEventType.MESSAGE_FAILED,
-        timestamp: new Date(),
-        data: { item, error: retryError, willRetry: shouldRetryAgain },
-        metadata: item.originalDeliveryReport.metadata,
-      } as MessageEvent);
-
-      if (!shouldRetryAgain) {
-        await this.options.onRetryExhausted?.(item);
-
-        this.emit("retry:exhausted", {
+      // Observers must not skip each other: the item is already settled.
+      await this.notifyObserver("Retry failure callback failed", item, () =>
+        this.options.onRetryFailed?.(item, retryError),
+      );
+      await this.notifyObserver("Failed retry observer failed", item, () =>
+        this.emit("retry:failed", {
           type: MessageEventType.MESSAGE_FAILED,
           timestamp: new Date(),
-          data: { item, finalError: retryError },
+          data: { item, error: retryError, willRetry: shouldRetryAgain },
           metadata: item.originalDeliveryReport.metadata,
-        } as MessageEvent);
+        } as MessageEvent),
+      );
+
+      if (!shouldRetryAgain) {
+        await this.notifyObserver("Retry exhausted callback failed", item, () =>
+          this.options.onRetryExhausted?.(item),
+        );
+        await this.notifyObserver("Exhausted retry observer failed", item, () =>
+          this.emit("retry:exhausted", {
+            type: MessageEventType.MESSAGE_FAILED,
+            timestamp: new Date(),
+            data: { item, finalError: retryError },
+            metadata: item.originalDeliveryReport.metadata,
+          } as MessageEvent),
+        );
       }
+    }
+  }
+
+  private async notifyObserver(
+    label: string,
+    item: RetryQueueItem,
+    notify: () => unknown,
+  ): Promise<void> {
+    try {
+      await notify();
+    } catch (error) {
+      logBackgroundFailure(label, error, { retryItemId: item.id });
     }
   }
 

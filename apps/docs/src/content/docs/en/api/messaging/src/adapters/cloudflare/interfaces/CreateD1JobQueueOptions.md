@@ -50,16 +50,18 @@ true
 
 > `optional` **leaseMs?**: `number`
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:64](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L64)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:83](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L83)
 
 How long a dequeued job may stay processing before it is due again
 (default: `Infinity`, no lease). If it is neither completed nor failed
 by then, for example because the worker stopped mid-job, the next
 `dequeue()` counts the lost attempt as failed (`error: "LEASE_EXPIRED"`)
 and makes the job due again, or fails it when no attempts are left.
-Set it above the longest time a job can take: a lease is not renewed,
-and a worker that outlives it can still complete or fail the job while
-another worker has it. `dequeue()` leaves the jobs its caller names as
+Set it above the longest time a job can take. Only `checkpoint()` renews
+a lease, which message jobs do before every recipient, so for them it
+only has to outlast one send. A worker that outlives its lease can still
+complete or fail the job while another worker has it, unless the caller
+fences the call with `JobSettleOptions.attempt` (message jobs do). `dequeue()` leaves the jobs its caller names as
 still running alone, which is how `JobProcessor` keeps a job it is
 still running from being run again or counted as lost.
 
@@ -73,7 +75,7 @@ still running from being run again or counted as lost.
 
 > `optional` **onLeaseExpired?**: (`job`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job-queue.interface.ts:72](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L72)
+Defined in: [packages/messaging/src/queue/job-queue.interface.ts:91](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job-queue.interface.ts#L91)
 
 Called by `dequeue()` for each job whose lease had expired, once the job
 is stored pending again or, with no attempts left, failed. `dequeue()`

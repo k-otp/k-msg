@@ -1,5 +1,7 @@
 import { hasUndecryptableSecret } from "../crypto/undecryptable-secret";
 import { RetryManager } from "../retry/retry.manager";
+import { validateEndpointUrl } from "../runtime/endpoint-validation";
+import { WebhookHostNotAllowedError } from "../runtime/errors";
 import {
   SecurityManager,
   WEBHOOK_TIMESTAMP_HEADER,
@@ -33,9 +35,115 @@ export interface HttpClient {
   fetch(url: string, options: RequestInit): Promise<Response>;
 }
 
+/** Keep a bounded diagnostic prefix and cancel the rest, even for chunked responses. */
+async function readResponsePrefix(response: Response, limit: number) {
+  if (!response.body) return { text: "", truncated: false };
+  if (limit === 0) {
+    void response.body.cancel().catch(() => undefined);
+    return { text: "", truncated: true };
+  }
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  let truncated = false;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const take = Math.min(value.byteLength, limit - length);
+      if (take > 0) {
+        chunks.push(value.slice(0, take));
+        length += take;
+      }
+      if (take < value.byteLength || length === limit) {
+        truncated = true;
+        void reader.cancel().catch(() => undefined);
+        break;
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { text: new TextDecoder().decode(bytes), truncated };
+}
+
+const ALLOWED_HOST_HELP =
+  "allowedHosts must contain exact DNS hostnames, without URLs, ports or wildcards (write IPv6 addresses in brackets and internationalized names as punycode)";
+
+function normalizeAllowedHost(host: string): string {
+  const normalized = host.toLowerCase().replace(/\.$/, "");
+  let parsed: URL;
+  try {
+    parsed = new URL(`https://${normalized}`);
+  } catch {
+    throw new TypeError(ALLOWED_HOST_HELP);
+  }
+  if (
+    // A second trailing dot would be stored but never match a request.
+    normalized.endsWith(".") ||
+    parsed.hostname !== normalized ||
+    parsed.port ||
+    parsed.username ||
+    parsed.password ||
+    parsed.pathname !== "/" ||
+    parsed.search ||
+    parsed.hash
+  ) {
+    throw new TypeError(ALLOWED_HOST_HELP);
+  }
+  if (normalized.includes("*"))
+    throw new TypeError("Wildcard hosts are not allowed");
+  return normalized;
+}
+
+/**
+ * Delivers only to the hosts it is given, over HTTPS, and never follows a
+ * redirect.
+ *
+ * `allowedHosts` entries are exact hostnames, compared in lowercase without a
+ * trailing dot: DNS names, public IPv4 addresses, and IPv6 addresses in
+ * brackets (`[2001:db8::1]`). Write an internationalized name as punycode
+ * (`xn--...`). A URL, a port, credentials, a path and a wildcard throw
+ * `TypeError`.
+ *
+ * Port: only the host is compared, so an entry trusts every port of that host
+ * (`https://hooks.example.com:6379/`). Trust only hosts whose every port you
+ * control.
+ *
+ * DNS: it checks names, not addresses. A trusted name that resolves to a
+ * private address is still fetched, so it is not a defense against DNS
+ * rebinding. For arbitrary customer URLs, inject an `HttpClient` that pins
+ * DNS or filters egress.
+ */
 export class DefaultHttpClient implements HttpClient {
+  private readonly hosts: ReadonlySet<string>;
+  constructor(allowedHosts: readonly string[] = []) {
+    this.hosts = new Set(allowedHosts.map(normalizeAllowedHost));
+  }
+
+  /**
+   * Parses the URL and throws unless fetch() would deliver to it: HTTPS, a
+   * public host, no credentials, and a host in `allowedHosts`
+   * (`WebhookHostNotAllowedError`).
+   */
+  assertAllowed(url: string): URL {
+    const parsed = validateEndpointUrl(url);
+    if (parsed.username || parsed.password)
+      throw new Error("Webhook URL credentials are not allowed");
+    const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
+    if (!this.hosts.has(host)) throw new WebhookHostNotAllowedError(host);
+    return parsed;
+  }
+
   async fetch(url: string, _options: RequestInit): Promise<Response> {
-    return fetch(url, _options);
+    const parsed = this.assertAllowed(url);
+    return fetch(parsed, { ..._options, redirect: "manual" });
   }
 }
 
@@ -72,15 +180,39 @@ export class MockHttpClient implements HttpClient {
 
 export class WebhookDispatcher {
   private config: WebhookConfig;
+  private readonly maxResponseBodyBytes: number;
   private httpClient: HttpClient;
+  // Set only when no client was injected: an injected client vets its own destinations.
+  private readonly defaultClient?: DefaultHttpClient;
   private securityManager: SecurityManager;
   private retryManager: RetryManager;
 
   constructor(config: WebhookConfig, httpClient?: HttpClient) {
     this.config = config;
-    this.httpClient = httpClient || new DefaultHttpClient();
+    if (httpClient) {
+      this.httpClient = httpClient;
+    } else {
+      this.defaultClient = new DefaultHttpClient(config.allowedHosts);
+      this.httpClient = this.defaultClient;
+    }
+    const limit = config.maxResponseBodyBytes ?? 4096;
+    if (!Number.isSafeInteger(limit) || limit < 0 || limit > 1_048_576) {
+      throw new RangeError(
+        "maxResponseBodyBytes must be an integer between 0 and 1048576",
+      );
+    }
+    this.maxResponseBodyBytes = limit;
     this.securityManager = new SecurityManager(config);
     this.retryManager = new RetryManager(config);
+  }
+
+  /**
+   * Throws `WebhookHostNotAllowedError` (or the error for an unusable URL)
+   * when deliveries to `url` would be refused by the default client. Does
+   * nothing when an HTTP client was injected.
+   */
+  assertDestinationAllowed(url: string): void {
+    this.defaultClient?.assertAllowed(url);
   }
 
   async dispatch(
@@ -241,7 +373,12 @@ export class WebhookDispatcher {
       });
 
       attempt.httpStatus = response.status;
-      attempt.responseBody = await response.text();
+      const captured = await readResponsePrefix(
+        response,
+        this.maxResponseBodyBytes,
+      );
+      attempt.responseBody = captured.text;
+      attempt.responseBodyTruncated = captured.truncated;
       // Headers를 객체로 변환
       const responseHeaders: Record<string, string> = {};
       response.headers.forEach((value, key) => {

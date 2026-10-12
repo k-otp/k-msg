@@ -641,3 +641,17 @@ describe("CloudflareObjectJobQueue with JobProcessor", () => {
     expect(expired).toEqual([]);
   });
 });
+
+test("object checkpoints persist receipts and reject stale attempts", async () => {
+  const { queue } = queueWith<{ receipt?: string }>();
+  const job = await queue.enqueue("message", {});
+  const claimed = (await queue.dequeue())!;
+  await queue.checkpoint(job.id, { receipt: "sent" }, claimed.attempts);
+  expect((await queue.getJob(job.id))?.data.receipt).toBe("sent");
+  await queue.fail(job.id, "retry", { enabled: true, delayMs: 0 });
+  await queue.dequeue();
+  await expect(
+    queue.checkpoint(job.id, { receipt: "stale" }, claimed.attempts),
+  ).rejects.toThrow();
+  expect((await queue.getJob(job.id))?.data.receipt).toBe("sent");
+});

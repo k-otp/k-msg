@@ -5,8 +5,13 @@ export type {
   JobQueue,
   JobQueueCleanupOptions,
   JobRetryDirective,
+  JobSettleOptions,
 } from "./job-queue.interface";
-export { JOB_LEASE_EXPIRED, JobStatus } from "./job-queue.interface";
+export {
+  JOB_LEASE_EXPIRED,
+  JobCheckpointLostError,
+  JobStatus,
+} from "./job-queue.interface";
 export type {
   BuildSendInputDetailedResult,
   BuildSendInputIssue,

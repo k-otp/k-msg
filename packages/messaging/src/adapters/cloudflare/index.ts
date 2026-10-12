@@ -315,3 +315,5 @@ export function createDurableObjectJobQueue<T>(
     options,
   );
 }
+
+export { JobCheckpointLostError } from "../../queue/job-queue.interface";

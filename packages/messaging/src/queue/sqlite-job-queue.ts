@@ -8,11 +8,13 @@ import {
 import {
   JOB_LEASE_EXPIRED,
   type Job,
+  JobCheckpointLostError,
   type JobDequeueOptions,
   type JobLeaseOptions,
   type JobQueue,
   type JobQueueCleanupOptions,
   type JobRetryDirective,
+  type JobSettleOptions,
   JobStatus,
 } from "./job-queue.interface";
 
@@ -274,8 +276,40 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     return result ? this.rowToJob(result) : undefined;
   }
 
-  async complete(jobId: string, _result?: any): Promise<void> {
+  async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
+    // The lease is renewed with every checkpoint, so a job that saves its
+    // progress between sends does not outlive it.
+    const renew = this.leasesEnabled() ? ", process_at = ?" : "";
+    const result = this.db
+      .prepare(
+        `UPDATE jobs SET data = ?${renew} WHERE id = ? AND status = ? AND attempts = ?`,
+      )
+      .run(
+        JSON.stringify(data),
+        ...(this.leasesEnabled() ? [Date.now() + this.leaseMs] : []),
+        jobId,
+        JobStatus.PROCESSING,
+        attempt,
+      );
+    if (result.changes !== 1) throw new JobCheckpointLostError();
+  }
+
+  async complete(
+    jobId: string,
+    _result?: any,
+    options: JobSettleOptions = {},
+  ): Promise<void> {
     const now = Date.now();
+    if (options.attempt !== undefined) {
+      const fenced = this.db
+        .prepare(
+          `UPDATE jobs SET status = 'completed', completed_at = ?
+           WHERE id = ? AND status = 'processing' AND attempts = ?`,
+        )
+        .run(now, jobId, options.attempt);
+      if (fenced.changes !== 1) throw new JobCheckpointLostError();
+      return;
+    }
     const stmt = this.db.prepare(`
       UPDATE jobs
       SET status = 'completed',
@@ -295,6 +329,7 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     jobId: string,
     error: string | Error,
     retry: JobRetryDirective = { enabled: false },
+    options: JobSettleOptions = {},
   ): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : error;
     const now = Date.now();
@@ -304,6 +339,19 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
       throw new Error(`Job ${jobId} not found`);
     }
     if (job.status === JobStatus.COMPLETED) return;
+    // A fenced caller only settles the attempt it owns.
+    const fence = options.attempt;
+    const owner =
+      fence === undefined
+        ? "status <> 'completed'"
+        : "status = 'processing' AND attempts = ?";
+    const ownerParams = fence === undefined ? [] : [fence];
+    if (
+      fence !== undefined &&
+      (job.status !== JobStatus.PROCESSING || job.attempts !== fence)
+    ) {
+      throw new JobCheckpointLostError();
+    }
 
     if (retry.enabled) {
       const stmt = this.db.prepare(`
@@ -316,10 +364,19 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
             status = CASE WHEN attempts + 1 < max_attempts
               THEN 'pending' ELSE 'failed' END,
             attempts = attempts + 1
-        WHERE id = ? AND status <> 'completed'
+        WHERE id = ? AND ${owner}
       `);
 
-      stmt.run(errorMessage, now + Math.ceil(retry.delayMs ?? 0), now, jobId);
+      const result = stmt.run(
+        errorMessage,
+        now + Math.ceil(retry.delayMs ?? 0),
+        now,
+        jobId,
+        ...ownerParams,
+      );
+      if (fence !== undefined && result.changes !== 1) {
+        throw new JobCheckpointLostError();
+      }
     } else {
       const stmt = this.db.prepare(`
         UPDATE jobs
@@ -327,10 +384,13 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
             failed_at = ?,
             status = 'failed',
             attempts = attempts + 1
-        WHERE id = ? AND status <> 'completed'
+        WHERE id = ? AND ${owner}
       `);
 
-      stmt.run(errorMessage, now, jobId);
+      const result = stmt.run(errorMessage, now, jobId, ...ownerParams);
+      if (fence !== undefined && result.changes !== 1) {
+        throw new JobCheckpointLostError();
+      }
     }
   }
 

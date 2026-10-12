@@ -103,6 +103,16 @@ app.get("/messages/:messageId", requireAdmin, async (c) => {
   return c.json(toMessageStatus(record));
 });
 
+// The host WebhookRuntimeService.addEndpoint() refused, if that is why it threw.
+// Matched by name rather than instanceof WebhookHostNotAllowedError, so the
+// example also typechecks against a published @k-msg/webhook without the class.
+function hostNotAllowed(error: unknown): string | undefined {
+  if (!(error instanceof Error) || error.name !== "WebhookHostNotAllowedError")
+    return undefined;
+  const host = (error as Error & { host?: unknown }).host;
+  return typeof host === "string" ? host : "of this URL";
+}
+
 app.post("/webhook-endpoints", requireAdmin, async (c) => {
   const input = parseEndpointRegistration(await readJsonObject(c.req));
   const config = c.var.config;
@@ -127,6 +137,16 @@ app.post("/webhook-endpoints", requireAdmin, async (c) => {
       secret,
     });
   } catch (error) {
+    // Registering a host that deliveries could never reach would store an
+    // endpoint that fails every webhook.
+    const refusedHost = hostNotAllowed(error);
+    if (refusedHost !== undefined) {
+      throw new ApiError(
+        400,
+        "WEBHOOK_HOST_NOT_ALLOWED",
+        `The host ${refusedHost} is not in this Worker's WEBHOOK_ALLOWED_HOSTS`,
+      );
+    }
     // The unique url index refuses a registered URL in the insert itself,
     // so two registrations of one URL at the same moment cannot both win.
     if (

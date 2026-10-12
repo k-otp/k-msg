@@ -1,4 +1,13 @@
 export interface CloudflareObjectStorage {
+  /**
+   * What a read-then-write sequence can rely on. Message delivery progress is
+   * checkpointed with such a sequence, so only `"serialized"` storage, whose
+   * reads and writes one coordinator runs one at a time (Durable Object
+   * storage), can fence a stale worker. Leaving it out is the same as
+   * `"strong"`: reads see earlier writes, but two workers can interleave
+   * (R2). `"eventual"` stores (KV) may even read old values.
+   */
+  readonly consistency?: "serialized" | "strong" | "eventual";
   get(key: string): Promise<string | null>;
   put(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
@@ -107,6 +116,7 @@ export function createKvObjectStorage(
   namespace: CloudflareKvNamespaceLike,
 ): CloudflareObjectStorage {
   return {
+    consistency: "eventual",
     async get(key: string): Promise<string | null> {
       return namespace.get(key, "text");
     },
@@ -138,6 +148,7 @@ export function createR2ObjectStorage(
   bucket: CloudflareR2BucketLike,
 ): CloudflareObjectStorage {
   return {
+    consistency: "strong",
     async get(key: string): Promise<string | null> {
       const object = await bucket.get(key);
       if (!object) return null;
@@ -171,6 +182,7 @@ export function createDurableObjectStorage(
   storage: CloudflareDurableObjectStorageLike,
 ): CloudflareObjectStorage {
   return {
+    consistency: "serialized",
     async get(key: string): Promise<string | null> {
       const value = await storage.get<string>(key);
       return typeof value === "string" ? value : null;
