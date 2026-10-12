@@ -7,7 +7,7 @@ title: "WebhookEvent"
 
 > **WebhookEvent**\<`T`\> = `Omit`\<[`WebhookEventData`](/en/api/webhook/src/type-aliases/webhookeventdata/), `"data"`\> & `object`
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L223)
+Defined in: [packages/webhook/src/types/webhook.types.ts:233](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L233)
 
 ## Type Declaration
 

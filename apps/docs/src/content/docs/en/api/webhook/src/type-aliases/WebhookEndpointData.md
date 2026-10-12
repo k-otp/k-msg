@@ -7,4 +7,4 @@ title: "WebhookEndpointData"
 
 > **WebhookEndpointData** = [`WebhookEndpoint`](/en/api/webhook/src/type-aliases/webhookendpoint/)
 
-Defined in: [packages/webhook/src/types/webhook.types.ts:230](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L230)
+Defined in: [packages/webhook/src/types/webhook.types.ts:240](https://github.com/k-otp/k-msg/blob/main/packages/webhook/src/types/webhook.types.ts#L240)

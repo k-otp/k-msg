@@ -7,7 +7,7 @@ title: "createCloudflareSqlClient"
 
 > **createCloudflareSqlClient**(`options`): [`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:161](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L161)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:166](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L166)
 
 ## Parameters
 

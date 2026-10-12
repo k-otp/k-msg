@@ -5,7 +5,7 @@ prev: false
 title: "CloudflareObjectJob"
 ---
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:28](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L28)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:29](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L29)
 
 A job in a KV, R2 or Durable Object queue.
 
@@ -184,7 +184,7 @@ Defined in: [packages/messaging/src/queue/job-queue.interface.ts:39](https://git
 
 > `optional` **result?**: `unknown`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:30](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L30)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-job-queue.ts:31](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-job-queue.ts#L31)
 
 What `complete()` was given.
 

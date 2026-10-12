@@ -11,11 +11,16 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:1](htt
 
 ### consistency?
 
-> `readonly` `optional` **consistency?**: `"strong"` \| `"eventual"`
+> `readonly` `optional` **consistency?**: `"serialized"` \| `"strong"` \| `"eventual"`
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:3](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L3)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:10](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L10)
 
-Eventual stores cannot safely checkpoint message delivery progress.
+What a read-then-write sequence can rely on. Message delivery progress is
+checkpointed with such a sequence, so only `"serialized"` storage, whose
+reads and writes one coordinator runs one at a time (Durable Object
+storage), can fence a stale worker. Leaving it out is the same as
+`"strong"`: reads see earlier writes, but two workers can interleave
+(R2). `"eventual"` stores (KV) may even read old values.
 
 ## Methods
 
@@ -23,7 +28,7 @@ Eventual stores cannot safely checkpoint message delivery progress.
 
 > **delete**(`key`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:6](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L6)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L13)
 
 #### Parameters
 
@@ -41,7 +46,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:6](htt
 
 > `optional` **entries**(`prefix`): `AsyncIterable`\<\[`string`, `string`\]\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:13](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L13)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:20](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L20)
 
 The keys under `prefix` with their values, a listing page at a time, for
 storage whose listing returns values (Durable Objects), so reading
@@ -63,7 +68,7 @@ everything under a prefix takes no get() per key.
 
 > **get**(`key`): `Promise`\<`string` \| `null`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:4](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L4)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:11](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L11)
 
 #### Parameters
 
@@ -81,7 +86,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:4](htt
 
 > **list**(`prefix`): `Promise`\<`string`[]\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:7](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L7)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:14](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L14)
 
 #### Parameters
 
@@ -99,7 +104,7 @@ Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:7](htt
 
 > **put**(`key`, `value`): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:5](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L5)
+Defined in: [packages/messaging/src/adapters/cloudflare/object-storage.ts:12](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/object-storage.ts#L12)
 
 #### Parameters
 

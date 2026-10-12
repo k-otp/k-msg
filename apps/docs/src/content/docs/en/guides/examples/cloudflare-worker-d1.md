@@ -59,6 +59,8 @@ This uses the mock provider, so nothing leaves your machine.
 cd examples/cloudflare-worker-d1
 bun install
 cp .dev.vars.example .dev.vars
+# Uncomment ENVIRONMENT=development and DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true
+# in .dev.vars for the localhost receiver below.
 bun run db:migrate:local
 bunx wrangler dev --test-scheduled
 ```
@@ -71,7 +73,8 @@ export API_TOKEN=dev-admin-token-for-local-testing-only
 ```
 
 1. Register the sample receiver. `DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` in
-   `.dev.vars` is what allows an `http://localhost` URL.
+   `.dev.vars` is what allows an `http://localhost` URL, and the Worker accepts
+   that flag only together with `ENVIRONMENT=development`.
 
    ```bash
    curl -s -X POST http://localhost:8787/webhook-endpoints \
@@ -236,8 +239,10 @@ the provider's own error text in the logs and answer with the
 Body: `{"url":"https://example.com/hooks/kmsg","events":["message.delivered"]}`.
 `events` is optional and defaults to `message.sent`, `message.delivered` and
 `message.failed`. The URL must use HTTPS and a public host unless
-`DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` (`400 INVALID_WEBHOOK_URL`). A URL that
-is already registered answers `409 ENDPOINT_EXISTS`.
+`DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` (`400 INVALID_WEBHOOK_URL`), and its host
+must be listed in `WEBHOOK_ALLOWED_HOSTS` (`400 WEBHOOK_HOST_NOT_ALLOWED`; the
+development flag skips that check). A URL that is already registered answers
+`409 ENDPOINT_EXISTS`.
 
 `201` with `{"id","url","events","secret","createdAt"}`. The secret is not
 shown again.
@@ -366,9 +371,15 @@ deploy:
 bun run deploy
 ```
 
-The Cron Trigger starts with the deployment. Register your receiver's HTTPS
-URL with `POST /webhook-endpoints`. Leave `DEV_ALLOW_PRIVATE_WEBHOOK_URLS`
-and `WEBHOOK_RECEIVER_SECRET` unset in production.
+The Cron Trigger starts with the deployment. Before you register a receiver,
+add its hostname to `WEBHOOK_ALLOWED_HOSTS` under `vars` in `wrangler.jsonc`
+(comma-separated exact hostnames such as `hooks.example.com`; no scheme, port or
+wildcard), and deploy again. Then register the receiver's HTTPS URL with
+`POST /webhook-endpoints`; a host that is not listed answers
+`400 WEBHOOK_HOST_NOT_ALLOWED`. Leave `ENVIRONMENT`,
+`DEV_ALLOW_PRIVATE_WEBHOOK_URLS` and `WEBHOOK_RECEIVER_SECRET` unset in
+production. The Worker refuses to start with the development flag outside
+`ENVIRONMENT=development`, or together with `WEBHOOK_ALLOWED_HOSTS`.
 
 ## Production checklist
 
@@ -378,6 +389,8 @@ and `WEBHOOK_RECEIVER_SECRET` unset in production.
   Access or rate limiting rules in front of the admin routes as well.
 - `POST /messages` is not idempotent. A client that retries after a timeout
   (`503 NETWORK_TIMEOUT`) can send the same text twice.
+- `WEBHOOK_ALLOWED_HOSTS` lists every receiver host and nothing else (see
+  [Trusted webhook destinations](#trusted-webhook-destinations)).
 - Receivers use HTTPS, verify the signature and timestamp, and skip event ids
   they have already processed.
 - A webhook is not retried after its cron run. If your systems must not miss
@@ -389,8 +402,9 @@ and `WEBHOOK_RECEIVER_SECRET` unset in production.
   webhook attempts all count as subrequests, and the Workers Free plan allows
   50 per invocation and 10 ms of CPU, so plan for the Paid plan.
 - Nothing is deleted automatically. `kmsg_delivery_tracking` keeps recipient
-  numbers in plain text, `kmsg_webhook_deliveries` keeps payloads and receiver
-  responses, and endpoint secrets are stored in plain text unless you
+  numbers in plain text, `kmsg_webhook_deliveries` keeps payloads and the first
+  4096 bytes of each receiver response (`maxResponseBodyBytes`; keep secrets
+  out of your receiver's responses), and endpoint secrets are stored in plain text unless you
   configure `fieldCrypto` on `WebhookRuntimeService`. Schedule a cleanup that
   fits your retention policy.
 - Workers Logs is enabled in `wrangler.jsonc`. Alert on the `error` and
@@ -400,15 +414,33 @@ and `WEBHOOK_RECEIVER_SECRET` unset in production.
 
 ### Trusted webhook destinations
 
-With the hardened webhook transport, set `WEBHOOK_ALLOWED_HOSTS` to a
-comma-separated list of administrator-trusted receiver hostnames (for example
-`hooks.example.com,events.example.com`). Do not build it from endpoint registration
-requests. An empty list refuses DNS destinations. Trusting a hostname also trusts
-its DNS operator; arbitrary customer destinations need a DNS-pinned HTTP client
-or a private-network-blocking egress proxy.
+The Worker delivers webhooks only to hosts you list in `WEBHOOK_ALLOWED_HOSTS`, a
+comma-separated list of exact receiver hostnames (for example
+`hooks.example.com,events.example.com`). Set it under `vars` in
+`wrangler.jsonc`, never from endpoint registration requests.
 
-The local walkthrough's `DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` explicitly injects
-a development HTTP client so the localhost sample receiver still works. It checks
-URL syntax and rejects credentials and redirects, but intentionally allows private
-hosts. Never enable this flag in production.
+- Entries are bare hostnames: no scheme, port, path or wildcard. Write an IPv6
+  address in brackets and an internationalized name as punycode. An invalid
+  entry is a configuration error: every request answers
+  `500 CONFIGURATION_ERROR`, and the Worker logs name the entry's position in
+  `WEBHOOK_ALLOWED_HOSTS`.
+- An entry trusts every port of that host, so list hosts whose every port you
+  control.
+- Trusting a hostname also trusts its DNS operator: the transport checks names
+  and does not pin the addresses they resolve to. Arbitrary customer
+  destinations need a DNS-pinned HTTP client or a private-network-blocking
+  egress proxy.
+- `POST /webhook-endpoints` refuses a host that is not listed with
+  `400 WEBHOOK_HOST_NOT_ALLOWED`, so no endpoint is stored that could never
+  receive a delivery. Changing the list does not recheck stored endpoints; their
+  deliveries fail as untrusted.
+- An empty list refuses every endpoint.
+
+The local walkthrough's `DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` injects a
+development HTTP client so the localhost sample receiver works. It checks URL
+syntax and rejects credentials and redirects, but allows every host, private
+ones included, and ignores `WEBHOOK_ALLOWED_HOSTS`. The Worker therefore refuses
+the flag unless `ENVIRONMENT=development` is set, refuses it together with
+`WEBHOOK_ALLOWED_HOSTS`, and logs a `warn` line whenever it is active. Never set
+it in a deployed environment.
 

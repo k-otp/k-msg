@@ -5,7 +5,7 @@ prev: false
 title: "MessageJobProcessor"
 ---
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:473](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L473)
+Defined in: [packages/messaging/src/queue/job.processor.ts:659](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L659)
 
 Specific processor for message jobs
 
@@ -19,7 +19,7 @@ Specific processor for message jobs
 
 > **new MessageJobProcessor**(`provider`, `options?`, `jobQueue?`): `MessageJobProcessor`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:474](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L474)
+Defined in: [packages/messaging/src/queue/job.processor.ts:660](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L660)
 
 #### Parameters
 
@@ -49,9 +49,11 @@ Defined in: [packages/messaging/src/queue/job.processor.ts:474](https://github.c
 
 > **add**\<`T`\>(`jobType`, `data`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:158](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L158)
+Defined in: [packages/messaging/src/queue/job.processor.ts:695](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L695)
 
-Add a job to the queue
+Adds a job. A message job is refused when it carries delivery receipts
+(they are the processor's own, never the caller's) or is too large to
+save its progress cheaply.
 
 #### Type Parameters
 
@@ -91,7 +93,7 @@ Add a job to the queue
 
 `Promise`\<`string`\>
 
-#### Inherited from
+#### Overrides
 
 [`JobProcessor`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/).[`add`](/en/api/k-msg/src/adapters/node/classes/jobprocessor/#add)
 
@@ -127,7 +129,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:16](https://github.c
 
 > **cleanup**(): `Promise`\<`number`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:242](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L242)
+Defined in: [packages/messaging/src/queue/job.processor.ts:403](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L403)
 
 Remove terminal jobs from queue without touching pending or processing jobs.
 
@@ -171,7 +173,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:44](https://github.c
 
 > **getJob**(`jobId`): `Promise`\<[`Job`](/en/api/k-msg/src/adapters/node/interfaces/job/)\<`any`\> \| `undefined`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:258](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L258)
+Defined in: [packages/messaging/src/queue/job.processor.ts:419](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L419)
 
 Get specific job by ID
 
@@ -195,7 +197,7 @@ Get specific job by ID
 
 > **getMetrics**(): [`JobProcessorMetrics`](/en/api/k-msg/src/adapters/node/interfaces/jobprocessormetrics/)
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:216](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L216)
+Defined in: [packages/messaging/src/queue/job.processor.ts:377](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L377)
 
 Get current metrics
 
@@ -213,7 +215,7 @@ Get current metrics
 
 > **getQueueStatus**(): `Promise`\<\{ `failed`: `number`; `pending`: `number`; `processing`: `number`; `totalProcessed`: `number`; \}\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:223](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L223)
+Defined in: [packages/messaging/src/queue/job.processor.ts:384](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L384)
 
 Get queue status
 
@@ -231,7 +233,7 @@ Get queue status
 
 > **handle**\<`T`\>(`jobType`, `handler`): `void`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:151](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L151)
+Defined in: [packages/messaging/src/queue/job.processor.ts:312](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L312)
 
 Register a job handler
 
@@ -343,7 +345,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:35](https://github.c
 
 > **queueBulkMessages**(`messageRequests`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:804](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L804)
+Defined in: [packages/messaging/src/queue/job.processor.ts:1098](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L1098)
 
 Add bulk messages to the processing queue
 
@@ -377,7 +379,7 @@ Add bulk messages to the processing queue
 
 > **queueMessage**(`messageRequest`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:776](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L776)
+Defined in: [packages/messaging/src/queue/job.processor.ts:1070](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L1070)
 
 Add a message to the processing queue
 
@@ -515,7 +517,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:57](https://github.c
 
 > **removeJob**(`jobId`): `Promise`\<`boolean`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:265](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L265)
+Defined in: [packages/messaging/src/queue/job.processor.ts:426](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L426)
 
 Remove job from queue
 
@@ -565,7 +567,7 @@ Defined in: [packages/messaging/src/shared/event-emitter.ts:31](https://github.c
 
 > **scheduleMessage**(`messageRequest`, `scheduledAt`, `options?`): `Promise`\<`string`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:822](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L822)
+Defined in: [packages/messaging/src/queue/job.processor.ts:1116](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L1116)
 
 Schedule a message for future delivery
 
@@ -677,7 +679,7 @@ Schedule a message for future delivery
 
 > **start**(): `void`
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:184](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L184)
+Defined in: [packages/messaging/src/queue/job.processor.ts:345](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L345)
 
 Start processing jobs
 
@@ -695,7 +697,7 @@ Start processing jobs
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [packages/messaging/src/queue/job.processor.ts:197](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L197)
+Defined in: [packages/messaging/src/queue/job.processor.ts:358](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/queue/job.processor.ts#L358)
 
 Stop processing jobs
 

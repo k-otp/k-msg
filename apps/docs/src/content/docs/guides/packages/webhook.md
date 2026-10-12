@@ -44,6 +44,7 @@ import {
 } from "@k-msg/webhook";
 
 const config: WebhookConfig = {
+  allowedHosts: ["example.com"], // 관리자가 신뢰하는 전송 대상
   maxRetries: 3,
   retryDelayMs: 1_000,
   timeoutMs: 30_000,
@@ -163,6 +164,8 @@ type Env = {
 };
 
 const config: WebhookConfig = {
+  // 전송을 허용할 호스트입니다. "보안 기본값"을 참고하세요.
+  allowedHosts: ["hooks.example.com"],
   // 호출 안에서 끝날 만큼 작게 잡습니다(위 설명 참고).
   maxRetries: 2,
   retryDelayMs: 1_000,
@@ -175,9 +178,8 @@ function createRuntime(env: Env): WebhookRuntimeService {
   return new WebhookRuntimeService({
     delivery: config,
     persistence: createD1WebhookPersistence(env.DB),
-    security: {
-      allowPrivateHosts: true,
-    },
+    // 로컬 개발에서만 `security: { allowPrivateHosts: true }`를 쓰고, 이때는
+    // `httpClient`도 직접 넘겨야 합니다(없으면 생성자가 예외를 던집니다).
     // Worker에서는 타이머를 쓰지 않습니다. "Cloudflare Workers 등 서버리스
     // 런타임"을 참고하세요.
     autoStart: false,
@@ -296,6 +298,49 @@ const runtime = new WebhookRuntimeService({
 
 - 기본적으로 private host 차단
 - `http://localhost` 류 URL은 옵션으로 명시 허용해야 사용 가능
+- 기본 HTTP client는 `delivery.allowedHosts`에 있는 호스트로만 전송
+- 응답 진단 정보는 4096바이트까지만 보관
+
+### 외부 전송 호스트 정책
+
+기본 HTTP client는 정확한 호스트 이름이나 공인 IP 리터럴이
+`delivery.allowedHosts`(`WebhookConfig.allowedHosts`)에 없으면 모든 전송 대상을
+거부합니다. 이 목록은 관리자 설정에서 채우고, 들어온 엔드포인트 URL에서 만들지
+마세요.
+
+- **등록할 때 검사합니다.** `addEndpoint()`, `addEndpoints()`,
+  `updateEndpoint()`(URL이 바뀔 때)는 목록에 없는 호스트에 대해
+  `WebhookHostNotAllowedError`를 던집니다. 그래서 엔드포인트가 저장된 뒤 모든
+  전송이 실패하는 일이 없습니다. 오류에는 호스트 이름만 담기고, 토큰이 들어
+  있을 수 있는 URL의 나머지는 담기지 않습니다. 목록을 바꾸기 전에 저장된
+  엔드포인트는 다시 검사하지 않으며, 그 엔드포인트의 전송은 신뢰할 수 없는
+  호스트로 실패합니다. `httpClient`를 직접 넘기면 runtime은 검사하지 않고 그
+  client가 판단합니다.
+- **항목 형식.** 스킴, 경로, 포트, 인증 정보, 와일드카드가 없는 정확한 호스트
+  이름이며 소문자로 비교합니다. 끝의 점은 무시합니다. IPv6 주소는 대괄호로
+  (`[2001:db8::1]`), 국제화 도메인은 punycode로(`münchen.de`가 아니라
+  `xn--mnchen-3ya.de`) 적어야 하며, 그렇지 않으면 생성자가 예외를 던집니다.
+  요청 URL은 정규화된 호스트 이름으로 비교하므로
+  `https://HOOKS.example.com./x`는 `hooks.example.com`과 일치합니다.
+- **포트.** 호스트만 비교합니다. 항목 하나는 그 호스트의 모든 포트를
+  신뢰하는 것이므로(`https://hooks.example.com:6379/`), 모든 포트를 직접
+  통제하는 호스트만 넣으세요.
+- **DNS.** client는 이름만 검사할 뿐 해석된 주소를 검사하거나 DNS를 고정하지
+  않습니다. 항목은 해당 호스트의 DNS 운영자를 신뢰한다는 뜻이므로, private
+  주소로 해석되는 이름이나 탈취된 레코드도 그대로 요청합니다. 고객이 임의로
+  넣는 URL에는 해석된 주소를 검증하고 연결을 고정하는 `HttpClient`를 주입하거나,
+  private·메타데이터 네트워크를 막는 egress 프록시나 방화벽을 거치세요.
+- private 리터럴 주소와 URL 인증 정보는 거부하고, 리다이렉트는 따라가지
+  않습니다.
+- `httpClient` 없이 `security.allowPrivateHosts`를 켜면 runtime 생성 시점에
+  예외를 던집니다.
+
+`maxResponseBodyBytes`는 보관하는 응답 진단 정보를 기본 4096바이트로 제한합니다
+(`0`이면 보관하지 않고, 최대 1 MiB). 한도에 닿으면 나머지 본문을 취소하고
+`responseBodyTruncated`를 설정하며, 본문 길이가 한도와 정확히 같을 때도
+잘렸다고 표시합니다. 바이트는 UTF-8로 해석하므로 한도에서 잘린 멀티바이트 문자는
+U+FFFD가 됩니다. 이 제한이 있어도 응답에 비밀 값을 담지 마세요. 직접 넘긴 HTTP
+client는 요청 취소와 수동 리다이렉트 정책을 지켜야 합니다.
 
 ## 전송 서명과 검증
 
@@ -397,7 +442,27 @@ Node 스타일 헤더 레코드(`req.headers`)와 `express.raw()`의 `Buffer` �
 | Cloudflare persistence 수동 구성 | `@k-msg/webhook/adapters/cloudflare` 사용 |
 | `fields.secret` / `fields.payload` 없이, 또는 `plain`/`mask`로 설정한 `fieldCrypto.endpoint` / `fieldCrypto.delivery` | `fields.secret`(endpoint)과 `fields.payload`(delivery)를 `encrypt` 또는 `encrypt+hash`로 설정. 그 외 값은 이제 시작 시 실패 |
 | `fieldCrypto.tenantId`를 설정한 상태로 저장한 암호문 | 이제 tenant에도 바인딩됨. 이전에 저장된 값은 `fieldCrypto.acceptLegacyAad`를 켜지 않으면 거부됨. 플래그를 켠 채 배포하고, 모든 인스턴스가 새 버전으로 바뀐 뒤 `runtime.migrateFieldCryptoToTenant()`를 한 번 실행해 재암호화한 다음(이전 버전 인스턴스는 tenant 없는 값을 계속 쓰므로, 다시 실행하면 그 값도 옮겨짐) 플래그를 제거. 실행하는 동안 다른 인스턴스의 엔드포인트 변경은 멈출 것. 커스텀 delivery store는 `replace()`와 `list()`의 `before` 커서를 지원해야 함 |
+| 기본 HTTP client가 모든 공인 HTTPS 호스트로 전송 | `delivery.allowedHosts`에 있는 호스트로만 전송하고, 그 밖의 호스트는 `addEndpoint()` / `updateEndpoint()`가 `WebhookHostNotAllowedError`를 던짐. 수신 호스트를 `allowedHosts`에 추가하거나, 임의 URL에는 DNS를 고정하거나 egress를 걸러 주는 `httpClient`를 주입 ([외부 전송 호스트 정책](#외부-전송-호스트-정책) 참고) |
+| `httpClient` 없이 `new WebhookRuntimeService({ security: { allowPrivateHosts: true } })` | 생성 시점에 "Private webhook destinations require an explicitly configured HTTP client" 예외. 로컬 개발에서는 `httpClient`를 넘기거나, `allowPrivateHosts`를 빼고 호스트를 `allowedHosts`에 추가 |
+| 전송 시도에 수신 측 응답 전체 저장 | 저장되는 `responseBody`는 앞 4096바이트(`maxResponseBodyBytes`, `0`이면 저장 안 함)이고, 잘렸으면 `responseBodyTruncated`로 표시 |
 | `@k-msg/webhook/toolkit`의 `BatchDispatcher` / `BatchConfig` | 제거됨. 실제 요청을 보낸 적이 없음. `runtime.emit()` / `flush()`를 쓰거나, 단건 전송은 `WebhookDispatcher.dispatch()` 사용 ([Toolkit subpath](#toolkit-subpath) 참고) |
+
+`hooks.example.com`으로 전송하는 Worker의 변경 전후는 다음과 같습니다.
+
+```ts
+// 변경 전: 모든 공인 HTTPS 호스트로 전송할 수 있었고, 이 설정도 허용됐습니다.
+new WebhookRuntimeService({
+  delivery: config,
+  persistence,
+  security: { allowPrivateHosts: true },
+});
+
+// 변경 후: 신뢰하는 호스트를 지정합니다. (`allowPrivateHosts`에는 이제 `httpClient`가 필요합니다.)
+new WebhookRuntimeService({
+  delivery: { ...config, allowedHosts: ["hooks.example.com"] },
+  persistence,
+});
+```
 
 ## Toolkit subpath
 

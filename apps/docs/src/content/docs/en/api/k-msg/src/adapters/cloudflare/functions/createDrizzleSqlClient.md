@@ -7,7 +7,7 @@ title: "createDrizzleSqlClient"
 
 > **createDrizzleSqlClient**(`options`): [`CloudflareSqlClient`](/en/api/k-msg/src/adapters/cloudflare/interfaces/cloudflaresqlclient/)
 
-Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:210](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L210)
+Defined in: [packages/messaging/src/adapters/cloudflare/sql-client.ts:215](https://github.com/k-otp/k-msg/blob/main/packages/messaging/src/adapters/cloudflare/sql-client.ts#L215)
 
 ## Parameters
 
