@@ -8,6 +8,7 @@ import {
 import {
   JOB_LEASE_EXPIRED,
   type Job,
+  JobCheckpointLostError,
   type JobDequeueOptions,
   type JobLeaseOptions,
   type JobQueue,
@@ -272,6 +273,15 @@ export class SQLiteJobQueue<T> implements JobQueue<T> {
     ) as Record<string, unknown> | null;
 
     return result ? this.rowToJob(result) : undefined;
+  }
+
+  async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
+    const result = this.db
+      .prepare(
+        "UPDATE jobs SET data = ? WHERE id = ? AND status = ? AND attempts = ?",
+      )
+      .run(JSON.stringify(data), jobId, JobStatus.PROCESSING, attempt);
+    if (result.changes !== 1) throw new JobCheckpointLostError();
   }
 
   async complete(jobId: string, _result?: any): Promise<void> {

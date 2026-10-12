@@ -1,3 +1,20 @@
+const CHECKPOINT_LOST = Symbol.for("@k-msg/messaging/JobCheckpointLostError");
+/** Lost ownership is not a processing failure: a stale worker must not call fail(). */
+export class JobCheckpointLostError extends Error {
+  readonly [CHECKPOINT_LOST] = true;
+  constructor() {
+    super("Job checkpoint lost its processing attempt");
+    this.name = "JobCheckpointLostError";
+  }
+  static [Symbol.hasInstance](value: unknown): boolean {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      (value as Record<symbol, unknown>)[CHECKPOINT_LOST] === true
+    );
+  }
+}
+
 export enum JobStatus {
   PENDING = "pending",
   PROCESSING = "processing",
@@ -97,6 +114,12 @@ export interface JobQueue<T> {
   dequeue(options?: JobDequeueOptions): Promise<Job<T> | undefined>;
 
   complete(jobId: string, result?: any): Promise<void>;
+
+  /** False for stores that cannot persist reliable message progress (such as KV). */
+  readonly supportsCheckpoints?: boolean;
+  /** Persist message progress before/after a send. Required by MessageJobProcessor.
+   * Must reject with JobCheckpointLostError if the processing attempt no longer owns the job. */
+  checkpoint?(jobId: string, data: T, attempt: number): Promise<void>;
 
   fail(
     jobId: string,

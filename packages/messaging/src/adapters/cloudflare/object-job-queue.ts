@@ -12,7 +12,10 @@ import type {
   JobQueueCleanupOptions,
   JobRetryDirective,
 } from "../../queue/job-queue.interface";
-import { JobStatus } from "../../queue/job-queue.interface";
+import {
+  JobCheckpointLostError,
+  JobStatus,
+} from "../../queue/job-queue.interface";
 import { logFallbackFailure } from "../../shared/log-fallback";
 import {
   type CloudflareObjectStorage,
@@ -199,6 +202,27 @@ export class CloudflareObjectJobQueue<T> implements JobQueue<T> {
       return leased;
     }
     return undefined;
+  }
+
+  get supportsCheckpoints(): boolean {
+    return this.storage.consistency !== "eventual";
+  }
+
+  async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
+    if (!this.supportsCheckpoints)
+      throw new Error(
+        "Message checkpoints require strongly consistent storage; KV is unsupported",
+      );
+    const job = await this.getJob(jobId);
+    if (
+      !job ||
+      job.status !== JobStatus.PROCESSING ||
+      job.attempts !== attempt
+    ) {
+      throw new JobCheckpointLostError();
+    }
+    // Requires a single coordinated writer AND read-your-writes consistency.
+    await this.write({ ...job, data });
   }
 
   /**

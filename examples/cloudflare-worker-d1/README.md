@@ -395,3 +395,17 @@ and `WEBHOOK_RECEIVER_SECRET` unset in production.
   `warn` lines: `send failed`, `could not record a sent message`,
   `status webhook failed`, `webhook delivery failed` and
   `delivery status poll failed`.
+
+### Trusted webhook destinations
+
+With the hardened webhook transport, set `WEBHOOK_ALLOWED_HOSTS` to a
+comma-separated list of administrator-trusted receiver hostnames (for example
+`hooks.example.com,events.example.com`). Do not build it from endpoint registration
+requests. An empty list refuses DNS destinations. Trusting a hostname also trusts
+its DNS operator; arbitrary customer destinations need a DNS-pinned HTTP client
+or a private-network-blocking egress proxy.
+
+The local walkthrough's `DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true` explicitly injects
+a development HTTP client so the localhost sample receiver still works. It checks
+URL syntax and rejects credentials and redirects, but intentionally allows private
+hosts. Never enable this flag in production.

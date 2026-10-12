@@ -10,6 +10,11 @@ export interface WebhookConfig {
 
   // 네트워크 설정
   timeoutMs: number;
+  /** Diagnostic response prefix, in bytes (default 4096, maximum 1 MiB; 0 omits it). */
+  maxResponseBodyBytes?: number;
+  /** Exact administrator-trusted hosts (including public IP literals) for the default HTTP client.
+   * Arbitrary customer domains need an injected DNS-pinned/egress-filtered HttpClient. */
+  allowedHosts?: readonly string[];
 
   // 보안 설정
   /**
@@ -152,6 +157,7 @@ export const WebhookAttemptSchema = z.object({
   timestamp: z.date(),
   httpStatus: z.optional(z.number()),
   responseBody: z.optional(z.string()),
+  responseBodyTruncated: z.optional(z.boolean()),
   responseHeaders: z.optional(z.record(z.string(), z.string())),
   error: z.optional(z.string()),
   latencyMs: z.number(),

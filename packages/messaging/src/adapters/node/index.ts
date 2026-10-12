@@ -7,6 +7,7 @@ export {
   MessageJobProcessor,
 } from "../../queue/job.processor";
 export type { Job, JobQueue } from "../../queue/job-queue.interface";
+export { JobCheckpointLostError } from "../../queue/job-queue.interface";
 export {
   MessageRetryHandler,
   type RetryAttempt,

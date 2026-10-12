@@ -4,6 +4,7 @@
 
 import {
   CircuitBreaker,
+  KMsgErrorCode,
   type Provider,
   RateLimiter,
   type SendOptions,
@@ -19,7 +20,12 @@ import {
   MessageStatus,
   type RecipientResult,
 } from "../types/message.types";
-import type { Job, JobQueue, JobRetryDirective } from "./job-queue.interface";
+import {
+  type Job,
+  JobCheckpointLostError,
+  type JobQueue,
+  type JobRetryDirective,
+} from "./job-queue.interface";
 import { buildSendInputFromJob } from "./send-input.builder";
 
 export interface JobProcessorOptions {
@@ -50,6 +56,49 @@ export interface JobProcessorMetrics {
   queueSize: number;
   averageProcessingTime: number;
   lastProcessedAt?: Date;
+}
+
+class MessageDeliveryError extends Error {
+  constructor(
+    readonly retryable: boolean,
+    readonly result?: MessageResult,
+  ) {
+    super(
+      retryable
+        ? "Some recipients were rate limited; only those recipients will retry"
+        : "Some recipients failed or have an unknown outcome; inspect saved delivery progress before retrying",
+    );
+  }
+}
+type Receipt = {
+  messageId: string;
+  result?: RecipientResult;
+  retryable?: boolean;
+};
+type CheckpointedMessage = MessageRequest & {
+  __kmsgDelivery?: Record<string, Receipt>;
+};
+
+function withoutReceipts(data: unknown): unknown {
+  if (Array.isArray(data)) return data.map(withoutReceipts);
+  if (!data || typeof data !== "object") return data;
+  const { __kmsgDelivery: _progress, ...publicData } = data as Record<
+    string,
+    unknown
+  >;
+  return publicData;
+}
+function publicJob(job: Job<unknown>): Job<unknown> {
+  return job.type.startsWith("send_")
+    ? { ...job, data: withoutReceipts(job.data) }
+    : job;
+}
+function senderNumber(
+  options: Record<string, unknown> | undefined,
+): string | undefined {
+  if (typeof options?.from === "string") return options.from;
+  if (typeof options?.senderNumber === "string") return options.senderNumber;
+  return undefined;
 }
 
 export class JobProcessor extends EventEmitter {
@@ -266,6 +315,14 @@ export class JobProcessor extends EventEmitter {
     }
   }
 
+  protected async checkpoint(job: Job<unknown>): Promise<void> {
+    if (!this.queue.checkpoint)
+      throw new Error(
+        "MessageJobProcessor requires a queue with checkpoint support",
+      );
+    await this.queue.checkpoint(job.id, job.data, job.attempts);
+  }
+
   private async processJob(job: Job<any>): Promise<void> {
     const handler = this.handlers.get(job.type);
     if (!handler) {
@@ -306,11 +363,29 @@ export class JobProcessor extends EventEmitter {
       const processingTime = Date.now() - startTime;
       this.updateAverageProcessingTime(processingTime);
 
-      this.emit("job:completed", { job, result, processingTime });
+      try {
+        this.emit("job:completed", {
+          job: publicJob(job),
+          result,
+          processingTime,
+        });
+      } catch (error) {
+        logBackgroundFailure("Completed job observer failed", error, {
+          jobId: job.id,
+        });
+      }
     } catch (error) {
       this.metrics.activeJobs--;
+      if (error instanceof JobCheckpointLostError) {
+        this.processing.delete(job.id);
+        this.metrics.lastProcessedAt = new Date();
+        await this.refreshQueueMetrics();
+        return;
+      }
 
-      const shouldRetry = job.attempts + 1 < job.maxAttempts;
+      const shouldRetry =
+        job.attempts + 1 < job.maxAttempts &&
+        (!(error instanceof MessageDeliveryError) || error.retryable);
 
       // The job stays in `processing` until its failure is stored, so a
       // dequeue() in between still leaves it to this processor.
@@ -324,7 +399,13 @@ export class JobProcessor extends EventEmitter {
           );
 
           this.metrics.retried++;
-          this.emit("job:retry", { job, error, retryDelay });
+          try {
+            this.emit("job:retry", { job: publicJob(job), error, retryDelay });
+          } catch (observerError) {
+            logBackgroundFailure("Job retry observer failed", observerError, {
+              jobId: job.id,
+            });
+          }
         } else {
           await this.failJob(
             job.id,
@@ -351,7 +432,13 @@ export class JobProcessor extends EventEmitter {
     if (!retry.enabled) {
       this.metrics.failed++;
       this.metrics.processed++;
-      this.emit("job:failed", { jobId, error });
+      try {
+        this.emit("job:failed", { jobId, error });
+      } catch (observerError) {
+        logBackgroundFailure("Job failure observer failed", observerError, {
+          jobId,
+        });
+      }
     }
   }
 
@@ -407,6 +494,10 @@ export class MessageJobProcessor extends JobProcessor {
       jobQueue,
     );
 
+    if (!jobQueue.checkpoint || jobQueue.supportsCheckpoints === false)
+      throw new Error(
+        "MessageJobProcessor requires a queue with checkpoint support",
+      );
     this.setupMessageHandlers();
   }
 
@@ -434,140 +525,175 @@ export class MessageJobProcessor extends JobProcessor {
 
   private async processSingleMessage(
     job: Job<MessageRequest>,
+    save: () => Promise<void> = () => this.checkpoint(job),
   ): Promise<MessageResult> {
-    const { data: messageRequest } = job;
-    const requestOptions = (messageRequest.options as any) || {};
-    const attempt = job.attempts + 1;
-    const envelope = {
-      requestId: job.id,
-      correlationId:
-        typeof job.metadata?.correlationId === "string"
-          ? job.metadata.correlationId
-          : job.id,
-      providerOptions:
-        requestOptions.providerOptions &&
-        typeof requestOptions.providerOptions === "object"
-          ? requestOptions.providerOptions
-          : undefined,
-    };
-
-    // Emit processing event
-    this.emit("message:processing", {
-      type: MessageEventType.MESSAGE_QUEUED,
-      timestamp: new Date(),
-      data: { requestId: job.id, messageRequest },
-      metadata: job.metadata,
-    } as MessageEvent);
-
-    const results: RecipientResult[] = await Promise.all(
-      messageRequest.recipients.map(async (recipient) => {
-        const sendInputResult = buildSendInputFromJob(
-          {
-            type:
-              typeof (messageRequest as any).type === "string"
-                ? (messageRequest as any).type
-                : "ALIMTALK",
-            to: recipient.phoneNumber,
-            from: requestOptions.from || requestOptions.senderNumber,
-            templateId: messageRequest.templateId,
-            text:
-              typeof (messageRequest as any).text === "string"
-                ? (messageRequest as any).text
-                : undefined,
-            variables: {
-              ...messageRequest.variables,
-              ...recipient.variables,
+    const request = job.data as CheckpointedMessage;
+    try {
+      this.emit("message:processing", {
+        type: MessageEventType.MESSAGE_QUEUED,
+        timestamp: new Date(),
+        data: { requestId: job.id, messageRequest: withoutReceipts(request) },
+        metadata: job.metadata,
+      } as MessageEvent);
+    } catch (error) {
+      logBackgroundFailure("Message processing observer failed", error, {
+        jobId: job.id,
+      });
+    }
+    request.__kmsgDelivery ??= {};
+    const progress = request.__kmsgDelivery;
+    const requestOptions = request.options as
+      | Record<string, unknown>
+      | undefined;
+    const results: RecipientResult[] = [];
+    let retryable = false;
+    // Sequential checkpoints make progress durable before any later recipient starts.
+    for (const [index, recipient] of request.recipients.entries()) {
+      const key = String(index);
+      const previous = progress[key];
+      if (previous && !previous.retryable) {
+        results.push(
+          previous.result ?? {
+            phoneNumber: recipient.phoneNumber,
+            messageId: previous.messageId,
+            metadata: recipient.metadata,
+            status: MessageStatus.FAILED,
+            error: {
+              code: "OUTCOME_UNKNOWN",
+              message:
+                "A previous send started without a durable result; reconcile before retrying",
             },
-            providerOptions:
-              requestOptions.providerOptions &&
-              typeof requestOptions.providerOptions === "object"
-                ? requestOptions.providerOptions
-                : undefined,
           },
-          envelope,
-          attempt,
         );
-
-        if (sendInputResult.isFailure) {
-          return {
+        continue;
+      }
+      const built = buildSendInputFromJob(
+        {
+          type:
+            (request as MessageRequest & { type?: string }).type ?? "ALIMTALK",
+          to: recipient.phoneNumber,
+          from: senderNumber(requestOptions),
+          templateId: request.templateId,
+          text: (request as MessageRequest & { text?: string }).text,
+          variables: { ...request.variables, ...recipient.variables },
+          providerOptions: requestOptions?.providerOptions as
+            | Record<string, unknown>
+            | undefined,
+        },
+        {
+          requestId: job.id,
+          correlationId:
+            typeof job.metadata.correlationId === "string"
+              ? job.metadata.correlationId
+              : job.id,
+          providerOptions: requestOptions?.providerOptions as
+            | Record<string, unknown>
+            | undefined,
+        },
+        job.attempts + 1,
+      );
+      const receipt: Receipt = {
+        messageId: previous?.messageId ?? crypto.randomUUID(),
+      };
+      progress[key] = receipt;
+      // If persistence fails, do not send. A persisted unfinished receipt is
+      // treated as unknown after a crash, never blindly sent a second time.
+      await save();
+      let result: RecipientResult;
+      if (built.isFailure) {
+        result = {
+          phoneNumber: recipient.phoneNumber,
+          status: MessageStatus.FAILED,
+          error: { code: built.error.code, message: built.error.message },
+          metadata: recipient.metadata,
+        };
+      } else {
+        try {
+          const response = await this.provider.send({
+            ...built.value,
+            messageId: receipt.messageId,
+          } as SendOptions);
+          if (response.isSuccess) {
+            result = {
+              phoneNumber: recipient.phoneNumber,
+              messageId: response.value.messageId,
+              status:
+                response.value.status === "SENT"
+                  ? MessageStatus.SENT
+                  : MessageStatus.QUEUED,
+              metadata: recipient.metadata,
+            };
+          } else {
+            result = {
+              phoneNumber: recipient.phoneNumber,
+              status: MessageStatus.FAILED,
+              error: {
+                code: response.error.code,
+                message: response.error.message,
+              },
+              metadata: recipient.metadata,
+            };
+            // Only an explicit admission denial is safe to retry. Network/timeout
+            // failures may have sent a message and require reconciliation.
+            receipt.retryable =
+              response.error.code === KMsgErrorCode.RATE_LIMIT_EXCEEDED;
+          }
+        } catch {
+          // Provider exception text may contain credentials or recipient data.
+          logBackgroundFailure(
+            "Provider send outcome unknown",
+            new Error("Provider send rejected"),
+            { jobId: job.id, messageId: receipt.messageId },
+          );
+          result = {
             phoneNumber: recipient.phoneNumber,
             status: MessageStatus.FAILED,
             error: {
-              code: sendInputResult.error.code,
-              message: sendInputResult.error.message,
+              code: "OUTCOME_UNKNOWN",
+              message: "Provider outcome is unknown; reconcile before retrying",
             },
+            messageId: receipt.messageId,
             metadata: recipient.metadata,
           };
         }
-
-        const sendOptions = sendInputResult.value as SendOptions;
-
-        const response = await this.provider.send(sendOptions);
-
-        if (response.isSuccess) {
-          return {
-            phoneNumber: recipient.phoneNumber,
-            messageId: response.value.messageId,
-            status:
-              response.value.status === "SENT"
-                ? MessageStatus.SENT
-                : MessageStatus.QUEUED,
-            metadata: recipient.metadata,
-          };
-        } else {
-          return {
-            phoneNumber: recipient.phoneNumber,
-            status: MessageStatus.FAILED,
-            error: {
-              code: response.error.code,
-              message: response.error.message,
-            },
-            metadata: recipient.metadata,
-          };
-        }
-      }),
-    );
-
-    const sent = results.filter((r) => r.status === MessageStatus.SENT).length;
-    const failed = results.filter(
-      (r) => r.status === MessageStatus.FAILED,
-    ).length;
-    const queued = results.filter(
-      (r) => r.status === MessageStatus.QUEUED,
-    ).length;
-
+      }
+      receipt.result = result;
+      await save();
+      retryable ||= receipt.retryable === true;
+      results.push(result);
+    }
     const result: MessageResult = {
       requestId: job.id,
       results,
       summary: {
-        total: messageRequest.recipients.length,
-        queued,
-        sent,
-        failed,
+        total: results.length,
+        sent: results.filter((item) => item.status === MessageStatus.SENT)
+          .length,
+        queued: results.filter((item) => item.status === MessageStatus.QUEUED)
+          .length,
+        failed: results.filter((item) => item.status === MessageStatus.FAILED)
+          .length,
       },
       metadata: {
         createdAt: new Date(),
         provider: this.provider.id,
-        templateId: messageRequest.templateId,
+        templateId: request.templateId,
       },
     };
-
-    if (failed > 0) {
-      const firstError = results.find((r) => r.error)?.error;
-      throw new Error(
-        firstError?.message ||
-          "Failed to send message to one or more recipients",
-      );
+    if (result.summary.failed > 0)
+      throw new MessageDeliveryError(retryable, result);
+    try {
+      this.emit("message:queued", {
+        type: MessageEventType.MESSAGE_QUEUED,
+        timestamp: new Date(),
+        data: result,
+        metadata: job.metadata,
+      } as MessageEvent);
+    } catch (error) {
+      logBackgroundFailure("Message completion observer failed", error, {
+        jobId: job.id,
+      });
     }
-
-    // Emit completion event
-    this.emit("message:queued", {
-      type: MessageEventType.MESSAGE_QUEUED,
-      timestamp: new Date(),
-      data: result,
-      metadata: job.metadata,
-    } as MessageEvent);
-
     return result;
   }
 
@@ -577,9 +703,11 @@ export class MessageJobProcessor extends JobProcessor {
     const { data: messageRequests } = job;
     const results: MessageResult[] = [];
 
-    for (const messageRequest of messageRequests) {
+    let anyFailed = false;
+    let retryable = false;
+    for (const [index, messageRequest] of messageRequests.entries()) {
       const singleJob: Job<MessageRequest> = {
-        id: `${job.id}_${results.length}`,
+        id: `${job.id}_${index}`,
         type: job.type,
         data: messageRequest,
         status: job.status,
@@ -595,10 +723,20 @@ export class MessageJobProcessor extends JobProcessor {
         metadata: job.metadata,
       };
 
-      const result = await this.processSingleMessage(singleJob);
-      results.push(result);
+      try {
+        results.push(
+          await this.processSingleMessage(singleJob, () =>
+            this.checkpoint(job),
+          ),
+        );
+      } catch (error) {
+        if (!(error instanceof MessageDeliveryError)) throw error;
+        anyFailed = true;
+        retryable ||= error.retryable;
+        if (error.result) results.push(error.result);
+      }
     }
-
+    if (anyFailed) throw new MessageDeliveryError(retryable);
     return results;
   }
 

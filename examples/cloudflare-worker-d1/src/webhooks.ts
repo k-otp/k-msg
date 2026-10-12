@@ -51,8 +51,27 @@ function endpointSecurity(config: Config): WebhookRuntimeSecurityOptions {
 
 /** A webhook runtime for one request or cron run. */
 export function createWebhookRuntime(config: Config): WebhookRuntimeService {
+  const delivery = {
+    ...deliveryConfig,
+    allowedHosts: config.webhookAllowedHosts,
+  };
   return new WebhookRuntimeService({
-    delivery: deliveryConfig,
+    delivery,
+    // Explicit local-only opt-in keeps the sample receiver usable. Production
+    // uses the default trusted-host transport; never enable this flag there.
+    httpClient: config.allowPrivateWebhookUrls
+      ? {
+          fetch: async (url, options) => {
+            const parsed = validateEndpointUrl(
+              url,
+              resolveEndpointValidationOptions(endpointSecurity(config)),
+            );
+            if (parsed.username || parsed.password)
+              throw new Error("Webhook URL credentials are not allowed");
+            return fetch(parsed, { ...options, redirect: "manual" });
+          },
+        }
+      : undefined,
     // migrations/ owns the tables, so skip the CREATE TABLE statements the
     // persistence would otherwise run on first use.
     persistence: createD1WebhookPersistence(config.db, {

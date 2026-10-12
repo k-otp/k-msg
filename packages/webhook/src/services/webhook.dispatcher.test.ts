@@ -1,4 +1,11 @@
-import { afterEach, describe, expect, setSystemTime, test } from "bun:test";
+import {
+  afterEach,
+  describe,
+  expect,
+  setSystemTime,
+  spyOn,
+  test,
+} from "bun:test";
 import { createHmac } from "node:crypto";
 import {
   type WebhookConfig,
@@ -6,7 +13,11 @@ import {
   type WebhookEvent,
   WebhookEventType,
 } from "../types/webhook.types";
-import { type HttpClient, WebhookDispatcher } from "./webhook.dispatcher";
+import {
+  DefaultHttpClient,
+  type HttpClient,
+  WebhookDispatcher,
+} from "./webhook.dispatcher";
 
 class StubHttpClient implements HttpClient {
   readonly calls: RequestInit[] = [];
@@ -293,4 +304,81 @@ describe("WebhookDispatcher signing", () => {
     expect(headers.has("X-Webhook-Signature")).toBe(false);
     expect(headers.get("X-Webhook-Timestamp")).toMatch(/^\d+$/);
   });
+});
+
+describe("bounded responses and trusted hosts", () => {
+  test("retains only a bounded prefix and cancels a streaming response", async () => {
+    let cancelled = false;
+    const client = new StubHttpClient(
+      () =>
+        new Response(
+          new ReadableStream({
+            pull(controller) {
+              controller.enqueue(new TextEncoder().encode("abcdefgh"));
+            },
+            cancel() {
+              cancelled = true;
+            },
+          }),
+        ),
+    );
+    const d = new WebhookDispatcher(
+      createConfig({ maxResponseBodyBytes: 5 }),
+      client,
+    );
+    const delivery = await d.dispatch(createEvent(), createEndpoint());
+    expect(delivery.status).toBe("success");
+    expect(delivery.attempts[0]?.responseBody).toBe("abcde");
+    expect(delivery.attempts[0]?.responseBodyTruncated).toBe(true);
+    expect(cancelled).toBe(true);
+  });
+  test("can omit response content completely", async () => {
+    const d = new WebhookDispatcher(
+      createConfig({ maxResponseBodyBytes: 0 }),
+      new StubHttpClient(() => new Response("secret")),
+    );
+    const delivery = await d.dispatch(createEvent(), createEndpoint());
+    expect(delivery.attempts[0]?.responseBody).toBe("");
+  });
+  test("untrusted DNS hosts, literal private addresses and credentials fail before fetch", async () => {
+    const client = new DefaultHttpClient(["example.com"]);
+    await expect(
+      client.fetch("https://untrusted.example/hook", {}),
+    ).rejects.toThrow("not explicitly trusted");
+    await expect(client.fetch("http://127.0.0.1/hook", {})).rejects.toThrow();
+    await expect(
+      client.fetch("https://user:pass@example.com/hook", {}),
+    ).rejects.toThrow();
+    expect(() => new DefaultHttpClient(["*.example.com"])).toThrow();
+    expect(() => new DefaultHttpClient(["https://example.com"])).toThrow();
+  });
+});
+
+test("trusted destinations use manual redirects; unlisted public literals are refused", async () => {
+  const fetchMock = spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response("ok"),
+  );
+  try {
+    const client = new DefaultHttpClient(["example.com"]);
+    await client.fetch("https://example.com/hook", { redirect: "follow" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[1]?.redirect).toBe("manual");
+    await expect(client.fetch("https://1.1.1.1/hook", {})).rejects.toThrow(
+      "not explicitly trusted",
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  } finally {
+    fetchMock.mockRestore();
+  }
+});
+
+test("mutating the caller config cannot remove the validated response cap", async () => {
+  const config = createConfig({ maxResponseBodyBytes: 4 });
+  const d = new WebhookDispatcher(
+    config,
+    new StubHttpClient(() => new Response("123456789")),
+  );
+  config.maxResponseBodyBytes = Number.POSITIVE_INFINITY;
+  const delivery = await d.dispatch(createEvent(), createEndpoint());
+  expect(delivery.attempts[0]?.responseBody).toBe("1234");
 });

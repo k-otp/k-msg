@@ -1,4 +1,6 @@
 export interface CloudflareObjectStorage {
+  /** Eventual stores cannot safely checkpoint message delivery progress. */
+  readonly consistency?: "strong" | "eventual";
   get(key: string): Promise<string | null>;
   put(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
@@ -107,6 +109,7 @@ export function createKvObjectStorage(
   namespace: CloudflareKvNamespaceLike,
 ): CloudflareObjectStorage {
   return {
+    consistency: "eventual",
     async get(key: string): Promise<string | null> {
       return namespace.get(key, "text");
     },

@@ -318,14 +318,25 @@ export class MessageRetryHandler extends EventEmitter {
       this.metrics.totalRetries++;
       this.updateMetrics();
 
-      await this.options.onRetrySuccess?.(item, result);
-
-      this.emit("retry:success", {
-        type: MessageEventType.MESSAGE_SENT,
-        timestamp: new Date(),
-        data: { item, attempt, result },
-        metadata: item.originalDeliveryReport.metadata,
-      } as MessageEvent);
+      try {
+        await this.options.onRetrySuccess?.(item, result);
+      } catch (error) {
+        logBackgroundFailure("Retry success callback failed", error, {
+          retryItemId: item.id,
+        });
+      }
+      try {
+        this.emit("retry:success", {
+          type: MessageEventType.MESSAGE_SENT,
+          timestamp: new Date(),
+          data: { item, attempt, result },
+          metadata: item.originalDeliveryReport.metadata,
+        } as MessageEvent);
+      } catch (error) {
+        logBackgroundFailure("Successful retry observer failed", error, {
+          retryItemId: item.id,
+        });
+      }
     } catch (error) {
       const retryError =
         error instanceof Error ? error : new Error(String(error));

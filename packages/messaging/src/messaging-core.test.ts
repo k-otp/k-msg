@@ -121,6 +121,13 @@ class InMemoryJobQueue<T> implements JobQueue<T> {
     return { ...next };
   }
 
+  async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
+    const job = this.jobs.get(jobId);
+    if (!job || job.attempts !== attempt || job.status !== JobStatus.PROCESSING)
+      throw new Error("Lost checkpoint");
+    this.jobs.set(jobId, { ...job, data: structuredClone(data) });
+  }
+
   async complete(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job) return;

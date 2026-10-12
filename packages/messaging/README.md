@@ -788,3 +788,19 @@ await kmsg.send({
   },
 });
 ```
+
+## Queue delivery migration
+
+`MessageJobProcessor` now requires `JobQueue.checkpoint(jobId, data, attempt)`.
+The included SQLite and Hyperdrive adapters implement it. R2/Durable Object queues require a single coordinated writer and strongly consistent reads. KV queues are unsupported for MessageJobProcessor. Custom
+queues must persist the complete job data atomically and reject writes with `JobCheckpointLostError` (from `@k-msg/messaging/queue`) unless
+the job is still processing the same attempt. This error tells a stale processor to stop without failing the new owner’s job. Object-backed queues still require
+a single coordinated writer; use a transactional queue for concurrent workers.
+
+Recipient receipts are stored in the reserved `__kmsgDelivery` field of queued
+message data. Preserve this field across restarts and retries. A successful
+recipient is skipped on subsequent attempts. Only an explicit rate-limit
+rejection retries automatically; a transport error or an unfinished receipt is
+an unknown outcome requiring operator/provider reconciliation. Do not delete
+receipts to retry an unknown send: that can send a duplicate. This trades blind
+retries for safety and does not promise exactly-once delivery.

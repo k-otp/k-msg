@@ -8,6 +8,9 @@ API_TOKEN=dev-admin-token-for-local-testing-only
 # Local development only: lets you register http://localhost webhook URLs.
 DEV_ALLOW_PRIVATE_WEBHOOK_URLS=true
 
+# Production: keep the development flag off and explicitly trust receiver DNS hosts.
+# WEBHOOK_ALLOWED_HOSTS=hooks.example.com
+
 # The secret POST /webhook-endpoints returned for
 # http://localhost:8787/webhooks/receiver. Enables the sample receiver.
 # WEBHOOK_RECEIVER_SECRET=

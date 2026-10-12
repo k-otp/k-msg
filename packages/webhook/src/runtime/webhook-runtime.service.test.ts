@@ -1451,3 +1451,14 @@ describe("WebhookRuntimeService batching", () => {
     }
   });
 });
+
+test("private destination opt-in requires an explicit transport at construction", () => {
+  expect(
+    () =>
+      new WebhookRuntimeService({
+        delivery: createConfig(),
+        security: { allowPrivateHosts: true },
+        autoStart: false,
+      }),
+  ).toThrow("explicitly configured HTTP client");
+});

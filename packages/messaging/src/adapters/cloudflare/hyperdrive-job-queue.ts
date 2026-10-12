@@ -12,7 +12,11 @@ import type {
   JobQueueCleanupOptions,
   JobRetryDirective,
 } from "../../queue/job-queue.interface";
-import { JOB_LEASE_EXPIRED, JobStatus } from "../../queue/job-queue.interface";
+import {
+  JOB_LEASE_EXPIRED,
+  JobCheckpointLostError,
+  JobStatus,
+} from "../../queue/job-queue.interface";
 import type { CloudflareSqlClient } from "./sql-client";
 import { runCloudflareSqlTransaction } from "./sql-client";
 import {
@@ -240,6 +244,33 @@ export class HyperdriveJobQueue<T> implements JobQueue<T> {
     }
     if (this.leasesEnabled()) await this.settleExpiredLeases(running);
     return this.takeNext(running);
+  }
+
+  async checkpoint(jobId: string, data: T, attempt: number): Promise<void> {
+    await this.init();
+    const q = (name: string) => this.quoteIdentifier(name);
+    const result = await this.client.query(
+      `UPDATE ${this.tableRef()} SET ${q("data")} = ${jsonParameterSql(this.client.dialect, this.placeholder(1), this.hasNativeJsonColumns())}
+       WHERE ${q("id")} = ${this.placeholder(2)} AND ${q("status")} = ${this.placeholder(3)} AND ${q("attempts")} = ${this.placeholder(4)}`,
+      [
+        toJsonText(data, this.hasNativeJsonColumns()),
+        jobId,
+        JobStatus.PROCESSING,
+        attempt,
+      ],
+    );
+    if (result.rowCount === 1) return;
+    // Drivers may omit counts, or report zero for an unchanged MySQL value.
+    // The UPDATE has completed; a strongly consistent read verifies its fence.
+    if (result.rowCount === undefined || result.rowCount === 0) {
+      const current = await this.getJob(jobId);
+      if (
+        current?.status === JobStatus.PROCESSING &&
+        current.attempts === attempt
+      )
+        return;
+    }
+    throw new JobCheckpointLostError();
   }
 
   async complete(

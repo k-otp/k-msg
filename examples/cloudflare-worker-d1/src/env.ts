@@ -28,6 +28,8 @@ export interface Config {
   webhookReceiverSecret: string | undefined;
   /** Development only: accept http://localhost and private-network URLs. */
   allowPrivateWebhookUrls: boolean;
+  /** Comma-separated administrator-trusted DNS destinations; never derived from endpoint input. */
+  webhookAllowedHosts: string[];
 }
 
 export class ConfigError extends Error {
@@ -147,6 +149,11 @@ export function readConfig(env: Env): Config {
     adminToken,
     webhookReceiverSecret: text("WEBHOOK_RECEIVER_SECRET"),
     allowPrivateWebhookUrls: flag("DEV_ALLOW_PRIVATE_WEBHOOK_URLS"),
+    webhookAllowedHosts:
+      text("WEBHOOK_ALLOWED_HOSTS")
+        ?.split(",")
+        .map((host) => host.trim())
+        .filter(Boolean) ?? [],
   };
 
   if (db === undefined || issues.length > 0) {

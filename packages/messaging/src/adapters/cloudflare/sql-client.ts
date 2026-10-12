@@ -97,8 +97,28 @@ function defaultDrizzleQueryRenderer(input: {
 
 function defaultDrizzleResultNormalizer<T = Record<string, unknown>>(input: {
   result: unknown;
+  dialect: SqlDialect;
 }): CloudflareSqlQueryResult<T> {
   if (Array.isArray(input.result)) {
+    const [first, fields] = input.result;
+    // mysql2/Drizzle return [ResultSetHeader | rows, fields].
+    if (
+      input.dialect === "mysql" &&
+      input.result.length === 2 &&
+      isRecord(first) &&
+      !Array.isArray(first) &&
+      "affectedRows" in first
+    ) {
+      return { rows: [], rowCount: toNumber(first.affectedRows) };
+    }
+    if (
+      input.dialect === "mysql" &&
+      input.result.length === 2 &&
+      Array.isArray(first) &&
+      Array.isArray(fields)
+    ) {
+      return { rows: first as T[], rowCount: first.length };
+    }
     return {
       rows: input.result as T[],
       rowCount: input.result.length,
@@ -118,6 +138,7 @@ function defaultDrizzleResultNormalizer<T = Record<string, unknown>>(input: {
     const rowCount =
       toNumber(input.result.rowCount) ??
       toNumber(input.result.rowsAffected) ??
+      toNumber(input.result.affectedRows) ??
       toNumber(input.result.changes) ??
       (isRecord(input.result.meta)
         ? toNumber(input.result.meta.changes)
@@ -190,8 +211,7 @@ export function createDrizzleSqlClient(
   options: CreateDrizzleSqlClientOptions,
 ): CloudflareSqlClient {
   const renderQuery = options.renderQuery ?? defaultDrizzleQueryRenderer;
-  const normalizeResult =
-    options.normalizeResult ?? defaultDrizzleResultNormalizer;
+  const normalizeResult = options.normalizeResult;
   const mapTransactionDb =
     options.mapTransactionDb ??
     ((value: unknown): DrizzleSqlDatabaseLike => {
@@ -215,7 +235,12 @@ export function createDrizzleSqlClient(
         params,
       });
       const result = await options.db.execute(query);
-      return normalizeResult<T>({ result, sql, params });
+      return normalizeResult
+        ? normalizeResult<T>({ result, sql, params })
+        : defaultDrizzleResultNormalizer<T>({
+            result,
+            dialect: options.dialect,
+          });
     },
     ...(options.close ? { close: options.close } : {}),
   };

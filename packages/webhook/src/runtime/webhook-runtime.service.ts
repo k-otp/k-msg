@@ -134,6 +134,11 @@ export class WebhookRuntimeService implements WebhookRuntime {
   private shuttingDown = false;
 
   constructor(config: WebhookRuntimeConfig) {
+    if (config.security?.allowPrivateHosts && !config.httpClient) {
+      throw new Error(
+        "Private webhook destinations require an explicitly configured HTTP client",
+      );
+    }
     this.config = config.delivery;
     this.dispatcher = new WebhookDispatcher(config.delivery, config.httpClient);
     this.securityOptions = resolveEndpointValidationOptions(config.security);

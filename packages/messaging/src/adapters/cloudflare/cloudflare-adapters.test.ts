@@ -1580,3 +1580,78 @@ describe("Cloudflare backend helpers", () => {
     expect(await queue.size()).toBe(1);
   });
 });
+
+for (const dialect of ["sqlite", "postgres", "mysql"] as const) {
+  test(`message checkpoints fence the processing attempt (${dialect})`, async () => {
+    let affected = 1;
+    const queries: CapturedQuery[] = [];
+    const client = stubSqlClient(dialect, async (sql, params = []) => {
+      queries.push({ sql, params });
+      return { rows: [], rowCount: affected };
+    });
+    const queue = new HyperdriveJobQueue(client, { initializeSchema: false });
+    await queue.checkpoint("job", { receipt: "sent" }, 2);
+    const query = queries.at(-1)!;
+    expect(query.sql).toContain("UPDATE");
+    expect(query.sql).toContain("attempts");
+    expect(query.params.slice(1)).toEqual(["job", JobStatus.PROCESSING, 2]);
+    expect(JSON.parse(query.params[0] as string)).toEqual({ receipt: "sent" });
+    affected = 0;
+    await expect(
+      queue.checkpoint("job", { receipt: "stale" }, 1),
+    ).rejects.toThrow("lost its processing attempt");
+  });
+}
+
+test("checkpoint verifies ownership when SQL omits update counts", async () => {
+  let attempt = 2;
+  const client = stubSqlClient("postgres", async (sql) =>
+    /UPDATE/.test(sql)
+      ? { rows: [] }
+      : {
+          rows: [
+            {
+              id: "job",
+              status: "processing",
+              attempts: attempt,
+              data: { saved: true },
+            },
+          ],
+        },
+  );
+  const queue = new HyperdriveJobQueue(client, { initializeSchema: false });
+  await queue.checkpoint("job", { saved: true }, 2);
+  attempt = 3;
+  await expect(queue.checkpoint("job", {}, 2)).rejects.toThrow(
+    "lost its processing attempt",
+  );
+});
+
+test("Drizzle MySQL normalizes affectedRows and result tuples", async () => {
+  for (const result of [{ affectedRows: 1 }, [{ affectedRows: 1 }, []]]) {
+    const client = createDrizzleSqlClient({
+      dialect: "mysql",
+      db: { execute: async () => result },
+    });
+    expect(
+      (await client.query("UPDATE jobs SET data = ?", ["{}"])).rowCount,
+    ).toBe(1);
+  }
+  const client = createDrizzleSqlClient({
+    dialect: "mysql",
+    db: { execute: async () => [[{ id: "job" }], []] },
+  });
+  expect((await client.query("SELECT id FROM jobs")).rows).toEqual([
+    { id: "job" },
+  ]);
+});
+
+test("KV queues refuse durable message checkpoints", () => {
+  const queue = createKvJobQueue({
+    get: async () => null,
+    put: async () => {},
+    delete: async () => {},
+    list: async () => ({ keys: [], list_complete: true }),
+  });
+  expect(queue.supportsCheckpoints).toBe(false);
+});
