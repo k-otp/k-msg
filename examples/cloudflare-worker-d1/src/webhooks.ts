@@ -9,6 +9,7 @@ import {
 } from "@k-msg/webhook";
 import { createD1WebhookPersistence } from "@k-msg/webhook/adapters/cloudflare";
 import type { Config } from "./env";
+import { log } from "./log";
 
 /** The events this Worker sends; endpoints subscribe to all of them by default. */
 export const MESSAGE_EVENT_TYPES: readonly WebhookEventType[] = [
@@ -51,14 +52,21 @@ function endpointSecurity(config: Config): WebhookRuntimeSecurityOptions {
 
 /** A webhook runtime for one request or cron run. */
 export function createWebhookRuntime(config: Config): WebhookRuntimeService {
+  if (config.allowPrivateWebhookUrls) {
+    log(
+      "warn",
+      "development webhook transport active; allowedHosts is ignored",
+    );
+  }
   const delivery = {
     ...deliveryConfig,
     allowedHosts: config.webhookAllowedHosts,
   };
   return new WebhookRuntimeService({
     delivery,
-    // Explicit local-only opt-in keeps the sample receiver usable. Production
-    // uses the default trusted-host transport; never enable this flag there.
+    // Local-only opt-in (readConfig refuses it outside ENVIRONMENT=development)
+    // keeps the sample receiver usable. Deployments use the default
+    // trusted-host transport.
     httpClient: config.allowPrivateWebhookUrls
       ? {
           fetch: async (url, options) => {

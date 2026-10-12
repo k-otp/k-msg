@@ -1,6 +1,7 @@
 import {
   type WebhookEndpoint,
   WebhookEndpointConflictError,
+  WebhookHostNotAllowedError,
 } from "@k-msg/webhook";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
@@ -127,6 +128,15 @@ app.post("/webhook-endpoints", requireAdmin, async (c) => {
       secret,
     });
   } catch (error) {
+    // Registering a host that deliveries could never reach would store an
+    // endpoint that fails every webhook.
+    if (error instanceof WebhookHostNotAllowedError) {
+      throw new ApiError(
+        400,
+        "WEBHOOK_HOST_NOT_ALLOWED",
+        `The host ${error.host} is not in this Worker's WEBHOOK_ALLOWED_HOSTS`,
+      );
+    }
     // The unique url index refuses a registered URL in the insert itself,
     // so two registrations of one URL at the same moment cannot both win.
     if (
